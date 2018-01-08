@@ -49,7 +49,7 @@ public class TaraDAO {
 			"  LEFT JOIN COLLAB_INFOS ON (COLLAB_INFOS.SAMPLE_ID=SAMPLE.SAMPLE_ID AND COLLAB_INFOS.INFOS_TYPE_CODE=1)"+
 			"  INNER JOIN MATERIAL ON (MATERIAL.MATERIAL_ID=SAMPLE.MATERIAL_ID)";
 */
-	@Autowired
+//	@Autowired
 	@Qualifier("tara")
 	public void setDataSourceTara(DataSource dataSource) {
 		this.jdbcTemplate = new JdbcTemplate(dataSource);              

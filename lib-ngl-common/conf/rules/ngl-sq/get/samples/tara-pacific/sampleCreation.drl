@@ -1,0 +1,30 @@
+//created on: Feb 2, 2015
+package rules
+
+//list any import classes here.
+
+
+
+//declare any global variables here
+
+rule "Rules when sample is created in Tara Pacific project "
+	@nglSQ( sampleCreation )
+	dialect "java"
+	salience 1000
+	no-loop
+    when
+        $sample : Sample($code:code, $code != null, _id == null)
+        $projectCode : String(this == 'AA') from $sample.projectCodes
+    then
+    	Logger.debug("Update Sample for Tara Pacific : "+$code);  
+       	$sample.referenceCollab = $code;
+       	
+       	$sample.typeCode = "not-defined";
+       	$sample.categoryCode = "unknown";
+       	$sample.importTypeCode = "tara-reception-without-file";
+       	
+       	PropertySingleValue psv = new PropertySingleValue($code);
+       	$sample.properties = new HashMap<String, PropertyValue>();
+       	$sample.properties.put("taraBarCode", psv);
+	end
+	

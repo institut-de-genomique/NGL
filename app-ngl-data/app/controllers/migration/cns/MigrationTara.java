@@ -6,7 +6,7 @@ import java.util.Map;
 
 import models.Constants;
 import models.LimsCNSDAO;
-import models.TaraDAO;
+//import models.TaraDAO;
 import models.laboratory.common.instance.PropertyValue;
 import models.laboratory.container.instance.Container;
 import models.laboratory.run.instance.ReadSet;
@@ -36,7 +36,7 @@ import fr.cea.ig.MongoDBDAO;
 public class MigrationTara extends AbstractMigration {
 	
 	static ALogger logger=Logger.of("MigrationTara");
-	protected static TaraDAO  taraServices = Spring.getBeanOfType(TaraDAO.class);
+//	protected static TaraDAO  taraServices = Spring.getBeanOfType(TaraDAO.class);
 	protected static LimsCNSDAO  limsServices = Spring.getBeanOfType(LimsCNSDAO.class);
 	
 	public static Result migration() {
@@ -63,11 +63,11 @@ public class MigrationTara extends AbstractMigration {
 				sample.importTypeCode=DataMappingCNS.getImportTypeCode(true,adaptater);
 				MongoDBDAO.update(InstanceConstants.SAMPLE_COLL_NAME, Sample.class,DBQuery.is("code",sample.code),DBUpdate.set("importTypeCode",sample.importTypeCode));
 			}
-			Map<String, PropertyValue> taraProperties=taraServices.findTaraSampleFromLimsCode(Integer.valueOf(sample.properties.get("limsCode").value.toString()), contextValidation);
+//			Map<String, PropertyValue> taraProperties=taraServices.findTaraSampleFromLimsCode(Integer.valueOf(sample.properties.get("limsCode").value.toString()), contextValidation);
 			ImportType importType=BusinessValidationHelper.validateRequiredDescriptionCode(contextValidation, sample.importTypeCode,"importTypeCode", ImportType.find,true);
-			if(sample.typeCode!=null && importType!=null){
-				ValidationHelper.validateProperties(contextValidation,taraProperties, importType.getPropertiesDefinitionSampleLevel());
-			}
+//			if(sample.typeCode!=null && importType!=null){
+//				ValidationHelper.validateProperties(contextValidation,taraProperties, importType.getPropertiesDefinitionSampleLevel());
+//			}
 			//SampleHelper.updateSampleProperties(sample.code, taraProperties, contextValidation);
 		}
 		

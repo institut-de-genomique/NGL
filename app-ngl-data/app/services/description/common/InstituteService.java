@@ -26,14 +26,8 @@ public class InstituteService {
 		
 		String institute=play.Play.application().configuration().getString("institute");
 
-		if(institute.equals("CNG")){
-			l.add(newInstitute("Centre National de Génomique","CNG"));
-		}
-		else if(institute.equals("CNS")){
-			l.add(newInstitute("Centre National de Séquençage","CNS"));
-		}
-		else if(institute.equals("TEST")){
-			l.add(newInstitute("Test","TEST"));
+		if(institute.equals("GET")){
+			l.add(newInstitute("Génome et Transcriptome","GET"));
 		}
 		DAOHelpers.saveModels(Institute.class, l, errors);
 	}

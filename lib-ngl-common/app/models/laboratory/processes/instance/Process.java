@@ -25,6 +25,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import fr.cea.ig.DBObject;
 
+import play.Logger;
+
 
 @MongoCollection(name="Process")
 public class Process extends DBObject implements IValidation{
@@ -62,6 +64,8 @@ public class Process extends DBObject implements IValidation{
 		}
 		if(contextValidation.isCreationMode() 
 				&& contextValidation.getObject(CommonValidationHelper.FIELD_PROCESS_CREATION_CONTEXT).equals(CommonValidationHelper.VALUE_PROCESS_CREATION_CONTEXT_COMMON)){
+
+			Logger.debug("Process validate contextValidation.isCreationMode()");
 			ProcessValidationHelper.validateProcessType(typeCode,properties,contextValidation);
 			ProcessValidationHelper.validateProcessCategory(categoryCode,contextValidation);
 			ProcessValidationHelper.validateState(typeCode,state, contextValidation);
@@ -112,6 +116,7 @@ public class Process extends DBObject implements IValidation{
 		p.inputContainerCode = this.inputContainerCode;
 		p.state = this.state;
 		p.comments = this.comments;
+		Logger.debug("Process cloneCommon() " + p.inputContainerCode);
 		return p;
 	}
 

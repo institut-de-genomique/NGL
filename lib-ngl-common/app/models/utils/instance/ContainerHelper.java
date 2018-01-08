@@ -59,8 +59,8 @@ public class ContainerHelper {
 		finalContent.projectCode = content.projectCode;
 		finalContent.percentage=content.percentage;
 		finalContent.referenceCollab=content.referenceCollab;
-		finalContent.taxonCode=content.taxonCode;
-		finalContent.ncbiScientificName=content.ncbiScientificName;
+//		finalContent.taxonCode=content.taxonCode;
+//		finalContent.ncbiScientificName=content.ncbiScientificName;
 		
 		SampleType sampleType =BusinessValidationHelper.validateExistDescriptionCode(null, sample.typeCode, "typeCode", SampleType.find,true);
 		ImportType importType =BusinessValidationHelper.validateExistDescriptionCode(null, sample.importTypeCode, "importTypeCode", ImportType.find,true);
@@ -126,8 +126,8 @@ public class ContainerHelper {
 		finalContent.referenceCollab = content.referenceCollab;
 		finalContent.percentage = content.percentage;
 		finalContent.properties.putAll(content.properties);
-		finalContent.taxonCode=content.taxonCode;
-		finalContent.ncbiScientificName=content.ncbiScientificName;
+//		finalContent.taxonCode=content.taxonCode;
+//		finalContent.ncbiScientificName=content.ncbiScientificName;
 		finalContent.processProperties = content.processProperties;
 		finalContent.processComments = content.processComments;
 		return finalContent;
@@ -142,8 +142,8 @@ public class ContainerHelper {
 		finalContent.sampleCategoryCode = contents.get(0).sampleCategoryCode;
 		finalContent.sampleTypeCode = contents.get(0).sampleTypeCode;
 		finalContent.referenceCollab = contents.get(0).referenceCollab;
-		finalContent.taxonCode = contents.get(0).taxonCode;
-		finalContent.ncbiScientificName = contents.get(0).ncbiScientificName;
+//		finalContent.taxonCode = contents.get(0).taxonCode;
+//		finalContent.ncbiScientificName = contents.get(0).ncbiScientificName;
 		finalContent.percentage = new BigDecimal(contents.stream().mapToDouble((Content c) -> c.percentage).sum()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
 		finalContent.processProperties = new HashMap<String, PropertyValue>();
 		finalContent.processComments = new ArrayList<Comment>();
@@ -198,6 +198,7 @@ public class ContainerHelper {
 
 	private static String getContentKey(Content content) {
 		if(content.properties.containsKey("tag")){
+			Logger.debug("ContainerHelper.getContentKey "+ content.projectCode+"_"+content.sampleCode+"_"+content.properties.get("tag").value);
 			return content.projectCode+"_"+content.sampleCode+"_"+content.properties.get("tag").value;
 		}else{
 			return content.projectCode+"_"+content.sampleCode;

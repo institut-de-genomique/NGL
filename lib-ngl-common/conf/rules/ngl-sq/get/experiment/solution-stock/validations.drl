@@ -1,0 +1,46 @@
+//created on: Apr 21, 2015
+package rules
+
+
+rule "Concentration not null in SolutionStock outputContainer"
+    @nglSQ( validations )
+	dialect "java"
+	salience 930
+	no-loop
+    when
+    	$experiment:Experiment($typeCode:typeCode,$typeCode=="solution-stock")
+		$atomicTransfert: OneToOneContainer($inputContainerUsed:inputContainerUseds.get(0), $outputContainerUsed: outputContainerUseds.get(0))
+		OutputContainerUsed($finalConcentration: concentration) from $outputContainerUsed
+		$contextValidation:ContextValidation()
+		eval($finalConcentration == null || $finalConcentration.value == null || $finalConcentration.value == "") 
+    then
+    Logger.debug("Concentration not null in SolutionStock outputContainer");
+    Integer i = null;
+    for(AtomicTransfertMethod atomic : $experiment.atomicTransfertMethods){    	
+    	if(($inputContainerUsed.code).equals(atomic.inputContainerUseds.get(0).code)){
+    	 $contextValidation.addErrors("solution-stock","error.validationexp.outputconcentrationnotnull", $inputContainerUsed.code);
+    	}
+    }    
+end
+
+rule "Volume not null in SolutionStock outputContainer"
+    @nglSQ( validations )
+	dialect "java"
+	salience 940
+	no-loop
+    when
+    	$experiment:Experiment($typeCode:typeCode,$typeCode=="solution-stock")
+		$atomicTransfert: OneToOneContainer($inputContainerUsed:inputContainerUseds.get(0), $outputContainerUsed: outputContainerUseds.get(0))
+	   	OutputContainerUsed($finalVolume: volume) from $outputContainerUsed
+    	$contextValidation:ContextValidation()
+    	eval($finalVolume == null || $finalVolume.value == null || $finalVolume.value == "")
+    then
+    Logger.debug("Volume not null in SolutionStock outputContainer");
+    Integer i = null;
+    for(AtomicTransfertMethod atomic : $experiment.atomicTransfertMethods){    	
+    	if(($inputContainerUsed.code).equals(atomic.inputContainerUseds.get(0).code)){
+    	 $contextValidation.addErrors("solution-stock","error.validationexp.outputvolumenotnull", $inputContainerUsed.code);
+    	}
+    }
+   
+end

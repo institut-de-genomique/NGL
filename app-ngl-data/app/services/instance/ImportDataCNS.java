@@ -13,6 +13,7 @@ import services.instance.container.UpdateAmpliCNS;
 import services.instance.container.UpdateSizingCNS;
 import services.instance.container.UpdateSolutionStockCNS;
 import services.instance.container.UpdateTaraPropertiesCNS;
+//import services.instance.container.UpdateTaraPropertiesCNS;
 import services.instance.parameter.IndexImportCNS;
 import services.instance.project.ProjectImportCNS;
 import services.instance.run.RunExtImportCNS;
@@ -25,6 +26,7 @@ import services.instance.sample.UpdateSamplePropertiesCNS;
 public class ImportDataCNS{
 
 	public ImportDataCNS(){
+	
 		// Import Projects tous les jours à 16h00
 		new ProjectImportCNS(ImportDataUtil.getDurationForNextHour(0),Duration.create(1,TimeUnit.HOURS));
 		new TubeImportCNS(ImportDataUtil.getDurationForNextHour(10),Duration.create(1,TimeUnit.HOURS));
@@ -62,7 +64,7 @@ public class ImportDataCNS{
 		new UpdateReportingData(ImportDataUtil.getDurationInMillinsBefore(20, 0),Duration.create(1,TimeUnit.DAYS));
 		new UpdateTaraPropertiesCNS(ImportDataUtil.getDurationInMillinsBefore(4, 0),Duration.create(1,TimeUnit.DAYS));
 	    new IndexImportCNS(ImportDataUtil.getDurationInMillinsBefore(5, 0),Duration.create(1,TimeUnit.DAYS));
-		
+
 	}
 
 	

@@ -1,0 +1,84 @@
+{
+  "code": "RC-20150303164302",
+  "name": "Container Additional Columns",
+  "traceInformation": {
+    "createUser": "okorovina",
+    "creationDate": "new Date()",
+    "modifyUser": "ngsrg",
+    "modifyDate": "new Date()"
+  },
+  "pageCodes": [
+    "containers-addcolumns",
+    "containers-addcolumns-processes-creation"
+  ],
+  "columns": [
+    {
+      "header": "Ref. collab",
+      "property": "contents",
+      "type": "String",
+      "order": true,
+      "hide": true,
+      "groupMethod": "unique",
+      "render": "<div list-resize='cellValue| unique' list-resize-min-size='1'>",
+      "filter": "getArray:\"referenceCollab\"| unique ",
+      "modes": [
+        "datatable"
+      ],
+      "position": 8.05,
+      "queryIncludeKeys": [
+        "contents.referenceCollab"
+      ]
+    },
+    {
+      "header": "Nom pool sequencage",
+      "property": "contents",
+      "type": "String",
+      "order": true,
+      "hide": true,
+      "groupMethod": "unique",
+      "render": "<div list-resize='cellValue| unique' list-resize-min-size='1'>",
+      "filter": "getArray:\"properties.Nom_pool_sequencage.value\"| unique ",
+      "modes": [
+        "datatable"
+      ],
+      "position": 0.05,
+      "queryIncludeKeys": [
+        "contents.properties"
+      ]
+    },
+    {
+      "header": "Type échantillon",
+      "property": "contents",
+      "type": "String",
+      "order": true,
+      "hide": true,
+      "groupMethod": "collect",
+      "render": "<div list-resize='cellValue| unique' list-resize-min-size='3'>",
+      "filter": "getArray:\"sampleTypeCode\"| unique | codes:\"type\"",
+      "modes": [
+        "datatable"
+      ],
+      "position": 8.1,
+      "queryIncludeKeys": [
+        "contents.sampleTypeCode"
+      ]
+    },
+    {
+      "header": "Catégorie tag",
+      "property": "contents",
+      "type": "string",
+      "order": true,
+      "hide": true,
+      "groupMethod": "collect",
+      "render": "<div list-resize='cellValue| unique' list-resize-min-size='3'>",
+      "filter": "getArray:\"properties.tagCategory.value\"| unique",
+      "modes": [
+        "datatable"
+      ],
+      "position": 10.5,
+      "queryIncludeKeys": [
+        "contents.properties"
+      ]
+    }
+  ]
+}

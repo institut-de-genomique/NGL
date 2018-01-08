@@ -21,7 +21,10 @@ http://www.springframework.org/schema/jee http://www.springframework.org/schema/
     <context:component-scan base-package="workflows" />
     
     <jee:jndi-lookup id="ngl" jndi-name="ngl"/>
+	<jee:jndi-lookup id="esitoul" jndi-name="esitoul" />
+	<!--
   	<jee:jndi-lookup id="tara" jndi-name="tara" /> 
+	-->
 	<jee:jndi-lookup id="lims" jndi-name="lims" />
 	
 	<bean id="code" class="models.utils.code.DefaultCodeImpl"></bean>

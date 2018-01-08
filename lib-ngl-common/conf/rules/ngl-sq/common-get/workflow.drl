@@ -1,0 +1,100 @@
+package rules;
+
+declare ContainerUpdateLims
+	code : String
+	stateCode : String
+	experimentType : String
+	limsCode : String
+	limsStateCode : Integer 
+end
+
+rule "Test"
+	@nglSQ( workflow )
+	dialect "java"
+	salience 1000
+	no-loop
+    when
+	eval(true)
+    then
+		Logger.debug("Rules annotation @nglSQ(workflow)");    
+	end
+
+rule "Create Object ContainerUpdateLims"
+	@nglSQ( workflow )
+	dialect "java"
+	salience 900
+	no-loop
+    when
+    
+		$container:Container($fromTransformationTypeCodes:fromTransformationTypeCodes,$properties:properties)
+		$experimentType :String() from $fromTransformationTypeCodes
+		$limsCode : PropertyValue() from $properties.get("limsCode")
+    then
+    	ContainerUpdateLims containerUpdateLims=new ContainerUpdateLims();
+    	containerUpdateLims.setCode($container.code);
+    	containerUpdateLims.setStateCode($container.state.code);
+    	containerUpdateLims.setExperimentType($experimentType);
+    	containerUpdateLims.setLimsCode($limsCode.value.toString());
+    	containerUpdateLims.setLimsStateCode(null);
+    	insert(containerUpdateLims);
+		Logger.debug("Container to update in Lims "+$container.code+ " experiment Type "+$experimentType);    
+	end
+    	    
+rule "Solution stock IS"
+@nglSQ( workflow )
+	dialect "java"
+	salience 800
+	no-loop
+    when
+    	$containerUpdateLims:ContainerUpdateLims(experimentType=="solution-stock",stateCode=="IS",limsStateCode==null)
+    then
+    	//Logger.debug("Container "+$containerUpdateLims.getCode()+"( code lims :"+$containerUpdateLims.getLimsCode()+")  update lims state");
+    	//Etat Lims = En reserve
+    	$containerUpdateLims.setLimsStateCode(5);
+    	update($containerUpdateLims);
+    end
+    
+
+rule "Solution stock UA"
+@nglSQ( workflow )
+	dialect "java"
+	salience 800
+	no-loop
+    when
+    	$containerUpdateLims:ContainerUpdateLims(experimentType=="solution-stock",stateCode=="UA",limsStateCode==null)
+    then
+    	//Logger.debug("Container "+$containerUpdateLims.getCode()+"( code lims :"+$containerUpdateLims.getLimsCode()+")  update lims state");
+    	//Etat Lims = Epuise
+    	$containerUpdateLims.setLimsStateCode(3);
+    	update($containerUpdateLims);
+    end
+
+rule "Banque Amplifié/Sizing  A-TM ou A-QC"
+	@nglSQ( workflow )
+	dialect "java"
+	salience 800
+	no-loop
+    when
+    	$containerUpdateLims:ContainerUpdateLims((experimentType=="pcr-amplification-and-purification" || experimentType=="sizing"),(stateCode=="A-TM" || stateCode=="A-QC" || stateCode=="A-PF" || stateCode=="A-TF"),limsStateCode==null)
+    then
+    	Logger.debug("Container "+$containerUpdateLims.getCode()+"( code lims :"+$containerUpdateLims.getLimsCode()+")  update lims state");
+    	//Etat Lims = En reserve
+    	$containerUpdateLims.setLimsStateCode(5);
+    	update($containerUpdateLims);
+    end
+    
+    
+rule "Update State Container in Lims"
+	@nglSQ( workflow )
+	dialect "java"
+	salience 500
+	no-loop
+    when
+	    $containerUpdateLims:ContainerUpdateLims(limsStateCode!=null)
+    then
+    	Logger.debug("Update State Container in Lims "+$containerUpdateLims.getLimsCode()); 
+	    Spring.getBeanOfType(ILimsServices.class).updateContainerState($containerUpdateLims.getLimsCode(),$containerUpdateLims.getLimsStateCode().toString());
+    	retract($containerUpdateLims);
+    end
+
+    

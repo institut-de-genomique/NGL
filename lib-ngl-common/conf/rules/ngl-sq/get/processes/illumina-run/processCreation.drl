@@ -1,0 +1,31 @@
+//created on: Feb 2, 2015
+package rules
+
+//list any import classes here.
+
+
+
+//declare any global variables here
+
+rule "Calculation of estimatedPercent property of pool process "
+	@nglSQ( processCreation )
+	dialect "java"
+	salience 1000
+	no-loop
+    when
+        $process : Process(typeCode=="illumina-run")
+        $estimatedPercentPerLane : PropertyValue() from $process.properties.get("estimatedPercentPerLane")
+        $percentage : Double() from $process.sampleOnInputContainer.percentage
+        $contextValidation : ContextValidation()      
+     	eval ($contextValidation.isCreationMode()==true && $estimatedPercentPerLane.value !=null && Double.class.isInstance($estimatedPercentPerLane.value) && $percentage!=null) 
+    then
+    	//Logger.debug("Run estimatedPercentCalculations rules ok");  
+        Double val = (Double) $estimatedPercentPerLane.value;
+        Logger.debug($process.code+" estimatedPercentPerLane before calculation : "+ val+" $percentage : "+$percentage);
+        Double newValue = roundValue(val*$percentage/100.0);
+    	$process.properties.remove("estimatedPercentPerLane");
+        $process.properties.put("estimatedPercentPerLane", new PropertySingleValue(newValue));
+        //Logger.debug("estimatedPercentPerLane after calculation : "+  $process.properties.get("estimatedPercentPerLane").value);
+        MongoDBDAO.update(InstanceConstants.PROCESS_COLL_NAME, Process.class, DBQuery.is("code", $process.code), DBUpdate.set("properties.estimatedPercentPerLane.value",newValue));        
+        		
+	end

@@ -1,0 +1,30 @@
+@(e:models.laboratory.experiment.instance.Experiment, containers: List[models.laboratory.container.instance.Container])
+
+@import controllers.instruments.io.utils._;
+;
+;;;;;;;;;;;;@(OutputHelper.getInstrumentProperty(e,"sequencingProgramType"));@(CsvHelper.getTagModel(containers).tagType)
+;
+
+Lane;PROJET;Echantillon;Code Barre;Concentration;Dilution;Vol. final;Vol. Ech;Vol. RSB;Prélever X;% de PhiX;Concentration;Volume;Mettre 5 µL;Ajout 5µL de;incub 8 min;Ajout de 5µL;Preparation ;Preparation;Distribution 
+;;;;qPCR (nM);Souhaitée	;dilution;(µL);(µL);(µL);à ajouter;du PhiX;de PhiX;d'éch + PhiX;NaOH 0.1 N;à T° amb;de Tris-HCl 200nM;cbot avec;du Master;de 35 µL
+;;;;;(nM);;;;;;(nM);à prélever;;Melange;;Mel. aspi-refoul;Pré-check;Mix ExAmp;de mix
+;;;;;;;;;;;;;;aspi-refoul;;puis sur glace;;;dans echs
+@for(etm <- e.atomicTransfertMethods.sortWith(_.line < _.line)){
+	@for(c <- etm.inputContainerUseds.sortWith(_.code < _.code)){
+			@(etm.line);@for((key,cp) <- c.contents.groupBy(_.projectCode)){@(cp.head.projectCode);@(OutputHelper.getContentProperty(cp.head,"Nom_pool_sequencage"))};@(c.code);@(c.concentration.value);@(OutputHelper.getExperimentProperty(c,"finalConcentration1"));@(OutputHelper.getExperimentProperty(c,"finalVolume"));@(OutputHelper.getExperimentProperty(c,"inputVolume"));@(OutputHelper.getExperimentProperty(c,"rsbVolume"));@(OutputHelper.getExperimentProperty(c,"finalVolume"));@(OutputHelper.getExperimentProperty(c,"phixPercent"));@(OutputHelper.getExperimentProperty(c,"phixConcentration"));@(OutputHelper.getExperimentProperty(c,"phixVolume"));; Commentaires:; @if(c.contents.toList.head.processComments != null && c.contents.toList.head.processComments.size > 0){@(c.contents.toList.head.processComments.get(0).comment);}@for(cn <- containers.find(_.code == c.code)){@(cn.comments.get(0).comment)}
+ 	}
+}
+;
+;
+Do not Vortex;Mix ExAmp;; ;NaOH 0.1N;; 			;Tris HCl 200 mM;;
+EXP1;210 µL;;             H20;990 µL;;			H20;80 µL;;
+EXP2;30 µL;;              10N NaOH;10 µLs;;		Tris-HCl 1 M;20 µL;;
+EXP3;110 µL;;
+;
+ ;PhiX 300 pM;;			 ; PhiX 3 nM;;
+RSB;323 µL;;			RSB;7;;
+PhiX 10 nM;10 µL;;		PhiX 10 nM;3;;
+;
+
+
+ 

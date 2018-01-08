@@ -24,6 +24,7 @@ import validation.common.instance.CommonValidationHelper;
 import validation.utils.BusinessValidationHelper;
 import validation.utils.ValidationConstants;
 import validation.utils.ValidationHelper;
+import play.Logger;
 
 public class ContentValidationHelper extends CommonValidationHelper {
 
@@ -57,12 +58,16 @@ public class ContentValidationHelper extends CommonValidationHelper {
 	public static void validateSampleCodeWithProjectCode(String projectCode,
 			String sampleCode, ContextValidation contextValidation) {
 		if(!checkSampleWithProject(projectCode, sampleCode)){
+			Logger.debug("ContentValidationHelper !checkSampleWithProject(projectCode, sampleCode");
 			contextValidation.addErrors("sample", ValidationConstants.ERROR_NOTEXISTS_MSG, projectCode+" + "+sampleCode);
+			Logger.debug("ContentValidationHelper !checkSampleWithProject(projectCode, sampleCode after contextValidation");
 		}
+		Logger.debug("ContentValidationHelper after checkSampleWithProject");
 	}
 
 	private static boolean checkSampleWithProject(String projectCode,
 			String sampleCode) {
+		Logger.debug("ContentValidationHelper checkSampleWithProject "+ InstanceConstants.SAMPLE_COLL_NAME);
 		return MongoDBDAO.checkObjectExist(InstanceConstants.SAMPLE_COLL_NAME, Sample.class, 
 						DBQuery.is("code", sampleCode).in("projectCodes", projectCode));
 	}

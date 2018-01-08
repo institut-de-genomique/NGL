@@ -204,7 +204,8 @@ public abstract class FileService {
 			container.support.line = container.support.line.toUpperCase();
 			container.support.column = container.support.column.toUpperCase();
 			
-			code=support.code+"_"+container.support.line+container.support.column;
+//			code=support.code+"_"+container.support.line+container.support.column;
+			code=support.code+":"+container.support.line+container.support.column;
 		}
 
 		return code;

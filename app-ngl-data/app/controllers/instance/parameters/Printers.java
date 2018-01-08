@@ -19,11 +19,11 @@ public class Printers extends CommonController {
 		ContextValidation ctx = new ContextValidation(Constants.NGL_DATA_USER);
 		ctx.setCreationMode();
 		try {
-			if (play.Play.application().configuration().getString("institute").equals("CNS")){
-				PrinterCNS.main(ctx);
-			}else if(play.Play.application().configuration().getString("institute").equals("CNG")){
-				
-			}else if(play.Play.application().configuration().getString("institute").equals("TEST")){
+//			if (play.Play.application().configuration().getString("institute").equals("CNS")){
+//				PrinterCNS.main(ctx);
+//			}else if(play.Play.application().configuration().getString("institute").equals("CNG")){
+//			}else
+			if(play.Play.application().configuration().getString("institute").equals("GET")){
 				
 			}else{
 				Logger.error("You need to specify only one institute ! Now, it's "+ play.Play.application().configuration().getString("institute"));

@@ -2,6 +2,6 @@ package services.description;
 
 public class Constants {
 
-	public enum CODE{CNG, CNS, TEST}
+	public enum CODE{CNG, CNS, TEST, GET}
 
 }

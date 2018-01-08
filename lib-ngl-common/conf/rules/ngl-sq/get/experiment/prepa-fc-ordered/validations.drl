@@ -1,0 +1,28 @@
+package rules
+
+rule "Code Flowcell catch start"
+    @nglSQ( validations )
+	dialect "java"
+	salience 900
+	no-loop
+    when
+	    $experiment:Experiment($typeCode:typeCode,$typeCode=="prepa-fc-ordered", $stateCode : state.code, $stateCode == "IP", $instrumentProperties:instrumentProperties)
+	    $containerSupportCode: PropertyValue($code:value, $code matches ".*[^A-Z0-9].*") from $instrumentProperties.get("containerSupportCode")
+	    $contextValidation:ContextValidation()
+    then
+	    Logger.debug("Code Flowcell without bad chars");
+	    $contextValidation.addErrors("instrument",	"error.validationexp.codewithbadchar", "Code Flowcell");
+end
+
+rule "Code Flowcell catch full"
+    @nglSQ( validations )
+	dialect "java"
+	salience 900
+	no-loop
+    when
+	    $experiment:Experiment($typeCode:typeCode,$typeCode=="prepa-fc-ordered", $stateCode : state.code, $atomicTransfertMethods:atomicTransfertMethods, $atomicTransfertMethods.size()!=8)
+	    $contextValidation:ContextValidation()
+    then
+    	Logger.debug("Code Flowcell not full " + $atomicTransfertMethods.size());
+	    $contextValidation.addErrors("instrument",	"error.validationexp.lanefull", $atomicTransfertMethods.size());
+end

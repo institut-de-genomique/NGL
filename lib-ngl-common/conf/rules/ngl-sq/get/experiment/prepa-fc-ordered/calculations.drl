@@ -1,0 +1,188 @@
+package rules
+
+rule "prepa-fc-ordered"
+	@nglSQ( calculations )
+	dialect "java"
+	salience 1000
+	no-loop
+	lock-on-active true
+    when
+    	 $experiment:Experiment($typeCode:typeCode,$typeCode=="prepa-fc-ordered", $stateCode : state.code, $stateCode!="F")
+    	 $atomicTransfert: ManyToOneContainer( )
+    	 InputContainerUsed( $experimentProperties : experimentProperties,$experimentProperties!=null, $concentrationIN:concentration) from $atomicTransfert.inputContainerUseds
+    	 
+    then
+    	Logger.debug("Experiment prepa-fc-ordered calculations");
+    end
+   	
+rule "prepa-fc-ordered volume stock engaged in denaturation"
+	@nglSQ( calculations )
+	dialect "java"
+	salience 1000
+	no-loop
+	lock-on-active true
+    when
+    	 $experiment:Experiment($typeCode:typeCode,$typeCode=="prepa-fc-ordered", $stateCode : state.code, $stateCode!="F")
+    	 $atomicTransfert: ManyToOneContainer( )
+    	 InputContainerUsed( $processProperties : contents.get(0).processProperties, $experimentProperties : experimentProperties,$experimentProperties!=null, $concentrationIN:concentration) from $atomicTransfert.inputContainerUseds
+		 $finalConcentration1 : PropertyValue() from $processProperties.get("finalConcentration1")
+    	 $finalVolume1 : PropertyValue() from $experimentProperties.get("finalVolume1")
+    	 eval($finalVolume1.value != null && Number.class.isInstance($finalVolume1.value) && $finalConcentration1.value != null && Number.class.isInstance($finalConcentration1.value) && convertPVToDouble($concentrationIN) != 0 && null == $experimentProperties.get("finalConcentration1"))
+   	then
+   		Logger.debug("Calculation prepa-fc-ordered inputVolume: "+ $experiment.code+ " "+ $atomicTransfert.line+" "+ $finalConcentration1.value+"  "+$concentrationIN.value);
+   		if (null == $experimentProperties.get("finalConcentration1")){
+   			PropertySingleValue value = new PropertySingleValue($finalConcentration1.value, "nM");
+   			$experimentProperties.put("finalConcentration1",value);
+   		}
+   		Logger.debug("finalConcentration1 : " + $experimentProperties.get("finalConcentration1"));
+
+   		PropertySingleValue value = new PropertySingleValue(Math.round(convertPVToDouble($finalConcentration1)*convertPVToDouble($finalVolume1)/convertPVToDouble($concentrationIN)*100.0)/100.0,"\u00B5L");
+   		if($experimentProperties.get("inputVolume") != null){
+   			$experimentProperties.remove("inputVolume");
+   		} 
+
+   		$experimentProperties.put("inputVolume",value);  
+   		 		
+   		update($experiment);
+   	end
+
+
+rule "prepa-fc-ordered volume stock engaged in denaturation 2"
+	@nglSQ( calculations )
+	dialect "java"
+	salience 1000
+	no-loop
+	lock-on-active true
+    when
+    	 $experiment:Experiment($typeCode:typeCode,$typeCode=="prepa-fc-ordered", $stateCode : state.code, $stateCode!="F")
+    	 $atomicTransfert: ManyToOneContainer( )
+    	 InputContainerUsed( $experimentProperties : experimentProperties,$experimentProperties!=null, $concentrationIN:concentration) from $atomicTransfert.inputContainerUseds
+		 $finalConcentration1 : PropertyValue() from $experimentProperties.get("finalConcentration1")
+    	 $finalVolume1 : PropertyValue() from $experimentProperties.get("finalVolume1")
+    	 eval($finalVolume1.value != null && Number.class.isInstance($finalVolume1.value) && $finalConcentration1.value != null && Number.class.isInstance($finalConcentration1.value) && convertPVToDouble($concentrationIN) != 0)
+   	then
+   		Logger.debug("Calculation prepa-fc-ordered inputVolume 2 : "+ $experiment.code+ " "+ $atomicTransfert.line+" "+ $finalConcentration1.value+"  "+$concentrationIN.value);
+   		PropertySingleValue value = new PropertySingleValue(Math.round(convertPVToDouble($finalConcentration1)*convertPVToDouble($finalVolume1)/convertPVToDouble($concentrationIN)*100.0)/100.0,"\u00B5L");
+   		if($experimentProperties.get("inputVolume") != null){
+   			$experimentProperties.remove("inputVolume");
+   		} 
+
+   		$experimentProperties.put("inputVolume",value);  
+   		 		
+   		update($experiment);
+   	end
+  
+rule "prepa-fc-ordered volume PhiX"
+	@nglSQ( calculations )
+	dialect "java"
+	salience 700
+	no-loop
+	lock-on-active true
+	when
+		 $experiment:Experiment($typeCode:typeCode,$typeCode=="prepa-fc-ordered", $stateCode : state.code, $stateCode!="F")
+		 $atomicTransfert: ManyToOneContainer( )
+		 InputContainerUsed($processProperties : contents.get(0).processProperties, $experimentProperties : experimentProperties, $experimentProperties!=null) from $atomicTransfert.inputContainerUseds
+		 $phixPercent : PropertyValue() from $processProperties.get("phixPercent")
+		 $finalConcentration1 : PropertyValue() from $processProperties.get("finalConcentration1")
+		 $finalVolume : PropertyValue() from $experimentProperties.get("finalVolume")
+		 eval($phixPercent.value != null &&  Number.class.isInstance($phixPercent.value) && $finalConcentration1.value != null && Number.class.isInstance($finalConcentration1.value) && $finalVolume.value != null && Number.class.isInstance($finalVolume.value) && (null == $experimentProperties.get("phixPercent") || null == $experimentProperties.get("finalConcentration1")))
+	then
+		
+ 		if(null == $experimentProperties.get("phixPercent")){
+   			PropertySingleValue value = new PropertySingleValue($phixPercent.value);
+   			$experimentProperties.put("phixPercent",value);
+   		} 
+   		
+		PropertySingleValue pXconcenration = new PropertySingleValue(0.3,"nM");
+		PropertySingleValue value = new PropertySingleValue(Math.round((convertPVToDouble($phixPercent)*convertPVToDouble($finalVolume)))/10.0,"\u00B5L");
+		
+         if (convertPVToDouble($phixPercent) > 5){
+                        //Logger.debug("Dans prepa-fc-ordered volume PhiX : $phixPercent > 5 avant : "+convertPVToDouble($phixConcentration));
+
+                        pXconcenration = new PropertySingleValue(3.0,"nM");
+                        value = new PropertySingleValue(Math.round((convertPVToDouble($phixPercent)*convertPVToDouble($finalVolume)))/100.0,"\u00B5L"); 
+         
+         }
+         Logger.debug("prepa-fc-ordered volume PhiX / value = " + value);
+         $experimentProperties.put("phixConcentration", pXconcenration); 
+          // Logger.debug("Dans prepa-fc-ordered volume PhiX : $phixPercent > 5 apres : "+$phixConcentration);
+         
+		Logger.debug("Calculation prepa-fc-ordered  phixVolume: "+ $experiment.code+ " "+ $atomicTransfert.line);
+		
+		//PropertySingleValue value = new PropertySingleValue(Math.round((convertPVToDouble($phixPercent)*convertPVToDouble($finalConcentration1)*convertPVToDouble($finalVolume)/convertPVToDouble(pXconcenration)))/100.0,"\u00B5L");
+		if($experimentProperties.get("phixVolume") != null){
+			$experimentProperties.remove("phixVolume");
+		}
+		
+		$experimentProperties.put("phixVolume",value);
+		
+		update($experiment); 
+	end     
+		
+rule "prepa-fc-ordered volume PhiX 2"
+	@nglSQ( calculations )
+	dialect "java"
+	salience 700
+	no-loop
+	lock-on-active true
+	when
+		 $experiment:Experiment($typeCode:typeCode,$typeCode=="prepa-fc-ordered", $stateCode : state.code, $stateCode!="F")
+		 $atomicTransfert: ManyToOneContainer( )
+		 InputContainerUsed( $experimentProperties : experimentProperties,$experimentProperties!=null) from $atomicTransfert.inputContainerUseds
+		 $phixPercent : PropertyValue() from $experimentProperties.get("phixPercent")
+		 $finalConcentration1 : PropertyValue() from $experimentProperties.get("finalConcentration1")
+		 $finalVolume : PropertyValue() from $experimentProperties.get("finalVolume")
+		 eval($phixPercent.value != null &&  Number.class.isInstance($phixPercent.value) && $finalConcentration1.value != null && Number.class.isInstance($finalConcentration1.value) && $finalVolume.value != null && Number.class.isInstance($finalVolume.value))
+	then
+		PropertySingleValue pXconcenration = new PropertySingleValue(0.3,"nM");
+		PropertySingleValue value = new PropertySingleValue(Math.round((convertPVToDouble($phixPercent)*convertPVToDouble($finalVolume)))/10.0,"\u00B5L");
+		
+         if (convertPVToDouble($phixPercent) > 5){
+                        //Logger.debug("Dans prepa-fc-ordered volume PhiX : $phixPercent > 5 avant : "+convertPVToDouble($phixConcentration));
+
+                        pXconcenration = new PropertySingleValue(3.0,"nM");
+                        value = new PropertySingleValue(Math.round((convertPVToDouble($phixPercent)*convertPVToDouble($finalVolume)))/100.0,"\u00B5L"); 
+         
+         }
+         Logger.debug("prepa-fc-ordered volume PhiX / value = " + value);
+         $experimentProperties.put("phixConcentration", pXconcenration); 
+          // Logger.debug("Dans prepa-fc-ordered volume PhiX : $phixPercent > 5 apres : "+$phixConcentration);
+         
+		Logger.debug("Calculation prepa-fc-ordered  phixVolume 2 : "+ $experiment.code+ " "+ $atomicTransfert.line);
+		
+		//PropertySingleValue value = new PropertySingleValue(Math.round((convertPVToDouble($phixPercent)*convertPVToDouble($finalConcentration1)*convertPVToDouble($finalVolume)/convertPVToDouble(pXconcenration)))/100.0,"\u00B5L");
+		if($experimentProperties.get("phixVolume") != null){
+			$experimentProperties.remove("phixVolume");
+		}
+		
+		$experimentProperties.put("phixVolume",value);
+		
+		update($experiment); 
+	end     
+	
+rule "prepa-fc-ordered volume RSB"
+	@nglSQ( calculations )
+	dialect "java"
+	salience 900
+	no-loop
+    when
+    	 $experiment:Experiment($typeCode:typeCode,$typeCode=="prepa-fc-ordered", $stateCode : state.code, $stateCode!="F")
+    	 $atomicTransfert: ManyToOneContainer( )
+    	 InputContainerUsed( $experimentProperties : experimentProperties,$experimentProperties!=null, $concentrationIN:concentration) from $atomicTransfert.inputContainerUseds
+		 $phixVolume : PropertyValue() from $experimentProperties.get("phixVolume")
+    	 $finalVolume1 : PropertyValue() from $experimentProperties.get("finalVolume1")
+    	 $inputVolume : PropertyValue() from $experimentProperties.get("inputVolume")
+    	 eval($inputVolume.value != null && Number.class.isInstance($inputVolume.value) && $finalVolume1.value != null && Number.class.isInstance($finalVolume1.value) && $phixVolume.value != null && Number.class.isInstance($phixVolume.value))
+   	then
+   		Logger.debug("Calculation prepa-fc-ordered rsbVolume: "+ $experiment.code+ " "+ $atomicTransfert.line);
+   		//PropertySingleValue value = new PropertySingleValue(Math.round((convertPVToDouble($finalVolume1)-convertPVToDouble($inputVolume)-convertPVToDouble($phixVolume))*100.0)/100.0,"\u00B5L");
+   		PropertySingleValue value = new PropertySingleValue(Math.round((convertPVToDouble($finalVolume1)-convertPVToDouble($inputVolume))*100.0)/100.0,"\u00B5L");
+   		if($experimentProperties.get("rsbVolume") != null){
+   			$experimentProperties.remove("rsbVolume");
+   		}
+   		
+   		$experimentProperties.put("rsbVolume", value);
+   		
+   		update($experiment);
+   	end 
+

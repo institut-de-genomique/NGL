@@ -1,0 +1,244 @@
+//created on: Aug 6, 2014
+//Rules for validation
+package rules
+
+declare ATMInfo	
+	position : String
+	contentInfos : List 
+end
+
+declare ContentInfo
+	position : String
+	containerCode : String 
+	tag : String 
+	tagCategory : String 
+	sampleCode : String
+	tagRealSize : Integer
+	sequence : String
+	libProcessTypeCode :String
+	fromExperimentTypeCode : String
+end
+
+rule "Debug validations"
+	@nglSQ( validations )
+	dialect "java"
+	salience 1000
+	no-loop
+    when
+	eval(true)
+    then
+		Logger.debug("Rules annotation @nglSQ(validations)");    
+	end
+
+rule "Init object ATMInfo in WM"
+	@nglSQ( validations )
+	dialect "java"
+	salience 700
+	no-loop
+    when
+    Experiment($typeCode : typeCode, $typeCode!="opgen-depot")
+    $atomicTransfert: ManyToOneContainer($position : viewIndex.toString())
+    not ATMInfo($position==position)
+    then
+    
+    ATMInfo ATMInfo = new ATMInfo($position,new ArrayList());
+    Logger.debug("Lane Info Position :"+$position);
+    insert(ATMInfo);
+    
+	end
+
+
+
+rule "Init objects ContentInfo in WM"
+		@nglSQ( validations )
+	dialect "java"
+	salience 600
+	no-loop
+    when
+    $atomicTransfert: ManyToOneContainer($position:viewIndex.toString(),$inputContainers : inputContainerUseds, $inputContainers.size()!=0)
+	$container : InputContainerUsed( $contents : contents,$contents!=null) from $inputContainers
+	$content : Content() from $contents	 
+	$ATMInfo : ATMInfo($position==position)
+    then
+   
+    String tag="VIDE";
+    String libProcessTypeCode="VIDE";
+    String tagCategory="VIDE";
+    Integer tagRealSize = 0;
+    String sequence = "VIDE";
+    String fromCode="VIDE";
+    
+    if($content.properties.containsKey("tag")){
+    	tag=$content.properties.get("tag").value.toString();
+    	Index index=MongoDBDAO.findOne(InstanceConstants.PARAMETER_COLL_NAME, Index.class, DBQuery.in("typeCode", "index-illumina-sequencing","index-nanopore-sequencing").is("code", tag));
+    	if(index != null){
+    		sequence = index.sequence;
+    		tagRealSize = index.sequence.length();
+    	}else{
+    		Logger.debug("Can't find index "+tag+" in collection "+InstanceConstants.PARAMETER_COLL_NAME);
+    	}
+    }
+    if($content.properties.containsKey("tagCategory")) tagCategory=$content.properties.get("tagCategory").value.toString();
+
+	if($content.properties.containsKey("libProcessTypeCode")){
+		libProcessTypeCode=$content.properties.get("libProcessTypeCode").value.toString();
+	}
+
+	if($container.fromTransformationTypeCodes!=null && $container.fromTransformationTypeCodes.size()>0)
+		fromCode=$container.fromTransformationTypeCodes.iterator().next();
+	
+
+	ContentInfo contentInfo= new ContentInfo($atomicTransfert.viewIndex.toString(),$container.code,tag,tagCategory,$content.sampleCode, tagRealSize, sequence, libProcessTypeCode,fromCode);
+	Logger.debug("Content Info Position : "+$atomicTransfert.viewIndex.toString()+ ", Sample Code :"+$content.sampleCode + ", Container Code :"+$container.code+", Tag :"+tag +", tagCategory :"+tagCategory+", size :"+tagRealSize+", sequence :"+sequence + ",libProcessTypeCode :"+libProcessTypeCode+", fromExperimentTypeCode :"+fromCode);
+    $ATMInfo.getContentInfos().add(contentInfo);
+	insert(contentInfo);
+	
+    end
+
+
+rule "Container duplicate in Lane"
+	@nglSQ( validations )
+	dialect "java"
+	salience 500
+	no-loop
+    when
+    	  ATMInfo($position:position)
+    	  ManyToOneContainer($position==viewIndex.toString(),$inputContainers : inputContainerUseds)
+    	  $containerCodes : Set(empty==false, size >= 1) from accumulate( InputContainerUsed($containerCode:code) from $inputContainers,
+	                         init( HashSet result = new HashSet(); HashSet containers=new HashSet(); ),
+                              action( if(!containers.contains($containerCode)){ containers.add($containerCode); } 
+                              				else if(!result.contains($containerCode)) { result.add($containerCode);} ),
+                             reverse( result.remove($containerCode); ),
+                              result( result) )
+		 $containerDuplicate : String() from $containerCodes
+		 $contextValidation:ContextValidation()
+    then
+    	//Logger.debug("Erreur containers "+$containerDuplicate);
+ 		$contextValidation.addErrors("Position["+$position+"]",	"error.validationexp.duplicateinputcontainers",$containerDuplicate, $position);
+    end
+
+
+rule "For Tag vide same sample"
+	@nglSQ (validations )
+	dialect "java"
+	salience 400
+	no-loop
+    when
+    	   $contentInfo1 : ContentInfo($tag :tag, $tag=="VIDE",$sampleCode :sampleCode,$position:position,$containerCode1:containerCode)
+           $contentInfo2 : ContentInfo(this != $contentInfo1, tag == $tag, position==$position, sampleCode!=$sampleCode,$containerCode2:containerCode)
+           $contextValidation:ContextValidation()
+    then
+    	List<String> containers=new ArrayList<String>();
+    	containers.add($containerCode1);
+    	containers.add($containerCode2);
+    	Collections.sort(containers);
+    	Logger.debug("Tag error "+$contentInfo1 + " position "+$position);
+    	$contextValidation.addErrors("Position["+$position+"]",	"error.validationexp.sameSample",containers.get(0),containers.get(1));    	
+    end
+
+rule "No Tag with Tag "
+	@nglSQ (validations )
+	dialect "java"
+	salience 400
+	no-loop
+    when
+    	   $contentInfo1 : ContentInfo($tag :tag, $tag=="VIDE",$sampleCode :sampleCode,$position:position,$containerCode1:containerCode)
+           $contentInfo2 : ContentInfo(this != $contentInfo1, tag != $tag, position==$position, $containerCode2:containerCode)
+           $contextValidation:ContextValidation()
+    then
+    	$contextValidation.addErrors("Position["+$position+"]",	"error.validationexp.noTagSampleWithTagSample");    	
+    end
+
+//rule "Many TagCategory on same position"
+//	@nglSQ (validations )
+//	dialect "java"
+//	salience 300
+//	no-loop
+//when
+//	 ATMInfo($position:position)
+//     $tagCategories : Set(empty==false, size > 1) from accumulate( ContentInfo ( tag!="VIDE",$tagCategory : tagCategory,$position==position),
+//                        collectSet( $tagCategory) )
+//	  $contextValidation:ContextValidation($errors : errors)
+//then
+//	Logger.debug("TagCategory error "+ $tagCategories.size()+" position "+$position);
+//    $contextValidation.addErrors("Position["+$position+"]",	"error.validationexp.manytagCategory", $position);
+//end
+
+//rule "Same tag size"
+//	@nglSQ (validations )
+//	dialect "java"
+//	salience 301
+//	no-loop
+//when
+//	 ATMInfo($position:position)
+//     $tagRealSizes : Set(empty==false, size > 1) from accumulate( ContentInfo ( tag!="VIDE", $tagRealSize : tagRealSize, $position==position),
+//                        collectSet( $tagRealSize) )
+//	  $contextValidation:ContextValidation($errors : errors)
+//then
+//	Logger.debug("Tag squence error "+ $tagRealSizes+" position "+$position);
+//    $contextValidation.addErrors("Position["+$position+"]",	"error.validationexp.manytagSize", $position);
+//end
+
+rule "Same sequence"
+	@nglSQ (validations )
+	dialect "java"
+	salience 302
+	no-loop
+when
+	 ATMInfo($position:position, $contentInfos:contentInfos)
+     $sequences : Set(empty==false, size != $contentInfos.size()) from accumulate( ContentInfo ( $sequence : sequence, $sequence!="VIDE", $position==position),
+                        collectSet( $sequence) )
+      $seq : String() from $sequences
+      $results : List(size>1) from accumulate( ContentInfo($s:sequence, $tag:tag, $seq==$s) from $contentInfos, collectList($tag+":"+$s))
+	  $contextValidation:ContextValidation($errors : errors)
+then
+	Logger.debug("Tag sequence error "+ $sequences+" and "+$contentInfos.size()+" position "+$position);
+    $contextValidation.addErrors("Position["+$position+"]",	"error.validationexp.sameTagSequence", $position, $results);
+end
+
+
+rule "Same liprocessTypeCode for tag VIDE"
+	@nglSQ (validations )
+	dialect "java"
+	salience 220
+	no-loop
+    when
+    	   $contentInfo1 : ContentInfo($tag :tag, $tag=="VIDE",$sampleCode :sampleCode,$position:position,$containerCode1:containerCode, $libProcessTypeCode :libProcessTypeCode, $libProcessTypeCode!="VIDE")
+           $contentInfo2 : ContentInfo(this != $contentInfo1, tag == $tag, position==$position, sampleCode==$sampleCode, $libProcessTypeCode !=libProcessTypeCode, $libProcessTypeCode2:libProcessTypeCode, $containerCode2:containerCode)
+           $contextValidation:ContextValidation()
+    then
+    	Logger.debug("LibProcessTypeCode error "+$contentInfo1 + " position "+$position);
+    	List<String> containers=new ArrayList();
+    	containers.add($containerCode1);
+    	containers.add($containerCode2);
+    	Collections.sort(containers);
+    	List<String> libProcessTypeCodes=new ArrayList<String>();
+    	libProcessTypeCodes.add($libProcessTypeCode);
+    	libProcessTypeCodes.add($libProcessTypeCode2);
+    	Collections.sort(libProcessTypeCodes);
+    	$contextValidation.addErrors("Position["+$position+"]",	"error.validationexp.samelibprocesstypecode",containers.get(0),containers.get(1), libProcessTypeCodes.get(0),libProcessTypeCodes.get(1));    	
+    end
+
+    
+rule "Same fromTransformationTypeCodes for tag VIDE and same libprocesstypeCode"
+	@nglSQ (validations )
+	dialect "java"
+	salience 210
+	no-loop
+    when
+    	   $contentInfo1 : ContentInfo($tag :tag, $tag=="VIDE",$sampleCode :sampleCode,$position:position,$containerCode1:containerCode, $fromExperimentTypeCode:fromExperimentTypeCode,$libProcessTypeCode :libProcessTypeCode)
+           $contentInfo2 : ContentInfo(this != $contentInfo1, tag == $tag, position==$position, sampleCode==$sampleCode, $libProcessTypeCode ==libProcessTypeCode, $fromExperimentTypeCode!=fromExperimentTypeCode, $containerCode2:containerCode,$fromExperimentTypeCode2:fromExperimentTypeCode)
+           $contextValidation:ContextValidation()
+    then
+    	Logger.debug("LibProcessTypeCode error "+$contentInfo1 + " position "+$position);
+    	List<String> containers=new ArrayList<String>();
+    	containers.add($containerCode1);
+    	containers.add($containerCode2);
+    	Collections.sort(containers);
+    	List<String> fromExperimentTypeCode=new ArrayList<String>();
+    	fromExperimentTypeCode.add($fromExperimentTypeCode);
+    	fromExperimentTypeCode.add($fromExperimentTypeCode2);
+    	Collections.sort(fromExperimentTypeCode);
+    	$contextValidation.addErrors("Position["+$position+"]",	"error.validationexp.samefromexperimenttypecode", containers.get(0),containers.get(1),fromExperimentTypeCode.get(0),fromExperimentTypeCode.get(1));    	
+    end
+    

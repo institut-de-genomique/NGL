@@ -23,7 +23,7 @@ public class UserDAO extends AbstractDAOMapping<User> {
 
 	protected UserDAO() {
 		super("user", User.class, UserMappingQuery.class,
-				"SELECT t.id, t.login, t.firstname, t.lastname, t.email, t.technicaluser " +
+				"SELECT t.id, t.login, t.firstname, t.lastname, t.email, t.technicaluser, t.active " +
 				"FROM user as t ", true);
 	}
 	/*
@@ -38,28 +38,27 @@ public class UserDAO extends AbstractDAOMapping<User> {
 	
 	public boolean isExistUserWithLoginAndPassword(String login, String password){
 		String sql = "SELECT login "+
-				"FROM user WHERE login='"+login+"' AND password='"+password+"'";
-		
+				"FROM user WHERE login = :login AND password = :password";
 		Map<String, Object> parameters = new HashMap<String, Object>();
 		parameters.put("login", login);
 		parameters.put("password", password);
 		
 		BeanPropertyRowMapper<User> mapper = new BeanPropertyRowMapper<User>(User.class);
-		List<User> us =  this.jdbcTemplate.query(sql, mapper);
+		List<User> us =  this.jdbcTemplate.query(sql, mapper, parameters);
 		
 		return this.jdbcTemplate.query(sql, mapper).size()>0;
 	}
 
 	public String  getUserPassword(String login) throws DAOException{
 		String sql = "SELECT login , password "+
-				"FROM user WHERE login='"+login+"' ";
-		
+				"FROM user WHERE login = :login";
 		Map<String, Object> parameters = new HashMap<String, Object>();
 		parameters.put("login", login);
-		
 		BeanPropertyRowMapper<User> mapper = new BeanPropertyRowMapper<User>(User.class);
-		List<User> users =  this.jdbcTemplate.query(sql, mapper);
-		if(users != null && users.size() == 1 && users.get(0).password != null){
+		Logger.debug("UserDAO - getUserPassword : requête SQL : " + sql + "  for " + login);
+		List<User> users =  this.jdbcTemplate.query(sql, mapper, parameters);
+		
+		if(users != null && users.size() == 1){
 			return users.get(0).password.toString();
 		}else{
 			return null;
@@ -67,31 +66,31 @@ public class UserDAO extends AbstractDAOMapping<User> {
 		
 		//return null ;
 	}	
-	
 	public boolean isUserActive(String login) throws DAOException{
 		String sql = "SELECT active "+
-				"FROM user WHERE login = '"+login+"' ";
+				"FROM user WHERE login = :login";
 		Map<String, Object> parameters = new HashMap<String, Object>();
 		parameters.put("login", login);
 		BeanPropertyRowMapper<User> mapper = new BeanPropertyRowMapper<User>(User.class);
 		Logger.debug("UserDAO - isUserActive : requête SQL : " + sql + "  for " + login);
 		List<User> users =  this.jdbcTemplate.query(sql, mapper, parameters);
 		
-		if(users != null && users.size() == 1 ){
+		if(users != null && users.size() == 1){
 			return users.get(0).active;
 		}
 		return false;
 	}
-	
-	
 	public boolean isUserAccessApplication(String login, String application){
 		if(!login.equals("") && getUserId(login) != 0){
 			applicationAccess(login, application);
-			
+			 
 			String sql = "SELECT a.label "+
-					"FROM user u, application a, user_application ua WHERE u.login='"+login+"' AND a.code='"+application+"' AND ua.user_id=u.id and ua.application_id=a.id";
+					"FROM user u, application a, user_application ua WHERE u.login= :login AND a.code= :application AND ua.user_id=u.id and ua.application_id=a.id";
+			Map<String, Object> parameters = new HashMap<String, Object>();
+			parameters.put("login", login);
+			parameters.put("application", application);
 			BeanPropertyRowMapper<User> mapper = new BeanPropertyRowMapper<User>(User.class);
-			return this.jdbcTemplate.query(sql, mapper).size()>0;
+			return this.jdbcTemplate.query(sql, mapper, parameters).size()>0;
 		}else if(!login.equals("")){
 			createUser(login);
 			applicationAccess(login, application);
@@ -207,7 +206,7 @@ public class UserDAO extends AbstractDAOMapping<User> {
 	
 
 	@Override
-	public long save(User 	user) throws NotImplementedException{
+	public long save(User 	user) throws DAOException{
 		
 		Map<String, Object> parameters = new HashMap<String, Object>();
 		parameters.put("login", user.code);
@@ -223,9 +222,8 @@ public class UserDAO extends AbstractDAOMapping<User> {
 	}
 
 	@Override
-	public void update(User user) throws NotImplementedException{
+	public void update(User user) throws DAOException{
 		String sql = "UPDATE user SET firstname=?, lastname=?, email=?, password = ?, technicaluser = ?, active=? WHERE id=?";
 		jdbcTemplate.update(sql, user.firstname, user.lastname, user.email, user.password,user.technicaluser,user.active, user.id);
-
 	}
 }

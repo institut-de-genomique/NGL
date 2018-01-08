@@ -1,0 +1,163 @@
+package rules
+
+rule "Create Run and ReadSets Nanopore"
+	@nglSQ( workflow )
+	dialect "java"
+	salience 1000
+	no-loop
+	when 
+	$experiment:Experiment($state:state.code,$typeCode:typeCode,$typeCode=="nanopore-depot",$state=="F")
+	
+	then
+		Logger.debug("Nanopore-depot update state code : "+$state);
+		//Creation run
+		Run run=new Run();
+		Date runStartDate = (Date)$experiment.experimentProperties.get("runStartDate").value;
+		run.sequencingStartDate=runStartDate;
+		run.state=new State("N","ngl-sq");
+	
+		run.containerSupportCode=$experiment.outputContainerSupportCodes.toArray()[0].toString();
+   		//run.projectCodes = $experiment.projectCodes; //done with readset creation
+    	//run.sampleCodes = $experiment.sampleCodes; //done with readset creation
+   		run.traceInformation=new TraceInformation();
+   		run.traceInformation.setTraceInformation("ngl-sq");
+   		
+   		run.instrumentUsed=new InstrumentUsed();
+   		run.instrumentUsed.typeCode=$experiment.instrument.typeCode;
+   		run.instrumentUsed.code=$experiment.instrument.code;
+    	
+    	run.code=((new SimpleDateFormat("yyMMdd")).format(runStartDate))+"_"+run.instrumentUsed.code+"_"+run.containerSupportCode;
+		
+		Treatment treatment=new Treatment();
+		treatment.code="minknowMetrichor";
+		treatment.typeCode="minknow-metrichor";
+		treatment.categoryCode="sequencing";
+		treatment.results.put("default",new HashMap<String, PropertyValue>(0));
+		run.treatments.put("minknowMetrichor",treatment);
+		
+		insert(run);			
+end
+
+
+rule "Update type Run RMINION"
+	@nglSQ( workflow )
+	dialect "java"
+	salience 900
+	no-loop
+	when 
+		$run:Run(typeCode==null,$instrumentTypeCode:instrumentUsed.typeCode,$instrumentTypeCode=="minION")
+	then
+		 Logger.debug("typeCode RMINION");
+		$run.typeCode="RMINION";	
+		$run.categoryCode="nanopore";
+		update($run);
+end
+
+
+rule "Update type Run RMKI"
+	@nglSQ( workflow )
+	dialect "java"
+	salience 900
+	no-loop
+	when 
+	$run:Run(typeCode==null,$instrumentTypeCode:instrumentUsed.typeCode,$instrumentTypeCode=="mk1")
+	then
+		Logger.debug("typeCode RMKI");
+		$run.typeCode="RMKI";	
+		$run.categoryCode="nanopore";
+		update($run);
+end
+
+
+rule "Update type Run RMKIB"
+	@nglSQ( workflow )
+	dialect "java"
+	salience 900
+	no-loop
+	when 
+	$run:Run(typeCode==null,$instrumentTypeCode:instrumentUsed.typeCode,$instrumentTypeCode=="mk1b")
+	then
+		Logger.debug("typeCode RMKIB");
+		$run.typeCode="RMKIB";	
+		$run.categoryCode="nanopore";
+		update($run);
+end
+
+rule "Save Run Nanopore"
+	@nglSQ( workflow )
+	dialect "java"
+	salience 800
+	no-loop
+	when 
+		$run:Run(categoryCode=="nanopore")	
+    	$contextError:ContextValidation()
+	then
+		Logger.debug("Save run nanopore");
+		$contextError.setCreationMode();
+		$run = (Run)InstanceHelpers.save(InstanceConstants.RUN_ILLUMINA_COLL_NAME,$run,$contextError,true);
+		update($run);			
+end
+
+rule "Create ReadSet"
+@nglSQ( workflow )
+	dialect "java"
+	salience 700
+	no-loop
+	when  
+		$experiment:Experiment($atomic:atomicTransfertMethods,$state:state.code,$typeCode:typeCode,$typeCode=="nanopore-depot",$state=="F")
+		AtomicTransfertMethod($inputContainerUseds :inputContainerUseds,$laneNumber:line) from $atomic
+		InputContainerUsed($code:code,$contents:contents) from $inputContainerUseds
+		$content:Content() from $contents 
+		$run:Run(categoryCode=="nanopore")
+		$contextError:ContextValidation()
+	then
+		Logger.debug("ReadSet Creation for run "+$run.code);
+		//Creation des readsets
+		Date runStartDate = (Date)$experiment.experimentProperties.get("runStartDate").value;
+ 		 
+		ReadSet readSet=new ReadSet();
+		readSet.typeCode="rsnanopore";
+		readSet.code=$content.sampleCode+"_ONT_"+$laneNumber+"_"+$run.containerSupportCode;
+		if($content.properties.containsKey("tag")){
+			readSet.code=readSet.code+"."+$content.properties.get("tag").value;
+		}
+		
+		
+		readSet.state=new State("N","ngsrg");
+		
+		readSet.runCode=$run.code;
+		readSet.runTypeCode=$run.typeCode;
+		readSet.runSequencingStartDate=runStartDate;
+		readSet.laneNumber=1;
+		readSet.sampleCode=$content.sampleCode;
+		readSet.projectCode=$content.projectCode;
+		//TO DO
+		readSet.path="A_RENSEIGNER";
+     	readSet.location="CNS";	
+		readSet.traceInformation=new TraceInformation();
+		readSet.traceInformation.setTraceInformation("ngsrg");
+	    $contextError.setCreationMode();
+	    InstanceHelpers.save(InstanceConstants.READSET_ILLUMINA_COLL_NAME,readSet,$contextError,true);
+	    MongoDBDAO.update(InstanceConstants.RUN_ILLUMINA_COLL_NAME, Run.class
+				,DBQuery.is("code",$run.code)
+				,DBUpdate.addToSet("sampleCodes", $content.sampleCode).addToSet("projectCodes",$content.projectCode));
+	    
+end
+
+//!!!!! NEED TO CALL IN LAST BECAUSE THE Workflows.setRunState() call DROOLS AND INACTIVE OTHER RULES EXECUTION!!!!!!
+rule "Update Workflow Run Nanopore"
+	@nglSQ( workflow )
+	dialect "java"
+	salience 600
+	no-loop
+	when 
+		$run:Run(categoryCode=="nanopore")	
+    	$contextError:ContextValidation()
+	then
+		Logger.debug("Update Workflow run nanopore");
+		State nextState = new State();
+		nextState.code = "IP-S";
+		nextState.date = new Date();
+		nextState.user = "ngl-sq";
+		Workflows.setRunState($contextError, $run, nextState);				
+end

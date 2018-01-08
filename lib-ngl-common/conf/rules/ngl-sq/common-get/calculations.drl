@@ -1,0 +1,32 @@
+package rules
+
+rule "Set RunStartDate to Illumina Depot, Opgen Depot, Nanopore Depot if not exist"
+@nglSQ (calculations )
+	dialect "java"
+	salience 500
+	no-loop
+when
+	$experiment: Experiment($typeCode:typeCode,$typeCode=="illumina-depot"|| $typeCode=="opgen-depot" || $typeCode=="nanopore-depot" || $typeCode=="bionano-depot" , $state: state, $state.code=="N", 
+	$experimentProperties: experimentProperties, (null == $experimentProperties || (null != $experimentProperties && null == $experimentProperties.get("runStartDate"))), traceInformation!=null, $creationDate: traceInformation.creationDate)	
+then	
+	Logger.info("Regle RunStartDate propertie OK");
+	if($experimentProperties==null){
+		$experiment.experimentProperties=new HashMap<String,PropertyValue>();
+	}
+	
+	Calendar c = Calendar.getInstance();
+	c.setTime($creationDate);
+	c.set(Calendar.HOUR,0);
+	c.set(Calendar.MINUTE,0);
+	c.set(Calendar.SECOND,0);
+	c.set(Calendar.MILLISECOND,0);
+	
+	$creationDate = c.getTime();
+	
+	PropertySingleValue value = new PropertySingleValue($creationDate);
+	$experiment.experimentProperties.put("runStartDate", value);
+	//$contextValidation.addErrors("experiment", "error.validationexp.mandatoryrunstartdate", $typeCode, $runStartDate);
+	Logger.info("Date reel de dépot = " + $experiment.experimentProperties.get("runStartDate"));
+	update ($experiment);
+
+end

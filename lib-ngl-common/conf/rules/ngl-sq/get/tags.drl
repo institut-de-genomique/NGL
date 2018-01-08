@@ -1,0 +1,288 @@
+package rules
+
+//declare any global variables here
+declare TagInfo
+	experimentTypeCode : String @key
+	support : ContainerSupport @key
+end
+
+declare TagDetails
+	barcode : String
+	categoryCode : String
+	experimentTrigramCode : String
+	projectCode : String
+	sampleCode : String
+	libProcessTypeCode : String
+	tagCode : String	
+end
+
+rule "Generate TagInfo from Experiment"
+	@nglSQ( tags )
+	dialect "java"
+	salience 100
+	no-loop
+    when
+		$experiment:Experiment($typeCode:typeCode)    
+    then
+		Logger.debug("Rules annotation @nglSQ(tags) "+$typeCode);
+		List<AtomicTransfertMethod> atomics = $experiment.atomicTransfertMethods;
+		Map<String, ContainerSupport> supports = new HashMap<String, ContainerSupport>();
+		
+		for(AtomicTransfertMethod atm : atomics){
+			List<InputContainerUsed> cuinputs = atm.inputContainerUseds;
+			Set<String> sampleCodes = new TreeSet<String>();
+			Set<String> projectCodes = new TreeSet<String>();
+			Set<String> fromTransformationTypeCodes = new TreeSet<String>();
+			Set<String> libProcessTypeCodes = new TreeSet<String>();
+			Set<String> tags = new TreeSet<String>();
+			//extract content info
+			for(InputContainerUsed cu:cuinputs){
+				fromTransformationTypeCodes.addAll(cu.fromTransformationTypeCodes);				
+			}
+			
+			if(!OneToVoidContainer.class.isAssignableFrom(atm.getClass())){				
+				List<OutputContainerUsed> cuoutputs = atm.outputContainerUseds;
+				//generate support
+				for(OutputContainerUsed cu:cuoutputs){
+					ContainerSupport support = null;
+					if(null != cu.locationOnContainerSupport){
+						if(!supports.containsKey(cu.locationOnContainerSupport.code)){
+							support = new ContainerSupport();
+							support.code = cu.locationOnContainerSupport.code;
+							support.categoryCode = cu.locationOnContainerSupport.categoryCode;
+							support.properties=new HashMap<String, PropertyValue>();
+							supports.put(cu.locationOnContainerSupport.code, support);
+						}else{
+							support = supports.get(cu.locationOnContainerSupport.code);
+						}
+						//add content info to each support
+						support.fromTransformationTypeCodes.addAll(fromTransformationTypeCodes);
+						
+						if(null != cu.contents){
+							for(Content content : cu.contents){
+								support.projectCodes.add(content.projectCode);
+								support.sampleCodes.add(content.sampleCode);
+							}
+						}
+						
+						/*
+						if(!support.properties.containsKey("libProcessTypeCodes")){
+							support.properties.put("libProcessTypeCodes", new PropertyListValue(new ArrayList<String>(libProcessTypeCodes)));						
+						}else{
+							TreeSet<String> l = new TreeSet<String>((List<String>) ((PropertyListValue)support.properties.get("libProcessTypeCodes")).value);
+							l.addAll(libProcessTypeCodes);
+							support.properties.put("libProcessTypeCodes", new PropertyListValue(new ArrayList<String>(l)));
+						}
+						
+						if(!support.properties.containsKey("tags")){
+							support.properties.put("tags", new PropertyListValue(new ArrayList<String>(tags)));						
+						}else{
+							TreeSet<String> l = new TreeSet<String>((List<String>) ((PropertyListValue)support.properties.get("tags")).value);
+							l.addAll(tags);
+							support.properties.put("tags", new PropertyListValue(new ArrayList<String>(l)));
+						}
+						*/
+					}
+					
+				}
+			}else{
+				List<InputContainerUsed> cuInputs = atm.inputContainerUseds;
+				for(InputContainerUsed cu : cuInputs){
+					ContainerSupport support = null;
+					if(null != cu.locationOnContainerSupport){
+						if(!supports.containsKey(cu.locationOnContainerSupport.code)){
+							support = new ContainerSupport();
+							support.code = cu.locationOnContainerSupport.code;
+							support.categoryCode = cu.locationOnContainerSupport.categoryCode;
+							support.properties=new HashMap<String, PropertyValue>();
+							supports.put(cu.locationOnContainerSupport.code, support);
+						}else{
+							support = supports.get(cu.locationOnContainerSupport.code);
+						}
+						//add content info to each support
+						support.fromTransformationTypeCodes.addAll(fromTransformationTypeCodes);
+						
+						if(null != cu.contents){
+							for(Content content : cu.contents){
+								support.projectCodes.add(content.projectCode);
+								support.sampleCodes.add(content.sampleCode);
+							}
+						}					
+					}
+					
+				}
+			}				
+		}
+		retract($experiment);
+		for(ContainerSupport support : supports.values()){
+			if("transformation".equals($experiment.categoryCode)){
+				TagInfo tagInfo = new TagInfo($typeCode, support);
+				insert(tagInfo);
+			}else{
+				if(support.fromTransformationTypeCodes.size() == 1){
+					TagInfo tagInfo = new TagInfo(support.fromTransformationTypeCodes.iterator().next(), support);
+					insert(tagInfo);
+				}else{
+					TagInfo tagInfo = new TagInfo(null, support);
+					insert(tagInfo);
+				}
+			}
+		}		
+		    
+end
+
+rule "Generate TagInfo from ContainerSupport"
+	@nglSQ( tags )
+	dialect "java"
+	salience 100
+	no-loop
+    when
+		$support:ContainerSupport()    
+    then
+		Logger.debug("Rules annotation @nglSQ(tags) "+$support.code);
+		
+		ContainerSupport tagSupport = new ContainerSupport();
+		tagSupport.code = $support.code;
+		tagSupport.categoryCode = $support.categoryCode;
+		tagSupport.projectCodes= $support.projectCodes;
+		tagSupport.sampleCodes= $support.sampleCodes;
+		
+		/*
+		Set<String> libProcessTypeCodes = new TreeSet<String>();
+		Set<String> tags = new TreeSet<String>();
+		
+		MongoDBResult<Container> containers = MongoDBDAO.find(InstanceConstants.CONTAINER_COLL_NAME, Container.class, DBQuery.is("support.code", $support.code));
+		DBCursor<Container> cursor = containers.getCursor();
+		while(cursor.hasNext()){
+			Container container = cursor.next();
+			if(null != container.contents){
+				for(Content content : container.contents){
+					if(content.properties.containsKey("libProcessTypeCode")){
+						libProcessTypeCodes.add((String)content.properties.get("libProcessTypeCode").value);
+					}
+					if(content.properties.containsKey("tag")){
+						tags.add((String)content.properties.get("tag").value);
+					}
+				}
+			}
+			
+		}
+		tagSupport.properties.put("libProcessTypeCodes", new PropertyListValue(new ArrayList<String>(libProcessTypeCodes)));	
+		tagSupport.properties.put("tags", new PropertyListValue(new ArrayList<String>(tags)));	
+		*/
+		retract($support);
+		if($support.fromTransformationTypeCodes.size() == 1){
+			TagInfo tagInfo = new TagInfo($support.fromTransformationTypeCodes.iterator().next(), tagSupport);
+			insert(tagInfo);
+		}else{
+			TagInfo tagInfo = new TagInfo(null, tagSupport);
+			insert(tagInfo);
+		}
+				
+end
+
+rule "Generate TagDetails from TagInfo"
+	@nglSQ( tags )
+	dialect "java"
+	salience 200
+	no-loop
+    when
+		$tagInfo:TagInfo()    
+    then
+		Logger.debug("Generate tag details "+$tagInfo.getSupport().code);
+		ContainerSupport support = $tagInfo.getSupport();
+		
+		String projectCode = "MP";
+		String sampleCode = "MS";
+		String libProcessTypeCode = "ML";
+		String tagCode = "MT";
+		
+		if(support.projectCodes.size() == 1){
+			projectCode = support.projectCodes.iterator().next();
+		}
+		
+		if(support.sampleCodes.size() == 1){
+			sampleCode = support.sampleCodes.iterator().next().replace(projectCode+"_","");
+		}
+		/*
+		if(((List)support.properties.get("libProcessTypeCodes").value).size() == 1){
+			libProcessTypeCode = (String)((List)support.properties.get("libProcessTypeCodes").value).get(0);
+		}else if(((List)support.properties.get("libProcessTypeCodes").value).size() == 0){
+			libProcessTypeCode = null;
+		}
+		
+		if(((List)support.properties.get("tags").value).size() == 1){
+			tagCode = (String)((List)support.properties.get("tags").value).get(0);
+		}else if(((List)support.properties.get("tags").value).size() == 0){
+			tagCode = null;
+		}
+		*/
+		if(null !=  $tagInfo.getExperimentTypeCode()){
+			ExperimentType experimentType = ExperimentType.find.findByCode( $tagInfo.getExperimentTypeCode());
+			TagDetails tagDetails = new TagDetails(support.code, support.categoryCode, experimentType.shortCode, projectCode, sampleCode, libProcessTypeCode, tagCode);
+			insert(tagDetails);
+		}else{
+			TagDetails tagDetails = new TagDetails(support.code, support.categoryCode, null, projectCode, sampleCode, libProcessTypeCode, tagCode);
+			insert(tagDetails);
+		}
+		
+		
+		retract($tagInfo);
+				
+end
+
+
+rule "Generate tag from TagDetails"
+	@nglSQ( tags )
+	dialect "java"
+	salience 300
+	no-loop
+    when
+		$tagDetails:TagDetails()    
+    then
+		Logger.debug("Generate tag from barcode : "+$tagDetails.getBarcode());
+		
+		StringBuffer sb = new StringBuffer();
+		
+		if(null != $tagDetails.getExperimentTrigramCode()){
+			sb.append($tagDetails.getExperimentTrigramCode());
+			sb.append("_");
+			
+		}
+		if(!$tagDetails.getCategoryCode().contains("well-plate")){
+			sb.append($tagDetails.getProjectCode());
+			sb.append("_").append($tagDetails.getSampleCode());
+			/*
+			if(null != $tagDetails.getLibProcessTypeCode()){
+				sb.append("_").append($tagDetails.getLibProcessTypeCode());
+			}
+			
+			if(null != $tagDetails.getTagCode()){
+				sb.append("_").append($tagDetails.getTagCode());
+			}
+			
+			sb.append("_").append($tagDetails.getBarcode());
+			*/
+		}else{
+			sb.append($tagDetails.getProjectCode());
+			sb.append("_").append($tagDetails.getBarcode());
+		}
+		
+		Tag tag = new Tag();
+		tag.barcode = $tagDetails.getBarcode();
+		tag.label = sb.toString(); 
+		retract($tagDetails);
+		insert(tag);
+end
+	
+	
+rule "Log tag"
+	@nglSQ( tags )
+	dialect "java"
+	salience 1000
+	no-loop
+    when
+    	$tag:Tag()
+    then
+    	Logger.debug("Tag = : "+$tag.barcode+" / "+$tag.label);
+ end	

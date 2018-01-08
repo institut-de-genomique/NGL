@@ -1,0 +1,25 @@
+@(experiment: models.laboratory.experiment.instance.Experiment)
+
+@import controllers.instruments.io.utils._;
+
+@***** FDS: declaration de variables avec le mot cle 'var' et toutes sur une seule ligne *******@
+@import java.lang.String; var source_code=""; var dest_code=""; var sample_vol=""; var buffer_vol="";
+@import java.math.BigInteger; var source_pos=0; var dest_pos=0;
+
+@*******************TEST************************************@
+Plaque source;N° puit;Vol éch à prélever;Vol tampon;Plaque destination;N° puit
+@for((a,index) <- experiment.atomicTransfertMethods.sortWith(_.line<_.line).sortWith(_.column.toInt<_.column.toInt).zipWithIndex){
+		@for(c <- a.inputContainerUseds){
+			
+			 @{source_code=c.locationOnContainerSupport.code}	
+			 @{source_pos=OutputHelper.getNumberPositionInPlateByColumn(c.locationOnContainerSupport.line, c.locationOnContainerSupport.column)}
+			 @{dest_code=a.outputContainerUseds.get(0).locationOnContainerSupport.code}
+			 @{dest_pos=OutputHelper.getNumberPositionInPlateByColumn(a.outputContainerUseds.get(0).locationOnContainerSupport.line, a.outputContainerUseds.get(0).locationOnContainerSupport.column)}
+			
+			 @*** OutputHelper.getInputContainerUsedExperimentProperty(c,"inputVolume")}  converti les "." en "," ne pas utiliser pour du CSV basique... ***@
+			 @{sample_vol=c.experimentProperties.get("inputVolume").value.toString()}
+			 @{buffer_vol=a.outputContainerUseds.get(0).experimentProperties.get("bufferVolume").value.toString()}
+			 
+			 @(source_code);@(source_pos);@(sample_vol);@(buffer_vol);@(dest_code);@(dest_pos)\u000D\u000A
+		}	
+} 

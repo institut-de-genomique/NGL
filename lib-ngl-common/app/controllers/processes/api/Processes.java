@@ -261,7 +261,8 @@ public class Processes extends DocumentController<Process> {
 		input.validate(contextValidation);
 		
 		if(!contextValidation.hasErrors()){
-			List<Process> processes = getNewProcessList(contextValidation, input);
+			Logger.debug("Processes saveOneElement processes");
+			List<Process> processes = getNewProcessList(contextValidation, input); 
 			if(processes.size()>0){
 				processes = ProcessHelper.applyRules(processes, contextValidation, "processCreation");
 			}
@@ -284,19 +285,27 @@ public class Processes extends DocumentController<Process> {
 	
 	private List<Process> getNewProcessList(ContextValidation contextValidation, Process input) {
 		Container container = MongoDBDAO.findByCode(InstanceConstants.CONTAINER_COLL_NAME, Container.class, input.inputContainerCode);
+		Logger.debug("Processes getNewProcessList after MongoDBDAO.findByCode " + container.categoryCode);
 		return container.contents.parallelStream().map(content ->{
 				Process process = input.cloneCommon();
 				process.sampleCodes = SampleHelper.getSampleParent(content.sampleCode);
+				Logger.debug("Processes getNewProcessList sampleCode :" + process.sampleCodes);
 				process.projectCodes = SampleHelper.getProjectParent(process.sampleCodes);
+				Logger.debug("Processes getNewProcessList projectCodes :" + process.projectCodes);
 				process.sampleOnInputContainer = InstanceHelpers.getSampleOnInputContainer(content, container);
+				Logger.debug("Processes getNewProcessList typeCode :" + process.typeCode);
+				Logger.debug("Processes getNewProcessList sampleOnInputContainer :" + process.sampleOnInputContainer.sampleCode);
 				//need sampleOnInputContainer to generate code
 				process.code = CodeHelper.getInstance().generateProcessCode(process);
+				Logger.debug("Processes getNewProcessList code : " + process.code);
+				
 				return process;
 			}).collect(Collectors.toList());		
 	}
 	
 	@Permission(value={"writing"})
 	public Result saveBatch(){	
+	Logger.debug("Proceses saveBatch");
 		List<Form<ProcessesBatchElement>> filledForms =  getFilledFormList(batchElementForm, ProcessesBatchElement.class);
 		final String user = getCurrentUser();
 		final Lang lang = Http.Context.Implicit.lang();

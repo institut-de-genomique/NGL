@@ -1,0 +1,60 @@
+{
+  "code": "FC-20150529162613",
+  "name": "Containers Search Additional Filters",
+  "traceInformation": {
+    "createUser": "okorovina",
+    "creationDate": ISODate("2017-07-13T12:52:27.202Z"),
+    "modifyUser": "ngsrg",
+    "modifyDate": ISODate("2017-07-13T12:52:27.203Z")
+  },
+  "pageCodes": [
+    "containers-search-addfilters"
+  ],
+  "filters": [
+    {
+      "property": "contents.sampleTypeCode",
+      "html": "<div class='form-control' bt-select ng-model='searchService.form[\"sampleTypeCodes\"]' multiple='true' placeholder='Types échantillon' bt-options='v.code as v.name for v in searchService.lists.getSampleTypes()'></div>",
+      "position": 0
+    },
+    {
+      "property": "supportStorageCodeRegex",
+      "html": "<input class='form-control' type='text' ng-model='searchService.form.supportStorageCodeRegex'  placeholder='Regex pour stockage' title='Regex pour stockage'>",
+      "position": 1
+    },
+    {
+      "property": "properties.receptionDate",
+      "html": "<input type='text' class='form-control' ng-model='searchService.form[\"properties[receptionDate]\"]' placeholder='Date de réception' title='Date de réception' udt-html-filter='date'>",
+      "position": 2
+    },
+    {
+      "property": "contents.properties.tag",
+      "html": "<div class='form-control' bt-select ng-model='searchService.form[\"contentsProperties[tag]\"]' multiple='true' filter='true'  placeholder='Tag' bt-options='v.code as v.code for v in searchService.lists.getTags()'></div>",
+      "position": 4
+    },
+    {
+      "property": "contents.properties.tagCategory",
+      "html": "<div class='form-control' bt-select ng-model='searchService.form[\"contentsProperties[tagCategory]\"]' multiple='true' placeholder='Catégorie de tag' bt-options='v.code as v.code for v in searchService.lists.getValues({propertyDefinitionCode:\"tagCategory\"},\"tagCategory\")'></div>",
+      "position": 5
+    },
+    {
+      "property": "contents.contentsProperties.readType",
+      "html": "<div class='form-control' bt-select ng-model='searchService.form[\"processProperties[readType]\"]' multiple='true' placeholder='Type de lecture' bt-options='v.code as v.code for v in searchService.lists.getValues({propertyDefinitionCode:\"readType\"},\"readType\")'></div>",
+      "position": 7
+    },
+    {
+      "property": "contents.length",
+      "html": "<div class='form-control' bt-select ng-model='searchService.form[\"existingFields[contents.1]\"]' placeholder='Pool ?' bt-options='v.code as v.name for v in searchService.lists.get(\"booleans\")'></div>",
+      "position": 10
+    },
+    {
+      "property": "contents.properties.tag",
+      "html": "<div class='form-control' bt-select ng-model='searchService.form[\"existingFields[contents.properties.tag]\"]' placeholder='Tag existe ?' bt-options='v.code as v.name for v in searchService.lists.get(\"booleans\")'></div>",
+      "position": 11
+    },
+    {
+      "property": "contents.properties.expectedSize",
+      "html": "<div class='form-control' bt-select ng-model='searchService.form[\"contentsProperties[expectedSize]\"]' multiple='true' placeholder='Taille théorique sizing' bt-options='v.code as v.code for v in searchService.lists.getValues({propertyDefinitionCode:\"expectedSize\"},\"expectedSize\")'></div>",
+      "position": 12
+    }
+  ]
+}

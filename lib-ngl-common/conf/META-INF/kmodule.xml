@@ -3,7 +3,7 @@
 
 
 <kbase name="ngl-common" packages="rules.common.*"></kbase>
-
+<!--
 <kbase name="ngl-bi-common"  includes="ngl-common" packages="rules.ngl-bi.common.*"></kbase>
 
 <kbase name="ngl-bi-cns" includes="ngl-bi-common" packages="rules.ngl-bi.cns.*"></kbase>
@@ -13,10 +13,17 @@
 
 <kbase name="ngl-sq-cns" includes="ngl-sq-common" packages="rules.ngl-sq.cns.*"></kbase>
 <kbase name="ngl-sq-cng" includes="ngl-sq-common" packages="rules.ngl-sq.cng.*"></kbase>
+-->
+<kbase name="ngl-sq-common"  includes="ngl-common" packages="rules.ngl-sq.common-get.*"></kbase>
+
+<kbase name="ngl-sq-get" includes="ngl-sq-common" packages="rules.ngl-sq.get.*"></kbase>
+
 
 
 <!-- new declaration -->
+<kbase name="ngl-all-get" packages="rules.common.*,rules.ngl-sq.common-get.*,rules.ngl-sq.get.*"></kbase>
+<!--
 <kbase name="ngl-all-cns" packages="rules.common.*,rules.ngl-bi.common.*,rules.ngl-bi.cns.*,rules.ngl-sq.common.*,rules.ngl-sq.cns.*"></kbase>
 <kbase name="ngl-all-cng" packages="rules.common.*,rules.ngl-bi.common.*,rules.ngl-bi.cng.*,rules.ngl-sq.common.*,rules.ngl-sq.cng.*"></kbase>
-
+-->
 </kmodule>

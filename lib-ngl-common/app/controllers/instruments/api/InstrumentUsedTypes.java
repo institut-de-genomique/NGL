@@ -58,6 +58,7 @@ public class InstrumentUsedTypes extends CommonController{
 			InstrumentUsedType instrumentUsedType = null;
 
 			instrumentUsedType = instrumentUsedTypesDAO.findByCode(code);
+			Logger.debug("instrumentUsedType : "+ instrumentUsedType);
 			if(null != instrumentUsedType){
 				return ok(Json.toJson(instrumentUsedType));
 			}else{

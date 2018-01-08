@@ -197,11 +197,8 @@ public class Input extends AbstractInput {
 			}
 		}
 
-		/* Verifier que tous les puits du secteur concerné par l'import ont tous une concentration
-		 *  ( verification minimale pour eviter une erreur de choix du fichier initial...)
-		 *  27/04/2017 ATTENTION !!! ceci suppose que les inputContainers en entree sont des puits de plaque. Avec des strip-8 ca ne marche plus !!!
-		 *    => belongToSector96=>isPlatePosition --> "ligne 0: La position 'x' ne correspond pas à un format de plaque connu"
-		 */
+		// Verifier que tous les puits du secteur concerné par l'import ont tous une concentration
+		//  ( verification minimale pour eviter une erreur de choix du fichier initial...)
 		if (!contextValidation.hasErrors()) {
 			final int sector_arg = sector;
 			experiment.atomicTransfertMethods

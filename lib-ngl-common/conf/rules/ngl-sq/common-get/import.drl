@@ -1,0 +1,33 @@
+//created on: Aug 6, 2014
+package rules
+
+import play.Logger;
+import java.util.Map;
+import models.laboratory.experiment.instance.Experiment;
+import models.laboratory.experiment.instance.AtomicTransfertMethod;
+import models.laboratory.processes.instance.Process;
+import models.laboratory.container.instance.Container;
+import validation.ContextValidation;
+import play.data.validation.ValidationError;
+import models.laboratory.experiment.instance.ManyToOneContainer;
+import models.laboratory.experiment.instance.OutputContainerUsed;
+import models.laboratory.experiment.instance.InputContainerUsed;
+import models.laboratory.common.instance.PropertyValue;
+import models.laboratory.common.instance.property.PropertySingleValue;
+import models.laboratory.container.instance.Content;
+import models.laboratory.sample.instance.Sample;
+import java.util.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import models.utils.InstanceConstants;
+import fr.cea.ig.MongoDBDAO;
+import org.mongojack.DBQuery;
+import org.mongojack.DBUpdate;
+import java.util.Date;
+import lims.services.ILimsServices;
+import play.api.modules.spring.Spring;
+import models.laboratory.parameter.index.*;
+import java.util.regex.Pattern;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.HashMap;

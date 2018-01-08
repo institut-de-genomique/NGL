@@ -1,0 +1,26 @@
+//created on: Apr 21, 2015
+package rules
+
+
+
+declare InputSupport
+	code : String
+	categoryCode : String
+end
+
+
+rule "set Nb cycles Read Index2"
+	@nglSQ( calculations )
+	dialect "java"
+	salience 100
+	no-loop
+    when
+    	$experiment:Experiment($typeCode:typeCode == "illumina-depot", $ReadType : instrumentProperties.sequencingProgramType.value != null, $ReadType == "SR", instrumentProperties.nbCyclesRead2.value != 0, $instrumentProperties : instrumentProperties)
+    then
+            Logger.debug("$ReadType - " + $ReadType);
+            PropertySingleValue nbCyclesRead2 = new PropertySingleValue(0);
+            $instrumentProperties.put("nbCyclesRead2",nbCyclesRead2);
+            update($experiment);
+            //Logger.debug("$cycleRead2 - " + $cycleRead2 + ", $ReadType - " + $ReadType);
+    end
+	

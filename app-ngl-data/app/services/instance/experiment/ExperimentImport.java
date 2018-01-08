@@ -144,16 +144,18 @@ public class ExperimentImport {
 				OneToVoidContainer atomicTransfertMethod = new OneToVoidContainer();		
 				atomicTransfertMethod.line = "1";
 				atomicTransfertMethod.column = "1";
-				atomicTransfertMethod.inputContainerUseds = new ArrayList<InputContainerUsed>();
-				InputContainerUsed cnt = new InputContainerUsed();
-				cnt.code = c.code;
-				atomicTransfertMethod.inputContainerUseds.add(cnt);
+//				atomicTransfertMethod.inputContainerUseds = new ArrayList<ContainerUsed>();
+//				ContainerUsed cnt = new ContainerUsed();
+//				cnt.code = c.code;
+//				cnt.state = new State(); 		
+//				cnt.state.code = c.state.code;
+//				atomicTransfertMethod.inputContainerUseds.add(cnt);
 				
 				LocationOnContainerSupport locationOnContainerSupport = new LocationOnContainerSupport(); 
 				locationOnContainerSupport.code = rs.getString("code_flowcell"); 
 				locationOnContainerSupport.line = c.support.line; 
 				locationOnContainerSupport.column = "1"; 
-				atomicTransfertMethod.inputContainerUseds.get(atomicTransfertMethod.inputContainerUseds.indexOf(cnt)).locationOnContainerSupport = locationOnContainerSupport;
+//				atomicTransfertMethod.inputContainerUseds.get(atomicTransfertMethod.inputContainerUseds.indexOf(cnt)).locationOnContainerSupport = locationOnContainerSupport;
 				
 				
 				
@@ -189,7 +191,7 @@ public class ExperimentImport {
 		//experiment.experimentProperties.put("runStartDate", new PropertySingleValue(rs.getDate("min_date")));
 		
 		//set inputContainerSupportCodes
-		//experiment.inputContainerSupportCodes = ExperimentHelper.getInputContainerSupportCodes(experiment);
+//		experiment.inputContainerSupportCodes = ExperimentHelper.getInputContainerSupportCodes(experiment);
 
 		//return the object with this main attributes defined
 		return experiment;

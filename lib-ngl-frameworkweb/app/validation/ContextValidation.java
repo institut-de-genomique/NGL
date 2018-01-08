@@ -66,7 +66,8 @@ public class ContextValidation {
 
 
 	public void setContextObjects(Map<String,Object> contextObjects) {
-		this.contextObjects = contextObjects;
+        this.contextObjects = new TreeMap<String,Object>(contextObjects);
+        
 	}
 
 	/**

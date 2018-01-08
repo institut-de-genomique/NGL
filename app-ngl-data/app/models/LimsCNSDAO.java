@@ -178,26 +178,26 @@ public class LimsCNSDAO{
 
 				boolean tara=false;
 
-				if(rs.getInt("tara")==1){
-					tara=true;
-				}
-
-				if(tara){
-
-					Logger.debug("Tara sample "+sample.code);
-
-					TaraDAO  taraServices = Spring.getBeanOfType(TaraDAO.class);
-					if(sample.properties==null){ sample.properties=new HashMap<String, PropertyValue>();}
-
-					Map<String, PropertyValue> map=taraServices.findTaraSampleFromLimsCode(rs.getInt(LIMS_CODE),contextError);
-
-					if(map!=null){
-						sample.properties.putAll(map);
-					} else {
+//				if(rs.getInt("tara")==1){
+//					tara=true;
+//				}
+//
+//				if(tara){
+//
+//					Logger.debug("Tara sample "+sample.code);
+//
+//					TaraDAO  taraServices = Spring.getBeanOfType(TaraDAO.class);
+//					if(sample.properties==null){ sample.properties=new HashMap<String, PropertyValue>();}
+//
+//					Map<String, PropertyValue> map=taraServices.findTaraSampleFromLimsCode(rs.getInt(LIMS_CODE),contextError);
+//
+//					if(map!=null){
+//						sample.properties.putAll(map);
+//					} else {
 						tara=false;
-					}
-
-				}
+//					}
+//
+//				}
 				//Logger.debug("Adpatateur :"+sample.properties.get("adaptateur").value.toString());
 
 				boolean adapter=false;

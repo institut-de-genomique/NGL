@@ -1,0 +1,35 @@
+@(e:models.laboratory.experiment.instance.Experiment, containers: List[models.laboratory.container.instance.Container], tagModel: controllers.instruments.io.utils.TagModel)
+
+@import controllers.instruments.io.utils._;
+
+[Header]
+IEMFileVersion,4
+Investigator Name,@(e.traceInformation.createUser)
+Experiment Name,@(e.inputContainerSupportCodes.filterNot(x => x == "["))
+Date,@(CsvHelper.getRunDate(e))
+Workflow,GenerateFASTQ
+Application,FASTQ Only
+Assay,PlaGe
+Description,Nothing
+Chemistry,Default
+
+[Reads]
+@(OutputHelper.getInstrumentProperty(e,"nbCyclesRead1"))
+@if(OutputHelper.getInstrumentProperty(e,"nbCyclesRead2") != 0){@(OutputHelper.getInstrumentProperty(e,"nbCyclesRead2"))}
+
+[Settings]
+
+[Data]
+Lane,Sample_ID,Sample_Name,Sample_Plate,Sample_Well,I7_Index_ID,index,@if(tagModel.tagType == "DUAL-INDEX"){I5_Index_ID,index2,}Sample_Project,Description
+
+@for(c <- containers.sortWith(_.support.line < _.support.line)){
+	@if(c.contents.toList.length == 1 || CsvHelper.catch10x(c.contents.get(0))){
+		@(c.support.line),@if(OutputHelper.getContentProperty(c.contents.get(0),"Nom_echantillon_collaborateur")){@(CsvHelper.checkName(OutputHelper.getContentProperty(c.contents.get(0),"Nom_echantillon_collaborateur"))),@(CsvHelper.checkName(OutputHelper.getContentProperty(c.contents.get(0),"Nom_echantillon_collaborateur")))}else{@(CsvHelper.checkName(OutputHelper.getContentProperty(c.contents.get(0),"Nom_pool_sequencage"))),@(CsvHelper.checkName(OutputHelper.getContentProperty(c.contents.get(0),"Nom_pool_sequencage")))},@(c.contents.get(0).sampleCode.split(":")(0)),@if(c.contents.get(0).sampleCode.split(":").length > 1){@(c.contents.get(0).sampleCode.split(":")(1))},NoIndex,,@if(tagModel.tagType == "DUAL-INDEX"){,,}@(c.contents.get(0).projectCode),@if(OutputHelper.getContentProperty(c.contents.get(0),"analyseType") == "DNA"){split}
+	}else{
+		@for(co <- c.contents.toList.sortWith(OutputHelper.getContentProperty(_,"Nom_echantillon_collaborateur")<OutputHelper.getContentProperty(_,"Nom_echantillon_collaborateur"))) {
+			@if(!CsvHelper.catch10x(co)){
+				@(c.support.line),@(CsvHelper.checkName(OutputHelper.getContentProperty(co,"Nom_echantillon_collaborateur"))),@(CsvHelper.checkName(OutputHelper.getContentProperty(co,"Nom_echantillon_collaborateur"))),@(co.sampleCode.split(":")(0)),@if(co.sampleCode.split(":").length > 1){@(co.sampleCode.split(":")(1))},@if(OutputHelper.getContentProperty(co,"tag") != "NoIndex"){@(OutputHelper.getContentProperty(co,"tag").split("/")(0)),@(CsvHelper.sampleIndex(co).sequence.split("-")(0)),@if(tagModel.tagType == "DUAL-INDEX"){@if(OutputHelper.getContentProperty(co,"tagCategory") == "DUAL-INDEX"){@if(OutputHelper.getContentProperty(co,"tag").split("/").length > 1){@(OutputHelper.getContentProperty(co,"tag").split("/")(1))}else{@(OutputHelper.getContentProperty(co,"tag").split("_")(1))d},@if(OutputHelper.getInstrumentProperty(e,"sequencingProgramType") != "PE"){@(CsvHelper.sampleIndex(co).sequence.split("-")(1))}else{@(CsvHelper.reverseComplement(CsvHelper.sampleIndex(co).sequence.split("-")(1)))}}else{,},}}else{"NoIndex",,@if(tagModel.tagType == "DUAL-INDEX"){,,}}@(co.projectCode),
+			}
+		}
+	}
+}

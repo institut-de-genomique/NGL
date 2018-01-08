@@ -11,17 +11,7 @@ import play.data.validation.ValidationError;
 public class InstrumentService {
 	
 	public static void main(Map<String,List<ValidationError>> errors) throws DAOException{
-		String institute=play.Play.application().configuration().getString("institute");
-		if (institute.equals("CNS")){
-			(new InstrumentServiceCNS()).main(errors);
-		}else if(institute.equals("CNG")){
-			(new InstrumentServiceCNG()).main(errors);
-		}else if(institute.equals("TEST")){
-			(new InstrumentServiceTEST()).main(errors);
-		}else{
-			Logger.error("You need to specify only one institute ! Now, it's "+ play.Play.application().configuration().getString("institute"));
-		}
-
+		(new InstrumentServiceGET()).main(errors);
 		}
 	
 

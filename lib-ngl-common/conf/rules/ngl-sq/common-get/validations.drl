@@ -1,0 +1,149 @@
+//created on: Aug 6, 2014
+//Rules for validation
+package rules
+
+
+declare InputSupport
+	code : String
+	categoryCode : String
+end
+
+declare InputContainer
+	code : String
+	supportCode : String 
+	line : String
+	column : String
+end
+
+rule "Input not null for all Experiment"
+	@nglSQ( validations )
+	dialect "java"
+	salience 510
+	no-loop
+    when
+    	$experiment:Experiment()
+    	$atomics:AtomicTransfertMethod($inputContainers : inputContainerUseds)
+    	$contextValidation:ContextValidation()
+    	eval($inputContainers.size()==0)
+    then
+    	//Logger.debug("Erreur position "+$atomics.position);
+    	$contextValidation.addErrors("lane["+$atomics.line+"]",	"error.validationexp.emptyoutputcontainer",$atomics.line);
+    end
+    
+
+
+
+rule "init inputsupport"
+	@nglSQ( validations )
+	dialect "java"
+	salience 1000
+	no-loop
+    when
+	Experiment($typeCode:typeCode,$typeCode=="illumina-depot" || $typeCode=="bionano-depot" || $typeCode=="prep-pcr-free",$atomics:atomicTransfertMethods,$atomics!=null)
+	AtomicTransfertMethod($inputContainerUseds:inputContainerUseds) from $atomics
+    InputContainerUsed($support:locationOnContainerSupport.code,$categoryCode:locationOnContainerSupport.categoryCode) from $inputContainerUseds
+	not InputSupport($support==code)
+    then
+		//Logger.debug("Support"+$support +" de category "+$categoryCode);
+		InputSupport inputSupport=new InputSupport($support,$categoryCode);
+		insert(inputSupport);
+	end
+
+rule "init InputContainer"
+	@nglSQ( validations )
+	dialect "java"
+	salience 1000
+	no-loop
+    when
+	Experiment($typeCode:typeCode,$typeCode=="illumina-depot" || $typeCode=="bionano-depot",$atomics:atomicTransfertMethods,$atomics!=null)
+    AtomicTransfertMethod($inputContainerUseds:inputContainerUseds) from $atomics
+    $containerUsed:InputContainerUsed($code:code) from $inputContainerUseds
+    not InputContainer(code==$code)
+    then
+    InputContainer inputContainer=new InputContainer($code,$containerUsed.getLocationOnContainerSupport().getCode(),$containerUsed.getLocationOnContainerSupport().getLine(),
+    															$containerUsed.getLocationOnContainerSupport().getColumn());
+   // Logger.debug("Container "+$code+" in support "+$containerUsed.getLocationOnContainerSupport().getCode());
+    insert(inputContainer);
+    end
+
+
+rule "only one inputssupport"
+	@nglSQ (validations )
+	dialect "java"
+	salience 400
+	no-loop
+    when
+    Experiment($typeCode:typeCode,$typeCode=="illumina-depot" || $typeCode=="bionano-depot" || $typeCode=="prep-pcr-free")
+    Set(empty==false,size!=1) from collect(InputSupport())
+    $contextValidation:ContextValidation($errors : errors)
+    then 
+    	$contextValidation.addErrors("inputContainerSupportCodes","error.validationexp.oneInputSupport", $typeCode);
+    end
+    
+rule "input all container from support"
+	@nglSQ (validations )
+	dialect "java"
+	salience 400
+	no-loop
+    when
+ 	Experiment($typeCode:typeCode,$typeCode=="illumina-depot" || $typeCode=="bionano-depot")
+ 	InputSupport($support:code,$categoryCode:categoryCode,$categoryCode!=null)
+ 	$inputContainers:Set(empty==false) from collect(InputContainer($support==supportCode))
+ 	$contextValidation:ContextValidation($errors : errors)
+ 	eval(!$categoryCode.endsWith(Integer.toString($inputContainers.size())))	
+ 	then
+	 		$contextValidation.addErrors("inputContainerSupportCodes","error.validationexp.notAllInputContainer", $support);
+	end
+
+
+declare TagInfos
+	tag : PropertyValue
+	index : Index
+	containerCode : String
+end
+
+rule "validate tag exist"
+	@nglSQ( validations )
+	dialect "java"
+	salience 1000
+	no-loop
+    when
+    	Experiment($typeCode:typeCode,$typeCode=="prep-pcr-free" || $typeCode=="dna-illumina-indexed-library" || $typeCode=="rna-illumina-indexed-library")
+    	$contextValidation:ContextValidation($errors : errors)
+    	$atomicTransfert: AtomicTransfertMethod($outputContainerUseds: outputContainerUseds, $outputContainerUseds!=null )
+		$outputContainerUsed:OutputContainerUsed($experimentProperties:experimentProperties, $experimentProperties!=null, $tag:experimentProperties.get("tag"), $tag != null) from $outputContainerUseds		
+    then
+    	Logger.debug("validate tag :"+$tag.value);
+    	
+    	Index index=MongoDBDAO.findOne(InstanceConstants.PARAMETER_COLL_NAME, Index.class, DBQuery.in("typeCode", "index-illumina-sequencing","index-nanopore-sequencing").is("code", $tag.value));
+    	if(index == null){
+    		$contextValidation.addErrors("tag","error.validationexp.tagNotExist", $tag.value, $outputContainerUsed.code);
+    	}else{
+    		TagInfos tagInfos=new TagInfos($tag, index, $outputContainerUsed.code);
+			insert(tagInfos);
+    	}
+    	
+    end
+
+rule "valid tag and tagCategory match"
+    @nglSQ( validations )
+	dialect "java"
+	salience 1000
+	no-loop
+    when
+    	$experiment:Experiment($typeCode:typeCode)
+    	$atomicTransfert: AtomicTransfertMethod($outputContainerUseds: outputContainerUseds, $outputContainerUseds!=null )
+	   	$contextValidation:ContextValidation() 
+	   	$outputContainerUsed: OutputContainerUsed($experimentProperties:experimentProperties, $experimentProperties!=null, $tagCategory:experimentProperties.get("tagCategory"), $tagCategory != null) from $outputContainerUseds
+	   	$tagInfos:TagInfos($outputContainerUsed.code == containerCode)    	
+	   	eval(!$tagCategory.value.equals($tagInfos.getIndex().categoryCode))	  	
+    then
+    	Logger.debug("!!!"+$tagCategory.value +"!="+ $tagInfos.getIndex().categoryCode+"!!!");
+    
+    	$contextValidation.addErrors($typeCode,"error.validationexp.tagcategory.notvalid", $tagInfos.getTag().value, $tagInfos.getContainerCode());
+end
+
+
+
+
+    

@@ -1,0 +1,87 @@
+//created on: May 5, 2015
+package rules
+
+
+rule "Set good project code for DNA"
+    @nglSQ( calculations )
+	dialect "java"
+	salience 900
+	no-loop
+    when
+		$experiment:Experiment($typeCode:typeCode,$typeCode=="dna-rna-extraction", state.code == "N")
+		$atomicTransfert: OneToManyContainer($inputContainerUseds : inputContainerUseds, $inputContainerUseds!=null , $outputContainerUseds: outputContainerUseds, $outputContainerUseds!=null )
+		$inputContainerUsed: InputContainerUsed($inputProjectCode:contents.get(0).projectCode, $inputProjectCode != null) from $inputContainerUseds
+		$outputContainerUsed: OutputContainerUsed($outputSampleTypeCode:experimentProperties.get("sampleTypeCode"), $outputSampleTypeCode != null) from $outputContainerUseds		
+    	eval("DNA".equals($outputSampleTypeCode.value))
+    then
+        Logger.debug("Set good project code for DNA calculation");
+		
+		PropertySingleValue outputProjectCode = (PropertySingleValue)$outputContainerUsed.experimentProperties.get("projectCode");
+		if(null == outputProjectCode){
+			outputProjectCode=new PropertySingleValue();
+			$outputContainerUsed.experimentProperties.put("projectCode",outputProjectCode);
+		}
+		
+		if("BUA".equals($inputProjectCode)){
+			outputProjectCode.value = "BUB";
+		}else if("BUE".equals($inputProjectCode)){
+			outputProjectCode.value = "BUF";
+		}else if("BUI".equals($inputProjectCode)){
+			outputProjectCode.value = "BUK";
+		}else if("BUN".equals($inputProjectCode)){
+			outputProjectCode.value = "BUP";
+		}else if("BUS".equals($inputProjectCode)){
+			outputProjectCode.value = "BUT";
+		}else if("BUX".equals($inputProjectCode)){
+			outputProjectCode.value = "BUY";
+		}else if("BWB".equals($inputProjectCode)){
+			outputProjectCode.value = "BWC";
+		}else{
+			outputProjectCode.value = null;
+		}
+		
+		Logger.debug("Input project code = "+$inputProjectCode+" / "+$outputSampleTypeCode.value+" => Output project code ="+outputProjectCode.value);
+		
+end
+
+rule "Set good project code for RNA"
+    @nglSQ( calculations )
+	dialect "java"
+	salience 900
+	no-loop
+    when
+		$experiment:Experiment($typeCode:typeCode,$typeCode=="dna-rna-extraction", state.code == "N")
+		$atomicTransfert: OneToManyContainer($inputContainerUseds : inputContainerUseds, $inputContainerUseds!=null , $outputContainerUseds: outputContainerUseds, $outputContainerUseds!=null )
+		$inputContainerUsed: InputContainerUsed($inputProjectCode:contents.get(0).projectCode, $inputProjectCode != null) from $inputContainerUseds
+		$outputContainerUsed: OutputContainerUsed($outputSampleTypeCode:experimentProperties.get("sampleTypeCode"), $outputSampleTypeCode != null) from $outputContainerUseds		
+    	eval("RNA".equals($outputSampleTypeCode.value))
+    then
+        Logger.debug("Set good project for RNA code calculation");
+		
+		PropertySingleValue outputProjectCode = (PropertySingleValue)$outputContainerUsed.experimentProperties.get("projectCode");
+		if(null == outputProjectCode){
+			outputProjectCode=new PropertySingleValue();
+			$outputContainerUsed.experimentProperties.put("projectCode",outputProjectCode);
+		}
+		
+		if("BUA".equals($inputProjectCode)){
+			outputProjectCode.value = "BUC";
+		}else if("BUE".equals($inputProjectCode)){
+			outputProjectCode.value = "BUG";
+		}else if("BUI".equals($inputProjectCode)){
+			outputProjectCode.value = "BUL";
+		}else if("BUN".equals($inputProjectCode)){
+			outputProjectCode.value = "BUQ";
+		}else if("BUS".equals($inputProjectCode)){
+			outputProjectCode.value = "BUU";
+		}else if("BUX".equals($inputProjectCode)){
+			outputProjectCode.value = "BUZ";
+		}else if("BWB".equals($inputProjectCode)){
+			outputProjectCode.value = "BWD";
+		}else{
+			outputProjectCode.value = null;
+		}
+		   
+		Logger.debug("Input project code = "+$inputProjectCode+" / "+$outputSampleTypeCode.value+" => Output project code ="+outputProjectCode.value);
+		
+end

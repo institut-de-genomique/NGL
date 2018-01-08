@@ -1,0 +1,8 @@
+@(experiment:models.laboratory.experiment.instance.Experiment, stripDestination:java.lang.Integer)
+
+@import controllers.instruments.io.utils._;
+
+Sample order,Sample Plate Well #,Sample Plate Name, Strip #, Code support\u000D\u000A
+@for((atm,index) <- experiment.atomicTransfertMethods.sortWith(_.line < _.line).zipWithIndex){
+	@(stripDestination*8-8+index+1),@(OutputHelper.getNumberPositionInPlateByColumn(atm.inputContainerUseds.get(0).locationOnContainerSupport.line,atm.inputContainerUseds.get(0).locationOnContainerSupport.column)),Librairie4nM_@(OutputHelper.getInstrumentProperty(atm.inputContainerUseds.get(0), "source")),@(stripDestination),@(atm.inputContainerUseds.get(0).locationOnContainerSupport.code)\u000D\u000A
+}

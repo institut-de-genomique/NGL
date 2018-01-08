@@ -36,6 +36,7 @@ error.validationexp.manytagCategory="Plusieurs catégories d''index sont présen
 error.validationexp.sameSample="Les containers non indexés ({0},{1}) n''appartiennent pas au même échantillon"
 error.validationexp.noTagSampleWithTagSample="Présence de containers NON indéxés avec des containers indexés"
 error.validationexp.tagcategory.notvalid = La category de tag n''est pas valide pour l''index {0} du container {1}.
+error.validationexp.processProperties.notexist = Pas de processProperties pour {0} dans {1}.
 error.validationexp.tagNotExist = Le tag {0} n''existe pas pour le container {1}.
 error.validationexp.samelibprocesstypecode="Les containers non indexés ({0},{1}) n''ont pas le même type de processus de banque ({2},{3})"
 error.validationexp.samefromexperimenttypecode="Les containers non indexés ({0},{1}) ne proviennent pas du même type d''experience ({2},{3})"
@@ -53,6 +54,10 @@ error.validationexp.outputvolumenotnull.light="La saisie du volume de sortie est
 error.validationexp.outputconcentrationnotnull="La saisie de la concentration de sortie est obligatoire pour le container {0}"
 error.validationexp.outputconcentrationnotnull.light="La saisie de la concentration de sortie est obligatoire"
 error.validationexp.outputvolumelow="Le volume de sortie saisi doit etre supérieur à {0} pour le container {1}"
+
+error.validationexp.outputconcentrationnotnull="La saisie de la concentration de sortie est obligatoire pour le container {0}"
+error.validationexp.lanefull="Vous avez remplis que {0} lanes"
+
 error.validationexp.codewithbadchar= "Le champ {0} contient des caractères interdits"
 error.validationexp.oneInputSupport="Le type d''expérience {0} n''accepte qu''un seul support en entrée"
 error.validationexp.notAllInputContainer="Le support {0} n'est pas complet"

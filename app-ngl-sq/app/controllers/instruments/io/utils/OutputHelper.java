@@ -22,6 +22,8 @@ import models.laboratory.instrument.description.Instrument;
 import models.laboratory.parameter.index.Index;
 import models.utils.InstanceConstants;
 import models.utils.dao.DAOException;
+import models.laboratory.processes.instance.Process;
+import controllers.processes.api.Processes;
 
 import org.apache.commons.lang3.StringUtils;
 import org.mongojack.DBQuery;
@@ -109,8 +111,11 @@ public class OutputHelper {
 	
 	public static String getSequence(Index index, TagModel tagModel, String instrumentTypeCode, Integer position){
 		
+		Logger.debug("OutputHelper.getSequence Tag = "+ instrumentTypeCode);
 		if("NONE".equals(tagModel.tagType)){
 			return null;
+		}else if("NoIndex".equals(tagModel.tagType)){
+				return null;
 		}else if("SINGLE-INDEX".equals(tagModel.tagType)){
 			if(null == index || "MID".equals(index.categoryCode)){
 				return getIndex(null, tagModel.maxTag1Size);
@@ -164,9 +169,11 @@ public class OutputHelper {
 	}
 	
 	public static String getContentProperty(Content content, String propertyName){
+//		Logger.debug("OutputHelper.getContentProperty propertyName = "+ propertyName);
 		if(content.properties.get(propertyName) != null){
 			return (String) content.properties.get(propertyName).value;
 		}
+        Logger.debug("OutputHelper.getContentProperty property " + propertyName + " is null for " + content.sampleCode);
 		return "";
 	}
 	
@@ -224,6 +231,9 @@ public class OutputHelper {
 	}
 	
 	public static Object getExperimentProperty(AbstractContainerUsed container, String propertyName){
+			Logger.debug("getExperimentProperty propertyName : " + propertyName );
+			Logger.debug("getExperimentProperty container : " + container.code );
+			Logger.debug("getExperimentProperty experimentProperties : " + container.experimentProperties.size() );
 		if(container.experimentProperties.containsKey(propertyName)){
 			return container.experimentProperties.get(propertyName).value;
 		}
@@ -279,7 +289,7 @@ public class OutputHelper {
 				}						
 			};
 		}else{
-			tagModel.tagType = "NONE";
+			tagModel.tagType = "NO-INDEX";
 		}
 				
 		return tagModel;
@@ -359,4 +369,21 @@ public class OutputHelper {
 		
 	}
 	
+	/**
+	 * 
+	 * @param processCode - Mongo process code 
+	 * @param propertyName - process property name to find
+	 * @return - property value string
+	 */
+	//get property string from process
+	public static String getProcessProperty(String processCode, String propertyName) {
+		Process process = MongoDBDAO.findByCode(InstanceConstants.PROCESS_COLL_NAME, Process.class, processCode);
+		
+		if(process != null){
+			
+			return (String) process.properties.get(propertyName).value;
+		}else {
+			return null;
+		}
+	}
 }

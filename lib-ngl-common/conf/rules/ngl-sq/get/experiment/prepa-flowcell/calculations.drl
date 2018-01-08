@@ -1,0 +1,148 @@
+package rules
+
+rule "volume stock engaged in denat"
+	@nglSQ( calculations )
+	dialect "java"
+	salience 1000
+	no-loop
+	lock-on-active true
+    when
+    	 $experiment:Experiment($typeCode:typeCode,$typeCode=="prepa-flowcell", $stateCode : state.code, $stateCode!="F")
+    	 $atomicTransfert: ManyToOneContainer( )
+    	 InputContainerUsed( $experimentProperties : experimentProperties,$experimentProperties!=null, $concentrationIN:concentration) from $atomicTransfert.inputContainerUseds
+    	 $finalConcentration1 : PropertyValue() from $experimentProperties.get("finalConcentration1")
+    	 $finalVolume1 : PropertyValue() from $experimentProperties.get("finalVolume1")
+    	 eval($finalVolume1.value != null && Number.class.isInstance($finalVolume1.value) && $finalConcentration1.value != null && Number.class.isInstance($finalConcentration1.value) && convertPVToDouble($concentrationIN) != 0)
+   	then
+   		Logger.debug("Calculation Test  1: "+ $experiment.code+ " "+ $atomicTransfert.line+" "+ $finalConcentration1.value+"  "+$concentrationIN.value);
+   		PropertySingleValue value = new PropertySingleValue(Math.round(convertPVToDouble($finalConcentration1)*convertPVToDouble($finalVolume1)/convertPVToDouble($concentrationIN)*100.0)/100.0,"\u00B5L");
+   		if($experimentProperties.get("requiredVolume1") != null){
+   			$experimentProperties.remove("requiredVolume1");
+   		}
+
+   		$experimentProperties.put("requiredVolume1",value);   		
+   		update($experiment);
+   	end
+
+rule "volume EB"
+	@nglSQ( calculations )
+	dialect "java"
+	salience 900
+	no-loop
+    when
+    	 $experiment:Experiment($typeCode:typeCode,$typeCode=="prepa-flowcell", $stateCode : state.code, $stateCode!="F")
+    	 $atomicTransfert: ManyToOneContainer( )
+    	 InputContainerUsed( $experimentProperties : experimentProperties,$experimentProperties!=null, $concentrationIN:concentration) from $atomicTransfert.inputContainerUseds
+    	 $naohVolume : PropertyValue() from $experimentProperties.get("NaOHVolume")
+    	 $finalVolume1 : PropertyValue() from $experimentProperties.get("finalVolume1")
+    	 $requiredVolume1 : PropertyValue() from $experimentProperties.get("requiredVolume1")
+    	 eval($requiredVolume1.value != null && Number.class.isInstance($requiredVolume1.value) && $finalVolume1.value != null && Number.class.isInstance($finalVolume1.value) && $naohVolume.value != null && Number.class.isInstance($naohVolume.value))
+   	then
+   		Logger.debug("Calculation Test  2: "+ $experiment.code+ " "+ $atomicTransfert.line);
+   		PropertySingleValue value = new PropertySingleValue(Math.round((convertPVToDouble($finalVolume1)-convertPVToDouble($requiredVolume1)-convertPVToDouble($naohVolume))*100.0)/100.0,"\u00B5L");
+   		if($experimentProperties.get("EBVolume") != null){
+   			$experimentProperties.remove("EBVolume");
+   		}
+   		
+   		$experimentProperties.put("EBVolume", value);
+   	end  
+   	 	
+rule "volume engaged in dilution"
+	@nglSQ( calculations )
+	dialect "java"
+	salience 800
+	lock-on-active true
+	no-loop
+    when
+    	 $experiment:Experiment($typeCode:typeCode,$typeCode=="prepa-flowcell", $stateCode : state.code, $stateCode!="F")
+    	 $atomicTransfert: ManyToOneContainer( )
+    	 InputContainerUsed( $experimentProperties : experimentProperties,$experimentProperties!=null) from $atomicTransfert.inputContainerUseds
+    	 $finalConcentration2 : PropertyValue() from $experimentProperties.get("finalConcentration2")
+    	 $finalVolume2 : PropertyValue() from $experimentProperties.get("finalVolume2")
+    	 $finalConcentration1 : PropertyValue() from $experimentProperties.get("finalConcentration1")
+    	 eval($finalConcentration2.value != null && Number.class.isInstance($finalConcentration2.value) && $finalVolume2.value != null && Number.class.isInstance($finalVolume2.value) && $finalConcentration1.value != null && Number.class.isInstance($finalConcentration1.value) && convertPVToDouble($finalConcentration1) !=0)
+   	then
+   		Logger.debug("Calculation Test  3: "+ $experiment.code+ " "+ $atomicTransfert.line);
+   		PropertySingleValue value = new PropertySingleValue(Math.round((convertPVToDouble($finalConcentration2)*convertPVToDouble($finalVolume2)/convertPVToDouble($finalConcentration1))*100.0)/100.0,"\u00B5L");
+   		if($experimentProperties.get("requiredVolume2") != null){
+   			$experimentProperties.remove("requiredVolume2");
+   		}
+   		
+   		$experimentProperties.put("requiredVolume2",value);
+   		update($experiment);
+   	end
+
+rule "volume PhiX"
+	@nglSQ( calculations )
+	dialect "java"
+	salience 700
+	no-loop
+	lock-on-active true
+	when
+		 $experiment:Experiment($typeCode:typeCode,$typeCode=="prepa-flowcell", $stateCode : state.code, $stateCode!="F")
+		 $atomicTransfert: ManyToOneContainer( )
+		 InputContainerUsed( $experimentProperties : experimentProperties,$experimentProperties!=null) from $atomicTransfert.inputContainerUseds
+		 OutputContainerUsed( $experimentPropertiesOut : experimentProperties,$experimentPropertiesOut!=null) from $atomicTransfert.outputContainerUseds
+		 $phixPercent : PropertyValue() from $experimentPropertiesOut.get("phixPercent")
+		 $finalConcentration2 : PropertyValue() from $experimentProperties.get("finalConcentration2")
+		 $finalVolume2 : PropertyValue() from $experimentProperties.get("finalVolume2")
+		 $phixConcentration : PropertyValue() from $experimentProperties.get("phixConcentration")
+		 eval($phixPercent.value != null &&  Number.class.isInstance($phixPercent.value) && $finalVolume2.value != null && Number.class.isInstance($finalVolume2.value) && $phixConcentration.value != null && Number.class.isInstance($phixConcentration.value))
+	then
+		Logger.debug("Calculation Test  4: "+ $experiment.code+ " "+ $atomicTransfert.line);
+		PropertySingleValue value = new PropertySingleValue(Math.round((convertPVToDouble($phixPercent)*convertPVToDouble($finalConcentration2)*convertPVToDouble($finalVolume2)/convertPVToDouble($phixConcentration)))/100.0,"\u00B5L");
+		if($experimentProperties.get("phixVolume") != null){
+			$experimentProperties.remove("phixVolume");
+		}
+		
+		$experimentProperties.put("phixVolume",value);
+		
+		update($experiment);
+	end   
+	
+
+rule "volume HT1"
+	@nglSQ( calculations )
+	dialect "java"
+	salience 600
+	no-loop
+	when
+		 $experiment:Experiment($typeCode:typeCode,$typeCode=="prepa-flowcell", $stateCode : state.code, $stateCode!="F")
+		 $atomicTransfert: ManyToOneContainer( )
+		 InputContainerUsed( $experimentProperties : experimentProperties,$experimentProperties!=null) from $atomicTransfert.inputContainerUseds
+		 $phixVolume : PropertyValue() from $experimentProperties.get("phixVolume")
+		 $finalVolume2 : PropertyValue() from $experimentProperties.get("finalVolume2")
+		 $requiredVolume2 : PropertyValue() from $experimentProperties.get("requiredVolume2")
+		 eval($phixVolume.value != null && Number.class.isInstance($phixVolume.value) && $finalVolume2.value != null && Number.class.isInstance($finalVolume2.value) && $requiredVolume2.value != null && Number.class.isInstance($requiredVolume2.value))
+	then
+		Logger.debug("Calculation Test  5: "+ $experiment.code+ " "+ $atomicTransfert.line);
+		PropertySingleValue value = new PropertySingleValue(Math.round((convertPVToDouble($finalVolume2)-convertPVToDouble($requiredVolume2)-convertPVToDouble($phixVolume))*100.0)/100.0,"\u00B5L");
+		if($experimentProperties.get("HT1Volume") != null){
+			$experimentProperties.remove("HT1Volume");
+		}
+		
+		$experimentProperties.put("HT1Volume",value);
+	end
+	
+rule "Volume dilution on track"
+	@nglSQ( calculations )
+	dialect "java"
+	salience 500
+	no-loop
+	when
+		 $experiment:Experiment($typeCode:typeCode,$typeCode=="prepa-flowcell", $stateCode : state.code, $stateCode!="F")
+		 $atomicTransfert: ManyToOneContainer( )
+		 InputContainerUsed( $experimentProperties : experimentProperties,$experimentProperties!=null, $percentPerLane:percentage) from $atomicTransfert.inputContainerUseds
+		 OutputContainerUsed( $experimentPropertiesOut : experimentProperties,$experimentPropertiesOut!=null) from $atomicTransfert.outputContainerUseds
+		 $finalVolume : PropertyValue() from $experimentPropertiesOut.get("finalVolume")
+		 eval($finalVolume.value != null && Number.class.isInstance($finalVolume.value) && $percentPerLane != null && Number.class.isInstance($percentPerLane))
+	then
+		Logger.debug("Calculation Test  6: "+ $experiment.code+ " "+ $atomicTransfert.line);
+		PropertySingleValue value = new PropertySingleValue(Math.round($percentPerLane*convertPVToDouble($finalVolume))/100.0,"\u00B5L");
+		if($experimentProperties.get("requiredVolume3") != null){
+			$experimentProperties.remove("requiredVolume3");
+		}
+		
+		$experimentProperties.put("requiredVolume3",value);
+	end
+	

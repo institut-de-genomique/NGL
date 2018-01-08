@@ -152,14 +152,20 @@ public class InstanceHelpers {
 			Boolean keepRootKeyName) {
 		ContextValidation localContextError = new ContextValidation(contextError.getUser());
 		localContextError.setMode(contextError.getMode());
+		Logger.debug("InstanceHelpers.save");
 		if (keepRootKeyName) {
+			Logger.debug("InstanceHelpers.save if keepRootKeyName " + keepRootKeyName);
 			localContextError.addKeyToRootKeyName(contextError.getRootKeyName());
-		}
+		} 
 		localContextError.setContextObjects(contextError.getContextObjects());
+		Logger.debug("InstanceHelpers.save localContextError.setContextObjects");
 
 		if (obj != null) {
+			Logger.debug("InstanceHelpers.save obj != null");
 			obj.validate(localContextError);
+			Logger.debug("InstanceHelpers.save obj != null after validate");
 		} else {
+			Logger.debug("InstanceHelpers.save else");
 			throw new IllegalArgumentException("missing object to validate");
 		}
 
@@ -169,7 +175,7 @@ public class InstanceHelpers {
 			contextError.errors.putAll(localContextError.errors);
 			Logger.info("error(s) on output :: " + contextError.errors.toString());
 			return null;
-		}
+		}  
 	}
 
 	public static DBObject save(String collectionName, IValidation obj, ContextValidation contextError) {
@@ -224,6 +230,8 @@ public class InstanceHelpers {
 	}
 
 	public static SampleOnInputContainer getSampleOnInputContainer(Content content,Container container) {
+		
+		Logger.debug("InstanceHelper getSampleOnInputContainer");
 
 		SampleOnInputContainer sampleOnInputContainer = new SampleOnInputContainer();
 		sampleOnInputContainer.projectCode = content.projectCode;

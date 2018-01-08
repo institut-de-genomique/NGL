@@ -43,15 +43,16 @@ public abstract class AbstractImportData implements Runnable{
 		MDC.put("name", name);
 		contextError.clear();
 		contextError.addKeyToRootKeyName("import");
-		logger.info("ImportData execution :"+name);
 		long t1 = System.currentTimeMillis();
+		logger.info("AbstractImportData - run - ImportData execution :"+name);
+
 		try{
 			contextError.setCreationMode();
 			runImport();
 			contextError.removeKeyFromRootKeyName("import");
 
 		}catch (Throwable e) {
-			logger.error("",e);
+			logger.error("AbstractImportData - run - try runImport : error",e);
 			error=true;
 		}
 		finally{
@@ -61,9 +62,10 @@ public abstract class AbstractImportData implements Runnable{
 			/* Logger send an email */
 			long t2 = System.currentTimeMillis();
 			if(error){
-				logger.error("ImportData End Error - "+(t2-t1)/1000+" s");
+				logger.error("AbstractImportData - run - ImportData End Error");
 			}else {
 				logger.info("ImportData End - "+(t2-t1)/1000+" s");
+				logger.info("AbstractImportData - run - ImportData End");
 			}
 			MDC.remove("name");
 		}

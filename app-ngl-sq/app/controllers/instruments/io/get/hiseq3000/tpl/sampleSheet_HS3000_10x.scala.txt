@@ -1,0 +1,29 @@
+@(e:models.laboratory.experiment.instance.Experiment, containers: List[models.laboratory.container.instance.Container], tagModel: controllers.instruments.io.utils.TagModel)
+
+@import controllers.instruments.io.utils._;
+
+[Header]
+IEMFileVersion,4
+
+[Reads]
+@(OutputHelper.getInstrumentProperty(e,"nbCyclesRead1"))
+@(OutputHelper.getInstrumentProperty(e,"nbCyclesRead2"))
+
+[Settings]
+
+[Data]
+Lane,Sample_ID,index,Sample_Project
+@for(c <- containers.sortWith(_.support.line < _.support.line)){
+	@for(co <- c.contents.toList.sortWith(OutputHelper.getContentProperty(_,"Nom_echantillon_collaborateur")<OutputHelper.getContentProperty(_,"Nom_echantillon_collaborateur"))) {
+		@if(CsvHelper.catch10x(co)){
+			@**Lane**@
+			@(c.support.line),@**
+			Sample id
+			**@@if(CsvHelper.checkName(OutputHelper.getContentProperty(co,"Nom_echantillon_collaborateur"))){@(CsvHelper.checkName(OutputHelper.getContentProperty(co,"Nom_echantillon_collaborateur")))}else{@(CsvHelper.checkName(OutputHelper.getContentProperty(co,"Nom_pool_sequencage")))},@**
+			index
+			**@@if(OutputHelper.getContentProperty(co,"tag").split("10X_").length > 1){@(OutputHelper.getContentProperty(co,"tag").split("10X_")(1))}else{@(OutputHelper.getContentProperty(co,"tag"))},@**
+			project
+			**@@(c.contents.get(0).projectCode),
+		}
+	}
+}
