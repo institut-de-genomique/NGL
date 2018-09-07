@@ -21,6 +21,8 @@ http://www.springframework.org/schema/jee http://www.springframework.org/schema/
   	<jee:jndi-lookup id="ngl" jndi-name="ngl" />
   	<jee:jndi-lookup id="lims" jndi-name="lims" />
   	
+  	<bean id="code" class="models.utils.code.DefaultCodeImpl"></bean>
+  	
 	<!-- Define the transaction strategy depends environment here JDBC. Reference 
 		dataSource -->
   	<bean id="txManager"
