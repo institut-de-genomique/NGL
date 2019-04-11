@@ -1,12 +1,15 @@
 package fr.cea.ig.ngl.dao.api;
 
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.jongo.Aggregate;
 import org.jongo.MongoCursor;
-import org.mongojack.DBQuery.Query;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.PropertyAccessorFactory;
 
 import com.mongodb.BasicDBObject;
 
@@ -22,7 +25,10 @@ import validation.ContextValidation;
 public abstract class GenericAPI<O extends GenericMongoDAO<T>, T extends DBObject> {
 
 	private static final play.Logger.ALogger logger = play.Logger.of(GenericAPI.class);
-
+	public static final String CREATE_SEMANTIC_ERROR_MSG = "create method does not update existing objects";
+	public static final String INVALID_INPUT_ERROR_MSG = "invalid input";
+	public static final String INVALID_STATE_ERROR_MSG = "Invalid state modification";
+	
 	protected final O dao; 
 
 	@Inject
@@ -46,7 +52,6 @@ public abstract class GenericAPI<O extends GenericMongoDAO<T>, T extends DBObjec
 	 * Update a complete object
 	 * @param input 					Object to update
 	 * @param currentUser 				current user
-	 * @param fields 					fields
 	 * @return 							updated object
 	 * @throws APIException if the code doesn't correspond to an object 
 	 * @throws APIValidationException validation failure
@@ -65,8 +70,12 @@ public abstract class GenericAPI<O extends GenericMongoDAO<T>, T extends DBObjec
 	 */
 	public abstract T update(T input, String currentUser, List<String> fields) throws APIException, APIValidationException;
 
-	public void delete(String code) {
-		this.dao.deleteObject(code);
+	public void delete(String code) throws APIException {
+	    if (dao.checkObjectExistByCode(code)) {
+	        dao.deleteObject(code);
+	    } else {
+	        throw new APIException(dao.getElementClass().getSimpleName() + " with code " + code + " not exist");
+	    }
 	}
 
 	/**
@@ -102,79 +111,35 @@ public abstract class GenericAPI<O extends GenericMongoDAO<T>, T extends DBObjec
 	}
 	
 	public Iterable<T> listObjects(ListFormWrapper<T> wrapper) throws APIException {
-		if(wrapper.isReportingMode()) {
+		if (wrapper.isReportingMode()) {
 			return findByQuery(wrapper.reportingQuery());
 		} else if(wrapper.isAggregateMode()) {
-			//TODO implement list in AggregateMode()
-			return null;
+			return findByAggregate(wrapper.reportingQuery());
 		} else if(wrapper.isMongoJackMode()) {
-			return dao.mongoDBFinder(wrapper.getQuery(), "code", Sort.ASC, wrapper.getKeys(defaultKeys())).getCursor();
+			return dao.mongoDBFinder(wrapper.getQuery(), "code", Sort.ASC, wrapper.getKeys(defaultKeys())).cursor; //.getCursor();
 		} else {
 			throw new APIException("Unsupported query mode");
 		}
 	}
 	
-
 	public MongoCursor<T> findByQuery(String reportingQuery) {
 		return dao.findByQuery(reportingQuery);
 	}
 
-	@Deprecated
-	public List<T> list(Query query, String orderBy, Sort orderSense) {
-		return dao.mongoDBFinder(query, orderBy, orderSense).toList();
-	}
-	@Deprecated
-	public List<T> list(Query query, String orderBy, Sort orderSense, BasicDBObject keys, Integer limit) {
-		return dao.mongoDBFinder(query, orderBy, orderSense, limit, keys).toList();
-	}
-	@Deprecated
-	public List<T> list(Query query, String orderBy, Sort orderSense, BasicDBObject keys) {
-		return list(query, orderBy, orderSense, keys, -1);
-	}
-	@Deprecated
-	public List<T> list(Query query, String orderBy, Sort orderSense, BasicDBObject keys, 
-			Integer pageNumber, Integer numberRecordsPerPage) {
-		return dao.mongoDBFinderWithPagination(query, orderBy, orderSense, pageNumber, numberRecordsPerPage, keys).toList();
-	}
-	@Deprecated
-	public Source<ByteString, ?> streamUDT(Query query, String orderBy, Sort orderSense, BasicDBObject keys, 
-			Integer pageNumber, Integer numberRecordsPerPage) {
-		return MongoStreamer.streamUDT(dao.mongoDBFinderWithPagination(query, orderBy, orderSense, pageNumber, numberRecordsPerPage, keys));
-	}
-	@Deprecated
-	public Source<ByteString, ?> streamUDTWithDefaultKeys(Query query, String orderBy, Sort orderSense,
-			Integer pageNumber, Integer numberRecordsPerPage) {
-		return MongoStreamer.streamUDT(dao.mongoDBFinderWithPagination(query, orderBy, orderSense, pageNumber, numberRecordsPerPage, defaultDBKeys()));
-	}
-	@Deprecated
-	public Source<ByteString, ?> streamUDTWithDefaultKeys(Query query, String orderBy, Sort orderSense, Integer limit) {
-		return MongoStreamer.streamUDT(dao.mongoDBFinder(query, orderBy, orderSense, limit, defaultDBKeys()));
-	}
-	@Deprecated
-	public Source<ByteString, ?> streamUDT(Query query, String orderBy, Sort orderSense, BasicDBObject keys, Integer limit) {
-		return MongoStreamer.streamUDT(dao.mongoDBFinder(query, orderBy, orderSense, limit, keys));
-	}
-	@Deprecated
-	public Source<ByteString, ?> stream(Query query, String orderBy, Sort orderSense, BasicDBObject keys, Integer limit) {
-		return MongoStreamer.stream(dao.mongoDBFinder(query, orderBy, orderSense, limit, keys));
-	}
-	@Deprecated
-	public Source<ByteString, ?> streamUDT(Query query, String orderBy, Sort orderSense, BasicDBObject keys) {
-		return MongoStreamer.streamUDT(dao.mongoDBFinder(query, orderBy, orderSense, keys));
+	public Aggregate.ResultsIterator<T> findByAggregate(String reportingQuery) {
+		return dao.findByAggregate(reportingQuery);
 	}
 
 	/* ---- method often used in reporting context ---- */
-	public Integer count(String reportingQuery){
+	public Integer count(String reportingQuery) {
 		return findByQuery(reportingQuery).count();
 	}
 
-	public Source<ByteString, ?> stream(String reportingQuery){
+	public Source<ByteString, ?> stream(String reportingQuery) {
 		return MongoStreamer.streamUDT(findByQuery(reportingQuery));
 	}
 
 	/* ------------------------------------------------ */
-
-
 
 	/**
 	 * @return BasicDBObject which corresponds to the list of default keys from {@link GenericAPI#defaultKeys()}
@@ -189,25 +154,35 @@ public abstract class GenericAPI<O extends GenericMongoDAO<T>, T extends DBObjec
 		return keys;		
 	}
 
-
 	public void checkAuthorizedUpdateFields(ContextValidation ctxVal, List<String> fields) {
 		for (String field: fields) {
 			if (!authorizedUpdateFields().contains(field)) {
-				ctxVal.addErrors("fields", "error.valuenotauthorized", field);
+			    ctxVal.addError("fields", "error.valuenotauthorized", field);   
 			}
 		}
 	}
 
 	protected void checkIfFieldsAreDefined(ContextValidation ctxVal, List<String> fields, T s) {
-		for (String field: fields) {
-			try {
-				if (s.getClass().getField(field).get(s) == null) {
-					ctxVal.addErrors(field, "error.notdefined");
-				}
-			} catch(Exception e) {
-				logger.error(e.getMessage());
-			}
-		}
+	    try {
+            for (String field: fields) {
+                Matcher matcher = GenericMongoDAO.FIELD_PATTERN.matcher(field);
+                if(matcher.matches()){
+                    String nPrefix = matcher.group(1);
+                    String nField = matcher.group(2);
+                    BeanWrapper wrapper = PropertyAccessorFactory.forBeanPropertyAccess(s);
+                    Object o = wrapper.getPropertyValue(nPrefix);
+                    if (wrapper.getPropertyType(nPrefix).getField(nField).get(o) == null) {
+                        ctxVal.addError(field, "error.notdefined");
+                    }
+                } else {
+                    if (s.getClass().getField(field).get(s) == null) {
+                        ctxVal.addError(field, "error.notdefined");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
 	}
 
 }

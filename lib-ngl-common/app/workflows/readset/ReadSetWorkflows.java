@@ -1,6 +1,5 @@
 package workflows.readset;
 
-
 import java.util.ArrayList;
 
 import javax.inject.Inject;
@@ -10,7 +9,7 @@ import org.mongojack.DBQuery;
 import org.mongojack.DBUpdate;
 
 import fr.cea.ig.MongoDBDAO;
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import models.laboratory.common.instance.State;
 import models.laboratory.common.instance.TBoolean;
 import models.laboratory.project.instance.Project;
@@ -40,15 +39,24 @@ public class ReadSetWorkflows extends Workflows<ReadSet> {
 	private static final String ruleN    = "N_1";
 	
 	private final ReadSetWorkflowsHelper readSetWorkflowsHelper;
-	private final LazyRules6Actor rulesActor;
-	private final NGLContext ctx;
-	@Inject
-	public ReadSetWorkflows(NGLContext ctx, ReadSetWorkflowsHelper readSetWorkflowsHelper) {
-		this.ctx                    = ctx;
-		this.readSetWorkflowsHelper = readSetWorkflowsHelper;
-		rulesActor                  = ctx.rules6Actor();
-	}
+	private final LazyRules6Actor        rulesActor;
+//	private final NGLContext ctx;
+	private final NGLApplication         app;
 	
+//	@Inject
+//	public ReadSetWorkflows(NGLContext ctx, ReadSetWorkflowsHelper readSetWorkflowsHelper) {
+//		this.ctx                    = ctx;
+//		this.readSetWorkflowsHelper = readSetWorkflowsHelper;
+//		rulesActor                  = ctx.rules6Actor();
+//	}
+	
+	@Inject
+	public ReadSetWorkflows(NGLApplication app, ReadSetWorkflowsHelper readSetWorkflowsHelper) {
+		this.app                    = app;
+		this.readSetWorkflowsHelper = readSetWorkflowsHelper;
+		rulesActor                  = app.rules6Actor();
+	}
+
 	@Override
 	public void applyPreStateRules(ContextValidation validation, ReadSet readSet, State nextState) {
 		if ("N".equals(readSet.state.code)) {
@@ -94,15 +102,18 @@ public class ReadSetWorkflows extends Workflows<ReadSet> {
 	@Override
 	public void setState(ContextValidation contextValidation, ReadSet readSet, State nextState) {
 		contextValidation.setUpdateMode();
-		RunValidationHelper.validateState(readSet.typeCode, nextState, contextValidation);
-		if(!contextValidation.hasErrors() && !nextState.code.equals(readSet.state.code)){
-			boolean goBack = goBack(readSet.state, nextState);
-			if (goBack) 
+		RunValidationHelper.validateStateRequired(contextValidation, readSet.typeCode, nextState);
+		if (!contextValidation.hasErrors() && !nextState.code.equals(readSet.state.code)) {
+//			boolean goBack = goBack(readSet.state, nextState);
+			boolean backward = models.laboratory.common.description.State.find.get().isBackward(readSet.state.code, nextState.code);
+			if (backward) 
 				// Logger.debug(readSet.code + " : back to the workflow. "+readSet.state.code +" -> "+nextState.code);
 				logger.debug("{} : back to the workflow. {} -> {}", readSet.code, readSet.state.code, nextState.code);
-			readSet.traceInformation = updateTraceInformation(readSet.traceInformation, nextState); 
-			readSet.state = updateHistoricalNextState(readSet.state, nextState);
-
+//			readSet.traceInformation = updateTraceInformation(readSet.traceInformation, nextState); 
+			readSet.traceInformation.forceModificationStamp(nextState.user, nextState.date); 
+//			readSet.state = updateHistoricalNextState(readSet.state, nextState);
+			readSet.state = nextState.createHistory(readSet.state);
+			
 			MongoDBDAO.update(InstanceConstants.READSET_ILLUMINA_COLL_NAME,  Run.class, 
 					DBQuery.is("code", readSet.code),
 					DBUpdate.set("state", readSet.state).set("traceInformation",readSet.traceInformation));
@@ -113,7 +124,8 @@ public class ReadSetWorkflows extends Workflows<ReadSet> {
 
 	@Override
 	public void nextState(ContextValidation contextValidation, ReadSet readSet) {
-		State nextStep = cloneState(readSet.state, contextValidation.getUser());
+//		State nextStep = cloneState(readSet.state, contextValidation.getUser());
+		State nextStep = new State(readSet.state.code, contextValidation.getUser());
 		if ("F-RG".equals(readSet.state.code)) {
 			nextStep.code = "IW-QC";
 		} else if("F-QC".equals(readSet.state.code)) {
@@ -142,7 +154,7 @@ public class ReadSetWorkflows extends Workflows<ReadSet> {
 			facts.add(nextStep);
 			facts.add(project);
 			facts.add(readSet);
-			ctx.callRulesWithGettingFacts(ruleIWBA, facts);
+			app.callRulesWithGettingFacts(ruleIWBA, facts);
 		} else if("F-BA".equals(readSet.state.code)) {
 			nextStep.code = "IW-VBA";
 		} else if("IW-VBA".equals(readSet.state.code)) {
@@ -165,7 +177,7 @@ public class ReadSetWorkflows extends Workflows<ReadSet> {
 				facts.add(nextStep);
 				facts.add(project);
 				facts.add(readSet);
-				ctx.callRulesWithGettingFacts(ruleA, facts);
+				app.callRulesWithGettingFacts(ruleA, facts);
 			} else { //FALSE or UNSET
 				nextStep.code = "UA";
 			}			
@@ -174,7 +186,7 @@ public class ReadSetWorkflows extends Workflows<ReadSet> {
 			ArrayList<Object> facts = new ArrayList<>();
 			facts.add(nextStep);
 			facts.add(project);
-			ctx.callRulesWithGettingFacts(ruleFTF, facts);
+			app.callRulesWithGettingFacts(ruleFTF, facts);
 		}
 		setState(contextValidation, readSet, nextStep);
 	}

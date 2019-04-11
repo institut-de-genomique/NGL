@@ -1,23 +1,35 @@
 package models.laboratory.sample.description;
 
+import java.util.function.Supplier;
+
+import fr.cea.ig.ngl.utils.SpringSupplier;
 import models.laboratory.common.description.AbstractCategory;
 import models.laboratory.sample.description.dao.SampleCategoryDAO;
-//TODO: fix doc generation that produces an error with the unqualified name
-// import models.utils.Model.Finder;
-import models.utils.dao.AbstractDAO;
+import ngl.refactoring.MiniDAO;
 
-public class SampleCategory extends AbstractCategory<SampleCategory> {
+//public class SampleCategory extends AbstractCategory<SampleCategory> {
+public class SampleCategory extends AbstractCategory {
 
 //	public static Finder<SampleCategory> find = new Finder<SampleCategory>(SampleCategoryDAO.class.getName());
-	public static final Finder<SampleCategory,SampleCategoryDAO> find = new Finder<>(SampleCategoryDAO.class);
+//	public static final Finder<SampleCategory,SampleCategoryDAO> find = new Finder<>(SampleCategoryDAO.class);
+//	public static final SampleCategoryDAO find = Spring.getBeanOfType(SampleCategoryDAO.class);
+	public static final Supplier<SampleCategoryDAO> find = new SpringSupplier<>(SampleCategoryDAO.class);
+	public static final Supplier<MiniDAO<SampleCategory>>  miniFind = MiniDAO.createSupplier(find);
 	
-	public SampleCategory() {
-		super(SampleCategoryDAO.class.getName());
+	// Serialization constructor
+	public SampleCategory() {}
+	
+	public SampleCategory(String code, String name) {
+		super(code,name);
 	}
-
-	@Override
-	protected Class<? extends AbstractDAO<SampleCategory>> daoClass() {
-		return SampleCategoryDAO.class;
-	}
+	
+//	public SampleCategory() {
+//		super(SampleCategoryDAO.class.getName());
+//	}
+//
+//	@Override
+//	protected Class<? extends AbstractDAO<SampleCategory>> daoClass() {
+//		return SampleCategoryDAO.class;
+//	}
 
 }

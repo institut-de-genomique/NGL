@@ -39,20 +39,20 @@ public interface StateController extends NGLApplicationHolder, NGLForms, LoggerH
 			State state = filledForm.get();
 			state.date = new Date();
 			state.user = getCurrentUser();
-			return okAsJson(updateStateImpl(code, state));
+			return okAsJson(updateStateImpl(code, state, getCurrentUser()));
 		} catch (APIValidationException e) {
-			getLogger().error(e.getMessage());
+		    if (getLogger().isDebugEnabled()) getLogger().warn(e.getMessage(), e);
 			if(e.getErrors() != null) {
 				return badRequestAsJson(errorsAsJson(e.getErrors()));
 			} else {
 				return badRequestAsJson(e.getMessage());
 			}
 		} catch (APIException e) {
-			getLogger().error(e.getMessage());
+			getLogger().error(e.getMessage(), e);
 			return badRequestAsJson(e.getMessage());
 		} catch (Exception e) {
-			getLogger().error(e.getMessage());
-			return nglGlobalBadRequest();
+			getLogger().error(e.getMessage(), e);
+			return nglGlobalBadRequest(e.getMessage());
 		}
 	}
 	
@@ -63,14 +63,15 @@ public interface StateController extends NGLApplicationHolder, NGLForms, LoggerH
 			Form<StateBatchElement> batchElementForm =  getNGLApplication().formFactory().form(StateBatchElement.class);
 			List<Form<StateBatchElement>> filledForms =  getFilledFormList(batchElementForm, StateBatchElement.class);
 			final Lang lang = Http.Context.Implicit.lang();
+			String currentUser = getCurrentUser();
 			List<DatatableBatchResponseElement> response = filledForms.parallelStream()
 					.map(filledForm -> {
 						StateBatchElement element = filledForm.get();
 						State state = element.data.state;
 						state.date = new Date();
-						state.user = getCurrentUser();
+						state.user = currentUser;
 						try {
-							Object o = updateStateImpl(element.data.code, state);
+							Object o = updateStateImpl(element.data.code, state, currentUser);
 							return new DatatableBatchResponseElement(play.mvc.Http.Status.OK, o, element.index);
 						} catch (APIValidationException e) {
 							return new DatatableBatchResponseElement(play.mvc.Http.Status.BAD_REQUEST, errorsAsJson(lang, e.getErrors()), element.index);
@@ -80,23 +81,24 @@ public interface StateController extends NGLApplicationHolder, NGLForms, LoggerH
 					}).collect(Collectors.toList());
 			return okAsJson(response);
 		} catch (Exception e) {
-			getLogger().error(e.getMessage());
-			return nglGlobalBadRequest();
+			getLogger().error(e.getMessage(), e);
+			return nglGlobalBadRequest(e.getMessage());
 		}
 	}	
 	
 	/**
 	 * These method defines the specific updateState behavior for each resource. 
-	 * @param code 	code of resource object to update
-	 * @param state new state of resource object
-	 * @return
-	 * @throws APIException
+	 * @param  code         code of resource object to update
+	 * @param  state        new state of resource object
+	 * @param currentUser   user
+	 * @return              updated object
+	 * @throws APIException exception
 	 */
-	public abstract Object updateStateImpl(String code, State state) throws APIException;
+	public abstract Object updateStateImpl(String code, State state, String currentUser) throws APIException;
 	
 	public abstract JsonNode errorsAsJson(Map<String, List<ValidationError>> errors);
 	public abstract JsonNode errorsAsJson(Lang lang, Map<String, List<ValidationError>> errors);
-	public abstract Result nglGlobalBadRequest();
+	public abstract Result nglGlobalBadRequest(String message);
 	public abstract String getCurrentUser();
 	public abstract Result okAsJson(Object o);
 	public abstract Result badRequestAsJson(Object o);

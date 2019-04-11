@@ -55,6 +55,10 @@ public class LFWController extends Controller implements LFWApplicationHolder, L
 		return ok(Json.toJson(o)).as("application/json");
 	}
 	
+	public Result notFoundAsJson(Object o) {
+        return notFound(Json.toJson(o)).as("application/json");
+    }
+	
 	public Result badRequestAsJson(Object o) {
 		return badRequest(Json.toJson(o)).as("application/json");
 	}

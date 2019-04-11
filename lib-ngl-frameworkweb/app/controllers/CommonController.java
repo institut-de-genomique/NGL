@@ -28,8 +28,11 @@ import org.springframework.beans.PropertyAccessorFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Iterators;
 import com.mongodb.AggregationOptions;
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
+import com.mongodb.util.JSON;
 
+import fr.cea.ig.lfw.utils.DateConverter;
 //import akka.stream.javadsl.Source;
 //import akka.util.ByteString;
 import controllers.history.UserHistory;
@@ -50,7 +53,6 @@ import play.mvc.Http.Context;
 import play.mvc.Result;
 import play.mvc.With;
 import play.routing.JavaScriptReverseRouter;
-// import scala.io.Source;
 import validation.ContextValidation;
 import views.components.datatable.DatatableForm;
 
@@ -240,6 +242,12 @@ public abstract class CommonController extends Controller {
 		return keys;
 	}
 	
+	/** 
+	 * @param form form 
+	 * @return keys in json format
+	 * @deprecated replaced by LFWRequestParsing.generateJSONKeys()
+	 */
+	@Deprecated
 	protected static String getJSONKeys(DatatableForm form) {
 		Set<String> keys = new HashSet<>();
 		if(null != form.includes && form.includes.size() > 0 && !form.includes.contains("*")){
@@ -251,6 +259,7 @@ public abstract class CommonController extends Controller {
 		return jsonKey;
 	}
 	
+	@Deprecated
 	protected static BasicDBObject getIncludeKeys(String[] keys) {
 		Arrays.sort(keys, Collections.reverseOrder());
 		BasicDBObject values = new BasicDBObject();
@@ -260,6 +269,7 @@ public abstract class CommonController extends Controller {
 		return values;
     }
 	
+	@Deprecated
 	protected static void getIncludeJSONKeys(String[] includes, Set<String> keys) {
 		Arrays.sort(includes, Collections.reverseOrder());
 		for(int i=0; i<includes.length;i++){
@@ -268,6 +278,7 @@ public abstract class CommonController extends Controller {
 		
     }
 	
+	@Deprecated
 	protected static BasicDBObject getExcludeKeys(String[] keys) {
 		Arrays.sort(keys, Collections.reverseOrder());
 		BasicDBObject values = new BasicDBObject();
@@ -277,6 +288,7 @@ public abstract class CommonController extends Controller {
 		return values;
     }
 	
+	@Deprecated
 	protected static void getExcludeJSONKeys(String[] excludes, Set<String> keys) {
 		Arrays.sort(excludes, Collections.reverseOrder());
 		for(int i=0;i<excludes.length;i++){
@@ -326,7 +338,7 @@ public abstract class CommonController extends Controller {
 	protected static void validateAuthorizedUpdateFields(ContextValidation ctxVal, List<String> fields,	List<String> authorizedUpdateFields) {
 		for(String field: fields)
 			if (!authorizedUpdateFields.contains(field))
-				ctxVal.addErrors("fields", "error.valuenotauthorized", field);		
+				ctxVal.addError("fields", "error.valuenotauthorized", field);		
 	}
 	
 	/*
@@ -345,9 +357,15 @@ public abstract class CommonController extends Controller {
 	protected static void validateIfFieldsArePresentInForm(ContextValidation ctxVal, List<String> fields, Form<?> filledForm) {
 		for (String field : fields)
 			if (filledForm.field(field).getValue() == null) 
-				ctxVal.addErrors(field, "error.notdefined");
+				ctxVal.addError(field, "error.notdefined");
 	}
 	
+	/**
+	 * replaced by {@link DateConverter#getToDate}.
+	 * @param date date to extract 'to date' from 
+	 * @return     to date for the given date
+	 */
+	@Deprecated
 	protected static Calendar getToDate(Date date) {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(date);
@@ -357,6 +375,12 @@ public abstract class CommonController extends Controller {
 		return cal;
 	}
 
+	/**
+	 * replaced by {@link DateConverter#getFromDate}
+	 * @param date date to extract 'from date' from
+	 * @return     from date for the given date
+	 */
+	@Deprecated
 	protected static Calendar getFromDate(Date date) {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(date);
@@ -403,8 +427,40 @@ public abstract class CommonController extends Controller {
 			return badRequest();
 		}
 	}
-
-	protected static <T extends DBObject> Result nativeMongoDBAggregate(String collectionName, ListForm form, Class<T> type) {
+	
+	/**
+	 * Use to replace controllers.CommonController.nativeMongoDBAggregate(ListForm form).
+	 * @param <T>            collection element type
+	 * @param collectionName collection name
+	 * @param form           form
+	 * @param type           type
+	 * @return               MongoDB result
+	 */
+	public static <T extends DBObject> Result nativeMongoDBAggregate(String collectionName, ListForm form, Class<T> type) {
+		MongoCollection collection = MongoDBPlugin.getCollection(collectionName);
+		BasicDBList mongoList = (BasicDBList)JSON.parse(form.reportingQuery);
+		final Aggregate aggregateQuery = collection.aggregate(((com.mongodb.BasicDBObject)mongoList.get(0)).toJson());
+		for(int i = 1; i < mongoList.size(); i++){
+			aggregateQuery.and(((com.mongodb.BasicDBObject)mongoList.get(i)).toJson());
+		}
+		
+		Aggregate.ResultsIterator<T> all = aggregateQuery.options(AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).build())
+				.as(type);
+		if (form.datatable) {
+			return MongoStreamer.okStream(all);			
+		} else if(form.list) {
+			return MongoStreamer.okStream(all);
+		} else if(form.count) {
+			int count = Iterators.size(all);
+			Map<String, Integer> m = new HashMap<>(1);
+			m.put("result", count);
+			return ok(Json.toJson(m));
+		} else {
+			return badRequest();
+		}	
+	}
+	
+	protected static <T extends DBObject> Result nativeMongoDBAggregateOld(String collectionName, ListForm form, Class<T> type) {
 		MongoCollection collection = MongoDBPlugin.getCollection(collectionName);
 		
 		String[] pipeline = getAggregatePipeline(form.reportingQuery);

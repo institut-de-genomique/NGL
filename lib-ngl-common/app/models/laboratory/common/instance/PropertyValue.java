@@ -5,6 +5,7 @@ import static fr.cea.ig.lfw.utils.Equality.typedEquals;
 import static fr.cea.ig.lfw.utils.Hashing.hash;
 
 import java.util.Collection;
+import java.util.function.Supplier;
 
 import  com.fasterxml.jackson.annotation.JsonSubTypes;
 import  com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -13,7 +14,6 @@ import  com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
 import models.laboratory.common.description.PropertyDefinition;
 import validation.ContextValidation;
-import validation.IValidation;
 import validation.utils.ValidationHelper;
 
 /**
@@ -32,8 +32,12 @@ import validation.utils.ValidationHelper;
 	@JsonSubTypes.Type(value = models.laboratory.common.instance.property.PropertyObjectValue.class,     name = PropertyValue.objectType),
 	@JsonSubTypes.Type(value = models.laboratory.common.instance.property.PropertyObjectListValue.class, name = PropertyValue.objectListType)
 })
-//public abstract class PropertyValue<T> implements IValidation {
-public abstract class PropertyValue implements IValidation {
+//public abstract class PropertyValue implements IValidation {
+// The validation as IValidation cannot be applied to property values as property values
+// cannot be validated without a collection of property definition, so property values do
+// not implement IValidation anymore and provide a validate(ContextValidation,Collection<PropertyDefinition>)
+// as should be expected.
+public abstract class PropertyValue {
 	
 	public static final String singleType     = "single";
 	public static final String listType       = "list";
@@ -49,31 +53,13 @@ public abstract class PropertyValue implements IValidation {
 	public Object value;
 	
 	public PropertyValue(String _type) {
-		// super();
-//		this._type = _type;
 		this(_type, null);
 	}
-	
-//	public PropertyValue(String _type, T value) {
-//		// super();
-//		this._type = _type;
-//		this.value = value;
-//	}
+
 	public PropertyValue(String _type, Object value) {
 		this._type = _type;
 		this.value = value;
 	}
-	
-//	public PropertyValue(String _type, T value, String unit) {
-//		// super();
-//		this._type = _type;
-//		this.value = value;		
-//	}
-	
-	// Cheap covariance 
-//	public T getValue() {
-//		return value;
-//	}
 	
 	// This is supposed to be overloaded in subclasses so we have 
 	// some covariance in the return type that helps with drools.
@@ -85,59 +71,48 @@ public abstract class PropertyValue implements IValidation {
 	// and defined in subclasses so the proper value type is enforced.
 	// This is a setter that is not named "setValue" so it does not interact with
 	// json serialization.
-//	@SuppressWarnings("unchecked")
-//	public void assignValue(Object value) {
-//		this.value = (T)value;
-//	}
 	public void assignValue(Object value) {
 		this.value = value;
 	}
 	
-	@Override
-	public void validate(ContextValidation contextValidation) {
-		// Validate type of property against propertyDefinition
-//		@SuppressWarnings("unchecked") // Uncheckable access to the validation context objects
-//		Collection<PropertyDefinition> propertyDefinitions = (Collection<PropertyDefinition>) contextValidation.getObject("propertyDefinitions");
-		Collection<PropertyDefinition> propertyDefinitions = contextValidation.<Collection<PropertyDefinition>>getTypedObject("propertyDefinitions");
+//	@Override
+//	public void validate_(ContextValidation contextValidation) {
+//		Collection<PropertyDefinition> propertyDefinitions = contextValidation.<Collection<PropertyDefinition>>getTypedObject("propertyDefinitions");
+//		ValidationHelper.checkType(contextValidation, this, propertyDefinitions);
+//	}
+	
+	public void validate(ContextValidation contextValidation, Collection<PropertyDefinition> propertyDefinitions) {
+		// This does not generate any error (see implementation) and the return type 
+		// is ignored so this does nothing.
 		ValidationHelper.checkType(contextValidation, this, propertyDefinitions);
 	}
 	
-//	public static final int hash(Object... objects) {
-//		return hash(1,objects);
-//	}
-		
 	@Override
 	public int hashCode() {
-//		final int prime = 31;
-//		int result = 1;
-//		result = prime * result + ((_type == null) ? 0 : _type.hashCode());
-//		result = prime * result + ((value == null) ? 0 : value.hashCode());
-//		return result;
 		return hash(1,_type,value);
 	}
 	
 	@Override
 	public boolean equals(Object obj) {
-//		if (this == obj)
-//			return true;
-//		if (obj == null)
-//			return false;
-//		if (getClass() != obj.getClass())
-//			return false;
-////		PropertyValue<?> other = (PropertyValue<?>) obj;
-//		PropertyValue other = (PropertyValue) obj;
-//		if (_type == null) {
-//			if (other._type != null)
-//				return false;
-//		} else if (!_type.equals(other._type))
-//			return false;
-//		if (value == null) {
-//			if (other.value != null)
-//				return false;
-//		} else if (!value.equals(other.value))
-//			return false;
-//		return true;
 		return typedEquals(PropertyValue.class, this, obj, (x,y) -> objectEquals(x._type,y._type) && objectEquals(x.value,y.value));
 	}
 	
+	/**
+	 * Validate the core definition of a property (required and not empty) and
+	 * executes the provided assertion if the property is required and not empty.
+	 * @param validationContext  validation context
+	 * @param propertyDefinition property definition
+	 * @param assertion          assertion to run if the core requirements are met
+	 * @return                   true if the validation succeeded, false otherwise
+	 */
+	protected boolean validateProperty(ContextValidation  validationContext, 
+			                           PropertyDefinition propertyDefinition, 
+			                           Supplier<Boolean>  assertion) {
+		if (!propertyDefinition.required)
+			return true;
+		if (!ValidationHelper.validateNotEmpty(validationContext, this, propertyDefinition.code))
+			return false;
+		return assertion.get();
+	}
+
 }

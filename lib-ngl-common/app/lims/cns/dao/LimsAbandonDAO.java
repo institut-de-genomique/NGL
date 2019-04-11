@@ -50,7 +50,6 @@ import models.laboratory.run.instance.Treatment;
 import models.laboratory.sample.description.SampleType;
 import models.laboratory.sample.instance.Sample;
 import models.utils.InstanceConstants;
-import models.utils.InstanceHelpers;
 import models.utils.dao.DAOException;
 
 
@@ -589,7 +588,8 @@ public class LimsAbandonDAO {
 			@Override
 			public Sample mapRow(ResultSet rs, int rowNum) throws SQLException {
 				Sample sample = new Sample();
-				InstanceHelpers.updateTraceInformation(sample.traceInformation, "ngl-bi");
+//				InstanceHelpers.updateTraceInformation(sample.traceInformation, "ngl-bi");
+				sample.traceInformation.setTraceInformation("ngl-bi");
 				String tadco = rs.getString("tadco");
 				String tprco = rs.getString("tprco");
 				sample.code  = rs.getString("code");
@@ -600,7 +600,7 @@ public class LimsAbandonDAO {
 				}
 				SampleType sampleType=null;
 				try {
-					sampleType = SampleType.find.findByCode(sampleTypeCode);
+					sampleType = SampleType.find.get().findByCode(sampleTypeCode);
 				} catch (DAOException e) {
 					logger.error("",e);
 					return null;

@@ -1,0 +1,92 @@
+//package ngl.data.crontab;
+//
+//// This misses the week day definition (e.g: every Saturday or Sunday).
+//public class CronSchedule {
+//	private String timeZone;
+//	// default schedule is [January 1st, 00:00]
+//	private int[] months    = { 0 };  // 0 - 11
+//	private int[] monthDays = { 1 };  // 1 - 31
+//	private int[] hours     = { 0 };  // 0 - 23
+//	private int[] minutes   = { 0 };  // 0 - 59
+//	// int[] weekDays;
+//	
+//	// France centric constructor.
+//	public CronSchedule() {
+//		this("Europe/Paris");
+//	}
+//	
+//	public CronSchedule(String timeZone) {
+//		this.timeZone = timeZone;
+//	}
+//	
+//	public CronSchedule minutes  (int... minutes)   { this.minutes   = atLeastOneValue("minutes", minutes);   return this; }
+//	public CronSchedule hours    (int... hours)     { this.hours     = atLeastOneValue("hours",   hours);     return this; }
+//	public CronSchedule monthDays(int... monthDays) { this.monthDays = atLeastOneValue("days",    monthDays); return this; }
+//	public CronSchedule months   (int... months)    { this.months    = atLeastOneValue("months",  months);    return this; }
+//	
+//	public CronSchedule everyMonth() { return months(0,1,2,3,4,5,6,7,8,9,10,11); }
+//	
+//	/**
+//	 * Implies every month.
+//	 * @return this
+//	 */
+//	public CronSchedule everyDay() { 
+//		return everyMonth().monthDays(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31); 
+//	}
+//	
+//	/**
+//	 * Implies every day.
+//	 * @return this
+//	 */
+//	public CronSchedule everyHour() {
+//		return everyDay().hours(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23);
+//	}
+//	
+//	private static int[] atLeastOneValue(String name, int... values) {
+//		if (values.length == 0)
+//			throw new IllegalArgumentException(name + " must define at least one value");
+//		return values;
+//	}
+//	
+//	public String getTimeZone() {
+//		return timeZone;
+//	}
+//	
+//	public void setTimeZone(String timeZone) {
+//		this.timeZone = timeZone;
+//	}
+//	
+//	public int[] getMonths() {
+//		return months;
+//	}
+//	
+//	public void setMonth(int... months) {
+//		this.months = atLeastOneValue("months", months);
+//	}
+//	
+//	public int[] getMonthDays() {
+//		return monthDays;
+//	}
+//	
+//	public void setMonthDays(int... monthDays) {
+//		this.monthDays = atLeastOneValue("month days", monthDays);
+//	}
+//	
+//	public int[] getHours() {
+//		return hours;
+//	}
+//	
+//	public void setHours(int... hours) {
+//		this.hours = atLeastOneValue("hours", hours);
+//	}
+//	
+//	public int[] getMinutes() {
+//		return minutes;
+//	}
+//	
+//	public void setMinutes(int... minutes) {
+//		this.minutes = atLeastOneValue("minutes", minutes);
+//	}
+//	
+//}
+//

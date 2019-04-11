@@ -16,7 +16,7 @@ public class BioinformaticParameters implements IValidation {
 	public String fgGroup;
 	public Integer fgPriority;
 	public Boolean localDataDelete = Boolean.FALSE;
-	
+	public Boolean ccrtAutomaticTransfer = Boolean.TRUE;
 	
 	@Override
 	public String toString() {

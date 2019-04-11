@@ -1,24 +1,20 @@
 package models.laboratory.run.description;
 
-import java.util.List;
+import java.util.function.Supplier;
 
+import fr.cea.ig.ngl.utils.SpringSupplier;
 import models.laboratory.common.description.CommonInfoType;
-import models.laboratory.common.description.Level;
-import models.laboratory.common.description.PropertyDefinition;
 import models.laboratory.run.description.dao.ReadSetTypeDAO;
+import ngl.refactoring.MiniDAO;
 
 public class ReadSetType extends CommonInfoType {
 
 	@SuppressWarnings("hiding")
-	public static final CommonInfoType.AbstractCommonInfoTypeFinder<ReadSetType,ReadSetTypeDAO> find = 
-			new CommonInfoType.AbstractCommonInfoTypeFinder<>(ReadSetTypeDAO.class); 
+	public static final Supplier<ReadSetTypeDAO>       find     = new SpringSupplier<>(ReadSetTypeDAO.class);
+	public static final Supplier<MiniDAO<ReadSetType>> miniFind = MiniDAO.createSupplier(find); 
 	
-	public ReadSetType() {
-		super(ReadSetTypeDAO.class.getName());
-	}
-	
-	public List<PropertyDefinition> getPropertiesDefinitionDefaultLevel(){
-		return getPropertyDefinitionByLevel(Level.CODE.ReadSet);
-	}
+//	public List<PropertyDefinition> getPropertiesDefinitionDefaultLevel() {
+//		return getPropertyDefinitionByLevel(Level.CODE.ReadSet);
+//	}
 	
 }

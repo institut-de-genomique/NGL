@@ -173,7 +173,7 @@ Conta mat ori + duplicat>30 + rep bases	46	TAXO-contaMatOri ; Qlte-duplicat ; Ql
 
 	private String getInstrumentCategoryCode(Experiment exp) {
 		try {
-			return models.laboratory.instrument.description.Instrument.find.findByCode(exp.instrument.code).typeCode;
+			return models.laboratory.instrument.description.Instrument.find.get().findByCode(exp.instrument.code).typeCode;
 		} catch (DAOException e) {
 			throw new RuntimeException(e);
 		}

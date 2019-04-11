@@ -8,6 +8,11 @@ angular.module('ngl-sub.ExperimentsServices', []).
    //methode utilisée pour definir les colonnes 
    var getColumns = function() {				
 		var columns = [];
+		columns.push({property:"traceInformation.creationDate",
+					  header: Messages("experiment.traceInformation.creationDate"),
+					  type :"date",		    	  	
+					  order:false
+				     });		
 		columns.push({property:"code",
 					  header: Messages("experiment.code"),
 					  type :"text",		    	  	

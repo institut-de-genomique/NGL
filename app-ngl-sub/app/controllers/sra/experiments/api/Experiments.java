@@ -1,8 +1,5 @@
 package controllers.sra.experiments.api;
 
-//import static play.data.Form.form;
-//import static fr.cea.ig.play.IGGlobals.form;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -19,17 +16,14 @@ import controllers.DocumentController;
 import controllers.QueryFieldsForm;
 import fr.cea.ig.MongoDBDAO;
 import fr.cea.ig.MongoDBResult;
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import models.sra.submit.sra.instance.Experiment;
 import models.utils.InstanceConstants;
-//import play.Logger;
 import play.data.Form;
 import play.libs.Json;
 import play.mvc.Result;
 import validation.ContextValidation;
 import views.components.datatable.DatatableResponse;
-
-// TODO: remove System.out.print
 
 public class Experiments extends DocumentController<Experiment> {
 	
@@ -37,16 +31,24 @@ public class Experiments extends DocumentController<Experiment> {
 
 	private static final List<String> authorizedUpdateFields = Arrays.asList("accession");
 
-	final /*static*/ Form<ExperimentsSearchForm> experimentsSearchForm;// = form(ExperimentsSearchForm.class);
-	final /*static*/ Form<Experiment> experimentForm;// = form(Experiment.class);
-	final /*static*/ Form<QueryFieldsForm> updateForm ;//= form(QueryFieldsForm.class);
+	final Form<ExperimentsSearchForm> experimentsSearchForm;
+	final Form<Experiment>            experimentForm;
+	final Form<QueryFieldsForm>       updateForm;
+
+//	@Inject
+//	public Experiments(NGLContext ctx) {
+//		super(ctx,InstanceConstants.SRA_EXPERIMENT_COLL_NAME, Experiment.class);
+//		experimentsSearchForm = ctx.form(ExperimentsSearchForm.class);
+//		experimentForm = ctx.form(Experiment.class);
+//		updateForm = ctx.form(QueryFieldsForm.class);
+//	}
 
 	@Inject
-	public Experiments(NGLContext ctx) {
-		super(ctx,InstanceConstants.SRA_EXPERIMENT_COLL_NAME, Experiment.class);
-		experimentsSearchForm = ctx.form(ExperimentsSearchForm.class);
-		experimentForm = ctx.form(Experiment.class);
-		updateForm = ctx.form(QueryFieldsForm.class);
+	public Experiments(NGLApplication app) {
+		super(app,InstanceConstants.SRA_EXPERIMENT_COLL_NAME, Experiment.class);
+		experimentsSearchForm = app.form(ExperimentsSearchForm.class);
+		experimentForm = app.form(Experiment.class);
+		updateForm = app.form(QueryFieldsForm.class);
 	}
 
 	@Override
@@ -60,11 +62,6 @@ public class Experiments extends DocumentController<Experiment> {
 			return notFound();
 		}	
 	}
-
-	/*public Result get(String code) {
-		return ok(Json.toJson(getSample(code)));
-	}
-*/
 
 	public Result list() {
 		//if (true){return ok(Json.toJson(new ArrayList<Experiment>()));}
@@ -90,41 +87,36 @@ public class Experiments extends DocumentController<Experiment> {
 		QueryFieldsForm queryFieldsForm = filledQueryFieldsForm.get();
 
 //		ContextValidation ctxVal = new ContextValidation(this.getCurrentUser(), filledForm.errors());
-		ContextValidation ctxVal = new ContextValidation(this.getCurrentUser(), filledForm);
+		ContextValidation ctxVal = ContextValidation.createUndefinedContext(this.getCurrentUser(), filledForm);
 		Experiment experiment = getObject(code);
 		if (experiment == null) {
 			//return badRequest("Submission with code "+code+" not exist");
-			ctxVal.addErrors("experiments ", " not exist");
+			ctxVal.addError("experiments ", " not exist");
 			// return badRequest(filledForm.errors-AsJson());
 			return badRequest(errorsAsJson(ctxVal.getErrors()));
 		}
-//		System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!updateExperiment: " +userExperiment.code );
 		logger.debug("!!!!!!!!!!!!!!!!!!!!!!!!!!!! updateExperiment : {}", userExperiment.code );
 		if (queryFieldsForm.fields == null) {
 			if (code.equals(userExperiment.code)) {
 //				ctxVal = new ContextValidation(getCurrentUser(), filledForm.errors()); 	
-				ctxVal = new ContextValidation(getCurrentUser(), filledForm); 	
-				ctxVal.setUpdateMode();
-				ctxVal.getContextObjects().put("type", "sra");
+//				ctxVal = new ContextValidation(getCurrentUser(), filledForm); 	
+//				ctxVal.setUpdateMode();
+				ctxVal = ContextValidation.createUpdateContext(getCurrentUser(), filledForm); 
+//				ctxVal.getContextObjects().put("type", "sra");
+				ctxVal.putObject("type", "sra");
 				userExperiment.traceInformation.setTraceInformation(getCurrentUser());
 
 				//userExperiment.state = new State("V-SUB", getCurrentUser());
 				userExperiment.validate(ctxVal);
-//				System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!updateExperiment: " +userExperiment.code );
-//				System.out.println("experiment.state: " +userExperiment.state.code );
 				logger.debug("!!!!!!!!!!!!!!!!!!!!!!!!!!!! updateExperiment : {}", userExperiment.code );
 				logger.debug("experiment.state : {}", userExperiment.state.code );
-				//System.out.println(Json.toJson(userExperiment));
 				if (!ctxVal.hasErrors()) {
 					MongoDBDAO.update(InstanceConstants.SRA_EXPERIMENT_COLL_NAME, userExperiment);
 					return ok(Json.toJson(userExperiment));
 				} else {
-//					System.out.println("contextValidation.errors pour experiment :"  +userExperiment.code);
 					logger.debug("contextValidation.errors pour experiment : {}", userExperiment.code);
 					ctxVal.displayErrors(logger);
-					// System.out.println(filledForm.errors-AsJson());
 					// return badRequest(filledForm.errors-AsJson());
-//					System.out.println(errorsAsJson(ctxVal.getErrors()));
 					return badRequest(errorsAsJson(ctxVal.getErrors()));
 				}
 			} else {
@@ -135,8 +127,9 @@ public class Experiments extends DocumentController<Experiment> {
 			}	
 		} else {
 //			ctxVal = new ContextValidation(getCurrentUser(), filledForm.errors()); 	
-			ctxVal = new ContextValidation(getCurrentUser(), filledForm); 	
-			ctxVal.setUpdateMode();
+//			ctxVal = new ContextValidation(getCurrentUser(), filledForm); 	
+//			ctxVal.setUpdateMode();
+			ctxVal = ContextValidation.createUpdateContext(getCurrentUser(), filledForm);
 			validateAuthorizedUpdateFields(ctxVal, queryFieldsForm.fields, authorizedUpdateFields);
 			validateIfFieldsArePresentInForm(ctxVal, queryFieldsForm.fields, filledForm);
 			if (!ctxVal.hasErrors()) {
@@ -150,14 +143,6 @@ public class Experiments extends DocumentController<Experiment> {
 			}		
 		}
 	}
-
-	/*	// Renvoie l'experiment present dans la base repondant au code indiqué
-	private Experiment getExperiment(String code)
-	{
-		Experiment experiment = MongoDBDAO.findByCode(InstanceConstants.SRA_EXPERIMENT_COLL_NAME, Experiment.class, code);
-		return experiment;
-	}
-	 */
 
 	private Query getQuery(ExperimentsSearchForm form) {
 		List<Query> queries = new ArrayList<>();

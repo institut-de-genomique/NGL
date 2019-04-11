@@ -1,8 +1,13 @@
 angular.module('home').controller('CNGXToPlateCtrl',['$scope' ,'$http','$parse', '$filter','atmToSingleDatatable',
                                                        function($scope, $http,$parse,$filter,atmToSingleDatatable) {
+	
+	var inputExtraHeaders=Messages("experiments.inputs");   // ajout 05/09/2018
+	var outputExtraHeaders=Messages("experiments.outputs");	// ajout 05/09/2018
+	
 	var datatableConfig = {
 			name:$scope.experiment.typeCode.toUpperCase(),
-			columns:[			  
+			columns:[	
+				    //--------------------- INPUT containers section -----------------------   
 					{
 						"header" : Messages("containers.table.supportCode"),
 						"property" : "inputContainer.support.code",
@@ -11,9 +16,7 @@ angular.module('home').controller('CNGXToPlateCtrl',['$scope' ,'$http','$parse',
 						"hide" : true,
 						"type" : "text",
 						"position" : 1,
-						"extraHeaders" : {
-							0 : Messages("experiments.inputs")
-						}
+						"extraHeaders" : {0:inputExtraHeaders}
 					},
 					{
 						"header" : Messages("containers.table.support.line"),
@@ -23,9 +26,7 @@ angular.module('home').controller('CNGXToPlateCtrl',['$scope' ,'$http','$parse',
 						"hide" : true,
 						"type" : "text",
 						"position" : 1.1,
-						"extraHeaders" : {
-							0 : Messages("experiments.inputs")
-						}
+						"extraHeaders" : {0:inputExtraHeaders}
 					},
 					{
 						"header" : Messages("containers.table.support.column"),
@@ -35,9 +36,7 @@ angular.module('home').controller('CNGXToPlateCtrl',['$scope' ,'$http','$parse',
 						"hide" : true,
 						"type" : "number",
 						"position" : 1.2,
-						"extraHeaders" : {
-							0 : Messages("experiments.inputs")
-						}
+						"extraHeaders" : {0:inputExtraHeaders}
 					},
 					{
 			        	"header":Messages("containers.table.projectCodes"),
@@ -47,7 +46,7 @@ angular.module('home').controller('CNGXToPlateCtrl',['$scope' ,'$http','$parse',
 			 			"type":"text",
 			 			"position":2,
 			 			"render":"<div list-resize='cellValue' list-resize-min-size='3'>",
-			        	 "extraHeaders":{0:Messages("experiments.inputs")}
+						"extraHeaders" : {0:inputExtraHeaders}
 				     },
 				     {
 			        	"header":Messages("containers.table.sampleCodes"),
@@ -57,7 +56,7 @@ angular.module('home').controller('CNGXToPlateCtrl',['$scope' ,'$http','$parse',
 			 			"type":"text",
 			 			"position":3,
 			 			"render":"<div list-resize='cellValue' list-resize-min-size='3'>",
-			        	 "extraHeaders":{0:Messages("experiments.inputs")}
+						"extraHeaders" : {0:inputExtraHeaders}
 				     },
 				     {
 			        	 "header":Messages("containers.table.fromTransformationTypeCodes"),
@@ -67,9 +66,9 @@ angular.module('home').controller('CNGXToPlateCtrl',['$scope' ,'$http','$parse',
 						 "hide":true,
 						 "filter":"unique | codes:'type'",
 			        	 "type":"text",
-			 			"render":"<div list-resize='cellValue' list-resize-min-size='3'>",
+			 			 "render":"<div list-resize='cellValue' list-resize-min-size='3'>",
 			        	 "position":4,
-			        	 "extraHeaders":{0:Messages("experiments.inputs")}
+						 "extraHeaders" : {0:inputExtraHeaders}
 			         },
 			         {
 			        	 "header" : Messages("containers.table.concentration"),
@@ -79,9 +78,8 @@ angular.module('home').controller('CNGXToPlateCtrl',['$scope' ,'$http','$parse',
 						 "hide":true,
 			        	 "type":"number",
 			        	 "position":5,
-			        	 "extraHeaders":{0:Messages("experiments.inputs")}
+						 "extraHeaders" : {0:inputExtraHeaders}
 			         },
-			        
 					 {
 			        	 "header":Messages("containers.table.concentration.unit"),
 			        	 "property":"inputContainerUsed.concentration.unit",
@@ -90,9 +88,8 @@ angular.module('home').controller('CNGXToPlateCtrl',['$scope' ,'$http','$parse',
 						 "hide":true,
 			        	 "type":"text",
 			        	 "position":5.1,
-			        	 "extraHeaders":{0:Messages("experiments.inputs")}
+			        	 "extraHeaders" : {0:inputExtraHeaders}
 			         },
-			        
 			         {
 			        	 "header":function(){return Messages("containers.table.volume") + " (µL)"},
 			        	 "property":"inputContainerUsed.volume.value",
@@ -101,7 +98,7 @@ angular.module('home').controller('CNGXToPlateCtrl',['$scope' ,'$http','$parse',
 						 "hide":true,
 			        	 "type":"number",
 			        	 "position":6,
-			        	 "extraHeaders":{0:Messages("experiments.inputs")}
+			        	 "extraHeaders" : {0:inputExtraHeaders}
 			         },
 			         {
 			        	 "header" : Messages("containers.table.quantity"),
@@ -111,9 +108,8 @@ angular.module('home').controller('CNGXToPlateCtrl',['$scope' ,'$http','$parse',
 						 "hide":true,
 			        	 "type":"number",
 			        	 "position":6.1,
-			        	 "extraHeaders":{0:Messages("experiments.inputs")}
+			        	 "extraHeaders" : {0:inputExtraHeaders}
 			         },
-			        
 					 {
 			        	 "header":Messages("containers.table.quantity.unit"),
 			        	 "property":"inputContainerUsed.quantity.unit",
@@ -122,7 +118,7 @@ angular.module('home').controller('CNGXToPlateCtrl',['$scope' ,'$http','$parse',
 						 "hide":true,
 			        	 "type":"text",
 			        	 "position":6.2,
-			        	 "extraHeaders":{0:Messages("experiments.inputs")}
+			        	 "extraHeaders" : {0:inputExtraHeaders}
 			         },
 			         {
 			        	 "header":Messages("containers.table.state.code"),
@@ -133,8 +129,9 @@ angular.module('home').controller('CNGXToPlateCtrl',['$scope' ,'$http','$parse',
 			        	 "type":"text",
 						 "filter":"codes:'state'",
 			        	 "position":7,
-			        	 "extraHeaders":{0:Messages("experiments.inputs")}
+			        	 "extraHeaders" : {0 :inputExtraHeaders}
 			         },
+			         //------------------------ OUTPUT containers section -------------------
 			         {
 			        	 "header":Messages("containers.table.concentration"),
 			        	 "property":"outputContainerUsed.concentration.value",
@@ -143,7 +140,7 @@ angular.module('home').controller('CNGXToPlateCtrl',['$scope' ,'$http','$parse',
 						 "hide":true,
 			        	 "type":"number",
 			        	 "position":50,
-			        	 "extraHeaders":{0:Messages("experiments.outputs")}
+			        	 "extraHeaders":{0:outputExtraHeaders}
 			         },
 			         {
 			        	 "header":Messages("containers.table.concentration.unit") ,
@@ -153,7 +150,7 @@ angular.module('home').controller('CNGXToPlateCtrl',['$scope' ,'$http','$parse',
 						 "hide":true,
 			        	 "type":"text",
 			        	 "position":51,
-			        	 "extraHeaders":{0:Messages("experiments.outputs")}
+			        	 "extraHeaders":{0:outputExtraHeaders}
 			         },
 			         {
 			        	 "header":Messages("containers.table.volume")+ " (µL)",
@@ -163,7 +160,7 @@ angular.module('home').controller('CNGXToPlateCtrl',['$scope' ,'$http','$parse',
 						 "hide":true,
 			        	 "type":"number",
 			        	 "position":52,
-			        	 "extraHeaders":{0:Messages("experiments.outputs")}
+			        	 "extraHeaders":{0:outputExtraHeaders}
 			         },
 			         {
 			        	 "header":Messages("containers.table.quantity"),
@@ -173,7 +170,7 @@ angular.module('home').controller('CNGXToPlateCtrl',['$scope' ,'$http','$parse',
 						 "hide":true,
 			        	 "type":"number",
 			        	 "position":53,
-			        	 "extraHeaders":{0:Messages("experiments.outputs")}
+			        	 "extraHeaders":{0:outputExtraHeaders}
 			         },
 			         {
 			        	 "header":Messages("containers.table.quantity.unit") ,
@@ -183,7 +180,7 @@ angular.module('home').controller('CNGXToPlateCtrl',['$scope' ,'$http','$parse',
 						 "hide":true,
 			        	 "type":"text",
 			        	 "position":54,
-			        	 "extraHeaders":{0:Messages("experiments.outputs")}
+			        	 "extraHeaders":{0:outputExtraHeaders}
 			         },
 			         {
 			 			// barcode plaque sortie == support Container used code... faut Used
@@ -193,12 +190,9 @@ angular.module('home').controller('CNGXToPlateCtrl',['$scope' ,'$http','$parse',
 			 			"hide" : true,
 			 			"type" : "text",
 			 			"position" : 400,
-			 			"extraHeaders" : {
-			 				0 : Messages("experiments.outputs")
-			 			}
+			 			"extraHeaders":{0:outputExtraHeaders}
 			 		},
-			 		{
-			 			// Ligne
+			 		{// Ligne
 			 			"header" : Messages("containers.table.support.line"),
 			 			"property" : "outputContainerUsed.locationOnContainerSupport.line",
 			 			"edit" : true,
@@ -209,9 +203,7 @@ angular.module('home').controller('CNGXToPlateCtrl',['$scope' ,'$http','$parse',
 			 			"hide" : true,
 			 			"type" : "text",
 			 			"position" : 401,
-			 			"extraHeaders" : {
-			 				0 : Messages("experiments.outputs")
-			 			}
+			 			"extraHeaders":{0:outputExtraHeaders}
 			 		},
 			 		{// colonne
 			 			"header" : Messages("containers.table.support.column"),
@@ -227,9 +219,7 @@ angular.module('home').controller('CNGXToPlateCtrl',['$scope' ,'$http','$parse',
 			 			"hide" : true,
 			 			"type" : "number",
 			 			"position" : 402,
-			 			"extraHeaders" : {
-			 				0 : Messages("experiments.outputs")
-			 			}
+			 			"extraHeaders":{0:outputExtraHeaders}
 			 		},
 			         {
 			        	 "header":Messages("containers.table.stateCode"),
@@ -239,7 +229,7 @@ angular.module('home').controller('CNGXToPlateCtrl',['$scope' ,'$http','$parse',
 						 "hide":true,
 			        	 "type":"text",
 			        	 "position":500,
-			        	 "extraHeaders":{0:Messages("experiments.outputs")}
+			        	 "extraHeaders":{0:outputExtraHeaders}
 			         },
 			         {
 			        	 "header":Messages("containers.table.storageCode"),
@@ -249,7 +239,7 @@ angular.module('home').controller('CNGXToPlateCtrl',['$scope' ,'$http','$parse',
 						 "hide":true,
 			        	 "type":"text",
 			        	 "position":600,
-			        	 "extraHeaders":{0:Messages("experiments.outputs")}
+			        	 "extraHeaders":{0:outputExtraHeaders}
 				     }
 			         ],
 			compact:true,
@@ -349,8 +339,7 @@ angular.module('home').controller('CNGXToPlateCtrl',['$scope' ,'$http','$parse',
 			var dtConfig = $scope.atmService.data.getConfig();
 			dtConfig.edit.byDefault = false;
 			$scope.atmService.data.setConfig(dtConfig);
-		}
-		
+		}	
 	});
 	
 	$scope.$on('activeEditMode', function(e) {
@@ -359,7 +348,6 @@ angular.module('home').controller('CNGXToPlateCtrl',['$scope' ,'$http','$parse',
 		$scope.atmService.data.setEdit();
 	});
 
-	
 	$scope.copyVolumeInToOut = function(){
 		var data = $scope.atmService.data.displayResult;		
 		data.forEach(function(value){
@@ -375,9 +363,9 @@ angular.module('home').controller('CNGXToPlateCtrl',['$scope' ,'$http','$parse',
 	});
 	
 	var atmService = atmToSingleDatatable($scope, datatableConfig);
+	
 	// defined new atomictransfertMethod
-	atmService.newAtomicTransfertMethod =  function(line, column){
-		
+	atmService.newAtomicTransfertMethod =  function(line, column){	
 		return {
 			class:"OneToOne",
 			line:undefined, 
@@ -391,14 +379,14 @@ angular.module('home').controller('CNGXToPlateCtrl',['$scope' ,'$http','$parse',
 	atmService.defaultOutputUnit = {
 			volume : "µL"
 	};
+	
 	atmService.defaultOutputValue = {
 			concentration : {copyInputContainer:true},
 			size : {copyInputContainer:true}
 	};	
 	
 	atmService.experimentToView($scope.experiment, $scope.experimentType);
+	
 	$scope.atmService = atmService;
-	
-	
 	
 }]);

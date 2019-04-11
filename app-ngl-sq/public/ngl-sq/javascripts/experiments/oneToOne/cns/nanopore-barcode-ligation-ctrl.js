@@ -276,7 +276,7 @@ angular.module('home').controller('NanoporeBarcodeLigationCtrl',['$scope', '$par
 	         var inputQtty = getter(udtData);
 	         console.log("computeInputQuantityToContentProperties");
 	        var compute = {
-	                inputvolume : $parse("inputContainerUsed.volume.value")(udtData),
+	                inputvolume : $parse("inputContainerUsed.experimentProperties.inputVolume.value")(udtData),
 	                concentration : $parse("inputContainerUsed.concentration.value")(udtData),
 	                isReady:function(){
 	                    return (this.inputvolume && this.concentration);

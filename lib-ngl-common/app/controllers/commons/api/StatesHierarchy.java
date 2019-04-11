@@ -1,18 +1,14 @@
 package controllers.commons.api;
 
-// import static play.data.Form.form;
-//import static fr.cea.ig.play.IGGlobals.form;
-
 import java.util.ArrayList;
 import java.util.List;
 
-//import controllers.CommonController;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 
 import controllers.APICommonController;
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import models.laboratory.common.description.ObjectType;
 import models.laboratory.common.description.StateHierarchy;
 import models.utils.ListObject;
@@ -22,16 +18,22 @@ import play.libs.Json;
 import play.mvc.Result;
 import views.components.datatable.DatatableResponse;
 
-public class StatesHierarchy extends APICommonController<StatesHierarchySearchForm> {// CommonController {
+public class StatesHierarchy extends APICommonController<StatesHierarchySearchForm> {
 	
-    private final /*static*/ Form<StatesHierarchySearchForm> statesHierarchyForm; // = form(StatesHierarchySearchForm.class);
+    private final Form<StatesHierarchySearchForm> statesHierarchyForm;
 
-    @Inject
-    public StatesHierarchy(NGLContext ctx){
-    	super(ctx, StatesHierarchySearchForm.class);
-    	this.statesHierarchyForm = ctx.form(StatesHierarchySearchForm.class);
-    }
+//    @Inject
+//    public StatesHierarchy(NGLContext ctx){
+//    	super(ctx, StatesHierarchySearchForm.class);
+//    	this.statesHierarchyForm = ctx.form(StatesHierarchySearchForm.class);
+//    }
     
+    @Inject
+    public StatesHierarchy(NGLApplication app){
+    	super(app, StatesHierarchySearchForm.class);
+    	this.statesHierarchyForm = app.form(StatesHierarchySearchForm.class);
+    }
+
     public Result list() throws DAOException {
 		Form<StatesHierarchySearchForm> statesHierarchyFilledForm = filledFormQueryString(
 				statesHierarchyForm, StatesHierarchySearchForm.class);
@@ -40,7 +42,7 @@ public class StatesHierarchy extends APICommonController<StatesHierarchySearchFo
 		List<StateHierarchy> values = new ArrayList<>(0);
 
 		if (StringUtils.isNotBlank(statesHierarchySearch.objectTypeCode)) 
-		    values = StateHierarchy.find.findByObjectTypeCode(ObjectType.CODE.valueOf(statesHierarchySearch.objectTypeCode));
+		    values = StateHierarchy.find.get().findByObjectTypeCode(ObjectType.CODE.valueOf(statesHierarchySearch.objectTypeCode));
 		else 
 			return notFound();
 		

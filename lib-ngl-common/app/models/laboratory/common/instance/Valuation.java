@@ -40,19 +40,31 @@ public class Valuation implements IValidation {
      */
     public String comment;
     
+    /**
+     * Validate this valuation (context parameter {@link CommonValidationHelper#FIELD_TYPE_CODE}).
+     */
 	@Override
+	@Deprecated
 	public void validate(ContextValidation contextValidation) {
-		ValidationHelper.required(contextValidation, valid, "valid");
-		if(!TBoolean.UNSET.equals(valid)){
-			ValidationHelper.required(contextValidation, date, "date");
-			ValidationHelper.required(contextValidation, user, "user");
-			
+		ValidationHelper.validateNotEmpty             (contextValidation, valid, "valid");
+		if (!TBoolean.UNSET.equals(valid)) {
+			ValidationHelper.validateNotEmpty         (contextValidation, date, "date");
+			ValidationHelper.validateNotEmpty         (contextValidation, user, "user");
 		}
-		CommonValidationHelper.validateResolutionCodes(resolutionCodes, contextValidation);
-		//TODO : resolution si different de zero
-		
-		CommonValidationHelper.validateCriteriaCode(criteriaCode, contextValidation); 
-		
+		CommonValidationHelper.validateResolutionCodes(contextValidation, resolutionCodes);
+		// TODO : resolution si different de zero
+		CommonValidationHelper.validateCriteriaCode   (contextValidation, criteriaCode); 
+	}
+	
+	public void validate(ContextValidation contextValidation, String typeCode) {
+		ValidationHelper.validateNotEmpty             (contextValidation, valid, "valid");
+		if (!TBoolean.UNSET.equals(valid)) {
+			ValidationHelper.validateNotEmpty         (contextValidation, date, "date");
+			ValidationHelper.validateNotEmpty         (contextValidation, user, "user");
+		}
+		CommonValidationHelper.validateResolutionCodes(contextValidation, typeCode, resolutionCodes);
+		// TODO : resolution si different de zero
+		CommonValidationHelper.validateCriteriaCode   (contextValidation, typeCode, criteriaCode); 
 	}
 
 }

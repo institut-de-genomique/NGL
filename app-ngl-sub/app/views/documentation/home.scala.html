@@ -26,6 +26,7 @@
 				<ul>
 					<li><strong>STRATEGY_SAMPLE_TAXON</strong> : building sample object per project (LIMS project code) and taxon (LIMS taxon).</li>
 					<li><strong>STRATEGY_SAMPLE_CLONE</strong> : building sample object per project and per clone.</li>
+					<li><strong>STRATEGY_SAMPLE_BANK</strong>  : building sample object per project and per bank (type of bank).</li>				
 					<li><strong>STRATEGY_NO_SAMPLE</strong> : tag FILE_USER_CLONE_TO_ACSAMPLE_ACSTUDY used.</li>
                 </ul>
            	</li>
@@ -232,10 +233,57 @@
 		"IROO-D6-0005"|"ERS154530"|"ERP001583"<br>
 		"IROO-E5-5146"|"ERS154531"|"ERP001583"<br>
 		"IROO-F5-5079"|"ERS154532"|"ERP001583"<br>		
+	<br/>
+	
+	</div>		
+	<div class="panel-heading">
+		<h3>@Messages("documentation.sampleAttributes")</h3>
+	</div>
+		<div class="panel-body">
+		<ul>		
+		<li><h4>utilité du champs :</h4>	
 		
-	</div>	
-
-</div>
-
-
+		L'EBI reconnait un ensemble fini de caracteristiques pour le sample (ex: title, description, code, taxonId, ...).<br>
+		Si le sample doit etre decrit plus precisement (a l'aide de propriétés qui n'apparaissent pas dans les differents champs du sample),<br>
+		il est possible de definir ses propres attributs (ex Strain, Clone, Note, altitude...) dans 
+		le champs attributes, en utilisant les balises autorisées.<br>
+		On peut definir plusieurs "attributes" dans ce champs.<br>
+		
+		<li><h4>Balises autorisées dans le champs attributes :</h4>
+		- SAMPLE_ATTRIBUTE <br>
+		- TAG              <br>
+		- VALUE            <br>
+		- UNITS            <br>
+		
+	
+		<li><h4>Exemple d'un champs attributes :</h4>
+		</ul>
+		<xmp>
+	   "<SAMPLE_ATTRIBUTE><TAG>Strain</TAG><VALUE>ABBA</VALUE></SAMPLE_ATTRIBUTE>
+	    <SAMPLE_ATTRIBUTE><TAG></TAG>Depth<VALUE>200</VALUE><UNITS>m</UNITS></SAMPLE_ATTRIBUTE>
+	    <SAMPLE_ATTRIBUTE><TAG>Sample Collection Device</TAG><VALUE>high volume peristaltic pump [HVP-PUMP]</VALUE></SAMPLE_ATTRIBUTE>"
+  		</xmp>
+		
+    </div>	
+			
+	<div class="panel-heading">
+		<h3>@Messages("documentation.visibiliteEBI_study")</h3>
+	</div>
+	<br/>
+	<div class="panel-body">		
+		<img src="/assets/images/visibiliteEbi_study.png" />
+		<br/>
+		<br/>	
+	</div>
+	
+	
+	<div class="panel-heading">
+		<h3>@Messages("documentation.visibiliteEBI_sample")</h3>
+	</div>
+	<br/>
+	<div class="panel-body">
+		<img src="/assets/images/visibiliteEbi_sample.png" />
+		<br/>
+		<br/>		
+	</div>
 }

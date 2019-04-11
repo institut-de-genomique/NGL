@@ -1,5 +1,7 @@
 package models.laboratory.experiment.description.dao;
 
+import static models.utils.dao.DAOException.daoAssertNotNull;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -27,6 +29,8 @@ import play.api.modules.spring.Spring;
 @Repository
 public class ExperimentTypeDAO extends AbstractDAOCommonInfoType<ExperimentType> {
 
+	private static final play.Logger.ALogger logger = play.Logger.of(ExperimentTypeDAO.class);
+	
 //	public ExperimentTypeDAO() {
 //		super("experiment_type", ExperimentType.class,ExperimentTypeMappingQuery.class,
 //				"SELECT distinct c.id, c.fk_experiment_category, c.fk_common_info_type, c.atomic_transfert_method, c.short_code, c.new_sample ",
@@ -40,31 +44,35 @@ public class ExperimentTypeDAO extends AbstractDAOCommonInfoType<ExperimentType>
 	
 	@Override
 	public long save(ExperimentType experimentType) throws DAOException	{
-		if (experimentType == null) {
-			throw new DAOException("ExperimentType is mandatory");
-		}
-		//Check if category exist
-		if (experimentType.category == null || experimentType.category.id == null) {
-			throw new DAOException("ExperimentCategory is not present !!");
-		}
-
-		//Add commonInfoType
+//		if (experimentType == null) {
+//			throw new DAOException("ExperimentType is mandatory");
+//		}
+//		//Check if category exist
+//		if (experimentType.category == null || experimentType.category.id == null) {
+//			throw new DAOException("ExperimentCategory is not present !!");
+//		}
+		
+		daoAssertNotNull("experimentType",             experimentType);
+		daoAssertNotNull("experimentType.category",    experimentType.category);
+		daoAssertNotNull("experimentType.category.id", experimentType.category.id);
+		logger.debug("save {}", experimentType.code);
+		// Add commonInfoType
 		CommonInfoTypeDAO commonInfoTypeDAO = Spring.getBeanOfType(CommonInfoTypeDAO.class);
 		experimentType.id = commonInfoTypeDAO.save(experimentType);
 
-		//Create experimentType 
+		// Create experimentType 
 		Map<String, Object> parameters = new HashMap<>();
-		parameters.put("id", experimentType.id);
-		parameters.put("fk_common_info_type", experimentType.id);
-		parameters.put("fk_experiment_category", experimentType.category.id);
+		parameters.put("id",                      experimentType.id);
+		parameters.put("fk_common_info_type",     experimentType.id);
+		parameters.put("fk_experiment_category",  experimentType.category.id);
 		parameters.put("atomic_transfert_method", experimentType.atomicTransfertMethod);
-		parameters.put("short_code", experimentType.shortCode);
-		parameters.put("new_sample", experimentType.newSample);
+		parameters.put("short_code",              experimentType.shortCode);
+		parameters.put("new_sample",              experimentType.newSample);
 		jdbcInsert.execute(parameters);
 
-		//Add list instruments
+		// Add list instruments
 		insertInstrumentUsedTypes(experimentType.instrumentUsedTypes, experimentType.id, false);
-		insertSampleTypes(experimentType.sampleTypes,experimentType.id,false);
+		insertSampleTypes        (experimentType.sampleTypes,         experimentType.id, false);
 		return experimentType.id;
 	}
 
@@ -218,6 +226,19 @@ public class ExperimentTypeDAO extends AbstractDAOCommonInfoType<ExperimentType>
 				new SqlParameter("current_pt.code", Types.VARCHAR),new SqlParameter("current_t.code", Types.VARCHAR)).execute(processTypeCode, processTypeCode, code);
 	}
 	
+	public List<ExperimentType> findInputExperimentTypeForAnProcessTypeCode(String processTypeCode) throws DAOException{
+
+		String sql = sqlCommon+" inner join experiment_type_node as n on n.fk_experiment_type = t.id"+
+				" inner join process_experiment_type as previous_pet on previous_pet.fk_experiment_type = t.id"+
+				" 	inner join process_type as previous_pt on previous_pt.id = previous_pet.fk_process_type"+
+				" 		inner join common_info_type as previous_cpt on previous_cpt.id = previous_pt.fk_common_info_type and previous_cpt.code=?"+
+				" where previous_pet.position_in_process = -1";
+
+		//Logger.debug(sql);
+		
+		return initializeMapping(sql, new SqlParameter("previous_cpt.code", Types.VARCHAR)).execute(processTypeCode);
+	}
+	
 	public List<ExperimentType> findNextExperimentTypeForAnExperimentTypeCodeAndProcessTypeCode(String code, String processTypeCode) throws DAOException{
 
 		String sql = sqlCommon+" inner join experiment_type_node as n on n.fk_experiment_type = t.id"+ 
@@ -334,6 +355,15 @@ public class ExperimentTypeDAO extends AbstractDAOCommonInfoType<ExperimentType>
 		return initializeMapping(sql, new SqlParameter("ce.code", Types.VARCHAR), new SqlParameter("cp.code", Types.VARCHAR)).execute(previousExperimentTypeCode, processTypeCode);
 	}
 	
+	// Finder implementation
+//	public List<ExperimentType> findPreviousExperimentTypeForAnExperimentTypeCodeAndProcessTypeCode(String code, String processTypeCode) throws DAOException{
+////return ((ExperimentTypeDAO)getInstance()).findPreviousExperimentTypeForAnExperimentTypeCodeAndProcessTypeCode(code, processTypeCode, null);
+//return getInstance().findPreviousExperimentTypeForAnExperimentTypeCodeAndProcessTypeCode(code, processTypeCode, null);
+//}
+	public List<ExperimentType> findPreviousExperimentTypeForAnExperimentTypeCodeAndProcessTypeCode(String code, String processTypeCode) throws DAOException{
+		return findPreviousExperimentTypeForAnExperimentTypeCodeAndProcessTypeCode(code, processTypeCode, null);
+	}
 	
+
 	
 }

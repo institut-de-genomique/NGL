@@ -6,50 +6,6 @@ import fr.cea.ig.auto.submission.SubmissionServicesFactory;
 import fr.genoscope.lis.devsi.birds.impl.properties.ProjectProperties;
 import fr.cea.ig.auto.submission.SRAFilesUtil;
 
-#Select resource for getCCRTFiles treatment
-rule "select resources from nglsub for getCCRTFiles treatment"
-	@BirdsRule ( selectionRule )
-	salience 200
-	dialect 'java'
-	no-loop
-	when
-		$input : InputSpecificationElement(name=="inputGetCCRT", treatmentSpecification.name=="getCCRTFile", project.name == "SRA")
-		$resourcesReferential : ResourcesReferential(name=="nglSubRef_processCCRT") 
-		$device : JSONDevice() from $resourcesReferential.referentialDevice
-		$rps : ResourcePropertiesSet(initialized==false, inputSpecificationElement==$input, resourcesReferential==$resourcesReferential)
-		//$groupJob : Job( treatmentSpecification.specificationGroup == true)
-	then
-		Logger log = Logger.getLogger("ngl.sub.rules");
-		$rps.initialize();
-		
-		//JobResource groupJobResource = $groupJob.getUniqueJobResource("subData");
-		Set<ResourceProperties> resourceProperties = new HashSet<ResourceProperties>();
-		
-		JSONDevice jsonDevice = new JSONDevice();
-		
-		//Get code submission IP-SUB
-		Set<ResourceProperties> rpSubmissions = $device.httpGetJSON(ProjectProperties.getProperty("server")+"/api/sra/submissions?stateCode=IP-SUB", "bot");
-		for(ResourceProperties rpSub : rpSubmissions){
-			//Get submission code
-			String codeSubmission = rpSub.getProperty("code");
-			log.debug("Get CCRT files for "+codeSubmission);
-			String submissionDirectory = rpSub.getProperty("submissionDirectory");
-			Set<ResourceProperties> rpsRawData = jsonDevice.httpGetJSON(ProjectProperties.getProperty("server")+"/api/sra/experiments/rawDatas?submissionCode="+codeSubmission,"bot");
-			rpsRawData = SRAFilesUtil.filterByLocation(rpsRawData);
-			log.debug("Filter by location size "+rpsRawData.size());
-			for(ResourceProperties rp : rpsRawData){
-				ResourceProperties newRp = new ResourceProperties();
-				newRp.setProperty("code",codeSubmission);
-				newRp.setProperty("submissionDirectory",submissionDirectory);
-				newRp.setProperty("relatifName",rp.getProperty("relatifName"));
-				newRp.setProperty("directory",rp.getProperty("directory"));
-				resourceProperties.add(newRp);
-			}
-		}
-		log.debug("size resources "+resourceProperties.size());
-		$rps.setResourcePropertiesSet(resourceProperties);
-		modify($rps){};
-end
 
 rule "set parameter for getCCRTFiles"
 	@BirdsRule(fsRule)
@@ -65,7 +21,8 @@ rule "set parameter for getCCRTFiles"
 			
 			String fileName = $job.getUniqueJobResource("inputGetCCRT").getProperty("relatifName");
 			String fileCCRT =  $job.getUniqueJobResource("inputGetCCRT").getProperty("directory")+File.separator+fileName;
-			String filePath = $job.getUniqueJobResource("inputGetCCRT").getProperty("submissionDirectory")+File.separator+fileName;
+			//String filePath = $job.getUniqueJobResource("inputGetCCRT").getProperty("submissionDirectory")+File.separator+fileName;
+			String filePath = ProjectProperties.getProperty("tmpDirectory")+File.separator+$job.getUniqueJobResource("inputGetCCRT").getProperty("code")+File.separator+fileName;
 			String userCCRT = $job.getTreatmentSpecification().getProject().getProjectProperties().get("ccrt_user");
 			
 			String gsisshParam = $job.getParameterValue("gsisshParam").getValue().replace("%userCCRT%",userCCRT).replace("%ccrtFileName%",fileCCRT);
@@ -73,4 +30,29 @@ rule "set parameter for getCCRTFiles"
 			
 			String endArg = $job.getParameterValue("endArg").getValue().replace("%filePath%",filePath);
 			$job.setParameterValue("endArg", endArg);
+end
+
+rule "add resources in internalRefGetCCRT to fire touch file"
+	@BirdsRule( addResources ) 
+	dialect 'java'
+	salience 200
+	when
+		$flag : Flag ( done == false ) 
+		$output : OutputSpecificationElement(treatmentSpecification.name == "getCCRTFile")
+	  	$referential : ResourcesReferential ( name == "internalRefTouchCCRT" )
+		$resourceSet : ResourceSet( ioSpecificationElement == $output )
+		$job : Job(treatmentSpecification!=null, treatmentSpecification.name == "getCCRTFile")
+	then
+		Logger log = Logger.getLogger("ngl.sub.rules");
+		log.debug("Add resources rules for getCCRT from file "+$job.getProperty(Job.STDOUT));
+		JobResource jobResource = $job.getUniqueJobResource("inputGetCCRT");
+		JobResource outputResource = $resourceSet.createJobResource($output.getResourceType(),$referential.getName());
+		ResourceProperties resourceProperties = outputResource.getResourceProperties();
+	  	resourceProperties.setProperty("code",jobResource.getProperty("code"));
+	  	resourceProperties.setProperty("submissionDirectory",jobResource.getProperty("submissionDirectory"));
+	  	resourceProperties.setProperty("relatifName",jobResource.getProperty("relatifName"));
+	  	resourceProperties.setProperty("directory",jobResource.getProperty("directory"));
+		$flag.setDone(true);
+		modify($flag){};
+		modify($resourceSet){};
 end

@@ -9,7 +9,7 @@ import validation.ContextValidation;
 import validation.IValidation;
 import validation.utils.ValidationHelper;
 
-public class NGLObjectsSearchForm extends ListForm implements IValidation{
+public class NGLObjectsSearchForm extends ListForm implements IValidation {
 	
 	public List<String> collectionNames;
 	
@@ -24,16 +24,14 @@ public class NGLObjectsSearchForm extends ListForm implements IValidation{
 	
     @Override
 	public void validate(ContextValidation contextValidation) {
-		ValidationHelper.required(contextValidation, collectionNames, "collectionNames");
-		ValidationHelper.required(contextValidation, projectCode, "projectCode");
-		ValidationHelper.required(contextValidation, sampleCode, "sampleCode");
-		ValidationHelper.required(contextValidation, contentProperties, "contentProperties");
-		ValidationHelper.required(contextValidation, contentPropertyNameUpdated, "contentPropertyNameUpdated");
-		if(!contextValidation.hasErrors()){
-			ValidationHelper.required(contextValidation, contentProperties.get(contentPropertyNameUpdated), "contentProperties."+contentPropertyNameUpdated);
+		ValidationHelper.validateNotEmpty(contextValidation, collectionNames,            "collectionNames");
+		ValidationHelper.validateNotEmpty(contextValidation, projectCode,                "projectCode");
+		ValidationHelper.validateNotEmpty(contextValidation, sampleCode,                 "sampleCode");
+		ValidationHelper.validateNotEmpty(contextValidation, contentProperties,          "contentProperties");
+		ValidationHelper.validateNotEmpty(contextValidation, contentPropertyNameUpdated, "contentPropertyNameUpdated");
+		if (!contextValidation.hasErrors()) {
+			ValidationHelper.validateNotEmpty(contextValidation, contentProperties.get(contentPropertyNameUpdated), "contentProperties." + contentPropertyNameUpdated);
 		}
-		
 	}
     
-     
 }

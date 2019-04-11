@@ -1,5 +1,7 @@
 package models.laboratory.container.description.dao;
 
+import java.util.List;
+
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.stereotype.Repository;
 
@@ -16,13 +18,18 @@ public class ContainerCategoryDAO extends AbstractDAODefault<ContainerCategory> 
 	
 	@SuppressWarnings("deprecation")
 	public ContainerCategory findByContainerSupportCategoryCode(String containerSupportCategoryCode) {
-		if (null == containerSupportCategoryCode) {
+		if (containerSupportCategoryCode == null) {
 			throw new DAOException("containerSupportCategoryCode is mandatory");
 		}
-		String sql = sqlCommon + " inner join container_support_category as c ON c.fk_container_category=t.id" +
+		String sql = getSqlCommon() + " inner join container_support_category as c ON c.fk_container_category=t.id" +
 				" WHERE c.code=? order by t.name";
 		BeanPropertyRowMapper<ContainerCategory> mapper = new BeanPropertyRowMapper<>(entityClass);
 		return this.jdbcTemplate.queryForObject(sql, mapper, containerSupportCategoryCode);
 	}
 	
+	@Override
+	protected List<String> getColumns() {
+		return enumColumns;
+	}
+
 }

@@ -37,7 +37,6 @@ search.placeholder.fgGroup = Projet FG
 search.placeholder.codeFgGroup = Code projet FG
 search.placeholder.unixGroup = Groupe Unix
 
-
 #projects
 projects.menu = Projets
 projects.menu.search = Recherche
@@ -78,7 +77,7 @@ umbrellaProjects.name = Nom
 projects.projectCodesSelected = Projets rattachés
 projects.bioinformaticParameters.biologicalAnalysis = Analyse biologique ?
 projects.bioinformaticParameters.localDataDelete = Suppression des données locales ?
-
+projects.bioinformaticParameters.ccrtAutomaticTransfer = Transfert des données au CCRT automatique ?
 
 
 #button
@@ -89,6 +88,7 @@ button.edit = Editer
 #tab
 projects.details.general = Général
 projects.details.bioinformaticParameters = Paramètres bio-informatique
+projects.details.admin = Administration
 
 #msg
 projects.msg.save.sucess = Sauvegarde réussie

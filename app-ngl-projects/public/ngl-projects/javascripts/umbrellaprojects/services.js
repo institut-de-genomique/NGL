@@ -8,13 +8,13 @@
 					var columns = [
 								    {  	property:"code",
 								    	header: "projects.code",
-								    	type :"String",
+								    	type :"text",
 								    	order:true,
 								    	edit:false
 									},
 								    {  	property:"name",
 								    	header: "projects.name",
-								    	type :"String",
+								    	type :"text",
 								    	order:false,
 								    	edit:false
 									}

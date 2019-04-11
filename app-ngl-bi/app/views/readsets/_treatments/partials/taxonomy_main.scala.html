@@ -2,22 +2,22 @@
 
 <div class="row">
 	<div class="col-md-2 col-lg-2 col-xs-4">
-		<div id="panel_softwareVersion" class="panel panel-default text-center" ng-if='@("readset.treatments.taxonomy."+read+".software != null")'>
+		<div id="panel_softwareVersion" class="panel panel-default text-center" ng-if='@("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".software != null")'>
 			<div class="panel-heading">
 				<strong>@Messages("readsets.treatments.taxonomy.software") : </strong>
 			</div>
 			<div class="panel-body">
-				{{@("readset.treatments.taxonomy."+read+".software.value")}}
+				{{@("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".software.value")}}
 			</div>
 		</div>
 	</div>
 	<div class="col-md-3 col-lg-3 col-xs-4">
-		<div id="panel_databaseVersion" class="panel panel-default text-center" ng-if='@("readset.treatments.taxonomy."+read+".databaseVersion != null")'>
+		<div id="panel_databaseVersion" class="panel panel-default text-center" ng-if='@("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".databaseVersion != null")'>
 			<div class="panel-heading">
 				<strong>@Messages("readsets.treatments.taxonomy.databaseVersion") : </strong>
 			</div>
 			<div class="panel-body">
-				{{@("readset.treatments.taxonomy."+read+".databaseVersion.value")}}
+				{{@("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".databaseVersion.value")}}
 			</div>
 		</div>
 	</div>
@@ -44,7 +44,7 @@
 				<tbody>
 				<tr>
 					<td>
-						{{@("readset.treatments.taxonomy."+read+".sampleInput.value") | number}}
+						{{@("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".sampleInput.value") | number}}
 					</td>
 					<td>
 						{{sample.ncbiScientificName}}
@@ -65,7 +65,7 @@
 		  <div class="panel-heading"><strong>@Messages("readsets.treatments.taxonomy.taxonBilan")</strong></div>	
 		  <div class="treatmentOverflow">
 		 	 <label for="inputFilter">@Messages("filterTaxonBilanTaxo") </label>
-			<input type="text" ng-model="filterTaxonBilanDefault" placeholder='@Messages("filterTaxonBilanTaxo")' title='@Messages("filterTaxonBilanTaxo")' ng-value="filterTaxonBilanDefault" id="inputFilter">
+			<input type="text" ng-model="filterTaxonBilanDefault" placeholder='@Messages("filterTaxonBilanTaxo")' title='@Messages("filterTaxonBilanTaxo")' ng-value="filterTaxonBilanDefault" ng-change="setFilterTaxonBilanDefault(filterTaxonBilanDefault)" id="inputFilter">
 		 	<table class="table table-condensed table-hover table-bordered">
 			<thead>							
 			<tr>
@@ -81,14 +81,14 @@
 			</tr>
 			</thead>
 			<tbody>
-			<tr ng-repeat='obj in @("readset.treatments.taxonomy."+read+".taxonBilan.value")' ng-if="obj.percent>filterTaxonBilanDefault">
+			<tr ng-repeat='obj in @("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".taxonBilan.value")|orderBy:"nbSeq":true' ng-if="obj.percent>filterTaxonBilanDefault">
 				<td>									
 					 <a href="{{ncbiUrl + obj.taxon.replace(' ','+') }}" target="_blank">{{obj.taxon}}</a>									
 				</td>
 				<td>
 					 {{obj.nbSeq | number}}													
 				</td>
-				<td ng-class="highLight('treatments.taxonomy' + @(read) + '.taxonBilan.value|filter:\''+obj.taxon+'\'|sum:\'percent\'')">
+				<td ng-class="highLight('treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].' + @(read) + '.taxonBilan.value|filter:\''+obj.taxon+'\'|sum:\'percent\'')">
 					{{ obj.percent | number:2}} @Messages("unit.percent")												
 				</td>
 			</tr>
@@ -115,14 +115,14 @@
 				</tr>					
 				</thead>
 				<tbody>
-				<tr ng-repeat='obj in @("readset.treatments.taxonomy."+read+".divisionBilan.value")'>
+				<tr ng-repeat='obj in @("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".divisionBilan.value")|orderBy:"nbSeq":true'>
 					<td>							
 						 {{obj.division}}
 					</td>
 					<td>
 						 {{obj.nbSeq | number}}												
 					</td>
-					<td ng-class="highLight('treatments.taxonomy' + @(read) + '.divisionBilan.value|filter:\''+obj.division+'\'|sum:\'percent\'')">
+					<td ng-class="highLight('treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].' + @(read) + '.divisionBilan.value|filter:\''+obj.division+'\'|sum:\'percent\'')">
 						 {{ obj.percent | number:2}} @Messages("unit.percent")												
 					</td>
 				</tr>
@@ -147,14 +147,14 @@
 			</tr>					
 			</thead>
 			<tbody>	
-			<tr ng-repeat='obj in @("readset.treatments.taxonomy."+read+".keywordBilan.value")'>	
+			<tr ng-repeat='obj in @("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+ read+".keywordBilan.value")|orderBy:"nbSeq":true'>	
 				<td>
 					 {{obj.keyword}}							
 				</td>
 				<td>
 					 {{obj.nbSeq | number}}												
 				</td>
-				<td ng-class="highLight('treatments.taxonomy' + @(read) + '.keywordBilan.value|filter:\''+obj.keyword+'\'|sum:\'percent\'')">
+				<td ng-class="highLight('treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].' + @(read) + '.keywordBilan.value|filter:\''+obj.keyword+'\'|sum:\'percent\'')">
 					 {{ obj.percent | number:2}} @Messages("unit.percent")			
 				</td>
 			</tr>
@@ -165,13 +165,13 @@
 	</div>
 	
 	<div class="col-md-4 col-lg-4">
-		<div ng-if='@("readset.treatments.taxonomy."+read+".taxonBilanMitochondrion") != null' >
+		<div ng-if='@("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".taxonBilanMitochondrion") != null' >
 		@taxonomy_main_taxon("taxonBilanMitochondrion","filterTaxonBilanMitochondrion",read)	
 		</div>
-		<div ng-if='@("readset.treatments.taxonomy."+read+".taxonBilanPlastid") != null' >
+		<div ng-if='@("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".taxonBilanPlastid") != null' >
 		@taxonomy_main_taxon("taxonBilanPlastid","filterTaxonBilanPlastid",read)	
 		</div>
-		<div ng-if='@("readset.treatments.taxonomy."+read+".taxonBilanContamination") != null' >
+		<div ng-if='@("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".taxonBilanContamination") != null' >
 		@taxonomy_main_taxon("taxonBilanContamination","filtertaxonBilanContamination",read)	
 		</div>
 	</div>

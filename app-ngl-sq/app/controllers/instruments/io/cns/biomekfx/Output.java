@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import controllers.instruments.io.cns.biomekfx.tpl.txt.normalisation_post_pcr_x_to_plate;
 import controllers.instruments.io.cns.biomekfx.tpl.txt.normalisation_x_to_plate;
 import controllers.instruments.io.cns.biomekfx.tpl.txt.x_to_plate;
+import controllers.instruments.io.cns.biomekfx.tpl.txt.x_to_plate_no_calcul;
 //import controllers.instruments.io.cns.tecanevo100.SampleSheetPoolLine;
 import controllers.instruments.io.utils.AbstractOutput;
 import controllers.instruments.io.utils.File;
@@ -24,7 +25,7 @@ import validation.ContextValidation;
 public class Output extends AbstractOutput {
 
 	@Override
-	public File generateFile(Experiment experiment,ContextValidation contextValidation) throws Exception {
+	public File generateFile(Experiment experiment, ContextValidation contextValidation) throws Exception {
 		String type = (String)contextValidation.getObject("type");
 		
 		String content = null;
@@ -46,7 +47,9 @@ public class Output extends AbstractOutput {
 			content = OutputHelper.format(x_to_plate.render(getPlateSampleSheetLines(experiment, "tube")).body());
 		} else if ("plates-to-plate".equals(type)) {
 			content = OutputHelper.format(x_to_plate.render(getPlateSampleSheetLines(experiment, "plate")).body());
-		} else {
+		} else if("plates-to-plate-nocalcul".equals(type)){
+			content = OutputHelper.format(x_to_plate_no_calcul.render(getPlateSampleSheetLines(experiment, "plate")).body());
+		}else {
 			//rna-prep; pcr-purif; normalization-and-pooling a venir.....
 			throw new RuntimeException("Biomek-FX sampleSheet io combination not managed : "+experiment.instrument.inContainerSupportCategoryCode+" / "+experiment.instrument.outContainerSupportCategoryCode);
 		}
@@ -55,6 +58,8 @@ public class Output extends AbstractOutput {
 			suffix="_norm";
 		}else if ("normalisation-post-pcr".equals(type)){
 			suffix="_norm_post_pcr";
+		}else if("plates-to-plate-nocalcul".equals(type)){
+			suffix="_no_norm";
 		}
 		File file = new File(getFileName(experiment)+suffix+".csv", content);
 		return file;

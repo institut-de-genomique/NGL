@@ -22,11 +22,15 @@ rule "Set good project code for total-RNA"
 			$outputContainerUsed.experimentProperties.put("projectCode",outputProjectCode);
 		}
 		
-		if("BWN".equals($inputProjectCode)){
-			outputProjectCode.value = "BWN";
+		MapParameter mapping = (MapParameter)MongoDBDAO.findByCode(InstanceConstants.PARAMETER_COLL_NAME, Parameter.class,"rna-extraction-mapping-rules");
+		
+		if(mapping.map.containsKey($inputProjectCode)){
+			outputProjectCode.value = mapping.map.get($inputProjectCode);
 		}else{
+			Logger.error("DNA extraction mapping not defined for project "+$inputProjectCode);
 			outputProjectCode.value = null;
 		}
+		
 		
 		Logger.debug("Input project code = "+$inputProjectCode+" / "+$outputSampleTypeCode.value+" => Output project code ="+outputProjectCode.value);
 		

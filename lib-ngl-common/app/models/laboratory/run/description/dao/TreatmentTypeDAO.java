@@ -1,4 +1,6 @@
- package models.laboratory.run.description.dao;
+package models.laboratory.run.description.dao;
+
+import static models.utils.dao.DAOException.daoAssertNotNull;
 
 import java.sql.Types;
 import java.util.Arrays;
@@ -22,11 +24,6 @@ import play.api.modules.spring.Spring;
 @Repository
 public class TreatmentTypeDAO extends AbstractDAOCommonInfoType<TreatmentType> {
 
-//	protected TreatmentTypeDAO() {
-//		super("treatment_type", TreatmentType.class, TreatmentTypeMappingQuery.class, 
-//				"SELECT distinct c.id, c.names, c.fk_common_info_type, c.fk_treatment_category, c.display_orders ",
-//						"FROM treatment_type as c "+sqlCommonInfoType, false);
-//	}
 	protected TreatmentTypeDAO() {
 		super("treatment_type", TreatmentType.class, TreatmentTypeMappingQuery.factory, 
 				"SELECT distinct c.id, c.names, c.fk_common_info_type, c.fk_treatment_category, c.display_orders ",
@@ -35,11 +32,16 @@ public class TreatmentTypeDAO extends AbstractDAOCommonInfoType<TreatmentType> {
 	
 	@Override
 	public long save(TreatmentType treatmentType) throws DAOException {	
-		if (treatmentType == null)
-			throw new DAOException("ProjectType is mandatory");
-		//Check if category exist
-		if (treatmentType.category == null || treatmentType.category.id == null)
-			throw new DAOException("TreatmentCategory is not present !!");
+//		if (treatmentType == null)
+//			throw new DAOException("ProjectType is mandatory");
+//		//Check if category exist
+//		if (treatmentType.category == null || treatmentType.category.id == null)
+//			throw new DAOException("TreatmentCategory is not present !!");
+		
+		daoAssertNotNull("treatmentType",             treatmentType);
+		daoAssertNotNull("treatmentType.category",    treatmentType.category);
+		daoAssertNotNull("treatmentType.category.id", treatmentType.category.id);
+		
 		//Add commonInfoType
 		CommonInfoTypeDAO commonInfoTypeDAO = Spring.getBeanOfType(CommonInfoTypeDAO.class);
 		treatmentType.id = commonInfoTypeDAO.save(treatmentType);
@@ -57,27 +59,26 @@ public class TreatmentTypeDAO extends AbstractDAOCommonInfoType<TreatmentType> {
 		return treatmentType.id;
 	}
 	
-	
 	@SuppressWarnings("deprecation")
 	private void insertTreatmentContexts(List<TreatmentTypeContext> contexts, Long id, boolean deleteBefore) throws DAOException {
 		if (deleteBefore) {
 			removeTreatmentContexts(id);
 		}
-		//Add contexts list		
-		if (contexts!=null && contexts.size()>0) {
+		// Add contexts list		
+		if (contexts != null && contexts.size() > 0) {
 			String sql = "INSERT INTO treatment_type_context (fk_treatment_type, fk_treatment_context, required) VALUES(?,?,?)";
-			for(TreatmentTypeContext context : contexts){
-				if(context == null || context.id == null ){
-					throw new DAOException("context is mandatory");
-				}
+			for (TreatmentTypeContext context : contexts) {
+//				if (context == null || context.id == null ) {
+//					throw new DAOException("context is mandatory");
+//				}
+				daoAssertNotNull("context",    context);
+				daoAssertNotNull("context.id", context.id);				
 				jdbcTemplate.update(sql, id, context.id, context.required);
 			}
-		}
-		else {
+		} else {
 			throw new DAOException("contexts null or empty");
 		}
 	}
-	
 	
 	@SuppressWarnings("deprecation")
 	private void removeTreatmentContexts(Long id)  throws DAOException {
@@ -85,7 +86,6 @@ public class TreatmentTypeDAO extends AbstractDAOCommonInfoType<TreatmentType> {
 		jdbcTemplate.update(sql, id);
 	}
 	
-
 	@SuppressWarnings("deprecation")
 	@Override
 	public void update(TreatmentType treatmentType) throws DAOException {
@@ -114,7 +114,6 @@ public class TreatmentTypeDAO extends AbstractDAOCommonInfoType<TreatmentType> {
 		return treatmentTypeMappingQuery.execute(id);
 	}
 	
-	
 	public List<TreatmentType> findByTreatmentCategoryNames(String...categoryNames) throws DataAccessException, DAOException {
 		String sql = sqlCommon+
 				" inner join treatment_category cat on cat.id = c.fk_treatment_category where cat.name in ("+listToParameters(Arrays.asList(categoryNames))+")";				
@@ -132,7 +131,7 @@ public class TreatmentTypeDAO extends AbstractDAOCommonInfoType<TreatmentType> {
 				+" inner join level l on l.id = pdl.fk_level"
 				+" where 1=1 ";
 		
-		if(null != levels && levels.length > 0){
+		if (levels != null && levels.length > 0){
 			parameters = ArrayUtils.addAll(parameters,levels);
 			sqlParameters = ArrayUtils.addAll(sqlParameters, listToSqlParameters(Arrays.asList(levels),"l.code", Types.VARCHAR));
 			sql += "and l.code in ("+listToParameters(Arrays.asList(levels))+")";
@@ -141,5 +140,4 @@ public class TreatmentTypeDAO extends AbstractDAOCommonInfoType<TreatmentType> {
 		return initializeMapping(sql, (SqlParameter[])sqlParameters).execute(parameters);
 	}
 	
-
 }

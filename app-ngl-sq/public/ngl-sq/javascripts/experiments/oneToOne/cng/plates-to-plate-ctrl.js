@@ -1,5 +1,5 @@
-angular.module('home').controller('CNGPlatesToPlateCtrl',['$scope' ,'$http','$parse', 'atmToSingleDatatable',
-                                                       function($scope, $http,$parse,atmToSingleDatatable) {
+angular.module('home').controller('CNGPlatesToPlateCtrl',['$scope' ,'$http','$parse', 'mainService', 'atmToSingleDatatable',
+                                                       function($scope, $http, $parse, mainService, atmToSingleDatatable) {
 	var datatableConfig = {
 			name:$scope.experiment.typeCode.toUpperCase(),
 			columns:[			  
@@ -81,7 +81,6 @@ angular.module('home').controller('CNGPlatesToPlateCtrl',['$scope' ,'$http','$pa
 			        	 "position":5,
 			        	 "extraHeaders":{0:Messages("experiments.inputs")}
 			         },
-			        
 					 {
 			        	 "header":Messages("containers.table.concentration.unit"),
 			        	 "property":"inputContainerUsed.concentration.unit",
@@ -92,7 +91,6 @@ angular.module('home').controller('CNGPlatesToPlateCtrl',['$scope' ,'$http','$pa
 			        	 "position":5.1,
 			        	 "extraHeaders":{0:Messages("experiments.inputs")}
 			         },
-			        
 			         {
 			        	 "header":function(){return Messages("containers.table.volume") + " (µL)"},
 			        	 "property":"inputContainerUsed.volume.value",
@@ -113,7 +111,6 @@ angular.module('home').controller('CNGPlatesToPlateCtrl',['$scope' ,'$http','$pa
 			        	 "position":6.1,
 			        	 "extraHeaders":{0:Messages("experiments.inputs")}
 			         },
-			        
 					 {
 			        	 "header":Messages("containers.table.quantity.unit"),
 			        	 "property":"inputContainerUsed.quantity.unit",
@@ -165,6 +162,7 @@ angular.module('home').controller('CNGPlatesToPlateCtrl',['$scope' ,'$http','$pa
 			        	 "position":52,
 			        	 "extraHeaders":{0:Messages("experiments.outputs")}
 			         },
+			         /* NGL-2115 mises en commentaire car pas utilisees
 			         {
 			        	 "header":Messages("containers.table.quantity"),
 			        	 "property":"outputContainerUsed.quantity.value",
@@ -185,11 +183,11 @@ angular.module('home').controller('CNGPlatesToPlateCtrl',['$scope' ,'$http','$pa
 			        	 "position":54,
 			        	 "extraHeaders":{0:Messages("experiments.outputs")}
 			         },
-			         {
-			 			// barcode plaque sortie == support Container used code... faut Used
+			         */
+			         { // barcode plaque sortie == support Container used code... faut Used
 			 			"header" : Messages("containers.table.support.name"),
 			 			"property" : "outputContainerUsed.locationOnContainerSupport.code",
-			 			"edit" : true,
+			 			"edit" : false, // NGL-2115 saisie sur la ligne dediée...
 			 			"hide" : true,
 			 			"type" : "text",
 			 			"position" : 400,
@@ -197,8 +195,7 @@ angular.module('home').controller('CNGPlatesToPlateCtrl',['$scope' ,'$http','$pa
 			 				0 : Messages("experiments.outputs")
 			 			}
 			 		},
-			 		{
-			 			// Ligne
+			 		{// Ligne
 			 			"header" : Messages("containers.table.support.line"),
 			 			"property" : "outputContainerUsed.locationOnContainerSupport.line",
 			 			"edit" : true,
@@ -215,8 +212,6 @@ angular.module('home').controller('CNGPlatesToPlateCtrl',['$scope' ,'$http','$pa
 			 		},
 			 		{// colonne
 			 			"header" : Messages("containers.table.support.column"),
-			 			// astuce GA: pour pouvoir trier les colonnes dans l'ordre naturel
-			 			// forcer a numerique.=> type:number, property: *1
 			 			"property" : "outputContainerUsed.locationOnContainerSupport.column",
 			 			"edit" : true,
 			 			"choiceInList":true,
@@ -231,7 +226,7 @@ angular.module('home').controller('CNGPlatesToPlateCtrl',['$scope' ,'$http','$pa
 			 				0 : Messages("experiments.outputs")
 			 			}
 			 		},	         
-			         {
+			        {
 			        	 "header":Messages("containers.table.stateCode"),
 			        	 "property":"outputContainer.state.code | codes:'state'",
 			        	 "order":true,
@@ -240,8 +235,8 @@ angular.module('home').controller('CNGPlatesToPlateCtrl',['$scope' ,'$http','$pa
 			        	 "type":"text",
 			        	 "position":500,
 			        	 "extraHeaders":{0:Messages("experiments.outputs")}
-			         },
-			         {
+			        },
+			        {
 			        	 "header":Messages("containers.table.storageCode"),
 			        	 "property":"outputContainerUsed.locationOnContainerSupport.storageCode",
 			        	 "order":true,
@@ -250,8 +245,8 @@ angular.module('home').controller('CNGPlatesToPlateCtrl',['$scope' ,'$http','$pa
 			        	 "type":"text",
 			        	 "position":600,
 			        	 "extraHeaders":{0:Messages("experiments.outputs")}
-				     }
-			         ],
+				    }
+			        ],
 			compact:true,
 			pagination:{
 				active:false
@@ -273,7 +268,10 @@ angular.module('home').controller('CNGPlatesToPlateCtrl',['$scope' ,'$http','$pa
 	        	withoutEdit: true,
 	        	showButton:false,
 	        	changeClass:false,
-	        	mode:'local'
+	        	mode:'local',
+		        callback:function(datatable){
+		        		copyContainerSupportCodeAndStorageCodeToDT(datatable);
+		        }
 			},
 			hide:{
 				active:true
@@ -310,6 +308,7 @@ angular.module('home').controller('CNGPlatesToPlateCtrl',['$scope' ,'$http','$pa
 			}
 			
 	};
+	
 	var updateATM = function(experiment){
 		if(experiment.instrument.outContainerSupportCategoryCode!=="tube"){
 			experiment.atomicTransfertMethods.forEach(function(atm){
@@ -368,9 +367,35 @@ angular.module('home').controller('CNGPlatesToPlateCtrl',['$scope' ,'$http','$pa
 	};
 	
 	$scope.$watch("experiment.instrument.outContainerSupportCategoryCode", function(){
+		// forcer le type de support en sortie
 		$scope.experiment.instrument.outContainerSupportCategoryCode = "96-well-plate";
+
 	});
 	
+	// 19/06/2018 NGL2115: 
+	var copyContainerSupportCodeAndStorageCodeToDT = function(datatable){
+
+		var dataMain = datatable.getData();
+		
+		var outputContainerSupportCode = $scope.outputContainerSupport.code;
+		var outputContainerSupportStorageCode = $scope.outputContainerSupport.storageCode;
+
+		if ( null != outputContainerSupportCode && undefined != outputContainerSupportCode){
+			for(var i = 0; i < dataMain.length; i++){
+				
+				// pas quand les boutons automatiques de choix mode colonne/ligne sont disponibles
+				// var atm = dataMain[i].atomicTransfertMethod;
+				// var newContainerCode = outputContainerSupportCode+"_"+atm.line + atm.column;
+				// $parse('outputContainerUsed.code').assign(dataMain[i],newContainerCode);
+				
+				$parse('outputContainerUsed.locationOnContainerSupport.code').assign(dataMain[i],outputContainerSupportCode);
+				
+				if( null != outputContainerSupportStorageCode && undefined != outputContainerSupportStorageCode){
+				    $parse('outputContainerUsed.locationOnContainerSupport.storageCode').assign(dataMain[i],outputContainerSupportStorageCode);
+				}
+			}
+		}
+	}
 	
 	var atmService = atmToSingleDatatable($scope, datatableConfig);
 	// defined new atomictransfertMethod
@@ -388,17 +413,69 @@ angular.module('home').controller('CNGPlatesToPlateCtrl',['$scope' ,'$http','$pa
 	atmService.defaultOutputUnit = {
 			volume : "µL"
 	};
+	
+	// copie automatique de concentration et size des inputs->outputs
 	atmService.defaultOutputValue = {
 			concentration : {copyInputContainer:true},
 			size : {copyInputContainer:true}
 	};
 	
 	atmService.experimentToView($scope.experiment, $scope.experimentType);
-	if($scope.experiment.instrument.inContainerSupportCategoryCode === "96-well-plate"){
-		$scope.messages.clear();
+	
+	// NGL-2115 ajout controles
+	// les supports d'entree ne doivent etre QUE des plaques ( meme a la main...)
+	if ( $scope.isCreationMode()){
+		// !! en mode creation $scope.experiment.atomicTransfertMethod n'est pas encore chargé=> passer par Basket (ajouter mainService dans le controller)
+		var categoryCodes = $scope.$eval("getBasket().get()|getArray:'support.categoryCode'|unique",mainService);
+		var supports = $scope.$eval("getBasket().get()|getArray:'support.code'|unique",mainService);
+		
+		if ( ((categoryCodes.length === 1) && ( categoryCodes[0] ==="tube")) || (categoryCodes.length > 1) ){
+			                          // only tubes                                      mixte
+			$scope.messages.setError(Messages('experiments.input.error.only-plates')); 
+			
+			$scope.experiment.instrument.typeCode =null; // pas suffisant pour bloquer la page..
+			$scope.atmService = null; //empeche la page de se charger...
+		} else {
+			// plaques uniqt mais il y a une limite  pour le Janus
+			if ( ($scope.experiment.instrument.typeCode === 'janus') && (supports.length > 8 )){ 
+				$scope.messages.setError(Messages("experiments.input.error.maxSupports", 8) + " avec l instrument choisi");
+				$scope.atmService = null; //empeche la page de se charger...
+			}else{
+				$scope.messages.clear();
+				$scope.atmService = atmService;
+			}
+			
+			// verifier qu'il n'y a pas plus de 96 inputs 
+			if ( $scope.isCreationMode() && $scope.mainService.getBasket().length() > 96 ){ 
+				$scope.messages.setError(Messages("experiments.input.error.maxContainers",8));
+				$scope.atmService = null; //empeche la page de se charger...
+			}else{
+				$scope.messages.clear();
+				$scope.atmService = atmService;
+			}
+		}
+	} else {
 		$scope.atmService = atmService;
-	}else{
-		$scope.messages.setError(Messages('experiments.input.error.only-plates'));					
 	}
+	
+	// NGL-2115 demande de ligne pour saisie plaque output ( et son stockage)
+	$scope.outputContainerSupport = { code : null , storageCode : null};	
+	
+	if ( undefined !== $scope.experiment.atomicTransfertMethods[0]) { 
+		 $scope.outputContainerSupport.code=$scope.experiment.atomicTransfertMethods[0].outputContainerUseds[0].locationOnContainerSupport.code;
+		 //console.log("previous code: "+ $scope.outputContainerSupport.code);
+	}
+	if ( undefined !== $scope.experiment.atomicTransfertMethods[0]) {
+		$scope.outputContainerSupport.storageCode=$scope.experiment.atomicTransfertMethods[0].outputContainerUseds[0].locationOnContainerSupport.storageCode;
+		//console.log("previous storageCode: "+ $scope.outputContainerSupport.storageCode);
+	}
+	
+	// NGL-2115 ajout FDR pour Janus
+	$scope.setAdditionnalButtons([{
+		isDisabled : function(){return $scope.isCreationMode();},
+		isShow:function(){return ($scope.experiment.instrument.typeCode === 'janus')}, // FDS ne pas afficher bouton pour "hand"
+		click: $scope.fileUtils.generateSampleSheet,
+		label:Messages("experiments.sampleSheet") 
+	}]);
 	
 }]);

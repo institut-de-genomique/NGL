@@ -9,11 +9,11 @@ import views.html.analyses.treatments;
 
 import javax.inject.Inject;
 
+import controllers.NGLController;
 import fr.cea.ig.authentication.Authenticated;
 import fr.cea.ig.authorization.Authorized;
 import fr.cea.ig.lfw.Historized;
 import fr.cea.ig.ngl.NGLApplication;
-import fr.cea.ig.ngl.NGLController;
 import fr.cea.ig.ngl.support.NGLJavascript;
 
 
@@ -78,8 +78,8 @@ public class Analyses extends NGLController implements NGLJavascript { // NGLBas
   	    				controllers.analyses.api.routes.javascript.Analyses.get(),
   	    				controllers.analyses.api.routes.javascript.Analyses.list(),
   	    				controllers.analyses.api.routes.javascript.Analyses.list(),
-  	    				controllers.analyses.api.routes.javascript.Analyses.state(),
-  	    				controllers.analyses.api.routes.javascript.Analyses.stateBatch(),
+  	    				controllers.analyses.api.routes.javascript.Analyses.updateState(),
+  	    				controllers.analyses.api.routes.javascript.Analyses.updateStateBatch(),
   	    				controllers.analyses.api.routes.javascript.Analyses.valuation(),
   	    				controllers.analyses.api.routes.javascript.Analyses.valuationBatch(),
   	    				controllers.analyses.api.routes.javascript.Analyses.properties(),
@@ -95,6 +95,7 @@ public class Analyses extends NGLController implements NGLJavascript { // NGLBas
   	    				controllers.projects.api.routes.javascript.Projects.list(),	    		
   	    				controllers.reporting.api.routes.javascript.ReportingConfigurations.list(),
   	    				controllers.reporting.api.routes.javascript.ReportingConfigurations.get(),
+  	    				controllers.reporting.api.routes.javascript.FilteringConfigurations.list(),
   	    				controllers.commons.api.routes.javascript.Users.list(),
   	    				controllers.resolutions.api.routes.javascript.Resolutions.list(),
   	    				controllers.readsets.tpl.routes.javascript.ReadSets.get());	  	      

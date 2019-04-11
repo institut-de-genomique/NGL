@@ -273,12 +273,12 @@ angular.module('home').controller('DnaExtractionCtrl',['$scope', '$parse', '$fil
 	});
 
 	//Met à jour selon selection de l'instrument
-	$scope.$watch("experiment.instrument.outContainerSupportCategoryCode", function(newValue, oldValue){
-		$scope.experiment.instrument.outContainerSupportCategoryCode = "96-well-plate";		
-	});	
+	//$scope.$watch("experiment.instrument.outContainerSupportCategoryCode", function(newValue, oldValue){
+	//	$scope.experiment.instrument.outContainerSupportCategoryCode = "96-well-plate";		
+	//});	
 
 	//Initialise = valeur par défaut
-	$scope.experiment.instrument.outContainerSupportCategoryCode = "96-well-plate";
+	//$scope.experiment.instrument.outContainerSupportCategoryCode = "96-well-plate";
 
 	//Init		
 	if($scope.experiment.instrument.inContainerSupportCategoryCode!=="tube"){

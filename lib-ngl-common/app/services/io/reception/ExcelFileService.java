@@ -15,30 +15,38 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 
-import fr.cea.ig.play.migration.NGLContext;
 import models.laboratory.common.instance.property.PropertyFileValue;
 import models.laboratory.reception.instance.ReceptionConfiguration;
-import play.Logger;
 import services.io.ExcelHelper;
 import validation.ContextValidation;
 
 public class ExcelFileService extends FileService {
 	
-	public ExcelFileService(ReceptionConfiguration configuration,
-			PropertyFileValue fileValue, ContextValidation contextValidation, NGLContext ctx) {
-		super(configuration, fileValue, contextValidation, ctx);		
+	private static final play.Logger.ALogger logger = play.Logger.of(ExcelFileService.class);
+	
+//	public ExcelFileService(ReceptionConfiguration configuration,
+//			PropertyFileValue fileValue, ContextValidation contextValidation, NGLContext ctx) {
+//		super(configuration, fileValue, contextValidation, ctx);		
+//	}
+
+//	public ExcelFileService(ReceptionConfiguration configuration, PropertyFileValue fileValue, ContextValidation contextValidation, NGLApplication app) {
+//		super(configuration, fileValue, contextValidation, app);		
+//	}
+
+	public ExcelFileService(ReceptionConfiguration configuration, PropertyFileValue fileValue, ContextValidation contextValidation) {
+		super(configuration, fileValue, contextValidation);		
 	}
 
 	@Override
 	public void analyse() {
-		try{
+		try {
 			//compute header label and column position
 			Sheet sheet = getSheet(0);
 			this.headerByIndex = convertRow(sheet.getRow(0));
 			updateHeaderConfiguration();
-			if(null == headerByIndex){
-				contextValidation.addErrors("Headers", "not found");
-			}else{
+			if (headerByIndex == null) {
+				contextValidation.addError("Headers", "not found");
+			} else {
 				Iterator<Row> iti = sheet.rowIterator();
 				iti.next();
 				while(iti.hasNext()){
@@ -56,18 +64,17 @@ public class ExcelFileService extends FileService {
 					saveObjects();
 				}				
 			}
-		}catch(Throwable e){
-			Logger.error("Error import file "+e.getMessage(),e);
-			contextValidation.addErrors("Exception contact your administrator", e.getMessage());
+//		} catch(Throwable e) {
+		} catch(Exception e) {
+			logger.error("Error import file "+e.getMessage(),e);
+			contextValidation.addError("Exception contact your administrator", e.getMessage());
 		}
 	}
 
-	
-
 	/**
-	 * return map for row with at least one cell not empty
-	 * @param row
-	 * @return
+	 * Return map for row with at least one cell not empty.
+	 * @param  row row
+	 * @return map 
 	 */
 	private Map<Integer, String> convertRow(Row row) {
 		Iterator<Cell> iti = row.cellIterator();
@@ -78,16 +85,16 @@ public class ExcelFileService extends FileService {
 			int columnIndex = cell.getColumnIndex();
 			String value = ExcelHelper.convertToStringValue(cell);
 			
-			if(StringUtils.isNotBlank(value)){
+			if (StringUtils.isNotBlank(value)) {
 				value = value.replaceAll("\u00A0"," ").trim();
 				isBlankLine = false;
 				rowMap.put(columnIndex, value);
 			}
 						
 		}
-		if(!isBlankLine){
+		if (!isBlankLine) {
 			return rowMap;
-		}else{
+		} else {
 			return null;
 		}
 	}
@@ -99,6 +106,5 @@ public class ExcelFileService extends FileService {
 		Sheet sheet = wb.getSheetAt(sheetNumber);
 		return sheet;
 	}
-	
 	
 }

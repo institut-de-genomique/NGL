@@ -2,11 +2,12 @@ package controllers.projects.tpl;
 
 import javax.inject.Inject;
 
+import controllers.NGLController;
 import fr.cea.ig.authentication.Authenticated;
 import fr.cea.ig.authorization.Authorized;
 import fr.cea.ig.lfw.Historized;
 import fr.cea.ig.ngl.NGLApplication;
-import fr.cea.ig.ngl.NGLController;
+//import fr.cea.ig.ngl.NGLConfig;
 import fr.cea.ig.ngl.support.NGLJavascript;
 //import play.Routes;
 // import play.routing.JavaScriptReverseRouter;
@@ -25,11 +26,13 @@ public class Projects extends NGLController
                      implements NGLJavascript {
 	
 	private home home;
+//	private NGLConfig config;
 	
 	@Inject
 	public Projects(NGLApplication app, home home) {
 		super(app);
 		this.home = home;
+//		this.config=app.nglConfig();
 	}
 	
 	@Authenticated
@@ -51,6 +54,8 @@ public class Projects extends NGLController
 	}
 
 	public Result details() {
+		//TODO EJACOBY AD
+		//return ok(details.render(config.getActiveDirectoryDefaultGroupAccess(), config.getActiveDirectoryOrganozationUnitUsersName()));
 		return ok(details.render());
 	}
 		
@@ -66,9 +71,17 @@ public class Projects extends NGLController
   	    				controllers.commons.api.routes.javascript.CommonInfoTypes.list(),
   	    				controllers.commons.api.routes.javascript.Values.list(),
   	    				controllers.commons.api.routes.javascript.States.list(),
+  	    				//TODO EJACOBY AD
+  	    				//controllers.commons.api.routes.javascript.Users.list(),
   	    				controllers.projects.api.routes.javascript.ProjectTypes.list(),
   	    				controllers.projects.api.routes.javascript.ProjectCategories.list(),
   	    				controllers.projects.api.routes.javascript.UmbrellaProjects.list());
+  	    				//TODO EJACOBY AD
+  	    				/*controllers.projects.api.routes.javascript.MembersProjects.update(),
+  	    				//controllers.projects.api.routes.javascript.MembersProjects.get(),
+  	    				//controllers.projects.api.routes.javascript.UserMembersProjects.get(),
+  	    				//controllers.projects.api.routes.javascript.UserMembersProjects.list(),
+  	    				//controllers.authorisation.routes.javascript.User.get());*/
   	  }
 	
 //	public Result javascriptRoutes() {

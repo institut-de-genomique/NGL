@@ -2,7 +2,7 @@ package workflows.container;
 
 import static validation.common.instance.CommonValidationHelper.FIELD_PREVIOUS_STATE_CODE;
 import static validation.common.instance.CommonValidationHelper.FIELD_STATE_CODE;
-import static validation.common.instance.CommonValidationHelper.FIELD_UPDATE_CONTAINER_SUPPORT_STATE;
+import static ngl.refactoring.state.ContainerStateNames.*;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -13,181 +13,296 @@ import org.mongojack.DBUpdate;
 import com.google.inject.Provider;
 
 import fr.cea.ig.MongoDBDAO;
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import models.laboratory.common.instance.State;
 import models.laboratory.container.instance.Container;
 import models.laboratory.container.instance.ContainerSupport;
 import models.laboratory.experiment.description.ExperimentCategory;
 import models.laboratory.processes.instance.Process;
 import models.utils.InstanceConstants;
+import ngl.refactoring.state.StateNames;
 import rules.services.LazyRules6Actor;
 import validation.ContextValidation;
 import validation.container.instance.ContainerValidationHelper;
-import workflows.Workflows;
 import workflows.process.ProcWorkflows;
 
+/**
+ * Container state machine implementation. 
+ */
 @Singleton
-public class ContWorkflows extends Workflows<Container> {
+public class ContWorkflows {
 
+	/**
+	 * Logger.
+	 */
+	private static final play.Logger.ALogger logger = play.Logger.of(ContWorkflows.class);
 	
-	private final LazyRules6Actor rulesActor;
+	private final LazyRules6Actor                rulesActor;
 	private final Provider<ContSupportWorkflows> contSupportWorkflows;
-	private final ProcWorkflows        procSupportWorkflows;
+	private final ProcWorkflows                  procSupportWorkflows;
 	
 	@Inject
-	public ContWorkflows(NGLContext ctx, Provider<ContSupportWorkflows> contSupportWorkflows, ProcWorkflows procSupportWorkflows) {
-		rulesActor                = ctx.rules6Actor();
+	public ContWorkflows(NGLApplication app, Provider<ContSupportWorkflows> contSupportWorkflows, ProcWorkflows procSupportWorkflows) {
+		rulesActor                = app.rules6Actor();
 		this.contSupportWorkflows = contSupportWorkflows;
 		this.procSupportWorkflows = procSupportWorkflows;
 	}
-	
-	private static final play.Logger.ALogger logger = play.Logger.of(ContWorkflows.class);
-	
-	@Override
-	public void applyPreStateRules(ContextValidation validation, Container exp, State nextState) {
-	}
 
-	@Override
-	public void applyPreValidateCurrentStateRules(ContextValidation validation, Container object) {
+	/**
+	 * Empty method.
+	 * @param validation validation context
+	 * @param container  container
+	 * @param nextState  next state
+	 */
+	private void applyPreStateRules(ContextValidation validation, Container container, State nextState) {
 	}
-	
-	@Override
-	public void applyPostValidateCurrentStateRules(ContextValidation validation, Container object) {
-	}
-	
-	@Override
-	public void applySuccessPostStateRules(ContextValidation validation, Container container) {
+		
+//	private void applySuccessPostStateRules(ContextValidation validation, Container container, String context) {
+//		// purg when pass to IS, UA or IW-P
+//		if (IS.equals(container.state.code) || UA.equals(container.state.code) || IW_P.equals(container.state.code)) {
+//			// GA improve the extraction of fromTransformationTypeCodes
+//			if (container.fromTransformationTypeCodes != null && container.fromTransformationTypeCodes.size() == 1) {
+//				String code = container.fromTransformationTypeCodes.iterator().next();
+//				if (code.startsWith("ext")){
+//					container.fromTransformationTypeCodes = null;
+//				}
+//			} else if (container.fromTransformationTypeCodes != null && container.fromTransformationTypeCodes.size() > 1) {
+//				logger.error("several fromTransformationTypeCodes not managed");
+//			}
+//			// put all process to F when pass container A-* to IS, UA or IW-P (only in manual mode not with dispatch popup)
+//			String previousStateCode = (String)validation.getObject(FIELD_PREVIOUS_STATE_CODE);
+//			if (previousStateCode.startsWith("A")) {
+//				validation.addKeyToRootKeyName("processes");
+//				
+//				// reset to IW-C all process that are initiate by the container with no experiment
+//				MongoDBDAO.find(InstanceConstants.PROCESS_COLL_NAME, Process.class, 
+//						        DBQuery.in("code", container.processCodes)
+//						               .is("state.historical.code", StateNames.IW_C).notExists("experimentCodes"))
+//				          .cursor
+//				          .forEach(process -> {
+//				        	  validation.addKeyToRootKeyName(process.code);
+//				        	  procSupportWorkflows.setState(validation, process, new State(StateNames.IW_C, validation.getUser()));
+//				        	  validation.removeKeyFromRootKeyName(process.code);
+//				          });
+//				
+//				
+//				// closed all process that are linked with the container
+//				MongoDBDAO.find(InstanceConstants.PROCESS_COLL_NAME, Process.class, 
+//						        DBQuery.in("code", container.processCodes)
+//							           .or(DBQuery.notEquals("state.historical.code", StateNames.IW_C), 
+//							        	   DBQuery.is("state.historical.code", StateNames.IW_C).exists("experimentCodes.0")))
+//				          .cursor
+//				          .forEach(process -> {
+//				        	  validation.addKeyToRootKeyName(process.code);
+//				        	  procSupportWorkflows.setState(validation, process, new State(StateNames.F, validation.getUser()));
+//				        	  validation.removeKeyFromRootKeyName(process.code);
+//				          });
+//				validation.removeKeyFromRootKeyName("processes");
+//			}			
+//			container.processCodes     = null;
+//			container.processTypeCodes = null;
+//			container.contents.parallelStream().forEach(c -> { c.processProperties = null; c.processComments = null; });
+//			MongoDBDAO.update(InstanceConstants.CONTAINER_COLL_NAME, container);
+//		}
+//		
+//		if (Boolean.TRUE.equals(validation.getObject(FIELD_UPDATE_CONTAINER_SUPPORT_STATE))) {
+//			ContainerSupport containerSupport = MongoDBDAO.findByCode(InstanceConstants.CONTAINER_SUPPORT_COLL_NAME, ContainerSupport.class,container.support.code);
+//			contSupportWorkflows.get().setStateFromContainers(validation, containerSupport, context);
+//		}
+//		callWorkflowRules(validation, container);
+//		
+//		if (validation.hasErrors()) {
+//			// TODO: probably use : validation.displayErrors(logger);
+//			logger.error("Problem on ContWorkflow.applySuccessPostStateRules : " + validation.getErrors().toString());
+//		}
+//	}
+
+	private void applySuccessPostStateRules(ContextValidation validation, Container container, String context, String previousStateCode, boolean updateContainerSupport) {
 		// purg when pass to IS, UA or IW-P
-		if ("IS".equals(container.state.code) || "UA".equals(container.state.code) || "IW-P".equals(container.state.code)) {
-			
-			//TODO GA improve the extraction of fromTransformationTypeCodes
-
-			if (null != container.fromTransformationTypeCodes && container.fromTransformationTypeCodes.size() == 1) {
+		if (IS.equals(container.state.code) || UA.equals(container.state.code) || IW_P.equals(container.state.code)) {
+			// GA improve the extraction of fromTransformationTypeCodes
+			if (container.fromTransformationTypeCodes != null && container.fromTransformationTypeCodes.size() == 1) {
 				String code = container.fromTransformationTypeCodes.iterator().next();
-				if (code.startsWith("ext")){
+				if (code.startsWith("ext")) {
 					container.fromTransformationTypeCodes = null;
 				}
-			} else if (null != container.fromTransformationTypeCodes && container.fromTransformationTypeCodes.size() > 1) {
+			} else if (container.fromTransformationTypeCodes != null && container.fromTransformationTypeCodes.size() > 1) {
 				logger.error("several fromTransformationTypeCodes not managed");
 			}
-			//put all process to F when pass container A-* to IS, UA or IW-P
-			String previousStateCode = (String)validation.getObject(FIELD_PREVIOUS_STATE_CODE);
-			if(previousStateCode.startsWith("A")){
+			// put all process to F when pass container A-* to IS, UA or IW-P (only in manual mode not with dispatch popup)
+			if (previousStateCode.startsWith("A")) {
 				validation.addKeyToRootKeyName("processes");
-				MongoDBDAO.find(InstanceConstants.PROCESS_COLL_NAME, Process.class, DBQuery.in("code", container.processCodes))
-				.cursor.forEach(process -> {
-					validation.addKeyToRootKeyName(process.code);
-					procSupportWorkflows.setState(validation, process, getNewState("F", validation.getUser()));
-					validation.removeKeyFromRootKeyName(process.code);
-				});
+				
+				// reset to IW-C all process that are initiate by the container with no experiment
+				MongoDBDAO.find(InstanceConstants.PROCESS_COLL_NAME, Process.class, 
+						        DBQuery.in("code", container.processCodes)
+						               .is("state.historical.code", StateNames.IW_C)
+						               .notExists("experimentCodes"))
+				          .cursor
+				          .forEach(process -> {
+				        	  validation.addKeyToRootKeyName(process.code);
+				        	  procSupportWorkflows.setState(validation, process, new State(StateNames.IW_C, validation.getUser()));
+				        	  validation.removeKeyFromRootKeyName(process.code);
+				          });
+				
+				// closed all process that are linked with the container
+				MongoDBDAO.find(InstanceConstants.PROCESS_COLL_NAME, Process.class, 
+						        DBQuery.in("code", container.processCodes)
+							           .or(DBQuery.notEquals("state.historical.code", StateNames.IW_C), 
+							        	   DBQuery.is("state.historical.code", StateNames.IW_C)
+							        	          .exists("experimentCodes.0")))
+				          .cursor
+				          .forEach(process -> {
+				        	  validation.addKeyToRootKeyName(process.code);
+				        	  procSupportWorkflows.setState(validation, process, new State(StateNames.F, validation.getUser()));
+				        	  validation.removeKeyFromRootKeyName(process.code);
+				          });
 				validation.removeKeyFromRootKeyName("processes");
-			}
-			
-			container.processCodes = null;
+			}			
+			container.processCodes     = null;
 			container.processTypeCodes = null;
-			container.contents.parallelStream().forEach(c -> {c.processProperties = null;c.processComments = null;});
+			container.contents.parallelStream().forEach(c -> { c.processProperties = null; c.processComments = null; });
 			MongoDBDAO.update(InstanceConstants.CONTAINER_COLL_NAME, container);
-			
-			
-			
-			/*
-			if(unsetFromExperimentTypeCodes){
-				MongoDBDAO.update(InstanceConstants.CONTAINER_COLL_NAME, Container.class,
-						DBQuery.is("code",container.code), DBUpdate.unset("processCodes")
-																	.unset("processTypeCodes")
-																	.unset("fromTransformationTypeCodes"));
-			}else{
-				MongoDBDAO.update(InstanceConstants.CONTAINER_COLL_NAME, Container.class,
-						DBQuery.is("code",container.code), DBUpdate.unset("processCodes")
-																.unset("processTypeCodes"));
-			}
-			*/		
 		}
 		
-		if (Boolean.TRUE.equals(validation.getObject(FIELD_UPDATE_CONTAINER_SUPPORT_STATE))) {
+//		if (Boolean.TRUE.equals(validation.getObject(FIELD_UPDATE_CONTAINER_SUPPORT_STATE))) {
+		if (updateContainerSupport) {
 			ContainerSupport containerSupport = MongoDBDAO.findByCode(InstanceConstants.CONTAINER_SUPPORT_COLL_NAME, ContainerSupport.class,container.support.code);
-			contSupportWorkflows.get().setStateFromContainers(validation, containerSupport);
+			contSupportWorkflows.get().setStateFromContainers(validation, containerSupport, context);
 		}
-		callWorkflowRules(validation,container);
+		callWorkflowRules(validation, container);
 		
-		if(validation.hasErrors()){
-			logger.error("Problem on ContWorkflow.applySuccessPostStateRules : "+validation.errors.toString());
+		if (validation.hasErrors()) {
+			// TODO: probably use : validation.displayErrors(logger);
+			logger.error("Problem on ContWorkflow.applySuccessPostStateRules : " + validation.getErrors().toString());
 		}
 	}
 	
-
-	public void callWorkflowRules(ContextValidation validation, Container container) {
+	private void callWorkflowRules(ContextValidation validation, Container container) {
 		rulesActor.tellMessage("workflow", container, validation);
 	}
 	
-	@Override
-	public void applyErrorPostStateRules(ContextValidation validation,
-			Container container, State nextState) {
-		// TODO Auto-generated method stub
-		if(validation.hasErrors()){
-			logger.error("Problem on ContWorkflow.applyErrorPostStateRules : "+validation.errors.toString());
+	/**
+	 * Log errors.
+	 * @param validation validation context
+	 * @param container  container
+	 * @param nextState  next state
+	 */
+	private void applyErrorPostStateRules(ContextValidation validation, Container container, State nextState) {
+		if (validation.hasErrors()) {
+			// TODO: probably use : validation.displayErrors(logger);
+			logger.error("Problem on ContWorkflow.applyErrorPostStateRules : " + validation.getErrors().toString());
 		}
 	}
 
-	@Override
-	public void setState(ContextValidation contextValidation, Container container,
-			State nextState) {
-		
-		ContextValidation currentCtxValidation = new ContextValidation(contextValidation.getUser());
-		currentCtxValidation.setContextObjects(contextValidation.getContextObjects());
-		currentCtxValidation.setUpdateMode();
-		
-		ContainerValidationHelper.validateNextState(container, nextState, currentCtxValidation);
+	@Deprecated
+	public void setState(ContextValidation contextValidation, Container container, State nextState) {
+//		
+////		ContextValidation currentCtxValidation = new ContextValidation(contextValidation.getUser());
+////		currentCtxValidation.setUpdateMode();
+//		ContextValidation currentCtxValidation = ContextValidation.createUpdateContext(contextValidation.getUser());
+//		currentCtxValidation.setContextObjects(contextValidation.getContextObjects());
+//		
+//		ContainerValidationHelper.validateNextState(container, nextState, currentCtxValidation);
+//		if (!currentCtxValidation.hasErrors() && !nextState.code.equals(container.state.code)) {
+//			applyPreStateRules(currentCtxValidation, container, nextState);
+//			currentCtxValidation.putObject(FIELD_PREVIOUS_STATE_CODE , container.state.code);
+//			currentCtxValidation.putObject(FIELD_STATE_CODE , nextState.code);
+//			//TODO GA improve performance to validate only field impacted by state
+//			//container.validate(currentCtxValidation); //in comment because no field are state dependant
+//			if(!currentCtxValidation.hasErrors()){
+//				boolean goBack = goBack(container.state, nextState);
+//				// if (goBack) logger.debug(container.code+" : back to the workflow. "+container.state.code +" -> "+nextState.code);
+//				if (goBack) logger.debug("{} : back to the workflow. {} -> {}", container.code, container.state.code, nextState.code);
+//				
+//				container.state = updateHistoricalNextState(container.state, nextState);
+//				
+//				MongoDBDAO.update(InstanceConstants.CONTAINER_COLL_NAME,  Container.class, 
+//						DBQuery.is("code", container.code),
+//						DBUpdate.set("state", container.state).set("traceInformation", container.traceInformation));
+//				
+//				applySuccessPostStateRules(currentCtxValidation, container);
+//				nextState(currentCtxValidation, container);
+//			} else {
+//				applyErrorPostStateRules(currentCtxValidation, container, nextState);
+//			}
+//		}
+//		if (currentCtxValidation.hasErrors()) {
+//			contextValidation.addErrors(currentCtxValidation.getErrors());
+//		}
+		String context = contextValidation.getTypedObject(ContainerValidationHelper.FIELD_STATE_CONTAINER_CONTEXT);
+		boolean updateContainerSupport = Boolean.TRUE.equals(contextValidation.getObject(ContainerValidationHelper.FIELD_UPDATE_CONTAINER_SUPPORT_STATE));
+		setState(contextValidation, container, nextState, context, updateContainerSupport);
+	}
+	
+	@Deprecated
+	public void setState(ContextValidation contextValidation, Container container, State nextState, String context) {
+		boolean updateContainerSupport = Boolean.TRUE.equals(contextValidation.getObject(ContainerValidationHelper.FIELD_UPDATE_CONTAINER_SUPPORT_STATE));
+		setState(contextValidation, container, nextState, context, updateContainerSupport);
+	}
+	
+	/**
+	 * Change container state to the provided next state.
+	 * @param contextValidation       validation context
+	 * @param container               container             
+	 * @param nextState               next state
+	 * @param context                 context
+	 * @param updateContainerSupport update container supports ?
+	 */
+	public void setState(ContextValidation contextValidation, Container container, State nextState, String context, boolean updateContainerSupport) {
+		ContextValidation currentCtxValidation = ContextValidation.createUpdateContext(contextValidation.getUser());
+		currentCtxValidation.setContextObjects(contextValidation.getContextObjects());		
+//		ContainerValidationHelper.validateNextState(container, nextState, currentCtxValidation);
+		ContainerValidationHelper.validateNextState(currentCtxValidation, container, nextState, context);
 		if (!currentCtxValidation.hasErrors() && !nextState.code.equals(container.state.code)) {
 			applyPreStateRules(currentCtxValidation, container, nextState);
+			String previousStateCode = container.state.code;
 			currentCtxValidation.putObject(FIELD_PREVIOUS_STATE_CODE , container.state.code);
 			currentCtxValidation.putObject(FIELD_STATE_CODE , nextState.code);
-			//TODO GA improve performance to validate only field impacted by state
+			// GA improve performance to validate only field impacted by state
 			//container.validate(currentCtxValidation); //in comment because no field are state dependant
 			if(!currentCtxValidation.hasErrors()){
-				boolean goBack = goBack(container.state, nextState);
+				// boolean goBack = goBack(container.state, nextState);
+				boolean goBack = models.laboratory.common.description.State.find.get().isBackward(container.state.code, nextState.code);
 				// if (goBack) logger.debug(container.code+" : back to the workflow. "+container.state.code +" -> "+nextState.code);
 				if (goBack) logger.debug("{} : back to the workflow. {} -> {}", container.code, container.state.code, nextState.code);
 				
-				container.state = updateHistoricalNextState(container.state, nextState);
+//				container.state = updateHistoricalNextState(container.state, nextState);
+				container.state = nextState.createHistory(container.state);
 				
 				MongoDBDAO.update(InstanceConstants.CONTAINER_COLL_NAME,  Container.class, 
-						DBQuery.is("code", container.code),
-						DBUpdate.set("state", container.state).set("traceInformation", container.traceInformation));
+						          DBQuery.is("code", container.code),
+						          DBUpdate.set("state", container.state)
+						                  .set("traceInformation", container.traceInformation));
 				
-				applySuccessPostStateRules(currentCtxValidation, container);
+				applySuccessPostStateRules(currentCtxValidation, container, context, previousStateCode, updateContainerSupport);
 				nextState(currentCtxValidation, container);
 			} else {
 				applyErrorPostStateRules(currentCtxValidation, container, nextState);
 			}
 		}
-		if(currentCtxValidation.hasErrors()){
-			contextValidation.addErrors(currentCtxValidation.errors);
+		if (currentCtxValidation.hasErrors()) {
+			contextValidation.addErrors(currentCtxValidation.getErrors());
 		}
-		
 	}
 
-	@Override
-	public void nextState(ContextValidation contextValidation, Container object) {
-	}
-
-	/*
-	 * Return the available container state for a experiment category code
-	 * @param categoryCode
-	 * @return
+	/**
+	 * Empty method.
+	 * @param contextValidation validation context
+	 * @param container            container
 	 */
-	public String getContainerStateFromExperimentCategory(String categoryCode) {
-		String nextContainerState=null;
-		if (categoryCode.equals(ExperimentCategory.CODE.transformation.name())) {
-			nextContainerState = "A-TM";
-		} else if (categoryCode.equals(ExperimentCategory.CODE.transfert.name())) {
-			nextContainerState = "A-TF";
-		} else if (categoryCode.equals(ExperimentCategory.CODE.qualitycontrol.name())) {
-			nextContainerState = "A-QC";
-		} else if (categoryCode.equals(ExperimentCategory.CODE.purification.name())) {
-			nextContainerState = "A-PF";
-		}
-		return nextContainerState;
+	private void nextState(ContextValidation contextValidation, Container container) {
 	}
-	
+
+	/**
+	 * Return the available container state for a experiment category code.
+	 * @param categoryCode experiment category code
+	 * @return             container state code
+	 * @deprecated use {@link ExperimentCategory#getContainerStateFromExperimentCategory(String)}
+	 */
+	@Deprecated
+	public String getContainerStateFromExperimentCategory(String categoryCode) {
+		return ExperimentCategory.getContainerStateFromExperimentCategory(categoryCode);
+	}
+
 }

@@ -47,6 +47,15 @@ public class ExcelHelper {
 		}
 	}
 	
+	public static boolean isNumericValue(Cell cell)
+	{
+		if(cell.getCellType()==Cell.CELL_TYPE_NUMERIC || cell.getCellType()==Cell.CELL_TYPE_FORMULA)
+			return true;
+		else
+			return false;
+				
+	}
+	
 //	public static String convertToStringValue(Cell cell){
 //		//test cell existance  first !!
 //		//a string can also be a formula

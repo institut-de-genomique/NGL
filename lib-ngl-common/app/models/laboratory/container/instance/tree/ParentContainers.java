@@ -4,16 +4,15 @@ import java.util.Set;
 
 public class ParentContainers {
 
-	public String code;
-	public String supportCode;
+	public String      code;
+	public String      supportCode;
 	public Set<String> fromTransformationTypeCodes;
 	public Set<String> fromTransformationCodes;
 	public Set<String> processTypeCodes;
 	public Set<String> processCodes;
 	
-	public ParentContainers() {
-		super();		
-	}
+//	public ParentContainers() {
+//		super();		
+//	}
 
-	
 }

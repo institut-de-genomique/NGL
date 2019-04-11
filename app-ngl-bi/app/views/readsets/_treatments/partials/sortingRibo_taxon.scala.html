@@ -8,7 +8,7 @@
 		
 		<div class="form-group">
 		<label for="inputFilter">@Messages("filterTaxonBilan") </label>
-			<input type="text" ng-model="filterTaxonBilan" placeholder='@Messages("filterTaxonBilan")' title='@Messages("filterTaxonBilan")' ng-value="filterTaxonBilan" id="inputFilter">
+			<input type="text" ng-model="filterTaxonBilan" placeholder='@Messages("filterTaxonBilan")' title='@Messages("filterTaxonBilan")' ng-value="filterTaxonBilan" ng-change="setFilterTaxonBilan(filterTaxonBilan)" id="inputFilter">
 		</div>
 		  <div class="treatmentOverflow">
 		 	<table class="table table-condensed table-hover table-bordered">
@@ -29,7 +29,7 @@
 			</tr>
 			</thead>
 			<tbody>
-			<tr ng-repeat='@("obj in readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".taxonBilan.value")' ng-if="obj.percent>filterTaxonBilan">
+			<tr ng-repeat='@("obj in readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".taxonBilan.value")|orderBy:"nbSeq":true' ng-if="obj.percent>filterTaxonBilan">
 				<td>									
 					 <a href="{{ncbiUrl + obj.taxon.replace(' ','+') }}" target="_blank">{{obj.taxon}}</a>									
 				</td>

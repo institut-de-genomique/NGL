@@ -20,7 +20,7 @@
 		};
 		
 		
-	
+
 				
 		var createService = {
 				isRouteParam : false,
@@ -89,12 +89,26 @@ var getColumns = function(){
 			        	edit:false,
 			        	choiceInList:false  
 			        	});	
+			   	columns.push({property:"externalId",
+			        	header: Messages("study.externalId"),
+			        	type :"text",		    	  	
+			        	order:true,
+			        	edit:false,
+			        	choiceInList:false  
+			        	});				        	
 			    columns.push({property:"state.code",
 			        	header: Messages("study.state.code"),
 			        	"filter":"codes:'state'",
 			        	type :"text",		    	  	
 			        	order:true
 			        	});	    	
+			 	columns.push({property:"traceInformation.creationDate",
+			        	header: Messages("traceInformation.creationDate"),
+			        	type :"date",		    	  	
+			        	order:false,
+			        	edit:false,
+			        	choiceInList:false  
+			           });
 			 	columns.push({property:"releaseDate",
 			        	header: Messages("study.releaseDate"),
 			        	type :"date",		    	  	
@@ -278,6 +292,13 @@ var getColumns = function(){
 			        	edit:false,
 			        	choiceInList:false  
 			        	});	
+			columns.push({property:"externalId",
+			        	header: Messages("study.externalId"),
+			        	type :"text",		    	  	
+			        	order:false,
+			        	edit:false,
+			        	choiceInList:false  
+			        	});				        	
 			/*columns.push({property:"releaseDate",
 			        	header: "study.releaseDate",
 			        	type :Date,		    	  	

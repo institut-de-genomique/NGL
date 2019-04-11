@@ -8,19 +8,19 @@ import models.laboratory.common.description.Level;
 import models.laboratory.common.instance.PropertyValue;
 import models.laboratory.common.instance.Valuation;
 import validation.ContextValidation;
-import validation.IValidation;
 import validation.run.instance.LaneValidationHelper;
 import validation.run.instance.TreatmentValidationHelper;
 
-public class Lane implements IValidation {
+//public class Lane implements IValidation {
+public class Lane {
 
-	public Integer number;
-	public Valuation valuation = new Valuation();
+	public Integer                    number;
+	public Valuation                  valuation = new Valuation();
 	//public List<ReadSet> readsets;
 	// dnoisett, the lane doesn't contain the entire readset anymore, just a code to refer it;
-	public List<String> readSetCodes;
+	public List<String>               readSetCodes;
 	public Map<String, PropertyValue> properties = new HashMap<>(); // <String, PropertyValue>();
-	public Map<String,Treatment> treatments = new HashMap<>();
+	public Map<String,Treatment>      treatments = new HashMap<>();
 	
 	/*
 	nbCycleRead1
@@ -39,16 +39,26 @@ public class Lane implements IValidation {
 	prephasing
 	 */
 
-	@Override
-	public void validate(ContextValidation contextValidation) {
-		LaneValidationHelper.validationLaneNumber(this.number,contextValidation);
-		LaneValidationHelper.validationLaneReadSetCodes(this.number, this.readSetCodes, contextValidation);
-		LaneValidationHelper.validateLaneValuation(this.valuation, contextValidation);
-		contextValidation.putObject("lane", this);
-		contextValidation.putObject("level", Level.CODE.Lane);
-		TreatmentValidationHelper.validationTreatments(this.treatments, contextValidation);
-		LaneValidationHelper.validationLaneProperties(this.properties, contextValidation);		
+//	@Deprecated
+//	@Override
+//	public void validate(ContextValidation contextValidation) {
+//		LaneValidationHelper.validationLaneNumber      (number, contextValidation);
+//		LaneValidationHelper.validateLaneReadSetCodes(contextValidation, number, readSetCodes);
+//		LaneValidationHelper.validateLaneValuation     (valuation, contextValidation);
+//		contextValidation.putObject("lane", this);
+//		contextValidation.putObject("level", Level.CODE.Lane);
+//		TreatmentValidationHelper.validationTreatments (contextValidation, treatments);
+//		LaneValidationHelper.validationLaneProperties  (this.properties, contextValidation);		
+//	}
+	
+	public void validate(ContextValidation contextValidation, Run run) {
+		LaneValidationHelper.validateLaneNumber      (contextValidation, run, number);
+		LaneValidationHelper.validateLaneReadSetCodes(contextValidation, number, readSetCodes);
+		LaneValidationHelper.validateLaneValuation   (contextValidation, run, valuation);
+		contextValidation.putObject("lane", this);             // CTX: to remove
+		contextValidation.putObject("level", Level.CODE.Lane); // CTX: to remove
+		TreatmentValidationHelper.validateTreatments (contextValidation, treatments, run, this);
+		LaneValidationHelper.validateLaneProperties  (contextValidation, run, properties);		
 	}
 
-	
 }

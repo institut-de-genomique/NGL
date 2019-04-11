@@ -6,24 +6,26 @@ import javax.inject.Inject;
 
 import com.mongodb.MongoException;
 
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import models.utils.dao.DAOException;
 import rules.services.RulesException;
-import scala.concurrent.duration.FiniteDuration;
+import validation.ContextValidation;
 
 public class UpdateAmpliCNS extends UpdateContainerImportCNS {
 
 	@Inject
-	public UpdateAmpliCNS(FiniteDuration durationFromStart,
-			FiniteDuration durationFromNextIteration, NGLContext ctx) {
-		super("UpdateAmpli", durationFromStart, durationFromNextIteration, ctx);
-
+	public UpdateAmpliCNS(NGLApplication app) {
+		super("UpdateAmpli", app);
 	}
 
-	@Override
-	public void runImport() throws SQLException, DAOException, MongoException, RulesException {
-		updateContainer("pl_BanqueAmpliToNGL @updated=1",contextError,"tube","amplification");
+//	@Override
+//	public void runImport() throws SQLException, DAOException, MongoException, RulesException {
+//		updateContainer("pl_BanqueAmpliToNGL @updated=1",contextError,"tube","amplification");
+//	}
 
+	@Override
+	public void runImport(ContextValidation contextError) throws SQLException, DAOException, MongoException, RulesException {
+		updateContainer("pl_BanqueAmpliToNGL @updated=1",contextError,"tube","amplification");
 	}
 
 }

@@ -125,6 +125,8 @@ angular.module('atomicTransfereServices', [])
 						projectCodes:container.projectCodes,
 						fromTransformationTypeCodes:container.fromTransformationTypeCodes,
 						fromTransformationCodes:container.fromTransformationCodes,
+						fromPurificationTypeCode:container.fromPurificationTypeCode,
+						fromTransfertTypeCode:container.fromTransfertTypeCode,
 					    processTypeCodes:container.processTypeCodes,
 					    processCodes:container.processCodes,
 						state : container.state,
@@ -155,6 +157,9 @@ angular.module('atomicTransfereServices', [])
 						containerUsed.fromTransformationCodes=container.fromTransformationCodes;
 						containerUsed.processTypeCodes=container.processTypeCodes;
 						containerUsed.processCodes=container.processCodes;
+						
+						containerUsed.fromPurificationTypeCode=container.fromPurificationTypeCode;
+						containerUsed.fromTransfertTypeCode=container.fromTransfertTypeCode;
 					}
 					containerUsed.sampleCodes=container.sampleCodes;
 					containerUsed.projectCodes=container.projectCodes;

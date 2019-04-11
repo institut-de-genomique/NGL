@@ -2,9 +2,14 @@
 
 angular.module('home').controller('CNGTubesToPlateCtrl',['$scope' ,'$http','$parse', '$filter','atmToSingleDatatable',
                                                        function($scope, $http,$parse,$filter,atmToSingleDatatable) {
+	
+	var inputExtraHeaders=Messages("experiments.inputs");   // ajout 05/09/2018
+	var outputExtraHeaders=Messages("experiments.outputs");	// ajout 05/09/2018
+	
 	var datatableConfig = {
 			name:$scope.experiment.typeCode.toUpperCase(),
 			columns:[
+				    //--------------------- INPUT containers section -----------------------   
 			        // 28/03/2017 attention on peut aussi avoir des strips: differencier les premieres colonnes => voir plus bas
 					{
 			        	"header":Messages("containers.table.projectCodes"),
@@ -14,7 +19,7 @@ angular.module('home').controller('CNGTubesToPlateCtrl',['$scope' ,'$http','$par
 			 			"type":"text",
 			 			"position":2,
 			 			"render":"<div list-resize='cellValue' list-resize-min-size='3'>",
-			        	 "extraHeaders":{0:Messages("experiments.inputs")}
+			        	"extraHeaders":{0:inputExtraHeaders}
 				     },
 				     {
 			        	"header":Messages("containers.table.sampleCodes"),
@@ -24,7 +29,7 @@ angular.module('home').controller('CNGTubesToPlateCtrl',['$scope' ,'$http','$par
 			 			"type":"text",
 			 			"position":3,
 			 			"render":"<div list-resize='cellValue' list-resize-min-size='3'>",
-			        	 "extraHeaders":{0:Messages("experiments.inputs")}
+			            "extraHeaders":{0:inputExtraHeaders}
 				     },
 				     {
 			        	 "header":Messages("containers.table.fromTransformationTypeCodes"),
@@ -34,9 +39,9 @@ angular.module('home').controller('CNGTubesToPlateCtrl',['$scope' ,'$http','$par
 						 "hide":true,
 						 "filter":"unique | codes:'type'",
 			        	 "type":"text",
-			 			"render":"<div list-resize='cellValue' list-resize-min-size='3'>",
+			 			 "render":"<div list-resize='cellValue' list-resize-min-size='3'>",
 			        	 "position":4,
-			        	 "extraHeaders":{0:Messages("experiments.inputs")}
+			        	 "extraHeaders":{0:inputExtraHeaders}
 			         },
 			         {
 			        	 "header" : Messages("containers.table.concentration"),
@@ -46,9 +51,8 @@ angular.module('home').controller('CNGTubesToPlateCtrl',['$scope' ,'$http','$par
 						 "hide":true,
 			        	 "type":"number",
 			        	 "position":5,
-			        	 "extraHeaders":{0:Messages("experiments.inputs")}
+			        	 "extraHeaders":{0:inputExtraHeaders}
 			         },
-			        
 					 {
 			        	 "header":Messages("containers.table.concentration.unit"),
 			        	 "property":"inputContainerUsed.concentration.unit",
@@ -57,9 +61,8 @@ angular.module('home').controller('CNGTubesToPlateCtrl',['$scope' ,'$http','$par
 						 "hide":true,
 			        	 "type":"text",
 			        	 "position":5.1,
-			        	 "extraHeaders":{0:Messages("experiments.inputs")}
+			        	 "extraHeaders":{0:inputExtraHeaders}
 			         },
-			        
 			         {
 			        	 "header":function(){return Messages("containers.table.volume") + " (µL)"},
 			        	 "property":"inputContainerUsed.volume.value",
@@ -68,7 +71,7 @@ angular.module('home').controller('CNGTubesToPlateCtrl',['$scope' ,'$http','$par
 						 "hide":true,
 			        	 "type":"number",
 			        	 "position":6,
-			        	 "extraHeaders":{0:Messages("experiments.inputs")}
+			        	 "extraHeaders":{0:inputExtraHeaders}
 			         },
 			         {
 			        	 "header" : Messages("containers.table.quantity"),
@@ -78,9 +81,8 @@ angular.module('home').controller('CNGTubesToPlateCtrl',['$scope' ,'$http','$par
 						 "hide":true,
 			        	 "type":"number",
 			        	 "position":6.1,
-			        	 "extraHeaders":{0:Messages("experiments.inputs")}
+			        	 "extraHeaders":{0:inputExtraHeaders}
 			         },
-			        
 					 {
 			        	 "header":Messages("containers.table.quantity.unit"),
 			        	 "property":"inputContainerUsed.quantity.unit",
@@ -89,7 +91,7 @@ angular.module('home').controller('CNGTubesToPlateCtrl',['$scope' ,'$http','$par
 						 "hide":true,
 			        	 "type":"text",
 			        	 "position":6.2,
-			        	 "extraHeaders":{0:Messages("experiments.inputs")}
+			        	 "extraHeaders":{0:inputExtraHeaders}
 			         },
 			         {
 			        	 "header":Messages("containers.table.state.code"),
@@ -100,8 +102,9 @@ angular.module('home').controller('CNGTubesToPlateCtrl',['$scope' ,'$http','$par
 			        	 "type":"text",
 						 "filter":"codes:'state'",
 			        	 "position":7,
-			        	 "extraHeaders":{0:Messages("experiments.inputs")}
+			        	 "extraHeaders":{0:inputExtraHeaders}
 			         },
+			         //------------------------ OUTPUT containers section -------------------
 			         {
 			        	 "header":Messages("containers.table.concentration"),
 			        	 "property":"outputContainerUsed.concentration.value",
@@ -110,7 +113,7 @@ angular.module('home').controller('CNGTubesToPlateCtrl',['$scope' ,'$http','$par
 						 "hide":true,
 			        	 "type":"number",
 			        	 "position":50,
-			        	 "extraHeaders":{0:Messages("experiments.outputs")}
+			        	 "extraHeaders":{0:outputExtraHeaders}
 			         },
 			         {
 			        	 "header":Messages("containers.table.concentration.unit") ,
@@ -120,7 +123,7 @@ angular.module('home').controller('CNGTubesToPlateCtrl',['$scope' ,'$http','$par
 						 "hide":true,
 			        	 "type":"text",
 			        	 "position":51,
-			        	 "extraHeaders":{0:Messages("experiments.outputs")}
+			        	 "extraHeaders":{0:outputExtraHeaders}
 			         },
 			         {
 			        	 "header":Messages("containers.table.volume")+ " (µL)",
@@ -130,7 +133,7 @@ angular.module('home').controller('CNGTubesToPlateCtrl',['$scope' ,'$http','$par
 						 "hide":true,
 			        	 "type":"number",
 			        	 "position":52,
-			        	 "extraHeaders":{0:Messages("experiments.outputs")}
+			        	 "extraHeaders":{0:outputExtraHeaders}
 			         },
 			         {
 			        	 "header":Messages("containers.table.quantity"),
@@ -140,7 +143,7 @@ angular.module('home').controller('CNGTubesToPlateCtrl',['$scope' ,'$http','$par
 						 "hide":true,
 			        	 "type":"number",
 			        	 "position":53,
-			        	 "extraHeaders":{0:Messages("experiments.outputs")}
+			        	 "extraHeaders":{0:outputExtraHeaders}
 			         },
 			         {
 			        	 "header":Messages("containers.table.quantity.unit") ,
@@ -150,22 +153,18 @@ angular.module('home').controller('CNGTubesToPlateCtrl',['$scope' ,'$http','$par
 						 "hide":true,
 			        	 "type":"text",
 			        	 "position":54,
-			        	 "extraHeaders":{0:Messages("experiments.outputs")}
+			        	 "extraHeaders":{0:outputExtraHeaders}
 			         },
-			         {
-			 			// barcode plaque sortie == support Container used code... faut Used
+			         {// barcode plaque sortie == support Container used code... faut Used
 			 			"header" : Messages("containers.table.support.name"),
 			 			"property" : "outputContainerUsed.locationOnContainerSupport.code",
 			 			"edit" : true,
 			 			"hide" : true,
 			 			"type" : "text",
 			 			"position" : 400,
-			 			"extraHeaders" : {
-			 				0 : Messages("experiments.outputs")
-			 			}
+			 			"extraHeaders" : {0:outputExtraHeaders}
 			 		},
-			 		{
-			 			// Ligne
+			 		{// Ligne
 			 			"header" : Messages("containers.table.support.line"),
 			 			"property" : "outputContainerUsed.locationOnContainerSupport.line",
 			 			"edit" : true,
@@ -176,9 +175,7 @@ angular.module('home').controller('CNGTubesToPlateCtrl',['$scope' ,'$http','$par
 			 			"hide" : true,
 			 			"type" : "text",
 			 			"position" : 401,
-			 			"extraHeaders" : {
-			 				0 : Messages("experiments.outputs")
-			 			}
+			 			"extraHeaders" : {0:outputExtraHeaders}
 			 		},
 			 		{// colonne
 			 			"header" : Messages("containers.table.support.column"),
@@ -194,19 +191,17 @@ angular.module('home').controller('CNGTubesToPlateCtrl',['$scope' ,'$http','$par
 			 			"hide" : true,
 			 			"type" : "number",
 			 			"position" : 402,
-			 			"extraHeaders" : {
-			 				0 : Messages("experiments.outputs")
-			 			}
+			 			"extraHeaders" : {0:outputExtraHeaders}
 			 		},
-			         {
-			        	 "header":Messages("containers.table.stateCode"),
-			        	 "property":"outputContainer.state.code | codes:'state'",
-			        	 "order":true,
-						 "edit":false,
-						 "hide":true,
-			        	 "type":"text",
-			        	 "position":500,
-			        	 "extraHeaders":{0:Messages("experiments.outputs")}
+			        {
+			            "header":Messages("containers.table.stateCode"),
+			        	"property":"outputContainer.state.code | codes:'state'",
+			        	"order":true,
+						"edit":false,
+					    "hide":true,
+			        	"type":"text",
+			        	"position":500,
+			            "extraHeaders":{0:outputExtraHeaders}
 			         },
 			         {
 			        	 "header":Messages("containers.table.storageCode"),
@@ -216,7 +211,7 @@ angular.module('home').controller('CNGTubesToPlateCtrl',['$scope' ,'$http','$par
 						 "hide":true,
 			        	 "type":"text",
 			        	 "position":600,
-			        	 "extraHeaders":{0:Messages("experiments.outputs")}
+			        	 "extraHeaders":{0:outputExtraHeaders}
 				     }
 			         ],
 			compact:true,
@@ -289,9 +284,7 @@ angular.module('home').controller('CNGTubesToPlateCtrl',['$scope' ,'$http','$par
 			"hide" : true,
 			"type" : "text",
 			"position" : 1,
-			"extraHeaders" : {
-				0 : Messages("experiments.inputs")
-			}
+			"extraHeaders" : {0:inputExtraHeaders}
 		});	
     }else{
     	// strip-8
@@ -303,11 +296,9 @@ angular.module('home').controller('CNGTubesToPlateCtrl',['$scope' ,'$http','$par
 			"hide" : true,
 			"type" : "text",
 			"position" : 1,
-			"extraHeaders" : {
-				0 : Messages("experiments.inputs")
-			}
+			"extraHeaders" : {0:inputExtraHeaders}
     	});
-    	
+  	    // ne pas mettre de ligne pour 1 strip....
     	datatableConfig.columns.push({	
 			"header" :  Messages("containers.table.support.column"),
 			"property" : "inputContainer.support.column*1",
@@ -316,11 +307,8 @@ angular.module('home').controller('CNGTubesToPlateCtrl',['$scope' ,'$http','$par
 			"hide" : true,
 			"type" : "text",
 			"position" : 1.1,
-			"extraHeaders" : {
-				0 : Messages("experiments.inputs")
-			}
+			"extraHeaders" : {0:inputExtraHeaders}
     	});
-    	
     }
 
 	var updateATM = function(experiment){
@@ -361,7 +349,6 @@ angular.module('home').controller('CNGTubesToPlateCtrl',['$scope' ,'$http','$par
 			dtConfig.edit.byDefault = false;
 			$scope.atmService.data.setConfig(dtConfig);
 		}
-		
 	});
 	
 	$scope.$on('activeEditMode', function(e) {
@@ -370,7 +357,6 @@ angular.module('home').controller('CNGTubesToPlateCtrl',['$scope' ,'$http','$par
 		$scope.atmService.data.setEdit();
 	});
 
-	
 	$scope.copyVolumeInToOut = function(){
 		var data = $scope.atmService.data.displayResult;		
 		data.forEach(function(value){
@@ -386,17 +372,16 @@ angular.module('home').controller('CNGTubesToPlateCtrl',['$scope' ,'$http','$par
 	});
 	
 	var atmService = atmToSingleDatatable($scope, datatableConfig);
+	
 	// defined new atomictransfertMethod
 	atmService.newAtomicTransfertMethod =  function(line, column){
 		var getLine = function(line){
-			if($scope.experiment.instrument.outContainerSupportCategoryCode 
-					=== $scope.experiment.instrument.inContainerSupportCategoryCode){
+			if($scope.experiment.instrument.outContainerSupportCategoryCode === $scope.experiment.instrument.inContainerSupportCategoryCode){
 				return line;
 			}else if($scope.experiment.instrument.outContainerSupportCategoryCode !== "tube" 
-				&& $scope.experiment.instrument.inContainerSupportCategoryCode === "tube") {
+				  && $scope.experiment.instrument.inContainerSupportCategoryCode === "tube") {
 				return undefined;
 			}
-			
 		}
 		var getColumn=getLine;
 		

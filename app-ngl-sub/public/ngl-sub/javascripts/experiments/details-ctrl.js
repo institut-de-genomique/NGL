@@ -17,7 +17,11 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 				withoutSelect : true,
 				columnMode : true
 			},
-			columns : [
+			columns : [{property:"traceInformation.creationDate",
+			        	header: Messages("experiment.traceInformation.creationDate"),
+			        	type :"date",		    	  	
+			        	order:true
+			           },
 			           {property:"code",
 			        	header: Messages("run.code"),
 			        	type :"text",		    	  	
@@ -62,7 +66,11 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 			exportCSV:{
 				active:false
 			},
-			columns : [
+			columns : [{property:"traceInformation.creationDate",
+			        	header: Messages("rawData.traceInformation.creationDate"),
+			        	type :"text",		    	  	
+			        	order:true
+			           },
 			           {property:"relatifName",
 			        	header: Messages("rawData.relatifName"),
 			        	type :"text",		    	  	

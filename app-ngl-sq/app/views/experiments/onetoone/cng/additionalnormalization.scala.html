@@ -1,8 +1,11 @@
 @()
 <!-- 19/07/2017 duplication a partir de libnormalization.scala.html -->
-<div class="col-md-12 col-lg-12" ng-controller="AdditionalNormalizationCtrl">
-  <div class="row margin-bottom-7">
-    <form class="form-inline" role="form">
+<!-- 20/09/2018  mise a jour pour cause meme probleme que lib-nomalisation:  NGL-1006/NGL-2041: sortie tube ne marchait pas correctement -->
+<div class="col-md-12 col-lg-12" ng-switch="experiment.instrument.outContainerSupportCategoryCode"  ng-controller="AdditionalNormalizationCtrl">  
+ <div ng-if="plateUtils.isPlate()" > 
+    <form class="form-inline margin-bottom-7" role="form">
+  	  <!-- premiere ligne -->
+      <div class="row margin-bottom-7">
          <div class="form-group col-lg-4">          
               <div ng-switch on="mainService.isEditMode()"> 
               <div ng-switch-when="false">   
@@ -32,10 +35,11 @@
 			  </div>
 			  </div>   
 	     </div>
-    </form>		
+	  </div>
+    </form>	
+    <br/>
   </div> 
-  
-  <div class="row">
-	  <div class="col-md-12 col-lg-12" ultimate-datatable="atmService.data"></div>					
-  </div>	
+ 
+ 
+   @views.html.experiments.onetoone.defaults.partials.udtAndPlateDesign()	
 </div>

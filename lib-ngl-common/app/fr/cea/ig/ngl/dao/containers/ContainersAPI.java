@@ -14,20 +14,21 @@ import fr.cea.ig.ngl.dao.api.APIValidationException;
 import fr.cea.ig.ngl.dao.api.GenericAPI;
 import models.laboratory.common.instance.State;
 import models.laboratory.common.instance.TraceInformation;
+import models.laboratory.common.instance.property.PropertySingleValue;
 import models.laboratory.container.instance.Container;
 import models.laboratory.container.instance.LocationOnContainerSupport;
 import models.utils.InstanceHelpers;
+import ngl.refactoring.state.ContainerStateNames;
 import play.Logger.ALogger;
 import validation.ContextValidation;
-import validation.common.instance.CommonValidationHelper;
 import validation.container.instance.ContainerValidationHelper;
 import workflows.container.ContWorkflows;
 
 public class ContainersAPI extends GenericAPI<ContainersDAO, Container> {
 
-	private static final ALogger logger = play.Logger.of(ContainersAPI.class); 
+    private static final ALogger logger = play.Logger.of(ContainersAPI.class); 
 	private static final List<String> AUTHORIZED_UPDATE_FIELDS = Arrays.asList("valuation",
-																			   "state",
+																			   "state.resolutionCodes",
 																			   "comments",
 																			   "volume",
 																			   "quantity",
@@ -71,49 +72,52 @@ public class ContainersAPI extends GenericAPI<ContainersDAO, Container> {
 
 	@Override
 	public Container create(Container input, String currentUser) throws APIValidationException, APISemanticException {
-		ContextValidation ctxVal = new ContextValidation(currentUser); 
-		if (input._id == null) { 
+//		ContextValidation ctxVal = new ContextValidation(currentUser); 
+//		ctxVal.setCreationMode();
+		ContextValidation ctxVal = ContextValidation.createCreationContext(currentUser); 
+		if (input.code != null && !dao.isObjectExist(input.code)) { 
 			input.traceInformation = new TraceInformation();
 			input.traceInformation.creationStamp(ctxVal, currentUser);
-			
-			if(null == input.state){
+			if (input.state == null)
 				input.state = new State();
-			}
-			input.state.code = "N";
+			input.state.code = ContainerStateNames.N;
 			input.state.user = currentUser;
 			input.state.date = new Date();		
 			
 		} else {
-			throw new APISemanticException("create method does not update existing objects"); 
+			throw new APISemanticException(CREATE_SEMANTIC_ERROR_MSG); 
 		}
-		ctxVal.setCreationMode();
-		input.validate(ctxVal);
+//		input.validate(ctxVal);
+		input.validate(ctxVal, null, null);
 		if (!ctxVal.hasErrors()) {
 			return dao.saveObject(input);
 		} else {
-			throw new APIValidationException("invalid input", ctxVal.getErrors());
+			throw new APIValidationException(INVALID_INPUT_ERROR_MSG, ctxVal.getErrors());
 		}
 	}
 
 	@Override
 	public Container update(Container input, String currentUser) throws APIException, APIValidationException {
 		Container containerInDb = get(input.code);
-		if(containerInDb == null) {
+		if (containerInDb == null) {
 			throw new APIException("Container with code " + input.code + " not exist");
 		} else {
-			ContextValidation ctxVal = new ContextValidation(currentUser);
-			if(input.traceInformation != null){
+//			ContextValidation ctxVal = new ContextValidation(currentUser);
+//			ctxVal.setUpdateMode();
+			ContextValidation ctxVal = ContextValidation.createUpdateContext(currentUser);
+			if (input.traceInformation != null) {
 				input.traceInformation.modificationStamp(ctxVal, currentUser);
-			}else{
+			} else {
 				logger.error("traceInformation is null !!");
 			}
-			ctxVal.setUpdateMode();
-			input.comments = InstanceHelpers.updateComments(input.comments, ctxVal);
+//			ctxVal.setUpdateMode();
+			input.comments = InstanceHelpers.updateComments(ctxVal, input.comments);
 			cleanProperties(input);
-			input.validate(ctxVal);
+//			input.validate(ctxVal);
+			input.validate(ctxVal, null, null);
 			if (!ctxVal.hasErrors()) {
 				dao.updateObject(input);
-				return input;
+				return get(input.code);
 			} else {
 				throw new APIValidationException("Invalid Container object", ctxVal.getErrors());
 			}
@@ -121,18 +125,18 @@ public class ContainersAPI extends GenericAPI<ContainersDAO, Container> {
 	}
 
 	@Override
-	public Container update(Container input, String currentUser, List<String> fields)
-			throws APIException, APIValidationException {
+	public Container update(Container input, String currentUser, List<String> fields) throws APIException, APIValidationException {
 		Container containerInDb = get(input.code);
-		if(containerInDb == null) {
+		if (containerInDb == null) {
 			throw new APIException("Container with code " + input.code + " not exist");
 		} else {
-			ContextValidation ctxVal = new ContextValidation(currentUser);
-			ctxVal.setUpdateMode();
+//			ContextValidation ctxVal = new ContextValidation(currentUser);
+//			ctxVal.setUpdateMode();
+			ContextValidation ctxVal = ContextValidation.createUpdateContext(currentUser);
 			checkAuthorizedUpdateFields(ctxVal, fields);
 			checkIfFieldsAreDefined(ctxVal, fields, input);
 			if (!ctxVal.hasErrors()) {
-				input.comments = InstanceHelpers.updateComments(input.comments, ctxVal);
+				input.comments = InstanceHelpers.updateComments(ctxVal, input.comments);
 				TraceInformation ti = containerInDb.traceInformation;
 				ti.modificationStamp(ctxVal, currentUser);
 				if(fields.contains("valuation")){
@@ -140,12 +144,11 @@ public class ContainersAPI extends GenericAPI<ContainersDAO, Container> {
 					input.valuation.date = new Date();
 				}
 				
-				if (fields.contains("volume"))        ContainerValidationHelper.validateVolume(input.volume, ctxVal);					
-				if (fields.contains("quantity"))	  ContainerValidationHelper.validateQuantity(input.quantity, ctxVal);
-				if (fields.contains("size"))          ContainerValidationHelper.validateSize(input.size, ctxVal);
-				if (fields.contains("concentration")) ContainerValidationHelper.validateConcentration(input.concentration, ctxVal);					
+				if (fields.contains("volume"))        ContainerValidationHelper.validateVolumeOptional(ctxVal, input.volume);					
+				if (fields.contains("quantity"))	  ContainerValidationHelper.validateQuantityOptional(ctxVal, input.quantity);
+				if (fields.contains("size"))          ContainerValidationHelper.validateSizeOptional(ctxVal, input.size);
+				if (fields.contains("concentration")) ContainerValidationHelper.validateConcentrationOptional(ctxVal, input.concentration);					
 
-				
 				if (!ctxVal.hasErrors()) {
 					dao.updateObject(DBQuery.and(DBQuery.is("code", input.code)), dao.getBuilder(input, fields).set("traceInformation", ti));
 					return get(input.code);
@@ -160,27 +163,42 @@ public class ContainersAPI extends GenericAPI<ContainersDAO, Container> {
 	
 	public Container updateState(String code, State state, String currentUser) throws APIException, APIValidationException {
 		Container containerInDb = get(code);
-		if(containerInDb == null) {
+		if (containerInDb == null) {
 			throw new APIException("Container with code " + code + " not exist");
 		} else {
-			ContextValidation ctxVal = new ContextValidation(currentUser);
-			ctxVal.putObject(CommonValidationHelper.FIELD_STATE_CONTAINER_CONTEXT, "controllers");
-			ctxVal.putObject(CommonValidationHelper.FIELD_UPDATE_CONTAINER_SUPPORT_STATE, Boolean.TRUE);		
-			workflows.setState(ctxVal, containerInDb, state);
+			ContextValidation ctxVal = ContextValidation.createUndefinedContext(currentUser);
+			ctxVal.putObject(ContainerValidationHelper.FIELD_STATE_CONTAINER_CONTEXT,        "controllers");
+			ctxVal.putObject(ContainerValidationHelper.FIELD_UPDATE_CONTAINER_SUPPORT_STATE, Boolean.TRUE);		
+//			workflows.setState(ctxVal, containerInDb, state);
+			workflows.setState(ctxVal, containerInDb, state, "controllers", true);
 			if (!ctxVal.hasErrors()) {
 				return get(code);
 			} else {
-				throw new APIValidationException("Invalid state modification", ctxVal.getErrors());
+				throw new APIValidationException(INVALID_STATE_ERROR_MSG, ctxVal.getErrors());
 			}
 		}
 	}
 	
+	private PropertySingleValue emptyAsNull(PropertySingleValue p) {
+		if (p == null)
+			return null;
+		if (p.value == null)
+			return null;
+		return p;
+	}
 	
+//	 TODO : find some factoring
+//	private void cleanProperties(Container input) {
+//		if (input.volume        != null && input.volume.value        == null) input.volume        = null;
+//		if (input.concentration != null && input.concentration.value == null) input.concentration = null;
+//		if (input.size          != null && input.size.value          == null) input.size          = null;
+//		if (input.quantity      != null && input.quantity.value      == null) input.quantity      = null;
+//	}
 	private void cleanProperties(Container input) {
-		if(input.volume != null && input.volume.value == null) input.volume = null;
-		if(input.concentration != null && input.concentration.value == null) input.concentration = null;
-		if(input.size != null && input.size.value == null) input.size = null;
-		if(input.quantity != null && input.quantity.value == null) input.quantity = null;
+		input.volume        = emptyAsNull(input.volume);
+		input.concentration = emptyAsNull(input.concentration);
+		input.size          = emptyAsNull(input.size);
+		input.quantity      = emptyAsNull(input.quantity);
 	}
 	
 	protected void updateStorageCode(String containerSupportCode, String storageCode, TraceInformation ti) {
@@ -190,4 +208,5 @@ public class ContainersAPI extends GenericAPI<ContainersDAO, Container> {
 		container.support.storageCode = storageCode;
 		dao.updateObject(DBQuery.and(DBQuery.is("support.code", containerSupportCode)), dao.getBuilder(container, fields, "support").set("traceInformation", ti));
 	}
+	
 }

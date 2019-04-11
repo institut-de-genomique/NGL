@@ -13,7 +13,7 @@ import org.mongojack.DBUpdate;
 import controllers.SubDocumentController;
 import fr.cea.ig.MongoDBDAO;
 import fr.cea.ig.MongoDBResult;
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import models.laboratory.project.instance.BioinformaticParameters;
 import models.laboratory.project.instance.Project;
 import models.utils.InstanceConstants;
@@ -21,13 +21,16 @@ import play.data.Form;
 import play.libs.Json;
 import play.mvc.Result;
 
-
-// @Controller
 public class ProjectBioinformaticParameters extends SubDocumentController<Project, BioinformaticParameters> {
 
+//	@Inject
+//	public ProjectBioinformaticParameters(NGLContext ctx) {
+//		super(ctx,InstanceConstants.PROJECT_COLL_NAME, Project.class, BioinformaticParameters.class);
+//	}
+
 	@Inject
-	public ProjectBioinformaticParameters(NGLContext ctx) {
-		super(ctx,InstanceConstants.PROJECT_COLL_NAME, Project.class, BioinformaticParameters.class);
+	public ProjectBioinformaticParameters(NGLApplication app) {
+		super(app,InstanceConstants.PROJECT_COLL_NAME, Project.class, BioinformaticParameters.class);
 	}
 
 	@Override

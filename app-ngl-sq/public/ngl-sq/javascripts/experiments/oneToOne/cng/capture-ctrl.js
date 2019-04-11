@@ -340,8 +340,7 @@ angular.module('home').controller('CaptureCtrl',['$scope', '$parse', '$http', 'a
 				$scope.messages.text = "Plusieurs noms de travail (robot) trouvés parmi les containers d'entrée (info processus)";
 				$scope.messages.open();			
 			
-				console.log('>1  run workLabel trouvé !!');
-				
+				//console.log('>1  run workLabel trouvé !!');
 			} else if ( workLabels.length === 1 ){
 				// verifier que TOUS les containers ont une valeur...
 				var contents= $scope.$eval("getBasket().get()|getArray:'contents[0]'");
@@ -352,9 +351,15 @@ angular.module('home').controller('CaptureCtrl',['$scope', '$parse', '$http', 'a
 					$scope.messages.text = "Certains containers en entrée n'ont pas de nom de travail run (robot) (info processus)";
 					$scope.messages.open();			
 				
-					console.log("Certains containers n'ont pas de workLabel.");
+					//console.log("Certains containers n'ont pas de workLabel.");
 				} else {
-					$parse("instrumentProperties.robotRunCode.value").assign($scope.experiment, workLabels[0]);
+					// NGL-2160/NGL-2164 ne faire l'assignation que si l'instrument possede la propriété robotRunCode (sinon erreur de sauvegarde experience!)
+					if ( $scope.instrumentHasProperty('robotRunCode') ) {
+						$parse("instrumentProperties.robotRunCode.value").assign($scope.experiment, workLabels[0]);
+					} else {
+						console.log("la propriété n'est pas gérée par l'instrument!");
+						// faut-il une alerte utilisateur ??
+					}
 				}
 			} 
 			// si aucun workLabel ne rien faire

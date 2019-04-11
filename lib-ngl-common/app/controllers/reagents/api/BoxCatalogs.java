@@ -1,8 +1,5 @@
 package controllers.reagents.api;
 
-// import static play.data.Form.form;
-//import static fr.cea.ig.play.IGGlobals.form;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,7 +13,7 @@ import org.mongojack.DBQuery.Query;
 import controllers.DocumentController;
 import fr.cea.ig.MongoDBDAO;
 import fr.cea.ig.MongoDBResult;
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import models.laboratory.reagent.description.AbstractCatalog;
 import models.laboratory.reagent.description.BoxCatalog;
 import models.laboratory.reagent.utils.ReagentCodeHelper;
@@ -32,21 +29,27 @@ import views.components.datatable.DatatableResponse;
 
 public class BoxCatalogs extends DocumentController<BoxCatalog> {
 	
-	private final /*static*/ Form<BoxCatalogSearchForm> boxCatalogSearchForm; // = form(BoxCatalogSearchForm.class);
+	private final Form<BoxCatalogSearchForm> boxCatalogSearchForm;
+	
+//	@Inject
+//	public BoxCatalogs(NGLContext ctx) {
+//		super(ctx,InstanceConstants.REAGENT_CATALOG_COLL_NAME, BoxCatalog.class);
+//		boxCatalogSearchForm = ctx.form(BoxCatalogSearchForm.class);
+//	}
 	
 	@Inject
-	public BoxCatalogs(NGLContext ctx) {
-		super(ctx,InstanceConstants.REAGENT_CATALOG_COLL_NAME, BoxCatalog.class);
-		boxCatalogSearchForm = ctx.form(BoxCatalogSearchForm.class);
+	public BoxCatalogs(NGLApplication app) {
+		super(app,InstanceConstants.REAGENT_CATALOG_COLL_NAME, BoxCatalog.class);
+		boxCatalogSearchForm = app.form(BoxCatalogSearchForm.class);
 	}
-	
+
 	public Result save() {
 		Form<BoxCatalog> boxCatalogFilledForm = getMainFilledForm();
 		BoxCatalog boxCatalog = boxCatalogFilledForm.get();
 //		ContextValidation contextValidation = new ContextValidation(getCurrentUser(), boxCatalogFilledForm.errors());
-		ContextValidation contextValidation = new ContextValidation(getCurrentUser(), boxCatalogFilledForm);
-		//TODO change not update autorized here !!!!
-		if (ValidationHelper.required(contextValidation, boxCatalog.name, "name")) {
+		ContextValidation contextValidation = ContextValidation.createUndefinedContext(getCurrentUser(), boxCatalogFilledForm);
+		// TODO change not update autorized here !!!!
+		if (ValidationHelper.validateNotEmpty(contextValidation, boxCatalog.name, "name")) {
 			if (boxCatalog._id == null) {
 				boxCatalog.code = ReagentCodeHelper.getInstance().generateBoxCatalogCode(boxCatalog.kitCatalogCode);
 				contextValidation.setCreationMode();
@@ -66,9 +69,9 @@ public class BoxCatalogs extends DocumentController<BoxCatalog> {
 		BoxCatalog boxCatalog = boxCatalogFilledForm.get();
 		
 //		ContextValidation contextValidation = new ContextValidation(getCurrentUser(), boxCatalogFilledForm.errors());
-		ContextValidation contextValidation = new ContextValidation(getCurrentUser(), boxCatalogFilledForm);
-		contextValidation.setUpdateMode();
-		
+//		ContextValidation contextValidation = new ContextValidation(getCurrentUser(), boxCatalogFilledForm);
+//		contextValidation.setUpdateMode();
+		ContextValidation contextValidation = ContextValidation.createUpdateContext(getCurrentUser(), boxCatalogFilledForm);
 //		boxCatalog = (BoxCatalog)InstanceHelpers.save(InstanceConstants.REAGENT_CATALOG_COLL_NAME, boxCatalog, contextValidation);
 		boxCatalog = InstanceHelpers.save(InstanceConstants.REAGENT_CATALOG_COLL_NAME, boxCatalog, contextValidation);
 		if (contextValidation.hasErrors())

@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import models.laboratory.common.description.CodeLabel;
+
 @SuppressWarnings("deprecation")
 @Repository
 public class CodeLabelDAO {
@@ -52,7 +53,7 @@ public class CodeLabelDAO {
 						"select distinct 'experiment_cat' as table_name, code, name as label from experiment_category "
 						;
 		BeanPropertyRowMapper<CodeLabel> mapper = new BeanPropertyRowMapper<>(CodeLabel.class);
-		return this.jdbcTemplate.query(sql, mapper);
+		return jdbcTemplate.query(sql, mapper);
 	}
 	
 }

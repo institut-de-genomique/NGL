@@ -2,9 +2,9 @@ package controllers;
 
 import java.util.List;
 
-import models.laboratory.common.instance.TraceInformation;
 import fr.cea.ig.DBObject;
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
+import models.laboratory.common.instance.TraceInformation;
 
 
 /**
@@ -17,12 +17,21 @@ import fr.cea.ig.play.migration.NGLContext;
  */
 public abstract class DocumentController<T extends DBObject> extends MongoCommonController<T> {
 
-	protected DocumentController(NGLContext ctx, String collectionName, Class<T> type) {
-		super(ctx,collectionName, type);
+//	protected DocumentController(NGLContext ctx, String collectionName, Class<T> type) {
+//		super(ctx,collectionName, type);
+//	}
+//		
+//	protected DocumentController(NGLContext ctx, String collectionName, Class<T> type, List<String> defaultKeys) {
+//		super(ctx,collectionName, type, defaultKeys);
+//		
+//	}
+	
+	protected DocumentController(NGLApplication app, String collectionName, Class<T> type) {
+		super(app,collectionName, type);
 	}
 		
-	protected DocumentController(NGLContext ctx, String collectionName, Class<T> type, List<String> defaultKeys) {
-		super(ctx,collectionName, type, defaultKeys);
+	protected DocumentController(NGLApplication app, String collectionName, Class<T> type, List<String> defaultKeys) {
+		super(app,collectionName, type, defaultKeys);
 		
 	}
 	

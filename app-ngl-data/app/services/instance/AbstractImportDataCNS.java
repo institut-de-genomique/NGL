@@ -1,24 +1,19 @@
 package services.instance;
 
-import javax.inject.Inject;
-
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import models.LimsCNSDAO;
 import models.TaraDAO;
 import play.api.modules.spring.Spring;
-import scala.concurrent.duration.FiniteDuration;
 
 public abstract class AbstractImportDataCNS extends AbstractImportData {
 
-	@Inject
-	public AbstractImportDataCNS(String name, FiniteDuration durationFromStart,
-			FiniteDuration durationFromNextIteration, NGLContext ctx) {
-		super(name, durationFromStart, durationFromNextIteration, ctx);
+	protected static LimsCNSDAO  limsServices;
+	protected static TaraDAO     taraServices;
+
+	protected AbstractImportDataCNS(String name, NGLApplication app) {
+		super(name, app);
 		limsServices = Spring.getBeanOfType(LimsCNSDAO.class);
 		taraServices = Spring.getBeanOfType(TaraDAO.class);
 	}
-
-	protected static LimsCNSDAO  limsServices;
-	protected static TaraDAO taraServices;
 
 }

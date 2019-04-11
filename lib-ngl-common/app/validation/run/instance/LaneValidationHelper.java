@@ -1,11 +1,11 @@
 package validation.run.instance;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.mongojack.DBQuery;
 
 import fr.cea.ig.MongoDBDAO;
@@ -25,64 +25,182 @@ import validation.utils.ValidationHelper;
 
 public class LaneValidationHelper extends CommonValidationHelper {
 	
-	public static void validationLanes(List<Lane> lanes, ContextValidation contextValidation) {
-		//TODO number of lanes (depends of the type run and the mode incremental insert or full insert !!!)
-		//TODO validate lane number
-		if (lanes != null && lanes.size() > 0) {
-			int index = 0;
-			Set<Integer> laneNumbers = new TreeSet<>();
-			for (Lane lane : lanes) {
-				if (lane != null) {
-					contextValidation.addKeyToRootKeyName("lanes[" + index + "]");
-					lane.validate(contextValidation);
-					if(laneNumbers.contains(lane.number)){
-						contextValidation.addErrors("number", ValidationConstants.ERROR_NOTUNIQUE_MSG, lane.number);
-					}
-					laneNumbers.add(lane.number);
-					contextValidation.removeKeyFromRootKeyName("lanes[" + index + "]");
+//	/**
+//	 * Validate a collection of lanes for a context run (context parameter "run").
+//	 * @param lanes             lanes to validate
+//	 * @param contextValidation validation context
+//	 * @deprecated use explicit {@link #validateLanes(ContextValidation, Run, List)}
+//	 */
+//	@Deprecated
+//	public static void validationLanes(List<Lane> lanes, ContextValidation contextValidation) {
+//		// TODO: number of lanes (depends of the type run and the mode incremental insert or full insert !!!)
+//		// TODO: validate lane number
+//		if (lanes != null && lanes.size() > 0) {
+//			int index = 0;
+//			Set<Integer> laneNumbers = new TreeSet<>();
+//			for (Lane lane : lanes) {
+//				if (lane != null) {
+//					contextValidation.addKeyToRootKeyName("lanes[" + index + "]");
+//					lane.validate(contextValidation);
+//					if(laneNumbers.contains(lane.number)){
+//						contextValidation.addError("number", ValidationConstants.ERROR_NOTUNIQUE_MSG, lane.number);
+//					}
+//					laneNumbers.add(lane.number);
+//					contextValidation.removeKeyFromRootKeyName("lanes[" + index + "]");
+//				}
+//				index++;
+//			}
+//		}
+//	}
+	
+	/**
+	 * Validate a collection of lanes in a run.
+	 * @param contextValidation validation context
+	 * @param run               run
+	 * @param lanes             lanes to validate
+	 */
+	public static void validateLanes(ContextValidation contextValidation, Run run, List<Lane> lanes) {
+		// TODO: number of lanes (depends of the type run and the mode incremental insert or full insert !!!)
+		// TODO: validate lane number
+		if (CollectionUtils.isEmpty(lanes))
+			return;
+		int index = 0;
+		Set<Integer> laneNumbers = new HashSet<>();
+		for (Lane lane : lanes) {
+			if (lane != null) {
+				contextValidation.addKeyToRootKeyName("lanes[" + index + "]");
+				lane.validate(contextValidation, run);
+				if (laneNumbers.contains(lane.number)) {
+					contextValidation.addError("number", ValidationConstants.ERROR_NOTUNIQUE_MSG, lane.number);
 				}
-				index++;
+				laneNumbers.add(lane.number);
+				contextValidation.removeKeyFromRootKeyName("lanes[" + index + "]");
 			}
+			index++;
+		}
+	}
+
+	/**
+	 * Validate a lane number for a context run (context parameter "run").
+	 * @param number            lane number
+	 * @param contextValidation validation context
+	 */
+	@Deprecated
+	public static void validationLaneNumber(Integer number, ContextValidation contextValidation) {
+		if (ValidationHelper.validateNotEmpty(contextValidation, number, "number")) {
+			//Validate unique lane.number if run already exist
+			if (contextValidation.isCreationMode() && isLaneExist(number, contextValidation)) {
+				contextValidation.addError("number",ValidationConstants.ERROR_NOTUNIQUE_MSG, number);
+			} else if(contextValidation.isUpdateMode() && !isLaneExist(number, contextValidation)) {
+				contextValidation.addError("number",ValidationConstants.ERROR_NOTEXISTS_MSG, number);				
+			}						
 		}
 	}
 	
-	public static void validationLaneNumber(Integer number, ContextValidation contextValidation) {
-		if (ValidationHelper.required(contextValidation, number, "number")) {
+	/**
+	 * Validate a lane number for a run.
+	 * @param contextValidation validation context
+	 * @param run               run
+	 * @param number            lane number
+	 */
+	public static void validateLaneNumber(ContextValidation contextValidation, Run run, Integer number) {
+		if (ValidationHelper.validateNotEmpty(contextValidation, number, "number")) {
 			//Validate unique lane.number if run already exist
-			if (contextValidation.isCreationMode() && isLaneExist(number, contextValidation)) {
-				contextValidation.addErrors("number",ValidationConstants.ERROR_NOTUNIQUE_MSG, number);
-			} else if(contextValidation.isUpdateMode() && !isLaneExist(number, contextValidation)) {
-				contextValidation.addErrors("number",ValidationConstants.ERROR_NOTEXISTS_MSG, number);				
+			if (contextValidation.isCreationMode() && isLaneExist(contextValidation, run, number)) {
+				contextValidation.addError("number",ValidationConstants.ERROR_NOTUNIQUE_MSG, number);
+			} else if(contextValidation.isUpdateMode() && !isLaneExist(contextValidation, run, number)) {
+				contextValidation.addError("number",ValidationConstants.ERROR_NOTEXISTS_MSG, number);				
 			}						
 		}
 	}
 
+	/**
+	 * Does the lane with given number exists in the context parameter (context parameter "run").
+	 * @param number            lane number
+	 * @param contextValidation validation context
+	 * @return                  true if the lane exists in the context run
+	 * @deprecated use {@link #isLaneExist(ContextValidation, Run, Integer)}
+	 */
+	@Deprecated
 	private static boolean isLaneExist(Integer number, ContextValidation contextValidation) {
 		Run run = getRunFromContext(contextValidation);
 		return MongoDBDAO.checkObjectExist(InstanceConstants.RUN_ILLUMINA_COLL_NAME, Run.class, 
 				DBQuery.and(DBQuery.is("code", run.code), DBQuery.is("lanes.number", number)));
 	}
+	
+	/**
+	 * Does a lane number exist in a run (from the database data) ? 
+	 * @param contextValidation validation context
+	 * @param run               run
+	 * @param laneNumber        lane number
+	 * @return                  true if the lane exists for the run in the database
+	 */
+	private static boolean isLaneExist(ContextValidation contextValidation, Run run, Integer laneNumber) {
+		return MongoDBDAO.checkObjectExist(InstanceConstants.RUN_ILLUMINA_COLL_NAME, Run.class, 
+				                           DBQuery.and(DBQuery.is("code",         run.code), 
+				                        		       DBQuery.is("lanes.number", laneNumber)));
+	}
 
-	public static void validationLaneReadSetCodes(Integer number, List<String> readSetCodes, ContextValidation contextValidation) {
-		if (readSetCodes != null && readSetCodes.size() > 0) {
-			List<String> readSetCodesTreat = new ArrayList<>();
-			for (int i=0; i< readSetCodes.size(); i++) {
-				ReadSet readSet = MongoDBDAO.findByCode(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, readSetCodes.get(i));
-				if (readSet == null || !number.equals(readSet.laneNumber)){
-					contextValidation.addErrors("readSetCodes["+i+"]",ValidationConstants.ERROR_CODE_NOTEXISTS_MSG,  readSetCodes.get(i), "ReadSet");
-				}
-				if (readSetCodesTreat.contains(readSetCodes.get(i))) {
-					contextValidation.addErrors("readSetCodes["+i+"]",ValidationConstants.ERROR_CODE_DOUBLE_MSG,  readSetCodes.get(i));
-				}
-				readSetCodesTreat.add(readSetCodes.get(i));
+	// ----------------------------------------------------------------
+	// renamed and arguments reordered
+	
+	/**
+	 * Validate that the read set are assigned to a given lane.
+	 * @param number            lane number
+	 * @param readSetCodes      read set codes to validate
+	 * @param contextValidation validation context
+	 * @deprecated use {@link #validateLaneReadSetCodes(ContextValidation, Integer, List)}
+	 */
+	@Deprecated
+	public static void validationLaneReadSetCodes_(Integer number, List<String> readSetCodes, ContextValidation contextValidation) {
+		LaneValidationHelper.validateLaneReadSetCodes(contextValidation, number, readSetCodes);
+	}
+
+//	public static void validationLaneReadSetCodes(Integer number, List<String> readSetCodes, ContextValidation contextValidation) {
+//		if (readSetCodes != null && readSetCodes.size() > 0) {
+//			List<String> readSetCodesTreat = new ArrayList<>();
+//			for (int i=0; i< readSetCodes.size(); i++) {
+//				ReadSet readSet = MongoDBDAO.findByCode(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, readSetCodes.get(i));
+//				if (readSet == null || !number.equals(readSet.laneNumber)) {
+//					contextValidation.addError("readSetCodes["+i+"]",ValidationConstants.ERROR_CODE_NOTEXISTS_MSG,  readSetCodes.get(i), "ReadSet");
+//				}
+//				if (readSetCodesTreat.contains(readSetCodes.get(i))) {
+//					contextValidation.addError("readSetCodes["+i+"]",ValidationConstants.ERROR_CODE_DOUBLE_MSG,  readSetCodes.get(i));
+//				}
+//				readSetCodesTreat.add(readSetCodes.get(i));
+//			}
+//		}
+//	}
+	/**
+	 * Validate that the read set are assigned to a given lane.
+	 * @param contextValidation validation context
+	 * @param number            lane number
+	 * @param readSetCodes      read set codes to validate
+	 */
+	public static void validateLaneReadSetCodes(ContextValidation contextValidation, Integer number, List<String> readSetCodes) {
+		if (CollectionUtils.isEmpty(readSetCodes)) 
+			return;
+		Set<String> readSetCodesTreat = new HashSet<>();
+		for (int i=0; i< readSetCodes.size(); i++) {
+			String  readSetCode = readSetCodes.get(i);
+			ReadSet readSet     = MongoDBDAO.findByCode(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, readSetCode);
+			if (readSet == null || !number.equals(readSet.laneNumber)) {
+				contextValidation.addError("readSetCodes["+i+"]",ValidationConstants.ERROR_CODE_NOTEXISTS_MSG,  readSetCode, "ReadSet");
 			}
+			if (readSetCodesTreat.contains(readSetCode)) {
+				contextValidation.addError("readSetCodes["+i+"]",ValidationConstants.ERROR_CODE_DOUBLE_MSG,  readSetCode);
+			}
+			readSetCodesTreat.add(readSetCode);
 		}
 	}
 
+	// ----------------------------------------------------------------
+	
+	@Deprecated
 	public static void validationLaneProperties(Map<String, PropertyValue> properties,	ContextValidation contextValidation) {
 		Run run = getRunFromContext(contextValidation);
 		try {
-			RunType  runType = RunType.find.findByCode(run.typeCode);
+			RunType  runType = RunType.find.get().findByCode(run.typeCode);
 			if (runType != null) {
 				contextValidation.addKeyToRootKeyName("properties");
 				ValidationHelper.validateProperties(contextValidation, properties, runType.getPropertyDefinitionByLevel(Level.CODE.Lane), true);
@@ -93,14 +211,52 @@ public class LaneValidationHelper extends CommonValidationHelper {
 		}		
 	}
 	
+	/**
+	 * Validate lane properties for a run.
+	 * @param contextValidation validation context
+	 * @param run               run
+	 * @param properties        properties
+	 */
+	public static void validateLaneProperties(ContextValidation contextValidation, Run run, Map<String, PropertyValue> properties) {
+		RunType  runType = RunType.find.get().findByCode(run.typeCode);
+		if (runType != null) {
+			contextValidation.addKeyToRootKeyName("properties");
+			ValidationHelper.validateProperties(contextValidation, properties, runType.getPropertyDefinitionByLevel(Level.CODE.Lane), true);
+			contextValidation.removeKeyFromRootKeyName("properties");
+		}
+	}
+	
+	/**
+	 * Get the run context parameter (context parameter "run").
+	 * @param contextValidation validation context
+	 * @return                  run from context
+	 */
+	@Deprecated
 	private static Run getRunFromContext(ContextValidation contextValidation) {
-		return getObjectFromContext("run", Run.class, contextValidation);
+//		return getObjectFromContext("run", Run.class, contextValidation);
+		return contextValidation.getTypedObject("run");
 	}
 
+	/**
+	 * Validate a valuation for an implicit run parameter (context parameter "run").
+	 * @param valuation         valuation to validate
+	 * @param contextValidation validation context
+	 * @deprecated use explicit run parameter {@link #validateLaneValuation(ContextValidation, Run, Valuation)}
+	 */
+	@Deprecated
 	public static void validateLaneValuation(Valuation valuation, ContextValidation contextValidation) {
 		Run run = getRunFromContext(contextValidation);
-		validateValuation(run.typeCode, valuation, contextValidation);	
-		
+		validateValuationRequired(contextValidation, run.typeCode, valuation);		
+	}
+	
+	/**
+	 * Validate a lane valuation in a run context.
+	 * @param contextValidation validation context
+	 * @param run               run
+	 * @param valuation         valuation to validate
+	 */
+	public static void validateLaneValuation(ContextValidation contextValidation, Run run, Valuation valuation) {
+		validateValuationRequired(contextValidation, run.typeCode, valuation);		
 	}
 
 }

@@ -26,27 +26,25 @@ public class Input extends AbstractInput {
 	@Override
 	public Experiment importFile(Experiment experiment,PropertyFileValue pfv, ContextValidation contextValidation) throws Exception {	
 			
-//		InputStream is = new ByteArrayInputStream(pfv.value);
-		InputStream is = new ByteArrayInputStream(pfv.byteValue());
-		
-		CSVReader reader = new CSVReader(new InputStreamReader(is));
-		
-		List<String[]> all = reader.readAll();
 		Map<String, String[]> allMap = new HashMap<>();
-		
-		all.forEach(array -> {
-			//Logger.debug(Arrays.asList(array).toString());
-			allMap.put(array[2], array);   //colonne 2 de la ligne=>clé du hash, toute ligne=> value du hash
-		});
-		reader.close();
+		try (InputStream is = new ByteArrayInputStream(pfv.byteValue());
+		     CSVReader reader = new CSVReader(new InputStreamReader(is))) {
+
+			List<String[]> all = reader.readAll();
+
+			all.forEach(array -> {
+				//Logger.debug(Arrays.asList(array).toString());
+				allMap.put(array[2], array);   //colonne 2 de la ligne=>clé du hash, toute ligne=> value du hash
+			});
+		}
 		
 		// reinitialiser le compteur a chaque import
 		icuCodeFound=0;
 		
-		experiment.atomicTransfertMethods.forEach(atm ->{
+		experiment.atomicTransfertMethods.forEach(atm -> {
 			InputContainerUsed icu = atm.inputContainerUseds.get(0);
 			
-			if(allMap.containsKey(icu.code)){
+			if (allMap.containsKey(icu.code)) {
 				String[] data = allMap.get(icu.code);
 				
 				PropertySingleValue clusterDensity = getPSV(icu, "clusterDensity");
@@ -62,7 +60,6 @@ public class Input extends AbstractInput {
 				PropertySingleValue passingFilter = getPSV(icu, "passingFilter");
 				passingFilter.value = Double.parseDouble(data[5].replace (",", "."));
 				
-
 				String[] alignedPercentage =data[6].split("/");	
 				PropertySingleValue R1AlignedPercentage = getPSV(icu, "R1AlignedPercentage");
 				R1AlignedPercentage.value = Double.parseDouble(alignedPercentage[0].replace (",", "."));
@@ -94,7 +91,7 @@ public class Input extends AbstractInput {
 			}
 		});
 
-		if (icuCodeFound == 0){ contextValidation.addErrors("Erreurs fichier","experiments.msg.import.data.notmatching");}
+		if (icuCodeFound == 0){ contextValidation.addError("Erreurs fichier","experiments.msg.import.data.notmatching");}
 
 		return experiment;
 	}

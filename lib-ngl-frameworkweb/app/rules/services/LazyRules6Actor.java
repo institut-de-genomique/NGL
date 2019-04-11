@@ -1,7 +1,6 @@
 package rules.services;
 
 import java.util.List;
-// import java.util.function.Supplier;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -9,14 +8,14 @@ import javax.inject.Singleton;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
+import fr.cea.ig.lfw.LFWConfig;
 import fr.cea.ig.lfw.utils.LazyLambdaSupplier;
-import fr.cea.ig.play.migration.NGLConfig;
 
 @Singleton
 class LazyRulesKey extends LazyLambdaSupplier<String> {
 	
 	@Inject
-	public LazyRulesKey(NGLConfig config) {
+	public LazyRulesKey(LFWConfig config) {
 		super(() -> config.getRulesKey());
 	}
 	

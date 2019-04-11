@@ -9,6 +9,7 @@ GET    	/api/projects/:code               				controllers.projects.api.Projects.
 HEAD	/api/projects/:code               				controllers.projects.api.Projects.head(code: java.lang.String)
 POST   	/api/projects									controllers.projects.api.Projects.save()
 PUT   	/api/projects/:code 							controllers.projects.api.Projects.update(code: java.lang.String)
+PUT		/api/projects/:code/state						controllers.projects.api.Projects.updateState(code:java.lang.String)
 #DELETE	/api/projects/:code								controllers.projects.api.Projects.delete(code:java.lang.String)
 
 
@@ -20,3 +21,11 @@ POST   	/api/umbrellaprojects							controllers.projects.api.UmbrellaProjects.sa
 PUT   	/api/umbrellaprojects/:code 					controllers.projects.api.UmbrellaProjects.update(code: java.lang.String)
 #DELETE	/api/umbrellaprojects/:code						controllers.projects.api.UmbrellaProjects.delete(code:java.lang.String)
 
+#MembersProject api
+#TODO EJACOBY AD
+#GET		/api/membersprojects/:code						controllers.projects.api.MembersProjects.get(code: java.lang.String)
+#POST	/api/membersprojects							controllers.projects.api.MembersProjects.save()
+#PUT		/api/membersprojects							controllers.projects.api.MembersProjects.update()
+
+#GET		/api/usermembersprojects						controllers.projects.api.UserMembersProjects.list()
+#GET		/api/usermembersprojects/:code					controllers.projects.api.UserMembersProjects.get(code: java.lang.String)

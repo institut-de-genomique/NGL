@@ -19,7 +19,6 @@ import models.laboratory.reagent.description.KitCatalog;
 import models.laboratory.reagent.description.ReagentCatalog;
 import models.laboratory.reagent.instance.ReagentUsed;
 import models.utils.InstanceConstants;
-//import play.Logger;
 import validation.ContextValidation;
 
 public class Input extends AbstractInput {
@@ -73,7 +72,7 @@ public class Input extends AbstractInput {
 				otherCatalog= new ExperimentCatalog (otherExperimentTypeCode);
 			}
 		} catch (CatalogException e) {
-			contextValidation.addErrors("Erreurs Catalogue",e.getMessage());
+			contextValidation.addError("Erreurs Catalogue",e.getMessage());
 			return experiment;
 		}	
 		
@@ -82,7 +81,6 @@ public class Input extends AbstractInput {
 		
 //		byte[] ibuf = pfv.value;
 		byte[] ibuf = pfv.byteValue();
-		InputStream is = new ByteArrayInputStream(ibuf);
 		
 		// le fichier CSV sorti par le logiciel Labx est en ISO-8859 ( valeur retournee par la commande "file" Linux)
 		String charset = "ISO-8859-15";
@@ -94,49 +92,50 @@ public class Input extends AbstractInput {
 		//	charset = "UTF-16LE";
 		// }
 
-		BufferedReader reader = new BufferedReader(new InputStreamReader(is, charset));
-		
 		// HashMap pour les reagentUsed valides au cours du parsing
 		Map<String,ReagentUsed> parsedReagentsMap = new HashMap<>(0);
-		
+
 		// 30/11/2017 creer un hashMap distinct pour les box permet de ne pas creer les box a la fin
 		Map<String,ReagentUsed> parsedBoxesMap = new HashMap<>(0);
-				
-		int n = 0;
-		boolean lastResult=false;
-		String line="";	
+
+		try (InputStream is = new ByteArrayInputStream(ibuf);
+			 BufferedReader reader = new BufferedReader(new InputStreamReader(is, charset))) {
 		
-		while (((line = reader.readLine()) != null) && !lastResult ){	 
-		
-			// attention si le fichier vient d'une machine avec LOCALE = FR les décimaux utilisent la virgule!!!
-			String[] cols = line.replace (",", ".").split(";");
-			
-			if (n == 0) {	
-				if (!firstLineCorrect(cols, contextValidation) ){
-					break;
-				}
-			} else if (n == 5) {
-				if (!fifthLineCorrect(cols, experiment, contextValidation) ){
-					break;
-				}
-			} else if (n > 5 ) {
-				// ligne "Résultats principaux..." = fin des données a parser
-				if ( cols[0].trim().matches("Résultats principaux(.*)")){
-					lastResult=true;
-				} else {
-					if ( !cols[0].trim().equals("") ){
-						// section boîtes
-						processBoxSectionLine(n, cols, currCatalog, otherCatalog, parsedReagentsMap, parsedBoxesMap, contextValidation ) ;
-					} else if ( !cols[1].trim().equals("Position") ){
-						//section resultats
-						processPositionSectionLine(n, cols, currCatalog, otherCatalog, parsedReagentsMap, parsedBoxesMap, contextValidation);
+			int n = 0;
+			boolean lastResult=false;
+			String line="";	
+
+			while (((line = reader.readLine()) != null) && !lastResult ){	 
+
+				// attention si le fichier vient d'une machine avec LOCALE = FR les décimaux utilisent la virgule!!!
+				String[] cols = line.replace (",", ".").split(";");
+
+				if (n == 0) {	
+					if (!firstLineCorrect(cols, contextValidation) ){
+						break;
+					}
+				} else if (n == 5) {
+					if (!fifthLineCorrect(cols, experiment, contextValidation) ){
+						break;
+					}
+				} else if (n > 5 ) {
+					// ligne "Résultats principaux..." = fin des données a parser
+					if ( cols[0].trim().matches("Résultats principaux(.*)")){
+						lastResult=true;
+					} else {
+						if ( !cols[0].trim().equals("") ){
+							// section boîtes
+							processBoxSectionLine(n, cols, currCatalog, otherCatalog, parsedReagentsMap, parsedBoxesMap, contextValidation ) ;
+						} else if ( !cols[1].trim().equals("Position") ){
+							//section resultats
+							processPositionSectionLine(n, cols, currCatalog, otherCatalog, parsedReagentsMap, parsedBoxesMap, contextValidation);
+						}
 					}
 				}
-			}
-			n++;
-		}//end while
+				n++;
+			}//end while
+		}
 		
-		reader.close();
 		logger.debug ("------ END PARSING METTLER FILE --------");
 			
 		//-3---------- creer les reagents used parsés
@@ -178,7 +177,7 @@ public class Input extends AbstractInput {
 			
 		//  verifier que c'est bien un fichier LabX pour sequençage
 		if ( !cols[0].trim().equals("Compte rendu de séquençage") ) {
-			contextValidation.addErrors("Erreurs fichier","experiments.msg.import.header-label.missing","1", "Compte rendu de séquençage");
+			contextValidation.addError("Erreurs fichier","experiments.msg.import.header-label.missing","1", "Compte rendu de séquençage");
 			return false ; // si ce n'est pas le bon type de fichier la suite va sortir des erreurs incomprehensibles...terminer
 		}
 		return true;
@@ -197,14 +196,14 @@ public class Input extends AbstractInput {
 			if ( experiment.typeCode.equals("prepa-fc-ordered") ) {	
 				// barcode FC dans propriete d'instrument (ou container out c'est pareil)
 				if ( !experiment.instrumentProperties.get("containerSupportCode").value.equals(flowcellId))  {
-				    contextValidation.addErrors("Erreurs fichier", "ligne 6: Le code flowcell ("+flowcellId+") ne correspond pas à celui de l'expérience.");
+				    contextValidation.addError("Erreurs fichier", "ligne 6: Le code flowcell ("+flowcellId+") ne correspond pas à celui de l'expérience.");
 					return false;
 				}
 			} else {
 				// ("illumina-depot").equals.experiment.typeCode
 				// barcode FC dans container in inputContainerSupportcodes
 				if ( ! experiment.inputContainerSupportCodes.contains(flowcellId) )  {
-				    contextValidation.addErrors("Erreurs fichier", "ligne 6: Le code flowcell ("+flowcellId+") ne correspond pas à celui de l'expérience.");
+				    contextValidation.addError("Erreurs fichier", "ligne 6: Le code flowcell ("+flowcellId+") ne correspond pas à celui de l'expérience.");
 					return false;
 				}
 			}		               
@@ -212,7 +211,7 @@ public class Input extends AbstractInput {
 			return true;
 			
 		} else {	
-			contextValidation.addErrors("Erreurs fichier","ligne 6:'"+ cols[0].trim() + "': type de fichier LabX non pris en charge.");
+			contextValidation.addError("Erreurs fichier","ligne 6:'"+ cols[0].trim() + "': type de fichier LabX non pris en charge.");
 			return false;
 		} 
 	}
@@ -252,7 +251,7 @@ public class Input extends AbstractInput {
 		List<BoxCatalog> matchListBox = MongoDBDAO.find(InstanceConstants.REAGENT_CATALOG_COLL_NAME, BoxCatalog.class, (DBQuery.is("category", "Box").and(DBQuery.is("name", fileItemName)))).toList();
 		
 		if (matchListReagent.size() == 0 && matchListBox.size() == 0 ) {
-			contextValidation.addErrors("Erreurs fichier","ligne "+ (n+1) +": '"+ fileItemName+ "': n'existe pas dans le catalogue (ni boîte, ni réactif).");
+			contextValidation.addError("Erreurs fichier","ligne "+ (n+1) +": '"+ fileItemName+ "': n'existe pas dans le catalogue (ni boîte, ni réactif).");
 		} else if (matchListReagent.size() == 0 && matchListBox.size() > 0 ) {  // c'est une boîte; 
 			//Logger.debug(fileItemName+ "=BOITE...");
 			createBoxtypeReagentUsed( n, fileItemName, fileItemCode, currCatalog, otherCatalog, parsedBoxesMap, contextValidation);
@@ -261,7 +260,7 @@ public class Input extends AbstractInput {
 			createReagtypeReagentUsed( n, null, fileItemName, fileItemCode, currCatalog, otherCatalog, parsedReagentsMap, matchListReagent, contextValidation);
 		} else {
 			// boîte ET reactif de même nom
-			contextValidation.addErrors("Erreurs fichier","ligne "+ (n+1) +": '"+ fileItemName+ "': un réactif et une boîte ont le même nom.");
+			contextValidation.addError("Erreurs fichier","ligne "+ (n+1) +": '"+ fileItemName+ "': un réactif et une boîte ont le même nom.");
 		}
 		return; 
 	}
@@ -276,7 +275,7 @@ public class Input extends AbstractInput {
 		
 		// !!! si des colonnes sont vides il y a coalescence et on obtient un arrayOutOfBonds....
 		if ( cols.length < 16) {
-			contextValidation.addErrors("Erreurs fichier","ligne "+ (n+1) +": nombre de colonne incorrect.");
+			contextValidation.addError("Erreurs fichier","ligne "+ (n+1) +": nombre de colonne incorrect.");
 			return;
 		}
 		
@@ -291,7 +290,7 @@ public class Input extends AbstractInput {
 		List<ReagentCatalog>  matchListReagent= MongoDBDAO.find(InstanceConstants.REAGENT_CATALOG_COLL_NAME, ReagentCatalog.class, DBQuery.is("category", "Reagent").and(DBQuery.is("name", fileReagentName))).toList();
 
 		if (matchListReagent.size() == 0) {
-			contextValidation.addErrors("Erreurs fichier","ligne "+ (n+1) +": '"+ fileReagentName+ "': ce réactif n'existe pas dans le catalogue.");
+			contextValidation.addError("Erreurs fichier","ligne "+ (n+1) +": '"+ fileReagentName+ "': ce réactif n'existe pas dans le catalogue.");
 			return;
 		// 08/01/2018 suppression unicité dans le catalogue car on le recherche dans les boîtes trouvees
 		//} 
@@ -366,7 +365,7 @@ public class Input extends AbstractInput {
 			} else {
 				// le même reactif existe deja dans une autre boîte active !!
 				//Logger.debug ("   ....REACTIF EN DOUBLON");
-				contextValidation.addErrors("Erreurs catalogue","le réactif '"+ reagent.name+ "' existe dans plusieurs boîtes actives pour ce type d'expérience.");	
+				contextValidation.addError("Erreurs catalogue","le réactif '"+ reagent.name+ "' existe dans plusieurs boîtes actives pour ce type d'expérience.");	
 			}
 		}
 		return;
@@ -418,7 +417,7 @@ public class Input extends AbstractInput {
 		else
 		{
 			//  boîte inactive soit dans kit inactif  soit pas relié aux 2 expériences impliquees...
-			contextValidation.addErrors("Erreurs fichier","ligne "+ (n+1) +": '"+ name+ "': boîte inactive ou dans un kit inactif ou non relié aux type d'expériences attendus.");
+			contextValidation.addError("Erreurs fichier","ligne "+ (n+1) +": '"+ name+ "': boîte inactive ou dans un kit inactif ou non relié aux type d'expériences attendus.");
 		}
 	
 	return ;
@@ -551,12 +550,12 @@ public class Input extends AbstractInput {
 					
 					} else {
 						//Logger.debug("Boite "+ reagent.boxCatalogCode +"pas trouvee dans currCatalog.boxMap");
-						contextValidation.addErrors("Erreurs fichier","ligne "+ (n+1) +": '"+ name+ "': boîte du réactif inactive ou dans un kit inactif ou non relié aux types d'expériences attendus.");
+						contextValidation.addError("Erreurs fichier","ligne "+ (n+1) +": '"+ name+ "': boîte du réactif inactive ou dans un kit inactif ou non relié aux types d'expériences attendus.");
 					}
 				}	
 			} else {
 				//Logger.debug("plusieurs reactifs avec ce nom...");
-				contextValidation.addErrors("Erreurs fichier","ligne "+ (n+1) +": '"+ name+ "': plusieurs réactifs de même nom dans le catalogue et boîte manquante dans le fichier.");
+				contextValidation.addError("Erreurs fichier","ligne "+ (n+1) +": '"+ name+ "': plusieurs réactifs de même nom dans le catalogue et boîte manquante dans le fichier.");
 			}
 		}
 		

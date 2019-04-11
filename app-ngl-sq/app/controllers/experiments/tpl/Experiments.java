@@ -4,12 +4,12 @@ import java.lang.reflect.Method;
 
 import javax.inject.Inject;
 
+import controllers.NGLController;
 //import controllers.NGLBaseController;
 import fr.cea.ig.authentication.Authenticated;
 import fr.cea.ig.authorization.Authorized;
 import fr.cea.ig.lfw.Historized;
 import fr.cea.ig.ngl.NGLApplication;
-import fr.cea.ig.ngl.NGLController;
 import fr.cea.ig.ngl.support.NGLForms;
 import fr.cea.ig.ngl.support.NGLJavascript;
 import models.laboratory.experiment.description.ExperimentCategory;
@@ -123,7 +123,7 @@ public class Experiments extends NGLController
 			outputCategoryCode = outputCategoryCode + "_" + experimentCategoryCode;			
 		}
 		
-		String institute = DescriptionHelper.getInstitute().get(0);	
+		String institute = DescriptionHelper.getInstitutes().get(0);	
 		// logger.info(atomicType+" / "+outputCategoryCode+" / "+experimentType+" / "+institute);
 		logger.info("{}/{}/{}/{}",atomicType,outputCategoryCode,experimentType,institute);
 		

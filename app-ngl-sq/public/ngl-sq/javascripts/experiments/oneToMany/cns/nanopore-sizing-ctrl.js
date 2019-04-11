@@ -337,6 +337,10 @@ angular.module('home').controller('NanoporeSizingCtrl',['$scope', '$parse', 'atm
 						||  icu.fromTransformationTypeCodes.indexOf('ext-to-nanopore-process-dev-2') > -1
 						||  icu.fromTransformationTypeCodes.indexOf('ext-to-nanopore-frg-rep-lib-depot') > -1
 						||  icu.fromTransformationTypeCodes.indexOf('ext-to-nanopore-frg-lib-depot') > -1
+					
+						||  icu.fromTransformationTypeCodes.indexOf('ext-to-nanopore-frg-rependprep-lig-depot-process') > -1
+						||  icu.fromTransformationTypeCodes.indexOf('ext-to-nanopore-rependprep-lig-depot-process') > -1
+						
 						||  icu.fromTransformationTypeCodes.indexOf('ext-to-nanopore-process-library-no-frg') > -1
 				)
 				&& ocu.size && ocu.size.value){

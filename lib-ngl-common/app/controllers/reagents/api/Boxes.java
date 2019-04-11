@@ -1,8 +1,5 @@
 package controllers.reagents.api;
 
-// import static play.data.Form.form;
-//import static fr.cea.ig.play.IGGlobals.form;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -20,7 +17,7 @@ import com.mongodb.BasicDBObject;
 import controllers.DocumentController;
 import fr.cea.ig.MongoDBDAO;
 import fr.cea.ig.MongoDBResult;
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import models.laboratory.common.instance.TraceInformation;
 import models.laboratory.reagent.description.AbstractCatalog;
 import models.laboratory.reagent.instance.Box;
@@ -28,7 +25,6 @@ import models.laboratory.reagent.utils.ReagentCodeHelper;
 import models.utils.InstanceConstants;
 import models.utils.InstanceHelpers;
 import models.utils.ListObject;
-import play.Logger;
 import play.data.Form;
 import play.libs.Json;
 import play.mvc.Result;
@@ -37,27 +33,34 @@ import validation.ContextValidation;
 import views.components.datatable.DatatableResponse;
 
 public class Boxes extends DocumentController<Box> {
-	
-	@Inject
-	public Boxes(NGLContext ctx) {
-		super(ctx,InstanceConstants.REAGENT_INSTANCE_COLL_NAME, Box.class);
-		boxSearchForm = ctx.form(BoxSearchForm.class);
-	}
 
-	private final /*static*/ Form<BoxSearchForm> boxSearchForm;// = form(BoxSearchForm.class);
+	private static final play.Logger.ALogger logger = play.Logger.of(Boxes.class);
+	
+	private final Form<BoxSearchForm> boxSearchForm;
+
+//	@Inject
+//	public Boxes(NGLContext ctx) {
+//		super(ctx,InstanceConstants.REAGENT_INSTANCE_COLL_NAME, Box.class);
+//		boxSearchForm = ctx.form(BoxSearchForm.class);
+//	}
+
+	@Inject
+	public Boxes(NGLApplication app) {
+		super(app,InstanceConstants.REAGENT_INSTANCE_COLL_NAME, Box.class);
+		boxSearchForm = app.form(BoxSearchForm.class);
+	}
 
 	@Override
 	public Result get(String code){
 		Box box = getObject(code);
-		if(box != null){
+		if (box != null) {
 			return ok(Json.toJson(box));
 		}
-
 		return badRequest();
 	}
 
 	@Override
-	public Result delete(String code){
+	public Result delete(String code) {
 		MongoDBDAO.delete(InstanceConstants.REAGENT_INSTANCE_COLL_NAME, AbstractCatalog.class, DBQuery.or(DBQuery.is("code", code),DBQuery.is("boxCode", code)));
 		return ok();
 	}
@@ -74,9 +77,9 @@ public class Boxes extends DocumentController<Box> {
 		box.traceInformation.creationDate = new Date();
 		
 //		ContextValidation contextValidation = new ContextValidation(getCurrentUser(), boxFilledForm.errors());
-		ContextValidation contextValidation = new ContextValidation(getCurrentUser(), boxFilledForm);
-		contextValidation.setCreationMode();
-
+//		ContextValidation contextValidation = new ContextValidation(getCurrentUser(), boxFilledForm);
+//		contextValidation.setCreationMode();
+		ContextValidation contextValidation = ContextValidation.createCreationContext(getCurrentUser(), boxFilledForm);
 		//When the user want to declare the box only, the kitCode = the boxCode
 		//in order to search it in the interface
 		if (box.declarationType.equals("box")) {
@@ -99,9 +102,9 @@ public class Boxes extends DocumentController<Box> {
 		box.traceInformation.modifyDate = new Date();
 
 //		ContextValidation contextValidation = new ContextValidation(getCurrentUser(), boxFilledForm.errors());
-		ContextValidation contextValidation = new ContextValidation(getCurrentUser(), boxFilledForm);
-		contextValidation.setUpdateMode();
-
+//		ContextValidation contextValidation = new ContextValidation(getCurrentUser(), boxFilledForm);
+//		contextValidation.setUpdateMode();
+		ContextValidation contextValidation = ContextValidation.createUpdateContext(getCurrentUser(), boxFilledForm);
 //		box = (Box)InstanceHelpers.save(InstanceConstants.REAGENT_INSTANCE_COLL_NAME, box, contextValidation);
 		box = InstanceHelpers.save(InstanceConstants.REAGENT_INSTANCE_COLL_NAME, box, contextValidation);
 		if (!contextValidation.hasErrors()) 
@@ -174,7 +177,7 @@ public class Boxes extends DocumentController<Box> {
 		}
 		
 		if(boxSearch.toExpirationDate != null){
-			Logger.info((DateUtils.addDays(boxSearch.toExpirationDate, 1)).toString());
+			logger.info((DateUtils.addDays(boxSearch.toExpirationDate, 1)).toString());
 			queryElts.add(DBQuery.lessThanEquals("expirationDate", (DateUtils.addDays(boxSearch.toExpirationDate, 1))));
 		}
 		

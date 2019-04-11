@@ -10,6 +10,7 @@ import fr.cea.ig.ngl.dao.api.APIException;
 import fr.cea.ig.ngl.dao.api.APIValidationException;
 import fr.cea.ig.ngl.dao.api.GenericAPI;
 import fr.cea.ig.ngl.dao.sra.ExternalSampleDAO;
+import fr.cea.ig.play.IGGlobals;
 import models.sra.submit.common.instance.ExternalSample;
 
 
@@ -44,6 +45,10 @@ public class ExternalSampleAPI extends GenericAPI<ExternalSampleDAO, ExternalSam
 		return dao.getObject(sampleCode);
 	}
 	
+	public void dao_saveObject(ExternalSample externalSample) {
+		dao.saveObject(externalSample);
+
+	}
 	/*-------------------------------------------------------------------------------------------------*/
 
 	@Override
@@ -79,4 +84,14 @@ public class ExternalSampleAPI extends GenericAPI<ExternalSampleDAO, ExternalSam
 		return null;
 	}	
 
+	/**
+	 * Acces à une instance globale de ExternalSampleAPI, qui permet de remplacer les appels
+	 * à MongoDBDAO qui est une globale, dans un contexte ou on ne peut pas injecter. 
+	 * Exemple dans objets du domaine (sra.Experiment, ...)
+	 * @return ExternalSampleAPI
+	 */
+	public static ExternalSampleAPI get() {
+		return IGGlobals.instanceOf(ExternalSampleAPI.class);
+	}
+	
 }

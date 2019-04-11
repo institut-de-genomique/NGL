@@ -8,7 +8,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import controllers.APICommonController;
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import lims.models.experiment.ContainerSupport;
 import lims.models.experiment.Experiment;
 import lims.models.instrument.Instrument;
@@ -20,19 +20,27 @@ import play.mvc.Result;
 //import controllers.CommonController;
 
 /**
- * Extract Information from the LIMS Sequencing
+ * Extract Information from the LIMS Sequencing.
+ * 
  * @author galbini
  *
  */
-public class LimsInformations  extends  APICommonController<Experiment> { //CommonController {
+public class LimsInformations  extends  APICommonController<Experiment> {
 	
-	private final /*static*/ Form<Experiment> experimentForm; // = form(Experiment.class);
+	private final Form<Experiment> experimentForm;
 	
+//	@Inject
+//	public LimsInformations(NGLContext ctx) {
+//		super(ctx, Experiment.class);
+//		experimentForm = ctx.form(Experiment.class);
+//	}
+
 	@Inject
-	public LimsInformations(NGLContext ctx) {
+	public LimsInformations(NGLApplication ctx) {
 		super(ctx, Experiment.class);
 		experimentForm = ctx.form(Experiment.class);
 	}
+
 	/*
 	 * Return the list of sequencers
 	 * @return

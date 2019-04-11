@@ -1,8 +1,5 @@
 package controllers.reagents.api;
 
-// import static play.data.Form.form;
-//import static fr.cea.ig.play.IGGlobals.form;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -21,7 +18,7 @@ import com.mongodb.BasicDBObject;
 import controllers.DocumentController;
 import fr.cea.ig.MongoDBDAO;
 import fr.cea.ig.MongoDBResult;
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import models.laboratory.common.instance.TraceInformation;
 import models.laboratory.reagent.description.AbstractCatalog;
 import models.laboratory.reagent.instance.Kit;
@@ -36,14 +33,20 @@ import play.mvc.Results;
 import validation.ContextValidation;
 import views.components.datatable.DatatableResponse;
 
-public class Kits extends DocumentController<Kit>{
+public class Kits extends DocumentController<Kit> {
 
-	private final /*static*/ Form<KitSearchForm> kitSearchForm; // = form(KitSearchForm.class);
+	private final Form<KitSearchForm> kitSearchForm;
+
+//	@Inject
+//	public Kits(NGLContext ctx) {
+//		super(ctx,InstanceConstants.REAGENT_INSTANCE_COLL_NAME, Kit.class);
+//		kitSearchForm = ctx.form(KitSearchForm.class);
+//	}
 
 	@Inject
-	public Kits(NGLContext ctx) {
-		super(ctx,InstanceConstants.REAGENT_INSTANCE_COLL_NAME, Kit.class);
-		kitSearchForm = ctx.form(KitSearchForm.class);
+	public Kits(NGLApplication app) {
+		super(app, InstanceConstants.REAGENT_INSTANCE_COLL_NAME, Kit.class);
+		kitSearchForm = app.form(KitSearchForm.class);
 	}
 
 	@Override
@@ -60,7 +63,7 @@ public class Kits extends DocumentController<Kit>{
 		return ok();
 	}
 
-	public Result save(){
+	public Result save() {
 		Form<Kit> kitFilledForm = getMainFilledForm();
 
 		Kit kit = kitFilledForm.get();
@@ -70,8 +73,9 @@ public class Kits extends DocumentController<Kit>{
 		kit.traceInformation.creationDate = new Date();
 
 //		ContextValidation contextValidation = new ContextValidation(getCurrentUser(), kitFilledForm.errors());
-		ContextValidation contextValidation = new ContextValidation(getCurrentUser(), kitFilledForm);
-		contextValidation.setCreationMode();
+//		ContextValidation contextValidation = new ContextValidation(getCurrentUser(), kitFilledForm);
+//		contextValidation.setCreationMode();
+		ContextValidation contextValidation = ContextValidation.createCreationContext(getCurrentUser(), kitFilledForm);
 		/*if(ValidationHelper.required(contextValidation, kit.name, "name")){
 				kitCatalog.code = CodeHelper.getInstance().generateKitCatalogCode(kitCatalog.name);
 			}*/
@@ -92,8 +96,9 @@ public class Kits extends DocumentController<Kit>{
 		kit.traceInformation.modifyDate = new Date();
 		
 //		ContextValidation contextValidation = new ContextValidation(getCurrentUser(), kitFilledForm.errors());
-		ContextValidation contextValidation = new ContextValidation(getCurrentUser(), kitFilledForm);
-		contextValidation.setUpdateMode();
+//		ContextValidation contextValidation = new ContextValidation(getCurrentUser(), kitFilledForm);
+//		contextValidation.setUpdateMode();
+		ContextValidation contextValidation = ContextValidation.createUpdateContext(getCurrentUser(), kitFilledForm);
 
 //		kit = (Kit)InstanceHelpers.save(InstanceConstants.REAGENT_INSTANCE_COLL_NAME, kit, contextValidation);
 		kit = InstanceHelpers.save(InstanceConstants.REAGENT_INSTANCE_COLL_NAME, kit, contextValidation);
@@ -103,7 +108,7 @@ public class Kits extends DocumentController<Kit>{
 		// legit, spaghetti above
 	}
 
-	public Result list(){
+	public Result list() {
 		Form<KitSearchForm> kitFilledForm = filledFormQueryString(kitSearchForm,KitSearchForm.class);
 		KitSearchForm kitSearch = kitFilledForm.get();
 		BasicDBObject keys = getKeys(kitSearch);

@@ -2,11 +2,11 @@ package controllers.containers.tpl;
 
 import javax.inject.Inject;
 
+import controllers.NGLController;
 import fr.cea.ig.authentication.Authenticated;
 import fr.cea.ig.authorization.Authorized;
 import fr.cea.ig.lfw.Historized;
 import fr.cea.ig.ngl.NGLApplication;
-import fr.cea.ig.ngl.NGLController;
 import fr.cea.ig.ngl.support.NGLJavascript;
 import play.mvc.Result;
 import views.html.container.details;
@@ -87,6 +87,7 @@ public class Containers extends NGLController implements NGLJavascript { // NGLB
                 		controllers.containers.api.routes.javascript.ContainerSupports.list(),
                 		controllers.containers.api.routes.javascript.ContainerSupports.saveCode(),
                 		controllers.containers.api.routes.javascript.Containers.updateStateBatch(),
+                		controllers.containers.api.routes.javascript.Containers.updateState(),
                 		controllers.reporting.api.routes.javascript.ReportingConfigurations.list(),
                 		controllers.reporting.api.routes.javascript.ReportingConfigurations.get(),
                 		controllers.reporting.api.routes.javascript.ReportingConfigurations.save(),

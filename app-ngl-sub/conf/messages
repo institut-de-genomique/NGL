@@ -135,7 +135,7 @@ sample.state.code=Etat
 sample.title=Titre
 sample.description=Déscription
 sample.clone=Clone
-
+sample.attributes=Attributes
 sample.taxonId= * identifiant du taxon
 sample.commonName=Nom commun
 sample.scientificName=* Nom scientifique
@@ -188,6 +188,9 @@ documentation.userFileReadSet=Fichier userFileReadSet
 documentation.userFileExperiments=Fichier userFileExperiments
 documentation.userFileSamples=Fichier userFileSamples
 documentation.userFileCloneToAc=Fichier userFileCloneToAc
+documentation.sampleAttributes=Champs attributes du sample
+documentation.visibiliteEBI_study=Visibilité des informations du study à l EBI
+documentation.visibiliteEBI_sample=Visibilité des informations du sample à l EBI
 
 button.save=Save
 button.reset=Reset
@@ -208,7 +211,12 @@ authentification.dropdown_list.profile=Profil
 authentification.dropdown_list.signout=Deconnexion
 
 date.format=dd/MM/yyyy
-
-
+traceInformation.creationDate=Date de création
+study.traceInformation.creationDate=Date de création
+experiment.traceInformation.creationDate=Date de création de SRA.experiment
+run.traceInformation.creationDate=Date de création de SRA.run
+sample.traceInformation.creationDate=Date de création de SRA.sample
+submission.traceInformation.creationDate=Date de création
+state.NONE=Non associé à une soumission.
 
 

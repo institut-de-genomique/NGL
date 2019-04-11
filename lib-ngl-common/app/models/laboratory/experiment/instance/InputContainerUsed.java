@@ -2,21 +2,21 @@ package models.laboratory.experiment.instance;
 
 import java.util.Set;
 
-// import play.Logger;
 import models.laboratory.common.description.Level;
 import models.laboratory.common.instance.State;
 import models.laboratory.common.instance.TBoolean;
 import models.laboratory.common.instance.Valuation;
 import models.laboratory.common.instance.property.PropertySingleValue;
 import models.laboratory.container.instance.Container;
-import models.utils.InstanceConstants;
+import models.laboratory.instrument.instance.InstrumentUsed;
 import validation.ContextValidation;
+import validation.common.instance.CommonValidationHelper;
 import validation.container.instance.ContainerValidationHelper;
 import validation.experiment.instance.ContainerUsedValidationHelper;
 
 public class InputContainerUsed extends AbstractContainerUsed {
 	
-	public Double percentage; //percentage of input in the final output
+	public Double percentage; // percentage of input in the final output
 	
 	public Set<String> projectCodes; 
 	public Set<String> sampleCodes; 
@@ -25,76 +25,63 @@ public class InputContainerUsed extends AbstractContainerUsed {
 	public Set<String> processTypeCodes;
 	public Set<String> processCodes;
 	
-	/*used in QualityControl to copy new attribut into input container attribute*/
+	public String fromPurificationTypeCode;
+	public String fromTransfertTypeCode;
+	
+	/* used in QualityControl to copy new attribute into input container attribute */
 	public PropertySingleValue newVolume;        
 	public PropertySingleValue newConcentration; 
 	public PropertySingleValue newQuantity; 	
 	public PropertySingleValue newSize; 
 	
-	
-	public Valuation valuation; //only on input because qc are to-void experiment !
+	public Valuation valuation; // only on input because qc are to-void experiment !
 	public TBoolean copyValuationToInput = TBoolean.UNSET;
-	//keep for some html page pool or flowcell
+	// keep for some HTML page pool or flowcell
 	public State state;
 	
 	public InputContainerUsed() {
-		super();
-		
 	}
 	
 	public InputContainerUsed(String code) {
 		super(code);
-		
 	}
 
-	
+	/**
+	 * Validate this input container used
+	 * (context parameters {@link CommonValidationHelper#FIELD_TYPE_CODE} {@link CommonValidationHelper#FIELD_STATE_CODE}
+	 * {@link CommonValidationHelper#FIELD_INST_USED}).
+	 * @deprecated use {@link #validate(ContextValidation, String, String, InstrumentUsed)}
+	 */
+	@Deprecated
 	@Override
 	public void validate(ContextValidation contextValidation) {
-		// long t0 = System.currentTimeMillis();
-		Container container = ContainerUsedValidationHelper.validateExistInstanceCode(contextValidation, code, Container.class, InstanceConstants.CONTAINER_COLL_NAME, true);
-		
-		// long t1 = System.currentTimeMillis();
-		ContainerUsedValidationHelper.compareInputContainerWithContainer(this, container, contextValidation);
-		
-		// long t2 = System.currentTimeMillis();
-		ContainerUsedValidationHelper.validateInputContainerCategoryCode(categoryCode, contextValidation);
-		
-		// long t3 = System.currentTimeMillis();
-		ContainerValidationHelper.validateVolume(volume, contextValidation);
-		
-		// long t4 = System.currentTimeMillis();
-		ContainerValidationHelper.validateConcentration(concentration, contextValidation);
-		
-		// long t5 = System.currentTimeMillis();
-		ContainerValidationHelper.validateQuantity(quantity, contextValidation);
-		
-		// long t6 = System.currentTimeMillis();
-		ContainerUsedValidationHelper.validatePercentage(percentage, contextValidation);
-		
-		ContainerValidationHelper.validateSize(size, contextValidation);
-		
-		// long t7 = System.currentTimeMillis();
-		ContainerUsedValidationHelper.validateExperimentProperties(experimentProperties, Level.CODE.ContainerIn, contextValidation);
-		
-		// long t8 = System.currentTimeMillis();
-		ContainerUsedValidationHelper.validateInstrumentProperties(instrumentProperties, Level.CODE.ContainerIn, contextValidation);
-		
-		// long t9 = System.currentTimeMillis();
-		/*
-		Logger.debug("InputContainerUsed validate \n "
-				+"1 = "+(t1-t0)+" ms\n"
-				+"2 = "+(t2-t1)+" ms\n"
-				+"3 = "+(t3-t2)+" ms\n"
-				+"4 = "+(t4-t3)+" ms\n"
-				+"5 = "+(t5-t4)+" ms\n"
-				+"6 = "+(t6-t5)+" ms\n"
-				+"7 = "+(t7-t6)+" ms\n"
-				+"8 = "+(t8-t7)+" ms\n"
-				+"9 = "+(t9-t8)+" ms\n"				
-				+"10 = "+(t9-t0)+" ms\n"				
-				);
-			*/	
+//		@SuppressWarnings("deprecation")
+//		Container container = ContainerUsedValidationHelper.validateExistInstanceCode(contextValidation, code, Container.class, InstanceConstants.CONTAINER_COLL_NAME, true);
+		Container container = ContainerUsedValidationHelper.validateCodeForeignOptional(contextValidation, Container.find.get(), code, true);		
+		ContainerUsedValidationHelper.validateInputContainerMatchesContainer    (contextValidation, this, container);
+		ContainerUsedValidationHelper.validateInputContainerCategoryCodeRequired(contextValidation, categoryCode);
+		ContainerValidationHelper.    validateVolumeOptional                    (contextValidation, volume);
+		ContainerValidationHelper.    validateConcentrationOptional             (contextValidation, concentration);
+		ContainerValidationHelper.    validateQuantityOptional                  (contextValidation, quantity);
+		ContainerUsedValidationHelper.validatePercentage                        (contextValidation, percentage);		
+		ContainerValidationHelper.    validateSizeOptional                      (contextValidation, size);
+		ContainerUsedValidationHelper.validateExperimentProperties              (contextValidation, experimentProperties, Level.CODE.ContainerIn);
+		ContainerUsedValidationHelper.validateInstrumentProperties              (contextValidation, instrumentProperties, Level.CODE.ContainerIn);
 	}
-
+	
+	public void validate(ContextValidation contextValidation, String experimentTypeCode, String stateCode, InstrumentUsed instrumentUsed) {
+//		@SuppressWarnings("deprecation")
+//		Container container = ContainerUsedValidationHelper.validateExistInstanceCode(contextValidation, code, Container.class, InstanceConstants.CONTAINER_COLL_NAME, true);
+		Container container = ContainerUsedValidationHelper.validateCodeForeignOptional(contextValidation, Container.find.get(), code, true);		
+		ContainerUsedValidationHelper.validateInputContainerMatchesContainer    (contextValidation, this, container);
+		ContainerUsedValidationHelper.validateInputContainerCategoryCodeRequired(contextValidation, categoryCode);
+		ContainerValidationHelper.    validateVolumeOptional                    (contextValidation, volume);
+		ContainerValidationHelper.    validateConcentrationOptional             (contextValidation, concentration);
+		ContainerValidationHelper.    validateQuantityOptional                  (contextValidation, quantity);
+		ContainerUsedValidationHelper.validatePercentage                        (contextValidation, percentage);		
+		ContainerValidationHelper.    validateSizeOptional                      (contextValidation, size);
+		ContainerUsedValidationHelper.validateExperimentProperties              (contextValidation, experimentProperties, Level.CODE.ContainerIn, experimentTypeCode, stateCode);
+		ContainerUsedValidationHelper.validateInstrumentProperties              (contextValidation, instrumentProperties, Level.CODE.ContainerIn, instrumentUsed, stateCode);
+	}
 	
 }

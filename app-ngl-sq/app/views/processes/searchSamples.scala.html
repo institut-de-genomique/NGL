@@ -3,38 +3,8 @@
 @import views.html.helper._
 @form() = {
 	<div class="col-md-12 col-lg-12">
-	<div class="row">
-		@columnSearchForm{			
-		@formGroup{
-			<div bt-select placeholder="@Messages("processes.select.processCategory")"  ng-required=true class="form-control" ng-class="getHasErrorClass('samplesSearchForm', 'processCategory')" name="processCategory" ng-model="processForm.processCategory" bt-options="processCategory.code as processCategory.name for processCategory in searchService.lists.getProcessCategories()" ng-change="changeProcessCategory()" auto-select>
-		</div>
-		}}
-		@columnSearchForm{			
-		@formGroup{
-			<div bt-select placeholder="@Messages("processes.select.processType")"  ng-required=true  class="form-control" ng-class="getHasErrorClass('samplesSearchForm', 'nextProcessTypeCode')" ng-disabled="processForm.processCategory == undefined" name="nextProcessTypeCode" ng-model="processForm.nextProcessTypeCode" bt-options="processType.code as processType.name for processType in  searchService.lists.getProcessTypes()" ng-change="changeProcessType()" auto-select>
-		</div>
-		}}
-		@columnSearchForm{
-		}
-		@columnSearchForm{
-		}
-		@columnSearchForm{
-		}
-		@columnSearchForm{
-			@formGroup{
-		<div class="btn-toolbar">
-			<button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="search()" class="btn btn-primary" >
-				<i class="fa fa-search"></i>
-			</button>
-			<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="reset()"  class="btn btn-default">
-				<i class="fa fa-undo"></i>
-			</button>
-										 	
-		</div>
-		}
-		}
-	</div>
-	<hr>
+	
+	
 	<div class="row">
 	@columnSearchForm{			
 		@formGroup{
@@ -112,7 +82,48 @@
 		}	
 		
 	}
-			
+	@columnSearchForm{
+			@formGroup{
+		<div class="btn-toolbar">
+			<button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="search()" class="btn btn-primary" >
+				<i class="fa fa-search"></i>
+			</button>
+			<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="reset()"  class="btn btn-default">
+				<i class="fa fa-undo"></i>
+			</button>
+										 	
+		</div>
+		}
+		}		
+	</div>
+	<hr>
+	<div class="row">
+		@columnSearchForm{			
+		@formGroup{
+			<div bt-select placeholder="@Messages("processes.select.processCategory")" class="form-control" ng-class="getHasErrorClass('samplesSearchForm', 'processCategory')" name="processCategory" ng-model="processForm.processCategory" bt-options="processCategory.code as processCategory.name for processCategory in searchService.lists.getProcessCategories()" ng-change="changeProcessCategory()" auto-select>
+		</div>
+		}}
+		@columnSearchForm{			
+		@formGroup{
+			<div bt-select placeholder="@Messages("processes.select.processType")"  class="form-control" ng-class="getHasErrorClass('samplesSearchForm', 'nextProcessTypeCode')" ng-disabled="processForm.processCategory == undefined" name="nextProcessTypeCode" ng-model="processForm.nextProcessTypeCode" bt-options="processType.code as processType.name for processType in  searchService.lists.getProcessTypes()" ng-change="changeProcessType()" auto-select>
+		</div>
+		}}
+		@columnSearchForm{
+		}
+		@columnSearchForm{
+		}
+		@columnSearchForm{
+		}
+		@columnSearchForm{
+			@formGroup{
+			<div class="btn-toolbar">
+				<button type="submit" title='@Messages("button.process.add")' data-toggle="tooltip" ng-click="addProcessType()" class="btn btn-primary" >
+					<i class="fa fa-plus"></i>
+				</button>
+														 	
+			</div>
+			}
+		}
 	</div>
 	</div>
 }
@@ -126,6 +137,8 @@
 	   	<li class="active"><a href="#" data-target="#filters" data-toggle="tab">@Messages("search.tab.filters")</a></li>
 	   	<li ng-if="searchService.getAddFiltersToForm().length > 0"><a href="#" data-target="#addfilters" data-toggle="tab">@Messages("search.tab.addfilters")</a></li>
 	   	<li ng-if="searchService.getAddColumnsToForm().length > 0"><a href="#" data-target="#addcolumns" data-toggle="tab">@Messages("search.tab.addcolumns")</a></li>       
+	   	<li><a href="#" data-target="#nativeQuery" data-toggle="tab">@Messages("search.tab.experimental")</a></li>       
+	   	
 	   	</ul>
 			
 		<div class="tab-content">
@@ -177,7 +190,7 @@
 			 @columnSearchForm{
 				@formGroup{
 				<div class="btn-toolbar">
-					<button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="searchService.addColumnsToDatatable()" class="btn btn-primary" >
+					<button type="submit" title='@Messages("button.add.columns")' data-toggle="tooltip" ng-click="searchService.addColumnsToDatatable()" class="btn btn-primary" >
 						<i class="fa fa-plus"></i>
 					</button>
 					<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="searchService.resetDatatableColumns()"  class="btn btn-default">
@@ -189,7 +202,27 @@
 			</div>			
 		</form>	
 	</div>
-	
+	<div class="tab-pane" id="nativeQuery">
+			<form class="well well-small">
+			<div class="row">
+				<div class="col-md-10 col-lg-10">
+					<textarea class="form-control" rows="10" ng-model="searchService.form.reportingQuery" placeholder="Warning : Only to use with MongoDB query language"></textarea>
+				</div>
+			@columnSearchForm{
+				@formGroup{
+				<div class="btn-toolbar">
+					<button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="search()" class="btn btn-primary" >
+						<i class="fa fa-search"></i>
+					</button>
+					<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="reset()"  class="btn btn-default">
+						<i class="fa fa-undo"></i>
+					</button>						 	
+				</div>
+				}				
+			}
+			</div>		
+		</form>	
+	</div>
 	</div>
 	</div>
 </div>

@@ -34,7 +34,7 @@ public class Output extends AbstractOutput {
 	private String name2 = "pipette_P200";
 	
 	@Override
-	public File generateFile(Experiment experiment,ContextValidation contextValidation) throws Exception {
+	public File generateFile(Experiment experiment, ContextValidation contextValidation) throws Exception {
 		String type = (String)contextValidation.getObject("type");
 
 		String adnContent    = null;

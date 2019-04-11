@@ -14,14 +14,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.mongojack.DBQuery;
 
 import fr.cea.ig.MongoDBDAO;
-import fr.cea.ig.lfw.controllers.AbstractScript;
+import fr.cea.ig.lfw.controllers.scripts.ScriptNoArgs;
 import models.sra.submit.common.instance.Study;
 import models.utils.InstanceConstants;
 import sra.scripts.utils.CSVParsing;
 import sra.scripts.utils.DateTools;
 import sra.scripts.utils.Tools;
 
-public class RepriseHistoStudy_extId extends AbstractScript {
+public class RepriseHistoStudy_extId extends ScriptNoArgs {
 	
 	@Override
 	public void execute() throws IOException, ParseException {

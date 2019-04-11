@@ -7,3 +7,5 @@
 # GET     /                           					@controllers.main.tpl.Main.home()
 # GET     /messages.js                					@controllers.main.tpl.Main.jsMessages()
 # GET     /codes.js        	        					@controllers.main.tpl.Main.jsCodes()
+
+

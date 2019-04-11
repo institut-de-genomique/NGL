@@ -18,6 +18,7 @@ public class Column implements IValidation{
 	public Boolean hide;
 	public Boolean group; //active or not the group
 	public String groupMethod; //sum, average, distinct
+	public String groupHeader; //Group property by header name 
 	
 	public String format; //number decimal or date format
 	public String render; //angular expression

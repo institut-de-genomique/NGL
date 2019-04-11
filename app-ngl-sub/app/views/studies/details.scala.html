@@ -49,6 +49,8 @@
   		<div ng-if="isReleasable"> @simpleLine(Messages("study.status"),Messages("study.private"))</div>
   		<div ng-if="!isReleasable"> @simpleLine(Messages("study.status"),Messages("study.public"))</div>
 	    @* Ecriture des autres lignes code, state, title, abstract et description :*@
+	    @lineDate("study.traceInformation.creationDate")
+	    @lineDate("study.releaseDate")
 		@line("study.code")
 		@line("study.accession")
 		@line("study.externalId")

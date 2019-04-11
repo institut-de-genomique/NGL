@@ -8,7 +8,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import fr.cea.ig.MongoDBDAO;
-import fr.cea.ig.lfw.controllers.AbstractScript;
+import fr.cea.ig.lfw.controllers.scripts.ScriptNoArgs;
 import mail.MailServiceException;
 import models.sra.submit.common.instance.Submission;
 import models.sra.submit.util.SraException;
@@ -16,8 +16,13 @@ import models.utils.InstanceConstants;
 import services.FileAcServices;
 import services.SubmissionServices;
 import validation.ContextValidation;
-
-public class Reload_AC_BAS extends AbstractScript {
+/*
+ * Script à utiliser pour ajouter les numeros d'accession à la soumission et tous 
+ * les objets soumis =>  
+ * @author sgas
+ *
+ */
+public class Reload_AC_BAS extends ScriptNoArgs {
 	
 	private FileAcServices fileAcServices;
 //	private SubmissionServices submissionServices;
@@ -46,8 +51,8 @@ public class Reload_AC_BAS extends AbstractScript {
 			
 			File fileEbi = new File("/env/cns/home/sgas/debug_BAS",  "listAC_" + submission.code + ".txt");
 			String user = "william";
-			ContextValidation ctxVal = new ContextValidation(user);
-			submission = this.fileAcServices.traitementFileAC(ctxVal, submissionCode, fileEbi); 
+			ContextValidation ctxVal = ContextValidation.createUndefinedContext(user);
+			submission = fileAcServices.traitementFileAC(ctxVal, submissionCode, fileEbi); 
 		}	
 	}
 		

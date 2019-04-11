@@ -12,8 +12,6 @@ import models.laboratory.reagent.description.ReagentCatalog;
 import models.utils.InstanceConstants;
 import models.utils.dao.DAOException;
 
-// import models.laboratory.reagent.instance.Reagent;
-
 @Singleton
 public class ReagentCatalogDAO {
 	

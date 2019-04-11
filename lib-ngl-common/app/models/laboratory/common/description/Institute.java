@@ -1,8 +1,10 @@
 package models.laboratory.common.description;
 
+import java.util.function.Supplier;
+
+import fr.cea.ig.ngl.utils.SpringSupplier;
 import models.laboratory.common.description.dao.InstituteDAO;
 import models.utils.Model;
-import models.utils.dao.AbstractDAO;
 
 /**
  * Value of institute (only 2 possible values : CNG {@literal &} CNS)
@@ -10,20 +12,18 @@ import models.utils.dao.AbstractDAO;
  * @author dnoisett
  *
  */
-public class Institute extends Model<Institute> {
+public class Institute extends Model {
 
-	// public static Finder<Institute> find = new Finder<Institute>(InstituteDAO.class.getName()); 
-	public static final Finder<Institute,InstituteDAO> find = new Finder<>(InstituteDAO.class); 
+	public static final Supplier<InstituteDAO> find = new SpringSupplier<>(InstituteDAO.class); 
 	
 	public String name;
 	
-	public Institute() {
-		super(InstituteDAO.class.getName());
-	}
-
-	@Override
-	protected Class<? extends AbstractDAO<Institute>> daoClass() {
-		return InstituteDAO.class;
+	// Serialization constructor
+	public Institute() {}
+	
+	public Institute(String code, String name) {
+		super(code);
+		this.name = name;
 	}
 	
 }

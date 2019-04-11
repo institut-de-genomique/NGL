@@ -15,7 +15,7 @@ import validation.ContextValidation;
 public class BravoWorkstationOutput extends AbstractOutput {
 
 	@Override
-	public File generateFile(Experiment experiment,ContextValidation contextValidation) throws Exception {
+	public File generateFile(Experiment experiment, ContextValidation contextValidation) throws Exception {
 		
 		Logger.info("generation feuille de route BravoWorkstation / exp="+ experiment.typeCode );
 		String content = OutputHelper.format(sampleSheet_1.render(experiment).body());

@@ -198,7 +198,8 @@ angular.module('home').controller('FragmentationCtrl',['$scope','$http', '$parse
 		                complex:true,
 		                template:  ''
 		                	+$scope.plateUtils.templates.buttonLineMode()
-		                	+$scope.plateUtils.templates.buttonColumnMode()              	   
+		                	+$scope.plateUtils.templates.buttonColumnMode()   
+		                	+$scope.plateUtils.templates.buttonCopyPosition()
 		            }
 
 			};	
@@ -210,7 +211,15 @@ angular.module('home').controller('FragmentationCtrl',['$scope','$http', '$parse
 				atm.line = atm.outputContainerUseds[0].locationOnContainerSupport.line;
 				atm.column = atm.outputContainerUseds[0].locationOnContainerSupport.column;
 			});
-		}		
+		}
+		if(experiment.instrument.outContainerSupportCategoryCode=="tube"){
+			experiment.atomicTransfertMethods.forEach(function(atm){
+				atm.line = "1";
+				atm.column = "1";
+				atm.outputContainerUseds[0].locationOnContainerSupport.line="1";
+				atm.outputContainerUseds[0].locationOnContainerSupport.column="1";
+			});
+		}
 	}
 	
 	$scope.$on('save', function(e, callbackFunction) {	
@@ -541,7 +550,7 @@ angular.module('home').controller('FragmentationCtrl',['$scope','$http', '$parse
 	
 	var atmService = atmToSingleDatatable($scope, datatableConfig);
 	//defined new atomictransfertMethod
-	atmService.newAtomicTransfertMethod =  function(line, column){
+	/*atmService.newAtomicTransfertMethod =  function(line, column){
 		var getLine = function(line){
 			if($scope.experiment.instrument.outContainerSupportCategoryCode 
 					=== $scope.experiment.instrument.inContainerSupportCategoryCode){
@@ -563,7 +572,17 @@ angular.module('home').controller('FragmentationCtrl',['$scope','$http', '$parse
 			inputContainerUseds:new Array(0), 
 			outputContainerUseds:new Array(0)
 		};
-	};
+	};*/
+	 atmService.newAtomicTransfertMethod =  function(line, column){
+	        
+	        return {
+	            class:"OneToOne",
+	            line:undefined,
+	            column:undefined,                 
+	            inputContainerUseds:new Array(0),
+	            outputContainerUseds:new Array(0)
+	        };
+	    };
 	//defined default output unit
 	atmService.defaultOutputUnit = {
 			volume : "µL"

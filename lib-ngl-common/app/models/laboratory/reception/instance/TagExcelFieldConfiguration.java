@@ -56,7 +56,7 @@ public class TagExcelFieldConfiguration extends AbstractFieldConfiguration {
 				populateField(field, dbObject, index.categoryCode);
 			}
 		} else if(required){
-			contextValidation.addErrors(headerValue, ERROR_REQUIRED_MSG);
+			contextValidation.addError(headerValue, ERROR_REQUIRED_MSG);
 		}
 	}
 
@@ -66,19 +66,19 @@ public class TagExcelFieldConfiguration extends AbstractFieldConfiguration {
 		//Logger.debug("index sequence/name : "+additionalErrInfo);	
         
 		DBQuery.Query q = DBQuery.in("typeCode", "index-illumina-sequencing","index-nanopore-sequencing").is("sequence", sequence);
-		if(null != name){
+		if (name != null) {
 			q.is("name", name);
 		}
 		
 		Index index = null; 
 		List<Index> indexes= MongoDBDAO.find(InstanceConstants.PARAMETER_COLL_NAME, Index.class, q).toList();
 		
-		if(indexes.size() == 1){
+		if (indexes.size() == 1) {
 			index = indexes.get(0);
-		}else if(indexes.size() == 0){
-			contextValidation.addErrors(headerValue, ERROR_NOTEXISTS_MSG, additionalErrInfo);
-		}else{
-			contextValidation.addErrors(headerValue, ERROR_SEVERAL_RESULT_MSG, additionalErrInfo);
+		} else if (indexes.size() == 0) {
+			contextValidation.addError(headerValue, ERROR_NOTEXISTS_MSG, additionalErrInfo);
+		} else {
+			contextValidation.addError(headerValue, ERROR_SEVERAL_RESULT_MSG, additionalErrInfo);
 		}
 		return index;
 	}

@@ -8,74 +8,70 @@ import javax.inject.Inject;
 import com.mongodb.MongoException;
 
 import fr.cea.ig.MongoDBDAO;
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import models.Constants;
 import models.laboratory.sample.instance.Sample;
 import models.utils.InstanceConstants;
-import models.utils.InstanceHelpers;
 import models.utils.dao.DAOException;
 import rules.services.RulesException;
-import scala.concurrent.duration.FiniteDuration;
 import validation.ContextValidation;
 
-public class UpdateSampleCNS extends UpdateSamplePropertiesCNS{
+public class UpdateSampleCNS extends UpdateSamplePropertiesCNS {
 
 	@Inject
-	public UpdateSampleCNS(FiniteDuration durationFromStart,
-			FiniteDuration durationFromNextIteration, NGLContext ctx) {
-		super("UpdateSample", durationFromStart, durationFromNextIteration, ctx);
-
+	public UpdateSampleCNS(NGLApplication app) {
+		super("UpdateSample", app);
 	}
 
+//	@Override
+//	public void runImport() throws SQLException, DAOException, MongoException, RulesException {
+//		updateSampleFromTara(contextError, null);
+//	}
+	
 	@Override
-	public void runImport() throws SQLException, DAOException, MongoException,
-	RulesException {
+	public void runImport(ContextValidation contextError) throws SQLException, DAOException, MongoException, RulesException {
 		updateSampleFromTara(contextError, null);
-
 	}
 
-	public void updateSampleFromTara(ContextValidation contextError,
-			List<String> sampleCodes) throws SQLException, DAOException {
+	public void updateSampleFromTara(ContextValidation contextError, List<String> sampleCodes) throws SQLException, DAOException {
 
-		List<String> results=limsServices.findSampleUpdated(sampleCodes);
+		List<String> results = limsServices.findSampleUpdated(sampleCodes);
 
-		for(String sampleCode:results){
-			Sample sample=limsServices.findSampleToCreate(contextError, sampleCode);
-			ContextValidation contextValidation = new ContextValidation(Constants.NGL_DATA_USER);
-			MongoDBDAO.deleteByCode(InstanceConstants.SAMPLE_COLL_NAME, Sample.class, sample.code);
-//			Sample newSample =(Sample) InstanceHelpers.save(InstanceConstants.SAMPLE_COLL_NAME,sample,contextValidation,true);
-			Sample newSample = InstanceHelpers.save(InstanceConstants.SAMPLE_COLL_NAME,sample,contextValidation,true);
-			if(!contextValidation.hasErrors()){
-				limsServices.updateMaterielLims(newSample, contextError);
-				/*
-				SampleType sampleType =BusinessValidationHelper.validateExistDescriptionCode(null, sample.typeCode, "typeCode", SampleType.find,true);
-				ImportType importType =BusinessValidationHelper.validateExistDescriptionCode(null, sample.importTypeCode, "importTypeCode", ImportType.find,true);
-
-				Map<String, PropertyValue> properties=new HashMap<String, PropertyValue>();
-
-				if(importType !=null){
-					InstanceHelpers.copyPropertyValueFromPropertiesDefinition(importType.getPropertyDefinitionByLevel(Level.CODE.Content), newSample.properties,properties);
-				}
-				if(sampleType !=null){
-					InstanceHelpers.copyPropertyValueFromPropertiesDefinition(sampleType.getPropertyDefinitionByLevel(Level.CODE.Content), newSample.properties,properties);
-				}
-
-				SampleHelper.updateSampleProperties(sampleCode, properties,contextError);
-				SampleHelper.updateSampleReferenceCollab(sample,contextError);
-				*/
+		for (String sampleCode : results) {
+			try {
+				Sample sample = limsServices.findSampleToCreate(contextError, sampleCode);
+				ContextValidation contextValidation = ContextValidation.createUndefinedContext(Constants.NGL_DATA_USER);
 				
-				super.updateOneSample(newSample, contextError);
-				
-			}else {
-				contextError.errors.putAll(contextValidation.errors);
+				Sample dbSample = MongoDBDAO.findByCode(InstanceConstants.SAMPLE_COLL_NAME, Sample.class, sample.code);
+				if (dbSample != null) {
+					logger.info("update sample "+dbSample.code);
+					updateSample(contextValidation, dbSample, sample);
+					dbSample.validate(contextValidation);
+					if(!contextValidation.hasErrors()){
+						MongoDBDAO.save(InstanceConstants.SAMPLE_COLL_NAME,dbSample);
+						super.updateOneSample(dbSample, contextError);
+						limsServices.updateMaterielLims(dbSample, contextError);						
+					}
+				} else {
+					contextError.getErrors().putAll(contextValidation.getErrors());
+				}
+			} catch(Exception e){
+				logger.error("Problème to update sample "+sampleCode+" "+e.getMessage());
 			}
 		}
-
-
-
 	}
 
-
-
+	private void updateSample(ContextValidation contextValidation, Sample dbSample, Sample sample) {
+		dbSample.traceInformation = sample.traceInformation; //use to keep the creation date
+		dbSample.setTraceUpdateStamp(contextValidation, contextValidation.getUser());
+		dbSample.properties = sample.properties;
+		dbSample.comments = sample.comments;
+		dbSample.referenceCollab = sample.referenceCollab;
+		if (!dbSample.taxonCode.equals(sample.taxonCode)) {
+			dbSample.taxonCode = sample.taxonCode;
+			dbSample.ncbiLineage = null;
+			dbSample.ncbiScientificName = null;
+		}
+	}
 
 }

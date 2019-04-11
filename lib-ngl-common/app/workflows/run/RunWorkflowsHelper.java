@@ -16,7 +16,7 @@ import com.mongodb.BasicDBObject;
 
 import fr.cea.ig.MongoDBDAO;
 import fr.cea.ig.MongoDBResult;
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import models.laboratory.common.instance.State;
 import models.laboratory.common.instance.TBoolean;
 import models.laboratory.run.instance.Lane;
@@ -35,9 +35,15 @@ public class RunWorkflowsHelper {
 	private final LazyRules6Actor  rulesActor;
 	private final ReadSetWorkflows readSetWorkflows;
 	
+//	@Inject
+//	public RunWorkflowsHelper(NGLContext ctx, ReadSetWorkflows readSetWorkflows) {
+//		 rulesActor = ctx.rules6Actor();
+//		this.readSetWorkflows = readSetWorkflows;
+//	}
+
 	@Inject
-	public RunWorkflowsHelper(NGLContext ctx, ReadSetWorkflows readSetWorkflows) {
-		 rulesActor = ctx.rules6Actor();
+	public RunWorkflowsHelper(NGLApplication app, ReadSetWorkflows readSetWorkflows) {
+		rulesActor = app.rules6Actor();
 		this.readSetWorkflows = readSetWorkflows;
 	}
 
@@ -59,7 +65,7 @@ public class RunWorkflowsHelper {
 					if(lane.valuation.valid.equals(TBoolean.FALSE)){
 						invalidateReadSet(readSet, contextValidation, rules, bioinformaticValuation);
 					}else{
-						State nextReadSetState = cloneState(run.state, contextValidation.getUser());
+						State nextReadSetState = State.cloneState(run.state, contextValidation.getUser());
 						readSetWorkflows.setState(contextValidation, readSet, nextReadSetState);
 					}
 				}
@@ -69,7 +75,7 @@ public class RunWorkflowsHelper {
 			DBCursor<ReadSet> cursor = readSetResult.cursor;
 			while(cursor.hasNext()){
 				ReadSet readSet = cursor.next();
-				State nextReadSetState = cloneState(run.state, contextValidation.getUser());
+				State nextReadSetState = State.cloneState(run.state, contextValidation.getUser());
 				readSetWorkflows.setState(contextValidation, readSet, nextReadSetState);
 			}	
 		}
@@ -118,24 +124,24 @@ public class RunWorkflowsHelper {
 					DBQuery.is("code", readSet.code), DBUpdate.set("bioinformaticValuation", readSet.bioinformaticValuation));
 		}
 		
-		State nextState = cloneState(readSet.state, contextValidation.getUser());
+		State nextState = State.cloneState(readSet.state, contextValidation.getUser());
 		nextState.code = "F-VQC";
 		readSetWorkflows.setState(contextValidation, readSet, nextState);
 		rulesActor.tellMessage(rules, readSet);
 	}
 
-	/**
-	 * Clone State without historical
-	 * @param state
-	 * @return
-	 */
-	private static State cloneState(State state, String user) {
-		State nextState = new State();
-		nextState.code = state.code;
-		nextState.date = new Date();
-		nextState.user = user;
-		return nextState;
-	}
+//	/**
+//	 * Clone State without historical
+//	 * @param state
+//	 * @return
+//	 */
+//	private static State cloneState(State state, String user) {
+//		State nextState = new State();
+//		nextState.code = state.code;
+//		nextState.date = new Date();
+//		nextState.user = user;
+//		return nextState;
+//	}
 
 	private static BasicDBObject getReadSetKeys() {
 		BasicDBObject keys = new BasicDBObject();

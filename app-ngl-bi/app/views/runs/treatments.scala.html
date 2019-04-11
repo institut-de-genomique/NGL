@@ -79,29 +79,22 @@
 <form class="form-horizontal" ng-controller="RunMinknowBasecallingCtrl">
 		<div class="row">
 			<div class="col-md-5 col-lg-5">
-				<div ng-switch on="isEditMode()">
 				@views.html.helper.columnLabelValue(Messages("runs.treatments.minknow-basecalling.minKnowVersion")){					
-					<p ng-switch-when="false" class="form-control-static" ng-bind="run.treatments.minknowBasecalling.default.minKnowVersion.value"></p>
-					<input  ng-switch-when="true" class="form-control" type="text" ng-model="run.treatments.minknowBasecalling.default.minKnowVersion.value" default-value="propDefinitions['minKnowVersion'].defaultValue"/>					
+					<p class="form-control-static" ng-bind="run.treatments.minknowBasecalling.default.minKnowVersion.value"></p>
 				}
 				@views.html.helper.columnLabelValue(Messages("runs.treatments.minknow-basecalling.minknowEvents")){
-					<p ng-switch-when="false" class="form-control-static" ng-bind="run.treatments.minknowBasecalling.default.minknowEvents.value | number"></p>
-					<input  ng-switch-when="true" class="form-control" type="text" ng-model="run.treatments.minknowBasecalling.default.minknowEvents.value"/>					
+					<p class="form-control-static" ng-bind="run.treatments.minknowBasecalling.default.minknowEvents.value | number"></p>
 				}
 				@views.html.helper.columnLabelValue(Messages("runs.treatments.minknow-basecalling.minknowCompleteReads")){
-					<p ng-switch-when="false" class="form-control-static" ng-bind="run.treatments.minknowBasecalling.default.minknowCompleteReads.value | number"></p>
-					<input  ng-switch-when="true" class="form-control" type="text" ng-model="run.treatments.minknowBasecalling.default.minknowCompleteReads.value"/>					
+					<p class="form-control-static" ng-bind="run.treatments.minknowBasecalling.default.minknowCompleteReads.value | number"></p>
 				}
 				@views.html.helper.columnLabelValue(Messages("runs.treatments.minknow-basecalling.basecallerName")){
-					<p ng-switch-when="false" class="form-control-static" ng-bind="run.treatments.minknowBasecalling.default.basecallerName.value"></p>
-					<input  ng-switch-when="true" class="form-control" type="text" ng-model="run.treatments.minknowBasecalling.default.basecallerName.value" default-value="propDefinitions['basecallerName'].defaultValue"/>					
+					<p class="form-control-static" ng-bind="run.treatments.minknowBasecalling.default.basecallerName.value"></p>
 				}
 				@views.html.helper.columnLabelValue(Messages("runs.treatments.minknow-basecalling.basecallerVersion")){
-					<p ng-switch-when="false" class="form-control-static" ng-bind="run.treatments.minknowBasecalling.default.basecallerVersion.value"></p>
-					<input  ng-switch-when="true" class="form-control" type="text" ng-model="run.treatments.minknowBasecalling.default.basecallerVersion.value" />
+					<p class="form-control-static" ng-bind="run.treatments.minknowBasecalling.default.basecallerVersion.value"></p>
 				}
 				
-				</div>
 				
 			</div>
 			

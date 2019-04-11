@@ -26,6 +26,10 @@ public class AbstractSampleAPI extends GenericAPI<AbstractSampleDAO, AbstractSam
 		super(dao);
 	}
 	
+	public Iterable<AbstractSample> dao_all() {
+		return dao.all();
+	}
+		
 	public boolean dao_checkObjectExist(String key, String keyValue) {
 		return dao.checkObjectExist(key, keyValue);
 	}
@@ -46,35 +50,30 @@ public class AbstractSampleAPI extends GenericAPI<AbstractSampleDAO, AbstractSam
 
 	@Override
 	protected List<String> authorizedUpdateFields() {
-		// TODO Auto-generated method stub
-		return null;
+		throw new RuntimeException();
 	}
 
 	@Override
 	protected List<String> defaultKeys() {
-		// TODO Auto-generated method stub
-		return null;
+		throw new RuntimeException();
 	}
 
 	@Override
 	public AbstractSample create(AbstractSample input, String currentUser)
 			throws APIValidationException, APIException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new RuntimeException();
 	}
 
 	@Override
 	public AbstractSample update(AbstractSample input, String currentUser)
 			throws APIException, APIValidationException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new RuntimeException();
 	}
 
 	@Override
 	public AbstractSample update(AbstractSample input, String currentUser,
 			List<String> fields) throws APIException, APIValidationException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new RuntimeException();
 	}
 
 }

@@ -43,7 +43,7 @@ public interface IAuthorizator {
 	 * @param  perms required set of permissions
 	 * @return true if the login has enough permissions
 	 */
-	default boolean authorize(String login, String[] perms) {
+	default boolean authorize(String login, String... perms) {
 		Set<String> lp = getPermissions(login);
 		for (String p : perms)
 			if (!lp.contains(p))

@@ -16,7 +16,7 @@ import org.mongojack.DBQuery.Query;
 
 import controllers.DocumentController;
 import fr.cea.ig.MongoDBResult;
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import models.laboratory.reporting.instance.FilteringConfiguration;
 import models.utils.InstanceConstants;
 import play.data.Form;
@@ -28,19 +28,21 @@ import validation.ContextValidation;
  * Controller around ResolutionConfigurations object
  *
  */
-// @Controller
 public class FilteringConfigurations extends DocumentController<FilteringConfiguration> {
 	
-//	private static final play.Logger.ALogger logger = play.Logger.of(FilteringConfigurations.class);
+	private final Form<ConfigurationsSearchForm> searchForm; 
 	
-	private final /*static*/ Form<ConfigurationsSearchForm> searchForm; // = form(ConfigurationsSearchForm.class); 
-//	private final /*static*/ Form<FilteringConfiguration> filteringConfigurationsForm;// = form(FilteringConfiguration.class);
-	
+//	@Inject
+//	public FilteringConfigurations(NGLContext ctx) {
+//		super(ctx,InstanceConstants.FILTERING_CONFIG_COLL_NAME, FilteringConfiguration.class);
+//		searchForm = ctx.form(ConfigurationsSearchForm.class);
+////		filteringConfigurationsForm = ctx.form(FilteringConfiguration.class);
+//	}
+
 	@Inject
-	public FilteringConfigurations(NGLContext ctx) {
+	public FilteringConfigurations(NGLApplication ctx) {
 		super(ctx,InstanceConstants.FILTERING_CONFIG_COLL_NAME, FilteringConfiguration.class);
 		searchForm = ctx.form(ConfigurationsSearchForm.class);
-//		filteringConfigurationsForm = ctx.form(FilteringConfiguration.class);
 	}
 
 	public Result list() {
@@ -70,7 +72,9 @@ public class FilteringConfigurations extends DocumentController<FilteringConfigu
 	public Result save() {
 		Form<FilteringConfiguration> filledForm = getMainFilledForm();
 		FilteringConfiguration configuration = filledForm.get();
-		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm);
+//		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm);
+//		ctxVal.setCreationMode();
+		ContextValidation ctxVal = ContextValidation.createCreationContext(getCurrentUser(), filledForm);
 		if (configuration._id == null) {
 //			configuration.traceInformation = new TraceInformation();
 //			configuration.traceInformation.setTraceInformation(getCurrentUser());
@@ -79,9 +83,8 @@ public class FilteringConfigurations extends DocumentController<FilteringConfigu
 		} else {
 			return badRequest("use PUT method to update the filtering config");
 		}
-
 //		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm.errors());
-		ctxVal.setCreationMode();
+//		ctxVal.setCreationMode();
 		configuration.validate(ctxVal);
 		if (!ctxVal.hasErrors()) {
 			configuration = saveObject(configuration);
@@ -106,9 +109,11 @@ public class FilteringConfigurations extends DocumentController<FilteringConfigu
 //				logger.error("traceInformation is null !!");
 //			}
 //			ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm.errors());
-			ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm);
+//			ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm);
+//			ctxVal.setCreationMode();
+			ContextValidation ctxVal = ContextValidation.createCreationContext(getCurrentUser(), filledForm);
 			configurationInput.setTraceUpdateStamp(ctxVal,getCurrentUser());
-			ctxVal.setCreationMode();
+//			ctxVal.setCreationMode();
 			configurationInput.validate(ctxVal);
 			if (!ctxVal.hasErrors()) {
 				updateObject(configurationInput);

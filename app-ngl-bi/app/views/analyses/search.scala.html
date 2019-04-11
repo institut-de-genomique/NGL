@@ -49,6 +49,10 @@
 	}	
 	
 	@columnSearchForm{
+		@formGroup{					
+		<!-- 	<input type="text" class="form-control" ng-model="searchService.form.fromAbundanceClusterPercentSum" placeholder='@Messages("search.placeholder.fromAbundanceClusterPercentSum")'> -->
+			
+		}
 	}		
 }
 
@@ -59,6 +63,10 @@
 <div class="row"> 
 	<div class="col-md-12 col-lg-12" ultimate-datatable="searchService.datatable">
 		<div udt-form>	
+		  <ul class="nav nav-tabs margin-bottom-5">
+	   	    <li class="active"><a href="#" data-target="#filters" data-toggle="tab">@Messages("search.tab.filters")</a></li>
+	   	    <li ng-if="searchService.getAddFiltersToForm().length > 0"><a href="#" data-target="#addfilters" data-toggle="tab">@Messages("search.tab.addfilters")</a></li>    	
+	      </ul>
 			<div class="tab-content">
 				<div class="tab-pane active" id="filters">
 					<form class="well well-small">
@@ -83,6 +91,36 @@
 						</div>		
 					</form>	
 				</div>
+				
+			<div class="tab-pane" id="addfilters">
+			<form class="well well-small">
+			<div class="row">
+				<div class="col-md-2 col-lg-2" ng-repeat="filters in searchService.getAddFiltersToForm()">
+					<div class="form-group" ng-repeat="filter in filters">
+						<div udt-compile="filter.html"></div> <!-- used directive from datatable to compile html -->
+					</div>
+				</div>
+				
+				@columnSearchForm{
+				@formGroup{
+				<div class="btn-toolbar">
+					<button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="search()" class="btn btn-primary" >
+						<i class="fa fa-search"></i>
+					</button>
+					<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="reset()"  class="btn btn-default">
+						<i class="fa fa-undo"></i>
+					</button>
+												 	
+				</div>	
+				}	
+				@formGroup{
+					@buttons
+				}
+			}
+			</div>			
+		</form>	
+		</div>
+		
 			</div>
 		</div>
 	</div>

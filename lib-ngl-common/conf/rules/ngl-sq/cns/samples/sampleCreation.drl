@@ -28,7 +28,7 @@ rule "Add property fishAnatomy when sample is imported or updated "
 	salience 900
 	no-loop
     when
-        $sample : Sample($properties:properties, $properties!=null, typeCode=="fish", $pvTaraProtocol:properties.get("taraProtocol")!=null)        
+        $sample : Sample($properties:properties, $properties!=null, typeCode=="fish", $pvTaraProtocol:properties.get("taraProtocol")!=null)               
     then
     	Logger.debug("Add property fishAnatomy to : "+$sample.code);  
        	String fishAnatomy = $pvTaraProtocol.value.toString();
@@ -37,3 +37,19 @@ rule "Add property fishAnatomy when sample is imported or updated "
        	PropertySingleValue psv = new PropertySingleValue(fishAnatomy);
        	$sample.properties.put("fishAnatomy", psv);
 	end	
+
+rule "set correct sample name "
+	@nglSQ( sampleCreation )
+	dialect "java"
+	salience 900
+	no-loop
+    when
+        $sample : Sample($name:name, $code:code, $code!=null, $name!=null)                       
+    then
+    	Logger.debug("set correct sample name to : "+$sample.code);  
+		//by default name = code so if code = [A-Z]_[A-Z] set second part in name
+		if($code.matches("[A-Z]{3}_[A-Z]+")){
+			$sample.name = $code.split("_")[1];
+		}       
+	end	
+	

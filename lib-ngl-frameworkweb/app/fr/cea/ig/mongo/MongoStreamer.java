@@ -37,12 +37,19 @@ import play.mvc.Result;
 
 public class MongoStreamer {
 	
+	/*
+	 * Logger.
+	 */
+	// private static final play.Logger.ALogger logger = play.Logger.of(MongoStreamer.class);
+	
 	// -------------- more generic streamer ------------------
+	
 	public static final <A,B> ImmutablePair<A,B> pair(A a, B b) { return new ImmutablePair<>(a,b); }
 
 	/**
-	 * @param i an iterable
-	 * @param f a function witch converts object to String
+	 * @param <A> iterable element type
+	 * @param i   an iterable
+	 * @param f   a function witch converts object to String
 	 * @return  the stream of ByteString
 	 */
 	public static final <A> Source<ByteString,?> streamUDT_(Iterable<A> i, Function<A,String> f) {
@@ -58,12 +65,6 @@ public class MongoStreamer {
 	public static final <A,B> Source<ByteString,?> stream(Iterable<A> iterable, Function<A,B> transform) {
 		return stream(Source.from(iterable),transform);
 	}
-	
-	
-	/*
-	 * Logger.
-	 */
-	// private static final play.Logger.ALogger logger = play.Logger.of(MongoStreamer.class);
 	
 	// 
 	// --------------------- MongoCursor<T> overloads ---------------
@@ -89,7 +90,7 @@ public class MongoStreamer {
 	 * @return          JSON array formatted source 
 	 */
 	public static <T extends DBObject,R> Source<ByteString, ?> stream(MongoCursor<T> cursor, Function<T,R> transform) {
-		return stream(Source.from(cursor),transform);
+		return stream(Source.from(cursor), transform);
 	}
 	
 	
@@ -100,7 +101,7 @@ public class MongoStreamer {
 	 * @return       JSON array formatted source
 	 */
 	public static <T extends DBObject> Source<ByteString, ?> streamUDT(MongoCursor<T> cursor) {
-		return streamUDT(cursor.count(),Source.from(cursor));
+		return streamUDT(cursor.count(), Source.from(cursor));
 	}
 	
 	// 

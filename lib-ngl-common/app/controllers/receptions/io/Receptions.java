@@ -1,10 +1,12 @@
 package controllers.receptions.io;
 
-// import static play.data.Form.form;
-//import static fr.cea.ig.play.IGGlobals.form;
-
 import javax.inject.Inject;
 
+import controllers.TPLCommonController;
+import controllers.authorisation.Permission;
+import fr.cea.ig.MongoDBDAO;
+import fr.cea.ig.ngl.NGLApplication;
+import fr.cea.ig.play.IGBodyParsers;
 import models.laboratory.common.instance.property.PropertyFileValue;
 import models.laboratory.reception.instance.ReceptionConfiguration;
 import models.utils.InstanceConstants;
@@ -14,31 +16,28 @@ import play.mvc.Result;
 import services.io.reception.FileService;
 import services.io.reception.ReceptionFileService;
 import validation.ContextValidation;
-import controllers.TPLCommonController;
-import controllers.authorisation.Permission;
-import fr.cea.ig.MongoDBDAO;
-import fr.cea.ig.play.IGBodyParsers;
-import fr.cea.ig.play.migration.NGLContext;
-
-
-// TODO: cleanup
-
-// TODO: cleanup
 
 public class Receptions extends TPLCommonController {
 
-	final Form<PropertyFileValue> fileForm;// = form(PropertyFileValue.class);
 	
-//	private final NGLContext ctx;
-	private final ReceptionFileService receptionFileService;
+	private final NGLApplication          app;
+	private final Form<PropertyFileValue> fileForm;
+	private final ReceptionFileService    receptionFileService;
 
+//	@Inject
+//	public Receptions(NGLContext ctx, ReceptionFileService receptionFileService) {
+//		fileForm = ctx.form(PropertyFileValue.class);
+////		this.ctx = ctx;
+//		this.receptionFileService = receptionFileService;
+//	}
+	
 	@Inject
-	public Receptions(NGLContext ctx, ReceptionFileService receptionFileService) {
-		fileForm = ctx.form(PropertyFileValue.class);
-//		this.ctx = ctx;
+	public Receptions(NGLApplication app, ReceptionFileService receptionFileService) {
+		fileForm = app.form(PropertyFileValue.class);
+		this.app = app;
 		this.receptionFileService = receptionFileService;
 	}
-	
+
 	private ReceptionConfiguration getReceptionConfig(String code){
 		return MongoDBDAO.findByCode(InstanceConstants.RECEPTION_CONFIG_COLL_NAME, ReceptionConfiguration.class, code);
 	}
@@ -54,17 +53,18 @@ public class Receptions extends TPLCommonController {
 		PropertyFileValue pfv = filledForm.get();
 		if (pfv != null) {
 //			ContextValidation contextValidation = new ContextValidation(getCurrentUser(), filledForm.errors());
-			ContextValidation contextValidation = new ContextValidation(getCurrentUser(), filledForm);
+			ContextValidation contextValidation = ContextValidation.createUndefinedContext(getCurrentUser(), filledForm);
 			try {				
 				FileService fileService = receptionFileService.getFileService(configuration, pfv, contextValidation);
 				fileService.analyse();
 			} catch(Throwable e) {
 				e.printStackTrace();
-				contextValidation.addErrors("Error", (e.getMessage() != null)?e.getMessage():"null");
+				contextValidation.addError("Error", (e.getMessage() != null)?e.getMessage():"null");
 			}
 			if (contextValidation.hasErrors()) {
 				// return badRequest(filledForm.errors-AsJson());
-				return badRequest(NGLContext._errorsAsJson(contextValidation.getErrors()));
+//				return badRequest(NGLContext._errorsAsJson(contextValidation.getErrors()));
+				return badRequest(app.errorsAsJson(contextValidation.getErrors()));
 			} else {
 				return ok();
 			}

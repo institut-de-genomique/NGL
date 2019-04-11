@@ -1,5 +1,6 @@
 package services.instance.protocol;
 
+import static java.util.Arrays.asList;
 import static services.instance.InstanceFactory.newPSV;
 import static services.instance.InstanceFactory.newProtocol;
 
@@ -15,7 +16,6 @@ import models.laboratory.common.instance.PropertyValue;
 import models.laboratory.protocol.instance.Protocol;
 import models.utils.InstanceConstants;
 import models.utils.InstanceHelpers;
-import services.instance.InstanceFactory;
 import validation.ContextValidation;
 
 public class ProtocolServiceCNG {	
@@ -43,183 +43,224 @@ public class ProtocolServiceCNG {
 		
 		//----------Experiences de transformation-------------------------------------
 		lp.add(newProtocol("PrepFC_CBot_ptr_sox139_1","PrepFC_CBot_ptr_sox139_1","","1","production", 
-				InstanceFactory.setExperimentTypeCodes("prepa-flowcell")));
+				asList("prepa-flowcell")));
 		
 		// 27/06/2016 ajout "protocole_FC_ordonnée"
 		lp.add(newProtocol("protocole-FC-ordered","protocole_FC_ordonnée","","1","production", 
-				InstanceFactory.setExperimentTypeCodes("prepa-fc-ordered")));
+				asList("prepa-fc-ordered")));
 		
 		lp.add(newProtocol("1a-sop-ill-pcrfree","1A_SOP_ILL_PCRfree_270116", "?","1","production",
-				InstanceFactory.setExperimentTypeCodes("prep-pcr-free",
+				asList("prep-pcr-free",
 													   "labchip-migration-profile" )));
 		
 		lp.add(newProtocol("1a-sop-ill-pcrfree-dap-plate","1A_SOP_ILL_PCRfree_DAPplate", "?","1","production",
-				InstanceFactory.setExperimentTypeCodes("prep-pcr-free",
-													   "labchip-migration-profile" )));
+				asList("prep-pcr-free",
+						"labchip-migration-profile" )));
 
 
 		// 10/08/2016 protocole  pour toutes les experiences du processus X5_WG NANO
 		// 01/09/2016 aussi pour "labchip-migration-profile"
 		// 27/09/2016 prepa-fc-ordered, normalisation, illumina-depot ont leur propre protocole
 		lp.add(newProtocol("1a-sop-ill-nano-240214","1A_SOP_ILL_NANO_240214", "?","1","production",
-				InstanceFactory.setExperimentTypeCodes("prep-wg-nano",
-													   "pcr-and-purification",
-													   "labchip-migration-profile")));
+				asList("prep-wg-nano",
+					   "pcr-and-purification",
+					   "labchip-migration-profile")));
 		
 		lp.add(newProtocol("sop-1","SOP 1","?","1","production", 
-				InstanceFactory.setExperimentTypeCodes("denat-dil-lib")));
+				asList("denat-dil-lib")));
 		
 		lp.add(newProtocol("sop-en-attente","SOP en attente","?","1","production", 
-				InstanceFactory.setExperimentTypeCodes("normalization-and-pooling",														   
-													   "aliquoting",
-													   "tubes-to-plate",
-													   "plate-to-tubes",
-													   "plates-to-plate",
-													   "x-to-plate")));
+				asList("normalization-and-pooling",
+					   "aliquoting",
+					   "tubes-to-plate",
+					   "plate-to-tubes",
+					   "plates-to-plate",
+					   "x-to-plate")));
 
 		// 12/12/2016 protocoles pour RNA
 		lp.add(newProtocol("2a-ill-ssmrna-010616","2A_ILL_ssmRNA_010616","?","1","production", 
-				InstanceFactory.setExperimentTypeCodes("library-prep",
-													   "pcr-and-purification")));
+				asList("library-prep",
+					   "pcr-and-purification")));
 		// 05/12/2016 library-prep
 		lp.add(newProtocol("2a-ill-sstotalrna-170816","2A_ILL_ssTotalRNA_170816","?","1","production", 
-				InstanceFactory.setExperimentTypeCodes("library-prep",
-													   "pcr-and-purification")));
+				asList("library-prep",
+					   "pcr-and-purification")));
 		
 		// 29/11/2017 NGL-1717 ajout "Truseq RNA v2"
 		lp.add(newProtocol("truseq-rna-v2","Truseq RNA v2","?","1","production", 
-				InstanceFactory.setExperimentTypeCodes( "library-prep",
-							                            "pcr-and-purification")));	
+				asList("library-prep",
+					   "pcr-and-purification")));	
 						
 		// 26/09/2016 ajout protocole "normalisation" dédié a l'experience lib-normalization"; 19/07/2017 ajout additional-normalization
 		lp.add(newProtocol("normalization","normalisation","?","1","production", 
-				InstanceFactory.setExperimentTypeCodes("lib-normalization",
-						                               "additional-normalization")));
+				asList("lib-normalization",
+					    "additional-normalization")));
 		
 		// 27/09/2016 ajout protocole "protocole_pool" dédié a l'experience "pool plaque a plaque"
 		lp.add(newProtocol("protocol-pool","protocole_pool","?","1","production", 
-				InstanceFactory.setExperimentTypeCodes("pool")));
+				asList("pool")));
 		
 		// 27/09/2016 ajout protocole "protocole_dépôt_illumina" dédié a l'experience "illumina-depot"
 		lp.add(newProtocol("protocol-illumina-depot","protocole_dépôt_illumina","?","1","production", 
-				InstanceFactory.setExperimentTypeCodes("illumina-depot")));
+				asList("illumina-depot")));
 		
 		// 23/03/2017 ajout protocole pour Chromium
 		lp.add(newProtocol("chromium-genome-protocol-v1","chromium genome protocol v1","?","1","production", 
-				InstanceFactory.setExperimentTypeCodes("chromium-gem-generation",
-													   "wg-chromium-lib-prep")));
+				asList("chromium-gem-generation",
+					   "wg-chromium-lib-prep")));
 		
 		lp.add(newProtocol("chromium-genome-protocol-v2","chromium genome protocol v2","?","1","production", 
-				InstanceFactory.setExperimentTypeCodes("chromium-gem-generation",
-													   "wg-chromium-lib-prep")));
-		
+				asList("chromium-gem-generation",
+					   "wg-chromium-lib-prep")));
 		
 		// 30/03/2017 ajout protocoles pour Nanopore
-			
 		//cdna-synthesis
 		lp.add(newProtocol("1d-strand-switching","1D strand switching ","path1","1","production",
-				InstanceFactory.setExperimentTypeCodes("cdna-synthesis")));
-		     
+				asList("cdna-synthesis")));
 		
 		//nanopore-frg 
-		lp.add(newProtocol("mechanical-fragmentation","fragmentation mécanique","path7","1","production", 
-				InstanceFactory.setExperimentTypeCodes("nanopore-frg")));
+		lp.add(newProtocol("mechanical-fragmentation","fragmentation mécanique","path7","1","production",
+				asList("nanopore-frg")));
 		
-		lp.add(newProtocol("enzymatic-fragmentation","fragmentation enzymatique","path7","1","production", 
-				InstanceFactory.setExperimentTypeCodes("nanopore-frg")));
+		lp.add(newProtocol("enzymatic-fragmentation","fragmentation enzymatique","path7","1","production",
+				asList("nanopore-frg")));
 		
 		//nanopore-dna-reparation
-		lp.add(newProtocol("ffpe-reparation","réparation FFPE","path7","1","production", 
-				InstanceFactory.setExperimentTypeCodes("nanopore-dna-reparation")));
+		lp.add(newProtocol("ffpe-reparation","réparation FFPE","path7","1","production",
+				asList("nanopore-dna-reparation")));
 		
 		//nanopore-library")
-		lp.add(newProtocol("R9-1D-ligation","R9-1D ligation","path7","1","production", 
-				InstanceFactory.setExperimentTypeCodes("nanopore-library"),
+		lp.add(newProtocol("R9-1D-ligation","R9-1D ligation","path7","1","production",
+				asList("nanopore-library"),
 				concatMap(newPSV("libraryProtocol","R9-1D ligation"))));
 		
 		lp.add(newProtocol("R9-1D-transposition","R9-1D transposition","path7","1","production", 
-				InstanceFactory.setExperimentTypeCodes("nanopore-library"),
+				asList("nanopore-library"),
 				concatMap(newPSV("libraryProtocol","R9-1D transposition"))));
 		
-		lp.add(newProtocol("R9-Long-Read 1D","R9-Long Read 1D","path7","1","production", 
-				InstanceFactory.setExperimentTypeCodes("nanopore-library"),
+		lp.add(newProtocol("R9-Long-Read 1D","R9-Long Read 1D","path7","1","production",
+				asList("nanopore-library"),
 				concatMap(newPSV("libraryProtocol","R9-Long Read 1D"))));
 		
 		lp.add(newProtocol("R9-Long-Read 2D","R9-Long Read 2D","path7","1","production",
-				InstanceFactory.setExperimentTypeCodes("nanopore-library"),
+				asList("nanopore-library"),
 				concatMap(newPSV("libraryProtocol","R9-Long Read 2D"))));
 		
 		lp.add(newProtocol("R9-Low-input","R9-Low input","path7","1","production", 
-				InstanceFactory.setExperimentTypeCodes("nanopore-library"),
+				asList("nanopore-library"),
 				concatMap(newPSV("libraryProtocol","R9-Low input"))));
 		
-		lp.add(newProtocol("R9-2D","R9-2D","path7","1","production", 
-				InstanceFactory.setExperimentTypeCodes("nanopore-library"),
+		lp.add(newProtocol("R9-2D","R9-2D","path7","1","production",
+				asList("nanopore-library"),
 				concatMap(newPSV("libraryProtocol","R9-2D"))));
 		
-		lp.add(newProtocol("1D2-library","Banque 1D²","path7","1","production", 
-				InstanceFactory.setExperimentTypeCodes("nanopore-library"),
+		lp.add(newProtocol("1D2-library","Banque 1D²","path7","1","production",
+				asList("nanopore-library"),
 				concatMap(newPSV("libraryProtocol","Banque 1D²"))));
 		
 		//nanopore-depot
-		lp.add(newProtocol("R9-depot","R9-dépôt","path7","1","production", 
-				InstanceFactory.setExperimentTypeCodes("nanopore-depot")));
+		lp.add(newProtocol("R9-depot","R9-dépôt","path7","1","production",
+				asList("nanopore-depot")));
 		
-		lp.add(newProtocol("R9-depot-SpotON","R9-dépôt-SpotON","path7","1","production", 
-				InstanceFactory.setExperimentTypeCodes("nanopore-depot")));
-		 
-		lp.add(newProtocol("R9-on-bead-depot","R9-dépôt sur billes","path7","1","production", 
-				InstanceFactory.setExperimentTypeCodes("nanopore-depot")));
+		lp.add(newProtocol("R9-depot-SpotON","R9-dépôt-SpotON","path7","1","production",
+				asList("nanopore-depot")));
 		
-		lp.add(newProtocol("R9-on-bead-spotOn-depot","R9-dépôt-SpotON sur billes","path7","1","production", 
-				InstanceFactory.setExperimentTypeCodes("nanopore-depot")));
+		lp.add(newProtocol("R9-on-bead-depot","R9-dépôt sur billes","path7","1","production",
+				asList("nanopore-depot")));
+		
+		lp.add(newProtocol("R9-on-bead-spotOn-depot","R9-dépôt-SpotON sur billes","path7","1","production",
+				asList("nanopore-depot")));
+		
+		lp.add(newProtocol("PromethION_DEV","PromethION_DEV","path7","1","production",
+				asList("nanopore-depot")));
+		
 		
 		// 12/07/2017 ajout protocoles pour Capture
-		lp.add(newProtocol("1-dna-a-2-sop-agil-capture-sciclone","1_DNA_A_2_SOP_AGIL_Capture_Sciclone","path7","1","production", 
-				InstanceFactory.setExperimentTypeCodes("fragmentation",
-						                               "sample-prep",
-						                               "pcr-and-purification",
-						                               "capture",
-						                               "pcr-and-indexing",
-						                               "fluo-quantification",
-						                               "labchip-migration-profile")));  
+		lp.add(newProtocol("1-dna-a-2-sop-agil-capture-sciclone","1_DNA_A_2_SOP_AGIL_Capture_Sciclone","path7","1","production",
+				asList("fragmentation",
+					   "sample-prep",
+					   "pcr-and-purification",
+					   "capture",
+					   "pcr-and-indexing",
+					   "fluo-quantification",
+					   "labchip-migration-profile")));  
 		
-		/* OOps trop tot... pas pour la 2.1.2 attendre
+		// 18/06/2018 NGL-2129
+		lp.add(newProtocol("1-dna-a-1-sop-sp-capture-3ug-bravo","1_DNA_A_1_SOP_SP_Capture_3µg_Bravo","path7","1","production",
+				asList("fragmentation",
+					   "sample-prep",
+					   "pcr-and-purification"))); 
+		
+		// 18/06/2018 NGL-2129
+		lp.add(newProtocol("1-dna-a-1-sop-sp-capture-200ng-bravo","1_DNA_A_1_SOP_SP_Capture_200ng_Bravo","path7","1","production",
+				asList("fragmentation",
+					   "sample-prep",
+					   "pcr-and-purification"))); 
+		
+		// 18/06/2018 NGL-2129
+		lp.add(newProtocol("1-dna-a-1-sop-postcapture-bravo","1_DNA_A_1_SOP_PostCapture_Bravo ","path7","1","production",
+				asList("capture",
+					   "pcr-and-indexing",
+					   "fluo-quantification",          //pas demandé explicitement
+					   "labchip-migration-profile"))); //pas demandé explicitement
+		
 		// 06/04/2018 ajout protocoles pour smallRNASeq
-		lp.add(newProtocol("nebnext-small-rna-library-prep","NEBNext Small RNA Library Prep","?","1","production", 
-				InstanceFactory.setExperimentTypeCodes("small-rnaseq-lib-prep")));
+		lp.add(newProtocol("nebnext-small-rna-library-prep","NEBNext Small RNA Library Prep","?","1","production",
+				asList("small-rnaseq-lib-prep")));
 		
-		lp.add(newProtocol("qiaseq-mirna-library-prep","QIAseq miRNA Library Prep","?","1","production", 
-				InstanceFactory.setExperimentTypeCodes("small-rnaseq-lib-prep")));
+		lp.add(newProtocol("qiaseq-mirna-library-prep","QIAseq miRNA Library","?","1","production", 
+				asList("small-rnaseq-lib-prep")));
 		
 		// 09/04/2018 ajout protocoles pour BisSeq
-		lp.add(newProtocol("nugen-ovation-ultralow-methyl-seq-system-1-96","NUGEN Ovation Ultralow Methyl-Seq System 1-96","?","1","production", 
-				InstanceFactory.setExperimentTypeCodes("bisseq-lib-prep")));
+		lp.add(newProtocol("nugen-ovation-ultralow-methyl-seq-system-1-96","NUGEN Ovation Ultralow Methyl-Seq System 1-96","?","1","production",
+				asList("bisseq-lib-prep")));
 		
-		*/
+		// 04/06/2018 ajout protocoles pour OxBisSeq
+		lp.add(newProtocol("oxbisseq-v3-1","OxBisSeq_v3.1","?","1","production",
+				asList("oxbisseq-and-bisseq-lib-prep")));
+		
+		// 29/10/2018 ajout protocoles pour processus RNAseq (DEV) NGL-1226
+		lp.add(newProtocol("ssmrna-seq-truseq", "ssmRNAseq Truseq","?","1","production",
+				asList("frg-cdna-indexing",
+					   "dev-pcr-amplification")));
+		
+		lp.add(newProtocol("sstotrna-seq-truseq", "sstotRNAseq Truseq","?","1","production",
+				asList("frg-cdna-indexing",
+						"dev-pcr-amplification")));
+		
+		lp.add(newProtocol("mrnaseq-truseq","mRNAseqTruseq","?","1","production",
+				asList("cdna-synthesis")));
+		
+		lp.add(newProtocol("mrnaseq-smarter-ultra-low-v4","mRNAseq Smarter Ultra Low v4","?","1","production",
+				asList("cdna-synthesis")));
+		
+		lp.add(newProtocol("nextera-xt", "Nextera XT","?","1","production",
+				asList("lib-and-pcr")));
+		
 		
 		//------------Experiences de Control Qualité------------------------------
 		lp.add(newProtocol("7-sop-miseq","7_SOP_Miseq","?","1","production", 
-				InstanceFactory.setExperimentTypeCodes("miseq-qc")));
+				asList("miseq-qc")));
 		
 		lp.add(newProtocol("3a-kapa-qPCR-240715","3A_KAPA_qPCR_240715", "?","1","production",
-				InstanceFactory.setExperimentTypeCodes("qpcr-quantification")));
+				asList("qpcr-quantification")));
 		
 		// 01/09/2016 ajout 
 		lp.add(newProtocol("labchip-gx","LabChiP_GX", "?","1","production",
-				InstanceFactory.setExperimentTypeCodes("labchip-migration-profile")));
+				asList("labchip-migration-profile")));
 		
 		// 27/02/2017 ajout protocole pour Bioanalyzer 
 		lp.add(newProtocol("bioanalyzer","BioAnalyzer", "?","1","production",
-				InstanceFactory.setExperimentTypeCodes("bioanalyzer-migration-profile")));
+				asList("bioanalyzer-migration-profile")));
 		
-		
-		
+		// 04/12/2018 ajout protocole Qubit HS
+		lp.add(newProtocol("qubit-hs","Qubit HS", "?","1","production",
+				asList("fluo-quantification")));
 		
 		//------------Experiences de Purification-----------------------------
 		// 30/03/2017 ajout Protocole pour Sizing 
 		lp.add(newProtocol("nanopore-sizing-ptr","sizing nanopore","path7","1","production", 
-				InstanceFactory.setExperimentTypeCodes("nanopore-sizing")));	
+				asList("nanopore-sizing")));	
 		
 		
 		for(Protocol protocole:lp){

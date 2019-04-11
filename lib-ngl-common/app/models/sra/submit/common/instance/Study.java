@@ -6,14 +6,17 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import fr.cea.ig.ngl.dao.api.sra.StudyAPI;
 import models.laboratory.common.description.ObjectType;
 import models.sra.submit.util.VariableSRA;
 import models.utils.InstanceConstants;
 import validation.ContextValidation;
+import validation.common.instance.CommonValidationHelper;
 import validation.sra.SraValidationHelper;
 import validation.utils.ValidationHelper;
 
 public class Study extends AbstractStudy {
+	private static final play.Logger.ALogger logger = play.Logger.of(Study.class);
 
 	// StudyType
 	//public String alias;             // required mais remplacé par code herité de DBObject, et valeur = study_projectCode_num
@@ -31,57 +34,80 @@ public class Study extends AbstractStudy {
  	public List <String> projectCodes = new ArrayList<>();    // required pour nos stats  
     // et heritage de state et traceInformation.
 	public static final String initialStateCode = "NONE";
+	public String adminComment;
+
+	
+	public void validateInvariants(ContextValidation contextValidation) {
+		contextValidation = contextValidation.appendPath("study");
+
+		//		contextValidation.addKeyToRootKeyName("study");
+		logger.debug("dans validate");
+
+		// verifier que projectCodes est bien renseigné et existe dans lims:
+		CommonValidationHelper.validateProjectCodes (contextValidation, projectCodes);
+		// Attention on peut vouloir regrouper dans un project_code virtuel ?? 
+		ValidationHelper      .validateNotEmpty     (contextValidation, centerProjectName , "centerProjectName");
+		SraValidationHelper   .requiredAndConstraint(contextValidation, centerName,	VariableSRA.mapCenterName(), "centerName");
+		CommonValidationHelper.validateIdPrimary    (contextValidation, this);
+		CommonValidationHelper.validateCodePrimary  (contextValidation, this, InstanceConstants.SRA_STUDY_COLL_NAME);
+		CommonValidationHelper.validateTraceInformationRequired(contextValidation, traceInformation);
+		if (state != null && StringUtils.isNotBlank(state.code) && !initialStateCode.equals(state.code)) {
+			CommonValidationHelper.validateStateRequired(contextValidation, ObjectType.CODE.SRASubmission, state);
+		}
+		SraValidationHelper   .validateFreeText     (contextValidation, "title",         title);
+		SraValidationHelper   .validateFreeText     (contextValidation, "studyAbstract", studyAbstract);
+		SraValidationHelper   .validateFreeText     (contextValidation, "description",   description);
+		CommonValidationHelper.validateCodePrimary  (contextValidation, this, InstanceConstants.SRA_STUDY_COLL_NAME);
+		SraValidationHelper   .requiredAndConstraint(contextValidation, existingStudyType, VariableSRA.mapExistingStudyType(), "existingStudyType");
+	}
+	
+	private void validateCreation(ContextValidation contextValidation) {
+		contextValidation = contextValidation.appendPath("study");
+		if (ValidationHelper.validateNotEmpty(contextValidation, code, "code")) 
+			contextValidation = contextValidation.appendPath(code);
+		StudyAPI studyAPI = StudyAPI.get();
+		if(studyAPI.dao_checkObjectExist("code", code)) {
+			contextValidation.addError("code", code + " existe deja dans la base de données et MODE CREATION");
+		}	
+	}
+
+	private void validateDelete(ContextValidation contextValidation) {
+		contextValidation = contextValidation.appendPath("study");
+		if (ValidationHelper.validateNotEmpty(contextValidation, code, "code")) 
+			contextValidation = contextValidation.appendPath(code);
+		StudyAPI studyAPI = StudyAPI.get();
+		if(! studyAPI.dao_checkObjectExist("code", code)) {
+			contextValidation.addError("code", code + " n'existe pas dans la base de données et MODE DELETE");
+		}	
+	}
+	
+
+	private void validateUpdate(ContextValidation contextValidation) {
+		contextValidation = contextValidation.appendPath("study");
+		if (ValidationHelper.validateNotEmpty(contextValidation, code, "code")) 
+			contextValidation = contextValidation.appendPath(code);
+		StudyAPI studyAPI = StudyAPI.get();
+		if(! studyAPI.dao_checkObjectExist("code", code)) {
+			contextValidation.addError("code", code + " n'existe pas dans la base de données et MODE UPDATE");
+		}	
+	}
 
 	@Override
 	public void validate(ContextValidation contextValidation) {
-
-		contextValidation.addKeyToRootKeyName("study");
-		System.out.println("dans validate");
-		
-		// verifier que projectCodes est bien renseigné et existe dans lims:
-		SraValidationHelper.validateProjectCodes(this.projectCodes, contextValidation);
-		// Attention on peut vouloir regrouper dans un project_code virtuel ?? 
-		ValidationHelper.required(contextValidation, this.centerProjectName , "centerProjectName");
-		SraValidationHelper.requiredAndConstraint(contextValidation, 
-												  this.centerName, 
-												  VariableSRA.mapCenterName(), 
-												  "centerName");
-		SraValidationHelper.validateId(this, contextValidation);
-		SraValidationHelper.validateCode(this, InstanceConstants.SRA_STUDY_COLL_NAME, contextValidation);
-		SraValidationHelper.validateTraceInformation(traceInformation, contextValidation);
-		if ( this.state != null && StringUtils.isNotBlank(this.state.code) && !initialStateCode.equals(this.state.code)) {
-			SraValidationHelper.validateState(ObjectType.CODE.SRASubmission, this.state, contextValidation);
-		}
-		SraValidationHelper.validateFreeText(contextValidation, "title", this.title);
-		SraValidationHelper.validateFreeText(contextValidation, "studyAbstract", this.studyAbstract);
-		SraValidationHelper.validateFreeText(contextValidation,"description", this.description);
-
-		if (!StringUtils.isNotBlank((CharSequence) contextValidation.getContextObjects().get("type"))){
-			contextValidation.addErrors(" study non evaluable ", "sans type de contexte de validation");
-			contextValidation.removeKeyFromRootKeyName("study");
-			return;
-		}
-		if (contextValidation.getContextObjects().get("type").equals("sra")) {
-			System.out.println("contextValidationType  = sra");
-			SraValidationHelper.validateCode(this, InstanceConstants.SRA_STUDY_COLL_NAME, contextValidation);
-			SraValidationHelper.requiredAndConstraint(contextValidation, 
-													  this.existingStudyType, 
-													  VariableSRA.mapExistingStudyType(), 
-													  "existingStudyType");
-		} else if (contextValidation.getContextObjects().get("type").equals("wgs")) {
-			System.out.println("contextValidationType  = wgs");
-			SraValidationHelper.validateCode(this, InstanceConstants.SRA_STUDY_WGS_COLL_NAME, contextValidation);
-			if (!this.existingStudyType.equals("Whole Genome Sequencing")) {
-				contextValidation.addErrors("existingStudyType" + " avec valeur '" + this.existingStudyType + 
-						"' qui n'appartient pas a la liste des valeurs autorisees :" , "Whole Genome Sequencing");
-			}
-		} else {
-			System.out.println("contextValidationType = "+contextValidation.getContextObjects().get("type"));
-			contextValidation.addErrors("study non evaluable ", "avec type de contexte de validation " 
-										 + contextValidation.getContextObjects().get("type"));	
-		}
-		contextValidation.removeKeyFromRootKeyName("study");
-
+		switch (contextValidation.getMode()) {
+		case CREATION:
+			validateCreation(contextValidation);
+			break;
+		case UPDATE:
+			validateUpdate(contextValidation);
+			break;
+		case DELETE:
+			validateDelete(contextValidation);
+			break;
+		default: // autre cas undefined notamment
+			contextValidation.addError("ERROR", "contextValidation.getMode() != de CREATION, UPDATE ou DELETE (undefined ?)");
+			break;	
+		} 
+		validateInvariants(contextValidation);
 	}
-
 }

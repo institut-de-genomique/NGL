@@ -125,7 +125,7 @@ public class UserDAOAuthorizator implements IAuthorizator {
      * the user if configured to do so.
      */
     @Override
-    public boolean authorize(String login, String[] perms) {
+    public boolean authorize(String login, String... perms) {
         if (applicationName == null) {
             logger.error("application name is not defined");
             return false;
@@ -172,8 +172,8 @@ public class UserDAOAuthorizator implements IAuthorizator {
         Set<String> permissions = new HashSet<>();
         PermissionAPI permissionAPI = this.permissionAPI.get();
         if (isBlank(login))                               return permissions;
-        if (!permissionAPI.isDeclaredUser(login))                       return permissions;
-        if (!permissionAPI.isActiveUser(login))                         return permissions;
+        if (!permissionAPI.isDeclaredUser(login))         return permissions;
+        if (!permissionAPI.isActiveUser(login))           return permissions;
         if (!canAccessApplication(applicationName,login)) return permissions;
         try {
             for (Permission p : permissionAPI.byUserLogin(login)) 

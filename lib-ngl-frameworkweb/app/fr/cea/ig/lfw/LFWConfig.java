@@ -16,8 +16,20 @@ import com.typesafe.config.Config;
 @Singleton
 public class LFWConfig {
 	
+	/**
+	 * Rules key in the configuration.
+	 */
+	public static final String NGL_RULES_PATH = "rules.key";
+
+	/**
+	 * Underlying configuration.
+	 */
 	private final Config config;
 	
+	/**
+	 * Constructor.
+	 * @param config play configuration
+	 */
 	@Inject
 	public LFWConfig(Config config) {
 		this.config = config;	
@@ -45,6 +57,12 @@ public class LFWConfig {
 		return config.getBoolean(path);
 	}
 	
+	/**
+	 * Returns a string constrained by a string set provided as an array.
+	 * @param path   path of value to get
+	 * @param values valid values
+	 * @return       string from configuration
+	 */
 	public String getCheckedString(String path, String[] values) {
 		if (!config.hasPath(path))
 			throw new RuntimeException(path + " has no value in configuration");
@@ -56,18 +74,35 @@ public class LFWConfig {
 		throw new RuntimeException("value " + value + " at " + path + " not in allowed values:" + String.join(",", values));
 	}
 	
+	/**
+	 * Hard failing get string (throws a runtime exception if path has no value
+	 * in the configuration.
+	 * @param path value path in configuration
+	 * @return     string value from configuration
+	 */
 	public String getString(String path) {
 		if (!config.hasPath(path))
 			throw new RuntimeException(path + " has no value in configuration");
 		return config.getString(path);
 	}
 		
+	/**
+	 * Get string from configuration or default value if it does not exist.
+	 * @param path         path of value in configuration
+	 * @param defaultValue default value
+	 * @return             configuration value or default value if no configuration value is defined
+	 */
 	public String getString(String path, String defaultValue) {
 		if (!config.hasPath(path))
 			return defaultValue;
 		return config.getString(path);
 	}
 	
+	/**
+	 * List of strings from the configuration.
+	 * @param path path of value in configuration
+	 * @return     value in configuration
+	 */
 	public List<String> getStringList(String path) {
 		try {
 			return config.getStringList(path);
@@ -76,5 +111,12 @@ public class LFWConfig {
 		}
 	}
 
-	
+	/**
+	 * Rules key from configuration.
+	 * @return rules key
+	 */
+	public String getRulesKey() {
+		return config.getString(NGL_RULES_PATH);
+	}
+
 }

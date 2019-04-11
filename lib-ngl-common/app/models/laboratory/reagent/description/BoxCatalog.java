@@ -18,17 +18,17 @@ public class BoxCatalog extends AbstractCatalog {
 
 	@Override
 	public void validate(ContextValidation contextValidation) {
-		ValidationHelper.required(contextValidation, name, "name");
-		ValidationHelper.required(contextValidation, catalogRefCode, "catalogRefCode");
+		ValidationHelper.validateNotEmpty(contextValidation, name, "name");
+		ValidationHelper.validateNotEmpty(contextValidation, catalogRefCode, "catalogRefCode");
 		if (!contextValidation.hasErrors()) {
-			KitCatalogValidationHelper.validateCode(this, InstanceConstants.REAGENT_CATALOG_COLL_NAME, contextValidation);
+			KitCatalogValidationHelper.validateCodePrimary(contextValidation, this, InstanceConstants.REAGENT_CATALOG_COLL_NAME);
 			KitCatalogValidationHelper.validateKitCatalogCode(kitCatalogCode, contextValidation);
 			if (contextValidation.isCreationMode()) {
 				if (MongoDBDAO.checkObjectExist(InstanceConstants.REAGENT_CATALOG_COLL_NAME, ReagentCatalog.class, DBQuery.and(DBQuery.is("catalogRefCode",catalogRefCode), DBQuery.is("kitCatalogCode",kitCatalogCode)))) {
-					contextValidation.addErrors("catalogRefCode", ValidationConstants.ERROR_NOTUNIQUE_MSG, catalogRefCode);
+					contextValidation.addError("catalogRefCode", ValidationConstants.ERROR_NOTUNIQUE_MSG, catalogRefCode);
 				}
 				if (MongoDBDAO.checkObjectExist(InstanceConstants.REAGENT_CATALOG_COLL_NAME, ReagentCatalog.class, DBQuery.and(DBQuery.is("name",name), DBQuery.is("kitCatalogCode",kitCatalogCode)))) {
-					contextValidation.addErrors("name", ValidationConstants.ERROR_NOTUNIQUE_MSG, name);
+					contextValidation.addError("name", ValidationConstants.ERROR_NOTUNIQUE_MSG, name);
 				}
 			}
 		}

@@ -46,7 +46,7 @@ public class ContainerSupportCategoryMappingQuery extends NGLMappingSqlQuery<Con
 		long idCategory = rs.getLong("fk_container_category");
 		ContainerCategory category = null;
 		try {
-			category = ContainerCategory.find.findById(idCategory);
+			category = ContainerCategory.find.get().findById(idCategory);
 		} catch (DAOException e) {
 			throw new SQLException(e);
 		}

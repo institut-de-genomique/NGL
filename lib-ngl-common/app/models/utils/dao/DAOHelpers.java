@@ -1,210 +1,215 @@
 package models.utils.dao;
 
+import static models.utils.dao.DAOException.daoAssertNotNull;
+
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
+import fr.cea.ig.lfw.utils.Iterables;
 import models.utils.DescriptionHelper;
-//import models.utils.HelperObjects;
 import models.utils.Model;
-import models.utils.Model.Finder;
-// import play.Logger;
+import models.utils.ModelDAOs;
 import play.data.validation.ValidationError;
 
+/**
+ * Utility methods for DAOs.
+ */
 public class DAOHelpers {
 
 	private static final play.Logger.ALogger logger = play.Logger.of(DAOHelpers.class);
 	
-	private static String SQLInstitute = null;
-
-	/*
-	 * Save an object Model in the description DB
-	 * @param type
-	 * @param models
-	 * @return
-	 * @throws DAOException
-	 */
-//	public static <T extends Model> Map<String,List<ValidationError>> saveModels(Class<T> type, Map<String, T> models) throws DAOException {
-////	public static <T extends Model<T>> Map<String,List<ValidationError>> saveModels(Class<T> type, Map<String, T> models) throws DAOException {
-//		Map<String,List<ValidationError>>errors = new HashMap<String, List<ValidationError>>();
-//		for (Entry<String,T> model : models.entrySet()) {
-//			T samp = new HelperObjects<T>().getObject(type, model.getKey());
-//			if (samp != null) {
-//				samp.remove(); // TODO: Remove ???
-//			}
-//			logger.debug(" Before save :" + model.getValue().code);
-//			model.getValue().save();
-//			logger.debug(" After save :" + model.getValue().code);
-//			samp = new  HelperObjects<T>().getObject(type, model.getKey());
-//			logger.debug(" After find :" + model.getValue().code);
+//	public static <T extends Model> Map<String,List<ValidationError>> saveModels(Class<T> type, Map<String,T> models) throws DAOException {
+//		Map<String,List<ValidationError>>errors = new HashMap<>();
+//		ModelDAOs daos = ModelDAOs.instance.get();
+//		for (Entry<String,T> entry : models.entrySet()) {
+//			T model = entry.getValue();
+//			T dbModel = daos.fromDB(model);
+//			if (dbModel != null)
+//				daos.remove(dbModel);
+//			logger.debug(" Before save :" + model.code);
+//			daos.save(model);
+//			logger.debug(" After save :" + model.code);
+//			model = daos.fromDB(model);
+//			logger.debug(" After find :" + model.code);
 //		}	
 //		return errors;
 //	}
-	public static <T> Map<String,List<ValidationError>> saveModels(Class<T> type, Map<String, Model<T>> models) throws DAOException {
-		Map<String,List<ValidationError>>errors = new HashMap<>();
-		for (Entry<String,Model<T>> entry : models.entrySet()) {
-			Model<T> model = entry.getValue();
-//			T samp = new HelperObjects<T>().getObject(type, model.getKey());
-//			if (samp != null) {
-//				samp.remove(); // TODO: Remove ???
-//			}
-			Model<T> dbModel = model.fromDB();
-			if (dbModel != null)
-				dbModel.remove();
-			logger.debug(" Before save :" + model.code);
-			model.save();
-			logger.debug(" After save :" + model.code);
-			// samp = new  HelperObjects<T>().getObject(type, model.getKey());
-			model = model.fromDB();
-			logger.debug(" After find :" + model.code);
-		}	
-		return errors;
+
+	// ------------------------------------------------------------------
+	// removed unused Class<T> parameter
+	
+	/**
+	 * Iteratively deletes instances accessible through the given DAO.
+	 * @param <T>           element type
+	 * @param c             java type of the objects to delete
+	 * @param finder        DAO used to access and delete instances
+	 * @throws DAOException persistence layer error
+	 * @deprecated use {@link AbstractDAO#removeAll()}
+	 */
+	@Deprecated
+	public static <T extends Model> void removeAll(Class<T> c, AbstractDAO<T> finder) throws DAOException {
+		for (T t : finder.findAll()) 
+			finder.remove(t);	
 	}
 	
-//	public static <T extends Model> void removeAll(Class<T> type, Finder<T,? extends AbstractDAO<T>> finder) throws DAOException {
-////	public static <T extends Model<T>> void removeAll(Class<T> type, Finder<T> finder) throws DAOException {
-//		List<T> list = finder.findAll();
-//		for(T t : list){
-//			logger.debug("remove "+type.getName() + " : "+t.code);
-//			t.remove();
-//		}		
-//	}
-	
-	public static <T,U extends Model<T>> void removeAll(Class<U> c, Finder<U,? extends AbstractDAO<U>> finder) throws DAOException {
-		List<U> list = finder.findAll();
-		for (U t : list) {
-			// logger.debug("remove "+type.getName() + " : "+t.code);
-			// t.remove();
-			// finder.getInstance().remove(value);
-			t.remove();
-		}		
+	/**
+	 * Iteratively deletes instances accessible through the given DAO.
+	 * @param <T>           element type
+	 * @param finder        DAO used to access and delete instances
+	 * @throws DAOException persistence layer error
+	 * @deprecated use {@link AbstractDAO#removeAll()}
+	 */
+	@Deprecated
+	public static <T extends Model> void removeAll(AbstractDAO<T> finder) throws DAOException {
+		for (T t : finder.findAll()) 
+			finder.remove(t);	
 	}
 
-//	public static <T extends Model> T getModelByCode(Class<T> type, Finder<T,? extends AbstractDAO<T>> finder, String code) throws DAOException {
-////	public static <T extends Model<T>> T getModelByCode(Class<T> type, Finder<T> finder, String code) throws DAOException {
-//		return getModelByCodes(type, finder, code).get(0);
-//	}
-	public static <T, U extends Model<T>> U getModelByCode(Class<U> type, Finder<U,? extends AbstractDAO<U>> finder, String code) throws DAOException {
-		//		public static <T extends Model<T>> T getModelByCode(Class<T> type, Finder<T> finder, String code) throws DAOException {
-		// return getModelByCodes(type, finder, code).get(0);
+	// ------------------------------------------------------------------
+	// use direct DAO call 
+	
+	/**
+	 * Find by code.
+	 * @param <T>           element type
+	 * @param type          type of object to find
+	 * @param finder        DAO
+	 * @param code          code of object to find
+	 * @return              found object or null
+	 * @throws DAOException DAO error
+	 * @deprecated use {@link AbstractDAO#findByCode(String)}
+	 */
+	@Deprecated
+	public static <T extends Model> T getModelByCode(Class<T> type, AbstractDAO<T> finder, String code) throws DAOException {
 		return finder.findByCode(code);
 	}
 
-//	public static <T extends Model> List<T> getModelByCodes(Class<T> type, Finder<T,? extends AbstractDAO<T>> finder, String...codes) throws DAOException {
-////	public static <T extends Model<T>> List<T> getModelByCodes(Class<T> type, Finder<T> finder, String...codes) throws DAOException {
-//		List<T> l = new ArrayList<T>();
-//		for (String code : codes) {
-//			//Logger.debug("Load "+type.getName() + " : "+code);
-//			l.add(finder.findByCode(code));
-//		}
-//		return l;
-//	}
-	public static <T, U extends Model<T>> List<U> getModelByCodes(Class<U> type, Finder<U,? extends AbstractDAO<U>> finder, String...codes) throws DAOException {
-		//		public static <T extends Model<T>> List<T> getModelByCodes(Class<T> type, Finder<T> finder, String...codes) throws DAOException {
-		List<U> l = new ArrayList<>();
+	// ------------------------------------------------------------------
+
+	/**
+	 * Get a list of objects by codes.
+	 * @param <T>           element type
+	 * @param type          type of objects
+	 * @param finder        DAO
+	 * @param codes         code of objects to find
+	 * @return              list of found objects
+	 * @throws DAOException DAO error
+	 * @deprecated use {@link AbstractDAO#findByCodes(String...)}
+	 */
+	@Deprecated
+	public static <T extends Model> List<T> getModelByCodes(Class<T> type, AbstractDAO<T> finder, String... codes) throws DAOException {
+		List<T> l = new ArrayList<>();
 		for (String code : codes) {
-			//Logger.debug("Load "+type.getName() + " : "+code);
-			l.add(finder.findByCode(code));
+			logger.debug("getModelByCode {} {}", type, code);
+			T t = finder.findByCode(code);
+			logger.debug("getModelByCode {} {} {}", type, code, t);
+			daoAssertNotNull("<" + type + ">getModelByCodes("+code+")",t);
+			l.add(t);
 		}
 		return l;
 	}
 	
-	/*
-	 * Save an object Model in the description DB if not exist also nothing
-	 * Used the code to find the object
-	 * @param type
-	 * @param models
-	 * @return
-	 * @throws DAOException
+	// ------------------------------------------------------------------
+
+	/**
+	 * Persists (save, not update) an instance of a given class in the database.
+	 * @param <T>           element type
+	 * @param type          type object to persist
+	 * @param model         instance to persist
+	 * @param errors        validation context like error list (ignored)
+	 * @throws DAOException persistence error
 	 */
-//	public static <T extends Model> void saveModel(Class<T> type, T model, Map<String,List<ValidationError>> errors) throws DAOException {
-////	public static <T extends Model<T>> void saveModel(Class<T> type, T model, Map<String,List<ValidationError>> errors) throws DAOException {
-//		T t = (T) model.getInstance().findByCode(model.code);
-////		T t = model.getInstance().findByCode(model.code);
-//		if (t == null) {
-//			logger.info("Save "+type.getName() + " : "+model.code);
-//			model.save();
-//		} else {
-//			logger.info("Already exists "+type.getName() + " : "+model.code);
-//		}
-//	}
-	public static <T,U extends Model<T>> void saveModel(Class<U> type, U model, Map<String,List<ValidationError>> errors) throws DAOException {
-		//		public static <T extends Model<T>> void saveModel(Class<T> type, T model, Map<String,List<ValidationError>> errors) throws DAOException {
-		//			T t = (T) model.getInstance().findByCode(model.code);
-//		T t = model.getInstance().findByCode(model.code);
-		Model<T> t = model.fromDB();
+	public static <T extends Model> void saveModel(Class<T> type, T model, Map<String,List<ValidationError>> errors) throws DAOException {
+		ModelDAOs daos = ModelDAOs.instance.get(); 
+		T t = daos.fromDB(model);
 		if (t == null) {
-			logger.info("Save "+type.getName() + " : "+model.code);
-			model.save();
+			logger.info("save {} : {}", type, model.code);
+			daos.save(model);
 		} else {
-			logger.info("Already exists "+type.getName() + " : "+model.code);
+			logger.info("already exists {} : {} ", type, model.code);
 		}
 	}
 
-	/*
-	 * Save a list of models
-	 * @param type
-	 * @param models
-	 * @param errors
-	 * @throws DAOException 
+	// ------------------------------------------------------------------
+
+	/**
+	 * Persist (save, not update) a list of instances of a given class.
+	 * @param <T>           element type
+	 * @param type          type of object to persist
+	 * @param models        instances to persist
+	 * @param errors        validation context like validation error list (ignored)
+	 * @throws DAOException persistence error
 	 */
-//	public static <T extends Model> void saveModels(Class<T> type, List<T> models, Map<String,List<ValidationError>> errors) throws DAOException {
-////	public static <T extends Model<T>> void saveModels(Class<T> type, List<T> models, Map<String,List<ValidationError>> errors) throws DAOException {
-//		for (T model : models) {
-//			saveModel(type, model, errors);
-//		}		
-//	}
-	// Type argument is not needed
-	public static <T, U extends Model<T>> void saveModels(Class<U> type, List<U> models, Map<String,List<ValidationError>> errors) throws DAOException {
-//		public static <T extends Model<T>> void saveModels(Class<T> type, List<T> models, Map<String,List<ValidationError>> errors) throws DAOException {
-		for (U model : models)
+ 	public static <T extends Model> void saveModels(Class<T> type, List<T> models, Map<String,List<ValidationError>> errors) throws DAOException {
+		for (T model : models)
 			saveModel(type, model, errors);
 	}
 
-	/*
-	 * 
-	 * @param type
-	 * @param model
-	 * @param errors
-	 * @throws DAOException
+	/**
+	 * Update an existing SQL mapped object.
+	 * @param <T>           element type
+	 * @param type          java class of the mapped object
+	 * @param model         persisted object
+	 * @param errors        validation context like error list (ignored)
+	 * @throws DAOException persistence failed
 	 */
-//	public static <T extends Model> void updateModel(Class<T> type, T model, Map<String,List<ValidationError>> errors) throws DAOException {
-////	public static <T extends Model<T>> void updateModel(Class<T> type, T model, Map<String,List<ValidationError>> errors) throws DAOException {
-//		T t = (T) model.getInstance().findByCode(model.code);
-////		T t = model.getInstance().findByCode(model.code);
-//		if (t != null) {
-//			model.update();
-//		} else {
-//			logger.debug("Not exists "+type.getName() + " : "+model.code);
-//		}
-//	}
-	
-	public static <T, U extends Model<T>> void updateModel(Class<U> type, U model, Map<String,List<ValidationError>> errors) throws DAOException {
-		//		public static <T extends Model<T>> void updateModel(Class<T> type, T model, Map<String,List<ValidationError>> errors) throws DAOException {
-//		T t = model.getInstance().findByCode(model.code);
-		//			T t = model.getInstance().findByCode(model.code);
-		Model<T> t = model.fromDB();
+	public static <T extends Model> void updateModel(Class<T> type, T model, Map<String,List<ValidationError>> errors) throws DAOException {
+		ModelDAOs daos = ModelDAOs.instance.get();
+		T t = daos.fromDB(model);
 		if (t != null) {
-			model.update();
+			daos.update(model);
 		} else {
-			logger.debug("Not exists "+type.getName() + " : "+model.code);
+			logger.debug("o object of type {} with code {}", type.getName(), model.code);
 		}
 	}
 
-//	public static <T extends Model> void updateModels(Class<T> type, List<T> models, Map<String,List<ValidationError>> errors) throws DAOException {
-////	public static <T extends Model<T>> void updateModels(Class<T> type, List<T> models, Map<String,List<ValidationError>> errors) throws DAOException {
-//		for (T model : models) {
-//			updateModel(type, model, errors);
+	/**
+	 * Update a list of SQL mapped objects. 
+	 * @param <T>           element type
+	 * @param type          java class of the mapped objects
+	 * @param models        objects to update
+	 * @param errors        validation context like error list (ignored)
+	 * @throws DAOException persistence failed
+	 */
+	public static <T extends Model> void updateModels(Class<T> type, List<T> models, Map<String,List<ValidationError>> errors) throws DAOException {
+		for (T model : models)
+			updateModel(type, model, errors);
+	}
+
+//	/*
+//	 * Create the sql to join with institute
+//	 * The rule is simple the join table name equals <main_table_name>_institute
+//	 * @param mainTable
+//	 * @param mainTableAlias
+//	 * @return
+//	 */
+//	public static String getSQLForInstitute(String mainTable, String mainTableAlias) { 
+//		List<String> institutes = DescriptionHelper.getInstitutes();
+//		String SQLInstitute = " inner join " + mainTable + "_institute " 
+//				                     + "as " + mainTable + "_join_institute " 
+//				                     + "on " + mainTable + "_join_institute.fk_" + mainTable + " = " + mainTableAlias + ".id "
+//				            + " inner join institute " 
+//				                     + "as " + mainTable + "_inst "
+//				                     + "on " + mainTable + "_inst.id = " + mainTable + "_join_institute.fk_institute ";
+//		// Prend en compte tous les instituts
+//		if (institutes.size() == 0) {
+//			return SQLInstitute = "";
+//			//Si un seul institut
+//		} else if (institutes.size() == 1) {
+//			return SQLInstitute+= " and "+mainTable+"_inst.code = '" + DescriptionHelper.getInstitutes().get(0)+"' ";
+//		} else {
+//			// Si plusieurs instituts (clause in)
+////			SQLInstitute+="  and "+mainTable+"_inst.code in (";
+////			
+////			String comma="";
+////			for(int i=0;i<institutes.size();i++){
+////				if(i==1) comma=",";
+////				SQLInstitute+=comma+"'"+institutes.get(i)+"'";
+////			}
+////			return SQLInstitute+=") ";
+//			return SQLInstitute + " and " + mainTable + "_inst.code in (" + String.join(",", institutes) + ") ";
 //		}		
 //	}
-	public static <T,U extends Model<T>> void updateModels(Class<U> type, List<U> models, Map<String,List<ValidationError>> errors) throws DAOException {
-//		public static <T extends Model<T>> void updateModels(Class<T> type, List<T> models, Map<String,List<ValidationError>> errors) throws DAOException {
-			for (U model : models) {
-				updateModel(type, model, errors);
-			}		
-		}
 
 	/*
 	 * Create the sql to join with institute
@@ -213,42 +218,39 @@ public class DAOHelpers {
 	 * @param mainTableAlias
 	 * @return
 	 */
-	public static String getSQLForInstitute(String mainTable, String mainTableAlias){
-		 
-		List<String> institutes = DescriptionHelper.getInstitute();
-		String SQLInstitute=" inner join "+mainTable+"_institute as "+mainTable+"_join_institute on "+mainTable+"_join_institute.fk_"+mainTable+" = "
-								+mainTableAlias+".id inner join institute as "+mainTable+"_inst on "+mainTable+"_inst.id = "+mainTable+"_join_institute.fk_institute ";
-		//Prend en compte tous les instituts
-		if (institutes.size() == 0) {
-			return SQLInstitute ="";
-			//Si un seul institut
-		} else if (institutes.size() == 1) {
-			return SQLInstitute+= " and "+mainTable+"_inst.code = '" + DescriptionHelper.getInstitute().get(0)+"' ";
-		} else {
-			// Si plusieurs instituts (clause in)
-			SQLInstitute+="  and "+mainTable+"_inst.code in (";
-			
-			String comma="";
-			for(int i=0;i<institutes.size();i++){
-				if(i==1) comma=",";
-				SQLInstitute+=comma+"'"+institutes.get(i)+"'";
-			}
-			return SQLInstitute+=") ";
-		}		
+	public static String getSQLForInstitute(String mainTable, String mainTableAlias) { 
+		List<String> institutes = DescriptionHelper.getInstitutes();
+		if (institutes.size() == 0)
+			return "";
+		String SQLInstitute = " inner join " + mainTable + "_institute " 
+				                     + "as " + mainTable + "_join_institute " 
+				                     + "on " + mainTable + "_join_institute.fk_" + mainTable + " = " + mainTableAlias + ".id "
+				            + " inner join institute " 
+				                     + "as " + mainTable + "_inst "
+				                     + "on " + mainTable + "_inst.id = " + mainTable + "_join_institute.fk_institute ";
+		if (institutes.size() == 1)
+			return SQLInstitute + " and " + mainTable + "_inst.code = '" + DescriptionHelper.getInstitutes().get(0)+"' ";
+		else
+			return SQLInstitute + " and " + mainTable + "_inst.code in " 
+					            + Iterables.map(institutes, s -> "'" + s +"'").surround("(", ",", ")").asString();
 	}
-	
-	public static String getInstrumentSQLForInstitute(String tableAlias){		 
+
+	public static String getInstrumentSQLForInstitute(String tableAlias) {		 
 		return getSQLForInstitute("instrument", tableAlias);		
 	}
 		
-	public static String getCommonInfoTypeSQLForInstitute(String tableAlias){		 
+	public static String getCommonInfoTypeSQLForInstitute(String tableAlias) {		 
 		return getSQLForInstitute("common_info_type", tableAlias);		
 	}
 	
+//	public static String getCommonInfoTypeDefaultSQLForInstitute() {
+//		if (SQLInstitute == null)
+//			SQLInstitute = getCommonInfoTypeSQLForInstitute("t");
+//		return SQLInstitute;
+//	}
+	
 	public static String getCommonInfoTypeDefaultSQLForInstitute() {
-		if (SQLInstitute == null)
-			SQLInstitute = getCommonInfoTypeSQLForInstitute("t");
-		return SQLInstitute;
+		return getCommonInfoTypeSQLForInstitute("t");
 	}
 	
 }

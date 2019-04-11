@@ -29,9 +29,9 @@ public class UmbrellaProject extends DBObject implements IValidation {
 	@Override
 	@JsonIgnore
 	public void validate(ContextValidation contextValidation) {
-		ProjectValidationHelper.validateId(this, contextValidation);
-		ProjectValidationHelper.validateCode(this, InstanceConstants.UMBRELLA_PROJECT_COLL_NAME, contextValidation);
-		ProjectValidationHelper.validateTraceInformation(traceInformation, contextValidation);
+		ProjectValidationHelper.validateIdPrimary(contextValidation, this);
+		ProjectValidationHelper.validateCodePrimary(contextValidation, this, InstanceConstants.UMBRELLA_PROJECT_COLL_NAME);
+		ProjectValidationHelper.validateTraceInformationRequired(contextValidation, traceInformation);
 	}
 	
 }

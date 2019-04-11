@@ -1,449 +1,176 @@
 package controllers.analyses.api;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.mongojack.DBQuery;
-import org.mongojack.DBQuery.Query;
-import org.mongojack.DBUpdate;
-
-import com.mongodb.BasicDBObject;
-
-import controllers.DocumentController;
-import controllers.NGLControllerHelper;
+import controllers.NGLAPIController;
 import controllers.QueryFieldsForm;
-import fr.cea.ig.MongoDBDAO;
-import fr.cea.ig.MongoDBResult;
+import controllers.StateController;
 import fr.cea.ig.authentication.Authenticated;
 import fr.cea.ig.authorization.Authorized;
-import fr.cea.ig.lfw.Historized;
-import fr.cea.ig.mongo.MongoStreamer;
-import fr.cea.ig.play.migration.NGLContext;
-import models.laboratory.common.description.Level;
+import fr.cea.ig.ngl.NGLApplication;
+import fr.cea.ig.ngl.dao.analyses.AnalysesAPI;
+import fr.cea.ig.ngl.dao.analyses.AnalysesDAO;
+import fr.cea.ig.ngl.dao.api.APIException;
+import fr.cea.ig.ngl.dao.api.APIValidationException;
 import models.laboratory.common.instance.PropertyValue;
 import models.laboratory.common.instance.State;
-import models.laboratory.common.instance.TBoolean;
-import models.laboratory.common.instance.TraceInformation;
 import models.laboratory.common.instance.Valuation;
 import models.laboratory.run.instance.Analysis;
-import models.laboratory.run.instance.ReadSet;
-import models.utils.InstanceConstants;
 import play.data.Form;
+import play.i18n.Lang;
 import play.libs.Json;
+import play.mvc.Http;
 import play.mvc.Result;
 import rules.services.LazyRules6Actor;
-import validation.ContextValidation;
-import validation.common.instance.CommonValidationHelper;
 import views.components.datatable.DatatableBatchResponseElement;
-import workflows.analyses.AnalysisWorkflows;
 
-// TODO: use packed construction of query
-public class Analyses extends DocumentController<Analysis> {
+public class Analyses extends NGLAPIController<AnalysesAPI, AnalysesDAO, Analysis> implements StateController {
 
-	private static final play.Logger.ALogger logger = play.Logger.of(Analyses.class);
-	
-	private final static List<String> authorizedUpdateFields = Arrays.asList("code","masterReadSetCodes","readSetCodes");
-	
-	private final Form<Valuation>            valuationForm; 
-	private final Form<State>                stateForm; 
-	private final Form<AnalysesBatchElement> batchElementForm; 
-	private final Form<QueryFieldsForm>      updateForm; 
-	private final AnalysisWorkflows          workflows;
-	private final LazyRules6Actor            rulesActor;
-	
-	@Inject
-	public Analyses(NGLContext ctx, AnalysisWorkflows workflows) {
-		super(ctx,InstanceConstants.ANALYSIS_COLL_NAME, Analysis.class);
-		this.valuationForm    = getNGLContext().form(Valuation.class);
-		this.stateForm        = getNGLContext().form(State.class);
-		this.batchElementForm = getNGLContext().form(AnalysesBatchElement.class);
-		this.updateForm       = getNGLContext().form(QueryFieldsForm.class);
-		this.rulesActor       = getNGLContext().rules6Actor(); 
-		this.workflows        = workflows;
-	}
-	
-//	@Permission(value={"reading"})
-	@Authenticated
-	@Historized
-	@Authorized.Read
-	public Result list() {
-		AnalysesSearchForm form = filledFormQueryString( AnalysesSearchForm.class);
-		Query q = getQuery(form);
-		BasicDBObject keys = getKeys(form);
-		if (form.datatable) {			
-			MongoDBResult<Analysis> results = mongoDBFinder(form, q, keys);	
-			return MongoStreamer.okStreamUDT(results);
-		}
-		MongoDBResult<Analysis> results = mongoDBFinder(form, q, keys);							
-		return MongoStreamer.okStream(results);
-	}
-	
-	private Query getQuery(AnalysesSearchForm form) {
-		List<Query> queries = new ArrayList<>();
-		Query query = null;
-		
-		if (StringUtils.isNotBlank(form.stateCode)) { //all
-			queries.add(DBQuery.is("state.code", form.stateCode));
-		} else if (CollectionUtils.isNotEmpty(form.stateCodes)) { //all
-			queries.add(DBQuery.in("state.code", form.stateCodes));
-		}
-		
-		if (StringUtils.isNotBlank(form.validCode)) { //all
-			queries.add(DBQuery.is("valuation.valid", TBoolean.valueOf(form.validCode)));
-		}
-		if (CollectionUtils.isNotEmpty(form.resolutionCodes)) { //all
-			queries.add(DBQuery.in("valuation.resolutionCodes", form.resolutionCodes));
-		}
-		
-		if (CollectionUtils.isNotEmpty(form.projectCodes)) { //all
-			queries.add(DBQuery.in("projectCodes", form.projectCodes));
-		} else if (StringUtils.isNotBlank(form.projectCode)) { //all
-			queries.add(DBQuery.in("projectCodes", form.projectCode));
-		}
-		
-		if (CollectionUtils.isNotEmpty(form.sampleCodes)) { //all
-			queries.add(DBQuery.in("sampleCodes", form.sampleCodes));
-		} else if (StringUtils.isNotBlank(form.sampleCode)) { //all
-			queries.add(DBQuery.in("sampleCodes", form.sampleCode));
-		}
-		
-		if (CollectionUtils.isNotEmpty(form.typeCodes)) { //all
-			queries.add(DBQuery.in("typeCode", form.typeCodes));
-		}
-				
-		if (StringUtils.isNotBlank(form.regexCode)) { //all
-			queries.add(DBQuery.regex("code", Pattern.compile(form.regexCode)));
-		}
-		
-		if (StringUtils.isNotBlank(form.analyseValuationUser)) {
-			queries.add(DBQuery.is("valuation.user", form.analyseValuationUser));
-		}
-		
-		queries.addAll(NGLControllerHelper.generateQueriesForProperties(form.properties, Level.CODE.Analysis, "properties"));
-		queries.addAll(NGLControllerHelper.generateQueriesForTreatmentProperties(form.treatmentProperties, Level.CODE.Analysis, "treatments"));
-		
-		if (CollectionUtils.isNotEmpty(form.existingFields)) { //all
-			for(String field : form.existingFields){
-				queries.add(DBQuery.exists(field));
-			}		
-		}
-		
-		if (CollectionUtils.isNotEmpty(form.notExistingFields)) { //all
-			for(String field : form.notExistingFields){
-				queries.add(DBQuery.notExists(field));
-			}
-		}
-		
-		if (queries.size() > 0) {
-			query = DBQuery.and(queries.toArray(new Query[queries.size()]));
-		}
-		
-		return query;
-	}
-	
-//	@Permission(value={"writing"})
-	@Authenticated
-	@Historized
-	@Authorized.Write
-	public Result save() {
-		
-		Form<Analysis> filledForm = getMainFilledForm();
-		Analysis input = filledForm.get();
-		
-		if (null == input._id) { 
-			input.traceInformation = new TraceInformation();
-			input.traceInformation.setTraceInformation(getCurrentUser());
-			
-			if(null == input.state){
-				input.state = new State();
-			}
-			input.state.code = "N";
-			input.state.user = getCurrentUser();
-			input.state.date = new Date();	
-						
-		} else {
-			return badRequest("use PUT method to update the analysis");
-		}
-		if (input.masterReadSetCodes != null && input.masterReadSetCodes.size() > 0)
-			updateAnalysis(input);			
-//		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm.errors());
-		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm);
-		ctxVal.setCreationMode();
-		input.validate(ctxVal);	
-		
-		if (!ctxVal.hasErrors()) {
-			input = saveObject(input);
-			// TODO Update ReadSet
-			return ok(Json.toJson(input));
-		}
-		// return badRequest(filledForm.errors-AsJson());
-		return badRequest(errorsAsJson(ctxVal.getErrors()));
-	}
-	
-	private void updateAnalysis(Analysis input) {
-		for (String code: input.masterReadSetCodes) {
-			ReadSet readSet = MongoDBDAO.findByCode(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, code);
-			input.projectCodes.add(readSet.projectCode);
-			input.sampleCodes.add(readSet.sampleCode);
-		}
-		
-	}
+    private final Form<Analysis>             form;
+    private final Form<Valuation>            valuationForm;
+    private final Form<AnalysesBatchElement> batchElementForm;
+    private final LazyRules6Actor            rulesActor;
 
-//	@Permission(value={"writing"})
-	@Authenticated
-	@Historized
-	@Authorized.Write
-	public Result update(String code){
-		Analysis objectInDB =  getObject(code);
-		if(objectInDB == null) {
-			return badRequest("Analysis with code "+code+" does not exist");
-		}
-		
-		Form<QueryFieldsForm> filledQueryFieldsForm = filledFormQueryString(updateForm, QueryFieldsForm.class);
-		QueryFieldsForm queryFieldsForm = filledQueryFieldsForm.get();
-		Form<Analysis> filledForm = getMainFilledForm();
-		Analysis input = filledForm.get();
-		
-		if (queryFieldsForm.fields == null) {
-			if (input.code.equals(code)) {
-				if (input.traceInformation != null) {
-					input.traceInformation = getUpdateTraceInformation(input.traceInformation);
-				} else {
-					logger.error("traceInformation is null !!");
-				}
-				if (!objectInDB.state.code.equals(input.state.code)) {
-					return badRequest("you cannot change the state code. Please used the state url ! ");
-				}
-//				ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm.errors()); 
-				ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm); 
-				ctxVal.setUpdateMode();
-				input.validate(ctxVal);
-				if (!ctxVal.hasErrors()) {
-					updateObject(input);
-					//TODO Update READSET
-					return ok(Json.toJson(input));
-				}
-				return badRequest(errorsAsJson(ctxVal.getErrors()));
-			} else {
-				return badRequest("Analysis code are not the same");
-			}
-		} else { //update only some authorized properties
-//			ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm.errors()); 	
-			ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm); 	
-			ctxVal.setUpdateMode();
-			validateAuthorizedUpdateFields(ctxVal, queryFieldsForm.fields, authorizedUpdateFields);
-			validateIfFieldsArePresentInForm(ctxVal, queryFieldsForm.fields, filledForm);
-			
-			if (!ctxVal.hasErrors() && queryFieldsForm.fields.contains("code")) {
-				ctxVal.setCreationMode();
-				CommonValidationHelper.validateCode(input, collectionName, ctxVal);
-				//TODO Update READSET
-			}
-			if (!ctxVal.hasErrors()) {
-				updateObject(DBQuery.and(DBQuery.is("code", code)), 
-						getBuilder(input, queryFieldsForm.fields).set("traceInformation", getUpdateTraceInformation(objectInDB.traceInformation)));
-				if (queryFieldsForm.fields.contains("code") && null != input.code) {
-					code = input.code;
-				}
-				return ok(Json.toJson(getObject(code)));
-			} else {
-				return badRequest(errorsAsJson(ctxVal.getErrors()));
-			}			
-		}
-	}
-	
-//	@Permission(value={"writing"})
-	@Authenticated
-	@Historized
-	@Authorized.Write
-	public Result state(String code){
-		Analysis objectInDB = getObject(code);
-		if (objectInDB == null)
-			return notFound();
-		Form<State> filledForm =  getFilledForm(stateForm, State.class);
-		State state = filledForm.get();
-		state.date = new Date();
-		state.user = getCurrentUser();
-//		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm.errors());
-		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm);
-		workflows.setState(ctxVal, objectInDB, state);
-		if (!ctxVal.hasErrors()) {
-			return ok(Json.toJson(getObject(code)));
-		} else {
-			return badRequest(errorsAsJson(ctxVal.getErrors()));
-		}
-	}
-	
-//	@Permission(value={"writing"})
-	@Authenticated
-	@Historized
-	@Authorized.Write
-	public Result stateBatch(){
-		List<Form<AnalysesBatchElement>> filledForms =  getFilledFormList(batchElementForm, AnalysesBatchElement.class);
-		List<DatatableBatchResponseElement> response = new ArrayList<>(filledForms.size());
-		for (Form<AnalysesBatchElement> filledForm: filledForms) {
-			AnalysesBatchElement element = filledForm.get();
-			Analysis objectInDB = getObject(element.data.code);
-			if (objectInDB != null) {
-				State state = element.data.state;
-				state.date = new Date();
-				state.user = getCurrentUser();
-//				ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm.errors());
-				ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm);
-				workflows.setState(ctxVal, objectInDB, state);
-				if (!ctxVal.hasErrors()) {
-					response.add(new DatatableBatchResponseElement(OK, getObject(objectInDB.code), element.index));
-				} else {
-					response.add(new DatatableBatchResponseElement(BAD_REQUEST,errorsAsJson(ctxVal.getErrors()), element.index));
-				}
-			} else {
-				response.add(new DatatableBatchResponseElement(BAD_REQUEST, element.index));
-			}
-		}		
-		return ok(Json.toJson(response));
-	}
-	
-//	@Permission(value={"writing"})
-	@Authenticated
-	@Historized
-	@Authorized.Write
-	public Result valuation(String code){
-		Analysis objectInDB = getObject(code);
-		if (objectInDB == null) {
-			return notFound();
-		}
-		Form<Valuation> filledForm =  getFilledForm(valuationForm, Valuation.class);
-		Valuation input = filledForm.get();
-//		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm.errors());
-		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm);
-		ctxVal.setUpdateMode();
-		input.date = new Date();
-		input.user = getCurrentUser();
-		CommonValidationHelper.validateValuation(objectInDB.typeCode, input, ctxVal);
-		if (!ctxVal.hasErrors()) {
-			updateObject(DBQuery.and(DBQuery.is("code", code)), DBUpdate.set("valuation", input)
-					.set("traceInformation", getUpdateTraceInformation(objectInDB.traceInformation)));
-										
-			objectInDB = getObject(code);
-			workflows.nextState(ctxVal, objectInDB);
-			return ok(Json.toJson(objectInDB));
-		} else {
-			return badRequest(errorsAsJson(ctxVal.getErrors()));
-		}
-	}
+    @Inject
+    public Analyses(NGLApplication app, AnalysesAPI api) {
+        super(app, api, AnalysesSearchForm.class);
+        this.rulesActor       = app.rules6Actor();
+        this.form             = app.formFactory().form(Analysis.class);
+        this.valuationForm    = app.formFactory().form(Valuation.class);
+        this.batchElementForm = app.formFactory().form(AnalysesBatchElement.class);
+    }
 
-//	@Permission(value={"writing"})
-	@Authenticated
-	@Historized
-	@Authorized.Write
-	public Result valuationBatch(){
-		List<Form<AnalysesBatchElement>> filledForms =  getFilledFormList(batchElementForm, AnalysesBatchElement.class);
-		List<DatatableBatchResponseElement> response = new ArrayList<>(filledForms.size());
-		
-		for(Form<AnalysesBatchElement> filledForm: filledForms){
-			AnalysesBatchElement element = filledForm.get();
-			Analysis objectInDB = getObject(element.data.code);
-			if (objectInDB != null) {
-//				ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm.errors());
-				ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm);
-				ctxVal.setUpdateMode();
-				element.data.valuation.date = new Date();
-				element.data.valuation.user = getCurrentUser();
-				CommonValidationHelper.validateValuation(objectInDB.typeCode, element.data.valuation, ctxVal);
-				if (!ctxVal.hasErrors()) {
-					updateObject(DBQuery.and(DBQuery.is("code", objectInDB.code)), 
-							                 DBUpdate.set("valuation", element.data.valuation)
-							                         .set("traceInformation", getUpdateTraceInformation(objectInDB.traceInformation)));
-					objectInDB = getObject(objectInDB.code);
-					workflows.nextState(ctxVal, objectInDB);
-					response.add(new DatatableBatchResponseElement(OK, objectInDB, element.index));
-				} else {
-					response.add(new DatatableBatchResponseElement(BAD_REQUEST,errorsAsJson(ctxVal.getErrors()), element.index));
-				}
-			} else {
-				response.add(new DatatableBatchResponseElement(BAD_REQUEST, element.index));
-			}
-		}		
-		return ok(Json.toJson(response));
-	}
-	
-//	@Permission(value={"writing"})
-	@Authenticated
-	@Historized
-	@Authorized.Write
-	public Result properties(String code){
-		Analysis objectInDB = getObject(code);
-		if (objectInDB == null)
-			return notFound();
-			
-		Form<Analysis> filledForm = getMainFilledForm();
-		Map<String, PropertyValue> properties = filledForm.get().properties;
-		
-//		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm.errors()); 
-		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm); 
-		ctxVal.setUpdateMode();
-		//TODO AnalysisValidationHelper.validateAnalysisType(objectInDB.typeCode, properties, ctxVal);
-		if (!ctxVal.hasErrors()) {
-		    updateObject(DBQuery.and(DBQuery.is("code", objectInDB.code)), DBUpdate.set("properties", properties)
-					.set("traceInformation", getUpdateTraceInformation(objectInDB.traceInformation)));
-			objectInDB = getObject(objectInDB.code);
-			return ok(Json.toJson(objectInDB));		
-		} else {
-			return badRequest(errorsAsJson(ctxVal.getErrors()));
-		}		
-	}
-	
-//	@Permission(value={"writing"})
-	@Authenticated
-	@Historized
-	@Authorized.Write
-	public Result propertiesBatch() {
-		List<Form<AnalysesBatchElement>> filledForms =  getFilledFormList(batchElementForm, AnalysesBatchElement.class);
-		List<DatatableBatchResponseElement> response = new ArrayList<>(filledForms.size());
-		
-		for(Form<AnalysesBatchElement> filledForm: filledForms) {
-			AnalysesBatchElement element = filledForm.get();
-			Analysis objectInDB = getObject(element.data.code);
-			if (objectInDB != null) {
-//				ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm.errors()); 
-				ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm); 
-				Map<String, PropertyValue> properties = element.data.properties;
-				ctxVal.setUpdateMode();
-				//TODO AnalysisValidationHelper.validateAnalysisType(objectInDB.typeCode, properties, ctxVal);
-				if (!ctxVal.hasErrors()) {
-					updateObject(DBQuery.and(DBQuery.is("code", objectInDB.code)), DBUpdate.set("properties", properties)
-							.set("traceInformation", getUpdateTraceInformation(objectInDB.traceInformation)));				   							
-				    response.add(new DatatableBatchResponseElement(OK, getObject(element.data.code), element.index));
-				} else {
-					response.add(new DatatableBatchResponseElement(BAD_REQUEST, errorsAsJson(ctxVal.getErrors()), element.index));
-				}
-			} else {
-				response.add(new DatatableBatchResponseElement(BAD_REQUEST, element.index));
-			}
-		}		
-		return ok(Json.toJson(response));
-	}
-	
-//	@Permission(value={"writing"})
-	@Authenticated
-	@Historized
-	@Authorized.Write
-	public Result applyRules(String code, String rulesCode)	{
-		Analysis objectInDB = getObject(code);
-		if (objectInDB == null) {
-			return notFound();
-		}		
-		// Outside of an actor and if no reply is needed the second argument can be null
-		rulesActor.tellMessage(rulesCode,objectInDB);
-		return ok();
-	}
-	
+    @Authenticated
+    @Authorized.Write
+    public Result applyRules(String code, String rulesCode) {
+        return globalExceptionHandler(() -> {
+            Analysis objectInDB = api().get(code);
+            if (objectInDB == null) {
+                return notFoundAsJson("Analysis " + code + " not found");
+            } else {      
+                // Outside of an actor and if no reply is needed the second argument can be null
+                rulesActor.tellMessage(rulesCode,objectInDB);
+                return ok();
+            }
+        });
+    }
+
+    @Authenticated
+    @Authorized.Write
+    public Result properties(String code) {
+        return globalExceptionHandler(() -> {
+            Analysis objectInDB = api().get(code);
+            if (objectInDB == null) {
+                return notFoundAsJson("Analysis " + code + " not found");
+            } else {  
+                try {
+                    Form<Analysis> filledForm = getFilledForm(form, Analysis.class);
+                    Map<String, PropertyValue> properties = filledForm.get().properties;
+                    return okAsJson(api().updateProperties(code, properties, getCurrentUser()));
+                } catch (APIValidationException e) {
+                    return badRequestLoggingForValidationException(e);
+                } catch (APIException e) {
+                    return badRequestAsJson(e.getMessage());
+                }   
+            }
+        });
+    }
+    
+    @Authenticated
+    @Authorized.Write
+    public Result propertiesBatch() {
+        return globalExceptionHandler(() -> {
+            List<Form<AnalysesBatchElement>> filledForms =  getFilledFormList(batchElementForm, AnalysesBatchElement.class);
+            final String user = getCurrentUser();
+            final Lang lang = Http.Context.Implicit.lang();
+
+            List<DatatableBatchResponseElement> response = filledForms.stream()
+                    .map(filledForm -> {
+                        AnalysesBatchElement element = filledForm.get();
+                        Map<String, PropertyValue> properties = element.data.properties;
+                        try {
+                            Analysis analysis = api().updateProperties(element.data.code, properties, user);
+                            return new DatatableBatchResponseElement(OK, analysis, element.index);
+                        } catch (APIValidationException e) {
+                            return new DatatableBatchResponseElement(BAD_REQUEST, errorsAsJson(lang, e.getErrors()), element.index);
+                        } catch (APIException e) {
+                            return new DatatableBatchResponseElement(BAD_REQUEST, element.index);
+                        }
+                    }).collect(Collectors.toList());
+            return ok(Json.toJson(response));
+        });
+    }
+    
+    
+    @Override
+    public Analysis updateStateImpl(String code, State state, String currentUser) throws APIException {
+        return api().updateState(code, state, currentUser);
+    }
+
+    @Override
+    public Analysis saveImpl() throws APIException {
+        Analysis input = getFilledForm(form, Analysis.class).get();
+        return api().create(input, getCurrentUser());
+    }
+
+    @Override
+    public Analysis updateImpl(String code) throws Exception, APIException, APIValidationException {
+        Analysis objectInDB =  api().get(code);
+        QueryFieldsForm queryFieldsForm = filledFormQueryString(updateForm, QueryFieldsForm.class).get();
+        Analysis input = getFilledForm(form, Analysis.class).get();
+        if (queryFieldsForm.fields == null) {
+            if (input.code.equals(code)) {
+                if (!objectInDB.state.code.equals(input.state.code)) throw new Exception("You can not change the state code. Please use the state url ! ");
+                return api().update(input, getCurrentUser());
+            } else {
+                throw new Exception("Analysis codes are not the same");
+            }
+        } else {
+            if (input.code == null) input.code = code; // in ngl-bi the code is not in input object when only specific fields are updated 
+            return api().update(input, getCurrentUser(), queryFieldsForm.fields);
+        }
+    }
+
+    @Authenticated
+    @Authorized.Write
+    public Result valuation(String code) {
+        return globalExceptionHandler(() -> {
+            try {
+                Valuation valuations = getFilledForm(valuationForm, Valuation.class).get();
+                Analysis analysis = api().valuation(code, valuations, getCurrentUser());
+                return okAsJson(analysis);
+            } catch (APIValidationException e) {
+                return badRequestLoggingForValidationException(e);
+            } catch (APIException e) {
+                return badRequestAsJson(e.getMessage());
+            }
+        });
+    }
+    
+    @Authenticated
+    @Authorized.Write
+    public Result valuationBatch(){
+        return globalExceptionHandler(() -> {
+            List<Form<AnalysesBatchElement>> filledForms =  getFilledFormList(batchElementForm, AnalysesBatchElement.class);
+            final String user = getCurrentUser();
+            final Lang lang = Http.Context.Implicit.lang();
+            List<DatatableBatchResponseElement> response = filledForms.parallelStream()
+                    .map(filledForm->{
+                        AnalysesBatchElement element = filledForm.get();
+                        try {
+                            Analysis analysis = api().valuation(element.data.code, element.data.valuation, user);
+                            return new DatatableBatchResponseElement(OK, analysis, element.index);
+                        } catch (APIValidationException e) {
+                            return new DatatableBatchResponseElement(BAD_REQUEST, errorsAsJson(lang, e.getErrors()), element.index);
+                        } catch (APIException e) {
+                            return new DatatableBatchResponseElement(BAD_REQUEST, element.index);
+                        }
+                    }).collect(Collectors.toList());
+            return ok(Json.toJson(response));
+        });
+    }
 }

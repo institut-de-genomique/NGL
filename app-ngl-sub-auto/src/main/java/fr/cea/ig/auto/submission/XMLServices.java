@@ -63,7 +63,7 @@ public class XMLServices implements IXMLServices{
 		chaine = chaine + "        <RELATED_STUDY>\n";
 		chaine = chaine + "          <RELATED_LINK>\n";
 		chaine = chaine + "            <DB>ENA</DB>\n";
-		chaine = chaine + "            <ID>" + rpsStudy.getProperty("bioProjectId") + "</ID>\n";
+		chaine = chaine + "            <ID>0</ID>\n";
 		chaine = chaine + "          </RELATED_LINK>\n";
 		chaine = chaine + "          <IS_PRIMARY>false</IS_PRIMARY>\n";
 		chaine = chaine + "        </RELATED_STUDY>\n";
@@ -103,6 +103,8 @@ public class XMLServices implements IXMLServices{
 				String anonymizedName = rpsSample.get("anonymizedName");
 				String description = rpsSample.get("description");
 				String clone = rpsSample.get("clone");
+				String attributes = rpsSample.get("attributes");
+
 				// Recuperer objet sample dans la base :
 				chaine = chaine + "  <SAMPLE alias=\""+ sampleCode + "\"";
 
@@ -128,13 +130,13 @@ public class XMLServices implements IXMLServices{
 				if (SRAFilesUtil.isNotNullValue(description)) {
 					chaine = chaine + "      <DESCRIPTION>" + description + "</DESCRIPTION>\n";
 				}
-				if (SRAFilesUtil.isNotNullValue(clone)) {
+				if (SRAFilesUtil.isNotNullValue(attributes)) {
 					chaine = chaine + "      <SAMPLE_ATTRIBUTES>\n";
-					chaine = chaine + "      	<SAMPLE_ATTRIBUTE>\n";
-					chaine = chaine + "      		<TAG>Clone</TAG>\n";
-					chaine = chaine + "      		<VALUE>" + clone + "</VALUE>\n";
-					chaine = chaine + "      	</SAMPLE_ATTRIBUTE>\n";
+					chaine = chaine + "      " + attributes + "\n"; 
 					chaine = chaine + "      </SAMPLE_ATTRIBUTES>\n";
+				}
+				if (! attributes.endsWith("\n")) {
+					chaine = chaine + "\n";
 				}
 				chaine = chaine + "  </SAMPLE>\n";
 			}// end if sampleCode

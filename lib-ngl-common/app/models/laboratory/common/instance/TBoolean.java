@@ -8,8 +8,8 @@ package models.laboratory.common.instance;
  */
 public enum TBoolean {
 	
-	TRUE(1),
-	FALSE(0),
+	TRUE ( 1),
+	FALSE( 0),
 	UNSET(-1);
 
 	public final Integer value;

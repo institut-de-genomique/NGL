@@ -9,7 +9,7 @@ import play.mvc.Result;
 import play.mvc.Http.Context;
 
 /**
- * Authenticates as {@link Identity.Write}.
+ * Authenticates as {@link fr.cea.ig.ngl.test.authentication.Identity#Write}.
  * 
  * @author vrd
  *

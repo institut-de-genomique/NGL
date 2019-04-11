@@ -18,14 +18,13 @@ public class ReadSpec implements IValidation {
 
 	@Override
 	public void validate(ContextValidation contextValidation) {
-		contextValidation.addKeyToRootKeyName("readSpec");
-		ValidationHelper.required(contextValidation, this.readIndex, "readIndex");
-		ValidationHelper.required(contextValidation, this.readClass, "readClass");
-		ValidationHelper.required(contextValidation, this.readType, "readType");
+		contextValidation = contextValidation.appendPath("readSpec");
+		ValidationHelper.validateNotEmpty(contextValidation, this.readIndex, "readIndex");
+		ValidationHelper.validateNotEmpty(contextValidation, this.readClass, "readClass");
+		ValidationHelper.validateNotEmpty(contextValidation, this.readType, "readType");
 		if (this.expectedBaseCallTable.size() == 0 ) {
-			ValidationHelper.required(contextValidation, this.baseCoord, "baseCoord");
+			ValidationHelper.validateNotEmpty(contextValidation, this.baseCoord, "baseCoord");
 		}
-		contextValidation.removeKeyFromRootKeyName("readSpec");
 	}
 
 }

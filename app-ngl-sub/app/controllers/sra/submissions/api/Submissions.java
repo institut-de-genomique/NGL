@@ -1,7 +1,5 @@
 package controllers.sra.submissions.api;
 
-// import static play.data.Form.form;
-// import static fr.cea.ig.play.IGGlobals.form;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,10 +21,9 @@ import org.mongojack.DBQuery.Query;
 
 import controllers.DocumentController;
 import controllers.QueryFieldsForm;
-// import controllers.sra.configurations.api.Configurations;
 import fr.cea.ig.MongoDBDAO;
 import fr.cea.ig.MongoDBResult;
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import mail.MailServiceException;
 import models.laboratory.common.instance.State;
 import models.sra.submit.common.instance.Study;
@@ -35,8 +32,7 @@ import models.sra.submit.common.instance.UserCloneType;
 import models.sra.submit.util.SraCodeHelper;
 import models.sra.submit.util.SraException;
 import models.utils.InstanceConstants;
-//import play.Logger;
-// import play.api.modules.spring.Spring;
+import ngl.refactoring.state.SRASubmissionStateNames;
 import play.data.Form;
 import play.libs.Json;
 import play.mvc.BodyParser;
@@ -51,41 +47,69 @@ import validation.ContextValidation;
 import views.components.datatable.DatatableResponse;
 import workflows.sra.submission.SubmissionWorkflows;
 
-//import workflows.sra.submission.SubmissionWorkflows;
-
-public class Submissions extends DocumentController<Submission>{
+public class Submissions extends DocumentController<Submission> {
 	
 	private static final play.Logger.ALogger logger = play.Logger.of(Submissions.class);
 	
 	private final static List<String> authorizedUpdateFields = Arrays.asList("accession","submissionDate", "xmlSubmission", "xmlStudys", "xmlSamples", "xmlExperiments", "xmlRuns");
-	private Map<String, UserCloneType>      mapUserClones      = new HashMap<>();
+	
+	private Map<String, UserCloneType>          mapUserClones      = new HashMap<>();
 	private final Form<QueryFieldsForm>         updateForm;
 	private final Form<Submission>              submissionForm;
 	private final Form<SubmissionsCreationForm> submissionsCreationForm;
 	private final Form<SubmissionsSearchForm>   submissionsSearchForm;
 	private final Form<SubmissionsFileForm>     submissionsACForm; 
 	private final Form<State>                   stateForm;
-	private final SubmissionWorkflows       subWorkflows;
+	private final SubmissionWorkflows           subWorkflows;
 	private final SubmissionServices            submissionServices;
 	private final ReleaseServices               releaseServices;
 	private final FileAcServices                fileAcServices;
+	private final XmlServices                   xmlServices;
+	private final SraCodeHelper                 sraCodeHelper;
 	
+//	@Inject
+//	public Submissions(NGLContext ctx, SubmissionWorkflows subWorkflows, 
+//			           SubmissionServices submissionServices, 
+//			           ReleaseServices    releaseServices,
+//			           FileAcServices     fileAcServices,
+//			           XmlServices        xmlServices,
+//			           SraCodeHelper      sraCodeHelper) {
+//		super(ctx,InstanceConstants.SRA_SUBMISSION_COLL_NAME, Submission.class);
+//		updateForm              = ctx.form(QueryFieldsForm.class);
+//		submissionForm          = ctx.form(Submission.class);
+//		submissionsCreationForm = ctx.form(SubmissionsCreationForm.class);
+//		submissionsSearchForm   = ctx.form(SubmissionsSearchForm.class);
+//		submissionsACForm       = ctx.form(SubmissionsFileForm.class); 
+//		stateForm               = ctx.form(State.class);
+//		this.subWorkflows       = subWorkflows;
+//		this.submissionServices = submissionServices;
+//		this.releaseServices    = releaseServices;
+//		this.fileAcServices     = fileAcServices;
+//		this.xmlServices        = xmlServices;
+//		this.sraCodeHelper      = sraCodeHelper;
+//	}
+
 	@Inject
-	public Submissions(NGLContext ctx, SubmissionWorkflows subWorkflows, 
-			           SubmissionServices submissionServices, 
-			           ReleaseServices    releaseServices,
-			           FileAcServices     fileAcServices) {
-		super(ctx,InstanceConstants.SRA_SUBMISSION_COLL_NAME, Submission.class);
-		updateForm              = ctx.form(QueryFieldsForm.class);
-		submissionForm          = ctx.form(Submission.class);
-		submissionsCreationForm = ctx.form(SubmissionsCreationForm.class);
-		submissionsSearchForm   = ctx.form(SubmissionsSearchForm.class);
-		submissionsACForm       = ctx.form(SubmissionsFileForm.class); 
-		stateForm               = ctx.form(State.class);
+	public Submissions(NGLApplication      app, 
+			           SubmissionWorkflows subWorkflows, 
+			           SubmissionServices  submissionServices, 
+			           ReleaseServices     releaseServices,
+			           FileAcServices      fileAcServices,
+			           XmlServices         xmlServices,
+			           SraCodeHelper       sraCodeHelper) {
+		super(app,InstanceConstants.SRA_SUBMISSION_COLL_NAME, Submission.class);
+		updateForm              = app.form(QueryFieldsForm.class);
+		submissionForm          = app.form(Submission.class);
+		submissionsCreationForm = app.form(SubmissionsCreationForm.class);
+		submissionsSearchForm   = app.form(SubmissionsSearchForm.class);
+		submissionsACForm       = app.form(SubmissionsFileForm.class); 
+		stateForm               = app.form(State.class);
 		this.subWorkflows       = subWorkflows;
 		this.submissionServices = submissionServices;
 		this.releaseServices    = releaseServices;
 		this.fileAcServices     = fileAcServices;
+		this.xmlServices        = xmlServices;
+		this.sraCodeHelper      = sraCodeHelper;
 	}
 
 	// methode appelee avec url suivante :
@@ -154,10 +178,12 @@ public class Submissions extends DocumentController<Submission>{
 		QueryFieldsForm queryFieldsForm = filledQueryFieldsForm.get();
 		
 //		ContextValidation ctxVal = new ContextValidation(this.getCurrentUser(), filledForm.errors());
-		ContextValidation ctxVal = new ContextValidation(this.getCurrentUser(), filledForm);
+//		ContextValidation ctxVal = new ContextValidation(this.getCurrentUser(), filledForm);
+//		ctxVal.setUpdateMode();
+		ContextValidation ctxVal = ContextValidation.createUpdateContext(getCurrentUser(), filledForm);
 		if (submission == null) {
 			//return badRequest("Submission with code "+code+" not exist");
-			ctxVal.addErrors("submission ", " not exist");
+			ctxVal.addError("submission ", " not exist");
 			//return badRequest(filledForm.errors-AsJson());
 			return badRequest(errorsAsJson(ctxVal.getErrors()));
 		}
@@ -165,8 +191,9 @@ public class Submissions extends DocumentController<Submission>{
 
 		if (queryFieldsForm.fields == null) {
 			if (code.equals(submissionInput.code)) {	
-				ctxVal.setUpdateMode();
-				ctxVal.getContextObjects().put("type","sra");
+//				ctxVal.setUpdateMode();
+//				ctxVal.getContextObjects().put("type","sra");
+				ctxVal.putObject("type","sra");
 				submissionInput.traceInformation.setTraceInformation(getCurrentUser());
 				submissionInput.validate(ctxVal);
 				if (!ctxVal.hasErrors()) {
@@ -179,14 +206,15 @@ public class Submissions extends DocumentController<Submission>{
 				}
 			} else {
 				//return badRequest("submission code are not the same");
-				ctxVal.addErrors("submission "+code, "submission code  " +code + " and submissionInput.code "+ submissionInput.code + "are not the same");
+				ctxVal.addError("submission "+code, "submission code  " +code + " and submissionInput.code "+ submissionInput.code + "are not the same");
 				// return badRequest(filledForm.errors-AsJson());
 				return badRequest(errorsAsJson(ctxVal.getErrors()));
 			}	
 		} else { //update only some authorized properties
 //			ctxVal = new ContextValidation(getCurrentUser(), filledForm.errors()); 	
-			ctxVal = new ContextValidation(getCurrentUser(), filledForm); 	
-			ctxVal.setUpdateMode();
+//			ctxVal = new ContextValidation(getCurrentUser(), filledForm); 	
+//			ctxVal.setUpdateMode();
+//			ctxVal = ContextValidation.createUpdateContext(getCurrentUser(), filledForm);
 			validateAuthorizedUpdateFields(ctxVal, queryFieldsForm.fields, authorizedUpdateFields);
 			validateIfFieldsArePresentInForm(ctxVal, queryFieldsForm.fields, filledForm);
 			if (!ctxVal.hasErrors()) {
@@ -210,10 +238,10 @@ public class Submissions extends DocumentController<Submission>{
 		state.date = new Date();
 		state.user = getCurrentUser();
 //		ContextValidation ctxVal = new ContextValidation(this.getCurrentUser(), filledForm.errors());
-		ContextValidation ctxVal = new ContextValidation(this.getCurrentUser(), filledForm);
+		ContextValidation ctxVal = ContextValidation.createUndefinedContext(this.getCurrentUser(), filledForm);
 		if (submission == null) {
 			//return badRequest("Submission with code "+code+" not exist");
-			ctxVal.addErrors("submission " + code,  " not exist in database");	
+			ctxVal.addError("submission " + code,  " not exist in database");	
 			// return badRequest(filledForm.errors-AsJson());
 			return badRequest(errorsAsJson(ctxVal.getErrors()));
 		}
@@ -238,7 +266,7 @@ public class Submissions extends DocumentController<Submission>{
 		// Form<Submission> filledForm = /*Form.*/form(Submission.class);
 		// filledForm.fill(submission);
 		Form<Submission> filledForm = getFilledForm(submissionForm, Submission.class);
-		ContextValidation ctx = new ContextValidation(getCurrentUser(),filledForm);
+		ContextValidation ctx = ContextValidation.createUndefinedContext(getCurrentUser(),filledForm);
 		if (submission == null) {
 			//return badRequest("Submission with code "+code+" not exist");
 //			filledForm.reject("Submission " + code," not exist");  // si solution filledForm.reject
@@ -247,7 +275,7 @@ public class Submissions extends DocumentController<Submission>{
 			return badRequest(errorsAsJson(ctx.getErrors()));
 		}
 		try {
-			submission = XmlServices.writeAllXml(code);
+			submission = xmlServices.writeAllXml(code);
 		} catch (IOException e) {
 			//return badRequest(e.getMessage());
 //			filledForm.reject("Submission " + code, e.getMessage());  // si solution filledForm.reject
@@ -274,8 +302,8 @@ public class Submissions extends DocumentController<Submission>{
 		Form<SubmissionsFileForm> submissionsACFilledForm = filledFormQueryString(submissionsACForm, SubmissionsFileForm.class);
 		SubmissionsFileForm submissionsACForm = submissionsACFilledForm.get();
 		//Logger.debug("filledForm "+filledForm);
-		File ebiFileAc =new File(submissionsACForm.fileName);
-		ContextValidation ctxVal = new ContextValidation(this.getCurrentUser());
+		File ebiFileAc = new File(submissionsACForm.fileName);
+		ContextValidation ctxVal = ContextValidation.createUndefinedContext(getCurrentUser());
 		try {
 			// submission = FileAcServices.traitementFileAC(ctxVal, code, ebiFileAc);
 			submission = fileAcServices.traitementFileAC(ctxVal, code, ebiFileAc);
@@ -302,8 +330,8 @@ public class Submissions extends DocumentController<Submission>{
 		Form<SubmissionsFileForm> submissionsFilledForm = filledFormQueryString(submissionsACForm, SubmissionsFileForm.class);
 		SubmissionsFileForm submissionsForm = submissionsFilledForm.get();
 		//Logger.debug("filledForm "+filledForm);
-		File retourEbiRelease =new File(submissionsForm.fileName);
-		ContextValidation ctxVal = new ContextValidation(this.getCurrentUser());
+		File retourEbiRelease = new File(submissionsForm.fileName);
+		ContextValidation ctxVal = ContextValidation.createUndefinedContext(getCurrentUser());
 		ctxVal.putObject("fileEbi", retourEbiRelease);
 		try {
 			// submission = ReleaseServices.traitementRetourRelease(ctxVal, code, retourEbiRelease); 
@@ -336,9 +364,11 @@ public class Submissions extends DocumentController<Submission>{
 		logger.debug("readsets "+submissionsCreationForm.readSetCodes);
 		String user = getCurrentUser();
 //		ContextValidation contextValidation = new ContextValidation(user, filledForm.errors());
-		ContextValidation contextValidation = new ContextValidation(user, filledForm);
-		contextValidation.setCreationMode();
-		contextValidation.getContextObjects().put("type", "sra");
+//		ContextValidation contextValidation = new ContextValidation(user, filledForm);
+//		contextValidation.setCreationMode();
+		ContextValidation contextValidation = ContextValidation.createCreationContext(user, filledForm);
+//		contextValidation.getContextObjects().put("type", "sra");
+		contextValidation.putObject("type", "sra");
 		String submissionCode;
 		try {
 			if (StringUtils.isBlank(submissionsCreationForm.base64UserFileExperiments)) {
@@ -399,7 +429,7 @@ public class Submissions extends DocumentController<Submission>{
 				return badRequest(errorsAsJson(contextValidation.getErrors()));
 			}	
 		} catch (SraException e) {
-			contextValidation.addErrors("save submission ", e.getMessage()); // si solution avec ctxVal
+			contextValidation.addError("save submission ", e.getMessage()); // si solution avec ctxVal
 			// return badRequest(filledForm.errors-AsJson());
 			return badRequest(errorsAsJson(contextValidation.getErrors()));
 		}
@@ -414,8 +444,8 @@ public class Submissions extends DocumentController<Submission>{
 		// affichage des erreurs via messages.addDetails qui passe par 
 		// solution filledForm et reject 
 		// ou bien solution ctxVal.addErrors
-		String user = this.getCurrentUser();
-		ContextValidation contextValidation = new ContextValidation(user);
+		String user = getCurrentUser();
+		ContextValidation contextValidation = ContextValidation.createUndefinedContext(user);
 		Form<Submission> filledForm = getFilledForm(submissionForm, Submission.class); 
 		//ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm.errors()); // si solution avec ctxVal
 		try {
@@ -424,7 +454,7 @@ public class Submissions extends DocumentController<Submission>{
 		} catch (SraException e) {
 			//return badRequest(Json.toJson(e.getMessage()));
 			// filledForm.reject("Submission "+submissionCode, e.getMessage());  // si solution filledForm.reject
-			contextValidation.addErrors("Submission "+submissionCode, e.getMessage()); // si solution avec ctxVal
+			contextValidation.addError("Submission "+submissionCode, e.getMessage()); // si solution avec ctxVal
 			// Logger.debug("filled form "+filledForm.errors-AsJson());
 			logger.debug("filled form "+filledForm.errorsAsJson());
 			// return badRequest(filledForm.errors-AsJson());
@@ -445,12 +475,14 @@ public class Submissions extends DocumentController<Submission>{
 		Date courantDate = new java.util.Date();
 		String user = getCurrentUser();
 
-		ContextValidation contextValidation = new ContextValidation(user);
+//		ContextValidation contextValidation = new ContextValidation(user);
+//			contextValidation.setCreationMode();
+		ContextValidation contextValidation = ContextValidation.createCreationContext(user);
 		try {
 			Study study = MongoDBDAO.findByCode(InstanceConstants.SRA_STUDY_COLL_NAME, Study.class, studyCode);
 			if (study == null) {
-				contextValidation.addErrors("createfromStudy appele avec le codeStudy" + studyCode , " qui n'existe pas dans base"); // si solution avec ctxVal
-				logger.debug("createfromStudy: " + contextValidation.errors);
+				contextValidation.addError("createfromStudy appele avec le codeStudy" + studyCode , " qui n'existe pas dans base"); // si solution avec ctxVal
+				logger.debug("createfromStudy: " + contextValidation.getErrors());
 				return badRequest(errorsAsJson(contextValidation.getErrors()));
 			}
 			if (study.traceInformation.createUser == null) {
@@ -464,7 +496,7 @@ public class Submissions extends DocumentController<Submission>{
 				return unauthorized(user + " n'est pas autorisé à rendre publique le study " + study.code + " crée par " + study.traceInformation.createUser);
 			}
 			submission = new Submission(user, study.projectCodes);
-			submission.code = SraCodeHelper.getInstance().generateSubmissionCode(study.projectCodes);
+			submission.code = sraCodeHelper.generateSubmissionCode(study.projectCodes);
 			
 			submission.creationDate = courantDate;
 			logger.debug("************************submissionCode="+ submission.code);
@@ -472,16 +504,17 @@ public class Submissions extends DocumentController<Submission>{
 			submission.release = true;
 			submission.refStudyCodes.add(study.code);
 			submission.studyCode = study.code;		
-			submission.state = new State(SubmissionWorkflows.N_R, contextValidation.getUser());
+//			submission.state = new State(SubmissionWorkflows.N_R, contextValidation.getUser());
+			submission.state = new State(SRASubmissionStateNames.N_R, contextValidation.getUser());
 
 			// valider et sauver submission
-			contextValidation.setCreationMode();
-			contextValidation.getContextObjects().put("type", "sra");
-			logger.debug("AVANT submission.validate="+contextValidation.errors);
+//			contextValidation.getContextObjects().put("type", "sra");
+			contextValidation.putObject("type", "sra");
+			logger.debug("AVANT submission.validate="+contextValidation.getErrors());
 			submission.validate(contextValidation);
-			logger.debug("APRES submission.validate="+contextValidation.errors);
+			logger.debug("APRES submission.validate="+contextValidation.getErrors());
 			if (contextValidation.hasErrors()) {
-				logger.debug("createfromStudy: " + contextValidation.errors);
+				logger.debug("createfromStudy: " + contextValidation.getErrors());
 				return badRequest(errorsAsJson(contextValidation.getErrors()));
 			}
 			if (!MongoDBDAO.checkObjectExist(InstanceConstants.SRA_SUBMISSION_COLL_NAME, Submission.class, "code",submission.code)){	
@@ -490,7 +523,7 @@ public class Submissions extends DocumentController<Submission>{
 			}
 			subWorkflows.activateSubmissionRelease(contextValidation, submission);
 		} catch (SraException e) {
-			contextValidation.addErrors("Submission " + submission.code, e.getMessage()); 
+			contextValidation.addError("Submission " + submission.code, e.getMessage()); 
 			return badRequest(errorsAsJson(contextValidation.getErrors()));
 		}		
 		return ok(Json.toJson(submission));

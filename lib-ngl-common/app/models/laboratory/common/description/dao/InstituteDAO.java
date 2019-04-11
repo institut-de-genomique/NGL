@@ -12,13 +12,10 @@ import models.utils.dao.AbstractDAOMapping;
 import models.utils.dao.DAOException;
 
 @Repository
-public class InstituteDAO extends AbstractDAOMapping<Institute>{
+public class InstituteDAO extends AbstractDAOMapping<Institute> {
 
-//	protected InstituteDAO() {
-//		super("institute", Institute.class, InstituteMappingQuery.class,
-//				"SELECT t.id, t.name, t.code FROM institute as t ",
-//				true);
-//	}
+//	private static final play.Logger.ALogger logger = play.Logger.of(InstituteDAO.class);
+	
 	protected InstituteDAO() {
 		super("institute", Institute.class, InstituteMappingQuery.factory,
 				"SELECT t.id, t.name, t.code FROM institute as t ",
@@ -28,7 +25,7 @@ public class InstituteDAO extends AbstractDAOMapping<Institute>{
 	@SuppressWarnings("deprecation")
 	@Override
 	public void remove(Institute institute) throws DAOException {
-		//Remove list institute for common_info_type
+		// Remove list institute for common_info_type
 		String sql = "DELETE FROM common_info_type_institute WHERE fk_institute=?";
 		jdbcTemplate.update(sql, institute.id);
 		
@@ -45,7 +42,8 @@ public class InstituteDAO extends AbstractDAOMapping<Institute>{
 		parameters.put("code", institute.code);
 		parameters.put("name", institute.name);
 
-		Long newId = (Long) jdbcInsert.executeAndReturnKey(parameters);
+//		Long newId = (Long) jdbcInsert.executeAndReturnKey(parameters);
+		Long newId = jdbcInsert.executeAndReturnKey(parameters).longValue();
 		institute.id = newId;
 		return institute.id;
 	}
@@ -55,7 +53,6 @@ public class InstituteDAO extends AbstractDAOMapping<Institute>{
 	public void update(Institute institute) throws DAOException {
 		String sql = "UPDATE institute SET code=?, name=? WHERE id=?";
 		jdbcTemplate.update(sql, institute.code, institute.name);
-		
 	}
 	
 	@SuppressWarnings("deprecation")
@@ -65,9 +62,8 @@ public class InstituteDAO extends AbstractDAOMapping<Institute>{
 				"JOIN common_info_type_institute ci ON ci.fk_institute= i.id "+
 				"WHERE ci.fk_common_info_type=?";
 		BeanPropertyRowMapper<Institute> mapper = new BeanPropertyRowMapper<>(Institute.class);
-		return this.jdbcTemplate.query(sql, mapper, idCommonInfoType);
+		return jdbcTemplate.query(sql, mapper, idCommonInfoType);
 	}
-
 
 }
 

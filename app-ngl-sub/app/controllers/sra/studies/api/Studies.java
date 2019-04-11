@@ -1,8 +1,5 @@
 package controllers.sra.studies.api;
 
-//import static play.data.Form.form;
-// import static fr.cea.ig.play.IGGlobals.form;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -17,11 +14,9 @@ import org.mongojack.DBQuery;
 import org.mongojack.DBQuery.Query;
 
 import controllers.DocumentController;
-// import controllers.sra.configurations.api.Configurations;
-//import models.sra.submit.util.VariableSRA;
 import fr.cea.ig.MongoDBDAO;
 import fr.cea.ig.MongoDBResult;
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import models.laboratory.common.instance.State;
 import models.laboratory.common.instance.TraceInformation;
 import models.sra.submit.common.instance.AbstractStudy;
@@ -30,45 +25,46 @@ import models.sra.submit.util.SraCodeHelper;
 import models.sra.submit.util.SraException;
 import models.sra.submit.util.VariableSRA;
 import models.utils.InstanceConstants;
-//import play.Logger;
-//import play.api.modules.spring.Spring;
 import play.data.Form;
 import play.libs.Json;
 import play.mvc.Result;
 import services.SubmissionServices;
 import validation.ContextValidation;
 import views.components.datatable.DatatableResponse;
-//import workflows.sra.study.StudyWorkflows;
-
 
 public class Studies extends DocumentController<AbstractStudy> {
 	
 	private static final play.Logger.ALogger logger = play.Logger.of(Studies.class);
-
-	// final static Form<AbstractStudy> studyForm = form(AbstractStudy.class);
-	// final static Form<StudiesSearchForm> studiesSearchForm = form(StudiesSearchForm.class);
-	// final StudyWorkflows studyWorkflows = Spring.get BeanOfType(StudyWorkflows.class);
-	// final static Form<State> stateForm = form(State.class);
 	
 	private final Form<AbstractStudy>     studyForm;
 	private final Form<StudiesSearchForm> studiesSearchForm;
-//	private final Form<State>             stateForm;
-//	private final StudyWorkflows          studyWorkflows;
 	private final SubmissionServices      submissionServices;
+	private final SraCodeHelper     sraCodeHelper;
+
+//	@Inject
+//	public Studies(NGLContext ctx, SubmissionServices submissionServices, SraCodeHelper     sraCodeHelper) {
+//		super(ctx,InstanceConstants.SRA_STUDY_COLL_NAME, AbstractStudy.class);
+//		studyForm               = ctx.form(AbstractStudy.class);
+//		studiesSearchForm       = ctx.form(StudiesSearchForm.class);
+////		stateForm               = ctx.form(State.class);		
+////		this.studyWorkflows     = studyWorkflows;
+//		this.submissionServices = submissionServices;
+//		this.sraCodeHelper      = sraCodeHelper;
+//	}
 
 	@Inject
-	public Studies(NGLContext ctx, SubmissionServices submissionServices) {
-		super(ctx,InstanceConstants.SRA_STUDY_COLL_NAME, AbstractStudy.class);
-		studyForm               = ctx.form(AbstractStudy.class);
-		studiesSearchForm       = ctx.form(StudiesSearchForm.class);
-//		stateForm               = ctx.form(State.class);		
-//		this.studyWorkflows     = studyWorkflows;
+	public Studies(NGLApplication app, SubmissionServices submissionServices, SraCodeHelper sraCodeHelper) {
+		super(app,InstanceConstants.SRA_STUDY_COLL_NAME, AbstractStudy.class);
+		studyForm               = app.form(AbstractStudy.class);
+		studiesSearchForm       = app.form(StudiesSearchForm.class);
 		this.submissionServices = submissionServices;
+		this.sraCodeHelper      = sraCodeHelper;
 	}
+	
 	public Result release(String studyCode) throws SraException {
 		String user = this.getCurrentUser();
 		System.out.println("Dans Studies.java.release ");
-		ContextValidation contextValidation = new ContextValidation(user);
+		ContextValidation contextValidation = ContextValidation.createUndefinedContext(user);
 		// SubmissionServices submissionServices = new SubmissionServices();
 //		Form<AbstractStudy> filledForm = getFilledForm(studyForm, AbstractStudy.class);
 //		AbstractStudy userStudy = filledForm.get();	
@@ -94,8 +90,9 @@ public class Studies extends DocumentController<AbstractStudy> {
 		AbstractStudy userStudy = filledForm.get();
 
 //		ContextValidation contextValidation = new ContextValidation(getCurrentUser(), filledForm.errors());
-		ContextValidation contextValidation = new ContextValidation(getCurrentUser(), filledForm);
-		contextValidation.setCreationMode();	
+//		ContextValidation contextValidation = new ContextValidation(getCurrentUser(), filledForm);
+//		contextValidation.setCreationMode();
+		ContextValidation contextValidation = ContextValidation.createCreationContext(getCurrentUser(), filledForm);
 		if (userStudy._id == null) {
 			userStudy.traceInformation = new TraceInformation(); 
 			userStudy.traceInformation.setTraceInformation(getCurrentUser());
@@ -113,13 +110,14 @@ public class Studies extends DocumentController<AbstractStudy> {
 					((Study)userStudy).centerProjectName = ((Study)userStudy).centerProjectName.replaceFirst("_", "");
 				}
 				try {
-					((Study)userStudy).code = SraCodeHelper.getInstance().generateStudyCode(((Study)userStudy).projectCodes);
+					((Study)userStudy).code = sraCodeHelper.generateStudyCode(((Study)userStudy).projectCodes);
 				} catch (SraException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}	
 			}
-			contextValidation.getContextObjects().put("type", "sra");
+//			contextValidation.getContextObjects().put("type", "sra");
+			contextValidation.putObject("type", "sra");
 			userStudy.validate(contextValidation);
 			//Logger.info("utilisateur = "+getCurrentUser());	
 			// if(contextValidation.errors.size()==0) {
@@ -162,7 +160,7 @@ public class Studies extends DocumentController<AbstractStudy> {
 	private Query getQuery(StudiesSearchForm form) {
 		List<Query> queries = new ArrayList<>();
 		Query query = null;
-
+		
 		if (CollectionUtils.isNotEmpty(form.projCodes)) { //
 			queries.add(DBQuery.in("projectCodes", form.projCodes)); // doit pas marcher car pour state.code
 			// C'est une valeur qui peut prendre une valeur autorisee dans le formulaire. Ici on veut que 
@@ -176,18 +174,19 @@ public class Studies extends DocumentController<AbstractStudy> {
 		if (StringUtils.isNotBlank(form.stateCode)) { //all
 			queries.add(DBQuery.in("state.code", form.stateCode));
 		}
-
-		if (CollectionUtils.isNotEmpty(form.accessions)) { //all
-			queries.add(DBQuery.in("accession", form.accessions));
-		}	
-
+	
 		if(CollectionUtils.isNotEmpty(form.accessions)){
 			queries.add(DBQuery.in("accession", form.accessions));
 		}else if(StringUtils.isNotBlank(form.accessionRegex)){
 			queries.add(DBQuery.regex("accession", Pattern.compile(form.accessionRegex)));
 		}
 
-
+		if(CollectionUtils.isNotEmpty(form.externalIds)){
+			queries.add(DBQuery.in("externalId", form.externalIds));
+		}else if(StringUtils.isNotBlank(form.externalIdRegex)){
+			queries.add(DBQuery.regex("externalId", Pattern.compile(form.externalIdRegex)));
+		}
+		
 		if (CollectionUtils.isNotEmpty(form.codes)) { //all
 			queries.add(DBQuery.in("code", form.codes));
 		}
@@ -221,18 +220,20 @@ public class Studies extends DocumentController<AbstractStudy> {
 		AbstractStudy study = getObject(code);
 		Form<AbstractStudy> filledForm = getFilledForm(studyForm, AbstractStudy.class);
 //		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm.errors()); 	
-		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm); 	
+//		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm); 	
+//		ctxVal.setUpdateMode();
+		ContextValidation ctxVal = ContextValidation.createUpdateContext(getCurrentUser(), filledForm);
 		if (study == null) {
 			//return badRequest("Study with code "+code+" not exist");
-			ctxVal.addErrors("study ", " not exist");
+			ctxVal.addError("study ", " not exist");
 			// return badRequest(filledForm.errors-AsJson());
 			return badRequest(errorsAsJson(ctxVal.getErrors()));
 		}
 		AbstractStudy studyInput = filledForm.get();
 
 		if (code.equals(studyInput.code)) {	
-			ctxVal.setUpdateMode();
-			ctxVal.getContextObjects().put("type","sra");
+//			ctxVal.getContextObjects().put("type","sra");
+			ctxVal.putObject("type","sra");
 			studyInput.traceInformation.setTraceInformation(getCurrentUser());
 			studyInput.validate(ctxVal);
 			if (!ctxVal.hasErrors()) {
@@ -245,7 +246,7 @@ public class Studies extends DocumentController<AbstractStudy> {
 			}
 		} else {
 			//return badRequest("study code are not the same");
-			ctxVal.addErrors("study " + code, "study code  " + code + " and studyInput.code "+ studyInput.code + " are not the same");
+			ctxVal.addError("study " + code, "study code  " + code + " and studyInput.code "+ studyInput.code + " are not the same");
 			// return badRequest(filledForm.errors-AsJson());
 			return badRequest(errorsAsJson(ctxVal.getErrors()));
 		}	

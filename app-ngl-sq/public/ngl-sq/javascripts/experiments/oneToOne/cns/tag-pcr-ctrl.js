@@ -1,5 +1,5 @@
-angular.module('home').controller('TagPCRCtrl',['$scope', '$parse','$filter', 'atmToSingleDatatable','lists','mainService',
-                                                    function($scope, $parse, $filter, atmToSingleDatatable,lists,mainService){
+angular.module('home').controller('TagPCRCtrl',['$scope', '$parse','$filter', 'atmToSingleDatatable','lists','mainService','$http',
+                                                    function($scope, $parse, $filter, atmToSingleDatatable,lists,mainService,$http){
                                                     
 	var datatableConfig = {
 					name: $scope.experiment.typeCode.toUpperCase(),
@@ -248,10 +248,10 @@ angular.module('home').controller('TagPCRCtrl',['$scope', '$parse','$filter', 'a
 		var blank2;
 		var sampleCodeAvailable;
 
-		var nestedDetectionBlank1  = $filter('filter')(experiment.atomicTransfertMethods,{inputContainerUseds:{contents:{properties:{tagPcrBlank1SampleCode:{value:'CEB'}}}}});
-		var nestedDetectionBlank2  = $filter('filter')(experiment.atomicTransfertMethods,{inputContainerUseds:{contents:{properties:{tagPcrBlank2SampleCode:{value:'CEB'}}}}});
-		var nestedNonBlanck =  $filter('filter')(experiment.atomicTransfertMethods,{inputContainerUseds:{contents:{properties:{tagPcrBlank2SampleCode:{value:'!CEA'}}}}});
-		nestedNonBlanck =  $filter('filter')(nestedNonBlanck,{inputContainerUseds:{contents:{properties:{tagPcrBlank2SampleCode:{value:'!CAM'}}}}});
+		var nestedDetectionBlank1  = $filter('filter')(experiment.atomicTransfertMethods,{inputContainerUseds:{contents:{properties:{tagPcrBlank1SampleCode:{value:'CEB_'}}}}});
+		var nestedDetectionBlank2  = $filter('filter')(experiment.atomicTransfertMethods,{inputContainerUseds:{contents:{properties:{tagPcrBlank2SampleCode:{value:'CEB_'}}}}});
+		var nestedNonBlanck =  $filter('filter')(experiment.atomicTransfertMethods,{inputContainerUseds:{contents:{properties:{tagPcrBlank2SampleCode:{value:'!CEA_'}}}}});
+		nestedNonBlanck =  $filter('filter')(nestedNonBlanck,{inputContainerUseds:{contents:{properties:{tagPcrBlank2SampleCode:{value:'!CAM_'}}}}});
 		
 		var isNested = false;
 		if(nestedDetectionBlank1.length > 0 && nestedDetectionBlank2.length > 0){
@@ -264,13 +264,17 @@ angular.module('home').controller('TagPCRCtrl',['$scope', '$parse','$filter', 'a
 			return false;
 		}
 		//search atm with output with CEB as new sampleCode
-		var atmWithBlanckSamples = $filter('filter')(experiment.atomicTransfertMethods,{outputContainerUseds:{experimentProperties:{sampleCode:{value:'CEB'}}}});
+		var atmWithBlanckSamples = $filter('filter')(experiment.atomicTransfertMethods,{outputContainerUseds:{experimentProperties:{sampleCode:{value:'CEB_'}}}});
 		if(isNested){
 			//search only where input is on CEB project
 			atmWithBlanckSamples = $filter('filter')(atmWithBlanckSamples,{inputContainerUseds:{contents:{projectCode:'CEB'}}});
-			$parse("protocolCode").assign(experiment,"tag16s_full_length_16s_v4v5_fuhrman");
-			$parse("experimentProperties.amplificationPrimers.value").assign(experiment,'16S FL 27F/1492R + Fuhrman primers');
-			$parse("experimentProperties.targetedRegion.value").assign(experiment,'16S_Full Length + 16S_V4V5');
+			if(experiment.protocolCode==="metab-primer-fusion-dev"){
+				$parse("experimentProperties.targetedRegion.value").assign(experiment,'16S_Full Length + 16S_V4V5');
+			}else{
+				$parse("protocolCode").assign(experiment,"tag16s_full_length_16s_v4v5_fuhrman");
+				$parse("experimentProperties.amplificationPrimers.value").assign(experiment,'16S FL 27F/1492R + Fuhrman primers');
+				$parse("experimentProperties.targetedRegion.value").assign(experiment,'16S_Full Length + 16S_V4V5');
+			}
 			
 		}
 		
@@ -512,6 +516,8 @@ angular.module('home').controller('TagPCRCtrl',['$scope', '$parse','$filter', 'a
 			column.editTemplate='<div class="form-control" bt-select #ng-model filter="true" placeholder="'+Messages("search.placeholder.projects")+'" bt-options="project.code as project.code+\' (\'+project.name+\')\' for project in lists.getProjects()" ></div>';
 		}else if(property.code=="sampleTypeCode"){
 			column.filter="getArray:'sampleTypeCode' | unique | codes:\"type\"";
+		}else if(property.code=="secondaryTag"){
+			column.editTemplate='<input class="form-control" type="text" #ng-model typeahead="v.code as v.code for v in tags | filter:{code:$viewValue} | limitTo:20" typeahead-min-length="1" udt-change="updatePropertyFromUDT(value,col)"/>';        											
 		}
 		return column;
 	};
@@ -540,6 +546,10 @@ angular.module('home').controller('TagPCRCtrl',['$scope', '$parse','$filter', 'a
 			computeInputQuantityToContentProperties(value.data);
 			
 		}
+		
+		if(col.property === 'outputContainerUsed.experimentProperties.secondaryTag.value'){
+			computeTagCategory(value.data);			
+		}
 	}
 	
 	 var computeInputQuantityToContentProperties  = function(udtData){
@@ -566,6 +576,36 @@ angular.module('home').controller('TagPCRCtrl',['$scope', '$parse','$filter', 'a
                getter.assign(udtData, inputQtty);
            }
   }
+	 var computeTagCategory = function(udtData){
+			var getter = $parse("outputContainerUsed.experimentProperties.secondaryTagCategory.value");
+			var tagCategory = getter(udtData);
+			
+			var compute = {
+					tagValue : $parse("outputContainerUsed.experimentProperties.secondaryTag.value")(udtData),
+					tag : $filter("filter")($scope.tags,{code:$parse("outputContainerUsed.experimentProperties.secondaryTag.value")(udtData)},true),
+					isReady:function(){
+						return (this.tagValue && this.tag && this.tag.length === 1);
+					}
+				};
+			if(compute.isReady()){
+				var result = compute.tag[0].categoryCode;
+				console.log("result = "+result);
+				if(result){
+					tagCategory = result;				
+				}else{
+					tagCategory = undefined;
+				}	
+				getter.assign(udtData, tagCategory);
+			}else{
+				getter.assign(udtData, undefined);
+			}
+			
+		}
+	 
+	 $http.get(jsRoutes.controllers.commons.api.Parameters.list().url,{params:{typeCode:"index-illumina-sequencing",categoryCode:"MID"}})
+		.success(function(data, status, headers, config) {
+				$scope.tags = data;		
+		})
 	
 	/*
 	 * Supprime la poss de remplir le champs manuellement

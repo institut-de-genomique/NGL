@@ -2,16 +2,56 @@ package validation.reagent.instance;
 
 import models.laboratory.reagent.instance.Box;
 import models.laboratory.reagent.instance.Kit;
-import models.utils.InstanceConstants;
 import validation.ContextValidation;
 import validation.common.instance.CommonValidationHelper;
 
-public class BoxValidationHelper extends CommonValidationHelper{
-	public static void validateBoxCatalogCode(String code, ContextValidation contextValidation){
-		validateExistInstanceCode(contextValidation, code, Box.class, InstanceConstants.REAGENT_CATALOG_COLL_NAME);
+public class BoxValidationHelper extends CommonValidationHelper {
+	
+	// -----------------------------------------------------------------------------
+	// renamed and arguments reordered
+	
+	/**
+	 * Validate a box catalog code.
+	 * @param code              box catalog code
+	 * @param contextValidation validation context
+	 * @deprecated use {@link #validateBoxCatalogCodeOptional(ContextValidation, String)}
+	 */
+	@Deprecated
+	public static void validateBoxCatalogCode(String code, ContextValidation contextValidation) {
+		validateBoxCatalogCodeOptional(contextValidation, code);
 	}
 	
-	public static void validateKitCode(String code, ContextValidation contextValidation){
-		validateExistInstanceCode(contextValidation, code, Kit.class, InstanceConstants.REAGENT_INSTANCE_COLL_NAME);
+	/**
+	 * Validate a box catalog code.
+	 * @param contextValidation validation context
+	 * @param code              box catalog code
+	 */
+	public static void validateBoxCatalogCodeOptional(ContextValidation contextValidation, String code) {
+//		validateExistInstanceCode(contextValidation, code, Box.class, InstanceConstants.REAGENT_CATALOG_COLL_NAME);
+		validateCodeForeignOptional(contextValidation, Box.catalogFind.get(), code);
 	}
+	
+	// --------------------------------------------------------------------------------
+	
+	/**
+	 * Validate a kit code.
+	 * @param code              kit code
+	 * @param contextValidation validation context
+	 * @deprecated use {@link #validateKitCodeOptional(ContextValidation, String)}
+	 */
+	@Deprecated
+	public static void validateKitCode_(String code, ContextValidation contextValidation) {
+		validateKitCodeOptional(contextValidation, code);
+	}
+
+	/**
+	 * Validate a kit code.
+	 * @param contextValidation validation context
+	 * @param code              kit code
+	 */
+	public static void validateKitCodeOptional(ContextValidation contextValidation, String code) {
+//		validateExistInstanceCode(contextValidation, code, Kit.class, InstanceConstants.REAGENT_INSTANCE_COLL_NAME);
+		validateCodeForeignOptional(contextValidation, Kit.find.get(), code);
+	}
+
 }

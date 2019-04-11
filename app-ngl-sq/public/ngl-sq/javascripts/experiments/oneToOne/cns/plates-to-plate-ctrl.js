@@ -161,6 +161,7 @@ angular.module('home').controller('CNSPlatesToPlateCtrl',['$scope' ,'$http','$pa
 			        	 "order":true,
 						 "edit":true,
 						 "hide":true,
+			        	 "required":true,
 			        	 "type":"number",
 			        	 "position":52,
 			        	 "extraHeaders":{0:Messages("experiments.outputs")}
@@ -303,6 +304,7 @@ angular.module('home').controller('CNSPlatesToPlateCtrl',['$scope' ,'$http','$pa
                 template:''
                 	+$scope.plateUtils.templates.buttonLineMode()
                 	+$scope.plateUtils.templates.buttonColumnMode()  
+                	+$scope.plateUtils.templates.buttonCopyPosition()
                 	+'<div class="btn-group" style="margin-left:5px">'
                 	+'<button class="btn btn-default" ng-click="copyVolumeInToOut()" data-toggle="tooltip" title="'+Messages("experiments.button.plate.copyVolume")+'"  ng-disabled="!isEditMode()" ng-if="experiment.instrument.outContainerSupportCategoryCode!==\'tube\'"><i class="fa fa-files-o" aria-hidden="true"></i> Volume </button>'                	                	
                 	+'</div>'
@@ -360,7 +362,9 @@ angular.module('home').controller('CNSPlatesToPlateCtrl',['$scope' ,'$http','$pa
 	$scope.copyVolumeInToOut = function(){
 		var data = $scope.atmService.data.displayResult;		
 		data.forEach(function(value){
-			value.data.outputContainerUsed.volume = value.data.inputContainerUsed.volume;
+			if ( null !==value.data.inputContainerUsed.volume) { 
+				value.data.outputContainerUsed.volume = value.data.inputContainerUsed.volume;
+			}
 		})		
 	};
 
@@ -403,7 +407,24 @@ angular.module('home').controller('CNSPlatesToPlateCtrl',['$scope' ,'$http','$pa
 	var generateSampleSheetPlateToPlate = function(){
 		$scope.fileUtils.generateSampleSheet({type:$scope.experiment.typeCode})
 	}
+	var generateSampleSheetPlateToPlateNoCalcul = function(){
+		$scope.fileUtils.generateSampleSheet({type:$scope.experiment.typeCode+"-nocalcul"})
+	}
 
+	//TODO next version NGL-2485
+	/*if($scope.experiment.instrument.typeCode === "biomek-fx"){
+			$scope.setAdditionnalButtons([{
+				isDisabled : function(){return $scope.isNewState();} ,
+				isShow:function(){return !$scope.isNewState();},
+				click:generateSampleSheetPlateToPlateNoCalcul,
+				label:Messages("experiments.sampleSheet")+" sans normalisation"
+			},{
+				isDisabled : function(){return $scope.isNewState();} ,
+				isShow:function(){return !$scope.isNewState();},
+				click:generateSampleSheetPlateToPlate,
+				label:Messages("experiments.sampleSheet")+" avec normalisation"
+        }]);
+	}else{*/
 	
 	$scope.setAdditionnalButtons([{
 			isDisabled : function(){return $scope.isNewState();} ,
@@ -411,6 +432,6 @@ angular.module('home').controller('CNSPlatesToPlateCtrl',['$scope' ,'$http','$pa
 			click:generateSampleSheetPlateToPlate,
 			label:Messages("experiments.sampleSheet")
 		}]);
-	
+	//}
 	
 }]);

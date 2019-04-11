@@ -4,22 +4,25 @@ import java.sql.SQLException;
 
 import javax.inject.Inject;
 
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import models.utils.dao.DAOException;
-import scala.concurrent.duration.FiniteDuration;
+import validation.ContextValidation;
 
 public class SizingImportCNS extends ContainerImportCNS {
 
-
 	@Inject
-	public SizingImportCNS(FiniteDuration durationFromStart,
-			FiniteDuration durationFromNextIteration, NGLContext ctx) {
-		super("Container Sizing CNS", durationFromStart, durationFromNextIteration, ctx);
-		
+	public SizingImportCNS(NGLApplication app) {
+		super("Container Sizing CNS", app);		
 	}
 
+//	@Override
+//	public void runImport() throws SQLException, DAOException {
+//		createContainers(contextError,"pl_MaterielmanipToNGL @emnco=16 ","tube","IW-P","sizing","pl_ContentFromContainer @matmanom=?");
+//	}
+	
 	@Override
-	public void runImport() throws SQLException, DAOException {
+	public void runImport(ContextValidation contextError) throws SQLException, DAOException {
 		createContainers(contextError,"pl_MaterielmanipToNGL @emnco=16 ","tube","IW-P","sizing","pl_ContentFromContainer @matmanom=?");
 	}
+
 }

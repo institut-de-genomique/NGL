@@ -168,7 +168,7 @@
 	<form class="well well-small">
 			<div class="row">
 			<div class="col-md-2 col-lg-2" ng-repeat="columns in searchService.getAddColumnsToForm()">
-			  		<div class="checkbox" ng-repeat="column in columns">
+			  		<div class="checkbox" ng-repeat="column in columns | filter:{header:regexColumn}">
 				    <label>
 				      <input type="checkbox" ng-model="column.select"> {{column.header}}
 				    </label>
@@ -177,14 +177,17 @@
 			 @columnSearchForm{
 				@formGroup{
 				<div class="btn-toolbar">
-					<button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="searchService.addColumnsToDatatable()" class="btn btn-primary" >
+					<button type="submit" title='@Messages("button.add.columns")' data-toggle="tooltip" ng-click="searchService.addColumnsToDatatable()" class="btn btn-primary" >
 						<i class="fa fa-plus"></i>
 					</button>
 					<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="searchService.resetDatatableColumns()"  class="btn btn-default">
 						<i class="fa fa-undo"></i>
 					</button>												 	
 				</div>	
-				}					
+				}		
+				@formGroup{
+					<input type="text" class="form-control" ng-model="regexColumn" placeholder='@Messages("search.placeholder.regexColumn")'>
+				}			
 			}
 			</div>			
 		</form>	

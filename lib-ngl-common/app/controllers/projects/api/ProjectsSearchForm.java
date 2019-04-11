@@ -50,14 +50,14 @@ public class ProjectsSearchForm extends DBObjectListForm<Project> {
 		}
 		
 		if(CollectionUtils.isNotEmpty(this.fgGroups)){
-			queries.add(DBQuery.in("biointhisaticParameters.fgGroup", this.fgGroups));
+			queries.add(DBQuery.in("bioinformaticParameters.fgGroup", this.fgGroups));
 		}
 		
 		if (this.isFgGroup != null) {
 			if(this.isFgGroup){
-				queries.add(DBQuery.exists("biointhisaticParameters.fgGroup"));
+				queries.add(DBQuery.exists("bioinformaticParameters.fgGroup"));
 			} else{
-				queries.add(DBQuery.notExists("biointhisaticParameters.fgGroup"));
+				queries.add(DBQuery.notExists("bioinformaticParameters.fgGroup"));
 			}
 		}
 		
@@ -67,6 +67,7 @@ public class ProjectsSearchForm extends DBObjectListForm<Project> {
 			queries.add(DBQuery.in("state.code", this.stateCodes));
 		}
 		
+		//TODO EJACOBY AD
 		if (CollectionUtils.isNotEmpty(this.unixGroups)) {
 			queries.add(DBQuery.in("properties.unixGroup.value", this.unixGroups));
 		}
@@ -88,7 +89,6 @@ public class ProjectsSearchForm extends DBObjectListForm<Project> {
 
 		return query;
 	}
-
 
 	@Override
 	@JsonIgnore

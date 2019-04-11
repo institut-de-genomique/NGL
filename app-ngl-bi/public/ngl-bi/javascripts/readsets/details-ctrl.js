@@ -194,6 +194,29 @@
 	    return -parseInt(trt.abundance);
 	};
 	
+	$scope.setFilterTaxonBilan = function(value){
+		 mainService.put('filterTaxonBilan', value);
+	}
+	
+	$scope.setFilterTaxonBilanDefault = function(value){
+		 mainService.put('filterTaxonBilanDefault', value);
+	}
+	
+	$scope.setFilterTaxonBilanCommon = function(key,value){
+		 mainService.put(key, value);
+	}
+	
+	$scope.setFilterTaxonBilanPlastid = function(value){
+		 mainService.put('filterTaxonBilanPlastid', value);
+	}
+	
+	$scope.setFiltertaxonBilanContamination = function(value){
+		 mainService.put('filtertaxonBilanContamination', value);
+	}
+	$scope.setFilterKmerPercentBilanDefault = function(value){
+		 mainService.put('filterKmerPercentDefault', value);
+	}
+	
 	var init = function(){
 		$scope.messages = messages();
 		$scope.lists = lists;
@@ -204,6 +227,8 @@
 		$scope.filterTaxonBilanMitochondrion=0.2;
 		$scope.filterTaxonBilanPlastid=0.2;
 		$scope.filtertaxonBilanContamination=0.2;
+		$scope.filterKmerPercentDefault=10;
+		$scope.arrayExpectedSeq=[];
 		
 		mainService.stopEditMode();
 		if(isValuationMode()){
@@ -227,6 +252,15 @@
 			$scope.lists.refresh.resolutions({typeCode:$scope.readset.typeCode});
 			$scope.lists.refresh.valuationCriterias({typeCode:$scope.readset.typeCode, objectTypeCode:"ReadSet", orderBy:'name'});
 			$scope.lists.refresh.states({objectTypeCode:"ReadSet"});
+			
+			if(angular.isDefined($scope.readset.sampleOnContainer.properties.expectedSequences)){
+				var expectedSequences = $scope.readset.sampleOnContainer.properties.expectedSequences.value.replace(/["]/g,'');
+				var lastChar = expectedSequences.charAt(expectedSequences.length-1);
+				if(lastChar==","){
+					expectedSequences=expectedSequences.substr(0,expectedSequences.length-1);
+				}
+				$scope.arrayExpectedSeq=expectedSequences.split(',');
+			}
 			
 			if(angular.isDefined($scope.readset.treatments)){				
 				$scope.treatments.init($scope.readset.treatments, jsRoutes.controllers.readsets.tpl.ReadSets.treatments, 'readsets', {global:true});				
@@ -252,6 +286,28 @@
 					
 			if(undefined == mainService.get('readSetActiveTab')){
 				 mainService.put('readSetActiveTab', 'general');
+			 }
+			
+			if(undefined != mainService.get('filterTaxonBilan')){
+				$scope.filterTaxonBilan=mainService.get('filterTaxonBilan');
+			 }
+			
+			if(undefined != mainService.get('filterTaxonBilanDefault')){
+				$scope.filterTaxonBilanDefault=mainService.get('filterTaxonBilanDefault');
+			 }
+			
+			if(undefined != mainService.get('taxonBilanMitochondrion')){
+				$scope.filterTaxonBilanMitochondrion=mainService.get('taxonBilanMitochondrion');
+			 }
+			if(undefined != mainService.get('taxonBilanPlastid')){
+				$scope.filterTaxonBilanPlastid=mainService.get('taxonBilanPlastid');
+			 }
+			if(undefined != mainService.get('taxonBilanContamination')){
+				$scope.filtertaxonBilanContamination=mainService.get('taxonBilanContamination');
+			 }
+			
+			if(undefined != mainService.get('filterKmerPercentDefault')){
+				$scope.filterKmerPercentDefault=mainService.get('filterKmerPercentDefault');
 			 }
 		});
 		

@@ -29,7 +29,7 @@ factory('balanceSheetsGeneralSrv', ['$http', 'mainService', 'datatable', '$parse
 				 return dataByYear;
 			},
 			
-			computeDataForYear : function(data,runTypes,projectData, year){
+			computeDataForYear : function(data,runTypes,projectData,runData,year){
 				var dataReadSet = {
 						total : 0,
 						totalProject : 0,
@@ -40,7 +40,12 @@ factory('balanceSheetsGeneralSrv', ['$http', 'mainService', 'datatable', '$parse
 						lineToColorQuarter:[],
 						dataSequencingDT:[],
 						dataProjectDT:[],
-						dataSampleDT:[]
+						dataSampleDT:[],
+						totalRun:0,
+						monthsRuns:[],
+						typeSeqRuns:new Map(),
+						listSeq:new Map(),
+						dataRunDT:[]
 				};
 				
 				//initialize months
@@ -50,6 +55,13 @@ factory('balanceSheetsGeneralSrv', ['$http', 'mainService', 'datatable', '$parse
 						month : balanceSheetsGeneralService.getMonthName(i),
 						nbBases : 0
 					 }
+					
+					dataReadSet.monthsRuns[i] = {
+							quarter : balanceSheetsGeneralService.getQuarter(i),
+							month : balanceSheetsGeneralService.getMonthName(i),
+							nbRunTotal : 0,
+							nbRunAborted : 0
+						 }
 				 }
 				//initialize quarters
 				for(var i=1;i<=4;i++){
@@ -72,6 +84,7 @@ factory('balanceSheetsGeneralSrv', ['$http', 'mainService', 'datatable', '$parse
 				var dataSequencing = new Map();
 				var dataProject = new Map();
 				var dataSample = new Map();
+				
 				
 				for(var i = 0; i < data.length; i++){
 					data[i].runSequencingStartDate = balanceSheetsGeneralService.convertToDate(data[i].runSequencingStartDate);
@@ -205,6 +218,69 @@ factory('balanceSheetsGeneralSrv', ['$http', 'mainService', 'datatable', '$parse
 				
 				dataReadSet.lineToColorQuarter.push(dataReadSet.dataQuarterDT.length-2);
 				dataReadSet.lineToColorQuarter.push(dataReadSet.dataQuarterDT.length-1);
+				
+				//Calculate dataRun
+				for(var i = 0; i < runData.length; i++){
+					runData[i].sequencingStartDate = balanceSheetsGeneralService.convertToDate(runData[i].sequencingStartDate);
+					var fullYear = runData[i].sequencingStartDate.getFullYear();
+					var monthValue = runData[i].sequencingStartDate.getMonth();
+					 
+					if(fullYear == year){
+						dataReadSet.totalRun++;
+						dataReadSet.monthsRuns[monthValue].nbRunTotal++;
+						var codeSequencer = runData[i].typeCode;
+						if(dataReadSet.monthsRuns[monthValue].dataRun == undefined){
+							dataReadSet.monthsRuns[monthValue].dataRun = new Map();
+						}
+						if(dataReadSet.monthsRuns[monthValue].dataRun.get(codeSequencer) == undefined){
+							dataReadSet.monthsRuns[monthValue].dataRun.set(codeSequencer, {nbRun : 0, nbRunAbort:0});
+						}
+						
+						if(runData[i].state.code === "FE-S"){
+							dataReadSet.monthsRuns[monthValue].nbRunAborted++;
+							dataReadSet.monthsRuns[monthValue].dataRun.get(codeSequencer).nbRunAbort++;
+						}else{
+							dataReadSet.monthsRuns[monthValue].dataRun.get(codeSequencer).nbRun++;
+							if(dataReadSet.typeSeqRuns.get(codeSequencer)==undefined){
+								dataReadSet.typeSeqRuns.set(codeSequencer,1);
+							}else{
+								dataReadSet.typeSeqRuns.set(codeSequencer,dataReadSet.typeSeqRuns.get(codeSequencer)+1);
+							}
+						}
+						if(dataReadSet.listSeq.get(codeSequencer) == undefined){
+							dataReadSet.listSeq.set(codeSequencer,sequencerMap.get(codeSequencer));
+						}
+						
+						
+					}
+				};
+				
+				for(i=0;i<12;i++){
+					var dataRunMonth={month:dataReadSet.monthsRuns[i].month,
+								 nbAborted:dataReadSet.monthsRuns[i].nbRunAborted,
+								 total:dataReadSet.monthsRuns[i].nbRunTotal};
+					for(var seqKey of dataReadSet.listSeq.keys()){
+						if(dataReadSet.monthsRuns[i].dataRun!=undefined && dataReadSet.monthsRuns[i].dataRun.get(seqKey)!=undefined){
+							dataRunMonth["type_"+seqKey]=dataReadSet.monthsRuns[i].dataRun.get(seqKey).nbRun;
+							if(dataReadSet.monthsRuns[i].dataRun.get(seqKey).nbRunAbort!=0){
+								dataRunMonth["type_"+seqKey]+=" ("+dataReadSet.monthsRuns[i].dataRun.get(seqKey).nbRunAbort+")";
+							}
+						}else{
+							dataRunMonth["type_"+seqKey]=0;
+						}
+					}
+					dataReadSet.dataRunDT.push(dataRunMonth);
+				};
+				//Add sum by typeSeq
+				var dataRunTypeSeq = {month: Messages("balanceSheets.sumNoAborting")};
+				for(var seqKey of dataReadSet.listSeq.keys()){
+					if(dataReadSet.typeSeqRuns.get(seqKey)!=undefined){
+						dataRunTypeSeq["type_"+seqKey]=dataReadSet.typeSeqRuns.get(seqKey);
+					}else{
+						dataRunTypeSeq["type_"+seqKey]=0;
+					}
+				}
+				dataReadSet.dataRunDT.push(dataRunTypeSeq);
 				return dataReadSet;
 			
 			},

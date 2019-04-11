@@ -92,6 +92,11 @@
 
 var getColumns = function(){
 		var columns = [];
+		columns.push({property:"traceInformation.creationDate",
+			        	header: Messages("traceInformation.creationDate"),
+			        	type :"date",		    	  	
+			        	order:true
+			        });			
 		columns.push({property:"code",
 			        	header: Messages("configuration.code"),
 			        	type :"text",		    	  	

@@ -22,11 +22,21 @@ rule "Set good project code for 17-200nt"
 			$outputContainerUsed.experimentProperties.put("projectCode",outputProjectCode);
 		}
 		
-		if("BWN".equals($inputProjectCode)){
+		/*if("BWN".equals($inputProjectCode)){
 			outputProjectCode.value = "BYE";
 		}else{
 			outputProjectCode.value = null;
+		}*/
+		
+		MapParameter mapping = (MapParameter)MongoDBDAO.findByCode(InstanceConstants.PARAMETER_COLL_NAME, Parameter.class,  "small-rna-isolation-17-200nt");
+		
+		if(mapping.map.containsKey($inputProjectCode)){
+			outputProjectCode.value = mapping.map.get($inputProjectCode);
+		}else{
+			Logger.error("small and large rna isolation 17-200nt mapping not defined for project "+$inputProjectCode);
+			outputProjectCode.value = null;
 		}
+		
 		
 		Logger.debug("Input project code = "+$inputProjectCode+" / "+$outputRNASize.value+" => Output project code ="+outputProjectCode.value);
 		
@@ -51,12 +61,22 @@ rule "Set good project code for >200nt"
 			outputProjectCode=new PropertySingleValue();
 			$outputContainerUsed.experimentProperties.put("projectCode",outputProjectCode);
 		}
-		
+	/*	
 		if("BWN".equals($inputProjectCode)){
 			outputProjectCode.value = "BYF";
 		}else{
 			outputProjectCode.value = null;
+		}*/
+		
+		MapParameter mapping = (MapParameter)MongoDBDAO.findByCode(InstanceConstants.PARAMETER_COLL_NAME, Parameter.class,  "large-rna-isolation>200nt");
+		
+		if(mapping.map.containsKey($inputProjectCode)){
+			outputProjectCode.value = mapping.map.get($inputProjectCode);
+		}else{
+			Logger.error("small and large rna isolation >200nt mapping not defined for project "+$inputProjectCode);
+			outputProjectCode.value = null;
 		}
+		
 		
 		Logger.debug("Input project code = "+$inputProjectCode+" / "+$outputRNASize.value+" => Output project code ="+outputProjectCode.value);
 		

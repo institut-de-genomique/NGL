@@ -27,6 +27,9 @@
 	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/services.js")" type="text/javascript" charset="utf-8"></script>  	
 	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/details-ctrl.js")" type="text/javascript" charset="utf-8"></script>
 	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/search-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<!-- FDS test remonter ici pour mise en commun...PB!!!
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/tag-plate-helpers.js")" type="text/javascript" charset="utf-8"></script>
+	-->
 	
 	<!-- oneToVoid -->
 	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToVoid/default/one-to-void-ctrl.js")" type="text/javascript" charset="utf-8"></script>
@@ -60,9 +63,11 @@
 	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToMany/cns/sizing-ctrl.js")" type="text/javascript" charset="utf-8"></script>
 	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToMany/cns/nanopore-sizing-ctrl.js")" type="text/javascript" charset="utf-8"></script>
 	
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToMany/cng/aliquoting-ctrl.js")" type="text/javascript" charset="utf-8"></script>
 	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToMany/cng/tube-to-tubes-ctrl.js")" type="text/javascript" charset="utf-8"></script>
 	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToMany/cng/nanopore-sizing-ctrl.js")" type="text/javascript" charset="utf-8"></script>
 	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToMany/cng/sample-prep-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToMany/cng/oxbisseq-and-bisseq-ctrl.js")" type="text/javascript" charset="utf-8"></script>
 		
 	<!-- manyToOne -->	
 	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/manyToOne/default/tubes-to-tube-ctrl.js")" type="text/javascript" charset="utf-8"></script>
@@ -79,17 +84,18 @@
 	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/manyToOne/cng/x-to-plates-ctrl.js")" type="text/javascript" charset="utf-8"></script>
 	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/manyToOne/cng/tubes-to-flowcell-ctrl.js")" type="text/javascript" charset="utf-8"></script>
 	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/manyToOne/cng/prepa-fc-ordered-ctrl.js")" type="text/javascript" charset="utf-8"></script>
-
 		
 	<!-- oneToOne -->
     <script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/default/tube-to-tube-ctrl.js")" type="text/javascript" charset="utf-8"></script>
     <script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/default/x-to-plate-ctrl.js")" type="text/javascript" charset="utf-8"></script>
     <script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/default/helpers.js")" type="text/javascript" charset="utf-8"></script>
-    
+  
 	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/nanopore-library-ctrl.js")" type="text/javascript" charset="utf-8"></script>
 	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/nanopore-fragmentation-ctrl.js")" type="text/javascript" charset="utf-8"></script>
 	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/nanopore-frg-ctrl.js")" type="text/javascript" charset="utf-8"></script>
 	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/nanopore-dna-reparation-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/nanopore-reparation-and-end-prep-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	
 	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/nanopore-end-prep-ctrl.js")" type="text/javascript" charset="utf-8"></script>
 	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/nanopore-pre-pcr-ligation-ctrl.js")" type="text/javascript" charset="utf-8"></script>
 	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/nanopore-pcr-ctrl.js")" type="text/javascript" charset="utf-8"></script>
@@ -97,13 +103,11 @@
 	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/nanopore-final-ligation-ctrl.js")" type="text/javascript" charset="utf-8"></script>
 	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/dna-extraction-ctrl.js")" type="text/javascript" charset="utf-8"></script>
 	
-	
 	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/cdna-synthesis-ctrl.js")" type="text/javascript" charset="utf-8"></script>
 	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/nanopore-frg-ctrl.js")" type="text/javascript" charset="utf-8"></script>
 	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/nanopore-dna-reparation-ctrl.js")" type="text/javascript" charset="utf-8"></script>
 	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/nanopore-library-ctrl.js")" type="text/javascript" charset="utf-8"></script>
 	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/nanopore-depot-ctrl.js")" type="text/javascript" charset="utf-8"></script>
-	
 	
 	
 	
@@ -130,7 +134,6 @@
 	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/fragmentation-ctrl.js")" type="text/javascript" charset="utf-8"></script>
 	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/dnase-treatment-ctrl.js")" type="text/javascript" charset="utf-8"></script>
 	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/spin-column-purification-ctrl.js")" type="text/javascript" charset="utf-8"></script>
-	
 	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/rrna-depletion-ctrl.js")" type="text/javascript" charset="utf-8"></script>
 	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/wga-amplification-ctrl.js")" type="text/javascript" charset="utf-8"></script>
 	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/wga-debranching-ctrl.js")" type="text/javascript" charset="utf-8"></script>
@@ -148,11 +151,16 @@
 	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/chromium-gem-generation-ctrl.js")" type="text/javascript" charset="utf-8"></script>
 	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/wg-chromium-lib-prep-ctrl.js")" type="text/javascript" charset="utf-8"></script>
 	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/additional-normalization-ctrl.js")" type="text/javascript" charset="utf-8"></script>
-    <script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/fragmentation-ctrl.js")" type="text/javascript" charset="utf-8"></script>
-    <script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/capture-ctrl.js")" type="text/javascript" charset="utf-8"></script>
-    <script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/pcr-and-indexing-ctrl.js")" type="text/javascript" charset="utf-8"></script>
-    <script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/small-rnaseq-lib-prep-ctrl.js")" type="text/javascript" charset="utf-8"></script>
-    <script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/bisseq-lib-prep-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/fragmentation-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/capture-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/pcr-and-indexing-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/small-rnaseq-lib-prep-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/bisseq-lib-prep-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/frg-cdna-indexing-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/dev-pcr-amplification-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/lib-and-pcr-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<!-- FDS remise a l'endroit initial...-->
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/tag-plate-helpers.js")" type="text/javascript" charset="utf-8"></script> 
 	
 	<script src="@controllers.experiments.tpl.routes.Experiments.javascriptRoutes" type="text/javascript" charset="utf-8"></script> 
 	<script src="@helper.getAsset("javascripts","cytoscape","2.6.12","cytoscape_2.6.12.js")" type="text/javascript" charset="utf-8"></script>   

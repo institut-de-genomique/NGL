@@ -17,7 +17,7 @@ import org.springframework.beans.PropertyAccessorFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import controllers.history.UserHistory;
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.lfw.LFWApplication;
 import play.data.DynamicForm;
 import play.data.Form;
 // import play.data.validation.ValidationError;
@@ -27,6 +27,7 @@ import play.libs.Json;
 // import play.mvc.Http.Context;
 // import play.routing.JavaScriptReverseRouter;
 import play.mvc.With;
+
 
 @With({fr.cea.ig.authentication.Authenticate.class, UserHistory.class})
 public abstract class APICommonController<T> extends NGLBaseController {
@@ -40,7 +41,19 @@ public abstract class APICommonController<T> extends NGLBaseController {
 	
 //	protected NGLContext ctx;
 	
-	public APICommonController(NGLContext ctx, Class<T> type) {
+//	public APICommonController(NGLContext ctx, Class<T> type) {
+//		super(ctx);
+//		this.type = type;
+////		this.ctx = ctx;
+//		listForm = ctx.form();
+//		mainForm = ctx.form(type);
+//	}
+//
+//	public final NGLContext getNGLContext(){
+//		return ctx;
+//	}
+
+	public APICommonController(LFWApplication ctx, Class<T> type) {
 		super(ctx);
 		this.type = type;
 //		this.ctx = ctx;
@@ -48,8 +61,8 @@ public abstract class APICommonController<T> extends NGLBaseController {
 		mainForm = ctx.form(type);
 	}
 
-	public final NGLContext getNGLContext(){
-		return ctx;
+	public final LFWApplication getNGLContext(){
+		return app;
 	}
 	
 	/*
@@ -124,7 +137,7 @@ public abstract class APICommonController<T> extends NGLBaseController {
 	 * @return      built form
 	 */
 	protected <A> Form<A> getQueryStringForm(Class<A> clazz) {
-		return filledFormQueryString(ctx.form(clazz),clazz);
+		return filledFormQueryString(app.form(clazz),clazz);
 	}
 
 	/*

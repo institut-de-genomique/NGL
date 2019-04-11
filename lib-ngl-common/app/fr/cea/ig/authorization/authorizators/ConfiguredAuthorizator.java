@@ -107,7 +107,7 @@ public class ConfiguredAuthorizator implements IAuthorizator {
 	 * Uses the delegate implementation.
 	 */
 	@Override
-	public boolean authorize(String login, String[] perms) {
+	public boolean authorize(String login, String... perms) {
 		return delegate.authorize(login, perms);
 	}
 

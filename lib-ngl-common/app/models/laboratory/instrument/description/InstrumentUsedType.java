@@ -1,58 +1,61 @@
 package models.laboratory.instrument.description;
 
 import java.util.List;
+import java.util.function.Supplier;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
+import fr.cea.ig.ngl.utils.SpringSupplier;
 import models.laboratory.common.description.CommonInfoType;
-import models.laboratory.common.description.Level;
-import models.laboratory.common.description.PropertyDefinition;
 import models.laboratory.container.description.ContainerSupportCategory;
 import models.laboratory.instrument.description.dao.InstrumentUsedTypeDAO;
-import models.utils.dao.DAOException;
+import ngl.refactoring.MiniDAO;
 
 /**
- * Entity type used to declare properties that will be indicated with the use of the instrument
+ * Entity type used to declare properties that will be indicated with the use of the instrument.
  * 
  * @author ejacoby
  *
  */
 public class InstrumentUsedType extends CommonInfoType {
 	
+//	@SuppressWarnings("hiding")
+//	public static final InstrumentUsedTypeFinder find = new InstrumentUsedTypeFinder(); 
+//	@SuppressWarnings("hiding")
+//	public static final InstrumentUsedTypeDAO find = Spring.getBeanOfType(InstrumentUsedTypeDAO.class); 
 	@SuppressWarnings("hiding")
-	public static final InstrumentUsedTypeFinder find = new InstrumentUsedTypeFinder(); 
+	public static final Supplier<InstrumentUsedTypeDAO>       find     = new SpringSupplier<>(InstrumentUsedTypeDAO.class); 
+	public static final Supplier<MiniDAO<InstrumentUsedType>> miniFind = MiniDAO.createSupplier(find);
 	
-	public List<Instrument> instruments;
-	public InstrumentCategory category;
+	public List<Instrument>               instruments;
+	public InstrumentCategory             category;
 	public List<ContainerSupportCategory> inContainerSupportCategories;
 	public List<ContainerSupportCategory> outContainerSupportCategories;
 	
-	public InstrumentUsedType() {
-		super(InstrumentUsedTypeDAO.class.getName());
-	}
+//	public InstrumentUsedType() {
+//		super(InstrumentUsedTypeDAO.class.getName());
+//	}
 	
-	@JsonIgnore
-	public List<PropertyDefinition> getPropertiesDefinitionDefaultLevel() {
-		return getPropertyDefinitionByLevel(Level.CODE.Instrument);
-	}
+//	@JsonIgnore
+//	public List<PropertyDefinition> getPropertiesDefinitionDefaultLevel() {
+//		return getPropertyDefinitionByLevel(Level.CODE.Instrument);
+//	}
 	
-	public static class InstrumentUsedTypeFinder extends Finder<InstrumentUsedType,InstrumentUsedTypeDAO> {
-
-//		public InstrumentUsedTypeFinder() {
-//			super(InstrumentUsedTypeDAO.class.getName());			
+//	public static class InstrumentUsedTypeFinder extends Finder<InstrumentUsedType,InstrumentUsedTypeDAO> {
+//
+////		public InstrumentUsedTypeFinder() {
+////			super(InstrumentUsedTypeDAO.class.getName());			
+////		}
+//		public InstrumentUsedTypeFinder() { super(InstrumentUsedTypeDAO.class);	}
+//		
+//		public List<InstrumentUsedType> findByExperimentTypeCode(String instrumentUsedTypeCode) throws DAOException {
+////			return ((InstrumentUsedTypeDAO)getInstance()).findByExperimentTypeCode(instrumentUsedTypeCode);
+//			return getInstance().findByExperimentTypeCode(instrumentUsedTypeCode);
 //		}
-		public InstrumentUsedTypeFinder() { super(InstrumentUsedTypeDAO.class);	}
-		
-		public List<InstrumentUsedType> findByExperimentTypeCode(String instrumentUsedTypeCode) throws DAOException {
-//			return ((InstrumentUsedTypeDAO)getInstance()).findByExperimentTypeCode(instrumentUsedTypeCode);
-			return getInstance().findByExperimentTypeCode(instrumentUsedTypeCode);
-		}
-		
-		public void cleanCache() throws DAOException{
-//			 ((InstrumentUsedTypeDAO)getInstance()).cleanCache();
-			 getInstance().cleanCache();
-		}
-		
-	}
+//		
+//		public void cleanCache() throws DAOException{
+////			 ((InstrumentUsedTypeDAO)getInstance()).cleanCache();
+//			 getInstance().cleanCache();
+//		}
+//		
+//	}
 	
 }

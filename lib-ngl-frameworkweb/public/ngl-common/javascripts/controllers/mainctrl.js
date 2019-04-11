@@ -264,7 +264,7 @@ angular.module('home').factory('tabService', ['$location', function($location){
 				    var valueIsInArray = false;
 		
 				    for(var j = 0; j < doubledTab.length; j++) {
-				        if(doubledTab[j].label == this.tabs[i].label) {
+				    	if(doubledTab[j].label === this.tabs[i].label && doubledTab[j].href === this.tabs[i].href) {
 				            valueIsInArray = true;
 				        }
 				    }

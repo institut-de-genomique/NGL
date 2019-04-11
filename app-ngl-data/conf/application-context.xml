@@ -13,29 +13,24 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
 http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd">
 
-
     <context:annotation-config />
-    <context:component-scan base-package="models" />
     <context:component-scan base-package="controllers" />
+    <context:component-scan base-package="models" />
     <context:component-scan base-package="services" />
     <context:component-scan base-package="workflows" />
     
-    <jee:jndi-lookup id="ngl" jndi-name="ngl"/>
+    <jee:jndi-lookup id="ngl"  jndi-name="ngl"  />
   	<jee:jndi-lookup id="tara" jndi-name="tara" /> 
 	<jee:jndi-lookup id="lims" jndi-name="lims" />
 	
 	<bean id="code" class="models.utils.code.DefaultCodeImpl"></bean>
-  	
-	
+  		
     <!-- Define the transaction strategy depends environment here JDBC. Reference dataSource -->
-	<bean id="txManager"
-		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+	<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
 		<property name="dataSource" ref="ngl" />
 	</bean>
 	
 	<!-- enable the configuration of transactional behavior based on annotations -->
-  <tx:annotation-driven transaction-manager="txManager"/>
-    
-   
-    
+    <tx:annotation-driven transaction-manager="txManager"/>
+
 </beans>

@@ -10,6 +10,11 @@ import org.mongojack.DBQuery;
 import org.mongojack.DBUpdate;
 import org.mongojack.DBUpdate.Builder;
 
+import fr.cea.ig.MongoDBDAO;
+import fr.cea.ig.ngl.NGLApplication;
+import fr.cea.ig.ngl.dao.api.APIException;
+import fr.cea.ig.ngl.dao.api.APIValidationException;
+import fr.cea.ig.ngl.dao.projects.ProjectsAPI;
 import models.Constants;
 import models.laboratory.project.instance.Project;
 import models.laboratory.sample.instance.Sample;
@@ -17,23 +22,36 @@ import models.utils.InstanceConstants;
 import models.utils.InstanceHelpers;
 import models.utils.dao.DAOException;
 import play.Logger;
-import scala.concurrent.duration.FiniteDuration;
 import services.instance.AbstractImportDataCNS;
 import validation.ContextValidation;
-import fr.cea.ig.MongoDBDAO;
-import fr.cea.ig.play.migration.NGLContext;
+import workflows.project.ProjectWorkflows;
 
-public class ProjectImportCNS extends AbstractImportDataCNS{
+public class ProjectImportCNS extends AbstractImportDataCNS {
 
+//	@Inject
+//	public ProjectImportCNS(FiniteDuration durationFromStart,
+//			                FiniteDuration durationFromNextIteration, 
+//			                NGLContext ctx) {
+//		super("Project CNS",durationFromStart, durationFromNextIteration, ctx);
+//	}
+
+//	@Inject
+//	public ProjectImportCNS(NGLContext ctx) {
+//		super("Project CNS", ctx);
+//	}
+
+	ProjectsAPI projectsAPI;
+	ProjectWorkflows projectsWorkflows;
+	
 	@Inject
-	public ProjectImportCNS(FiniteDuration durationFromStart,
-			                FiniteDuration durationFromNextIteration, 
-			                NGLContext ctx) {
-		super("Project CNS",durationFromStart, durationFromNextIteration, ctx);
+	public ProjectImportCNS(NGLApplication app) {
+		super("Project CNS", app);
+		this.projectsAPI=app.apis().project();
+		this.projectsWorkflows=app.apis().projectWorkflow();
 	}
 
 	@Override
-	public void runImport() throws SQLException, DAOException {
+	public void runImport(ContextValidation contextError) throws SQLException, DAOException, APIValidationException, APIException {
 		
 		createProject(contextError);
 		deleteProject(contextError);
@@ -41,8 +59,6 @@ public class ProjectImportCNS extends AbstractImportDataCNS{
 		//lastNGLSampleCode(contextError);
 	}
 
-	
-	
 	private void deleteProject(ContextValidation contextValidation) throws SQLException, DAOException{
 		List<String> availableProjectCodes = limsServices.findProjectToCreate(contextValidation)
 				.stream()
@@ -62,38 +78,44 @@ public class ProjectImportCNS extends AbstractImportDataCNS{
 		});
 	}
 
-	public static void createProject(ContextValidation contextValidation) throws SQLException, DAOException{
-		
-	List<Project> projects = limsServices.findProjectToCreate(contextValidation) ;
-		
-		for (Project limsProject:projects) {
-	
+	public /*static*/ void createProject(ContextValidation contextValidation) throws SQLException, DAOException, APIValidationException, APIException{
+
+		List<Project> projects = limsServices.findProjectToCreate(contextValidation) ;
+
+		for (Project limsProject : projects) {
+
 			Project nglProject = MongoDBDAO.findByCode(InstanceConstants.PROJECT_COLL_NAME, Project.class, limsProject.code);
-			if(nglProject != null){
+			if (nglProject != null) {
 				Builder update =  DBUpdate.set("name",limsProject.name).set("archive", limsProject.archive);
-				
+
 				if((nglProject.lastSampleCode == null &&  limsProject.lastSampleCode != null)
 						|| (nglProject.lastSampleCode != null &&  limsProject.lastSampleCode != null
-							&& limsProject.nbCharactersInSampleCode > nglProject.nbCharactersInSampleCode)
+						&& limsProject.nbCharactersInSampleCode > nglProject.nbCharactersInSampleCode)
 						|| (nglProject.lastSampleCode != null &&  limsProject.lastSampleCode != null
-								&& limsProject.nbCharactersInSampleCode == nglProject.nbCharactersInSampleCode
-								&& limsProject.lastSampleCode.compareTo(nglProject.lastSampleCode) > 0)){
+						&& limsProject.nbCharactersInSampleCode == nglProject.nbCharactersInSampleCode
+						&& limsProject.lastSampleCode.compareTo(nglProject.lastSampleCode) > 0)){
 					update.set("lastSampleCode",limsProject.lastSampleCode);
 					update.set("nbCharactersInSampleCode",limsProject.nbCharactersInSampleCode);
 					Logger.error(nglProject.code+": "+limsProject.lastSampleCode +" != "+ nglProject.lastSampleCode);
 				}
-					
+
 				nglProject.traceInformation.setTraceInformation(Constants.NGL_DATA_USER);
 				MongoDBDAO.update(InstanceConstants.PROJECT_COLL_NAME, Project.class, 
 						DBQuery.is("code", limsProject.code),update);
-				
-			}else{
+
+			} else {
+				//TODO EJACOBY AD Call API Project save
+				/*Project project = projectsAPI.create(limsProject, "ngl-data");
+				State state = new State(); 
+				state.code="IP";
+				state.user = "ngl-data";
+				projectsWorkflows.setState(contextValidation, project, state);*/
 				InstanceHelpers.save(InstanceConstants.PROJECT_COLL_NAME,limsProject,contextValidation);
 			}
 		}
-	
+
 		//InstanceHelpers.save(InstanceConstants.PROJECT_COLL_NAME,projects,contextValidation);
-		
+
 	}
 
 //	private void lastNGLSampleCode(ContextValidation contextError) {

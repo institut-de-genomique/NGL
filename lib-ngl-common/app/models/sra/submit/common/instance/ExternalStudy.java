@@ -1,17 +1,13 @@
 package models.sra.submit.common.instance;
 
 
+import fr.cea.ig.ngl.dao.api.sra.ExternalStudyAPI;
 import models.laboratory.common.description.ObjectType;
 import models.laboratory.common.instance.State;
-//import workflows.sra.submission.SubmissionWorkflows;
-// import models.sra.submit.util.VariableSRA;
 import models.utils.InstanceConstants;
-
-// import org.apache.commons.lang3.StringUtils;
-
-// import play.api.modules.spring.Spring;
 import validation.ContextValidation;
-import validation.sra.SraValidationHelper;
+import validation.common.instance.CommonValidationHelper;
+import validation.utils.ValidationHelper;
 
 
 public class ExternalStudy extends AbstractStudy {
@@ -23,33 +19,63 @@ public class ExternalStudy extends AbstractStudy {
 		state = new State("F-SUB", null); // Reference sur "models.laboratory.common.instance.state"
 	}
 	
-	@Override
-	public void validate(ContextValidation contextValidation) {
-		contextValidation.addKeyToRootKeyName("externalStudy");
-		// Pour l'instant externalStudy apparait uniquement dans sra d'ou verif du context.type inutile
-		/*
-		if (!StringUtils.isNotBlank((CharSequence) contextValidation.getContextObjects().get("type"))){
-			contextValidation.addErrors(" study non evaluable ", "sans type de contexte de validation");
-			contextValidation.removeKeyFromRootKeyName("external_study");
-			return;
-		}
-		if (contextValidation.getContextObjects().get("type").equals("sra")) {
-			System.out.println("contextValidationType  = sra");
-			SraValidationHelper.validateCode(this, InstanceConstants.SRA_STUDY_COLL_NAME, contextValidation);
-		} else if (contextValidation.getContextObjects().get("type").equals("wgs")) {
-			System.out.println("contextValidationType  = wgs");
-			SraValidationHelper.validateCode(this, InstanceConstants.SRA_STUDY_WGS_COLL_NAME, contextValidation);
-		} else {
-			System.out.println("contextValidationType = "+contextValidation.getContextObjects().get("type"));
-			contextValidation.addErrors("study non evaluable ", "avec type de contexte de validation " + contextValidation.getContextObjects().get("type"));	
-		}*/
-		SraValidationHelper.validateId(this, contextValidation);
-		SraValidationHelper.validateTraceInformation(traceInformation, contextValidation);
-		SraValidationHelper.validateCode(this, InstanceConstants.SRA_STUDY_COLL_NAME, contextValidation);
-		//SraValidationHelper.requiredAndConstraint(contextValidation, this.state.code , VariableSRA.mapExternalStatus, "state.code");
-		SraValidationHelper.validateState(ObjectType.CODE.SRASubmission, this.state, contextValidation);
-
-		contextValidation.removeKeyFromRootKeyName("externalStudy");
+	
+	public void validateInvariants(ContextValidation contextValidation) {
+		contextValidation = contextValidation.appendPath("externalStudy");
+		CommonValidationHelper.validateIdPrimary(contextValidation, this);
+		CommonValidationHelper.validateTraceInformationRequired(contextValidation, traceInformation);
+		CommonValidationHelper.validateCodePrimary(contextValidation, this, InstanceConstants.SRA_STUDY_COLL_NAME);
+		//SraValidationHelper .requiredAndConstraint(contextValidation, this.state.code , VariableSRA.mapExternalStatus, "state.code");
+		CommonValidationHelper.validateStateRequired(contextValidation, ObjectType.CODE.SRASubmission, this.state);
+	}
+	
+	private void validateCreation(ContextValidation contextValidation) {
+		contextValidation = contextValidation.appendPath("externalStudy");
+		if (ValidationHelper.validateNotEmpty(contextValidation, code, "code")) 
+			contextValidation = contextValidation.appendPath(code);
+		ExternalStudyAPI externalStudyAPI = ExternalStudyAPI.get();
+		if(externalStudyAPI.dao_checkObjectExist("code", code)) {
+			contextValidation.addError("code", code + " existe deja dans la base de données et MODE CREATION");
+		}	
 	}
 
+	private void validateDelete(ContextValidation contextValidation) {
+		contextValidation = contextValidation.appendPath("externalStudy");
+		if (ValidationHelper.validateNotEmpty(contextValidation, code, "code")) 
+			contextValidation = contextValidation.appendPath(code);
+		ExternalStudyAPI externalStudyAPI = ExternalStudyAPI.get();
+		if(! externalStudyAPI.dao_checkObjectExist("code", code)) {
+			contextValidation.addError("code", code + " n'existe pas dans la base de données et MODE DELETE");
+		}	
+	}
+	
+
+	private void validateUpdate(ContextValidation contextValidation) {
+		contextValidation = contextValidation.appendPath("externalStudy");
+		if (ValidationHelper.validateNotEmpty(contextValidation, code, "code")) 
+			contextValidation = contextValidation.appendPath(code);
+		ExternalStudyAPI externalStudyAPI = ExternalStudyAPI.get();
+		if(! externalStudyAPI.dao_checkObjectExist("code", code)) {
+			contextValidation.addError("code", code + " n'existe pas dans la base de données et MODE UPDATE");
+		}	
+	}
+
+	@Override
+	public void validate(ContextValidation contextValidation) {
+		switch (contextValidation.getMode()) {
+		case CREATION:
+			validateCreation(contextValidation);
+			break;
+		case UPDATE:
+			validateUpdate(contextValidation);
+			break;
+		case DELETE:
+			validateDelete(contextValidation);
+			break;
+		default: // autre cas undefined notamment
+			contextValidation.addError("ERROR", "contextValidation.getMode() != de CREATION, UPDATE ou DELETE (undefined ?)");
+			break;	
+		} 
+		validateInvariants(contextValidation);
+	}
 }	

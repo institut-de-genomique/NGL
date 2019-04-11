@@ -438,6 +438,28 @@ angular.module('home').controller('BalanceSheetsYearCtrl', ['$scope', '$http','m
 			           ]
 	}; 
 
+	
+	var configRunDT = {
+			name:'runDT',
+			order : {
+				active : false
+			},
+			search : {
+				active:false
+			},
+			pagination:{
+				active : false
+			},
+			hide:{
+				active:false
+			},
+			select : {
+				active : false
+			},
+			callbackEndDisplayResult : function(){
+				colorBlue($scope.dtRun,$scope.dataForYear.dataRunDT.length-1);
+			}
+	}; 
 
 	var colorBlue = function(datatable, pos){
 		if(datatable.displayResult != undefined){
@@ -467,6 +489,9 @@ angular.module('home').controller('BalanceSheetsYearCtrl', ['$scope', '$http','m
 
 	var loadData = function(activeYear)
 	{
+		var startDate = moment("01/01/"+activeYear, Messages("date.format").toUpperCase()).valueOf();
+		var endDate = moment("31/12/"+activeYear, Messages("date.format").toUpperCase()).valueOf();
+		
 		var form = {includes : [], typeCodes : []};
 		form.includes.push("default");
 		//For rsillumina
@@ -481,8 +506,8 @@ angular.module('home').controller('BalanceSheetsYearCtrl', ['$scope', '$http','m
 		form.includes.push("runSequencingStartDate");
 		form.includes.push("sampleOnContainer.sampleTypeCode");
 		form.includes.push("sampleOnContainer.sampleCategoryCode");
-		form.fromDate = moment("01/01/"+activeYear, Messages("date.format").toUpperCase()).valueOf();
-		form.toDate = moment("31/12/"+activeYear, Messages("date.format").toUpperCase()).valueOf();
+		form.fromDate = startDate;
+		form.toDate = endDate;
 		form.typeCode=$routeParams.typeCode;
 		form.limit = 20000;
 
@@ -490,16 +515,26 @@ angular.module('home').controller('BalanceSheetsYearCtrl', ['$scope', '$http','m
 		projectForm.includes.push("code");
 		projectForm.includes.push("name");
 		projectForm.includes.push("traceInformation.creationDate");
-
+		
+		var runForm = {includes:[]};
+		runForm.includes.push("default");
+		runForm.categoryCode=$routeParams.typeCode.replace('rs','');
+		runForm.fromDate=startDate;
+		runForm.toDate=endDate;
+		runForm.limit = 20000;
+		
 		$http.get(jsRoutes.controllers.readsets.api.ReadSets.list().url, {params : form})
 		.success(function(data, status, headers, config) {
 			$http.get(jsRoutes.controllers.commons.api.CommonInfoTypes.list().url,{params:{objectTypeCode:"Run"},key:"runTypes"})
 			.success(function(results, status, headers, config) {
 				$http.get(jsRoutes.controllers.projects.api.Projects.list().url, {params : projectForm})
 				.success(function(projectData, status, headers, config) {
-					$scope.dataForYear = $scope.balanceSheetsGeneralService.computeDataForYear(data,results,projectData,activeYear);
+					$http.get(jsRoutes.controllers.runs.api.Runs.list().url, {params : runForm})
+					.success(function(runData, status, headers, config) {
+					$scope.dataForYear = $scope.balanceSheetsGeneralService.computeDataForYear(data,results,projectData,runData,activeYear);
 					mainService.put($routeParams.typeCode+'-'+activeYear,$scope.dataForYear );
 					calculateData();
+					});
 				});
 			});
 		});
@@ -549,6 +584,57 @@ angular.module('home').controller('BalanceSheetsYearCtrl', ['$scope', '$http','m
 
 		$scope.chartSample = $scope.balanceSheetsGeneralService.computeChartSample($scope.dataForYear.dataSampleDT,$scope.dataForYear.total);
 
+		
+		//run Datatable
+		configRunDT.columns=[];
+		configRunDT.columns.push({
+     	   "property" : "month",
+    	   "header" : Messages("balanceSheets.monthRun"),
+    	   //filter: "codes:'sample_cat'",
+    	   "render":function(value, line){
+	    		return "<strong>"+value.month+"</strong>";
+	    	},
+    	   "type" : "text",
+    	   "position" : 1
+		});
+		
+		var position=1;
+		for(var key of $scope.dataForYear.listSeq.keys()){
+			position++;
+			configRunDT.columns.push({
+		     	   "property" : "type_"+key,
+		    	   "header" : $scope.dataForYear.listSeq.get(key),
+		    	   "type" : "text",
+		    	   "position" : position
+				});
+		}
+		position++;
+		configRunDT.columns.push(
+					{	"property":"nbAborted",
+		        	   "header": Messages("balanceSheets.nbAborted"),
+		        	   "type" :"Number",
+		        	   "position":position
+		           });
+		position++;
+		configRunDT.columns.push(
+		           {
+		        	   "property":"total",
+		        	   "header": Messages("balanceSheets.sumNoAborting"),
+		        	   "type":"Number",
+		        	   "position":position
+		           }
+		);
+		
+		$scope.dtRun = datatable(configRunDT);
+		$scope.dtRun.setData($scope.dataForYear.dataRunDT, $scope.dataForYear.dataRunDT.length);
+		
+		var sumData = [{
+			"property" : Messages('balanceSheets.sum'),
+			"value" : $scope.dataForYear.totalRun
+		}];
+		$scope.dtRunSum = datatable(configSumDT);
+		$scope.dtRunSum.setData(sumData, 1);
+		
 		$scope.loading=false;
 	};
 	

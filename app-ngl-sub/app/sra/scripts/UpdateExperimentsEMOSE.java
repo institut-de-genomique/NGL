@@ -6,19 +6,27 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.mongojack.DBQuery;
 
 import fr.cea.ig.MongoDBDAO;
-import fr.cea.ig.lfw.controllers.AbstractScript;
+import fr.cea.ig.lfw.controllers.scripts.ScriptNoArgs;
 import models.sra.submit.sra.instance.Experiment;
 import models.sra.submit.util.SraException;
 import models.utils.InstanceConstants;
 import services.XmlServices;
 
 
-public class UpdateExperimentsEMOSE extends AbstractScript {
+public class UpdateExperimentsEMOSE extends ScriptNoArgs {
 	// Pas besoin de definir un constructeur avec des arguments passés par injection car utilisation de Services statiques
 	
+	private final XmlServices xmlServices;
+	
+	@Inject
+	public UpdateExperimentsEMOSE(XmlServices xmlServices) {
+		this.xmlServices = xmlServices;
+	}
 	
 	public List<String> updateInDatabase ( String libraryConstructionProtocol, List<String> experimentAccessions) {
 		List<String> experimentCodes = new ArrayList<>();
@@ -58,7 +66,7 @@ public class UpdateExperimentsEMOSE extends AbstractScript {
 		experimentCodes.addAll(experimentCodes_3);
 		File outputFile = new File ("/env/cns/home/sgas/update_experiments_EMOSE/experiment.xml");
 		try {
-			XmlServices.writeSimpleExperimentXml(experimentCodes, outputFile);
+			xmlServices.writeSimpleExperimentXml(experimentCodes, outputFile);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (SraException e) {

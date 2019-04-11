@@ -14,6 +14,7 @@ import controllers.instruments.io.cng.janus.tpl.txt.normalizationPooling_buffer;
 import controllers.instruments.io.cng.janus.tpl.txt.normalizationPooling_samples;
 import controllers.instruments.io.cng.janus.tpl.txt.pool_PlatesToPlate_buffer;
 import controllers.instruments.io.cng.janus.tpl.txt.pool_PlatesToPlate_samples;
+import controllers.instruments.io.cng.janus.tpl.txt.transfert_PlatesToPlate;// ajout 14/06/2018
 import controllers.instruments.io.utils.AbstractOutput;
 import controllers.instruments.io.utils.File;
 import controllers.instruments.io.utils.OutputHelper;
@@ -27,7 +28,7 @@ public class Output extends AbstractOutput {
 	private static final play.Logger.ALogger logger = play.Logger.of(Output.class);
 	
 	@Override
-	 public File generateFile(Experiment experiment,ContextValidation contextValidation) throws Exception {
+	 public File generateFile(Experiment experiment, ContextValidation contextValidation) throws Exception {
 		String content=null;
 		String fdrType=null;
 		
@@ -76,7 +77,13 @@ public class Output extends AbstractOutput {
 		} else if ( "additional-normalization".equals(experiment.typeCode) ){
 			logger.info("generation feuille de route Janus / exp="+ experiment.typeCode );
 			content = OutputHelper.format(normalization.render(experiment).body());	
-
+			
+		// FDS 14/06/2018 NGL 2115 ajout "plates->plate"
+		} else if ( "plates-to-plate".equals(experiment.typeCode) ){
+			logger.info("generation feuille de route Janus / exp="+ experiment.typeCode );
+			// il n'y a pas de pooling mais reutilisation des methodes et classes deja existantes...
+			content = OutputHelper.format(transfert_PlatesToPlate.render(getSampleSheetPoolLines(experiment)).body());	
+				
 		}else {
 			// a venir ????
 			//    rna-prep; 
@@ -112,32 +119,42 @@ public class Output extends AbstractOutput {
 			OutputContainerUsed output = atm.outputContainerUseds.get(0);
 			
 			atm.inputContainerUseds.forEach(input -> {
-				lines.add(getSampleSheetPoolLine(input, output, sourceMapping));
+				lines.add(getSampleSheetPoolLine(input, output, sourceMapping, experiment)); //14/06/2018 ajout experiment en parametre
 			});	
 		});
 		
 		return lines;
 	}
 
+	//14/06/2018 ajout experiment en parametre
 	private SampleSheetPoolLine getSampleSheetPoolLine(
 			InputContainerUsed input, 
 			OutputContainerUsed output,
-			Map<String, String> sourceMapping) {
+			Map<String, String> sourceMapping,
+			Experiment experiment) {
 		SampleSheetPoolLine sspl = new SampleSheetPoolLine();
 		
 		sspl.inputSupportCode = input.locationOnContainerSupport.code;// normallement uniqt pour DEBUG
-		
 		sspl.inputSupportContainerPosition = OutputHelper.getNumberPositionInPlateByColumn(input.locationOnContainerSupport.line, input.locationOnContainerSupport.column);
-		// NON garder le separateur decimal "." 
-		// sspl.inputSupportContainerVolume = input.experimentProperties.get("inputVolume").value.toString().replace(".", ","); 
-		sspl.inputSupportContainerVolume = input.experimentProperties.get("inputVolume").value.toString(); 
+		
+		
+		if (! "plates-to-plate".equals(experiment.typeCode) ){
+			sspl.inputSupportContainerVolume = input.experimentProperties.get("inputVolume").value.toString(); 
+		} else {
+			// 14/06/2018 dans le cas de "plates-to-plate" il n'y a pas de pooling, on transfere tout le contenu de l'input !! ( inputVolume n'existe pas..)
+			// !! cas de puits sans volume ???
+			if ( null != input.volume) {
+				sspl.inputSupportContainerVolume = input.volume.value.toString(); 
+			} else {
+				sspl.inputSupportContainerVolume = "0";
+			}
+		}
+		
 		sspl.inputSupportSource =  sourceMapping.get(input.locationOnContainerSupport.code);
-			
 		sspl.outputSupportPosition = OutputHelper.getNumberPositionInPlateByColumn(output.locationOnContainerSupport.line, output.locationOnContainerSupport.column);
 		
 		return sspl;
 	}
-
 	
 	private Map<String, String> getSourceMapping(Experiment experiment) {
 		Map<String, String> sources = new HashMap<>();

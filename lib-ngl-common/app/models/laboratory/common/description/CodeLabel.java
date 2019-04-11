@@ -6,5 +6,4 @@ public class CodeLabel {
 	public String code;
 	public String label;
 	
-
 }

@@ -17,7 +17,6 @@ import fr.cea.ig.DBObject;
 	@JsonSubTypes.Type(value =  models.sra.submit.common.instance.ExternalSample.class, name = AbstractSample.externalSampleType),
 })
 public abstract class AbstractSample extends DBObject implements IValidation {
-
 	public static final String sampleType = "Sample";
 	public static final String externalSampleType = "ExternalSample";
 	
@@ -33,8 +32,4 @@ public abstract class AbstractSample extends DBObject implements IValidation {
 //		super();
 		this._type=_type;
 	} 
-	
-	
-
-	
 }

@@ -1,8 +1,5 @@
 package controllers.alerts.api;
 
-// import static play.data.Form.form;
-//import static fr.cea.ig.play.IGGlobals.form;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -16,7 +13,7 @@ import org.mongojack.DBQuery.Query;
 import controllers.DocumentController;
 import fr.cea.ig.MongoDBDAO;
 import fr.cea.ig.MongoDBResult;
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import models.laboratory.alert.instance.Alert;
 import models.utils.InstanceConstants;
 import play.data.Form;
@@ -24,12 +21,18 @@ import play.libs.Json;
 import play.mvc.Result;
 import views.components.datatable.DatatableResponse;
 
-public class Alerts extends DocumentController<Alert> {// CommonController{
+public class Alerts extends DocumentController<Alert> {
 
-	private final Form<AlertsSearchForm> searchForm; // = form(AlertsSearchForm.class);
+	private final Form<AlertsSearchForm> searchForm;
 	
+//	@Inject
+//	public Alerts(NGLContext ctx) {
+//		super(ctx, InstanceConstants.ALERT_COLL_NAME, Alert.class);
+//		this.searchForm = getNGLContext().form(AlertsSearchForm.class);
+//	}
+
 	@Inject
-	public Alerts(NGLContext ctx) {
+	public Alerts(NGLApplication ctx) {
 		super(ctx, InstanceConstants.ALERT_COLL_NAME, Alert.class);
 		this.searchForm = getNGLContext().form(AlertsSearchForm.class);
 	}

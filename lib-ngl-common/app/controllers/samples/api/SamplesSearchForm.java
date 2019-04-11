@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.lang3.StringUtils;
+//import org.apache.poi.util.StringUtil;
 import org.mongojack.DBQuery;
 import org.mongojack.DBQuery.Query;
 
@@ -26,6 +27,9 @@ public class SamplesSearchForm extends DBObjectListForm<Sample> {
 	public String code; 
 	public String codeRegex;
 	public String treeOfLifePathRegex;
+	public List<String> lifeFromProjectCodes;
+	public List<String> lifeFromSampleCodes;
+	public List<String> lifeFromSampleTypeCodes;
 	public Set<String> codes;
 	public String projectCode;
 	public List<String> projectCodes;
@@ -97,6 +101,15 @@ public class SamplesSearchForm extends DBObjectListForm<Sample> {
 
 		if(StringUtils.isNotBlank(treeOfLifePathRegex)){
 			queryElts.add(DBQuery.regex("life.path", Pattern.compile(treeOfLifePathRegex)));
+		}
+		if(CollectionUtils.isNotEmpty(lifeFromProjectCodes)){
+			queryElts.add(DBQuery.in("life.from.projectCode", lifeFromProjectCodes));
+		}
+		if(CollectionUtils.isNotEmpty(lifeFromSampleCodes)){
+			queryElts.add(DBQuery.in("life.from.sampleCode", lifeFromSampleCodes));
+		}
+		if(CollectionUtils.isNotEmpty(lifeFromSampleTypeCodes)){
+			queryElts.add(DBQuery.in("life.from.sampleTypeCode", lifeFromSampleTypeCodes));
 		}
 
 		// TODO: redundant code, done at method end 

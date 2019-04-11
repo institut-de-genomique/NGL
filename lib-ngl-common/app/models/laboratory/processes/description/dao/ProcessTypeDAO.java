@@ -1,5 +1,7 @@
 package models.laboratory.processes.description.dao;
 
+import static models.utils.dao.DAOException.daoAssertNotNull;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -33,7 +35,7 @@ public class ProcessTypeDAO extends AbstractDAOCommonInfoType<ProcessType> {
 	}
 
 	@SuppressWarnings("deprecation")
-	public List<ProcessType> findByProcessCategoryCodes(String...processCategoryCodes){	
+	public List<ProcessType> findByProcessCategoryCodes(String...processCategoryCodes) {	
 		try {
 			String sql = sqlCommonSelect + ",t.name, t.code " + sqlCommonFrom + ", process_category as pc WHERE c.fk_process_category=pc.id "
 						+"AND pc.code in ("+listToParameters(Arrays.asList(processCategoryCodes))+") order by display_order";
@@ -48,17 +50,18 @@ public class ProcessTypeDAO extends AbstractDAOCommonInfoType<ProcessType> {
 	}
 
 	@Override
-	public long save(ProcessType processType) throws DAOException
-	{
-
-		if(null == processType){
-			throw new DAOException("ProcessType is mandatory");
-		}
+	public long save(ProcessType processType) throws DAOException {
+//		if(null == processType){
+//			throw new DAOException("ProcessType is mandatory");
+//		}
+		daoAssertNotNull("processType",processType);
 		//Check if category exist
-		if(processType.category == null || processType.category.id == null){
-			throw new DAOException("ProcessCategory is not present !!");
-		}
-		//Add commonInfoType
+//		if(processType.category == null || processType.category.id == null){
+//			throw new DAOException("ProcessCategory is not present !!");
+//		}
+		daoAssertNotNull("processType.category",    processType.category);
+		daoAssertNotNull("processType.category.id", processType.category.id);
+		// Add commonInfoType
 		CommonInfoTypeDAO commonInfoTypeDAO = Spring.getBeanOfType(CommonInfoTypeDAO.class);
 		processType.id = commonInfoTypeDAO.save(processType);		
 		//Create new processType
@@ -187,5 +190,13 @@ public class ProcessTypeDAO extends AbstractDAOCommonInfoType<ProcessType> {
 		mapping.lightVersion = true;
 		return mapping.execute();
 	}
-	
+
+	// Finder implementation
+//	public List<ProcessType> findByExperimentTypeCode(String experimentTypeCode) throws DAOException {
+////return ((ProcessTypeDAO)getInstance()).findByExperimentCode(experimentTypeCode);
+//return getInstance().findByExperimentCode(experimentTypeCode);
+//}
+	public List<ProcessType> findByExperimentTypeCode(String experimentTypeCode) throws DAOException {
+		return findByExperimentCode(experimentTypeCode);
+	}
 }

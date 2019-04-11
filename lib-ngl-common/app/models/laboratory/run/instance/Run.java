@@ -1,6 +1,6 @@
 package models.laboratory.run.instance;
 
-import static fr.cea.ig.lfw.utils.Iterables.filter;
+import static fr.cea.ig.lfw.utils.Iterables.zen;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -8,10 +8,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Supplier;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import fr.cea.ig.DBObject;
+import fr.cea.ig.ngl.dao.runs.RunsDAO;
+import fr.cea.ig.ngl.utils.GuiceSupplier;
 import models.laboratory.common.description.Level;
 import models.laboratory.common.instance.PropertyValue;
 import models.laboratory.common.instance.State;
@@ -26,6 +29,8 @@ import validation.run.instance.TreatmentValidationHelper;
 
 public class Run extends DBObject implements IValidation {
         
+	public static final Supplier<RunsDAO> find = new GuiceSupplier<>(RunsDAO.class);
+	
 	public String           typeCode;
 	public Date             sequencingStartDate;
 	public String           categoryCode;
@@ -38,11 +43,9 @@ public class Run extends DBObject implements IValidation {
     public Boolean          keep             = Boolean.FALSE;
     public Boolean          deleted          = Boolean.FALSE;
     public TraceInformation traceInformation;
-    public InstrumentUsed   instrumentUsed; //Instrument used to obtain the run
+    public InstrumentUsed   instrumentUsed; // Instrument used to obtain the run
     public Map<String,Treatment> treatments = new HashMap<>();
-//    public Map<String, PropertyValue<?>> properties = new HashMap<>(); // <String, PropertyValue>();
-//    public Map<String, PropertyValue> properties = new HashMap<>(); // <String, PropertyValue>();
-    public Map<String, PropertyValue> properties = new HashMap<>(); // <String, PropertyValue>();
+    public Map<String, PropertyValue> properties = new HashMap<>(); 
     public List<Lane>       lanes;
     
 //    @JsonIgnore
@@ -59,34 +62,42 @@ public class Run extends DBObject implements IValidation {
 //    	return null;
 //    	//return lanes.stream().filter((Lane l) -> l.number.equals(laneNumber)).findFirst().get();
 //    }
+    
+//    @JsonIgnore
+//    public Lane getLane(Integer laneNumber) {
+//    	if (lanes == null)
+//    		return null;
+//   		return filter(lanes, l -> l.number.equals(laneNumber)).first().orElse(null);
+//    }
     @JsonIgnore
     public Lane getLane(Integer laneNumber) {
-    	if (lanes == null)
-    		return null;
-   		return filter(lanes, l -> l.number.equals(laneNumber)).first().orElse(null);
+    	return zen(lanes).filter(l -> l.number.equals(laneNumber)).first().orElse(null);
     }
     
     @Override
     public void validate(ContextValidation contextValidation) {
     	contextValidation.putObject("run", this);
-    	RunValidationHelper.validateId(this, contextValidation);
-    	RunValidationHelper.validateCode(this, InstanceConstants.RUN_ILLUMINA_COLL_NAME, contextValidation);
-    	RunValidationHelper.validateRunType(this.typeCode, this.properties, contextValidation);
+    	RunValidationHelper.validateIdPrimary               (contextValidation, this);
+    	RunValidationHelper.validateCodePrimary             (contextValidation, this, InstanceConstants.RUN_ILLUMINA_COLL_NAME);
+    	RunValidationHelper.validateRunType                 (typeCode, properties, contextValidation);
     	RunValidationHelper.validationRunCategoryCode(categoryCode, contextValidation);
     	// TODO ValidationHelper.required(contextValidation, sequencingStartDate, "sequencingStartDate");
-    	RunValidationHelper.validateState(this.typeCode, this.state, contextValidation);
-    	RunValidationHelper.validateValuation(this.typeCode, this.valuation, contextValidation);
-    	RunValidationHelper.validateTraceInformation(this.traceInformation, contextValidation);
-    	if(!(contextValidation.getContextObjects().containsKey("external")) || 
-    			(contextValidation.getContextObjects().containsKey("external") && !(Boolean)contextValidation.getContextObjects().get("external")))
-    		RunValidationHelper.validateContainerSupportCode(this.containerSupportCode, contextValidation, "containerSupportCode"); 
+    	RunValidationHelper.validateStateRequired(contextValidation, this.typeCode, this.state);
+    	RunValidationHelper.validateValuationRequired(contextValidation, this.typeCode, this.valuation);
+    	RunValidationHelper.validateTraceInformationRequired(contextValidation, this.traceInformation);
+//    	if(!(contextValidation.getContextObjects().containsKey("external")) || 
+//    			(contextValidation.getContextObjects().containsKey("external") && !(Boolean)contextValidation.getContextObjects().get("external")))
+    	if (!(contextValidation.containsKey("external")) || (!contextValidation.<Boolean>getTypedObject("external")))
+    		RunValidationHelper.validateContainerSupportCodeRequired(contextValidation, this.containerSupportCode, "containerSupportCode"); 
     	RunValidationHelper.validateRunInstrumentUsed(this.instrumentUsed, contextValidation);		
 		contextValidation.putObject("level", Level.CODE.Run);
 		RunValidationHelper.validateRunProjectCodes(this.code, this.projectCodes, contextValidation);
 		RunValidationHelper.validateRunSampleCodes(this.code, this.sampleCodes, contextValidation);
 		// WARN DON'T CHANGE THE ORDER OF VALIDATION
-		TreatmentValidationHelper.validationTreatments(this.treatments, contextValidation);
-		LaneValidationHelper.validationLanes(this.lanes, contextValidation);		
+//		TreatmentValidationHelper.validationTreatments(contextValidation, this.treatments);
+		TreatmentValidationHelper.validateTreatments(contextValidation, treatments, this);
+//		LaneValidationHelper.validationLanes(this.lanes, contextValidation);		
+		LaneValidationHelper.validateLanes(contextValidation, this, lanes);		
     }
 
     /*

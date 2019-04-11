@@ -40,6 +40,11 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 				},
 			},
 			columns : [
+			        {property:"traceInformation.creationDate",
+			        	header: "traceInformation.creationDate",
+			        	type :"date",		    	  	
+			        	order:true
+			        },	
 			        {property:"code",
 			        	header: "code",
 			        	type :"text",		    	  	

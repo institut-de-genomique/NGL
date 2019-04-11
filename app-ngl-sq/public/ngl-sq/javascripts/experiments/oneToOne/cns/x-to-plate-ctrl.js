@@ -161,6 +161,7 @@ angular.module('home').controller('CNSXToPlateCtrl',['$scope' ,'$http','$parse',
                          "order":true,
                          "edit":true,
                          "hide":true,
+			        	 "required":true,
                          "type":"number",
                          "position":52,
                          "extraHeaders":{0:Messages("experiments.outputs")}
@@ -365,7 +366,9 @@ angular.module('home').controller('CNSXToPlateCtrl',['$scope' ,'$http','$parse',
     $scope.copyVolumeInToOut = function(){
         var data = $scope.atmService.data.displayResult;        
         data.forEach(function(value){
-            value.data.outputContainerUsed.volume = value.data.inputContainerUsed.volume;
+        	if ( null !==value.data.inputContainerUsed.volume) { 
+        		value.data.outputContainerUsed.volume = value.data.inputContainerUsed.volume;
+        	}
         })        
     };
     

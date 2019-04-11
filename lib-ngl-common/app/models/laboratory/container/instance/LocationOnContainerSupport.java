@@ -33,19 +33,26 @@ public class LocationOnContainerSupport implements IValidation {
 	 */
 	public String categoryCode;
 
-	
 	public String storageCode;
 	
 	// Container coordinates in support
 	public String column;
 	public String line;
 	
+	/**
+	 * Validate
+	 * <ul>
+	 *   <li>the required container support code</li>
+	 *   <li>the coordinates on support are unique in the database</li>
+	 *   <li>the required container support category code</li>
+	 * </ul>
+	 */
 	@JsonIgnore
 	@Override
 	public void validate(ContextValidation contextValidation) {
-		ContainerSupportValidationHelper.validateContainerSupportCode(code, contextValidation, "code");
-		ContainerSupportValidationHelper.validateUniqueContainerSupportCodePosition(this, contextValidation);
-		ContainerSupportValidationHelper.validateContainerSupportCategoryCode(categoryCode, contextValidation);		
+		ContainerSupportValidationHelper.validateContainerSupportCodeRequired        (contextValidation, code, "code");
+		ContainerSupportValidationHelper.validateUniqueContainerSupportCodePosition  (contextValidation, this);
+		ContainerSupportValidationHelper.validateContainerSupportCategoryCodeRequired(contextValidation, categoryCode);		
 	}
 
 }

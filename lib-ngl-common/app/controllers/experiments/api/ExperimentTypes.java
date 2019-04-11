@@ -1,8 +1,5 @@
 package controllers.experiments.api;
 
-// import static play.data.Form.form;
-//import static fr.cea.ig.play.IGGlobals.form;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,14 +8,12 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 
 import controllers.APICommonController;
-//import controllers.CommonController;
 import controllers.authorisation.Permission;
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import models.laboratory.experiment.description.ExperimentType;
-import models.laboratory.processes.description.ProcessType;
+import models.laboratory.experiment.description.dao.ExperimentTypeDAO;
 import models.utils.ListObject;
 import models.utils.dao.DAOException;
-// import play.Logger;
 import play.data.Form;
 import play.libs.Json;
 import play.mvc.Result;
@@ -33,19 +28,19 @@ public class ExperimentTypes extends APICommonController<ExperimentTypesSearchFo
 	private final static play.Logger.ALogger logger = play.Logger.of(ExperimentTypes.class);
 	
 	
-	private final /*static*/ Form<ExperimentTypesSearchForm> experimentTypeForm;// = form(ExperimentTypesSearchForm.class);
+	private final Form<ExperimentTypesSearchForm> experimentTypeForm;
 	
 	@Inject
-	public ExperimentTypes(NGLContext ctx) {
+	public ExperimentTypes(NGLApplication ctx) {
 		super(ctx, ExperimentTypesSearchForm.class);
 		this.experimentTypeForm = ctx.form(ExperimentTypesSearchForm.class);
 	}
-	
+
 	@Permission(value={"reading"})
 	public Result get(String code){
 		ExperimentType experimentType = null;
 		try {
-			experimentType = ExperimentType.find.findByCode(code);
+			experimentType = ExperimentType.find.get().findByCode(code);
 		} catch (DAOException e) {
 			logger.error("DAO error: "+e.getMessage(),e);
 			// throw new RuntimeException("get experiment('" + code + "') failed",e);
@@ -60,27 +55,27 @@ public class ExperimentTypes extends APICommonController<ExperimentTypesSearchFo
 		Form<ExperimentTypesSearchForm> experimentTypeFilledForm = filledFormQueryString(experimentTypeForm,ExperimentTypesSearchForm.class);
 		ExperimentTypesSearchForm experimentTypesSearch = experimentTypeFilledForm.get();
 		List<ExperimentType> experimentTypes = new ArrayList<>();
-		
+		ExperimentTypeDAO etfind = ExperimentType.find.get();
 		try{		
 			
 			if(StringUtils.isNotBlank(experimentTypesSearch.categoryCode) && experimentTypesSearch.withoutOneToVoid !=null  && experimentTypesSearch.withoutOneToVoid){
-				experimentTypes = ExperimentType.find.findByCategoryCodeWithoutOneToVoid(experimentTypesSearch.categoryCode);				
+				experimentTypes = etfind.findByCategoryCodeWithoutOneToVoid(experimentTypesSearch.categoryCode);				
 			}else if(experimentTypesSearch.categoryCodes != null && experimentTypesSearch.categoryCodes.size()>0 && experimentTypesSearch.withoutOneToVoid !=null  && experimentTypesSearch.withoutOneToVoid){
-				experimentTypes = ExperimentType.find.findByCategoryCodesWithoutOneToVoid(experimentTypesSearch.categoryCodes);		
+				experimentTypes = etfind.findByCategoryCodesWithoutOneToVoid(experimentTypesSearch.categoryCodes);		
 			}else if(StringUtils.isNotBlank(experimentTypesSearch.categoryCode) && experimentTypesSearch.processTypeCode == null){
-				experimentTypes = ExperimentType.find.findByCategoryCode(experimentTypesSearch.categoryCode);
+				experimentTypes = etfind.findByCategoryCode(experimentTypesSearch.categoryCode);
 			}else if(experimentTypesSearch.categoryCodes != null && experimentTypesSearch.categoryCodes.size()>0 && experimentTypesSearch.processTypeCode == null){
-					experimentTypes = ExperimentType.find.findByCategoryCodes(experimentTypesSearch.categoryCodes);
+					experimentTypes = etfind.findByCategoryCodes(experimentTypesSearch.categoryCodes);
 			}else if(StringUtils.isNotBlank(experimentTypesSearch.categoryCode) && StringUtils.isNotBlank(experimentTypesSearch.processTypeCode)){
-				experimentTypes = ExperimentType.find.findByCategoryCodeAndProcessTypeCode(experimentTypesSearch.categoryCode, experimentTypesSearch.processTypeCode);
+				experimentTypes = etfind.findByCategoryCodeAndProcessTypeCode(experimentTypesSearch.categoryCode, experimentTypesSearch.processTypeCode);
 			}else if(StringUtils.isNotBlank(experimentTypesSearch.previousExperimentTypeCode) 
 					&& StringUtils.isNotBlank(experimentTypesSearch.processTypeCode)){
 				//experimentTypes = ExperimentType.find.findByPreviousExperimentTypeCodeInProcessTypeContext(experimentTypesSearch.previousExperimentTypeCode, experimentTypesSearch.processTypeCode);
-				experimentTypes = ExperimentType.find.findNextExperimentTypeForAnExperimentTypeCodeAndProcessTypeCode(experimentTypesSearch.previousExperimentTypeCode, experimentTypesSearch.processTypeCode);
+				experimentTypes = etfind.findNextExperimentTypeForAnExperimentTypeCodeAndProcessTypeCode(experimentTypesSearch.previousExperimentTypeCode, experimentTypesSearch.processTypeCode);
 			}else if(StringUtils.isNotBlank(experimentTypesSearch.previousExperimentTypeCode)){
-				experimentTypes = ExperimentType.find.findNextExperimentTypeCode(experimentTypesSearch.previousExperimentTypeCode);
+				experimentTypes = etfind.findNextExperimentTypeCode(experimentTypesSearch.previousExperimentTypeCode);
 			}else{
-				experimentTypes = ExperimentType.find.findAll();
+				experimentTypes = etfind.findAll();
 			}
 			
 			if(experimentTypesSearch.datatable){
@@ -105,12 +100,11 @@ public class ExperimentTypes extends APICommonController<ExperimentTypesSearchFo
 			return  Results.internalServerError(e.getMessage());
 		}	
 	}
-	
+
 	@Permission(value={"reading"})
 	public Result getDefaultFirstExperiments(String processTypeCode) throws DAOException{		
-			ProcessType processType = ProcessType.find.findByCode(processTypeCode);
-			List<ExperimentType> expTypes = ExperimentType.find.findPreviousExperimentTypeForAnExperimentTypeCodeAndProcessTypeCode(processType.firstExperimentType.code, processType.code, -1);
-			return ok(Json.toJson(expTypes));		
+			List<ExperimentType> expTypes = ExperimentType.find.get().findInputExperimentTypeForAnProcessTypeCode(processTypeCode);
+		return ok(Json.toJson(expTypes));		
 	}
-	
+
 }

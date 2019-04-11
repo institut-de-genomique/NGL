@@ -71,7 +71,18 @@ angular.module('home').controller('DetailsCtrl',['$scope','$sce', '$window','$ht
 		  }
 		  return supportCode.length;
 	};
-
+	
+	// FDS 27/07/2018 NGL-2164
+	// verifier que l'instrument en cours d'utilisation a une propriété
+	$scope.instrumentHasProperty = function(propertyCode ){
+		var itype = mainService.get("instrumentType");
+	
+		for (i=0 ;i < itype.propertiesDefinitions.length; i++ ){	
+			//console.log("...."+ itype.propertiesDefinitions[i].code);
+			if ( itype.propertiesDefinitions[i].code === propertyCode) { return true;}
+		}
+		return false;
+	}
 	
 	
 	$scope.isCreationMode=function(){
@@ -769,6 +780,175 @@ angular.module('home').controller('DetailsCtrl',['$scope','$sce', '$window','$ht
 			}
 	};
 	
+	$scope.plateFluoUtils = {
+			
+			getSupportCategoryCode:function(){
+				var tmp = [];
+				if(!$scope.isCreationMode()){
+					tmp = $scope.$eval("atomicTransfertMethods|flatArray:'inputContainerUseds'|getArray:'locationOnContainerSupport.categoryCode'|unique",$scope.experiment);			
+				}else{
+					tmp = $scope.$eval("getBasket().get()|getArray:'support.categoryCode'|unique",mainService);
+				}
+				var supportCategoryCode = undefined;
+				if(tmp.length === 1){
+					this.supportCategoryCode=tmp[0];
+				}else{
+					this.supportCategoryCode="mixte";
+				}
+				return this.supportCategoryCode;
+				
+			},
+			isPlate:function(){
+				category = this.getSupportCategoryCode();
+				return (category === '96-well-plate')
+										
+			},
+			/**
+			 * Compute A1, B1, C1, etc.
+			 */
+			computeColumnMode : function(atmService, udt, maxLine){
+				var wells = udt.displayResult;
+				var nbCol = 12;
+				var nbLine = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+				var x = 0;
+				for(var i = 0; i < nbCol ; i++){
+					for(var j = 0; j < nbLine.length && j <= maxLine; j++){
+						if(x < wells.length && x < 96){
+							//init instrumentProperties if undefined
+							if(wells[x].data.inputContainerUsed.instrumentProperties==undefined)
+								wells[x].data.inputContainerUsed.instrumentProperties={};
+							if(wells[x].data.inputContainerUsed.instrumentProperties.fluoroskanLine==undefined)
+								wells[x].data.inputContainerUsed.instrumentProperties.fluoroskanLine={};
+							if(wells[x].data.inputContainerUsed.instrumentProperties.fluoroskanColumn==undefined)
+								wells[x].data.inputContainerUsed.instrumentProperties.fluoroskanColumn={};
+							
+							wells[x].data.inputContainerUsed.instrumentProperties.fluoroskanLine.value = nbLine[j]+'';
+							wells[x].data.inputContainerUsed.instrumentProperties.fluoroskanColumn.value = i+1;					
+						}
+						x++;
+					}
+				}		
+			},
+			
+			/**
+			 * Compute A1, A2, A3, etc.
+			 */
+			computeLineMode : function(atmService, udt, maxColumn){
+				var wells = udt.displayResult;
+				var nbCol = 12;
+				var nbLine = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+				var x = 0;
+				for(var j = 0; j < nbLine.length; j++){
+					for(var i = 0; i < nbCol && i <= maxColumn; i++){
+						if(x < wells.length && x < 96){
+							if(wells[x].data.inputContainerUsed.instrumentProperties==undefined)
+								wells[x].data.inputContainerUsed.instrumentProperties={};
+							if(wells[x].data.inputContainerUsed.instrumentProperties.fluoroskanLine==undefined)
+								wells[x].data.inputContainerUsed.instrumentProperties.fluoroskanLine={};
+							if(wells[x].data.inputContainerUsed.instrumentProperties.fluoroskanColumn==undefined)
+								wells[x].data.inputContainerUsed.instrumentProperties.fluoroskanColumn={};
+							
+							wells[x].data.inputContainerUsed.instrumentProperties.fluoroskanLine.value = nbLine[j]+'';
+							wells[x].data.inputContainerUsed.instrumentProperties.fluoroskanColumn.value = i+1;					
+						}
+						x++;
+					}
+				}		
+			},
+			
+	        plateCells : undefined,
+			computePlateCells : function(atmService){
+					var plateCells = [];
+					var wells = atmService.data.displayResult;
+					angular.forEach(wells, function(well){
+						var containerUsed = well.data.inputContainerUsed;
+						
+						if(containerUsed.instrumentProperties!=undefined && containerUsed.instrumentProperties.fluoroskanLine!=undefined && containerUsed.instrumentProperties.fluoroskanColumn!=undefined){
+							var line = containerUsed.instrumentProperties.fluoroskanLine.value;
+							var column = containerUsed.instrumentProperties.fluoroskanColumn.value;
+							if(line && column){
+								if(plateCells[line] == undefined){
+									plateCells[line] = [];
+								}
+								var sampleCodeAndTags = [];
+								angular.forEach(containerUsed.contents, function(content){
+									var value = content.projectCode+" / "+content.sampleCode;
+								
+									if(content.properties && content.properties.libProcessTypeCode){
+										value = value +" / "+content.properties.libProcessTypeCode.value;
+									}
+								
+									if(content.properties && content.properties.tag){
+										value = value +" / "+content.properties.tag.value;
+									}
+								
+									sampleCodeAndTags.push(value);
+								});
+								plateCells[line][column] = sampleCodeAndTags;
+							
+							}
+						}
+					});	
+					this.plateCells = plateCells;
+			},
+			getCellPlateData : function(line, column){
+				if(this.plateCells && this.plateCells[line] && this.plateCells[line][column]){
+					return this.plateCells[line][column];
+				}
+			},
+			templates : {
+				buttonLineMode : function(udtName){
+					if(!udtName)udtName='atmService.data';
+					return ''
+					+'<div class="btn-group" style="margin-left:5px">'
+	            	+'<button class="btn btn-default" ng-click="plateFluoUtils.computeLineMode(atmService, '+udtName+', 11)" data-toggle="tooltip" title="'+Messages("experiments.button.plate.computeLineMode")+'"  ng-disabled="!isEditMode()"><i class="fa fa-magic"></i><i class="fa fa-arrow-right"></i></button>'
+	            	+'<div class="btn-group" role="group">'
+	            	+'<button type="button" title="'+Messages("experiments.button.plate.computeLineMode.advanced")+'" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ng-disabled="!isEditMode()">'
+	            	+'  <span class="caret"></span>'
+	            	+'</button>'
+	            	+' <ul class="dropdown-menu">'
+	            	+'  <li><a href="#" ng-click="plateFluoUtils.computeLineMode(atmService, '+udtName+', 0)" >1</a></li>'
+	            	+'  <li><a href="#" ng-click="plateFluoUtils.computeLineMode(atmService, '+udtName+', 1)" >2</a></li>'
+	            	+'  <li><a href="#" ng-click="plateFluoUtils.computeLineMode(atmService, '+udtName+', 2)" >3</a></li>'
+	            	+'  <li><a href="#" ng-click="plateFluoUtils.computeLineMode(atmService, '+udtName+', 3)" >4</a></li>'
+	            	+'  <li><a href="#" ng-click="plateFluoUtils.computeLineMode(atmService, '+udtName+', 4)" >5</a></li>'
+	            	+'  <li><a href="#" ng-click="plateFluoUtils.computeLineMode(atmService, '+udtName+', 5)" >6</a></li>'
+	            	+'  <li><a href="#" ng-click="plateFluoUtils.computeLineMode(atmService, '+udtName+', 6)" >7</a></li>'
+	            	+'  <li><a href="#" ng-click="plateFluoUtils.computeLineMode(atmService, '+udtName+', 7)" >8</a></li>'
+	            	+'  <li><a href="#" ng-click="plateFluoUtils.computeLineMode(atmService, '+udtName+', 8)" >9</a></li>'
+	            	+'  <li><a href="#" ng-click="plateFluoUtils.computeLineMode(atmService, '+udtName+', 9)" >10</a></li>'
+	            	+'  <li><a href="#" ng-click="plateFluoUtils.computeLineMode(atmService, '+udtName+', 10)" >11</a></li>'
+	            	+'  <li><a href="#" ng-click="plateFluoUtils.computeLineMode(atmService, '+udtName+', 11)" >12</a></li>'
+	            	+'</ul>'
+	            	+'</div>'
+	            	+'</div>'
+	            },
+				buttonColumnMode : function(udtName){
+					if(!udtName)udtName='atmService.data';
+					return ''
+					+'<div class="btn-group">'
+	            	+'<button class="btn btn-default" ng-click="plateFluoUtils.computeColumnMode(atmService, '+udtName+', 7)" data-toggle="tooltip" title="'+Messages("experiments.button.plate.computeColumnMode")+'" ng-disabled="!isEditMode()"><i class="fa fa-magic"></i><i class="fa fa-arrow-down"></i></button>'
+	            	+'<div class="btn-group" role="group">'
+	            	+'<button type="button"  title="'+Messages("experiments.button.plate.computeColumnMode.advanced")+'" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ng-disabled="!isEditMode()">'
+	            	+'  <span class="caret"></span>'
+	            	+'</button>'
+	            	+' <ul class="dropdown-menu">'
+	            	+'  <li><a href="#" ng-click="plateFluoUtils.computeColumnMode(atmService, '+udtName+', 0)" >A</a></li>'
+	            	+'  <li><a href="#" ng-click="plateFluoUtils.computeColumnMode(atmService, '+udtName+', 1)" >B</a></li>'
+	            	+'  <li><a href="#" ng-click="plateFluoUtils.computeColumnMode(atmService, '+udtName+', 2)" >C</a></li>'
+	            	+'  <li><a href="#" ng-click="plateFluoUtils.computeColumnMode(atmService, '+udtName+', 3)" >D</a></li>'
+	            	+'  <li><a href="#" ng-click="plateFluoUtils.computeColumnMode(atmService, '+udtName+', 4)" >E</a></li>'
+	            	+'  <li><a href="#" ng-click="plateFluoUtils.computeColumnMode(atmService, '+udtName+', 5)" >F</a></li>'
+	            	+'  <li><a href="#" ng-click="plateFluoUtils.computeColumnMode(atmService, '+udtName+', 6)" >G</a></li>'
+	            	+'  <li><a href="#" ng-click="plateFluoUtils.computeColumnMode(atmService, '+udtName+', 7)" >H</a></li>'
+	            	+'</ul>'
+	            	+'</div>'
+	            	+'</div>'
+	            }
+			}
+	            
+		};
+	
 	var updatePropertyUnit = function(experiment){
 		$scope.experimentType.propertiesDefinitions.forEach(function(propertyDef){
 			if(propertyDef.saveMeasureValue){
@@ -801,8 +981,11 @@ angular.module('home').controller('DetailsCtrl',['$scope','$sce', '$window','$ht
 	var loadInstrumentType = function(code){
 		$http.get(jsRoutes.controllers.instruments.api.InstrumentUsedTypes.get(code).url)
 			.success(function(data, status, headers, config) {
+				if ($parse('experiment.state.code')($scope) !== "F" || !Permissions.check("admin")){
+					data.instruments = $filter("filter")(data.instruments,{active:true},true);
+				}
 				$scope.instrumentType = data;
-				updateInstrumentIfNeeded();				
+				updateInstrumentIfNeeded();			
 				mainService.put("instrumentType",$scope.instrumentType);				
 				
 			})
@@ -868,14 +1051,16 @@ angular.module('home').controller('DetailsCtrl',['$scope','$sce', '$window','$ht
 		$scope.lists.clear("experimentCategories");
 		$scope.lists.refresh.valuationCriterias({typeCode:$scope.experiment.typeCode,objectTypeCode:"Experiment"});
 		$scope.lists.refresh.experimentTypes({categoryCode:$scope.experimentType.category.code},$scope.experimentType.category.code);
-		$scope.lists.refresh.instrumentUsedTypes({"experimentTypeCode":$scope.experimentType.code});
 		
-		if($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F')){
-			$scope.lists.refresh.protocols({"experimentTypeCode":$scope.experimentType.code,"isActive":true});
-		}else {
-			$scope.lists.refresh.protocols({"experimentTypeCode":$scope.experimentType.code});
-
-		}
+		
+		 if ($parse('experiment.state.code')($scope) === "F" && Permissions.check("admin")){
+			 $scope.lists.refresh.protocols({"experimentTypeCode":$scope.experimentType.code});
+			 $scope.lists.refresh.instrumentUsedTypes({"experimentTypeCode":$scope.experimentType.code});
+		 } else {
+			 $scope.lists.refresh.protocols({"experimentTypeCode":$scope.experimentType.code,"isActive":true});
+			 $scope.lists.refresh.instrumentUsedTypes({"experimentTypeCode":$scope.experimentType.code, "isActive":true});
+		 }
+		
 		$scope.lists.refresh.resolutions({"typeCode":$scope.experimentType.code});
 		$scope.lists.refresh.states({"objectTypeCode":"Experiment"});
 		$scope.lists.refresh.kitCatalogs({"experimentTypeCodes":$scope.experiment.typeCode});
@@ -1531,17 +1716,17 @@ angular.module('home').controller('DetailsCtrl',['$scope','$sce', '$window','$ht
 		    "position":10
 		});		
 		
-		
 		if($scope.experiment.categoryCode === 'qualitycontrol'){
 			columns.push({
 				 "header":Messages("containers.table.valuationqc.valid"),
-	        	 "property":"container.valuation.valid",
+	        	 "property":"container.valuation.valid", //NGL-2457 => ca c'est la validite du container, ce qu'on veut c'est la validite donnee dans l'experience
+				 //"property": "inputContainerUseds[0].valuation.valid", NON NE CORRIGE PAS...TODO !!!
 	        	 "filter":"codes:'valuation'",
 	        	 "order":true,
 				 "edit":false,
 				 "hide":false,
 	        	 "type":"text",
-	        	 "position":7.5				
+	        	 "position":7.5
 			});	
 		}
 		

@@ -1,11 +1,7 @@
 package controllers.authorisation;
 
-import java.util.List;
-
-import models.administration.authorisation.Permission;
-import models.administration.authorisation.Role;
-import models.administration.authorisation.Team;
-import models.administration.authorisation.User;
+import fr.cea.ig.authorization.IAuthorizator;
+import fr.cea.ig.play.IGGlobals;
 import models.utils.dao.DAOException;
 
 /**
@@ -16,36 +12,93 @@ import models.utils.dao.DAOException;
  */
 public class PermissionHelper {
 	
-	/*
-	 * 
-	 * @param ses the user session
-	 * @param codePermission the code of the permission that you want to verify
-	 * @return true if the user can access to the resources
-	 * @throws DAOException 
-	 */
 	public static boolean checkPermission(String username, String codePermission) throws DAOException {
-		if (null != username) {
-			List<Permission> permissions = Permission.find.findByUserLogin(username);
-			for (Permission p:permissions) {
-				if (codePermission.equals(p.code))
-					return true;
-			}
-		}
-		return false;
+		if (username == null) 
+			return false;
+		IAuthorizator authorizator = IGGlobals.instanceOf(IAuthorizator.class);
+		return authorizator.authorize(username, codePermission);
 	}
+		
+//	/*
+//	 * 
+//	 * @param ses the user session
+//	 * @param codePermission the code of the permission that you want to verify
+//	 * @return true if the user can access to the resources
+//	 * @throws DAOException 
+//	 */
+//	public static boolean checkPermission(String username, String codePermission) throws DAOException {
+//		if (username != null) {
+////			List<Permission> permissions = Permission.find.get().findByUserLogin(username);
+////			for (Permission p:permissions) {
+//			for (Permission p : Permission.find.get().findByUserLogin(username)) {
+//				if (codePermission.equals(p.code))
+//					return true;
+//			}
+//		}
+//		return false;
+//	}
+
+//	public static User getUser(long id) throws DAOException {
+//		return User.find.get().findById(id);
+//	}
+//	
+//	public static boolean isTechnical(int id) throws DAOException {
+//		return getUser(id).technicaluser == 1;
+//	}
 	
-	/*
-	 * Method checkRole()
-	 */
-	public static boolean checkRole(String username, String labelRole) throws DAOException{
-		List<Role> roles = Role.find.findByUserLogin(username);
-		for(Role r:roles){
-			if(labelRole.equals(r.label))
-				return true;
-		}
-		return false;
-	}
+//	/*
+//	 * 
+//	 * @param ses the user session
+//	 * @param varteam the name of the team you want to verify
+//	 * @return true if the user is in the team
+//	 * @throws DAOException 
+//	 */
+//	public static boolean checkTeam(String username, String varteam) throws DAOException {
+//		User user = User.find.get().findByLogin(username);  
+//		if (user != null) {
+//			for (Team team:user.teams) {
+//				if (team.nom.equals(varteam))
+//					return true;
+//			}
+//		}
+//		return false;
+//	}
 	
+//	/*
+//	 * 
+//	 * @param ses the user session
+//	 * @param teams the name of the teams you want to verify
+//	 * @return  if the user is in one of these team
+//	 * @throws DAOException 
+//	 */
+//	public static boolean checkTeam(String username, List<String> teams) throws DAOException {
+//		//By default -> [""]
+//		if(teams.size() < 2 && teams.get(0).equalsIgnoreCase(""))
+//			return true;
+//		
+//		User user = User.find.get().findByLogin(username);  
+//		if(user!=null) {
+//			for(Team team:user.teams) {
+//				for(String varteam:teams){
+//					if(team.nom.equals(varteam))
+//						return true;
+//				}
+//			}
+//		}
+//		return false;
+//	}
+
+//	/*
+//	 * Method checkRole()
+//	 */
+//	public static boolean checkRole(String username, String labelRole) throws DAOException {
+//		List<Role> roles = Role.find.get().findByUserLogin(username);
+//		for (Role r:roles)
+//			if (labelRole.equals(r.label))
+//				return true;
+//		return false;
+//	}
+
 	/*
 	 * 
 	 * @param ses the user session
@@ -86,56 +139,7 @@ public class PermissionHelper {
 //		}
 //		return false;
 //	}
-	
-	public static User getUser(long id) throws DAOException {
-		return User.find.findById(id);
-	}
-	
-	public static boolean isTechnical(int id) throws DAOException {
-		return getUser(id).technicaluser == 1;
-	}
-	
-	/*
-	 * 
-	 * @param ses the user session
-	 * @param varteam the name of the team you want to verify
-	 * @return true if the user is in the team
-	 * @throws DAOException 
-	 */
-	public static boolean checkTeam(String username, String varteam) throws DAOException {
-		User user = User.find.findByLogin(username);  
-		if (user != null) {
-			for (Team team:user.teams) {
-				if (team.nom.equals(varteam))
-					return true;
-			}
-		}
-		return false;
-	}
-	
-	/*
-	 * 
-	 * @param ses the user session
-	 * @param teams the name of the teams you want to verify
-	 * @return  if the user is in one of these team
-	 * @throws DAOException 
-	 */
-	public static boolean checkTeam(String username, List<String> teams) throws DAOException {
-		//By default -> [""]
-		if(teams.size() < 2 && teams.get(0).equalsIgnoreCase(""))
-			return true;
-		
-		User user = User.find.findByLogin(username);  
-		if(user!=null) {
-			for(Team team:user.teams) {
-				for(String varteam:teams){
-					if(team.nom.equals(varteam))
-						return true;
-				}
-			}
-		}
-		return false;
-	}
+
 	/*
 	public static boolean existPerm(int idPerm,String id) {
 		models.administration.authorisation.Role role = models.administration.authorisation.Role.find.byId(idPerm);

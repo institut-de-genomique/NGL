@@ -3,6 +3,7 @@ package models.sra.submit.common.instance;
 import models.sra.submit.util.VariableSRA;
 import validation.ContextValidation;
 import validation.IValidation;
+import validation.common.instance.CommonValidationHelper;
 import validation.sra.SraValidationHelper;
 import fr.cea.ig.DBObject;
 //import play.Logger;
@@ -17,13 +18,12 @@ public class Readset extends DBObject implements IValidation {
 
 	@Override
 	public void validate(ContextValidation contextValidation) {
-		logger.info("Validate ngl-sub::Readset");
-		//Logger.info("ok dans Sample.validate\n");
-		contextValidation.addKeyToRootKeyName("ngl-sub::Readset");
-		SraValidationHelper.validateId(this, contextValidation);
-		SraValidationHelper.requiredAndConstraint(contextValidation, this.type, VariableSRA.mapTypeReadset(), "typeReadset");
-		contextValidation.removeKeyFromRootKeyName("ngl-sub::Readset");
-		//System.out.println("sortie de sample.validate pour " + this.code);
+		logger.debug("Validate ngl-sub::Readset");
+		//Logger.debug("ok dans Sample.validate\n");
+		contextValidation = contextValidation.appendPath("sraReadset");
+		CommonValidationHelper.validateIdPrimary    (contextValidation, this);
+		SraValidationHelper   .requiredAndConstraint(contextValidation, this.type, VariableSRA.mapTypeReadset(), "typeReadset");
+		//logger.debug("sortie de sample.validate pour " + this.code);
 	}
 
 

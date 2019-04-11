@@ -4,6 +4,10 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 	function($http, $scope, $routeParams, $q, mainService, lists, tabService, messages, datatable) { 
 
 
+    $scope.isRemovable = function() {
+    	return $scope.submission != null;
+    };
+
 
 	var studiesDTConfig = {
 			name:'studiesDT',
@@ -43,6 +47,7 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 					return line;
 				},
 			},
+		
 			/*cancel : {
 				showButton:true
 			},
@@ -60,6 +65,11 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 				}
 			},*/
 			columns : [
+			    {property:"traceInformation.creationDate",
+			       	header: Messages("traceInformation.creationDate"),
+			       	type :"date",		    	  	
+			       	order:false
+			    },
 				{property:"code",
 					header: Messages("study.code"),
 					type :"text",		    	  	
@@ -175,6 +185,11 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 			},
 			 */
 			columns : [
+			 	{property:"traceInformation.creationDate",
+			       	header: Messages("sample.traceInformation.creationDate"),
+			       	type :"date",		    	  	
+			       	order:false
+			    },
 				{property:"code",
 					header: Messages("sample.code"),
 					type :"text",		    	  	
@@ -256,6 +271,14 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 					order:false,
 					edit:false,
 					choiceInList:false
+				},
+				{property:"attributes",
+					header: Messages("sample.attributes"),
+					//"filter":"codes:'state'",
+					type :"text",		    	  	
+					order:true,
+					edit:true,
+					choiceInList:false
 				}
 				]				
 	};
@@ -308,6 +331,11 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 			},
 			 */
 			columns : [
+				{property:"traceInformation.creationDate",
+			        header: Messages("experiment.traceInformation.creationDate"),
+			       	type :"date",		    	  	
+			       	order:false
+			    },
 				{property:"code",
 					header: Messages("experiment.code"),
 					type :"text",		    	  	
@@ -497,9 +525,11 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 
 				]	        
 	};
+	
+	
 	var rawDatasDTConfig = {
 			name:'rawDataDT',
-			order :{by:'code',mode:'local', reverse:true},
+			order :{by:'code', mode:'local', reverse:true},
 			search:{active:false},
 			select:{active:false},
 			pagination:{
@@ -510,7 +540,7 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 			showTotalNumberRecords:true,
 			edit : {
 				active:true,
-				showButton : false,
+				showButton :false,
 				withoutSelect : true,
 				columnMode : true
 			},
@@ -523,6 +553,25 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 			exportCSV:{
 				active:false
 			},
+			//url:function(lineValue){
+			//		return jsRoutes.controllers.sra.experiments.api.Experiments.update(lineValue.code).url; // jamais utilisé en mode local
+			//	},
+			
+			remove : {
+				active:false,
+				withEdit:false, //to authorize to remove a line in edition mode
+				showButton : false,
+				mode:'remote', //or local
+				url:function(lineValue) { 
+					return jsRoutes.controllers.sra.experiments.api.ExperimentsRawDatas.delete(lineValue.experimentCode, lineValue.relatifName).url;
+				},
+				callback : undefined, //used to have a callback after remove all element. the datatable is pass to callback method and number of error
+				start:false,
+				counter:0,
+				number:0, //number of element in progress
+				error:0								
+			},
+			
 			columns : [
 				{property:"relatifName",
 					header: Messages("rawData.relatifName"),
@@ -543,7 +592,6 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 	$scope.sraVariables = {};
 	$scope.subList={};
 	$scope.checkSample=false;
-
 
 	var init = function(){
 		$scope.messages = messages();
@@ -640,7 +688,8 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 					//Init datatable
 					$scope.sampleDT = datatable(samplesDTConfig);
 					$scope.sampleDT.setData($scope.samples, $scope.samples.length);
-					});*/
+					});
+			*/
 
 			if($scope.submission.experimentCodes.length>0){
 				var nbElementByBatch = Math.ceil($scope.submission.experimentCodes.length / 6); //6 because 6 request max in parrallel with firefox and chrome
@@ -670,14 +719,24 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 					// Get RawDatas : construction de la liste des rawData puis injection dans datatable :
 					var maListRawDatas = [];
 					for (var i=0; i<$scope.experiments.length; i++) {
-						var run = $scope.experiments[i].run;
+						var experiment = $scope.experiments[i];
+						var run = experiment.run;
 						for (var j=0; j<run.listRawData.length; j++) {
-							maListRawDatas.push(run.listRawData[j]);
+							var rawdataPlus = run.listRawData[j];
+							rawdataPlus.experimentCode = experiment.code;
+							//console.log("experimentCode = " +rawdataPlus.experimentCode);
+							//maListRawDatas.push(run.listRawData[j]);
+							maListRawDatas.push(rawdataPlus);
 						}
 					}
-
+					// Partie de la configuration (rawDatasDTConfig) à definir seulement
+					// lorsque $scope.submission est definit.
+					rawDatasDTConfig.remove.active=($scope.submission.state.code==='N');
+					rawDatasDTConfig.remove.showButton=($scope.submission.state.code==='N');
 					$scope.rawDataDT = datatable(rawDatasDTConfig);
 					$scope.rawDataDT.setData(maListRawDatas, maListRawDatas.length);
+					console.log("XXXXXXXXXXXXXXXXXXXXX " + $scope.submission.state.code);
+					
 				});	
 			}
 
@@ -705,6 +764,7 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 
 					$scope.rawDataDT = datatable(rawDatasDTConfig);
 					$scope.rawDataDT.setData(maListRawDatas, maListRawDatas.length);
+					
 					});		*/	
 
 		});
@@ -875,9 +935,22 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 	$scope.activeEditMode = function(){
 		$scope.messages.clear();
 		$scope.mainService.startEditMode();
-		$scope.studyDT.setEdit();
-		$scope.sampleDT.setEdit();
-		$scope.experimentDT.setEdit();
+		console.log("studyDT = "+$scope.studyDT);
+		console.log("expDT = "+$scope.experimentDT);
+		if ($scope.studyDT) {
+			$scope.studyDT.setEdit();
+		}
+		if ($scope.sampleDT) {
+			$scope.sampleDT.setEdit();
+		}
+
+		if ($scope.experimentDT) {
+			$scope.experimentDT.setEdit();
+		}
+		if ($scope.rawDataDT) {
+			$scope.rawDataDT.setEdit();
+		}
+		
 	};
 
 }]);

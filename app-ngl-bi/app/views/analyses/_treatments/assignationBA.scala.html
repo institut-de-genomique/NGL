@@ -22,17 +22,19 @@
 				<th class="text-center">@Messages("treatments.assignation.assignationBilan.otu")</th>
 				<th class="text-center">@Messages("treatments.assignation.assignationBilan.abundance")</th>
 				<th class="text-center">@Messages("treatments.assignation.assignationBilan.abundanceClusterPercent")</th>
+				<th class="text-center">@Messages("treatments.assignation.assignationBilan.abundanceControlPercent")</th>
 				<th class="text-center">@Messages("treatments.assignation.assignationBilan.taxonomy")</th>
 				<th class="text-center">@Messages("treatments.assignation.assignationBilan.idPercent")</th>
 				<th class="text-center">@Messages("treatments.assignation.assignationBilan.matchLength")</th>
 			</tr>
  		</thead>
  		<tbody>
- 			<tr ng-repeat="assign in analysis.treatments[treatments.getTreatment().code].read1.assignationBilan.value | filter:{controlName: trt.controlName} | orderBy:sorterFunc">
+ 			<tr ng-repeat="assign in analysis.treatments[treatments.getTreatment().code].read1.assignationBilan.value | filter:{controlName: trt.controlName} | filter:{cluster:'!!'} | orderBy:sorterFunc">
  				<td>{{assign.cluster}}</td>
  				<td>{{assign.otu}}</td>
  				<td>{{assign.abundance | number}}</td>
  				<td>{{assign.abundanceClusterPercent | number:2}}</td>
+ 				<td>{{assign.abundanceControlPercent | number:2}}</td>
  				<td><div list-resize='getList(assign.taxonomy)' list-resize-min-size='6' below/></td>
  				<td>{{assign.idPercent | number:2}} %</td>
  				<td>{{assign.matchLength | number:2}} %</td>

@@ -9,7 +9,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import fr.cea.ig.MongoDBDAO;
-import fr.cea.ig.lfw.controllers.AbstractScript;
+import fr.cea.ig.lfw.controllers.scripts.ScriptNoArgs;
 import mail.MailServiceException;
 import models.laboratory.run.instance.ReadSet;
 import models.sra.submit.common.instance.Submission;
@@ -22,7 +22,7 @@ import services.FileAcServices;
 import services.SubmissionServices;
 import validation.ContextValidation;
 
-public class Debug_soumission_nanopore_2D_BNZ extends AbstractScript {
+public class Debug_soumission_nanopore_2D_BNZ extends ScriptNoArgs {
 
 	private FileAcServices     fileAcServices;
 //	private SubmissionServices submissionServices;
@@ -55,12 +55,12 @@ public class Debug_soumission_nanopore_2D_BNZ extends AbstractScript {
 							    submissionCode);
 			File fileEbi = new File("/env/cns/home/sgas/debug_soumission_nanopore",  "listAC_" + submission.code + ".txt");
 			String user = "william";
-			ContextValidation ctxVal = new ContextValidation(user);
+			ContextValidation ctxVal = ContextValidation.createUndefinedContext(user);
 			submission = this.fileAcServices.traitementFileAC(ctxVal, submissionCode, fileEbi); 
 		}	
 	}
 	
-	public Run createRunEntityForMinion2D(ReadSet readSet, String runCode) {
+	public Run createRunEntityForMinion2D(ReadSet readSet, String runCode) throws Exception {
 		// On cree le run pour le readSet demandé.
 		// La validite du readSet doit avoir été testé avant.
 		// Recuperer pour le readSet la liste des fichiers associés:
@@ -70,7 +70,8 @@ public class Debug_soumission_nanopore_2D_BNZ extends AbstractScript {
 //		InstrumentUsed instrumentUsed = laboratoryRun.instrumentUsed;
 		List <models.laboratory.run.instance.File> list_files = readSet.files;
 		if (list_files == null) {
-			System.out.println("Aucun fichier pour le readSet " + readSet.code +"???");
+			
+			throw new Exception("Aucun fichier pour le readSet " + readSet.code +"???");
 		} else {
 			//System.out.println("nbre de fichiers = " + list_files.size());
 		}

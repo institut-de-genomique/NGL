@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import controllers.APICommonController;
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import models.laboratory.common.description.Level;
 import models.laboratory.common.description.PropertyDefinition;
 import models.utils.ListObject;
@@ -21,9 +21,14 @@ import views.components.datatable.DatatableResponse;
 
 public class PropertyDefinitions extends APICommonController<PropertyDefinition> {
 
+//	@Inject
+//	public PropertyDefinitions(NGLContext ctx) {
+//		super(ctx,PropertyDefinition.class);		
+//	}
+
 	@Inject
-	public PropertyDefinitions(NGLContext ctx) {
-		super(ctx,PropertyDefinition.class);		
+	public PropertyDefinitions(NGLApplication app) {
+		super(app,PropertyDefinition.class);		
 	}
 
 	public  Result list() throws DAOException {
@@ -31,9 +36,9 @@ public class PropertyDefinitions extends APICommonController<PropertyDefinition>
 		
 		List<PropertyDefinition> values = new ArrayList<>(0);
 		if (filledForm.get("levelCode") != null) {
-			values = PropertyDefinition.find.findUnique(Level.CODE.valueOf(filledForm.get("levelCode")));
+			values = PropertyDefinition.find.get().findUnique(Level.CODE.valueOf(filledForm.get("levelCode")));
 		} else {
-			values = PropertyDefinition.find.findUnique();
+			values = PropertyDefinition.find.get().findUnique();
 		}
 		
 		if (filledForm.get("datatable") != null) {

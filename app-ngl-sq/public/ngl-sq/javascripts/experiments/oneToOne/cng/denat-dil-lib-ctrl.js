@@ -167,9 +167,9 @@ angular.module('home').controller('DenatDilLibCtrl',['$scope', '$parse', 'atmToS
 			hide:{
 				active:true
 			},
-			edit:{
-				active: ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('IP')),
-				showButton: ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('IP')),
+			edit:{ /// 08/01/2019 modif a F
+				active: ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F')),
+				showButton: ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F')),
 				byDefault:($scope.isCreationMode()),
 				columnMode:true
 			},
@@ -333,8 +333,10 @@ angular.module('home').controller('DenatDilLibCtrl',['$scope', '$parse', 'atmToS
 		console.log("call event refresh");	
 		
 		var dtConfig = $scope.atmService.data.getConfig();
-		dtConfig.edit.active = ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('IP'));
+		dtConfig.edit.active = ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F'));// 08/01/2019 modifier IP=>F pour autoriser edition
+		//dtConfig.edit.showButton = ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F')); pas utile ??
 		dtConfig.edit.byDefault = false;
+		dtConfig.edit.start = false; 
 		dtConfig.remove.active = ($scope.isEditModeAvailable() && $scope.isNewState());
 		$scope.atmService.data.setConfig(dtConfig);
 		$scope.atmService.refreshViewFromExperiment($scope.experiment);
@@ -421,7 +423,7 @@ angular.module('home').controller('DenatDilLibCtrl',['$scope', '$parse', 'atmToS
 		return {
 			class:"OneToOne",
 			line:getLine(line), 
-			column:getColumn(column), 				
+			column:getColumn(column),
 			inputContainerUseds:new Array(0), 
 			outputContainerUseds:new Array(0)
 		};

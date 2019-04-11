@@ -3,6 +3,7 @@ package controllers.admin.supports.tpl;
 import javax.inject.Inject;
 // TODO: cleanup and comment
 
+import controllers.NGLController;
 // import controllers.APICommonController;
 //import controllers.NGLBaseController;
 // import controllers.history.UserHistory;
@@ -10,7 +11,6 @@ import fr.cea.ig.authentication.Authenticated;
 import fr.cea.ig.authorization.Authorized;
 import fr.cea.ig.lfw.Historized;
 import fr.cea.ig.ngl.NGLApplication;
-import fr.cea.ig.ngl.NGLController;
 import fr.cea.ig.ngl.support.NGLJavascript;
 //import play.Routes;
 //import play.routing.JavaScriptReverseRouter;

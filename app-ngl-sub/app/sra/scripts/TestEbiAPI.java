@@ -2,10 +2,10 @@ package sra.scripts;
 
 import javax.inject.Inject;
 
-import fr.cea.ig.lfw.controllers.AbstractScript;
+import fr.cea.ig.lfw.controllers.scripts.ScriptNoArgs;
 import sra.scripts.utils.EbiAPI;
 
-public class TestEbiAPI extends AbstractScript {
+public class TestEbiAPI extends ScriptNoArgs {
 	private final EbiAPI ebiAPI;	
 
 	@Inject

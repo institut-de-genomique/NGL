@@ -9,6 +9,7 @@ import fr.cea.ig.ngl.dao.api.APIException;
 import fr.cea.ig.ngl.dao.api.APIValidationException;
 import fr.cea.ig.ngl.dao.api.GenericAPI;
 import fr.cea.ig.ngl.dao.sra.ExternalStudyDAO;
+import fr.cea.ig.play.IGGlobals;
 
 import org.mongojack.DBQuery.Query;
 
@@ -38,6 +39,10 @@ public class ExternalStudyAPI extends GenericAPI<ExternalStudyDAO, ExternalStudy
 	public void dao_deleteByCode(String studyCode) {
 		dao.deleteByCode(studyCode);
 		
+	}
+	
+	public void dao_saveObject(ExternalStudy study) {
+		dao.saveObject(study);
 	}
 	
 	/*-------------------------------------------------------------------------------------------------*/
@@ -74,6 +79,18 @@ public class ExternalStudyAPI extends GenericAPI<ExternalStudyDAO, ExternalStudy
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
+
+
+
+	/**
+	 * Acces à une instance globale de ExternalStudyAPI, qui permet de remplacer les appels
+	 * à MongoDBDAO qui est une globale, dans un contexte ou on ne peut pas injecter. 
+	 * Exemple dans objets du domaine (sra.Experiment, ...)
+	 * @return ExternalStudyAPI
+	 */
+	public static ExternalStudyAPI get() {
+		return IGGlobals.instanceOf(ExternalStudyAPI.class);
+	}
+		
 
 }

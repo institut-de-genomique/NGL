@@ -15,21 +15,9 @@ import models.utils.dao.MappingSqlQueryFactory;
 import models.utils.dao.NGLMappingSqlQuery;
 import play.api.modules.spring.Spring;
 
-//public class CommonInfoTypeMappingQuery extends MappingSqlQuery<CommonInfoType> {
 public class CommonInfoTypeMappingQuery extends NGLMappingSqlQuery<CommonInfoType> {
 
 	public static final MappingSqlQueryFactory<CommonInfoType> factory = CommonInfoTypeMappingQuery::new;
-	
-//	public CommonInfoTypeMappingQuery(){
-//		super();
-//	}
-//	
-//	public CommonInfoTypeMappingQuery(DataSource ds, String sql,SqlParameter sqlParameter){
-//		super(ds,sql);
-//		if (sqlParameter != null)
-//			super.declareParameter(sqlParameter);
-//		compile();
-//	}
 	
 	public CommonInfoTypeMappingQuery(DataSource ds, String sql, SqlParameter... sqlParameters) {
 		super(ds,sql,sqlParameters);
@@ -38,15 +26,15 @@ public class CommonInfoTypeMappingQuery extends NGLMappingSqlQuery<CommonInfoTyp
 	@Override
 	protected CommonInfoType mapRow(ResultSet rs, int rowNumber) throws SQLException {
 		CommonInfoType commonInfoType = new CommonInfoType();
-		commonInfoType.id           = rs.getLong("cId");
-		commonInfoType.name         = rs.getString("name");
-		commonInfoType.code         = rs.getString("codeSearch");
-		commonInfoType.displayOrder = rs.getInt("displayOrder");
+		commonInfoType.id           = rs.getLong   ("cId");
+		commonInfoType.name         = rs.getString ("name");
+		commonInfoType.code         = rs.getString ("codeSearch");
+		commonInfoType.displayOrder = rs.getInt    ("displayOrder");
 		commonInfoType.active       = rs.getBoolean("active");
 		//Get object Type
 		ObjectType objectType       = new ObjectType();
-		objectType.id               = rs.getLong("oId");
-		objectType.code             = rs.getString("codeObject");
+		objectType.id               = rs.getLong   ("oId");
+		objectType.code             = rs.getString ("codeObject");
 		objectType.generic          = rs.getBoolean("generic");
 		commonInfoType.objectType   = objectType;
 		//Get variables State

@@ -4,11 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
-
-import fr.cea.ig.MongoDBDAO;
+import fr.cea.ig.ngl.dao.api.sra.ExperimentAPI;
 import models.sra.submit.util.VariableSRA;
-import models.utils.InstanceConstants;
 import validation.ContextValidation;
 import validation.IValidation;
 import validation.sra.SraValidationHelper;
@@ -24,49 +21,82 @@ public class Run implements IValidation {
 	public String expAccession;
 	public List <RawData> listRawData = new ArrayList<>();
 	public String adminComment; // commentaire privé "reprise historique"				
-
 	
 	public void validateLight(ContextValidation contextValidation) {
-		contextValidation.addKeyToRootKeyName("run");
+		contextValidation = contextValidation.appendPath("run");
+		if (ValidationHelper.validateNotEmpty(contextValidation, code, "code")) 
+			contextValidation = contextValidation.appendPath(code);
+
 		// Verifier que runDate est bien renseigné :
 		System.out.println("this.runDate: " + this.runDate);
-		ValidationHelper.required(contextValidation, this.runDate , "runDate");
+		ValidationHelper.validateNotEmpty(contextValidation, this.runDate , "runDate");
 		System.out.println("this.runCenter: " + this.runCenter);
-
 		SraValidationHelper.requiredAndConstraint(contextValidation, this.runCenter, VariableSRA.mapCenterName(), "runCenter");
-		
-		// verifier que code est bien renseigné
-		if(StringUtils.isBlank(this.code)) {
-			System.out.println("this.runCode: " + this.code);
-
-			contextValidation.addErrors("run.code", " aucune valeur");
-		} else {
-			// Verifier si on est dans un contexte de creation d'objet, que run.code n'existe pas dans la database (dans collection Experiment)
-			if(contextValidation.isCreationMode()){
-				System.out.println("contexte creationMode: ");
-
-				if(MongoDBDAO.checkObjectExist(InstanceConstants.SRA_EXPERIMENT_COLL_NAME, Experiment.class, "run.code", this.code)) {
-					System.out.println("En mode creation et run exitstant dans base pour " + this.code);
-					contextValidation.addErrors("run.code ", this.code + " existe deja dans la base de données et MODE CREATION");
-				}	
-			}
-			// Verifier si on est dans un contexte d'UPDATE d'objet, que run.code existe bien dans la database
-			if(contextValidation.isUpdateMode() ) {
-				if(! MongoDBDAO.checkObjectExist(InstanceConstants.SRA_EXPERIMENT_COLL_NAME, Experiment.class, "run.code", this.code)) {
-					contextValidation.addErrors("run.code",this.code + " n'existe pas dans la base de données et MODE UPDATE");
-				}
-			}
+	}
+	
+	public void validateInvariants(ContextValidation contextValidation) {
+		validateLight(contextValidation);
+		contextValidation = contextValidation.appendPath("run");
+		if (ValidationHelper.validateNotEmpty(contextValidation, code, "code")) 
+			contextValidation = contextValidation.appendPath(code);
+		if(listRawData.isEmpty()) {
+			contextValidation.addError("run.listRawData", this.code + " sans fichier de donnée brute associé");
 		}
-		contextValidation.removeKeyFromRootKeyName("run");
+		for(RawData rawData : listRawData) {
+			rawData.validate(contextValidation);
+		}
 	}
 	
 	@Override
 	public void validate(ContextValidation contextValidation) {
-		validateLight(contextValidation);
-		contextValidation.addKeyToRootKeyName("run");
-		for(RawData rawData : listRawData) {
-			rawData.validate(contextValidation);
-		}
-		contextValidation.removeKeyFromRootKeyName("run");
+		switch (contextValidation.getMode()) {
+		case CREATION:
+			validateCreation(contextValidation);
+			break;
+		case UPDATE:
+			validateUpdate(contextValidation);
+			break;
+		case DELETE:
+			validateDelete(contextValidation);
+			break;
+		default: // autre cas undefined notamment
+			contextValidation.addError("ERROR", "contextValidation.getMode() != de CREATION, UPDATE ou DELETE (undefined ?)");
+			break;	
+		} 
+		validateInvariants(contextValidation);
 	}
+
+	private void validateCreation(ContextValidation contextValidation) {
+		contextValidation = contextValidation.appendPath("run");
+		if (ValidationHelper.validateNotEmpty(contextValidation, code, "run.code")) 
+			contextValidation = contextValidation.appendPath(code);
+		ExperimentAPI experimentAPI = ExperimentAPI.get();
+		if(experimentAPI.dao_checkObjectExist("run.code", this.code)) {
+			contextValidation.addError("run.code", code + " existe deja dans la base de données et MODE CREATION");
+		}	
+	}
+
+	private void validateDelete(ContextValidation contextValidation) {
+		contextValidation = contextValidation.appendPath("run");
+		if (ValidationHelper.validateNotEmpty(contextValidation, code, "run.code")) 
+			contextValidation = contextValidation.appendPath(code);
+		ExperimentAPI experimentAPI = ExperimentAPI.get();
+		if(! experimentAPI.dao_checkObjectExist("run.code", code)) {
+			contextValidation.addError("run.code", code + " n'existe pas dans la base de données et MODE DELETE");
+		}	
+	}
+	
+
+	private void validateUpdate(ContextValidation contextValidation) {
+		contextValidation = contextValidation.appendPath("run");
+		if (ValidationHelper.validateNotEmpty(contextValidation, code, "run.code")) 
+			contextValidation = contextValidation.appendPath(code);
+		ExperimentAPI experimentAPI = ExperimentAPI.get();
+		if(! experimentAPI.dao_checkObjectExist("run.code", code)) {
+			contextValidation.addError("run.code", code + " n'existe pas dans la base de données et MODE UPDATE");
+		}	
+	}
+	
+	
+	
 }

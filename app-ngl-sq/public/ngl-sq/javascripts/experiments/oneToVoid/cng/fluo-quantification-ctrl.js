@@ -4,15 +4,14 @@ angular.module('home').controller('OneToVoidFluoQuantificationCNGCtrl',['$scope'
 	// NGL-1055 : surcharger la variable "name" definie dans le controleur parent ( one-to-void-qc-ctrl.js) => nom de fichier CSV exporté 
 	var config = $scope.atmService.data.getConfig();
 	config.name = $scope.experiment.typeCode.toUpperCase();
+	
 	$scope.atmService.data.setConfig(config);	
 	
 	$scope.$parent.copyPropertiesToInputContainer = function(experiment){
-		
 		// les propriétés de l'expérience doivent etres copiées dans le container
 		experiment.atomicTransfertMethods.forEach(function(atm){
 			var inputContainerUsed =$parse("inputContainerUseds[0]")(atm);
 			if(inputContainerUsed){
-				
 				var concentration1 = $parse("experimentProperties.concentration1")(inputContainerUsed);
 				// 26/03/2018: NGL-1970 la copie de la concentration ne doit etre faite que si l'utilisateur le demande explicitement !!!
 				if (concentration1  &&  $scope.experiment.experimentProperties.copyConcentration.value){
@@ -23,7 +22,7 @@ angular.module('home').controller('OneToVoidFluoQuantificationCNGCtrl',['$scope'
 				
 				// pas de newsize 
 			}
-		});			
+		});
 	};
 	
 	var importData = function(){
@@ -103,6 +102,7 @@ angular.module('home').controller('OneToVoidFluoQuantificationCNGCtrl',['$scope'
 	   	 "extraHeaders":{0 : Messages("experiments.inputs")}
 	  }); 
 	
+	/*                  NGL-1226 11/2018  demande de ne plus afficher ces 2 colonnes....
 	// 04/09/2017 utiliser processProperties
 	columns.push({
 		"header": Messages("containers.table.expectedBaits"),
@@ -128,6 +128,7 @@ angular.module('home').controller('OneToVoidFluoQuantificationCNGCtrl',['$scope'
 	  	 "position":8.2,
 	  	 "extraHeaders":{0 : Messages("experiments.inputs")}
 	   });
+     */
 
 	
 	$scope.atmService.data.setColumnsConfig(columns);

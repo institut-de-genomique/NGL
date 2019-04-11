@@ -1,8 +1,5 @@
 package controllers.sra.experiments.api;
 
-//import static play.data.Form.form;
-//import static fr.cea.ig.play.IGGlobals.form;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,7 +13,7 @@ import org.mongojack.DBQuery.Query;
 import controllers.DocumentController;
 import fr.cea.ig.MongoDBDAO;
 import fr.cea.ig.MongoDBResult;
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import models.sra.submit.common.instance.Submission;
 import models.sra.submit.sra.instance.Experiment;
 import models.sra.submit.sra.instance.ReadSpec;
@@ -27,16 +24,21 @@ import play.mvc.Result;
 
 public class ExperimentsReadSpecs extends DocumentController<Experiment> {
 
-	final /*static*/ Form<ExperimentsSearchForm> experimentsSearchForm;// = form(ExperimentsSearchForm.class);
+	final Form<ExperimentsSearchForm> experimentsSearchForm;
 	
+//	@Inject
+//	public ExperimentsReadSpecs(NGLContext ctx) {
+//		super(ctx,InstanceConstants.SRA_EXPERIMENT_COLL_NAME, Experiment.class);
+//		experimentsSearchForm = ctx.form(ExperimentsSearchForm.class);
+//	}
+
 	@Inject
-	public ExperimentsReadSpecs(NGLContext ctx) {
+	public ExperimentsReadSpecs(NGLApplication ctx) {
 		super(ctx,InstanceConstants.SRA_EXPERIMENT_COLL_NAME, Experiment.class);
 		experimentsSearchForm = ctx.form(ExperimentsSearchForm.class);
 	}
 
-	public Result list()
-	{
+	public Result list() {
 		List<ReadSpec> allReadSpecs = new ArrayList<>();
 		Form<ExperimentsSearchForm> form = filledFormQueryString(experimentsSearchForm, ExperimentsSearchForm.class);
 		ExperimentsSearchForm formExp = form.get();

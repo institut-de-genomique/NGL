@@ -1,9 +1,6 @@
 package controllers.stats.api;
 
 
-//import static play.data.Form.form;
-//import static fr.cea.ig.play.IGGlobals.form;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -20,12 +17,11 @@ import org.mongojack.DBQuery.Query;
 import com.mongodb.BasicDBObject;
 
 import controllers.DocumentController;
-//import controllers.CommonController;
 import controllers.authorisation.Permission;
 import controllers.reporting.api.ConfigurationsSearchForm;
 import fr.cea.ig.MongoDBDAO;
 import fr.cea.ig.MongoDBResult;
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import models.laboratory.stats.StatsConfiguration;
 import models.utils.InstanceConstants;
 import play.data.Form;
@@ -34,38 +30,45 @@ import play.mvc.Result;
 import validation.ContextValidation;
 import views.components.datatable.DatatableResponse;
 
-public class StatsConfigurations extends DocumentController<StatsConfiguration> {// CommonController {
+public class StatsConfigurations extends DocumentController<StatsConfiguration> {
 	
-	private final /*static*/ Form<StatsConfiguration> reportConfigForm;// = form(StatsConfiguration.class);
-	private final /*static*/ Form<ConfigurationsSearchForm> searchForm;// = form(ConfigurationsSearchForm.class);
+	private final Form<StatsConfiguration>       reportConfigForm;
+	private final Form<ConfigurationsSearchForm> searchForm;
+	
+//	@Inject
+//	public StatsConfigurations(NGLContext ctx) {
+//		super(ctx, InstanceConstants.STATS_CONFIG_COLL_NAME, StatsConfiguration.class);
+//		reportConfigForm = ctx.form(StatsConfiguration.class);
+//		searchForm = ctx.form(ConfigurationsSearchForm.class);
+//	}
 	
 	@Inject
-	public StatsConfigurations(NGLContext ctx) {
-		super(ctx, InstanceConstants.STATS_CONFIG_COLL_NAME, StatsConfiguration.class);
-		reportConfigForm = ctx.form(StatsConfiguration.class);
-		searchForm = ctx.form(ConfigurationsSearchForm.class);
+	public StatsConfigurations(NGLApplication app) {
+		super(app, InstanceConstants.STATS_CONFIG_COLL_NAME, StatsConfiguration.class);
+		reportConfigForm = app.form(StatsConfiguration.class);
+		searchForm = app.form(ConfigurationsSearchForm.class);
 	}
-	
+
 	@Permission(value={"reading"})
-	public /*static*/ Result list() {
+	public Result list() {
 		Form<ConfigurationsSearchForm> filledForm = filledFormQueryString(searchForm, ConfigurationsSearchForm.class);
 		ConfigurationsSearchForm form = filledForm.get();
 		
 		Query q = getQuery(form);
 		BasicDBObject keys = getKeys(form);
-		if(form.datatable){			
+		if (form.datatable) {			
 			MongoDBResult<StatsConfiguration> results = mongoDBFinder(form, q, keys).sort("name");
 //			MongoDBResult<StatsConfiguration> results = mongoDBFinder(InstanceConstants.STATS_CONFIG_COLL_NAME, form, StatsConfiguration.class, q, keys).sort("name");
 			List<StatsConfiguration> statsConfigurations = results.toList();
 			return ok(Json.toJson(new DatatableResponse<>(statsConfigurations, results.count())));
-		}else if(form.count){
+		} else if(form.count) {
 			MongoDBResult<StatsConfiguration> results = mongoDBFinder(form, q, keys).sort("name");
 //			MongoDBResult<StatsConfiguration> results = mongoDBFinder(InstanceConstants.STATS_CONFIG_COLL_NAME, form, StatsConfiguration.class, q, keys).sort("name");
 			int count = results.count();
 			Map<String, Integer> m = new HashMap<>(1);
 			m.put("result", count);
 			return ok(Json.toJson(m));
-		}else{
+		} else {
 			MongoDBResult<StatsConfiguration> results = mongoDBFinder(form, q, keys).sort("name");
 //			MongoDBResult<StatsConfiguration> results = mongoDBFinder(InstanceConstants.STATS_CONFIG_COLL_NAME, form, StatsConfiguration.class, q, keys).sort("name");
 			List<StatsConfiguration> statsConfigurations = results.toList();
@@ -80,10 +83,9 @@ public class StatsConfigurations extends DocumentController<StatsConfiguration> 
 		if (CollectionUtils.isNotEmpty(form.pageCodes)) { //all
 			queries.add(DBQuery.in("pageCodes", form.pageCodes));
 		}
-		if(queries.size() > 0){
+		if (queries.size() > 0){
 			query = DBQuery.and(queries.toArray(new Query[queries.size()]));
 		}
-		
 		return query;
 	}
 
@@ -100,8 +102,9 @@ public class StatsConfigurations extends DocumentController<StatsConfiguration> 
 	public /*static*/ Result save() {
 		Form<StatsConfiguration> filledForm = getFilledForm(reportConfigForm, StatsConfiguration.class);
 		StatsConfiguration statsConfiguration = filledForm.get();
-		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm);
-
+//		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm);
+//		ctxVal.setCreationMode();
+		ContextValidation ctxVal = ContextValidation.createCreationContext(getCurrentUser(), filledForm);
 		if (statsConfiguration._id == null) {
 //			statsConfiguration.traceInformation = new TraceInformation();
 //			statsConfiguration.traceInformation.setTraceInformation(getCurrentUser());
@@ -111,14 +114,14 @@ public class StatsConfigurations extends DocumentController<StatsConfiguration> 
 			return badRequest("use PUT method to update the run");
 		}
 //		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm.errors());
-		ctxVal.setCreationMode();
 		statsConfiguration.validate(ctxVal);
 		if (!ctxVal.hasErrors()) {
 			statsConfiguration = MongoDBDAO.save(InstanceConstants.STATS_CONFIG_COLL_NAME, statsConfiguration);
 			return ok(Json.toJson(statsConfiguration));
 		} else {
 			// return badRequest(filledForm.errors-AsJson());
-			return badRequest(NGLContext._errorsAsJson(ctxVal.getErrors()));
+//			return badRequest(NGLContext._errorsAsJson(ctxVal.getErrors()));
+			return badRequest(app.errorsAsJson(ctxVal.getErrors()));
 		}
 	}
 	
@@ -136,17 +139,19 @@ public class StatsConfigurations extends DocumentController<StatsConfiguration> 
 //			}else{
 //				Logger.error("traceInformation is null !!");
 //			}
-			ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm);
+//			ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm);
+//			ctxVal.setUpdateMode();
+			ContextValidation ctxVal = ContextValidation.createUpdateContext(getCurrentUser(), filledForm);
 			statsConfigurationInput.setTraceUpdateStamp(ctxVal, getCurrentUser());
 //			ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm.errors());
-			ctxVal.setUpdateMode();
 			statsConfigurationInput.validate(ctxVal);
 			if (!ctxVal.hasErrors()) {
 				MongoDBDAO.update(InstanceConstants.STATS_CONFIG_COLL_NAME, statsConfigurationInput);
 				return ok(Json.toJson(statsConfigurationInput));
 			} else {
 				// return badRequest(filledForm.errors-AsJson());
-				return badRequest(NGLContext._errorsAsJson(ctxVal.getErrors()));
+//				return badRequest(NGLContext._errorsAsJson(ctxVal.getErrors()));
+				return badRequest(app.errorsAsJson(ctxVal.getErrors()));
 			}
 		} else {
 			return badRequest("readset code are not the same");

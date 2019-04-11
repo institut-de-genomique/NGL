@@ -15,7 +15,7 @@ import org.mongojack.DBUpdate;
 import com.mongodb.MongoException;
 
 import fr.cea.ig.MongoDBDAO;
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import models.Constants;
 import models.laboratory.common.description.Level;
 import models.laboratory.common.instance.State;
@@ -30,12 +30,8 @@ import models.laboratory.sample.instance.Sample;
 import models.utils.InstanceConstants;
 import models.utils.InstanceHelpers;
 import models.utils.dao.DAOException;
-// import play.Logger;
-// import play.Play;
-// import play.api.modules.spring.Spring;
 import rules.services.RulesException;
 import rules.services.RulesServices;
-import scala.concurrent.duration.FiniteDuration;
 import services.instance.AbstractImportDataCNS;
 import validation.ContextValidation;
 import validation.run.instance.LaneValidationHelper;
@@ -47,20 +43,21 @@ public class RunImportCNS extends AbstractImportDataCNS {
 	@SuppressWarnings("hiding")
 	private static final play.Logger.ALogger logger = play.Logger.of(RunImportCNS.class);
 	
-	// final static RunWorkflows workflows = Spring.get BeanOfType(RunWorkflows.class);
 	private final RunWorkflows workflows;
-	
+
 	@Inject
-	public RunImportCNS(FiniteDuration durationFromStart,
-			            FiniteDuration durationFromNextIteration, 
-			            NGLContext ctx, 
-			            RunWorkflows workflows) {
-		super("RunCNS",durationFromStart, durationFromNextIteration, ctx);
+	public RunImportCNS(NGLApplication app, RunWorkflows workflows) {
+		super("RunCNS", app);
 		this.workflows = workflows;
 	}
 
+//	@Override
+//	public void runImport() throws SQLException, DAOException, MongoException, RulesException {
+//		createRuns("pl_RunToNGL",contextError);
+//	}
+
 	@Override
-	public void runImport() throws SQLException, DAOException, MongoException, RulesException {
+	public void runImport(ContextValidation contextError) throws SQLException, DAOException, MongoException, RulesException {
 		createRuns("pl_RunToNGL",contextError);
 	}
 
@@ -71,10 +68,12 @@ public class RunImportCNS extends AbstractImportDataCNS {
 		List<Run> newRuns=new ArrayList<>();
 		String rootKeyName=null;
 
-		for(Run run:runs){
-			if(run!=null) {
+		for (Run run : runs) {
+			if (run != null) {
 				rootKeyName="run["+run.code+"]";
-				ContextValidation ctx=new ContextValidation(Constants.NGL_DATA_USER);
+//				ContextValidation ctx = new ContextValidation(Constants.NGL_DATA_USER);
+//				ctx.setCreationMode();
+				ContextValidation ctx = ContextValidation.createCreationContext(Constants.NGL_DATA_USER);
 				ctx.addKeyToRootKeyName(rootKeyName);
 
 				//Save Run du Lims si n'existe pas ou n'est pas transféré dans NGL
@@ -82,14 +81,15 @@ public class RunImportCNS extends AbstractImportDataCNS {
 				if (newRun == null) {
 					logger.debug("Save Run "+run.code + " mode "+contextError.getMode());
 //					newRun=(Run) InstanceHelpers.save(InstanceConstants.RUN_ILLUMINA_COLL_NAME, run, ctx, true);
-					newRun = InstanceHelpers.save(InstanceConstants.RUN_ILLUMINA_COLL_NAME, run, ctx, true);
+					newRun = InstanceHelpers.save(ctx, InstanceConstants.RUN_ILLUMINA_COLL_NAME, run, true);
 				} else {
 
 					logger.debug("Update Run "+run.code + " mode "+contextError.getMode());	
-					ctx.setCreationMode();
+//					ctx.setCreationMode();
 					ctx.putObject("level", Level.CODE.Run);
 					ctx.putObject("run", run);
-					run.treatments.get("ngsrg").validate(ctx);
+//					run.treatments.get("ngsrg").validate(ctx);
+					run.treatments.get("ngsrg").validate(ctx, run);
 
 					if (!ctx.hasErrors()) {
 						
@@ -114,7 +114,7 @@ public class RunImportCNS extends AbstractImportDataCNS {
 				}
 
 				if(ctx.hasErrors()){
-					contextError.errors.putAll(ctx.errors);
+					contextError.getErrors().putAll(ctx.getErrors());
 				}
 
 				ctx.removeKeyFromRootKeyName(rootKeyName);
@@ -125,20 +125,21 @@ public class RunImportCNS extends AbstractImportDataCNS {
 		List<Run> updateRuns=new ArrayList<>();
 
 		for (Run run:newRuns) {
-			ContextValidation contextValidation=new ContextValidation(Constants.NGL_DATA_USER);
+			ContextValidation contextValidation = ContextValidation.createUndefinedContext(Constants.NGL_DATA_USER);
 			logger.debug("Create ReadSet from Run "+run.code);
 			createReadSetFromRun(run, contextValidation);
 
 			Run newRun = MongoDBDAO.findByCode(InstanceConstants.RUN_ILLUMINA_COLL_NAME, Run.class, run.code);
-			if(!contextValidation.hasErrors()){
+			if (!contextValidation.hasErrors()) {
 				List<Object> list=new ArrayList<>();
 				list.add(newRun);
 				try {
 					logger.debug("Run Rules from Run "+run.code);
 					// new RulesServices().callRules(Play.application().configuration().getString("rules.key"),"F_RG_1",list);
-					new RulesServices().callRules(ctx.getRulesKey(),"F_RG_1",list);
+//					new RulesServices().callRules(app.getRulesKey(),"F_RG_1",list);
+					new RulesServices().callRules(app.nglConfig().getRulesKey(),"F_RG_1",list);
 				} catch (Exception e) {
-					contextValidation.addErrors("rules", e.toString()+ "runCode :"+run.code, run.code);
+					contextValidation.addError("rules", e.toString()+ "runCode :"+run.code, run.code);
 				}
 				workflows.nextState(contextValidation, newRun);
 			}
@@ -146,7 +147,7 @@ public class RunImportCNS extends AbstractImportDataCNS {
 			if (!contextValidation.hasErrors()) {
 				updateRuns.add(run);
 			} else {
-				contextError.errors.putAll(contextValidation.errors);
+				contextError.getErrors().putAll(contextValidation.getErrors());
 			}			
 
 		}		
@@ -156,11 +157,11 @@ public class RunImportCNS extends AbstractImportDataCNS {
 
 
 	public static State fusionRunStateHistorical(State newState, State oldState) {
-		if(null != newState && null != oldState && null != newState.historical && null != oldState.historical){
+		if (newState != null && oldState != null && newState.historical != null && oldState.historical != null) {
 			newState.historical.addAll(oldState.historical);
 			//sort by date
 			
-			Collections.sort(new ArrayList<>(newState.historical), new Comparator<TransientState>(){
+			Collections.sort(new ArrayList<>(newState.historical), new Comparator<TransientState>() {
 				@Override
 				public int compare(TransientState state1, TransientState state2) {
 					return state1.date.compareTo(state2.date);
@@ -169,7 +170,7 @@ public class RunImportCNS extends AbstractImportDataCNS {
 			
 			//re-compute index
 			int index = 0;
-			for(TransientState ts : newState.historical){
+			for (TransientState ts : newState.historical) {
 				ts.index = index++;
 			}
 		}
@@ -177,21 +178,25 @@ public class RunImportCNS extends AbstractImportDataCNS {
 		return newState;
 	}
 
-	public static Run createLaneFromRun(Run newRun,ContextValidation contextError) throws SQLException{
-		logger.debug("Create Lanes from Run "+newRun.code);
-		List<Lane> lanes=limsServices.findLanesToCreateFromRun(newRun, contextError);
-		//Save TreatmentLane
-		ContextValidation contextErrorValidation = new ContextValidation(Constants.NGL_DATA_USER);
+	public static Run createLaneFromRun(Run newRun,ContextValidation contextError) throws SQLException {
+//		logger.debug("Create Lanes from Run "+newRun.code);
+		logger.debug("Create Lanes from Run {}", newRun.code);
+		List<Lane> lanes = limsServices.findLanesToCreateFromRun(newRun, contextError);
+		// Save TreatmentLane
+//		ContextValidation contextErrorValidation = new ContextValidation(Constants.NGL_DATA_USER);
+//		contextErrorValidation.setCreationMode();
+		ContextValidation contextErrorValidation = ContextValidation.createCreationContext(Constants.NGL_DATA_USER);
 		contextErrorValidation.addKeyToRootKeyName(contextError.getRootKeyName());
-		contextErrorValidation.putObject("run",newRun);
+		contextErrorValidation.putObject("run", newRun);
 
-		//Pas de lanes dans le run alors creation
-		if(newRun.lanes==null){
+		// Pas de lanes dans le run alors creation
+		if (newRun.lanes == null) {
 
-			contextErrorValidation.setCreationMode();
-			LaneValidationHelper.validationLanes(lanes, contextErrorValidation);
+//			contextErrorValidation.setCreationMode();
+//			LaneValidationHelper.validationLanes(lanes, contextErrorValidation);
+			LaneValidationHelper.validateLanes(contextErrorValidation, newRun, lanes);
 
-			if(!contextErrorValidation.hasErrors()){
+			if (!contextErrorValidation.hasErrors()) {
 				for(Lane lane : lanes){
 
 					MongoDBDAO.update(InstanceConstants.RUN_ILLUMINA_COLL_NAME, Run.class, 
@@ -203,15 +208,16 @@ public class RunImportCNS extends AbstractImportDataCNS {
 			}
 			//creation traitements ngsrg
 		} else {
-			for (Lane lane:lanes) {
-				for(String treatmentKey:lane.treatments.keySet()){
-					if(treatmentKey.equals("ngsrg")){
-						Treatment treatment=lane.treatments.get("ngsrg");
-						contextErrorValidation.setCreationMode();
+			for (Lane lane : lanes) {
+				for (String treatmentKey : lane.treatments.keySet()) {
+					if (treatmentKey.equals("ngsrg")) {
+						Treatment treatment = lane.treatments.get("ngsrg");
+//						contextErrorValidation.setCreationMode();
 						contextErrorValidation.putObject("level", Level.CODE.Lane);
 						contextErrorValidation.putObject("lane", lane);
-						treatment.validate(contextErrorValidation);
-						if(!contextErrorValidation.hasErrors()){
+//						treatment.validate(contextErrorValidation);
+						treatment.validate(contextErrorValidation, newRun, lane);
+						if (!contextErrorValidation.hasErrors()) {
 							MongoDBDAO.update(InstanceConstants.RUN_ILLUMINA_COLL_NAME, Run.class, 
 									DBQuery.and(DBQuery.is("code", newRun.code), DBQuery.is("lanes.number", lane.number)),
 									DBUpdate.set("lanes.$.treatments."+treatment.code, treatment));
@@ -222,25 +228,25 @@ public class RunImportCNS extends AbstractImportDataCNS {
 			}
 		}
 
-		if(contextErrorValidation.hasErrors()){
-			contextError.errors.putAll(contextErrorValidation.errors);
+		if (contextErrorValidation.hasErrors()) {
+			contextError.getErrors().putAll(contextErrorValidation.getErrors());
 			return null;
-		}else {
+		} else {
 			return newRun;
 		}
 	}
 
-	public static void createFileFromReadSet(ReadSet readSet,ContextValidation ctxVal) throws SQLException{
+	public static void createFileFromReadSet(ReadSet readSet, ContextValidation ctxVal) throws SQLException {
 		List<File> files = limsServices.findFileToCreateFromReadSet(readSet,ctxVal);
-		String rootKeyName=null;
-		for(File file:files){
-			rootKeyName="file["+file.fullname+"]";
+		String rootKeyName = null;
+		for (File file:files) {
+			rootKeyName = "file[" + file.fullname + "]";
 
 			ctxVal.addKeyToRootKeyName(rootKeyName);
 			ctxVal.putObject("readSet", readSet);
 			ctxVal.setCreationMode();
-			file.validate(ctxVal);
-
+//			file.validate(ctxVal);
+			file.validate(ctxVal, readSet);
 			if (!ctxVal.hasErrors()) {
 				MongoDBDAO.update(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, 
 						DBQuery.is("code", readSet.code),
@@ -255,27 +261,27 @@ public class RunImportCNS extends AbstractImportDataCNS {
 
 		List<ReadSet> newReadSets = new ArrayList<>();
 
-		//Delete old readSet from run
-		if(MongoDBDAO.checkObjectExist(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, DBQuery.is("runCode", run.code))){
+		// Delete old readSet from run
+		if (MongoDBDAO.checkObjectExist(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, DBQuery.is("runCode", run.code))) {
 			MongoDBDAO.delete(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, DBQuery.is("runCode", run.code));
 		}
 
 		List<ReadSet> readSets=limsServices.findReadSetToCreateFromRun(run,contextValidation);
 
-		if(!contextValidation.hasErrors() && readSets.size()!=0){
-			for(ReadSet readSet:readSets){
+		if (!contextValidation.hasErrors() && readSets.size() != 0) {
+			for (ReadSet readSet:readSets) {
 				String rootKeyName="readSet["+readSet.code+"]";
 				contextValidation.addKeyToRootKeyName(rootKeyName);
 
-				if (!MongoDBDAO.checkObjectExistByCode(InstanceConstants.SAMPLE_COLL_NAME,Sample.class,readSet.sampleCode)){
+				if (!MongoDBDAO.checkObjectExistByCode(InstanceConstants.SAMPLE_COLL_NAME,Sample.class,readSet.sampleCode)) {
 
 					Sample sample =limsServices.findSampleToCreate(contextValidation, readSet.sampleCode);
-					if(sample!=null){
-						InstanceHelpers.save(InstanceConstants.SAMPLE_COLL_NAME,sample,contextValidation,true);
+					if (sample != null) {
+						InstanceHelpers.save(contextValidation,InstanceConstants.SAMPLE_COLL_NAME,sample,true);
 					}
 				}
 
-				InstanceHelpers.save(InstanceConstants.READSET_ILLUMINA_COLL_NAME, readSet, contextValidation,true);
+				InstanceHelpers.save(contextValidation, InstanceConstants.READSET_ILLUMINA_COLL_NAME, readSet,true);
 
 				if(!contextValidation.hasErrors()){
 
@@ -294,7 +300,7 @@ public class RunImportCNS extends AbstractImportDataCNS {
 						MongoDBDAO.update(InstanceConstants.READSET_ILLUMINA_COLL_NAME,  ReadSet.class, 
 								DBQuery.is("code", readSet.code), DBUpdate.set("sampleOnContainer", sampleOnContainer));
 					}else{
-						contextValidation.addErrors( "sampleOneContainer", "error.codeNotExist");
+						contextValidation.addError( "sampleOneContainer", "error.codeNotExist");
 					}
 
 					if(!contextValidation.hasErrors()){

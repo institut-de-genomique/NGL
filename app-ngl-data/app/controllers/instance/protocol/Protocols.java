@@ -2,13 +2,11 @@ package controllers.instance.protocol;
 
 import javax.inject.Inject;
 
-import fr.cea.ig.ngl.NGLConfig;
 import models.Constants;
+import nglapps.DataService;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
-import services.instance.protocol.ProtocolServiceCNG;
-import services.instance.protocol.ProtocolServiceCNS;
 import validation.ContextValidation;
 
 public class Protocols extends Controller { // NGLBaseController { //CommonController {
@@ -20,16 +18,24 @@ public class Protocols extends Controller { // NGLBaseController { //CommonContr
 //		super(ctx);
 //	}
 	
-	private final String institute;
+//	private final String institute;
+//	
+//	@Inject
+//	public Protocols(NGLConfig config) {
+//		institute = config.getInstitute();
+//	}
+	
+	private final DataService dataService;
 	
 	@Inject
-	public Protocols(NGLConfig config) {
-		institute = config.getInstitute();
+	public Protocols(DataService dataService) {
+		this.dataService = dataService;
 	}
 	
 	public Result save() {
-		ContextValidation ctx = new ContextValidation(Constants.NGL_DATA_USER);
-		ctx.setCreationMode();
+//		ContextValidation ctx = new ContextValidation(Constants.NGL_DATA_USER);
+//		ctx.setCreationMode();
+		ContextValidation ctx = ContextValidation.createCreationContext(Constants.NGL_DATA_USER);
 		try {
 //			if (play.Play.application().configuration().getString("institute").equals("CNS")) {
 //				ProtocolServiceCNS.main(ctx);
@@ -40,15 +46,16 @@ public class Protocols extends Controller { // NGLBaseController { //CommonContr
 //			} else {
 //				logger.error("You need to specify only one institute ! Now, it's "+ play.Play.application().configuration().getString("institute"));
 //			}
-			switch (institute) {
-			case "CNS"  : ProtocolServiceCNS.main(ctx); break;
-			case "CNG"  : ProtocolServiceCNG.main(ctx); break;
-			case "TEST" : ProtocolServiceCNS.main(ctx); break;
-			default     : logger.error("You need to specify only one institute ! Now, it's {}", institute);
-			}
-			if (ctx.errors.size() > 0) {
+//			switch (institute) {
+//			case "CNS"  : ProtocolServiceCNS.main(ctx); break;
+//			case "CNG"  : ProtocolServiceCNG.main(ctx); break;
+//			case "TEST" : ProtocolServiceCNS.main(ctx); break;
+//			default     : logger.error("You need to specify only one institute ! Now, it's {}", institute);
+//			}
+			dataService.saveProtocolData(ctx);
+			if (ctx.getErrors().size() > 0) {
 				ctx.displayErrors(logger);
-				return badRequest(Json.toJson(ctx.errors));
+				return badRequest(Json.toJson(ctx.getErrors()));
 			} else {
 				return ok();
 			}

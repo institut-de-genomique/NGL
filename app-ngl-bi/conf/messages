@@ -46,7 +46,7 @@ search.tab.addcolumns = Colonnes supplémentaires
 search.tab.addfilters = Filtres supplémentaires
 search.tab.filters = Filtres
 search.tab.expSearchMode = Experimental search mode
-search.tab.aggregateSearchMode = Aggregate query
+
 
 valuation.menu = Evaluation
 valuation.menu.runs = Runs
@@ -108,6 +108,7 @@ search.placeholder.analyseValuationUser = Analyse évaluée par :
 search.placeholder.stats.configuration = Configuration
 search.placeholder.treatment = Traitement
 
+
 search.placeholder.fromEndRGDate = Fin RG depuis le (jj/mm/aaaa)
 search.placeholder.toEndRGDate = Fin RG jusqu''au (jj/mm/aaaa)
 
@@ -116,6 +117,8 @@ search.placeholder.toEvalDate = Eval. jusqu''au (jj/mm/aaaa)
 
 search.placeholder.userLogin = Login utilisateur
 search.placeHolder.config.context = Contexte
+
+search.placeholder.fromAbundanceClusterPercentSum= Somme % abundance (extraction ou pcr1 ou pcr2)
 
 button.search = Rechercher
 button.reset = Réinitialiser
@@ -303,6 +306,8 @@ sequencingProgramType.value.SR = Single Read
 
 runs.treatments.images.margin=25
 
+readsets.treatments.contaminationPCR = Contam. PCR
+readsets.treatments.taxonomyPcrDecontam = Taxonomy (vs PASS)
 ############
 #
 # READSETS
@@ -376,6 +381,7 @@ readsets.treatments.contamination.removedReads = Removed reads
 readsets.treatments.contamination.remainingReads = Remaining reads 
 readsets.treatments.contamination.removedReadsPercent = % removed reads
 readsets.treatments.contamination.remainingNucleotides = Reamining nucleotides
+readsets.treatments.contamination.contadb = PCR contaminant database used
 
 readsets.treatments.duplicates.estimateDuplicatedReads = Estimation de lectures dupliquées
 readsets.treatments.duplicates.estimateDuplicatedReadsPercent = Estimation % lectures dupliquées
@@ -751,7 +757,15 @@ readsets.treatments.chromium.numberReads=Number of reads
 readsets.treatments.chromium.read1Q30BaseRatio=Q30 of read 1
 readsets.treatments.chromium.read2Q30BaseRatio=Q30 of read 2
 
-readsets.treatments.ClustersDbAssignation=Clusters Db Assignation
+readsets.treatments.checkFastqIndex=Check Fastq Index
+readsets.treatments.checkFastqIndex.kmersBilan.kmer=Kmer
+readsets.treatments.checkFastqIndex.kmersBilan.kmerName=Nom Kmer
+readsets.treatments.checkFastqIndex.kmersBilan.kmerNumber=Nb. Kmer
+readsets.treatments.checkFastqIndex.kmersBilan.kmerPercent=Pourcent. Kmer
+readsets.treatments.checkFastqIndex.expectedSequences=Séquences attendues
+filterKmerPercent = Seuil % Kmer
+
+readsets.treatments.clustersDbAssignation=Clusters Db Assignation
 readsets.files.fullname = Nom du fichier
 readsets.files.typeCode = Type de fichier
 readsets.files.usable = Utilisable
@@ -908,6 +922,7 @@ treatments.assignation.assignationBilan.cluster=Cluster
 treatments.assignation.assignationBilan.otu=OTU
 treatments.assignation.assignationBilan.abundance=Abundance
 treatments.assignation.assignationBilan.abundanceClusterPercent=Abundance readset %
+treatments.assignation.assignationBilan.abundanceControlPercent=Abundance témoin %
 treatments.assignation.assignationBilan.taxonomy=Taxonomy
 treatments.assignation.assignationBilan.idPercent=% id
 treatments.assignation.assignationBilan.matchLength=% match length
@@ -1034,10 +1049,11 @@ balanceSheets.value = Valeur
 balanceSheets.noSampleTypeCode = default-sample-cns
 balanceSheets.percentageForTenProjects = Pourcentage sur dix projets
 balanceSheets.percentageForYear = Pourcentage sur cette année
-
+balanceSheets.nbAborted = Nb. en echec
+balanceSheets.total = Total
 balanceSheets.info.projectType = * Les readsets en cours de Read Generation ont le type d''échantillon ''non défini'' tant que le transfert n''est pas terminé.
 balanceSheets.danger.noData = Aucune donnée pour cette année
-
+balanceSheets.sumNoAborting = Total (hors échec)
 
 balanceSheets.export.firstTen = 10Projets
 balanceSheets.export.sequencingType = TypeSeq
@@ -1052,6 +1068,7 @@ balanceSheets.tab.sequencingType = Bilan par type séquençage
 balanceSheets.tab.firstTen = Bilan des 10 premiers projets de cette année
 balanceSheets.tab.quarters = Bilan par trimestre
 balanceSheets.tab.projectType = Bilan par type d''échantillon *
+balanceSheets.tab.runType = Bilan mensuel par type séquençage
 
 balanceSheets.january = Janvier
 balanceSheets.february = Février

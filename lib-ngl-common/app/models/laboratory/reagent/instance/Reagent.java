@@ -1,16 +1,21 @@
 package models.laboratory.reagent.instance;
 
 import java.util.Date;
+import java.util.function.Supplier;
 
 import models.laboratory.common.description.State;
 import models.utils.InstanceConstants;
+import ngl.refactoring.MiniDAO;
 import validation.ContextValidation;
 import validation.reagent.instance.ReagentValidationHelper;
 import validation.utils.ValidationHelper;
 
 public class Reagent extends AbstractDeclaration {
 	
-	public String boxCode;//To delete
+	public static final Supplier<MiniDAO<Reagent>> find        = MiniDAO.createSupplier(InstanceConstants.REAGENT_INSTANCE_COLL_NAME, Reagent.class); 
+	public static final Supplier<MiniDAO<Reagent>> catalogFind = MiniDAO.createSupplier(InstanceConstants.REAGENT_CATALOG_COLL_NAME,  Reagent.class); 
+	
+	public String boxCode; // To delete
 	
 	public String catalogCode;
 	public String boxBarCode;
@@ -32,16 +37,16 @@ public class Reagent extends AbstractDeclaration {
 
 	@Override
 	public void validate(ContextValidation contextValidation) {
-		ValidationHelper.required(contextValidation, code, "code");
-		ValidationHelper.required(contextValidation, catalogCode, "catalogCode");
-		ValidationHelper.required(contextValidation, providerID, "providerID");
-		ValidationHelper.required(contextValidation, receptionDate, "receptionDate");
-		ValidationHelper.required(contextValidation, expirationDate, "expirationDate");
-		ValidationHelper.required(contextValidation, state, "state");
-		ValidationHelper.required(contextValidation, orderCode, "orderCode");
+		ValidationHelper.validateNotEmpty(contextValidation, code,           "code");
+		ValidationHelper.validateNotEmpty(contextValidation, catalogCode,    "catalogCode");
+		ValidationHelper.validateNotEmpty(contextValidation, providerID,     "providerID");
+		ValidationHelper.validateNotEmpty(contextValidation, receptionDate,  "receptionDate");
+		ValidationHelper.validateNotEmpty(contextValidation, expirationDate, "expirationDate");
+		ValidationHelper.validateNotEmpty(contextValidation, state,          "state");
+		ValidationHelper.validateNotEmpty(contextValidation, orderCode,      "orderCode");
 
 		if (!contextValidation.hasErrors()) {
-			ReagentValidationHelper.validateCode(this, InstanceConstants.REAGENT_INSTANCE_COLL_NAME, contextValidation);
+			ReagentValidationHelper.validateCodePrimary(contextValidation, this, InstanceConstants.REAGENT_INSTANCE_COLL_NAME);
 			ReagentValidationHelper.validateReagentCatalogCode(catalogCode, contextValidation);
 		}
 	}

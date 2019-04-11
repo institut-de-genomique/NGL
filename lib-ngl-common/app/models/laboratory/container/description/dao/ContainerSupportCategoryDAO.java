@@ -29,7 +29,7 @@ public class ContainerSupportCategoryDAO extends AbstractDAOMapping<ContainerSup
 	@Override
 	public long save(ContainerSupportCategory containerSupportCategory) throws DAOException {
 		//Check if category exist
-		if(containerSupportCategory.containerCategory == null || containerSupportCategory.containerCategory.id == null){
+		if (containerSupportCategory.containerCategory == null || containerSupportCategory.containerCategory.id == null){
 			throw new IllegalArgumentException("ContainerCategory is not present ");
 		}
 		Map<String, Object> parameters = new HashMap<>();

@@ -1,6 +1,8 @@
 // FDS 09/04/2018 - copiee depuis pcr-and-indexing-ctrl
-angular.module('home').controller('BisSeqLibPrepCtrl',['$scope', '$parse',  '$filter', 'atmToSingleDatatable','$http',
-                                                     function($scope, $parse, $filter, atmToSingleDatatable, $http){
+// 22/06/2018 utilisation de la factory tagPlates dans le module tools (tag-plate-helpers.js)
+// 03/11/2018 deplacement du module tools pour le rendre dispo a tous les instituts et toutes les experiences
+angular.module('home').controller('BisSeqLibPrepCtrl',['$scope', '$parse',  '$filter', 'atmToSingleDatatable','$http','tagPlates',
+                                               function($scope,   $parse,    $filter,   atmToSingleDatatable,  $http,  tagPlates ){
 	
 	var inputExtraHeaders=Messages("experiments.inputs");
 	var outputExtraHeaders=Messages("experiments.outputs");	
@@ -192,10 +194,8 @@ angular.module('home').controller('BisSeqLibPrepCtrl',['$scope', '$parse',  '$fi
 				"dynamic":true,
 			},
 			"otherButtons": {
-				//30/08/2017 plus de volume in donc plus besoin de bouton de copie de volume...
 			}
-	}; // fin struct datatableConfig
-	
+	}; // fin struct datatableConfig	
 	
 	$scope.$on('save', function(e, callbackFunction) {	
 		console.log("call event save");
@@ -205,9 +205,7 @@ angular.module('home').controller('BisSeqLibPrepCtrl',['$scope', '$parse',  '$fi
 	});
 	
 	var copyContainerSupportCodeAndStorageCodeToDT = function(datatable){
-
-		var dataMain = datatable.getData();
-		
+		var dataMain = datatable.getData();	
 		var outputContainerSupportCode = $scope.outputContainerSupport.code;
 		var outputContainerSupportStorageCode = $scope.outputContainerSupport.storageCode;
 
@@ -227,7 +225,6 @@ angular.module('home').controller('BisSeqLibPrepCtrl',['$scope', '$parse',  '$fi
 		}
 	}
 	
-	// ajout showButton + suppression start = false;
 	$scope.$on('refresh', function(e) {
 		console.log("call event refresh");		
 		var dtConfig = $scope.atmService.data.getConfig();
@@ -258,11 +255,17 @@ angular.module('home').controller('BisSeqLibPrepCtrl',['$scope', '$parse',  '$fi
 		$scope.atmService.data.setEdit();
 	});
 	
+	//05/10/2018 seule la sortie en plaque est geree ==> forcer (pour le cas instrument=main)
+	$scope.$watch("experiment.instrument.outContainerSupportCategoryCode", function(){
+		$scope.experiment.instrument.outContainerSupportCategoryCode = "96-well-plate";
+	});
 		
 	//Init
 	
 	var atmService = atmToSingleDatatable($scope, datatableConfig);
+	
 	//defined new atomictransfertMethod
+	// 05/10/2018 attention : ne gere pas la sortie en tubes !!!
 	atmService.newAtomicTransfertMethod = function(l, c){
 		return {
 			class:"OneToOne",
@@ -278,9 +281,25 @@ angular.module('home').controller('BisSeqLibPrepCtrl',['$scope', '$parse',  '$fi
 			volume : "µL"
 	};
 	
+	// NGL-1350 aide a la saisie des index
+	// !! les surcharges doivent etre faites avant experimentToView 
+	atmService.convertOutputPropertiesToDatatableColumn = function(property, pName){
+		var column = atmService.$commonATM.convertTypePropertyToDatatableColumn(property,"outputContainerUsed."+pName+".",{"0":Messages("experiments.outputs")});
+		if(property.code==="tag"){
+			// amelioration: afficher le nom aux utilisateurs et pas le code 
+			//column.editTemplate='<input class="form-control" type="text" #ng-model typeahead="tag.code as tag.code for tag in getTags() | filter:{groupNames:selectedTagGroup.value} | filter:{code:$viewValue} | limitTo:20" typeahead-min-length="1" udt-change="updatePropertyFromUDT(value,col)"/>';  
+			//column.editTemplate='<input class="form-control" type="text" #ng-model typeahead="tag.code as tag.name for tag in getTags() | filter:{groupNames:selectedTagGroup.value} | filter:{name:$viewValue} | limitTo:20" typeahead-min-length="1" udt-change="updatePropertyFromUDT(value,col)"/>'; 
+			// NGL-2246: utiliser bt-select au lieu input / GA: for tag in <variable> au lieu de for tag in <function>
+			//column.editTemplate='<div class="form-control" bt-select  #ng-model filter="true" bt-options="tag.code as tag.name for tag in tags" udt-change="updatePropertyFromUDT(value,col)" /></div>';
+			column.editTemplate='<div class="form-control" bt-select  #ng-model filter="true" bt-options="tag.code as tag.name for tag in lists.getTags()" udt-change="updatePropertyFromUDT(value,col)" /></div>';
+			
+		}
+		return column;
+	};
+	
 	atmService.experimentToView($scope.experiment, $scope.experimentType);
 	
-	// 28/08/2017 OK countInputSupportCodes
+	// a ameliorer...
 	if ( $scope.countInputSupportCodes() > 1) {
 		console.log(" > 1 support en entree");
 		
@@ -293,13 +312,22 @@ angular.module('home').controller('BisSeqLibPrepCtrl',['$scope', '$parse',  '$fi
 		$scope.atmService = atmService;
 	}
 	
-	
 	var importData = function(){
 		$scope.messages.clear();
+		
+		// 22/10/2018 pour permettre l'import de fichier workbook par 'main' utiliser  "extra-instrument"   pour forcer
+		//  dans ExperimentService on a  pour "bissseq-lib-prep" :getInstrumentUsedTypes("sciclone-ngsx-and-zephyr","tecan-evo-150-and-zephyr","hand"), 
+		//  en fait les 2 intruments utilisent tous les 2 la classe Input de covarisandsciclone, mais on ne peut pas l'utiliser directement ici
+		//   => simuler l'appel a sciclonengsxandzephyr
+		var queryString='';// si null ou undefined plante Chrome !!!
+		
+		if ( $scope.experiment.instrument.categoryCode === "hand"){
+			queryString="?extraInstrument=sciclonengsxandzephyr";
+			console.log("'hand' remplacé par 'sciclonengsxandzephyr'...");
+		}
 
-		$http.post(jsRoutes.controllers.instruments.io.IO.importFile($scope.experiment.code).url, $scope.file)
-		.success(function(data, status, headers, config) {
-			
+		$http.post(jsRoutes.controllers.instruments.io.IO.importFile($scope.experiment.code).url+queryString, $scope.file)
+		.success(function(data, status, headers, config) {	
 			$scope.messages.clazz="alert alert-success";
 			$scope.messages.text=Messages('experiments.msg.import.success');
 			$scope.messages.showDetails = false;
@@ -309,11 +337,9 @@ angular.module('home').controller('BisSeqLibPrepCtrl',['$scope', '$parse',  '$fi
 			$scope.file = undefined;
 			// reinit select File...
 			angular.element('#importFile')[0].value = null;
-			$scope.$emit('refresh');
-			
+			$scope.$emit('refresh');		
 		})
-		.error(function(data, status, headers, config) {
-			
+		.error(function(data, status, headers, config) {		
 			$scope.messages.clazz = "alert alert-danger";
 			$scope.messages.text = Messages('experiments.msg.import.error');
 			$scope.messages.setDetails(data);
@@ -334,11 +360,10 @@ angular.module('home').controller('BisSeqLibPrepCtrl',['$scope', '$parse',  '$fi
 		//console.log("previous storageCode: "+ $scope.outputContainerSupport.storageCode);
 	}
 	
-	// importer un fichier definissant quels index sont déposés dans quels containers
-	// NGL-2012 :Ajouter les permissions pour admin; supprimer condition sur EditMode
+	// importer un fichier definissant quels index sont déposés dans quels containers;  NGL-2296 les import de fichiers ne marchent que a InProgress
 	$scope.button = {
 		isShow:function(){
-			return ( $scope.isInProgressState() || Permissions.check("admin") );
+			return ( $scope.isInProgressState() || Permissions.check("admin") ) ;
 			},
 		isFileSet:function(){
 			return ($scope.file === undefined)?"disabled":"";
@@ -346,137 +371,71 @@ angular.module('home').controller('BisSeqLibPrepCtrl',['$scope', '$parse',  '$fi
 		click:importData
 	};
 	
-	// Autre mode possible : utiliser une plaque d'index prédéfinis, l'utilisateur a juste a indiquer a partir de quelle colonne
-	// de cette plaque le robot doit prelever les index
-
+	// Autre mode possible : utiliser une plaque d'index prédéfinis, l'utilisateur a juste a indiquer a partir de quelle colonne de cette plaque le robot doit prelever les index
 	$scope.columns = [ {name:'---', position: undefined },
 	                   {name:'1', position:0}, {name:'2', position:8}, {name:'3', position:16}, {name:'4',  position:24}, {name:'5',  position:32}, {name:'6',  position:40},
 	                   {name:'7', position:48},{name:'8', position:56},{name:'9', position:64}, {name:'10', position:72}, {name:'11', position:80}, {name:'12', position:88}
 	                 ];
-	$scope.tagPlateColumn = $scope.columns[0]; // defaut du select
-
-	$scope.plates = [ {name:"NUGEN Ovation Ultralow Methyl-Seq System 1-96",   tagCategory:"SINGLE-INDEX", tags:[] } ];
-
-	// l'indice dans le tableau correspond a l'ordre "colonne d'abord" dans la plaque
-	// !! ce sont les codes des index qu'il faut mettre ici !!
-	//                             A         B         C         D         E         F         G         H
-	$scope.plates[0].tags.push("nuo-01", "nuo-13", "nuo-25", "nuo-37", "nuo-49", "nuo-61", "nuo-73", "nuo-85"); //colonne 1
-	$scope.plates[0].tags.push("nuo-02", "nuo-14", "nuo-26", "nuo-38", "nuo-50", "nuo-62", "nuo-74", "nuo-86"); //colonne 2
-	$scope.plates[0].tags.push("nuo-03", "nuo-15", "nuo-27", "nuo-39", "nuo-51", "nuo-63", "nuo-75", "nuo-87"); //colonne 3
-	$scope.plates[0].tags.push("nuo-04", "nuo-16", "nuo-28", "nuo-40", "nuo-52", "nuo-64", "nuo-76", "nuo-88"); //colonne 4
-	$scope.plates[0].tags.push("nuo-05", "nuo-17", "nuo-29", "nuo-41", "nuo-53", "nuo-65", "nuo-77", "nuo-89"); //colonne 5
-	$scope.plates[0].tags.push("nuo-06", "nuo-18", "nuo-30", "nuo-42", "nuo-54", "nuo-66", "nuo-78", "nuo-90"); //colonne 6
-	$scope.plates[0].tags.push("nuo-07", "nuo-19", "nuo-31", "nuo-43", "nuo-55", "nuo-67", "nuo-79", "nuo-91"); //colonne 7	
-	$scope.plates[0].tags.push("nuo-08", "nuo-20", "nuo-32", "nuo-44", "nuo-56", "nuo-68", "nuo-80", "nuo-92"); //colonne 8
-	$scope.plates[0].tags.push("nuo-09", "nuo-21", "nuo-33", "nuo-45", "nuo-57", "nuo-69", "nuo-81", "nuo-93"); //colonne 9
-	$scope.plates[0].tags.push("nuo-10", "nuo-22", "nuo-34", "nuo-46", "nuo-58", "nuo-70", "nuo-82", "nuo-94"); //colonne 10
-	$scope.plates[0].tags.push("nuo-11", "nuo-23", "nuo-35", "nuo-47", "nuo-59", "nuo-71", "nuo-83", "nuo-95"); //colonne 11
-	$scope.plates[0].tags.push("nuo-12", "nuo-24", "nuo-36", "nuo-48", "nuo-60", "nuo-72", "nuo-84", "nuo-96"); //colonne 12
 	
+	$scope.tagPlateColumn = $scope.columns[0]; // defaut du select
+	
+	// 12/04/2018 NGL-2012 ne rien mettre par defaut !!!
+	$scope.plates=[];
+	$scope.plates.push( {name: "---",                                           tagCategory: undefined,      tags: undefined });
+	$scope.plates.push( {name:"NUGEN Ovation Ultralow Methyl-Seq System 1-96",  tagCategory: "SINGLE-INDEX", tags: tagPlates.populateIndex_Nuo96() });
 	
 	$scope.tagPlate = $scope.plates[0]; // defaut du select
 
-	//NGL-2012 - 11/03/2018: Nvel algorithme plus générique, capable de gérer des plaques d'index incomplètes...(repris de small-rnaseq-lib-prep-ctrl.js)
-	//TODO ==> algorithme utilisé dans 6 experiences: mettre dans un service pour eviter duplication !!!!
-	var setTags = function(){
-		$scope.messages.clear();
-			
-		console.log("selected plate is "+ $scope.tagPlate.name);
-		console.log("selected start column is " + $scope.tagPlateColumn.name);
-		console.log("selected start position is " + $scope.tagPlateColumn.position);
-		
-		var dataMain = atmService.data.getData();
-		// trier dans l'ordre "colonne d'abord"
-		var dataMain = $filter('orderBy')(dataMain, ['atomicTransfertMethod.column*1','atomicTransfertMethod.line']); 
-		
-		if (($scope.tagPlateColumn.name === '---' ) && ($scope.tagPlate.name === '---')){
-			// remise a 0 des selects par l'utilisateur ????=> nettoyage de ce qui a ete positionné precedemment
-			console.log("suppression des index ...");
-			
-			for(var i = 0; i < dataMain.length; i++){
-				var udtData = dataMain[i];
-				var ocu=udtData.outputContainerUsed;
-				ocu.experimentProperties["tag"]= undefined;
-				ocu.experimentProperties["tagCategory"]=undefined;
-			}	
-			atmService.data.setData(dataMain);
-			
-		} else if (($scope.tagPlateColumn.name !== '---' ) && ($scope.tagPlate.name !== '---')){		
- 
-			//attention certains choix de colonne sont incorrrects !!! 
-			//le controle doit porter sur la valeur maximale de colonne trouvee sur la plaque a indexer
-			//=>dernier puit si on a trié  dans l'ordre "colonne d'abord"
-			var last=dataMain.slice(-1)[0];
-			var lastInputCol=last.atomicTransfertMethod.column*1;
-			console.log("last col in input plate="+ lastInputCol);
-			
-			var lastTagCol=$scope.tagPlate.tags.length / 8;    // ce sont des colonnes de 8
-			console.log("last col in tag plate="+ lastTagCol);
-			
-			// meme en prennant tous les index possibles, il n'y en a pas assez dans la plaque !!
-			if ( lastTagCol < lastInputCol ){
-	        	$scope.messages.clazz="alert alert-danger";
-	        	$scope.messages.text=Messages('select.msg.error.notEnoughTags.tagPlate',$scope.tagPlate.name);
-	        	$scope.messages.showDetails = false;
-	        	$scope.messages.open();
-	        	return;
-			}
-			
-			// la colonne de debut choisie est vide
-			if ( $scope.tagPlateColumn.name*1 > lastTagCol){
-	        	$scope.messages.clazz="alert alert-danger";
-	        	$scope.messages.text=Messages('select.msg.error.emptyStartColumn.tagPlate', $scope.tagPlateColumn.name, $scope.tagPlate.name );
-	        	$scope.messages.showDetails = false;
-	        	$scope.messages.open();	
-	        	return;
-	        }
-				
-			// la colonne choisie est incorrecte (toutes les puits input ne recevront pas d'index) !!INTERDIT
-		    if ( (lastTagCol - $scope.tagPlateColumn.name*1  +1) < lastInputCol ) {   	
-	        	$scope.messages.clazz="alert alert-danger";
-	        	$scope.messages.text=Messages('select.msg.error.wrongStartColumn.tagPlate', $scope.tagPlateColumn.name);
-	        	$scope.messages.showDetails = false;
-	        	$scope.messages.open();	
-	        	return;
-	        }
-	
-			for(var i = 0; i < dataMain.length; i++){
-				var udtData = dataMain[i];
-				var ocu=udtData.outputContainerUsed;
-				//console.log("outputContainerUsed.code"+udtData.outputContainerUsed.code);
-
-				//calculer la position sur la plaque:   pos= (col -1)*8 + line      (line est le code ascii - 65)
-				var libPos= (udtData.atomicTransfertMethod.column  -1 )*8 + ( udtData.atomicTransfertMethod.line.charCodeAt(0) -65);
-				//console.log("lib pos=" +libPos);
-				var indexPos= libPos + $scope.tagPlateColumn.position; 
-				//console.log("index pos="+indexPos);
-				console.log("=> setting index "+indexPos+ ": "+ $scope.tagPlate.tags[indexPos] );
-				
-				//ajouter dans experimentProperties les PSV tagCategory et tag
-				var ocu=udtData.outputContainerUsed;
-				if(ocu.experimentProperties===undefined || ocu.experimentProperties===null){
-					ocu.experimentProperties={};
-				}
-				
-				// attention aux positions non definies des plaques d'index ( plaques de 48..) /// ne doit plus arriver avec les tests initiaux...
-				// reste le cas possible de plan d'index avec des trous ???
-				if ( $scope.tagPlate.tags[indexPos] !== undefined) {
-					ocu.experimentProperties["tag"]={"_type":"single","value":$scope.tagPlate.tags[indexPos]};
-					ocu.experimentProperties["tagCategory"]={"_type":"single","value":$scope.tagPlate.tagCategory};
-				}
-			}	
-			
-			atmService.data.setData(dataMain);
-		}
-		// dans le dernier cas rien a faire...
-	};
-	
-	// NGL-2012 :Ajouter les permissions pour admin; supprimer condition sur EditMode
+	// NGL-2012 :Ajouter les permissions pour admin; supprimer condition sur EditMode; NGL-2272 etre coherent, tous les boutons s'affichent au meme etat!!!
 	$scope.selectColOrPlate = {
 		isShow:function(){
 			return ( $scope.isInProgressState() || Permissions.check("admin") );
 		},	
-		select:setTags
+		select:function(){
+			return tagPlates.setTags($scope.tagPlate, $scope.tagPlateColumn, atmService, $scope.messages) 
+		}
 	};
+	
+	// 31/08/2018 NGL-1350 aide a la saisie des tags
+	// appeller initTags() isNewState() necessaire sinon ils ne sont pas initialisés au moment du chgt etat de l'experience a InProgress
+	if ( $scope.isNewState() || $scope.isInProgressState() || Permissions.check("admin") ){ 
+	   //29/10/2018 si pas de parametre passé a initTag => tous les types, sinon preciser !!! 2 valeurs existent: 'index-illumina-sequencing','index-nanopore-sequencing'
+	   tagPlates.initTags("index-illumina-sequencing");
+	   
+	   //test.. initialiser la liste par defaut ??? peut pas marcher tant que la promise dans initTags() n'est pas finie...
+	   //$scope.tags = tagPlates.getAllTags();
+	   //console.log('tags fini...');
+	   
+	   $scope.getTagGroups= function(){return tagPlates.getAllTagGroups()};
+	   $scope.selectedTagGroup= $scope.getTagGroups()[0]; // valeur defaut du select (qui maintenant existe car definie sans attendre le retour de la promise)
+	}
+
+	$scope.selectGroup = {
+			isShow:function(){
+				// NGL-2246 afficher dès l'etat Nouveau mais pour l'instant un bug existe: la liste de tous les tags n'est pas initialisée !!
+				return ( $scope.isNewState() || $scope.isInProgressState() || Permissions.check("admin") );
+			},
+			// NGL-2246 ajout / GA recuperer ici l'objet groupName
+		    select:function(groupName){       	
+		    	console.log( 'groupe choisi :'+  groupName.value );
+		    	
+	        	//GA: creer une variable $scope.tags au lieu de d'ecraser la fonction getTags
+	        	if (groupName.value === undefined ){ 
+        			//$scope.tags = tagPlates.getAllTags(); //!! L'affichage de TOUS les index dans le bt-select qui est long...
+        			$scope.lists.refresh.tags({typeCodes:['index-illumina-sequencing','index-nanopore-sequencing']});
+        		} else { 
+        			//$scope.tags = $filter('filter')(tagPlates.getAllTags(),{groupNames:groupName.value}, true);
+        			$scope.lists.refresh.tags({typeCodes:['index-illumina-sequencing','index-nanopore-sequencing'],groupNames:[groupName.value]});
+        		}
+		    }
+	};
+	
+	// 26/06/2018 ajout pour selection manuelle d'index
+	$scope.updatePropertyFromUDT = function(value, col){
+		//console.log("update from property : "+col.property);
+		if(col.property === 'outputContainerUsed.experimentProperties.tag.value'){
+			tagPlates.computeTagCategory(value.data);
+		}
+	}
 	
 }]);

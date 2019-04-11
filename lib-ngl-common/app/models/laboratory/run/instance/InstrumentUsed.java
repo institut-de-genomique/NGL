@@ -24,9 +24,9 @@ public class InstrumentUsed implements IValidation {
 	@Override
 	public void validate(ContextValidation contextValidation) {
 
-		CommonValidationHelper.validateRequiredDescriptionCode(contextValidation, this.code, "code", Instrument.find);
+		CommonValidationHelper.validateCodeForeignRequired(contextValidation, Instrument.miniFind.get(), this.code, "code");
 		
-		CommonValidationHelper.validateRequiredDescriptionCode(contextValidation, this.typeCode, "typeCode", InstrumentUsedType.find);
+		CommonValidationHelper.validateCodeForeignRequired(contextValidation, InstrumentUsedType.miniFind.get(), this.typeCode, "typeCode");
 		
 	}
 

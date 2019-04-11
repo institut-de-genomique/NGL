@@ -319,7 +319,12 @@ angular.module('home').controller('OneToVoidQCCtrl',['$scope', '$parse','$filter
 			extraHeaders:{
 				number:2,
 				dynamic:true,
-			}			
+			},
+			otherButtons: {
+				active: ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F')),
+	            complex:true,
+	            template:  ''
+			}
 	};
 	
 	// attention ce order by est prevu pour le CNS...Il doit ensuite etre surchargé dans chaque QC du CNG...
@@ -331,7 +336,7 @@ angular.module('home').controller('OneToVoidQCCtrl',['$scope', '$parse','$filter
 	
 	
 	$scope.$on('save', function(e, callbackFunction) {	
-		console.log("call event save on one-to-void");
+		console.log("call event save on one-to-void-qc");
 		$scope.atmService.data.save();			
 		$scope.atmService.viewToExperimentOneToVoid($scope.experiment);
 		$scope.copyPropertiesToInputContainer($scope.experiment); //override from child
@@ -339,7 +344,7 @@ angular.module('home').controller('OneToVoidQCCtrl',['$scope', '$parse','$filter
 	});
 	
 	$scope.$on('refresh', function(e) {
-		console.log("call event refresh on one-to-void");		
+		console.log("call event refresh on one-to-void-qc");		
 		var dtConfig = $scope.atmService.data.getConfig();
 		dtConfig.edit.active = ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F'));
 		dtConfig.edit.showButton = ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F'));
@@ -350,12 +355,12 @@ angular.module('home').controller('OneToVoidQCCtrl',['$scope', '$parse','$filter
 	});
 	
 	$scope.$on('cancel', function(e) {
-		console.log("call event cancel");
+		console.log("call event cancel on one-to-void-qc");
 		$scope.atmService.data.cancel();				
 	});
 	
 	$scope.$on('activeEditMode', function(e) {
-		console.log("call event activeEditMode");
+		console.log("call event activeEditMode on one-to-void-qc");
 		$scope.atmService.data.selectAll(true);
 		$scope.atmService.data.setEdit();
 	});
@@ -387,5 +392,18 @@ angular.module('home').controller('OneToVoidQCCtrl',['$scope', '$parse','$filter
 			}
 		}
 		return undefined;
-	}
+	};
+	
+	$scope.computeVolume = function(volumeTot, volume) {
+		if (volumeTot && volumeTot.value && volume && volume.value) {
+			var result = volumeTot.value - volume.value;
+			if (angular.isNumber(result) && !isNaN(result) && result >= 0 ) {
+				return {
+					value: result,
+					unit: volumeTot.unit
+				};
+			}
+		}
+		return undefined;
+	};
 }]);

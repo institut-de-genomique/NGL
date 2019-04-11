@@ -1,0 +1,783 @@
+package models.dao.other;
+
+import java.util.Arrays;
+import java.util.List;
+
+import org.junit.Assert;
+import org.junit.Test;
+
+import fr.cea.ig.util.function.CC1;
+import models.laboratory.common.description.Level;
+import models.laboratory.common.description.MeasureCategory;
+import models.laboratory.common.description.PropertyDefinition;
+import models.laboratory.common.description.StateCategory;
+import models.laboratory.common.description.Value;
+import models.laboratory.common.description.dao.LevelDAO;
+import models.laboratory.common.description.dao.MeasureCategoryDAO;
+import models.laboratory.common.description.dao.StateCategoryDAO;
+import models.laboratory.common.description.dao.ValueDAO;
+import models.laboratory.container.description.ContainerCategory;
+import models.laboratory.container.description.dao.ContainerCategoryDAO;
+import models.laboratory.experiment.description.ExperimentCategory;
+import models.laboratory.experiment.description.ProtocolCategory;
+import models.laboratory.experiment.description.dao.ExperimentCategoryDAO;
+import models.laboratory.experiment.description.dao.ProtocolCategoryDAO;
+import models.laboratory.instrument.description.Instrument;
+import models.laboratory.instrument.description.InstrumentCategory;
+import models.laboratory.instrument.description.InstrumentQueryParams;
+import models.laboratory.instrument.description.dao.InstrumentCategoryDAO;
+import models.laboratory.processes.description.ProcessCategory;
+import models.laboratory.processes.description.dao.ProcessCategoryDAO;
+import models.laboratory.project.description.ProjectCategory;
+import models.laboratory.project.description.dao.ProjectCategoryDAO;
+import models.laboratory.run.description.RunCategory;
+import models.laboratory.run.description.TreatmentCategory;
+import models.laboratory.run.description.TreatmentContext;
+import models.laboratory.run.description.TreatmentType;
+import models.laboratory.run.description.TreatmentTypeContext;
+import models.laboratory.run.description.dao.RunCategoryDAO;
+import models.laboratory.run.description.dao.TreatmentCategoryDAO;
+import models.laboratory.run.description.dao.TreatmentContextDAO;
+import models.laboratory.sample.description.ImportCategory;
+import models.laboratory.sample.description.SampleCategory;
+import models.laboratory.sample.description.dao.ImportCategoryDAO;
+import models.laboratory.sample.description.dao.SampleCategoryDAO;
+import ngl.common.Global;
+import play.Application;
+import play.api.modules.spring.Spring;
+
+public class FindDAOTest {
+	
+	private static final CC1<Application> af =
+			Global.afSq.cc1();
+	
+	@Test
+	public void RunCategoryFindTest() throws Exception {
+		af.accept(app -> {
+			RunCategory rt = RunCategory.find.get().findAll().get(0);
+			Assert.assertNotNull(rt);
+			RunCategory rt2 = RunCategory.find.get().findByCode(rt.code); 
+			Assert.assertNotNull(rt2);
+			RunCategory rt3 = RunCategory.find.get().findById(rt.id);
+			Assert.assertNotNull(rt3);
+			Assert.assertFalse(RunCategory.find.get().isCodeExist(""));
+		});
+	}
+
+	@Test
+	public void TreatmentCategoryFindTest() throws Exception {
+		af.accept(app -> {
+			TreatmentCategory rt = TreatmentCategory.find.get().findAll().get(0);
+			Assert.assertNotNull(rt);
+			TreatmentCategory rt2 = TreatmentCategory.find.get().findByCode(rt.code); 
+			Assert.assertNotNull(rt2);
+			TreatmentCategory rt3 = TreatmentCategory.find.get().findById(rt.id);
+			Assert.assertNotNull(rt3);
+			Assert.assertFalse(TreatmentCategory.find.get().isCodeExist(""));
+		});
+	}
+
+	@Test
+	public void TreatmentContextFindTest() throws Exception {
+		af.accept(app -> {
+			TreatmentContext rt = TreatmentContext.find.get().findAll().get(0);
+			Assert.assertNotNull(rt);
+			TreatmentContext rt2 = TreatmentContext.find.get().findByCode(rt.code); 
+			Assert.assertNotNull(rt2);
+			TreatmentContext rt3 = TreatmentContext.find.get().findById(rt.id);
+			Assert.assertNotNull(rt3);
+			Assert.assertFalse(TreatmentContext.find.get().isCodeExist(""));
+		});
+	}
+	
+	@Test
+	public void TreatmentTypeContextFindTest() throws Exception {
+		af.accept(app -> {
+			Assert.assertFalse(TreatmentTypeContext.find.get().isCodeExist(""));
+			TreatmentType tt = TreatmentType.find.get().findAll().get(0);
+			TreatmentTypeContext rt4 = TreatmentTypeContext.find.get().findByTreatmentTypeId(tt.id).get(0);
+			Assert.assertNotNull(rt4);
+			TreatmentTypeContext rt5 = TreatmentTypeContext.find.get().findByTreatmentTypeId(rt4.code, tt.id);
+			Assert.assertNotNull(rt5);
+		});
+	}
+	
+	@Test
+	public void ImportCategoryFindTest() throws Exception {
+		af.accept(app -> {
+			ImportCategory rt = ImportCategory.find.get().findAll().get(0);
+			Assert.assertNotNull(rt);
+			ImportCategory rt2 = ImportCategory.find.get().findByCode(rt.code); 
+			Assert.assertNotNull(rt2);
+			ImportCategory rt3 = ImportCategory.find.get().findById(rt.id);
+			Assert.assertNotNull(rt3);
+			Assert.assertFalse(ImportCategory.find.get().isCodeExist(""));
+		});
+	}
+
+	@Test
+	public void SampleCategoryFindTest() throws Exception {
+		af.accept(app -> {
+			SampleCategory rt = SampleCategory.find.get().findAll().get(0);
+			Assert.assertNotNull(rt);
+			SampleCategory rt2 = SampleCategory.find.get().findByCode(rt.code); 
+			Assert.assertNotNull(rt2);
+			SampleCategory rt3 = SampleCategory.find.get().findById(rt.id);
+			Assert.assertNotNull(rt3);
+			Assert.assertFalse(SampleCategory.find.get().isCodeExist(""));
+		});
+	}
+
+	@Test
+	public void containerCategoryFindTest() throws Exception {
+		af.accept(app -> {
+			ContainerCategory type = ContainerCategory.find.get().findAll().get(0);
+			Assert.assertNotNull(type);
+			ContainerCategory cType = ContainerCategory.find.get().findByCode(type.code);
+			Assert.assertNotNull(cType);
+			ContainerCategory cTypeId = ContainerCategory.find.get().findById(type.id);
+			Assert.assertNotNull(cTypeId);
+			Assert.assertFalse(ContainerCategory.find.get().isCodeExist(""));
+
+			ContainerCategoryDAO typeDAO = Spring
+					.getBeanOfType(ContainerCategoryDAO.class);
+			Assert.assertNotNull(typeDAO.findAllForList());
+		});
+	}
+
+	@Test
+	public void experimentCategoryFindTest() throws Exception {
+		af.accept(app -> {
+			ExperimentCategory type = ExperimentCategory.find.get().findAll().get(0);
+			Assert.assertNotNull(type);
+			ExperimentCategory cType = ExperimentCategory.find.get().findByCode(type.code);
+			Assert.assertNotNull(cType);
+			ExperimentCategory cTypeId = ExperimentCategory.find.get().findById(type.id);
+			Assert.assertNotNull(cTypeId);
+			Assert.assertFalse(ExperimentCategory.find.get().isCodeExist(""));
+			List<ExperimentCategory> lec = ExperimentCategory.find.get().findByProcessTypeCode("");
+			Assert.assertEquals(0, lec.size());
+
+			ExperimentCategoryDAO typeDAO = Spring.getBeanOfType(ExperimentCategoryDAO.class);
+			Assert.assertNotNull(typeDAO.findAllForList());
+		});
+	}
+
+	@Test
+	public void importCategoryFindTest() throws Exception {
+		af.accept(app -> {
+			ImportCategory type = ImportCategory.find.get().findAll().get(0);
+			Assert.assertNotNull(type);
+			ImportCategory cType = ImportCategory.find.get().findByCode(type.code);
+			Assert.assertNotNull(cType);
+			ImportCategory cTypeId = ImportCategory.find.get().findById(type.id);
+			Assert.assertNotNull(cTypeId);
+			Assert.assertFalse(ImportCategory.find.get().isCodeExist(""));
+			ImportCategoryDAO typeDAO = Spring
+					.getBeanOfType(ImportCategoryDAO.class);
+			Assert.assertNotNull(typeDAO.findAllForList());
+		});
+	}
+
+	@Test
+	public void instrumentCategoryFindTest() throws Exception {
+		af.accept(app -> {
+			InstrumentCategory type = InstrumentCategory.find.get().findAll().get(0);
+			Assert.assertNotNull(type);
+			InstrumentCategory cType = InstrumentCategory.find.get().findByCode(type.code);
+			Assert.assertNotNull(cType);
+			InstrumentCategory cTypeId = InstrumentCategory.find.get().findById(type.id);
+			Assert.assertNotNull(cTypeId);
+			Assert.assertFalse(InstrumentCategory.find.get().isCodeExist(""));
+			InstrumentCategoryDAO typeDAO = Spring
+					.getBeanOfType(InstrumentCategoryDAO.class);
+			Assert.assertNotNull(typeDAO.findAllForList());
+		});
+	}
+
+	@Test
+	public void instrumentFindTest() throws Exception {
+		af.accept(app -> {
+			Instrument type = Instrument.find.get().findAll().get(0);
+			Assert.assertNotNull(type);
+			Instrument cType = Instrument.find.get().findByCode("MELISSE"); // not MISEQ1 because in double
+			Assert.assertNotNull(cType);
+			Instrument cTypeId = Instrument.find.get().findById(type.id);
+			Assert.assertNotNull(cTypeId);
+			Assert.assertFalse(Instrument.find.get().isCodeExist(""));	
+			InstrumentQueryParams instrumentsQueryParams = new InstrumentQueryParams();
+			Assert.assertNotNull(Instrument.find.get().findByQueryParams(instrumentsQueryParams));
+			instrumentsQueryParams.active = Boolean.TRUE;
+			Assert.assertNotNull(Instrument.find.get().findByQueryParams(instrumentsQueryParams));
+			instrumentsQueryParams.categoryCode = "seq-illumina";
+			Assert.assertNotNull(Instrument.find.get().findByQueryParams(instrumentsQueryParams));
+			instrumentsQueryParams.categoryCode = null;
+			instrumentsQueryParams.categoryCodes = Arrays.asList("seq-illumina");
+			Assert.assertNotNull(Instrument.find.get().findByQueryParams(instrumentsQueryParams));
+			instrumentsQueryParams.typeCode = "HISEQ2000";
+			Assert.assertNotNull(Instrument.find.get().findByQueryParams(instrumentsQueryParams));
+			instrumentsQueryParams.typeCode = null;		
+			instrumentsQueryParams.typeCodes = Arrays.asList("HISEQ2000");
+			Assert.assertNotNull(Instrument.find.get().findByQueryParams(instrumentsQueryParams));
+			instrumentsQueryParams.typeCodes = Arrays.asList("HISEQ9999");
+			Assert.assertEquals(Instrument.find.get().findByQueryParams(instrumentsQueryParams).size(), 0);
+		});
+	}
+
+	@Test
+	public void levelFindTest() throws Exception {
+		af.accept(app -> {
+			Level type = Level.find.get().findAll().get(0);
+			Assert.assertNotNull(type);
+			Level cType = Level.find.get().findByCode(type.code);
+			Assert.assertNotNull(cType);
+			Level cTypeId = Level.find.get().findById(type.id);
+			Assert.assertNotNull(cTypeId);
+			Assert.assertFalse(Level.find.get().isCodeExist(""));
+			LevelDAO levelDAO = Spring.getBeanOfType(LevelDAO.class);
+			Assert.assertNotNull(levelDAO.findAllForList());
+
+			//PropertyDefinition pdef =  PropertyDefinition.find.findAll().get(0);
+			//Assert.assertNotNull(levelDAO.findByPropertyDefinitionID(pdef.id));
+		});
+	}
+
+	@Test
+	public void measureCategoryFindTest() throws Exception {
+		af.accept(app -> {
+			MeasureCategory type = MeasureCategory.find.get().findAll().get(0);
+			Assert.assertNotNull(type);
+			MeasureCategory cType = MeasureCategory.find.get().findByCode(type.code);
+			Assert.assertNotNull(cType);
+			MeasureCategory cTypeId = MeasureCategory.find.get().findById(type.id);
+			Assert.assertNotNull(cTypeId);
+			Assert.assertFalse(MeasureCategory.find.get().isCodeExist(""));
+			MeasureCategoryDAO typeDAO = Spring.getBeanOfType(MeasureCategoryDAO.class);
+			Assert.assertNotNull(typeDAO.findAllForList());
+		});
+	}
+
+	@Test
+	public void processCategoryFindTest() throws Exception {
+		af.accept(app -> {
+			ProcessCategory type = ProcessCategory.find.get().findAll().get(0);
+			Assert.assertNotNull(type);
+			ProcessCategory cType = ProcessCategory.find.get().findByCode(type.code);
+			Assert.assertNotNull(cType);
+			ProcessCategory cTypeId = ProcessCategory.find.get().findById(type.id);
+			Assert.assertNotNull(cTypeId);
+			Assert.assertFalse(ProcessCategory.find.get().isCodeExist(""));
+			ProcessCategoryDAO typeDAO = Spring.getBeanOfType(ProcessCategoryDAO.class);
+			Assert.assertNotNull(typeDAO.findAllForList());
+		});
+	}
+
+	@Test
+	public void projectCategoryFindTest() throws Exception {
+		af.accept(app -> {
+			ProjectCategory type = ProjectCategory.find.get().findAll().get(0);
+			Assert.assertNotNull(type);
+			ProjectCategory cType = ProjectCategory.find.get().findByCode(type.code);
+			Assert.assertNotNull(cType);
+			ProjectCategory cTypeId = ProjectCategory.find.get().findById(type.id);
+			Assert.assertNotNull(cTypeId);
+			Assert.assertFalse(ProjectCategory.find.get().isCodeExist(""));
+			ProjectCategoryDAO typeDAO = Spring
+					.getBeanOfType(ProjectCategoryDAO.class);
+			Assert.assertNotNull(typeDAO.findAllForList());
+		});
+	}
+
+	@Test
+	public void protocolCategoryFindTest() throws Exception {
+		af.accept(app -> {
+			ProtocolCategory type = ProtocolCategory.find.get().findAll().get(0);
+			Assert.assertNotNull(type);
+			ProtocolCategory cType = ProtocolCategory.find.get().findByCode(type.code);
+			Assert.assertNotNull(cType);
+			ProtocolCategory cTypeId = ProtocolCategory.find.get().findById(type.id);
+			Assert.assertNotNull(cTypeId);
+			Assert.assertFalse(ProtocolCategory.find.get().isCodeExist(""));
+			ProtocolCategoryDAO typeDAO = Spring
+					.getBeanOfType(ProtocolCategoryDAO.class);
+			Assert.assertNotNull(typeDAO.findAllForList());
+		});
+	}
+
+	@Test
+	public void runCategoryFindTest() throws Exception {
+		af.accept(app -> {
+			RunCategory type = RunCategory.find.get().findAll().get(0);
+			Assert.assertNotNull(type);
+			RunCategory cType = RunCategory.find.get().findByCode(type.code);
+			Assert.assertNotNull(cType);
+			RunCategory cTypeId = RunCategory.find.get().findById(type.id);
+			Assert.assertNotNull(cTypeId);
+			Assert.assertFalse(RunCategory.find.get().isCodeExist(""));
+			RunCategoryDAO typeDAO = Spring.getBeanOfType(RunCategoryDAO.class);
+			Assert.assertNotNull(typeDAO.findAllForList());
+		});
+	}
+
+	@Test
+	public void sampleCategoryFindTest() throws Exception {
+		af.accept(app -> {
+			SampleCategory type = SampleCategory.find.get().findAll().get(0);
+			Assert.assertNotNull(type);
+			SampleCategory cType = SampleCategory.find.get().findByCode(type.code);
+			Assert.assertNotNull(cType);
+			SampleCategory cTypeId = SampleCategory.find.get().findById(type.id);
+			Assert.assertNotNull(cTypeId);
+			Assert.assertFalse(SampleCategory.find.get().isCodeExist(""));
+			SampleCategoryDAO typeDAO = Spring
+					.getBeanOfType(SampleCategoryDAO.class);
+			Assert.assertNotNull(typeDAO.findAllForList());
+		});
+	}
+
+	@Test
+	public void stateCategoryFindTest() throws Exception {
+		af.accept(app -> {
+			StateCategory type = StateCategory.find.get().findAll().get(0);
+			Assert.assertNotNull(type);
+			StateCategory cType = StateCategory.find.get().findByCode(type.code);
+			Assert.assertNotNull(cType);
+			StateCategory cTypeId = StateCategory.find.get().findById(type.id);
+			Assert.assertNotNull(cTypeId);
+			Assert.assertFalse(StateCategory.find.get().isCodeExist(""));
+			StateCategoryDAO typeDAO = Spring.getBeanOfType(StateCategoryDAO.class);
+			Assert.assertNotNull(typeDAO.findAllForList());
+		});
+	}
+
+	@Test
+	public void treatmentCategoryFindTest() throws Exception {
+		af.accept(app -> {
+			TreatmentCategory type = TreatmentCategory.find.get().findAll().get(0);
+			Assert.assertNotNull(type);
+			TreatmentCategory cType = TreatmentCategory.find.get().findByCode(type.code);
+			Assert.assertNotNull(cType);
+			TreatmentCategory cTypeId = TreatmentCategory.find.get().findById(type.id);
+			Assert.assertNotNull(cTypeId);
+			Assert.assertFalse(TreatmentCategory.find.get().isCodeExist(""));
+			TreatmentCategoryDAO typeDAO = Spring
+					.getBeanOfType(TreatmentCategoryDAO.class);
+			Assert.assertNotNull(typeDAO.findAllForList());
+		});
+	}
+
+	@Test
+	public void treatmentContextFindTest() throws Exception {
+		af.accept(app -> {
+			TreatmentContext type = TreatmentContext.find.get().findAll().get(0);
+			Assert.assertNotNull(type);
+			TreatmentContext cType = TreatmentContext.find.get().findByCode(type.code);
+			Assert.assertNotNull(cType);
+			TreatmentContext cTypeId = TreatmentContext.find.get().findById(type.id);
+			Assert.assertNotNull(cTypeId);
+			Assert.assertFalse(TreatmentContext.find.get().isCodeExist(""));
+			TreatmentContextDAO typeDAO = Spring
+					.getBeanOfType(TreatmentContextDAO.class);
+			Assert.assertNotNull(typeDAO.findAllForList());
+		});
+	}
+
+	@Test(expected = RuntimeException.class)
+	public void treatmentTypeContextFindTest() throws Exception {
+		af.accept(app -> { 
+			// TreatmentTypeContext type = 
+			TreatmentTypeContext.find.get().findAll().get(0);
+		});
+	}
+
+	@Test(expected=UnsupportedOperationException.class)
+	public void valueFindTest() throws Exception {
+		af.accept(app -> {
+			Value type = Value.find.get().findAll().get(0);
+			Assert.assertNotNull(type);
+			Value cType = Value.find.get().findByCode(type.code);
+			Assert.assertNotNull(cType);
+			Value cTypeId = Value.find.get().findById(type.id);
+			Assert.assertNotNull(cTypeId);
+			Assert.assertFalse(Value.find.get().isCodeExist(""));
+
+			//internal fcts
+			ValueDAO typeDAO = Spring.getBeanOfType(ValueDAO.class);
+			Assert.assertNotNull(typeDAO.findAllForList());
+			PropertyDefinition pdef = PropertyDefinition.find.get().findByCode("runType");
+			typeDAO.findByPropertyDefinition(pdef.id);
+		});
+	}
+
+}
+
+//package models.dao.other;
+//
+//import java.util.Arrays;
+//import java.util.List;
+//
+//import models.laboratory.common.description.Level;
+//import models.laboratory.common.description.MeasureCategory;
+//import models.laboratory.common.description.PropertyDefinition;
+//import models.laboratory.common.description.StateCategory;
+//import models.laboratory.common.description.Value;
+//import models.laboratory.common.description.dao.LevelDAO;
+//import models.laboratory.common.description.dao.MeasureCategoryDAO;
+//import models.laboratory.common.description.dao.StateCategoryDAO;
+//import models.laboratory.common.description.dao.ValueDAO;
+//import models.laboratory.container.description.ContainerCategory;
+//import models.laboratory.container.description.dao.ContainerCategoryDAO;
+//import models.laboratory.experiment.description.ExperimentCategory;
+//import models.laboratory.experiment.description.ProtocolCategory;
+//import models.laboratory.experiment.description.dao.ExperimentCategoryDAO;
+//import models.laboratory.experiment.description.dao.ProtocolCategoryDAO;
+//import models.laboratory.instrument.description.Instrument;
+//import models.laboratory.instrument.description.InstrumentCategory;
+//import models.laboratory.instrument.description.InstrumentQueryParams;
+//import models.laboratory.instrument.description.dao.InstrumentCategoryDAO;
+//import models.laboratory.processes.description.ProcessCategory;
+//import models.laboratory.processes.description.dao.ProcessCategoryDAO;
+//import models.laboratory.project.description.ProjectCategory;
+//import models.laboratory.project.description.dao.ProjectCategoryDAO;
+//import models.laboratory.run.description.RunCategory;
+//import models.laboratory.run.description.TreatmentCategory;
+//import models.laboratory.run.description.TreatmentContext;
+//import models.laboratory.run.description.TreatmentType;
+//import models.laboratory.run.description.TreatmentTypeContext;
+//import models.laboratory.run.description.dao.RunCategoryDAO;
+//import models.laboratory.run.description.dao.TreatmentCategoryDAO;
+//import models.laboratory.run.description.dao.TreatmentContextDAO;
+//import models.laboratory.sample.description.ImportCategory;
+//import models.laboratory.sample.description.SampleCategory;
+//import models.laboratory.sample.description.dao.ImportCategoryDAO;
+//import models.laboratory.sample.description.dao.SampleCategoryDAO;
+//import models.utils.dao.DAOException;
+//
+//import org.junit.Assert;
+//import org.junit.Test;
+//
+//import play.api.modules.spring.Spring;
+//import utils.AbstractTests;
+//
+//public class FindDAOTest extends AbstractTests {
+//	
+//
+//	@Test
+//	public void RunCategoryFindTest() throws DAOException {
+//		RunCategory rt = RunCategory.find.get().findAll().get(0);
+//		Assert.assertNotNull(rt);
+//		RunCategory rt2 = RunCategory.find.get().findByCode(rt.code); 
+//		Assert.assertNotNull(rt2);
+//		RunCategory rt3 = RunCategory.find.get().findById(rt.id);
+//		Assert.assertNotNull(rt3);
+//		Assert.assertFalse(RunCategory.find.get().isCodeExist(""));
+//	}
+//
+//	@Test
+//	public void TreatmentCategoryFindTest() throws DAOException {
+//		TreatmentCategory rt = TreatmentCategory.find.get().findAll().get(0);
+//		Assert.assertNotNull(rt);
+//		TreatmentCategory rt2 = TreatmentCategory.find.get().findByCode(rt.code); 
+//		Assert.assertNotNull(rt2);
+//		TreatmentCategory rt3 = TreatmentCategory.find.get().findById(rt.id);
+//		Assert.assertNotNull(rt3);
+//		Assert.assertFalse(TreatmentCategory.find.get().isCodeExist(""));
+//	}
+//
+//	@Test
+//	public void TreatmentContextFindTest() throws DAOException {
+//		TreatmentContext rt = TreatmentContext.find.get().findAll().get(0);
+//		Assert.assertNotNull(rt);
+//		TreatmentContext rt2 = TreatmentContext.find.get().findByCode(rt.code); 
+//		Assert.assertNotNull(rt2);
+//		TreatmentContext rt3 = TreatmentContext.find.get().findById(rt.id);
+//		Assert.assertNotNull(rt3);
+//		Assert.assertFalse(TreatmentContext.find.get().isCodeExist(""));
+//	}
+//
+//	
+//	@Test
+//	public void TreatmentTypeContextFindTest() throws DAOException {
+//		Assert.assertFalse(TreatmentTypeContext.find.get().isCodeExist(""));
+//		TreatmentType tt = TreatmentType.find.get().findAll().get(0);
+//		TreatmentTypeContext rt4 = TreatmentTypeContext.find.get().findByTreatmentTypeId(tt.id).get(0);
+//		Assert.assertNotNull(rt4);
+//		TreatmentTypeContext rt5 = TreatmentTypeContext.find.get().findByTreatmentTypeId(rt4.code, tt.id);
+//		Assert.assertNotNull(rt5);
+//	}
+//	
+//	
+//	@Test
+//	public void ImportCategoryFindTest() throws DAOException {
+//		ImportCategory rt = ImportCategory.find.get().findAll().get(0);
+//		Assert.assertNotNull(rt);
+//		ImportCategory rt2 = ImportCategory.find.get().findByCode(rt.code); 
+//		Assert.assertNotNull(rt2);
+//		ImportCategory rt3 = ImportCategory.find.get().findById(rt.id);
+//		Assert.assertNotNull(rt3);
+//		Assert.assertFalse(ImportCategory.find.get().isCodeExist(""));
+//	}
+//
+//	@Test
+//	public void SampleCategoryFindTest() throws DAOException {
+//		SampleCategory rt = SampleCategory.find.get().findAll().get(0);
+//		Assert.assertNotNull(rt);
+//		SampleCategory rt2 = SampleCategory.find.get().findByCode(rt.code); 
+//		Assert.assertNotNull(rt2);
+//		SampleCategory rt3 = SampleCategory.find.get().findById(rt.id);
+//		Assert.assertNotNull(rt3);
+//		Assert.assertFalse(SampleCategory.find.get().isCodeExist(""));
+//	}
+//
+//	@Test
+//	public void containerCategoryFindTest() throws DAOException {
+//		ContainerCategory type = ContainerCategory.find.get().findAll().get(0);
+//		Assert.assertNotNull(type);
+//		ContainerCategory cType = ContainerCategory.find.get().findByCode(type.code);
+//		Assert.assertNotNull(cType);
+//		ContainerCategory cTypeId = ContainerCategory.find.get().findById(type.id);
+//		Assert.assertNotNull(cTypeId);
+//		Assert.assertFalse(ContainerCategory.find.get().isCodeExist(""));
+//		
+//		ContainerCategoryDAO typeDAO = Spring
+//				.getBeanOfType(ContainerCategoryDAO.class);
+//		Assert.assertNotNull(typeDAO.findAllForList());
+//	}
+//
+//	@Test
+//	public void experimentCategoryFindTest() throws DAOException {
+//		ExperimentCategory type = ExperimentCategory.find.get().findAll().get(0);
+//		Assert.assertNotNull(type);
+//		ExperimentCategory cType = ExperimentCategory.find.get().findByCode(type.code);
+//		Assert.assertNotNull(cType);
+//		ExperimentCategory cTypeId = ExperimentCategory.find.get().findById(type.id);
+//		Assert.assertNotNull(cTypeId);
+//		Assert.assertFalse(ExperimentCategory.find.get().isCodeExist(""));
+//		List<ExperimentCategory> lec = ExperimentCategory.find.get().findByProcessTypeCode("");
+//		Assert.assertEquals(0, lec.size());
+//		
+//		ExperimentCategoryDAO typeDAO = Spring.getBeanOfType(ExperimentCategoryDAO.class);
+//		Assert.assertNotNull(typeDAO.findAllForList());
+//	}
+//
+//	@Test
+//	public void importCategoryFindTest() throws DAOException {
+//		ImportCategory type = ImportCategory.find.get().findAll().get(0);
+//		Assert.assertNotNull(type);
+//		ImportCategory cType = ImportCategory.find.get().findByCode(type.code);
+//		Assert.assertNotNull(cType);
+//		ImportCategory cTypeId = ImportCategory.find.get().findById(type.id);
+//		Assert.assertNotNull(cTypeId);
+//		Assert.assertFalse(ImportCategory.find.get().isCodeExist(""));
+//		ImportCategoryDAO typeDAO = Spring
+//				.getBeanOfType(ImportCategoryDAO.class);
+//		Assert.assertNotNull(typeDAO.findAllForList());
+//	}
+//
+//	@Test
+//	public void instrumentCategoryFindTest() throws DAOException {
+//		InstrumentCategory type = InstrumentCategory.find.get().findAll().get(0);
+//		Assert.assertNotNull(type);
+//		InstrumentCategory cType = InstrumentCategory.find.get().findByCode(type.code);
+//		Assert.assertNotNull(cType);
+//		InstrumentCategory cTypeId = InstrumentCategory.find.get().findById(type.id);
+//		Assert.assertNotNull(cTypeId);
+//		Assert.assertFalse(InstrumentCategory.find.get().isCodeExist(""));
+//		InstrumentCategoryDAO typeDAO = Spring
+//				.getBeanOfType(InstrumentCategoryDAO.class);
+//		Assert.assertNotNull(typeDAO.findAllForList());
+//	}
+//
+//	@Test
+//	public void instrumentFindTest() throws DAOException {
+//		Instrument type = Instrument.find.get().findAll().get(0);
+//		Assert.assertNotNull(type);
+//		Instrument cType = Instrument.find.get().findByCode("MELISSE"); // not MISEQ1 because in double
+//		Assert.assertNotNull(cType);
+//		Instrument cTypeId = Instrument.find.get().findById(type.id);
+//		Assert.assertNotNull(cTypeId);
+//		Assert.assertFalse(Instrument.find.get().isCodeExist(""));	
+//		InstrumentQueryParams instrumentsQueryParams = new InstrumentQueryParams();
+//		Assert.assertNotNull(Instrument.find.get().findByQueryParams(instrumentsQueryParams));
+//		instrumentsQueryParams.active = Boolean.TRUE;
+//		Assert.assertNotNull(Instrument.find.get().findByQueryParams(instrumentsQueryParams));
+//		instrumentsQueryParams.categoryCode = "seq-illumina";
+//		Assert.assertNotNull(Instrument.find.get().findByQueryParams(instrumentsQueryParams));
+//		instrumentsQueryParams.categoryCode = null;
+//		instrumentsQueryParams.categoryCodes = Arrays.asList("seq-illumina");
+//		Assert.assertNotNull(Instrument.find.get().findByQueryParams(instrumentsQueryParams));
+//		instrumentsQueryParams.typeCode = "HISEQ2000";
+//		Assert.assertNotNull(Instrument.find.get().findByQueryParams(instrumentsQueryParams));
+//		instrumentsQueryParams.typeCode = null;		
+//		instrumentsQueryParams.typeCodes = Arrays.asList("HISEQ2000");
+//		Assert.assertNotNull(Instrument.find.get().findByQueryParams(instrumentsQueryParams));
+//		instrumentsQueryParams.typeCodes = Arrays.asList("HISEQ9999");
+//		Assert.assertEquals(Instrument.find.get().findByQueryParams(instrumentsQueryParams).size(), 0);
+//		
+//	}
+//
+//	@Test
+//	public void levelFindTest() throws DAOException {
+//		Level type = Level.find.get().findAll().get(0);
+//		Assert.assertNotNull(type);
+//		Level cType = Level.find.get().findByCode(type.code);
+//		Assert.assertNotNull(cType);
+//		Level cTypeId = Level.find.get().findById(type.id);
+//		Assert.assertNotNull(cTypeId);
+//		Assert.assertFalse(Level.find.get().isCodeExist(""));
+//		LevelDAO levelDAO = Spring.getBeanOfType(LevelDAO.class);
+//		Assert.assertNotNull(levelDAO.findAllForList());
+//		
+//		//PropertyDefinition pdef =  PropertyDefinition.find.findAll().get(0);
+//		//Assert.assertNotNull(levelDAO.findByPropertyDefinitionID(pdef.id));
+//	}
+//
+//	@Test
+//	public void measureCategoryFindTest() throws DAOException {
+//		MeasureCategory type = MeasureCategory.find.get().findAll().get(0);
+//		Assert.assertNotNull(type);
+//		MeasureCategory cType = MeasureCategory.find.get().findByCode(type.code);
+//		Assert.assertNotNull(cType);
+//		MeasureCategory cTypeId = MeasureCategory.find.get().findById(type.id);
+//		Assert.assertNotNull(cTypeId);
+//		Assert.assertFalse(MeasureCategory.find.get().isCodeExist(""));
+//		MeasureCategoryDAO typeDAO = Spring
+//				.getBeanOfType(MeasureCategoryDAO.class);
+//		Assert.assertNotNull(typeDAO.findAllForList());
+//	}
+//
+//	@Test
+//	public void processCategoryFindTest() throws DAOException {
+//		ProcessCategory type = ProcessCategory.find.get().findAll().get(0);
+//		Assert.assertNotNull(type);
+//		ProcessCategory cType = ProcessCategory.find.get().findByCode(type.code);
+//		Assert.assertNotNull(cType);
+//		ProcessCategory cTypeId = ProcessCategory.find.get().findById(type.id);
+//		Assert.assertNotNull(cTypeId);
+//		Assert.assertFalse(ProcessCategory.find.get().isCodeExist(""));
+//		ProcessCategoryDAO typeDAO = Spring
+//				.getBeanOfType(ProcessCategoryDAO.class);
+//		Assert.assertNotNull(typeDAO.findAllForList());
+//	}
+//
+//	@Test
+//	public void projectCategoryFindTest() throws DAOException {
+//		ProjectCategory type = ProjectCategory.find.get().findAll().get(0);
+//		Assert.assertNotNull(type);
+//		ProjectCategory cType = ProjectCategory.find.get().findByCode(type.code);
+//		Assert.assertNotNull(cType);
+//		ProjectCategory cTypeId = ProjectCategory.find.get().findById(type.id);
+//		Assert.assertNotNull(cTypeId);
+//		Assert.assertFalse(ProjectCategory.find.get().isCodeExist(""));
+//		ProjectCategoryDAO typeDAO = Spring
+//				.getBeanOfType(ProjectCategoryDAO.class);
+//		Assert.assertNotNull(typeDAO.findAllForList());
+//	}
+//
+//	@Test
+//	public void protocolCategoryFindTest() throws DAOException {
+//		ProtocolCategory type = ProtocolCategory.find.get().findAll().get(0);
+//		Assert.assertNotNull(type);
+//		ProtocolCategory cType = ProtocolCategory.find.get().findByCode(type.code);
+//		Assert.assertNotNull(cType);
+//		ProtocolCategory cTypeId = ProtocolCategory.find.get().findById(type.id);
+//		Assert.assertNotNull(cTypeId);
+//		Assert.assertFalse(ProtocolCategory.find.get().isCodeExist(""));
+//		ProtocolCategoryDAO typeDAO = Spring
+//				.getBeanOfType(ProtocolCategoryDAO.class);
+//		Assert.assertNotNull(typeDAO.findAllForList());
+//	}
+//
+//
+//	@Test
+//	public void runCategoryFindTest() throws DAOException {
+//		RunCategory type = RunCategory.find.get().findAll().get(0);
+//		Assert.assertNotNull(type);
+//		RunCategory cType = RunCategory.find.get().findByCode(type.code);
+//		Assert.assertNotNull(cType);
+//		RunCategory cTypeId = RunCategory.find.get().findById(type.id);
+//		Assert.assertNotNull(cTypeId);
+//		Assert.assertFalse(RunCategory.find.get().isCodeExist(""));
+//		RunCategoryDAO typeDAO = Spring.getBeanOfType(RunCategoryDAO.class);
+//		Assert.assertNotNull(typeDAO.findAllForList());
+//	}
+//
+//	@Test
+//	public void sampleCategoryFindTest() throws DAOException {
+//		SampleCategory type = SampleCategory.find.get().findAll().get(0);
+//		Assert.assertNotNull(type);
+//		SampleCategory cType = SampleCategory.find.get().findByCode(type.code);
+//		Assert.assertNotNull(cType);
+//		SampleCategory cTypeId = SampleCategory.find.get().findById(type.id);
+//		Assert.assertNotNull(cTypeId);
+//		Assert.assertFalse(SampleCategory.find.get().isCodeExist(""));
+//		SampleCategoryDAO typeDAO = Spring
+//				.getBeanOfType(SampleCategoryDAO.class);
+//		Assert.assertNotNull(typeDAO.findAllForList());
+//	}
+//
+//	@Test
+//	public void stateCategoryFindTest() throws DAOException {
+//		StateCategory type = StateCategory.find.get().findAll().get(0);
+//		Assert.assertNotNull(type);
+//		StateCategory cType = StateCategory.find.get().findByCode(type.code);
+//		Assert.assertNotNull(cType);
+//		StateCategory cTypeId = StateCategory.find.get().findById(type.id);
+//		Assert.assertNotNull(cTypeId);
+//		Assert.assertFalse(StateCategory.find.get().isCodeExist(""));
+//		StateCategoryDAO typeDAO = Spring.getBeanOfType(StateCategoryDAO.class);
+//		Assert.assertNotNull(typeDAO.findAllForList());
+//	}
+//
+//	@Test
+//	public void treatmentCategoryFindTest() throws DAOException {
+//		TreatmentCategory type = TreatmentCategory.find.get().findAll().get(0);
+//		Assert.assertNotNull(type);
+//		TreatmentCategory cType = TreatmentCategory.find.get().findByCode(type.code);
+//		Assert.assertNotNull(cType);
+//		TreatmentCategory cTypeId = TreatmentCategory.find.get().findById(type.id);
+//		Assert.assertNotNull(cTypeId);
+//		Assert.assertFalse(TreatmentCategory.find.get().isCodeExist(""));
+//		TreatmentCategoryDAO typeDAO = Spring
+//				.getBeanOfType(TreatmentCategoryDAO.class);
+//		Assert.assertNotNull(typeDAO.findAllForList());
+//	}
+//
+//	@Test
+//	public void treatmentContextFindTest() throws DAOException {
+//		TreatmentContext type = TreatmentContext.find.get().findAll().get(0);
+//		Assert.assertNotNull(type);
+//		TreatmentContext cType = TreatmentContext.find.get().findByCode(type.code);
+//		Assert.assertNotNull(cType);
+//		TreatmentContext cTypeId = TreatmentContext.find.get().findById(type.id);
+//		Assert.assertNotNull(cTypeId);
+//		Assert.assertFalse(TreatmentContext.find.get().isCodeExist(""));
+//		TreatmentContextDAO typeDAO = Spring
+//				.getBeanOfType(TreatmentContextDAO.class);
+//		Assert.assertNotNull(typeDAO.findAllForList());
+//	}
+//
+//	@Test(expected = RuntimeException.class)
+//	public void treatmentTypeContextFindTest() throws DAOException {
+//		// TreatmentTypeContext type = 
+//				TreatmentTypeContext.find.get().findAll().get(0);
+//	}
+//
+//	@Test(expected=UnsupportedOperationException.class)
+//	public void valueFindTest() throws DAOException {
+//		Value type = Value.find.get().findAll().get(0);
+//		Assert.assertNotNull(type);
+//		Value cType = Value.find.get().findByCode(type.code);
+//		Assert.assertNotNull(cType);
+//		Value cTypeId = Value.find.get().findById(type.id);
+//		Assert.assertNotNull(cTypeId);
+//		Assert.assertFalse(Value.find.get().isCodeExist(""));
+//
+//		//internal fcts
+//		ValueDAO typeDAO = Spring.getBeanOfType(ValueDAO.class);
+//		Assert.assertNotNull(typeDAO.findAllForList());
+//		PropertyDefinition pdef = PropertyDefinition.find.get().findByCode("runType");
+//		typeDAO.findByPropertyDefinition(pdef.id);
+//	}
+//
+//}

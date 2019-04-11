@@ -32,7 +32,7 @@ public class DoubleExcelFieldConfiguration extends AbstractFieldConfiguration {
 		}else if(defaultValue != null){
 			populateField(field, dbObject, defaultValue);
 		} else if(required){
-			contextValidation.addErrors(headerValue, ERROR_REQUIRED_MSG);
+			contextValidation.addError(headerValue, ERROR_REQUIRED_MSG);
 		}
 	}
 

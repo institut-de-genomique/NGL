@@ -65,7 +65,7 @@ public interface InstanceConstants {
 	public static final String RECEPTION_CONFIG_COLL_NAME   = "ngl_common.ReceptionConfiguration";
 	
 	//public static final String SRA_MAP_LIBPROCESSTYPECODEVALUE_ORIENTATION_COLL_NAME="ngl_sub.map_libProcessTypeCodeValue_orientation";
-		
-	
+
 	public static final String TAG_PROPERTY_NAME = "tag";
+	
 }

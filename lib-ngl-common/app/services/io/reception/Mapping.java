@@ -70,7 +70,7 @@ public abstract class Mapping<T extends DBObject> {
 		} else if(Action.save.equals(action)) {
 			T objectInDB = get(object, rowMap, false);
 			if (objectInDB != null) {
-				contextValidation.addErrors("Error", "error.objectexist", type.getSimpleName(), objectInDB.code);
+				contextValidation.addError("Error", "error.objectexist", type.getSimpleName(), objectInDB.code);
 			} else if (object.code != null) {
 				// TODO: probably use properly typed separate object collections so the cast is not needed
 				@SuppressWarnings("unchecked")
@@ -119,13 +119,20 @@ public abstract class Mapping<T extends DBObject> {
 	}
 	
 	public void validate(DBObject c) {
-		ContextValidation cv = new ContextValidation(contextValidation.getUser());
+//		ContextValidation cv = new ContextValidation(contextValidation.getUser());
+//		if (Action.save.equals(action)){
+//			cv.setCreationMode();
+//		}else{
+//			cv.setUpdateMode();
+//		}
+		ContextValidation cv =
+				Action.save.equals(action) ? ContextValidation.createCreationContext(contextValidation.getUser())
+						                   : ContextValidation.createUpdateContext(contextValidation.getUser());
 		cv.setRootKeyName(contextValidation.getRootKeyName());
 		cv.addKeyToRootKeyName(c.code);
-		cv.setMode(cv.getMode());
 		((IValidation)c).validate(cv);
 		if (cv.hasErrors()) {
-			contextValidation.addErrors(cv.errors);
+			contextValidation.addErrors(cv.getErrors());
 		}
 		cv.removeKeyFromRootKeyName(c.code);	
 	}
@@ -137,7 +144,7 @@ public abstract class Mapping<T extends DBObject> {
 				fieldConfiguration.populateField(field, dbObject, rowMap, contextValidation, action);
 			} catch (Exception e) {
 				logger.error("Error", e.getMessage(), e);
-				contextValidation.addErrors("Error", e.getMessage());
+				contextValidation.addError("Error", e.getMessage());
 				throw new RuntimeException(e);
 			}
 		}			
@@ -152,10 +159,10 @@ public abstract class Mapping<T extends DBObject> {
 					String code = object.code;
 					object = MongoDBDAO.findByCode(collectionName, type, object.code);	
 					if (errorIsNotFound && object == null) {
-						contextValidation.addErrors("Error", "not found " + type.getSimpleName() + " for code " + code);
+						contextValidation.addError("Error", "not found " + type.getSimpleName() + " for code " + code);
 					}
 				} else if (codeConfig.required) {
-					contextValidation.addErrors("Error", "not found " + type.getSimpleName() + " code !!!");
+					contextValidation.addError("Error", "not found " + type.getSimpleName() + " code !!!");
 				} else {
 					object = null;
 				}
@@ -164,7 +171,7 @@ public abstract class Mapping<T extends DBObject> {
 			}
 		} catch (Exception e) {
 			logger.error("Error", e.getMessage(), e);
-			contextValidation.addErrors("Error", e.getMessage());
+			contextValidation.addError("Error", e.getMessage());
 			throw new RuntimeException(e);
 		}
 		return object;

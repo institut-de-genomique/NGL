@@ -20,14 +20,13 @@ import models.laboratory.sample.instance.Sample;
 import models.utils.InstanceConstants;
 import validation.ContextValidation;
 import validation.common.instance.CommonValidationHelper;
-import validation.utils.BusinessValidationHelper;
 import validation.utils.ValidationConstants;
 import validation.utils.ValidationHelper;
 
 public class RunValidationHelper extends CommonValidationHelper {
 		
 	public static void validateRunInstrumentUsed(InstrumentUsed instrumentUsed, ContextValidation contextValidation) {
-		if(ValidationHelper.required(contextValidation, instrumentUsed, "instrumentUsed")){
+		if (ValidationHelper.validateNotEmpty(contextValidation, instrumentUsed, "instrumentUsed")) {
 			contextValidation.addKeyToRootKeyName("instrumentUsed");
 			instrumentUsed.validate(contextValidation); 
 			contextValidation.removeKeyFromRootKeyName("instrumentUsed");
@@ -35,7 +34,7 @@ public class RunValidationHelper extends CommonValidationHelper {
 	}
 
 	public static void validateRunType(String typeCode,	Map<String, PropertyValue> properties, ContextValidation contextValidation) {
-		RunType runType = validateRequiredDescriptionCode(contextValidation, typeCode, "typeCode", RunType.find,true);
+		RunType runType = validateCodeForeignRequired(contextValidation, RunType.miniFind.get(), typeCode, "typeCode",true);
 		if (runType != null) {
 			contextValidation.addKeyToRootKeyName("properties");
 			ValidationHelper.validateProperties(contextValidation, properties, runType.getPropertyDefinitionByLevel(Level.CODE.Run), true);
@@ -44,7 +43,8 @@ public class RunValidationHelper extends CommonValidationHelper {
 	}
 	
 	public static void validationRunCategoryCode(String categoryCode, ContextValidation contextValidation) {
-		BusinessValidationHelper.validateRequiredDescriptionCode(contextValidation, categoryCode, "categoryCode", RunCategory.find,false);
+//		BusinessValidationHelper.validateRequiredDescriptionCode(contextValidation, categoryCode, "categoryCode", RunCategory.find.get(),false);
+		validateCodeForeignRequired(contextValidation, RunCategory.miniFind.get(), categoryCode, "categoryCode", false);
 	}
 	
 	public static void validationLaneReadSetCodes(Integer number, List<String> readSetCodes, ContextValidation contextValidation) {
@@ -53,10 +53,10 @@ public class RunValidationHelper extends CommonValidationHelper {
 			for (int i=0; i< readSetCodes.size(); i++) {
 				ReadSet readSet = MongoDBDAO.findByCode(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, readSetCodes.get(i));
 				if (readSet == null || !number.equals(readSet.laneNumber)) {
-					contextValidation.addErrors("readSetCodes[" + i + "]", ValidationConstants.ERROR_CODE_NOTEXISTS_MSG, readSetCodes.get(i), "ReadSet");
+					contextValidation.addError("readSetCodes[" + i + "]", ValidationConstants.ERROR_CODE_NOTEXISTS_MSG, readSetCodes.get(i), "ReadSet");
 				}
 				if (readSetCodesTreat.contains(readSetCodes.get(i))) {
-					contextValidation.addErrors("readSetCodes[" + i + "]", ValidationConstants.ERROR_CODE_DOUBLE_MSG, readSetCodes.get(i));
+					contextValidation.addError("readSetCodes[" + i + "]", ValidationConstants.ERROR_CODE_DOUBLE_MSG, readSetCodes.get(i));
 				}
 				readSetCodesTreat.add(readSetCodes.get(i));
 			}
@@ -70,10 +70,10 @@ public class RunValidationHelper extends CommonValidationHelper {
 			for (Iterator<String> it = projectCodes.iterator(); it.hasNext(); ) {
 				 String projectCode = it.next();
 				if (!MongoDBDAO.checkObjectExist(InstanceConstants.PROJECT_COLL_NAME, Project.class, DBQuery.is("code", projectCode))) {
-					contextValidation.addErrors("projectCode["+i+"]",ValidationConstants.ERROR_CODE_NOTEXISTS_MSG,  projectCode, "Project");
+					contextValidation.addError("projectCode["+i+"]",ValidationConstants.ERROR_CODE_NOTEXISTS_MSG,  projectCode, "Project");
 				}
 				if (!MongoDBDAO.checkObjectExist(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, DBQuery.and(DBQuery.is("runCode", runCode), DBQuery.is("projectCode", projectCode)))) {
-					contextValidation.addErrors("projectCode["+i+"]",ValidationConstants.ERROR_CODE_NOTEXISTS_MSG,  projectCode, "ReadSet");
+					contextValidation.addError("projectCode["+i+"]",ValidationConstants.ERROR_CODE_NOTEXISTS_MSG,  projectCode, "ReadSet");
 				}
 				i++;
 			}
@@ -118,10 +118,10 @@ public class RunValidationHelper extends CommonValidationHelper {
 			for (Iterator<String> it = sampleCodes.iterator(); it.hasNext(); ) {
 				 String sampleCode = it.next();
 				if (!MongoDBDAO.checkObjectExist(InstanceConstants.SAMPLE_COLL_NAME, Sample.class, DBQuery.is("code", sampleCode))) {
-					contextValidation.addErrors("sampleCode["+i+"]",ValidationConstants.ERROR_CODE_NOTEXISTS_MSG,  sampleCode, "Sample");
+					contextValidation.addError("sampleCode["+i+"]",ValidationConstants.ERROR_CODE_NOTEXISTS_MSG,  sampleCode, "Sample");
 				}
 				if (!MongoDBDAO.checkObjectExist(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, DBQuery.and(DBQuery.is("runCode", runCode), DBQuery.is("sampleCode", sampleCode)))) {
-					contextValidation.addErrors("sampleCode["+i+"]",ValidationConstants.ERROR_CODE_NOTEXISTS_MSG,  sampleCode, "ReadSet");
+					contextValidation.addError("sampleCode["+i+"]",ValidationConstants.ERROR_CODE_NOTEXISTS_MSG,  sampleCode, "ReadSet");
 				}
 				i++;
 			}

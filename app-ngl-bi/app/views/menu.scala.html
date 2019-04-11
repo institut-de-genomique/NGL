@@ -1,5 +1,5 @@
-
-@this(ctx : fr.cea.ig.play.migration.NGLContext)
+@this(ctx : fr.cea.ig.ngl.NGLApplication)
+@* @this(ctx : fr.cea.ig.play.migration.NGLContext) *@
 
 @(nav: String = "")
 
@@ -19,7 +19,8 @@
 @writePermission = @{ PermissionHelper.checkPermission(user, "writing") }
 @adminPermission = @{ PermissionHelper.checkPermission(user, "admin") }
 @always          = @{ true }
-@version         = @{ ctx.config().getApplicationVersion() }
+@* @version         = @{ ctx.config().getApplicationVersion() } *@
+@version         = @{ ctx.nglConfig().getApplicationVersion() }
 
   <!-- Navbar
     ================================================== -->

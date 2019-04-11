@@ -50,7 +50,7 @@
 	@columnSearchForm{		
 		
 			@formGroup{
-			<input class="form-control" type="text" ng-model="searchService.form.fromDate" placeholder='@Messages("containers.placeholder.fromDate")' title='@Messages("containers.placeholder.fromDate")'>					
+			<input class="form-control" type="text" ng-model="searchService.form.fromDate" placeholder='@Messages("containers.placeholder.fromDate")' title='@Messages("containers.placeholder.fromDate")' date-timestamp>					
 		
 		}
 		@formGroup{
@@ -66,7 +66,7 @@
 		}
 	@columnSearchForm{	
 		@formGroup{
-			<input class="form-control" type="text" ng-model="searchService.form.toDate" placeholder='@Messages("containers.placeholder.toDate")' title='@Messages("containers.placeholder.toDate")'>
+			<input class="form-control" type="text" ng-model="searchService.form.toDate" placeholder='@Messages("containers.placeholder.toDate")' title='@Messages("containers.placeholder.toDate")' date-timestamp>
 					
 		}
 		@formGroup{
@@ -95,30 +95,52 @@
 	   	<li class="active"><a href="#" data-target="#filters" data-toggle="tab">@Messages("search.tab.filters")</a></li>
 	   	<li ng-if="searchService.getAddFiltersToForm().length > 0"><a href="#" data-target="#addfilters" data-toggle="tab">@Messages("search.tab.addfilters")</a></li>
 	   	<li ng-if="searchService.getAddColumnsToForm().length > 0"><a href="#" data-target="#addcolumns" data-toggle="tab">@Messages("search.tab.addcolumns")</a></li>       
-	   	<li><a href="#" data-target="#nativeQuery" data-toggle="tab">Experimental search mode</a></li>       
+	   	<li><a href="#" data-target="#nativeQuery" data-toggle="tab">@Messages("search.tab.experimental")</a></li>       
 	   	
 	   	</ul>
 			
 <div class="tab-content">
 	<div class="tab-pane active" id="filters">
-			<form class="well well-small">
-			<div class="row">
-			@form
-			@columnSearchForm{
-				@formGroup{
-				<div class="btn-toolbar">
-					<button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="search()" class="btn btn-primary" >
-						<i class="fa fa-search"></i>
-					</button>
-					<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="reset()"  class="btn btn-default">
-						<i class="fa fa-undo"></i>
-					</button>						 	
+			<form class="well well-small" ng-switch="searchService.getMainFiltersToForm().length">
+			<div class="row" ng-switch-when="0">
+				@form
+				@columnSearchForm{
+					@formGroup{
+					<div class="btn-toolbar">
+						<button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="search()" class="btn btn-primary" >
+							<i class="fa fa-search"></i>
+						</button>
+						<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="reset()"  class="btn btn-default">
+							<i class="fa fa-undo"></i>
+						</button>						 	
+					</div>
+					}
+					@formGroup{
+						@buttons
+					}
+				}
+			</div>
+			<div class="row" ng-switch-default>
+				<div class="col-md-2 col-lg-2" ng-repeat="filters in searchService.getMainFiltersToForm()">
+					<div class="form-group" ng-repeat="filter in filters">
+						<div udt-compile="filter.html"></div> <!-- used directive from datatable to compile html -->
+					</div>
 				</div>
+				@columnSearchForm{
+					@formGroup{
+					<div class="btn-toolbar">
+						<button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="search()" class="btn btn-primary" >
+							<i class="fa fa-search"></i>
+						</button>
+						<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="searchService.aggregateForm = {}"  class="btn btn-default">
+							<i class="fa fa-undo"></i>
+						</button>						 	
+					</div>
+					}
+					@formGroup{
+						@buttons
+					}
 				}
-				@formGroup{
-					@buttons
-				}
-			}
 			</div>		
 		</form>	
 	</div>
@@ -163,7 +185,7 @@
 			 @columnSearchForm{
 				@formGroup{
 				<div class="btn-toolbar">
-					<button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="searchService.addColumnsToDatatable()" class="btn btn-primary" >
+					<button type="submit" title='@Messages("button.add.columns")' data-toggle="tooltip" ng-click="searchService.addColumnsToDatatable()" class="btn btn-primary" >
 						<i class="fa fa-plus"></i>
 					</button>
 					<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="searchService.resetDatatableColumns()"  class="btn btn-default">
@@ -197,6 +219,15 @@
 				</div>
 				}				
 			}
+			@columnSearchForm{
+				@formGroup{
+			  		<div class="checkbox">
+				    <label>
+				      <input type="checkbox" ng-model="searchService.form.aggregate"> @Messages("search.tab.aggregateSearchMode")
+				    </label>
+				  </div>	
+				  }
+			}	
 			</div>		
 		</form>	
 	</div>

@@ -150,7 +150,7 @@ angular.module('home').controller('OneToVoidCtrl',['$scope', '$parse','atmToSing
 		});
 		
 		$scope.$on('cancel', function(e) {
-			console.log("call event cancel");
+			console.log("call event cancel on one-to-void");
 			$scope.atmService.data.cancel();	
 			if($scope.isCreationMode()){
 				var dtConfig = $scope.atmService.data.getConfig();
@@ -160,7 +160,7 @@ angular.module('home').controller('OneToVoidCtrl',['$scope', '$parse','atmToSing
 		});
 		
 		$scope.$on('activeEditMode', function(e) {
-			console.log("call event activeEditMode");
+			console.log("call event activeEditMode on one-to-void ");
 			$scope.atmService.data.selectAll(true);
 			$scope.atmService.data.setEdit();
 		});

@@ -12,6 +12,7 @@ import fr.cea.ig.ngl.dao.api.APIException;
 import fr.cea.ig.ngl.dao.api.APIValidationException;
 import fr.cea.ig.ngl.dao.api.GenericAPI;
 import fr.cea.ig.ngl.dao.sra.SubmissionDAO;
+import fr.cea.ig.play.IGGlobals;
 import models.sra.submit.common.instance.Submission;
 
 
@@ -29,6 +30,11 @@ public class SubmissionAPI extends GenericAPI<SubmissionDAO, Submission> {
 //		this.dao = submissionDAO;
 //	}
 
+	
+	public Iterable<Submission> dao_all() {
+		return dao.all();
+	}
+	
 	public Submission dao_getObject(String submissionCode) {
 		return dao.getObject(submissionCode);
 	}
@@ -91,4 +97,13 @@ public class SubmissionAPI extends GenericAPI<SubmissionDAO, Submission> {
 		return dao.findAsList(q);
 	}
 
+	/**
+	 * Acces à une instance globale de SubmissionAPI, qui permet de remplacer les appels
+	 * à MongoDBDAO qui est une globale, dans un contexte ou on ne peut pas injecter. 
+	 * Exemple dans objets du domaine (sra.Experiment, ...)
+	 * @return SubmissionAPI
+	 */
+	public static SubmissionAPI get() {
+		return IGGlobals.instanceOf(SubmissionAPI.class);
+	}
 }

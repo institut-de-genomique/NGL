@@ -230,9 +230,9 @@ angular.module('home').controller('PcrAndPurificationCtrl',['$scope', '$parse', 
 			hide:{
 				active:true
 			},
-			edit:{
-				active: ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('IP')),
-				showButton: ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('IP')),
+			edit:{ // 08/01/2019 modif 'IP'=>'F' pour edition
+				active: ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F')),
+				showButton: ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F')),
 				byDefault:($scope.isCreationMode()),
 				columnMode:true 
 			},
@@ -270,7 +270,8 @@ angular.module('home').controller('PcrAndPurificationCtrl',['$scope', '$parse', 
 	$scope.$on('refresh', function(e) {
 		console.log("call event refresh");		
 		var dtConfig = $scope.atmService.data.getConfig();
-		dtConfig.edit.active = ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('IP'));
+		dtConfig.edit.active = ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F')); // modif IP=>F pourr edition
+		// showButton pas necessaire...
 		dtConfig.edit.byDefault = false;
 		dtConfig.remove.active = ($scope.isEditModeAvailable() && $scope.isNewState());
 		$scope.atmService.data.setConfig(dtConfig);
@@ -342,8 +343,7 @@ angular.module('home').controller('PcrAndPurificationCtrl',['$scope', '$parse', 
 				$scope.messages.text = "Plusieurs 'nom de travail de run' trouvés";
 				$scope.messages.open();			
 			
-				console.log('>1  run workLabel trouvé !!');
-				
+				//console.log('>1  run workLabel trouvé !!');	
 			} else if ( workLabels.length === 1 ){
 				// verifier que TOUS les containers ont une valeur...
 				var contents= $scope.$eval("getBasket().get()|getArray:'contents[0]'");
@@ -354,10 +354,16 @@ angular.module('home').controller('PcrAndPurificationCtrl',['$scope', '$parse', 
 					$scope.messages.text = "Certains containers n'ont pas de 'nom de travail de run'.";
 					$scope.messages.open();			
 				
-					console.log("Certains containers n'ont pas de workLabel.");
+					//console.log("Certains containers n'ont pas de workLabel.");
+				} else {
+					// NGL-2160/NGL-2164 ne faire l'assignation que si l'instrument possede la propriété robotRunCode (sinon erreur de sauvegarde experience!)
+					if ( $scope.instrumentHasProperty('robotRunCode') ) {
+						$parse("instrumentProperties.robotRunCode.value").assign($scope.experiment, workLabels[0]);
+					} else {
+						console.log("la propriété n'est pas gérée par l'instrument!");
+						// faut-il une alerte utilisateur ??
+					}
 				}
-			
-				$parse("instrumentProperties.robotRunCode.value").assign($scope.experiment, workLabels[0]);
 			} 
 			// si aucun workLabel ne rien faire
 	});

@@ -10,11 +10,11 @@ import views.html.readsets.treatments;
 
 import javax.inject.Inject;
 
+import controllers.NGLController;
 import fr.cea.ig.authentication.Authenticated;
 import fr.cea.ig.authorization.Authorized;
 import fr.cea.ig.lfw.Historized;
 import fr.cea.ig.ngl.NGLApplication;
-import fr.cea.ig.ngl.NGLController;
 import fr.cea.ig.ngl.support.NGLJavascript;
 
 
@@ -86,8 +86,8 @@ public class ReadSets extends NGLController implements NGLJavascript {
   	    			   controllers.readsets.api.routes.javascript.ReadSets.get(),
   	    			   controllers.readsets.api.routes.javascript.ReadSets.list(),
   	    			   controllers.readsets.api.routes.javascript.ReadSets.list(),
-  	    			   controllers.readsets.api.routes.javascript.ReadSets.state(),
-  	    			   controllers.readsets.api.routes.javascript.ReadSets.stateBatch(),
+  	    			   controllers.readsets.api.routes.javascript.ReadSets.updateState(),
+  	    			   controllers.readsets.api.routes.javascript.ReadSets.updateStateBatch(),
   	    			   controllers.readsets.api.routes.javascript.ReadSets.valuation(),
   	    			   controllers.readsets.api.routes.javascript.ReadSets.valuationBatch(),
   	    			   controllers.readsets.api.routes.javascript.ReadSets.properties(),

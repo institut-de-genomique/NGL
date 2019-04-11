@@ -28,7 +28,7 @@ angular.module('home', ['commonsServices','ngRoute','ultimateDataTableServices',
 		templateUrl : function(params){return jsRoutes.controllers.processes.tpl.Processes.newProcesses(params.processTypeCode).url},
 		controller : 'NewFromContainersCtrl'
 	});
-	$routeProvider.when('/processes/new-from-samples/:processTypeCode', {
+	$routeProvider.when('/processes/new-from-samples/:processTypeCode/:tabid', {
 		templateUrl : function(params){return jsRoutes.controllers.processes.tpl.Processes.newProcesses(params.processTypeCode).url},
 		controller : 'NewFromSamplesCtrl'
 	});

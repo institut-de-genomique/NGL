@@ -9,15 +9,11 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import fr.cea.ig.DBObject;
-import fr.cea.ig.MongoDBDAO;
-import fr.cea.ig.play.migration.NGLContext;
-//import play.Logger;
 import models.laboratory.common.instance.property.PropertyFileValue;
 import models.laboratory.container.description.ContainerSupportCategory;
 import models.laboratory.container.instance.Container;
 import models.laboratory.container.instance.ContainerSupport;
 import models.laboratory.container.instance.Content;
-import models.laboratory.project.instance.Project;
 import models.laboratory.reception.instance.AbstractFieldConfiguration;
 import models.laboratory.reception.instance.DoubleExcelFieldConfiguration;
 import models.laboratory.reception.instance.ExcelFieldConfiguration;
@@ -29,7 +25,6 @@ import models.laboratory.reception.instance.ReceptionConfiguration.Action;
 import models.laboratory.reception.instance.TagExcelFieldConfiguration;
 import models.laboratory.sample.instance.Sample;
 import models.utils.CodeHelper;
-import models.utils.InstanceConstants;
 import services.io.reception.mapping.ContainerMapping;
 import services.io.reception.mapping.SampleMapping;
 import services.io.reception.mapping.SupportMapping;
@@ -39,31 +34,44 @@ public abstract class FileService {
 
 	private static final play.Logger.ALogger logger = play.Logger.of(FileService.class);
 	
-	protected Map<Integer, String> headerByIndex = new HashMap<>();
-	protected ReceptionConfiguration configuration;
-	protected PropertyFileValue fileValue;
-	protected ContextValidation contextValidation;
-	private Map<String, Project> lastSampleCodeForProjects = new HashMap<>(0);
+//	private final NGLContext ctx;
+//	private final NGLApplication app;
+
+	protected Map<Integer, String>                   headerByIndex = new HashMap<>();
+	protected ReceptionConfiguration                 configuration;
+	protected PropertyFileValue                      fileValue;
+	protected ContextValidation                      contextValidation;
 	private Map<String, Mapping<? extends DBObject>> mappings = new HashMap<>();
-	private Map<String, Map<String, DBObject>> objects = new HashMap<>();
+	private Map<String, Map<String, DBObject>>       objects = new HashMap<>();
 	
-	private final NGLContext ctx;
+//	protected FileService(ReceptionConfiguration configuration,
+//			              PropertyFileValue fileValue, 
+//			              ContextValidation contextValidation, 
+//			              NGLContext ctx) {
+//		this.configuration = configuration;
+//		this.fileValue = fileValue;
+//		this.contextValidation = contextValidation;
+//		this.ctx = ctx;
+//		Set<String> objectTypes = configuration.configs.keySet();
+//		objectTypes.stream().forEach(s -> {
+//			objects.put(s, new TreeMap<String, DBObject>());
+//			mappings.put(s, mappingFactory(s));						
+//		});
+//	}
 
 	protected FileService(ReceptionConfiguration configuration,
-			              PropertyFileValue fileValue, 
-			              ContextValidation contextValidation, 
-			              NGLContext ctx) {
+                          PropertyFileValue fileValue, 
+                          ContextValidation contextValidation/*, 
+                          NGLApplication app*/) {
 		this.configuration = configuration;
 		this.fileValue = fileValue;
 		this.contextValidation = contextValidation;
-		this.ctx = ctx;
+//		this.app = app;
 		Set<String> objectTypes = configuration.configs.keySet();
 		objectTypes.stream().forEach(s -> {
 			objects.put(s, new TreeMap<String, DBObject>());
 			mappings.put(s, mappingFactory(s));						
 		});
-		
-
 	}
 
 	public Map<String, Map<String, DBObject>> getObjects() {
@@ -72,13 +80,14 @@ public abstract class FileService {
 
 	private Mapping<? extends DBObject> mappingFactory(String objectType) {
 		if (Mapping.Keys.sample.toString().equals(objectType)) {
-			return new SampleMapping(objects, configuration.configs.get(objectType), configuration.action, contextValidation, ctx);
+//			return new SampleMapping(objects, configuration.configs.get(objectType), configuration.action, contextValidation, app);
+			return new SampleMapping(objects, configuration.configs.get(objectType), configuration.action, contextValidation);
 		} else if(Mapping.Keys.support.toString().equals(objectType)) {
 			return new SupportMapping(objects, configuration.configs.get(objectType), configuration.action, contextValidation);
 		} else if(Mapping.Keys.container.toString().equals(objectType)) {
 			return new ContainerMapping(objects, configuration.configs.get(objectType), configuration.action, contextValidation);
 		} else {
-			contextValidation.addErrors("Error", "Mapping : " + objectType);
+			contextValidation.addError("Error", "Mapping : " + objectType);
 			throw new UnsupportedOperationException("Mapping : " + objectType);
 		}
 	}
@@ -124,24 +133,13 @@ public abstract class FileService {
 			if (Action.save.equals(configuration.action)) {
 				//allready one sample by line
 				Sample sample = (Sample)objectInLine.get(Mapping.Keys.sample.toString());
-				if (sample != null && sample.code == null && sample.projectCodes != null && sample.projectCodes.size() == 1) {
-					sample.code = generateSampleCode(sample); 
-					//update content sampleCode
+				if (sample != null && sample.code != null) {
 					List<Content> contents = container.contents.stream().filter(c -> (c.sampleCode == null)).collect(Collectors.toList());
 					if (contents.size() == 1) {
 						contents.get(0).sampleCode = sample.code;																
 					} else if(contents.size() > 1) {
-						contextValidation.addErrors("container.contents", "several contents without sampleCode");
+						contextValidation.addError("container.contents", "several contents without sampleCode");
 					}
-				} else if (sample != null && sample.code != null) {
-					List<Content> contents = container.contents.stream().filter(c -> (c.sampleCode == null)).collect(Collectors.toList());
-					if (contents.size() == 1) {
-						contents.get(0).sampleCode = sample.code;																
-					} else if(contents.size() > 1) {
-						contextValidation.addErrors("container.contents", "several contents without sampleCode");
-					}
-				} else if (sample != null && sample.code == null && sample.projectCodes != null && sample.projectCodes.size() == 0) {
-					contextValidation.addErrors("sample.projectCodes", "no project code found for sample code generation");
 				}
 				ContainerSupport support = (ContainerSupport)objectInLine.get(Mapping.Keys.support.toString());
 				if (support != null && support.code == null) {
@@ -150,7 +148,7 @@ public abstract class FileService {
 					if (container.support.code == null) {
 						container.support.code = support.code;				
 					} else {
-						contextValidation.addErrors("container.support.code", "not null during support code generation : "+container.support.code);
+						contextValidation.addError("container.support.code", "not null during support code generation : "+container.support.code);
 					}
 				}
 			}
@@ -160,34 +158,20 @@ public abstract class FileService {
 				String containerCode = getContainerCode(support, container);
 				if (containerCode != null && container.code == null) {
 					container.code = containerCode;
-				} else if(!containerCode.equals(container.code)) {
-					contextValidation.addErrors("container.code", "error during container code generation : "+containerCode+" / "+container.code);
+				} else if (containerCode == null) {
+					throw new RuntimeException("null container code");
+				} else if (!containerCode.equals(container.code)) {
+					contextValidation.addError("container.code", "error during container code generation : "+containerCode+" / "+container.code);
 				}
 			}
 		}		
 	}
 
-	private String generateSampleCode(Sample sample) {
-		String projectCode = sample.projectCodes.iterator().next();
-
-		if (!lastSampleCodeForProjects.containsKey(projectCode)) {
-			Project project = MongoDBDAO.findByCode(InstanceConstants.PROJECT_COLL_NAME, Project.class, projectCode);
-			lastSampleCodeForProjects.put(projectCode, project);
-		}
-		Project project = lastSampleCodeForProjects.get(projectCode);
-		if (project != null) {
-			project.lastSampleCode = CodeHelper.getInstance().generateSampleCode(project, false);
-			return project.lastSampleCode;
-		} else {
-			return null;
-		}
-	}
-	
 	/*
 	 * compute container code with the support code in case of container.code is null
 	 */
 	private String getContainerCode(ContainerSupport support, Container container) {
-		ContainerSupportCategory csc = ContainerSupportCategory.find.findByCode(container.support.categoryCode);
+		ContainerSupportCategory csc = ContainerSupportCategory.find.get().findByCode(container.support.categoryCode);
 		String code = null;
 		if (csc.nbLine == 1 && csc.nbColumn == 1) {
 			code = support.code;
@@ -232,20 +216,20 @@ public abstract class FileService {
 		} else {
 			contextValidation.setUpdateMode();
 		}
-		if(saveObjectsForKey(Mapping.Keys.sample.toString())){
-			if(saveObjectsForKey(Mapping.Keys.support.toString())){
+		if (saveObjectsForKey(Mapping.Keys.sample.toString())) {
+			if (saveObjectsForKey(Mapping.Keys.support.toString())) {
 				saveObjectsForKey(Mapping.Keys.container.toString());		
 				rollbackObjectIFNeeded(Mapping.Keys.sample.toString(),Mapping.Keys.support.toString());
-			}else{
+			} else {
 				rollbackObjectIFNeeded(Mapping.Keys.sample.toString()); //??? Good idea ???
 			}			
 		}
 
 	}
 
-	private void rollbackObjectIFNeeded(String...keys) {
+	private void rollbackObjectIFNeeded(String... keys) {
 		Arrays.asList(keys).forEach(key ->{
-			if(contextValidation.hasErrors() && configuration.configs.containsKey(key)){
+			if (contextValidation.hasErrors() && configuration.configs.containsKey(key)) {
 				Map<String, DBObject> dbobjects = objects.get(key);
 				Mapping<? extends DBObject> mapping = mappings.get(key);
 				dbobjects.values().forEach(o -> {
@@ -258,7 +242,8 @@ public abstract class FileService {
 
 	/**
 	 * Save objects only it not error
-	 * @param key
+	 * @param  key key
+	 * @return     success status
 	 */
 	private boolean saveObjectsForKey(String key) {
 		if(!contextValidation.hasErrors() && configuration.configs.containsKey(key)){
@@ -331,7 +316,7 @@ public abstract class FileService {
 		} else if(this.headerByIndex.containsKey(efc.cellSequence)) {
 			efc.headerValue = this.headerByIndex.get(efc.cellSequence);
 		} else {
-			contextValidation.addErrors("Headers","not found header for cell position "+efc.cellSequence);
+			contextValidation.addError("Headers","not found header for cell position "+efc.cellSequence);
 		}
 	}
 	
@@ -339,7 +324,7 @@ public abstract class FileService {
 		if (this.headerByIndex.containsKey(efc.cellPosition)) {
 			efc.headerValue = this.headerByIndex.get(efc.cellPosition);
 		} else {
-			contextValidation.addErrors("Headers","not found header for cell position "+efc.cellPosition);
+			contextValidation.addError("Headers","not found header for cell position "+efc.cellPosition);
 		}
 	}
 
@@ -347,7 +332,7 @@ public abstract class FileService {
 		if (this.headerByIndex.containsKey(efc.cellPosition1) && this.headerByIndex.containsKey(efc.cellPosition2)) {
 			efc.headerValue = this.headerByIndex.get(efc.cellPosition1)+" / "+this.headerByIndex.get(efc.cellPosition2);
 		} else {
-			contextValidation.addErrors("Headers","not found header for cell position "+efc.cellPosition1);
+			contextValidation.addError("Headers","not found header for cell position "+efc.cellPosition1);
 		}
 	}
 

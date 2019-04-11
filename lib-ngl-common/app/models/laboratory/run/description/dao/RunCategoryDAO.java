@@ -1,5 +1,7 @@
 package models.laboratory.run.description.dao;
 
+import java.util.List;
+
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.stereotype.Repository;
 
@@ -21,9 +23,14 @@ public class RunCategoryDAO extends AbstractDAODefault<RunCategory> {
 				+" where c.code = ?";
 		
 		BeanPropertyRowMapper<RunCategory> mapper = new BeanPropertyRowMapper<>(entityClass);
-		return this.jdbcTemplate.queryForObject(sql, mapper, typeCode);		
+		return jdbcTemplate.queryForObject(sql, mapper, typeCode);		
 	}
-	
+
+	@Override
+	protected List<String> getColumns() {
+		return enumColumns;
+	}
+
 }
 
 

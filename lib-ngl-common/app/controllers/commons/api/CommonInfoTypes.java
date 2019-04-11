@@ -6,7 +6,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import controllers.CommonController;
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import models.laboratory.common.description.CommonInfoType;
 import models.laboratory.common.description.ObjectType;
 import models.utils.ListObject;
@@ -19,19 +19,26 @@ import views.components.datatable.DatatableResponse;
 
 public class CommonInfoTypes extends CommonController {
 	
-	private final NGLContext ctx;
+//	private final NGLContext ctx;
+//	
+//	@Inject
+//	public CommonInfoTypes(NGLContext ctx) {
+//		this.ctx = ctx;
+//	}
+	
+	private final NGLApplication app;
 	
 	@Inject
-	public CommonInfoTypes(NGLContext ctx) {
-		this.ctx = ctx;
+	public CommonInfoTypes(NGLApplication app) {
+		this.app = app;
 	}
-	
-	public /*static*/ Result list() throws DAOException {
+
+	public Result list() throws DAOException {
 //		DynamicForm filledForm =  listForm().bindFromRequest();
-		DynamicForm filledForm =  ctx.form().bindFromRequest();
+		DynamicForm filledForm =  app.form().bindFromRequest();
 		List<CommonInfoType> values = new ArrayList<>(0);
 		if (filledForm.get("objectTypeCode") != null) {
-			values = CommonInfoType.find.findByObjectTypeCode(ObjectType.CODE.valueOf(filledForm.get("objectTypeCode")));
+			values = CommonInfoType.find.get().findByObjectTypeCode(ObjectType.CODE.valueOf(filledForm.get("objectTypeCode")));
 		}
 		if (filledForm.get("datatable") != null) {
 			return ok(Json.toJson(new DatatableResponse<>(values, values.size())));

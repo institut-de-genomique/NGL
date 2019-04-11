@@ -1,5 +1,7 @@
 package models.laboratory.run.description.dao;
 
+import static models.utils.dao.DAOException.daoAssertNotNull;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,11 +16,6 @@ import play.api.modules.spring.Spring;
 @Repository
 public class RunTypeDAO extends AbstractDAOCommonInfoType<RunType> {
 
-//	protected RunTypeDAO() {
-//		super("run_type", RunType.class, RunTypeMappingQuery.class, 
-//				"SELECT distinct c.id, c.nb_lanes, c.fk_common_info_type, c.fk_run_category ",
-//						"FROM run_type as c "+sqlCommonInfoType, false);
-//	}
 	protected RunTypeDAO() {
 		super("run_type", RunType.class, RunTypeMappingQuery.factory, 
 				"SELECT distinct c.id, c.nb_lanes, c.fk_common_info_type, c.fk_run_category ",
@@ -27,14 +24,18 @@ public class RunTypeDAO extends AbstractDAOCommonInfoType<RunType> {
 
 	@Override
 	public long save(RunType runType) throws DAOException {
-		if (runType == null)
-			throw new DAOException("RunType is mandatory");
+//		if (runType == null)
+//			throw new DAOException("RunType is mandatory");
 		
 		//Check if category exist
-		if(runType.category == null || runType.category.id == null){
-			throw new DAOException("RunCategory is not present !!");
-		}
-
+//		if(runType.category == null || runType.category.id == null){
+//			throw new DAOException("RunCategory is not present !!");
+//		}
+		
+		daoAssertNotNull("runType",             runType);
+		daoAssertNotNull("runType.category",    runType.category);
+		daoAssertNotNull("runType.category.id", runType.category.id);
+		
 		//Add commonInfoType
 		CommonInfoTypeDAO commonInfoTypeDAO = Spring.getBeanOfType(CommonInfoTypeDAO.class);
 		runType.id = commonInfoTypeDAO.save(runType);
@@ -65,4 +66,5 @@ public class RunTypeDAO extends AbstractDAOCommonInfoType<RunType> {
 		CommonInfoTypeDAO commonInfoTypeDAO = Spring.getBeanOfType(CommonInfoTypeDAO.class);
 		commonInfoTypeDAO.remove(runType);
 	}
+	
 }

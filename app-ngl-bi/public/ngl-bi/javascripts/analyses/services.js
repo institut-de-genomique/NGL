@@ -108,6 +108,7 @@
 				lists.refresh.valuationCriterias({objectTypeCode:"Analysis"});
 				
 				searchService.lists.refresh.reportConfigs({pageCodes:["analysis"+"-"+mainService.getHomePage()]});
+				searchService.lists.refresh.filterConfigs({pageCodes:["analysis-addfilters"]}, "analysis-addfilters");
 				searchService.lists.refresh.users();
 				isInit=true;
 			}
@@ -122,6 +123,7 @@
 				form : undefined,
 				reportingConfigurationCode:undefined,
 				reportingConfiguration:undefined,
+				additionalFilters:[],
 				//additionalsColumns:[],
 				//selectedAddColumns:[],
 				setRouteParams:function($routeParams){
@@ -201,6 +203,34 @@
 					}
 					
 				},
+				
+				initAdditionalFilters:function(){
+					this.additionalFilters=[];
+					
+					if(lists.get("analysis-addfilters") && lists.get("analysis-addfilters").length === 1){
+						var formFilters = [];
+						var allFilters = angular.copy(lists.get("analysis-addfilters")[0].filters);
+						
+						
+						var nbElementByColumn = Math.ceil(allFilters.length / 5); //5 columns
+						for(var i = 0; i  < 5 && allFilters.length > 0 ; i++){
+							formFilters.push(allFilters.splice(0, nbElementByColumn));	    								
+						}
+						//complete to 5 five element to have a great design 
+						while(formFilters.length < 5){
+							formFilters.push([]);
+						}
+							
+						this.additionalFilters = formFilters;
+					}
+				},
+				
+				getAddFiltersToForm : function(){
+					if(this.additionalFilters.length === 0){
+						this.initAdditionalFilters();
+					}
+					return this.additionalFilters;									
+				},	
 				
 				/*
 				initAdditionalColumns:function(){

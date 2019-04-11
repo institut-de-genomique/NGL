@@ -15,6 +15,9 @@ import validation.utils.ValidationHelper;
  * @author mhaquell
  * @author vrd
  */
+// The simpler strategy would be to set the creation and modification at creation time
+// so the code can always rely on creation and modification info. An unmodified object
+// would have the same creation and modification dates.
 public class TraceInformation implements IValidation {
 	
 	/**
@@ -134,18 +137,49 @@ public class TraceInformation implements IValidation {
 		forceModificationStamp(user, new Date());
 	}
 	
+	/**
+	 * Validation depends on the context mode ((update or undefined) or other) that will
+	 * require the creation and update info in update or undefined mode and only the
+	 * creation info in other modes.
+	 */
 	@Override
+//	public void validate(ContextValidation contextValidation) {
+//		// backward compatibility
+//		if (contextValidation.isUpdateMode() || (contextValidation.isNotDefined() && contextValidation.getObject("_id") != null)) {
+//			ValidationHelper.validateNotEmpty(contextValidation, createUser,   "createUser");
+//			ValidationHelper.validateNotEmpty(contextValidation, creationDate, "creationDate");
+//			ValidationHelper.validateNotEmpty(contextValidation, modifyUser,   "modifyUser");
+//			ValidationHelper.validateNotEmpty(contextValidation, modifyDate,   "modifyDate");
+//		} else {
+//			ValidationHelper.validateNotEmpty(contextValidation, createUser,   "createUser");
+//			ValidationHelper.validateNotEmpty(contextValidation, creationDate, "createDate");
+//		}
+//	}
 	public void validate(ContextValidation contextValidation) {
-		//backward compatibility
+		ValidationHelper.validateNotEmpty(contextValidation, createUser,   "createUser");
+		ValidationHelper.validateNotEmpty(contextValidation, creationDate, "createDate");
+		// backward compatibility
 		if (contextValidation.isUpdateMode() || (contextValidation.isNotDefined() && contextValidation.getObject("_id") != null)) {
-			ValidationHelper.required(contextValidation, createUser,   "createUser");
-			ValidationHelper.required(contextValidation, creationDate, "creationDate");
-			ValidationHelper.required(contextValidation, modifyUser,   "modifyUser");
-			ValidationHelper.required(contextValidation, modifyDate,   "modifyDate");
-		} else {
-			ValidationHelper.required(contextValidation, createUser,   "createUser");
-			ValidationHelper.required(contextValidation, creationDate, "createDate");
+			ValidationHelper.validateNotEmpty(contextValidation, modifyUser,   "modifyUser");
+			ValidationHelper.validateNotEmpty(contextValidation, modifyDate,   "modifyDate");
 		}
 	}
-	
+
+	/**
+	 * Update or create a trace information.
+	 * @param traceInformation optional trace information to update
+	 * @param user             user
+	 * @return                 updated object if one was provided otherwise a created object
+	 */
+	public static TraceInformation updateOrCreateTraceInformation(TraceInformation traceInformation, String user) {
+		TraceInformation ti = null;
+		if (traceInformation == null) {
+			ti = new TraceInformation();
+		} else {
+			ti = traceInformation;
+		}
+		ti.setTraceInformation(user);
+		return ti;
+	}
+		
 }

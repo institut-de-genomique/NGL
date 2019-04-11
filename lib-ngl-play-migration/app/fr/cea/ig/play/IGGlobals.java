@@ -1,16 +1,10 @@
 package fr.cea.ig.play;
 
 import java.util.ArrayList;
-// import java.util.HashMap;
-// import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-// import java.util.concurrent.Callable;
-
-// import play.Application;
-// TODO: use something like:
 import com.typesafe.config.Config;
 
 import akka.actor.ActorSystem;
@@ -24,7 +18,6 @@ import play.i18n.Lang;
 import play.i18n.Messages;
 import play.i18n.MessagesApi;
 import play.inject.Injector;
-// import play.libs.Akka;
 import play.libs.ws.WSClient;
 
 /**

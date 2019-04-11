@@ -38,7 +38,7 @@ public class OutputHelper {
 	public static String getInstrumentPath(String instrumentCode, boolean addSampleSheet) {
 		Instrument instrument = null;
 		try {
-			instrument = Instrument.find.findByCode(instrumentCode);
+			instrument = Instrument.find.get().findByCode(instrumentCode);
 		} catch (DAOException e) {
 			logger.error("DAO error: " + e.getMessage(),e);
 		}
@@ -105,12 +105,21 @@ public class OutputHelper {
 		return index;
 	}
 	
+	private static String getIndex(String sequence, Integer maxIndexSize) {
+		if(null == sequence){
+			return StringUtils.repeat("N", maxIndexSize);
+		}else if(sequence.length() < maxIndexSize){
+			return sequence.concat(StringUtils.repeat("N", maxIndexSize-sequence.length()));
+		}else{
+			return sequence;
+		}
+	}
+	
 	public static String getSequence(Index index, TagModel tagModel, String instrumentTypeCode) {
 		return 	getSequence(index, tagModel, instrumentTypeCode, null);
 	}
 	
 	public static String getSequence(Index index, TagModel tagModel, String instrumentTypeCode, Integer position){
-		
 		if("NONE".equals(tagModel.tagType)){
 			return null;
 		}else if("SINGLE-INDEX".equals(tagModel.tagType)){
@@ -141,17 +150,7 @@ public class OutputHelper {
 			
 			return sequence;
 		}else{
-			throw new RuntimeException("Index not manage "+tagModel.tagType);
-		}
-	}
-
-	private static String getIndex(String sequence, Integer maxIndexSize) {
-		if(null == sequence){
-			return StringUtils.repeat("N", maxIndexSize);
-		}else if(sequence.length() < maxIndexSize){
-			return sequence.concat(StringUtils.repeat("N", maxIndexSize-sequence.length()));
-		}else{
-			return sequence;
+			throw new RuntimeException("Index not managed "+tagModel.tagType);
 		}
 	}
 	
@@ -243,17 +242,20 @@ public class OutputHelper {
 	}
 	
 	public static TagModel getTagModel(List<Container> containers) {
-		List<PropertyValue> tags = containers.stream().map((Container container) -> container.contents)
+		List<PropertyValue> tags = containers.stream()
+			.map(container -> container.contents)
 			.flatMap(List::stream)
 			.filter(c -> c.properties.containsKey(InstanceConstants.TAG_PROPERTY_NAME))
-			.filter(c -> !c.properties.get("tagCategory").equals("MID"))
+//			.filter(c -> !c.properties.get("tagCategory").equals("MID"))
+			// TODO: check that the test is correct
+			.filter(c -> ! "MID".equals(c.properties.get("tagCategory").value))
 			.map((Content c) -> c.properties.get(InstanceConstants.TAG_PROPERTY_NAME))
 			.collect(Collectors.toList());
 		TagModel tagModel = new TagModel();
 		if (tags.size() > 0) {
 			tagModel.maxTag1Size = 0;
 			tagModel.maxTag2Size = 0;
-			tagModel.tagType = "SINGLE-INDEX";
+			tagModel.tagType     = "SINGLE-INDEX";
 			for (PropertyValue _tag : tags) {
 				PropertySingleValue tag = (PropertySingleValue)_tag;
 				Index index = getIndex("index-illumina-sequencing", tag.value.toString());
@@ -283,7 +285,7 @@ public class OutputHelper {
 	
 	// Cet algorithme est utile pour les robots qui numerotent les plaques 96 en colonne 
 	// A1=1, B1=2...A2=9
-	public static int getNumberPositionInPlateByColumn(String line,String column){
+	public static int getNumberPositionInPlateByColumn(String line, String column) {
 //		int asciiValue=(int) line.toCharArray()[0];
 		int asciiValue  = line.toCharArray()[0];
 		int columnValue = Integer.parseInt(column);
@@ -292,12 +294,11 @@ public class OutputHelper {
 	
 	// Cet algorithme est utile pour les robots qui numerotent les plaques 96 en ligne 
 		// A1=1, A2=2
-	public static int getNumberPositionInPlateByLine(String line,String column){
+	public static int getNumberPositionInPlateByLine(String line, String column) {
 //		int asciiValue=(int) line.toCharArray()[0];
 		int asciiValue  = line.toCharArray()[0];
 		int columnValue = Integer.parseInt(column);
-		
-		return (asciiValue-64)*12-12+columnValue;
+		return (asciiValue-64) * 12 - 12 + columnValue;
 	}
 	
 	// Cet algorithme est utile pour les robots qui numerotent les plaques 96 en colonne 
@@ -323,7 +324,7 @@ public class OutputHelper {
 	}
 
 	public static String getContentPropertyIfOne(InputContainerUsed container, String propertyName) {
-		List<String> l = container.contents.stream().map((Content c) -> c.properties.get(propertyName).value.toString())
+		List<String> l = container.contents.stream().filter((Content c) -> c.properties.containsKey(propertyName)).map((Content c) -> c.properties.get(propertyName).value.toString())
 				.collect(Collectors.toList());
 		if (l.size() == 1 ) {
 			return l.get(0);

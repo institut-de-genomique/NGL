@@ -185,5 +185,17 @@ rule "Check too many inputs in lane"
     	$contextValidation.addErrors("Position["+$position+"]","Un seul container par lane pour le Janus");
 end   
 
-
+// 23/01/2019  When using Novaseq on Board =>  all lanes must have same content
+//            
+rule "TEST All lanes with same contents"
+    @nglSQ( validations )
+	dialect "java"
+	salience 900
+	no-loop
+   when
+    	$experiment:Experiment($typeCode:typeCode, $typeCode=="prepa-fc-ordered", (instrument.Code == "cBot-interne-MarieCurix-A" || instrument.Code == "cBot-interne-MarieCurix-B"))
+   		$contextValidation:ContextValidation()
+    then
+  		$contextValidation.addErrors("TEST", "MarieCurix");
+end
  
