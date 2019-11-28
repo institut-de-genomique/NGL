@@ -184,6 +184,7 @@ angular.module('home').controller('DNAseTreatmentCtrl',['$scope', '$parse', 'atm
 		console.log("call event save");
 		$scope.atmService.data.save();
 		$scope.atmService.viewToExperimentOneToOne($scope.experiment);
+		addDnaseTreatmentProp($scope.experiment);	
 		$scope.$emit('childSaved', callbackFunction);
 	});
 	
@@ -222,6 +223,24 @@ angular.module('home').controller('DNAseTreatmentCtrl',['$scope', '$parse', 'atm
 	});
 	//Init		
 
+	//dnaseTreatment =true => constante que l'on ne veut pas afficher dans le datatable mais qui est necess a la validation des properties
+	var addDnaseTreatmentProp = function(experiment){
+		for(var i=0 ; i < experiment.atomicTransfertMethods.length && experiment.atomicTransfertMethods != null; i++){
+			var atm = experiment.atomicTransfertMethods[i];
+			for(var j=0 ; j < atm.outputContainerUseds.length ; j++){	
+				var ocu = atm.outputContainerUseds[j];
+				if (! ocu.experimentProperties)
+					ocu.experimentProperties={};
+				ocu.experimentProperties.dnaseTreatment={};
+				ocu.experimentProperties.dnaseTreatment.value=true;	
+				ocu.experimentProperties.dnaseTreatment._type="single";
+				ocu.experimentProperties.dnaseTreatment.unit=null;
+			}
+		}				
+	};
+	
+	
+	
 	$scope.updatePropertyFromUDT = function(value, col){
 		computeInputQuantity(value.data);
 	}
@@ -251,9 +270,7 @@ angular.module('home').controller('DNAseTreatmentCtrl',['$scope', '$parse', 'atm
 			}	
 			getter.assign(udtData, inputQuantity);
 		}else{
-			inputQuantity = null;
-			getter.assign(udtData, inputQuantity);
-			console.log("not ready to computeInputQuantity");
+				console.log("not ready to computeInputQuantity user can fill inputQuantity");
 		}
 		
 	}
@@ -275,6 +292,21 @@ angular.module('home').controller('DNAseTreatmentCtrl',['$scope', '$parse', 'atm
 	atmService.defaultOutputUnit = {
 			volume : "µL"
 	}
+	
+	atmService.convertOutputPropertiesToDatatableColumn = function(property, pName){
+         var column = atmService.$commonATM.convertTypePropertyToDatatableColumn(property,"outputContainerUsed."+pName+".",{"0":Messages("experiments.outputs")});
+        
+         //Pour masquer la prop dans le tableau.. Attention à rajouter la prop à la sauvegarde!!
+         if(property.code=="dnaseTreatment"){
+        	  console.log("hide property "+pName+" "+property.code);
+        //	 column.edit=false; //ne fonctionne pas car met false dans le value et ce n'est pas ce que l'on veut!!
+        	// column.hide=false; // uniquement pour choisir d'afficher ou non la colonne dans le tableau..
+        	return null;      
+        }else{
+        	return column;
+        }
+    };
+	
 	atmService.experimentToView($scope.experiment, $scope.experimentType);
 	
 	

@@ -27,6 +27,7 @@ import models.laboratory.processes.description.ProcessType;
 import models.laboratory.processes.instance.Process;
 import models.laboratory.sample.instance.Sample;
 import models.utils.InstanceConstants;
+import models.utils.dao.DAOException;
 import play.Logger.ALogger;
 
 public class ContainersSearchForm extends DBObjectListForm<Container> {
@@ -44,6 +45,8 @@ public class ContainersSearchForm extends DBObjectListForm<Container> {
 	public String sampleCode;
 	public Set<String> sampleCodes;
 	public Set<String> sampleTypeCodes;
+	public String contentsSampleCode;
+	public Set<String> contentsSampleCodes;
 	public String ncbiScientificNameRegex;
 	public String categoryCode;
 	public String nextExperimentTypeCode;
@@ -62,8 +65,8 @@ public class ContainersSearchForm extends DBObjectListForm<Container> {
 	public Set<String> valuations;
 	public Date fromDate;
 	public Date toDate;
-	public String column; //TODO rename in supportColumn
-	public String line; //TODO rename in supportLine
+	public String column; // GA: rename in supportColumn
+	public String line;   // GA: rename in supportLine
 	public String createUser; 
 	public List<String> createUsers;
 	public List<String> stateResolutionCodes;
@@ -83,7 +86,7 @@ public class ContainersSearchForm extends DBObjectListForm<Container> {
 	
 	@Override
 	public String toString() {
-		return "ContainersSearchForm [projectCode=" + projectCode
+		return "thisForm [projectCode=" + projectCode
 				+ ", projectCodes=" + projectCodes + ", stateCode=" + stateCode
 				+ ", sampleCode=" + sampleCode + ", sampleCodes=" + sampleCodes
 				+ ", categoryCode=" + categoryCode + ", nextExperimentTypeCode="
@@ -97,7 +100,7 @@ public class ContainersSearchForm extends DBObjectListForm<Container> {
 	}
 
 	@Override
-	public Query getQuery() {
+	public DBQuery.Query getQuery() throws DAOException{		
 		List<DBQuery.Query> queryElts = new ArrayList<>();
 		Query query = DBQuery.empty();
 
@@ -182,6 +185,13 @@ public class ContainersSearchForm extends DBObjectListForm<Container> {
 			}else{
 				queryElts.add(DBQuery.in("sampleCodes", "-1")); // none results
 			}
+			
+			if(CollectionUtils.isNotEmpty(this.projectCodes)){
+				queryElts.add(DBQuery.in("projectCodes", this.projectCodes));
+			}else if(StringUtils.isNotBlank(this.projectCode)){
+				queryElts.add(DBQuery.in("projectCodes", this.projectCode));
+			}
+			
 		}else {
 			if(CollectionUtils.isNotEmpty(this.projectCodes)){
 				queryElts.add(DBQuery.in("projectCodes", this.projectCodes));
@@ -195,6 +205,7 @@ public class ContainersSearchForm extends DBObjectListForm<Container> {
 				queryElts.add(DBQuery.in("sampleCodes", this.sampleCode));
 			}
 		}
+		
 		
 		if(CollectionUtils.isNotEmpty(this.supportCodes)){
 			queryElts.add(DBQuery.in("support.code", this.supportCodes));
@@ -232,7 +243,7 @@ public class ContainersSearchForm extends DBObjectListForm<Container> {
 		}else if(StringUtils.isNotBlank(this.containerSupportCategory)){
 			queryElts.add(DBQuery.is("support.categoryCode", this.containerSupportCategory));
 		}else if(StringUtils.isNotBlank(this.nextExperimentTypeCode)){
-			List<ContainerSupportCategory> containerSupportCategories = ContainerSupportCategory.find.findInputByExperimentTypeCode(this.nextExperimentTypeCode);
+			List<ContainerSupportCategory> containerSupportCategories = ContainerSupportCategory.find.get().findInputByExperimentTypeCode(this.nextExperimentTypeCode);
 			List<String> cs = new ArrayList<>();
 			for(ContainerSupportCategory c:containerSupportCategories){
 				cs.add(c.code);
@@ -248,10 +259,10 @@ public class ContainersSearchForm extends DBObjectListForm<Container> {
 		//used in processes creation
 		if(StringUtils.isNotBlank(this.nextProcessTypeCode)){					
 					
-			ProcessType processType = ProcessType.find.findByCode(this.nextProcessTypeCode);
+			ProcessType processType = ProcessType.find.get().findByCode(this.nextProcessTypeCode);
 			if(processType != null){
 				
-				List<ExperimentType> experimentTypes = ExperimentType.find.findPreviousExperimentTypeForAnExperimentTypeCodeAndProcessTypeCode(processType.firstExperimentType.code, processType.code);
+				List<ExperimentType> experimentTypes = ExperimentType.find.get().findInputExperimentTypeForAnProcessTypeCode(this.nextProcessTypeCode);
 				
 				boolean onlyEx = true;
 				for(ExperimentType e:experimentTypes){
@@ -282,19 +293,23 @@ public class ContainersSearchForm extends DBObjectListForm<Container> {
 		}else if(StringUtils.isNotBlank(this.nextExperimentTypeCode)){
 			
 			List<DBQuery.Query> subQueryElts = new ArrayList<>();
-			List<ProcessType> processTypes=ProcessType.find.findByExperimentTypeCode(this.nextExperimentTypeCode);
+			List<ProcessType> processTypes = ProcessType.find.get().findByExperimentTypeCode(this.nextExperimentTypeCode);
 			if(CollectionUtils.isNotEmpty(processTypes)){
 				for(ProcessType processType:processTypes){
-					List<ExperimentType> previousExpType = ExperimentType.find.findPreviousExperimentTypeForAnExperimentTypeCodeAndProcessTypeCode(this.nextExperimentTypeCode,processType.code);
+					List<ExperimentType> previousExpType = ExperimentType.find.get().findPreviousExperimentTypeForAnExperimentTypeCodeAndProcessTypeCode(this.nextExperimentTypeCode,processType.code);
 					//Logger.debug("NB Previous exp : "+previousExpType.size());
 					Set<String> previousExpTypeCodes = previousExpType.stream().map(et -> et.code).collect(Collectors.toSet());
 					
 					if(CollectionUtils.isNotEmpty(this.fromTransformationTypeCodes)){
-						previousExpTypeCodes.retainAll(this.fromTransformationTypeCodes);
+						previousExpTypeCodes = previousExpTypeCodes
+													.stream()
+													.filter(petc -> (this.fromTransformationTypeCodes.contains(petc)
+															|| (this.fromTransformationTypeCodes.contains("none") && petc.startsWith("ext-to-"))))
+													.collect(Collectors.toSet());
 					}
 					
 					if(CollectionUtils.isNotEmpty(previousExpTypeCodes)){
-						subQueryElts.add(DBQuery.in("processTypeCodes", processType.code).in("fromTransformationTypeCodes", previousExpTypeCodes));
+						subQueryElts.add(DBQuery.in("processTypeCodes", processType.code).in("fromTransformationTypeCodes", previousExpTypeCodes));						
 					}else{
 						subQueryElts.add(DBQuery.in("processTypeCodes", "-1")); //force to return zero result;
 					}
@@ -361,9 +376,17 @@ public class ContainersSearchForm extends DBObjectListForm<Container> {
 			queryElts.add(DBQuery.elemMatch("comments", DBQuery.regex("comment", Pattern.compile(this.commentRegex))));
 		}
 		
-		queryElts.addAll(NGLControllerHelper.generateQueriesForProperties(this.contentsProperties,Level.CODE.Content, "contents.properties"));
 		queryElts.addAll(NGLControllerHelper.generateQueriesForProperties(this.properties,Level.CODE.Container, "properties"));
 
+		
+		queryElts.addAll(NGLControllerHelper.generateQueriesForProperties(this.contentsProperties,Level.CODE.Content, "contents.properties"));
+		
+		if(CollectionUtils.isNotEmpty(this.contentsSampleCodes)){
+			queryElts.add(DBQuery.in("contents.sampleCode", this.contentsSampleCodes));
+		}else if(StringUtils.isNotBlank(this.contentsSampleCode)){
+			queryElts.add(DBQuery.is("contents.sampleCode", this.contentsSampleCode));
+		}
+		
 		queryElts.addAll(NGLControllerHelper.generateExistsQueriesForFields(this.existingFields));
 		queryElts.addAll(NGLControllerHelper.generateQueriesForFields(this.queryFields));
 		

@@ -1,17 +1,56 @@
 package validation.reagent.instance;
 
-import models.laboratory.reagent.instance.Box;
 import models.laboratory.reagent.instance.Reagent;
-import models.utils.InstanceConstants;
 import validation.ContextValidation;
 import validation.common.instance.CommonValidationHelper;
 
-public class ReagentValidationHelper extends CommonValidationHelper{
-	public static void validateReagentCatalogCode(String code, ContextValidation contextValidation){
-		validateExistInstanceCode(contextValidation, code, Reagent.class, InstanceConstants.REAGENT_CATALOG_COLL_NAME);
+public class ReagentValidationHelper {
+
+	// -------------------------------------------------------------
+	// renamed and arguments reordered
+	
+	/**
+	 * Validate an optional reagent catalog code.
+	 * @param code              reagent ctalog code
+	 * @param contextValidation validation context
+	 * @deprecated use {@link #validateReagentCatalogCodeOptional(ContextValidation, String)}
+	 */
+	@Deprecated
+	public static void validateReagentCatalogCode(String code, ContextValidation contextValidation) {
+		ReagentValidationHelper.validateReagentCatalogCodeOptional(contextValidation, code);
 	}
 	
-	public static void validateBoxCode(String code, ContextValidation contextValidation){
-		validateExistInstanceCode(contextValidation, code, Box.class, InstanceConstants.REAGENT_INSTANCE_COLL_NAME);
+	/**
+	 * Validate an optional reagent catalog code.
+	 * @param contextValidation validation context
+	 * @param code              reagent ctalog code
+	 */
+	public static void validateReagentCatalogCodeOptional(ContextValidation contextValidation, String code) {
+		CommonValidationHelper.validateCodeForeignOptional(contextValidation, Reagent.catalogFind.get(), code);
 	}
+	
+	// -------------------------------------------------------------
+//	// renamed and arguments reordered
+//	
+//	/**
+//	 * Validate an optional box code.
+//	 * @param code              box code
+//	 * @param contextValidation validation context
+//	 * @deprecated use {@link #validateBoxCodeOptional(ContextValidation, String)}
+//	 */
+//	public static void validateBoxCode(String code, ContextValidation contextValidation) {
+//		ReagentValidationHelper.validateBoxCodeOptional(contextValidation, code);
+//	}
+//
+//	/**
+//	 * Validate an optional box code.
+//	 * @param contextValidation validation context
+//	 * @param code              box code
+//	 */
+//	public static void validateBoxCodeOptional(ContextValidation contextValidation, String code) {
+//		CommonValidationHelper.validateCodeForeignOptional(contextValidation, Box.find.get(), code);
+//	}
+//
+//	// -------------------------------------------------------------
+	
 }

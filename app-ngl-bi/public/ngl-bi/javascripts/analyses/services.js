@@ -108,6 +108,7 @@
 				lists.refresh.valuationCriterias({objectTypeCode:"Analysis"});
 				
 				searchService.lists.refresh.reportConfigs({pageCodes:["analysis"+"-"+mainService.getHomePage()]});
+				searchService.lists.refresh.filterConfigs({pageCodes:["analysis-addfilters"]}, "analysis-addfilters");
 				searchService.lists.refresh.users();
 				isInit=true;
 			}
@@ -122,8 +123,9 @@
 				form : undefined,
 				reportingConfigurationCode:undefined,
 				reportingConfiguration:undefined,
-				//additionalsColumns:[],
-				//selectedAddColumns:[],
+				additionalFilters:[],
+				additionalsColumns:[],
+				selectedAddColumns:[],
 				setRouteParams:function($routeParams){
 					var count = 0;
 					for(var p in $routeParams){
@@ -202,54 +204,88 @@
 					
 				},
 				
-				/*
 				initAdditionalColumns:function(){
-					if(lists.get("readsets-addcolumns") && lists.get("readsets-addcolumns").length === 1){
+					this.additionalColumns=[];
+					this.selectedAddColumns=[];
+					
+					if(lists.get("analysis-addcolumns") && lists.get("analysus-addcolumns").length === 1){
 						var formColumns = [];
-						var allColumns = angular.copy(lists.get("readsets-addcolumns")[0].columns);
+						var allColumns = angular.copy(lists.get("analysis-addcolumns")[0].columns);
 						var nbElementByColumn = Math.ceil(allColumns.length / 5); //5 columns
 						for(var i = 0; i  < 5 && allColumns.length > 0 ; i++){
 							formColumns.push(allColumns.splice(0, nbElementByColumn));	    								
 						}
-						this.additionalsColumns = formColumns;
+						//complete to 5 five element to have a great design 
+						while(formColumns.length < 5){
+							formColumns.push([]);
+						}
+						this.additionalColumns = formColumns;
 					}
 				},
 				
 				getAddColumnsToForm : function(){
-					if(this.additionalsColumns.length === 0){
+					if(this.additionalColumns.length === 0){
 						this.initAdditionalColumns();
 					}
-					return this.additionalsColumns;									
-				},				
+					return this.additionalColumns;									
+				},
+				
 				addColumnsToDatatable:function(){
-					this.reportingConfiguration = undefined;
-					this.reportingConfigurationCode = undefined;
+					//this.reportingConfiguration = undefined;
+					//this.reportingConfigurationCode = undefined;
+					
 					this.selectedAddColumns = [];
-					for(var i = 0 ; i < this.additionalsColumns.length ; i++){
-						for(var j = 0; j < this.additionalsColumns[i].length; j++){
-							if(this.additionalsColumns[i][j].select){
-								this.selectedAddColumns.push(this.additionalsColumns[i][j]);
+					for(var i = 0 ; i < this.additionalColumns.length ; i++){
+						for(var j = 0; j < this.additionalColumns[i].length; j++){
+							if(this.additionalColumns[i][j].select){
+								this.selectedAddColumns.push(this.additionalColumns[i][j]);
 							}
 						}
 					}
-					this.datatable.setColumnsConfig(this.getColumns().concat(this.selectedAddColumns));
+					if(this.reportingConfigurationCode){
+						this.datatable.setColumnsConfig(this.reportingConfiguration.columns.concat(this.selectedAddColumns));
+					}else{
+						this.datatable.setColumnsConfig(this.getColumns().concat(this.selectedAddColumns));						
+					}
 					this.search();
-					
-				},	
+				},
 				resetDatatableColumns:function(){
-					this.additionalsColumns=[];
-					this.selectedAddColumns=[];
 					this.initAdditionalColumns();
 					this.datatable.setColumnsConfig(this.getColumns());
 					this.search();
 				},
-				 */
 				
-				resetDatatableColumns:function(){
-					this.datatable.setColumnsConfig(this.getColumns());
-					this.search();
+				
+				
+				initAdditionalFilters:function(){
+					this.additionalFilters=[];
+					
+					if(lists.get("analysis-addfilters") && lists.get("analysis-addfilters").length === 1){
+						var formFilters = [];
+						var allFilters = angular.copy(lists.get("analysis-addfilters")[0].filters);
+						
+						
+						var nbElementByColumn = Math.ceil(allFilters.length / 5); //5 columns
+						for(var i = 0; i  < 5 && allFilters.length > 0 ; i++){
+							formFilters.push(allFilters.splice(0, nbElementByColumn));	    								
+						}
+						//complete to 5 five element to have a great design 
+						while(formFilters.length < 5){
+							formFilters.push([]);
+						}
+							
+						this.additionalFilters = formFilters;
+					}
 				},
-			
+				
+				getAddFiltersToForm : function(){
+					if(this.additionalFilters.length === 0){
+						this.initAdditionalFilters();
+					}
+					return this.additionalFilters;									
+				},	
+				
+				
 				/**
 				 * initialization of the service
 				 */

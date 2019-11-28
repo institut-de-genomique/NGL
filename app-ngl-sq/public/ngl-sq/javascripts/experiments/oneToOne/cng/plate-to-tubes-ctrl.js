@@ -189,6 +189,7 @@ angular.module('home').controller('CNGPlateToTubesCtrl',['$scope' ,'$http','$par
 			 			"header" : Messages("containers.table.support.name"),
 			 			"property" : "outputContainerUsed.locationOnContainerSupport.code",
 			 			"edit" : true,
+			 			"editDirectives":"udt-change='atmService.emptyToNull(value.data, col.property)'",
 			 			"hide" : true,
 			 			"type" : "text",
 			 			"position" : 400,
@@ -289,6 +290,8 @@ angular.module('home').controller('CNGPlateToTubesCtrl',['$scope' ,'$http','$par
 		dtConfig.remove.active = ($scope.isEditModeAvailable() && $scope.isNewState());
 		$scope.atmService.data.setConfig(dtConfig);
 		$scope.atmService.refreshViewFromExperiment($scope.experiment);
+		$scope.outputContainerSupport.code=$scope.experiment.atomicTransfertMethods[0].outputContainerUseds[0].locationOnContainerSupport.code;
+		
 		$scope.$emit('viewRefeshed');
 	});
 	
@@ -309,6 +312,7 @@ angular.module('home').controller('CNGPlateToTubesCtrl',['$scope' ,'$http','$par
 		$scope.atmService.data.selectAll(true);
 		$scope.atmService.data.setEdit();
 	});
+	
 	
 	$scope.copyVolumeInToOut = function(){
 		var data = $scope.atmService.data.displayResult;		
@@ -353,5 +357,6 @@ angular.module('home').controller('CNGPlateToTubesCtrl',['$scope' ,'$http','$par
 	}else{
 		$scope.messages.setError(Messages('experiments.input.error.only-plates'));					
 	}
+	
 	
 }]);

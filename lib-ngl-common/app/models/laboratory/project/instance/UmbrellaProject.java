@@ -1,15 +1,15 @@
 package models.laboratory.project.instance;
 
+import org.mongojack.MongoCollection;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import validation.ContextValidation;
-import validation.IValidation;
-import validation.project.instance.ProjectValidationHelper;
-
+import fr.cea.ig.DBObject;
 import models.laboratory.common.instance.TraceInformation;
 import models.utils.InstanceConstants;
-import org.mongojack.MongoCollection;
-import fr.cea.ig.DBObject;
+import validation.ContextValidation;
+import validation.IValidation;
+import validation.common.instance.CommonValidationHelper;
 
 /**
  * Instance UmbrellaProject is stocked in a MongoDB Collection named "ngl_project.UmbrellaProject"
@@ -25,13 +25,12 @@ public class UmbrellaProject extends DBObject implements IValidation {
 	public String name;
 	public TraceInformation traceInformation;
 	
-	
 	@Override
 	@JsonIgnore
 	public void validate(ContextValidation contextValidation) {
-		ProjectValidationHelper.validateId(this, contextValidation);
-		ProjectValidationHelper.validateCode(this, InstanceConstants.UMBRELLA_PROJECT_COLL_NAME, contextValidation);
-		ProjectValidationHelper.validateTraceInformation(traceInformation, contextValidation);
+		CommonValidationHelper.validateIdPrimary               (contextValidation, this);
+		CommonValidationHelper.validateCodePrimary             (contextValidation, this, InstanceConstants.UMBRELLA_PROJECT_COLL_NAME);
+		CommonValidationHelper.validateTraceInformationRequired(contextValidation, traceInformation);
 	}
 	
 }

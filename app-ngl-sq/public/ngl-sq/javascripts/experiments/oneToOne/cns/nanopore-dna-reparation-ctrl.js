@@ -49,7 +49,17 @@ angular.module('home').controller('nanoporeDnaReparationCtrl',['$scope', '$parse
 			        	 "position":4,
 			        	 "extraHeaders":{0:Messages("experiments.inputs")}
 				     },
-								 
+				     {
+				        	"header":Messages("containers.table.tags"),
+				 			"property": "inputContainer.contents",
+				 			"filter": "getArray:'properties.tag.value'| unique",
+				 			"order":true,
+				 			"hide":true,
+				 			"type":"text",
+				 			"position":4.5,
+				 			"render":"<div list-resize='cellValue' list-resize-min-size='3'>",
+				        	 "extraHeaders":{0:Messages("experiments.inputs")}
+				      },
 					 {
 			        	 "header":Messages("containers.table.concentration") + " (ng/µl)",
 			        	 "property":"inputContainerUsed.concentration.value",

@@ -34,7 +34,7 @@ angular.module('home').controller('CNSPrepaFlowcellOrderedCtrl',['$scope', '$par
 		        	 "type":"text",
 		        	 "position":1.2,
 		        	 "extraHeaders":{0:"Solution Stock"}
-		         },	
+		         },		
 		         {
 		        	"header":Messages("containers.table.tags"),
 		 			"property": "inputContainer.contents",
@@ -45,7 +45,7 @@ angular.module('home').controller('CNSPrepaFlowcellOrderedCtrl',['$scope', '$par
 		 			"position":2,
 		 			"render":"<div list-resize='cellValue' list-resize-min-size='3'>",
 		        	 "extraHeaders":{0:"Solution Stock"}
-		         },				         
+		         },
 				 {
 		        	 "header":Messages("containers.table.concentration") + " (nM)",
 		        	 "property":"inputContainerUsed.concentration.value",
@@ -157,7 +157,18 @@ angular.module('home').controller('CNSPrepaFlowcellOrderedCtrl',['$scope', '$par
 				"inputContainerUsed.experimentProperties.trisHCLConcentration.value":400, 
 				"inputContainerUsed.experimentProperties.masterEPXVolume.value":105,
 				"outputContainerUsed.experimentProperties.finalVolume.value":150			
+			},
+			"NovaSeq S1-SP / XP FC":{
+				"inputContainerUsed.experimentProperties.inputVolume2.value":18,
+				"inputContainerUsed.experimentProperties.NaOHVolume.value":4,
+				"inputContainerUsed.experimentProperties.NaOHConcentration.value":"0.2N",
+				"inputContainerUsed.experimentProperties.trisHCLVolume.value":5,
+				"inputContainerUsed.experimentProperties.trisHCLConcentration.value":400, 
+				"inputContainerUsed.experimentProperties.masterEPXVolume.value":63,
+				"outputContainerUsed.experimentProperties.finalVolume.value":90			
 			}
+			
+			
 	};
 	
 	var getDefaultValueForWorkSheet = function(line, col){
@@ -365,5 +376,20 @@ angular.module('home').controller('CNSPrepaFlowcellOrderedCtrl',['$scope', '$par
 			getter.assign(udtData, finalConcentration2);
 			console.log("not ready to finalConcentration2");
 		}
+	};
+	$scope.getSampleAndTagsWithSecondary = function(container){
+		var sampleCodeAndTags = [];
+		angular.forEach(container.contents, function(content){
+			if(content.properties.secondaryTag != undefined && content.properties.tag != undefined && content.sampleCode != undefined){
+				sampleCodeAndTags.push(content.sampleCode+" / "+content.properties.secondaryTag.value+" / "+content.properties.tag.value);
+			}else if(content.properties.tag != undefined && content.sampleCode != undefined){
+ 				sampleCodeAndTags.push(content.sampleCode+" / / "+content.properties.tag.value);
+ 			}else if(content.properties.secondaryTag != undefined && content.sampleCode != undefined){
+ 				sampleCodeAndTags.push(content.sampleCode+" / "+content.properties.secondaryTag.value+" / ");
+ 			}else if(content.sampleCode != undefined){
+ 				sampleCodeAndTags.push(content.sampleCode);
+ 			}
+		});
+		return sampleCodeAndTags;
 	};
 }]);

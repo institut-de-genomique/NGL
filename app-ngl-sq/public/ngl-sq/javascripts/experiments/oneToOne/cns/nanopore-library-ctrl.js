@@ -274,6 +274,7 @@ angular.module('home').controller('NanoporeLibraryCtrl',['$scope', '$parse', 'at
 			computeLigationQuantity(value.data);
 		}
 		
+		
 	}
 	// inputVol * concIn 
 	var computeLigationQuantity = function(udtData){
@@ -303,6 +304,7 @@ angular.module('home').controller('NanoporeLibraryCtrl',['$scope', '$parse', 'at
 		}
 		
 	}
+	
 	
 	
 	

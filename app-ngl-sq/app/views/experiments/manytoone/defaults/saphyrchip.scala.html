@@ -12,7 +12,7 @@
 		<div class="row">
 		
 		<!-- InputContainers table -->
-		<div class="col-md-12 col-lg-5" droppable drop-fn="atmService.data.drop" ng-model="atmService.data.inputContainers"  ng-if="mainService.isEditMode()">
+		<div class="col-md-12 col-lg-5" droppable drop-fn="atmService.data.drop" ng-model="atmService.data.inputContainers"  ng-if="mainService.isEditMode() && isNewState()">
 			<div class="panel panel-primary"  style="border-style:dashed">				
 			<div class="panel-body" ng-if="atmService.data.inputContainers.length==0">		
 				<p><i class="fa fa-download"></i> @Messages("experiments.inputs")</p>

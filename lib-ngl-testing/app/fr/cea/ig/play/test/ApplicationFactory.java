@@ -1,13 +1,14 @@
 package fr.cea.ig.play.test;
 
 import java.util.ArrayList;
-// import java.util.Arrays;
 import java.util.List;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-//import java.util.function.Consumer;
 import java.util.function.Function;
 
+import fr.cea.ig.util.function.C1;
+import fr.cea.ig.util.function.C2;
+import fr.cea.ig.util.function.CC1;
+import fr.cea.ig.util.function.CC2;
 import play.Application;
 import play.inject.Bindings;
 import play.inject.guice.GuiceApplicationBuilder;
@@ -28,6 +29,8 @@ import play.inject.guice.GuiceApplicationBuilder;
  */
 public class ApplicationFactory {
 
+	private static final play.Logger.ALogger logger = play.Logger.of(ApplicationFactory.class);
+	
 	/**
 	 * Configuration file name (see @link DevAppTesting}.
 	 */
@@ -42,7 +45,7 @@ public class ApplicationFactory {
 	 * Create a factory using a configuration file
 	 * @param configFileName configuration file to use
 	 */
-	public ApplicationFactory(String configFileName) { 
+	public ApplicationFactory(String configFileName) {
 		this.configFileName = configFileName;
 		mods                = new ArrayList<>();
 	}
@@ -142,29 +145,75 @@ public class ApplicationFactory {
 	
 	/**
 	 * Test the application directly.
-	 * @param c code to execute using the created application
+	 * @param  c         code to execute using the created application
+	 * @throws Exception exception
 	 */
-	public void run(Consumer<Application> c) {
+//	public void run(Consumer<Application> c) {
+	public void run(C1<Application> c) throws Exception {
+		logger.debug("run - creating application");
 		Application a = createApplication();
+		logger.debug("run - created {}, will run {}", a, c);
 		try {
 			c.accept(a);
+			logger.debug("run - done {}", c);
 		} finally {
-			a.asScala().stop();			
+			a.asScala().stop();
+			logger.debug("run -application shut down");
 		}
 	}
 	
 	/**
 	 * Test the application using a WS client and the application.
-	 * @param c code to execute using the created application and WS client.
+	 * @param  c         code to execute using the created application and WS client.
+	 * @throws Exception exception
 	 */
 //	public void runWs(BiConsumer<Application,WSClient> c)  {
 //		final Application a = createApplication();
 //		DevAppTesting.testInServer(a,ws -> c.accept(a,ws));
 //	}
 
-	public void runWs(BiConsumer<Application,NGLWSClient> c)  {
+	public void runWs(C2<Application,NGLWSClient> c) throws Exception {
 		final Application a = createApplication();
 		DevAppTesting.testInServer(a,ws -> c.accept(a, new NGLWSClient(ws)));
+	}
+	
+	/**
+	 * Turns this application factory into a CC1 of application.
+	 * @return CC1 of application
+	 */
+	public CC1<Application> cc1() {
+		return Actions.withApp(this);
+	}
+	
+	/**
+	 * Turns this application factory into a CC2 of application and WS client.
+	 * @return CC2 of application and WS client
+	 */
+	public CC2<Application,NGLWSClient> cc2() {
+		return Actions.withAppWS(this);
+	}
+	
+	/**
+	 * Transformers of application factories into CCs.
+	 * 
+	 * @author vrd
+	 *
+	 */
+	public static class Actions {
+		
+		/**
+		 * No need to instanciate a utility methods class.
+		 */
+		private Actions() {}
+		
+		public static final CC1<Application> withApp(ApplicationFactory f) {
+			return nc -> f.run(nc::accept);
+		}
+		
+		public static final CC2<Application,NGLWSClient> withAppWS(ApplicationFactory f) {
+			return nc -> f.runWs(nc::accept);
+		}
+
 	}
 	
 }

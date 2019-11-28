@@ -171,7 +171,9 @@
 				    @columnLabelValue(Messages("experiments.modifyBy")){
 						<p class="form-control-static" ng-bind="experiment.traceInformation.modifyUser"></p>
 					}
-				   			    								
+				   	 @columnLabelValue(Messages("experiments.finishDate")){
+				   		<p class="form-control-static"  ng-if="(experiment.state.code === 'F')" ng-bind="experiment.state.date | date:'@Messages("datetime.format")' " ></p>
+				   	 }	    								
 					</form>
 				  </div>
 				</div>

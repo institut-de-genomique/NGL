@@ -12,10 +12,10 @@ import models.utils.dao.AbstractDAODefault;
 import models.utils.dao.DAOException;
 
 @Repository
-public class ProcessCategoryDAO extends AbstractDAODefault<ProcessCategory>{
+public class ProcessCategoryDAO extends AbstractDAODefault<ProcessCategory> {
 
 	public ProcessCategoryDAO() {
-		super("process_category",ProcessCategory.class,true);
+		super("process_category", ProcessCategory.class, true);
 	}
 
 	//overload to delete "order by" in sql query
@@ -31,4 +31,17 @@ public class ProcessCategoryDAO extends AbstractDAODefault<ProcessCategory>{
 			return new ArrayList<>();
 		}
 	}
+	
+	@Override
+	protected List<String> getColumns() {
+		return enumColumns;
+	}
+
+	public ProcessCategory getByCode(String code) throws DAOException {
+		ProcessCategory pc = findByCode(code);
+		if (pc == null)
+			throw new DAOException("process category '" + code + "' does not exist");
+		return pc;
+	}
+	
 }

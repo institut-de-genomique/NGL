@@ -16,7 +16,15 @@
 </div>
 </div>
 </div>
+
+	
 <div class="row SelectContainerProcess">
+<div class="inProgressSpinner" ng-if="getSpinner()">
+	<button class="btn btn-primary btn-lg">
+		<i class="fa fa-spinner fa-spin fa-5x"></i>
+	</button>
+</div>
+	
 <div class="col-md-12 col-lg-12" ultimate-datatable="newService.datatable"></div>
 </div>		
 

@@ -48,7 +48,17 @@ angular.module('home').controller('NanoporePcrCtrl',['$scope', '$parse', 'atmToS
 			        	 "position":4,
 			        	 "extraHeaders":{0:Messages("experiments.inputs")}
 				     },
-								 
+				     {
+				        	"header":Messages("containers.table.tags"),
+				 			"property": "inputContainer.contents",
+				 			"filter": "getArray:'properties.tag.value'| unique",
+				 			"order":true,
+				 			"hide":true,
+				 			"type":"text",
+				 			"position":4.5,
+				 			"render":"<div list-resize='cellValue' list-resize-min-size='3'>",
+				        	 "extraHeaders":{0:Messages("experiments.inputs")}
+				         },	 
 					 {
 			        	 "header":Messages("containers.table.concentration") + " (ng/µl)",
 			        	 "property":"inputContainerUsed.concentration.value",
@@ -195,7 +205,8 @@ angular.module('home').controller('NanoporePcrCtrl',['$scope', '$parse', 'atmToS
 	$scope.$on('save', function(e, callbackFunction) {	
 		console.log("call event save");
 		$scope.atmService.data.save();
-		$scope.atmService.viewToExperimentOneToOne($scope.experiment);		
+		$scope.atmService.viewToExperimentOneToOne($scope.experiment);	
+		removeTagCategoryIfNeeded($scope.experiment);
 	//	calcOutputQuantityToAttribute($scope.experiment);
 		$scope.$emit('childSaved', callbackFunction);
 	});
@@ -290,6 +301,25 @@ angular.module('home').controller('NanoporePcrCtrl',['$scope', '$parse', 'atmToS
 	               console.log("not ready to outputQtty");
 	           }
 	  }
+	  
+	 
+	  
+	  var removeTagCategoryIfNeeded = function(experiment){
+			if(null !== experiment.atomicTransfertMethods && undefined !== experiment.atomicTransfertMethods){
+				experiment.atomicTransfertMethods.forEach(function(atm){
+					var tagCategory = $parse("outputContainerUseds[0].experimentProperties.tagCategory")(atm);
+					var tag = $parse("outputContainerUseds[0].experimentProperties.tag")(atm);
+					
+					if((tag === null || tag === undefined) && 
+							tagCategory !== null && tagCategory !== undefined 
+							){
+						atm.outputContainerUseds[0].experimentProperties.tagCategory = undefined;
+					}
+				})
+			}
+		};
+	  
+	  
 		atmService.experimentToView($scope.experiment, $scope.experimentType);
 
 		$scope.atmService = atmService;

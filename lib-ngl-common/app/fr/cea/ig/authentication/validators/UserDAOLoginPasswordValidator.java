@@ -35,11 +35,12 @@ public class UserDAOLoginPasswordValidator implements ILoginPasswordValidator {
 			throw new ValidationFailedException("empty login name '" + login + "'");
 		if (isBlank(password))
 			throw new ValidationFailedException("empty password");
-		User.find.findByLogin(login);
+		User.find.get().findByLogin(login);
 		// Cannot get the instance through Spring
 		// AuthenticateDAO auth = Spring.getBeanOfType(AuthenticateDAO.class);
 //		UserDAO auth = (UserDAO)new User.UserFinder().getInstance();
-		UserDAO auth = new User.UserFinder().getInstance();
+//		UserDAO auth = new User.UserFinder().getInstance();
+		UserDAO auth = User.find.get();
 		if (!auth.isUserActive(login)) {
 			logger.debug("inactive user {}, authentication failed",login);
 			throw new ValidationFailedException("inactive user '" + login + "'"); 

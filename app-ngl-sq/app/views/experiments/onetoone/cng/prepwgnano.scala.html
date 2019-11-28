@@ -37,6 +37,7 @@
 			  </div>   
 	     </div>
 	  </div> 
+	  
 	  <!-- 2eme ligne -->
 	  <div class="row margin-bottom-7"><!-- margin bottom pas pris en compte!!! -->
          <div class="form-group col-lg-5"  ng-show="button.isShow()">
@@ -54,20 +55,33 @@
                 </span> 
             </div>                         				  
           </div>
-          <!--inverser les selects et chger le message -->
           <div class="form-group col-lg-6"  ng-show="selectColOrPlate.isShow()">
-             <label class="control-label">@Messages("experiments.startColumnTagPlate")</label>
+             <label class="control-label">@Messages("experiments.select.startColumnTagPlate")</label>
              <select ng-model="tagPlate" ng-options="plate.name for plate in plates" 
-                                         ng-change="selectColOrPlate.select()"selectpicker btn-primary">                                      
+                                         ng-change="selectColOrPlate.select()"  >                                      
              </select> 
              <select ng-model="tagPlateColumn" ng-options="column.name for column in columns"  
-             								   ng-change="selectColOrPlate.select()" selectpicker btn-primary">                                      
+             								   ng-change="selectColOrPlate.select()" >                                      
              </select>                				  
            </div> 
     </div>
-  </form>	
+    
+    <!--NGL-1350 3eme ligne // Masquer cette fonctionnalité pour l'instant
+    <div class="row margin-bottom-7" ng-show="selectGroup.isShow()">
+        <div class="form-group col-lg-5">
+           <label for="selectTagGroup" control-label">@Messages("experiments.select.tagGroup")</label>
+          <select ng-model="selectedTagGroup" ng-options="group.name for group in getTagGroups()"
+                  							  id="selectTagGroup">                                      
+          </select>  
+        </div>
+    </div>
+    -->
+  </form>
   
-  <div class="row">
-	<div class="col-md-12 col-lg-12" ultimate-datatable="atmService.data"></div>						
-  </div>
+  <!-- NGL-2014 ajout onglets -->	
+  <div class="row margin-bottom-7">
+	<div class="col-md-12 col-lg-12" >
+  		@views.html.experiments.onetoone.defaults.partials.udtAndPlateDesign()
+     </div>
+  </div> 
 </div>

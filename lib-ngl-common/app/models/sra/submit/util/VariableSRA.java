@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-import fr.cea.ig.ngl.utils.HashMapBuilder;
+import fr.cea.ig.lfw.utils.HashMapBuilder;
 
 public abstract class VariableSRA {
 	
@@ -101,9 +101,10 @@ public abstract class VariableSRA {
 	
 	public static final Map<String, String> mapStrategySample = 
 			new HashMapBuilder<String,String>()
-				.put("strategy_external_sample", "strategy_external_sample") // Si pas de sample à creer parce que fournis par les collaborateurs
-				.put("strategy_sample_taxon",    "strategy_sample_taxon")    // si sample specifique par code_projet et taxon
-				.put("strategy_sample_clone",    "strategy_sample_clone")    // si sample specifique par code_projet et clone
+				.put("strategy_external_sample", "strategy_external_sample") // si pas de sample à creer parce que fournis par les collaborateurs
+				.put("strategy_sample_taxon"   , "strategy_sample_taxon")    // si sample specifique par code_projet et taxon
+				.put("strategy_sample_clone"   , "strategy_sample_clone")    // si sample specifique par code_projet et clone
+				.put("strategy_sample_bank"    , "strategy_sample_bank")     // si sample specifique par code_projet et type de banque
 				.asMap();
 	
 	public static final Map<String, String> mapStrategyStudy = 

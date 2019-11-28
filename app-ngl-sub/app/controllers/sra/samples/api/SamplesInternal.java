@@ -1,8 +1,5 @@
 package controllers.sra.samples.api;
 
-//import static play.data.Form.form;
-//import static fr.cea.ig.play.IGGlobals.form;
-
 import java.util.Arrays;
 import java.util.List;
 
@@ -13,7 +10,7 @@ import org.mongojack.DBQuery;
 import controllers.DocumentController;
 import controllers.QueryFieldsForm;
 import fr.cea.ig.MongoDBDAO;
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import models.sra.submit.common.instance.Sample;
 import models.utils.InstanceConstants;
 import play.data.Form;
@@ -25,16 +22,23 @@ public class SamplesInternal extends DocumentController<Sample> {
 
 	final static List<String> authorizedUpdateFields = Arrays.asList("accession","externalId");
 
-	private final /*static*/ Form<Sample> sampleForm;// = form(Sample.class);
-	private final /*static*/ Form<QueryFieldsForm> updateForm;// = form(QueryFieldsForm.class);
+	private final Form<Sample>          sampleForm;
+	private final Form<QueryFieldsForm> updateForm;
 
+//	@Inject
+//	public SamplesInternal(NGLContext ctx) {
+//		super(ctx,InstanceConstants.SRA_SAMPLE_COLL_NAME, Sample.class);
+//		sampleForm = ctx.form(Sample.class);
+//		updateForm = ctx.form(QueryFieldsForm.class);
+//	}
+	
 	@Inject
-	public SamplesInternal(NGLContext ctx) {
-		super(ctx,InstanceConstants.SRA_SAMPLE_COLL_NAME, Sample.class);
-		sampleForm = ctx.form(Sample.class);
-		updateForm = ctx.form(QueryFieldsForm.class);
+	public SamplesInternal(NGLApplication app) {
+		super(app,InstanceConstants.SRA_SAMPLE_COLL_NAME, Sample.class);
+		sampleForm = app.form(Sample.class);
+		updateForm = app.form(QueryFieldsForm.class);
 	}
-
+	
 	@Override
 	public Result get(String code) {
 		return ok(Json.toJson(getSample(code)));
@@ -47,8 +51,9 @@ public class SamplesInternal extends DocumentController<Sample> {
 		
 		Form<QueryFieldsForm> filledQueryFieldsForm = filledFormQueryString(updateForm, QueryFieldsForm.class);
 		QueryFieldsForm queryFieldsForm = filledQueryFieldsForm.get();
-		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm); 	
-
+//		ValidationContext ctxVal = new ContextValidation(getCurrentUser(), filledForm); 	
+//			ctxVal.setUpdateMode();
+		ContextValidation ctxVal = ContextValidation.createUpdateContext(getCurrentUser(), filledForm);
 		if (sample == null) {
 //			filledForm.reject("Sample " +  code, "not exist in database");  // si solution filledForm.reject
 //			return badRequest(filledForm.errorsAsJson( )); // legit
@@ -60,16 +65,15 @@ public class SamplesInternal extends DocumentController<Sample> {
 
 		if (queryFieldsForm.fields != null) {
 //			ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm.errors()); 	
-			ctxVal.setUpdateMode();
 			validateAuthorizedUpdateFields(ctxVal, queryFieldsForm.fields, authorizedUpdateFields);
 			validateIfFieldsArePresentInForm(ctxVal, queryFieldsForm.fields, filledForm);
 
-			if(!ctxVal.hasErrors()){
+			if (!ctxVal.hasErrors()) {
 				updateObject(DBQuery.and(DBQuery.is("code", code)), 
 						getBuilder(sampleInput, queryFieldsForm.fields).set("traceInformation", getUpdateTraceInformation(sample.traceInformation)));
 
 				return ok(Json.toJson(getObject(code)));
-			}else{
+			} else {
 				// return badRequest(filledForm.errors-AsJson());
 				return badRequest(errorsAsJson(ctxVal.getErrors()));
 			}		
@@ -82,7 +86,4 @@ public class SamplesInternal extends DocumentController<Sample> {
 		return sample;
 	}
 
-
-
-	
 }

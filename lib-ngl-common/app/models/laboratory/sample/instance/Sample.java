@@ -5,13 +5,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
-//import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-//import com.fasterxml.jackson.annotation.JsonValue;
 
-import controllers.ICommentable;
 import fr.cea.ig.DBObject;
+import fr.cea.ig.ngl.dao.samples.SamplesDAO;
+import fr.cea.ig.ngl.utils.GuiceSupplier;
 import models.laboratory.common.instance.Comment;
 import models.laboratory.common.instance.ITracingAccess;
 import models.laboratory.common.instance.PropertyValue;
@@ -21,18 +21,13 @@ import models.laboratory.sample.instance.reporting.SampleProcess;
 import models.laboratory.sample.instance.reporting.SampleProcessesStatistics;
 import models.laboratory.sample.instance.tree.SampleLife;
 import models.utils.InstanceConstants;
-
-// import org.mongojack.MongoCollection;
-
 import validation.ContextValidation;
-import validation.ICRUDValidation;
 import validation.IValidation;
+import validation.common.instance.CommonValidationHelper;
 import validation.sample.instance.SampleValidationHelper;
+import validation.utils.ValidationHelper;
 
-//Link to this : {@link models.laboratory.sample.instance.Sample}
-
-// TODO: cleanup, comment
-// TODO: create a base class DBOject,ITracingAccess,ICommentable,IValidation
+// Link to this : {@link models.laboratory.sample.instance.Sample}
 
 /**
  * Sample information as required by the laboratory (the L in LIMS).
@@ -40,15 +35,13 @@ import validation.sample.instance.SampleValidationHelper;
  * Sample collection name is defined as {@link models.utils.InstanceConstants#SAMPLE_COLL_NAME}.
  * 
  * @author mhaquell
- * @author vrd
  * 
  */
-// @MongoCollection(name="Sample")
-@SuppressWarnings("unused") // IValidation duplicates ICRUDValiation
-public class Sample extends DBObject implements IValidation, ICommentable, ITracingAccess, ICRUDValidation<Sample> {
+public class Sample extends DBObject implements IValidation, ITracingAccess {
 
+	public static final Supplier<SamplesDAO> find = new GuiceSupplier<>(SamplesDAO.class);
+	
 	// @JsonIgnore
-	// TODO: explain
 	public final static String HEADER = 
 			"Sample.code;Sample.projectCodes;Sample.name;Sample.referenceCollab;Sample.taxonCode;Sample.comments";
 
@@ -61,6 +54,8 @@ public class Sample extends DBObject implements IValidation, ICommentable, ITrac
 	 * To be understood as something like: CodeReference<SampleType> type;
 	 * Possibly use some @JsonValue that would allow type annotation.
 	 */
+//	@NGLConstraints.Foreign(models.laboratory.sample.description.SampleType.class)
+//	@NGLConstraints.Required
 	public String typeCode;
 	
 	/*
@@ -70,6 +65,8 @@ public class Sample extends DBObject implements IValidation, ICommentable, ITrac
 	 * In the end: {@link models.laboratory.sample.description.SampleCategory}.
 	 * Would be {@code type.category}.
 	 */
+//	@NGLConstraints.Foreign(models.laboratory.sample.description.SampleCategory.class)
+//	@NGLConstraints.Required
 	public String categoryCode;
 	
 	/*
@@ -77,6 +74,8 @@ public class Sample extends DBObject implements IValidation, ICommentable, ITrac
 	 * {@link models.laboratory.sample.description.ImportType} linked to some 
 	 * {@link models.laboratory.sample.description.ImportCategory}.
 	 */
+//	@NGLConstraints.Foreign(models.laboratory.sample.description.ImportType.class)
+//	@NGLConstraints.Required	
 	public String importTypeCode;
 
 	/**
@@ -87,6 +86,7 @@ public class Sample extends DBObject implements IValidation, ICommentable, ITrac
 	/**
 	 * Name = localized code (default:null)
 	 */
+//	@NGLConstraints.Required	
 	public String name;
 	
 	// ?? Wath is difference with code / referenceCollbab => code s'est interne au genoscope
@@ -95,7 +95,6 @@ public class Sample extends DBObject implements IValidation, ICommentable, ITrac
 	 */
 	public String referenceCollab;
 	
-	// TODO: use Map<String,PropertyValue<?>>
 	/**
 	 * Mandatory : meta : false (meta:metagenomic,metatrucs)
 	 */
@@ -110,7 +109,6 @@ public class Sample extends DBObject implements IValidation, ICommentable, ITrac
 	// Expanded taxonomy information retrieved from the NCBI.
 	// See https://www.ncbi.nlm.nih.gov/taxonomy.
 	
-	// TODO: describe if/how the taxonCode can be changed for a sample.
 	/**
 	 * Taxonomy code (@see <a href="https://www.ncbi.nlm.nih.gov/taxonomy">taxonomy</a>).
 	 */
@@ -184,29 +182,32 @@ path: ",CO-0000140,BUP_AAAA",
 	 * Constructs a new Sample.
 	 */
 	public Sample() {
-		// TODO: remove trace information initialization as it is not needed
 		traceInformation = new TraceInformation();
 		comments         = new ArrayList<>(0);
 	}
 
+	// This could possibly be better implemented as some external process that would
+	// be the validator itself and not a helper.
+	/**
+	 * Validate this sample.
+	 */
 	@JsonIgnore
 	@Override
 	public void validate(ContextValidation contextValidation) {
 
-    	SampleValidationHelper.validateId(this, contextValidation);
-		SampleValidationHelper.validateCode(this, InstanceConstants.SAMPLE_COLL_NAME, contextValidation);
-
-		SampleValidationHelper.validateSampleCategoryCode(categoryCode,contextValidation);
-		SampleValidationHelper.validateProjectCodes(projectCodes, contextValidation);
-
-		SampleValidationHelper.validateSampleType(typeCode,importTypeCode,properties,contextValidation);
-		SampleValidationHelper.validateTraceInformation(traceInformation, contextValidation);
-		SampleValidationHelper.validateRules(this, contextValidation);
-		// TODO: validation taxon
-		
+    	CommonValidationHelper.validateIdPrimary                 (contextValidation, this);
+    	CommonValidationHelper.validateCodePrimary               (contextValidation, this, InstanceConstants.SAMPLE_COLL_NAME);
+		ValidationHelper      .validateNotEmpty                  (contextValidation, name, "name");
+		ValidationHelper	  .validateNotEmpty					 (contextValidation, referenceCollab, "referenceCollab");
+		SampleValidationHelper.validateSampleCategoryCodeRequired(contextValidation, categoryCode);
+		CommonValidationHelper.validateProjectCodes              (contextValidation, projectCodes);
+		SampleValidationHelper.validateSampleType                (typeCode,importTypeCode,properties,contextValidation);
+		CommonValidationHelper.validateTraceInformationRequired  (contextValidation, traceInformation);
+		CommonValidationHelper.validateRulesWithObjects          (contextValidation, this);
+		// GA: validation taxon	
 	}
 
-	// Interfaces implementations
+	// ---- Interfaces implementations
 	
 	// We cannot @JsonIgnore setters or getters otherwise the corresponding
 	// field serialization is disabled.
@@ -221,18 +222,4 @@ path: ",CO-0000140,BUP_AAAA",
 		return traceInformation;
 	}
 
-	// ICommentable
-	
-	//@JsonIgnore
-	@Override
-	public List<Comment> getComments() {
-		return comments;
-	}
-
-	//@JsonIgnore
-	@Override
-	public void setComments(List<Comment> comments) {
-		this.comments = comments;
-	}
-	
 }

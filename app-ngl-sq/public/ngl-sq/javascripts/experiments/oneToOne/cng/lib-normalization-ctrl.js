@@ -1,4 +1,4 @@
-// FDS 15/02/2016 -- JIRA NGL-894 : lib-normalization experiment (en plaques)
+// FDS 15/02/2016 -- JIRA NGL-894 : lib-normalization experiment
 angular.module('home').controller('LibNormalizationCtrl',['$scope', '$parse', '$http', 'atmToSingleDatatable',
                                                      function($scope, $parse, $http, atmToSingleDatatable){
 
@@ -10,8 +10,7 @@ angular.module('home').controller('LibNormalizationCtrl',['$scope', '$parse', '$
 	var datatableConfig = {
 			name: $scope.experiment.typeCode.toUpperCase(),
 			columns:[
-			         //--------------------- INPUT containers section -----------------------
-			         
+			         //--------------------- INPUT containers section -----------------------       
 			         { // Projet(s)
 			        	"header":Messages("containers.table.projectCodes"),
 			 			"property":"inputContainer.projectCodes",
@@ -117,7 +116,6 @@ angular.module('home').controller('LibNormalizationCtrl',['$scope', '$parse', '$
 			         //   => Volume engagé, Volume tampon
 			          
 			         //------------------------ OUTPUT containers section -------------------
-
 			         { // Concentration; 08/11/2016 shortLabel
 			        	 "header":Messages("containers.table.concentration.shortLabel") + " (nM)",
 			        	 "property":"outputContainerUsed.concentration.value",
@@ -129,7 +127,7 @@ angular.module('home').controller('LibNormalizationCtrl',['$scope', '$parse', '$
 			        	 "position":120,
 			        	 "extraHeaders":{0:outputExtraHeaders}
 			         },
-			         { // Volume ; 26/07/2017 supression de la valeur par defaut....
+			         { // Volume ; 26/07/2017 supression de la valeur par defaut...
 			        	 "header":Messages("containers.table.volume")+ " (µL)",
 			        	 "property":"outputContainerUsed.volume.value",
 						 "edit":true,
@@ -199,9 +197,16 @@ angular.module('home').controller('LibNormalizationCtrl',['$scope', '$parse', '$
 			extraHeaders:{
 				number:2,
 				dynamic:true,
+			},
+			// ajout boutons 11/09/2018
+			otherButtons: {
+                active: ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F')),
+                complex:true,
+                template:''
+                	+$scope.plateUtils.templates.buttonLineMode()
+                	+$scope.plateUtils.templates.buttonColumnMode()
 			}
 	}; // fin struct datatableConfig
-	
 	
 	// 07/05/2018 NGL-1006/NGL-2041 colonnes variables
 	//INPUT
@@ -225,8 +230,8 @@ angular.module('home').controller('LibNormalizationCtrl',['$scope', '$parse', '$
 	        "order":true,
 			"hide":true,
 	        "type":"text",
-	         "position":2,
-	        "extraHeaders":{0: inputExtraHeaders}
+	        "position":2,
+	        "extraHeaders":{0:inputExtraHeaders}
 	     });
 		 datatableConfig.columns.push({
 	        // colonne
@@ -237,9 +242,8 @@ angular.module('home').controller('LibNormalizationCtrl',['$scope', '$parse', '$
 			"hide":true,
 	        "type":"number",
 	        "position":3,
-	        "extraHeaders":{0: inputExtraHeaders}
-	     });
-		 
+	        "extraHeaders":{0:inputExtraHeaders}
+	     });		 
 	} else {
 			datatableConfig.columns.push({
 				"header":Messages("containers.table.code"),
@@ -249,7 +253,7 @@ angular.module('home').controller('LibNormalizationCtrl',['$scope', '$parse', '$
 				"hide":true,
 				"type":"text",
 				"position":1,
-				"extraHeaders":{0: inputExtraHeaders}
+				"extraHeaders":{0:inputExtraHeaders}
 			});
 	}	
 	
@@ -263,7 +267,7 @@ angular.module('home').controller('LibNormalizationCtrl',['$scope', '$parse', '$
 			 "hide":true,
 			 "type":"text",
 			 "position":100,
-			 "extraHeaders":{0: outputExtraHeaders}
+			 "extraHeaders":{0:outputExtraHeaders}
          });
 		 datatableConfig.columns.push({
 			 // Line
@@ -302,6 +306,7 @@ angular.module('home').controller('LibNormalizationCtrl',['$scope', '$parse', '$
 				"property":"outputContainerUsed.locationOnContainerSupport.code",
 				"order":true,
 				"edit":true,
+				"editDirectives":"udt-change='atmService.emptyToNull(value.data, col.property)'",
 				"hide":true,
 				"type":"text",
 				"position":100,
@@ -320,31 +325,43 @@ angular.module('home').controller('LibNormalizationCtrl',['$scope', '$parse', '$
 			});		 
 	}
 
-
+	// ajout pour NGL-2225 gestion des plaques en sortie
+	var updateATM = function(experiment){
+		if(experiment.instrument.outContainerSupportCategoryCode !==" tube"){
+			experiment.atomicTransfertMethods.forEach(function(atm){
+				atm.line = atm.outputContainerUseds[0].locationOnContainerSupport.line;
+				atm.column = atm.outputContainerUseds[0].locationOnContainerSupport.column;
+			});
+		}		
+	};
+	
 	$scope.$on('save', function(e, callbackFunction) {	
 		console.log("call event save");
-		$scope.atmService.data.save();
-		$scope.atmService.viewToExperimentOneToOne($scope.experiment);
-		$scope.$emit('childSaved', callbackFunction);
+			$scope.atmService.data.save();
+			$scope.atmService.viewToExperimentOneToOne($scope.experiment);
+		
+			// ajout pour NGL-2225 gestion des plaques en sortie
+			updateATM($scope.experiment);
+		
+			$scope.$emit('childSaved', callbackFunction);
 	});
 	
+	// Reprise du code code de oxbiseq-and-biseq pour NGL-2225 gestion des plaques en sortie
 	var copyContainerSupportCodeAndStorageCodeToDT = function(datatable){
 
 		var dataMain = datatable.getData();
-		
 		var outputContainerSupportCode = $scope.outputContainerSupport.code;
 		var outputContainerSupportStorageCode = $scope.outputContainerSupport.storageCode;
-
-		if ( null != outputContainerSupportCode && undefined != outputContainerSupportCode){
+		
+		// 14/03/2019 correction locale pour NGl-2371: ajout && "" !=outputContainerSupportCode
+		if ( null != outputContainerSupportCode && undefined != outputContainerSupportCode && "" !=outputContainerSupportCode ){
 			for(var i = 0; i < dataMain.length; i++){
-				
-				var atm = dataMain[i].atomicTransfertMethod;
-				var newContainerCode = outputContainerSupportCode+"_"+atm.line + atm.column;
 
-				$parse('outputContainerUsed.code').assign(dataMain[i],newContainerCode);
-				$parse('outputContainerUsed.locationOnContainerSupport.code').assign(dataMain[i],outputContainerSupportCode);
+				if($scope.experiment.instrument.outContainerSupportCategoryCode!=="tube"){
+					$parse('outputContainerUsed.locationOnContainerSupport.code').assign(dataMain[i],outputContainerSupportCode);
+				}
 				
-				if( null != outputContainerSupportStorageCode && undefined != outputContainerSupportStorageCode){
+				if( (null != outputContainerSupportStorageCode) && (undefined != outputContainerSupportStorageCode)){
 				    $parse('outputContainerUsed.locationOnContainerSupport.storageCode').assign(dataMain[i],outputContainerSupportStorageCode);
 				}
 			}
@@ -354,12 +371,16 @@ angular.module('home').controller('LibNormalizationCtrl',['$scope', '$parse', '$
 	$scope.$on('refresh', function(e) {
 		console.log("call event refresh");		
 		var dtConfig = $scope.atmService.data.getConfig();
-		dtConfig.edit.active = ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('IP'));
+		dtConfig.edit.active = ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F'));// 08/01/2018 => mettre 'F' au lieu 'IP'
+		//08/01/2018 dtConfig.edit.showButton manquant ???
 		dtConfig.edit.byDefault = false;
 		dtConfig.edit.start = false;
 		dtConfig.remove.active = ($scope.isEditModeAvailable() && $scope.isNewState());
 		$scope.atmService.data.setConfig(dtConfig);
 		$scope.atmService.refreshViewFromExperiment($scope.experiment);
+		// NGL-2371 FDS 20/03/2019 récupérer outputContainerSupport s'il été généré automatiquement (pas de barcode entré par l'utilisateur)
+		$scope.outputContainerSupport.code=$scope.experiment.atomicTransfertMethods[0].outputContainerUseds[0].locationOnContainerSupport.code;
+		
 		$scope.$emit('viewRefeshed');
 	});
 	
@@ -383,16 +404,19 @@ angular.module('home').controller('LibNormalizationCtrl',['$scope', '$parse', '$
 	//Init
 	
 	var atmService = atmToSingleDatatable($scope, datatableConfig);
-	//defined new atomictransfertMethod
-	// FDS ajout variables pour ligne et colonne
-	atmService.newAtomicTransfertMethod = function(l, c){
+	
+	// reprise du code de oxbiseq-and-biseq pour NGL-2225 gestion des plaques en sortie
+	// line et column sont indefinis au demarrage pour les plaques, ce sont les valeurs definies par l'utilisateur dans le datatable qui sont
+	// positionnees dans copyContainerSupportCodeAndStorageCodeToDT au momemt de la sauvegarde
+	// !!! l'original est class:"OneToMany", ici il faut oneToOne
+	atmService.newAtomicTransfertMethod = function(l,c){
 		return {
 			class:"OneToOne",
-			line: l, 
-			column: c, 				
+			line:($scope.experiment.instrument.outContainerSupportCategoryCode !== "tube")?undefined:"1", 
+			column:($scope.experiment.instrument.outContainerSupportCategoryCode !== "tube")?undefined:"1",	
 			inputContainerUseds:new Array(0), 
 			outputContainerUseds:new Array(0)
-		};
+		};		
 	};
 	
 	//defined default output unit
@@ -501,7 +525,4 @@ angular.module('home').controller('LibNormalizationCtrl',['$scope', '$parse', '$
 			getterEngageVol.assign(udtData, undefined);
 			getterBufferVol.assign(udtData, undefined);
 		}
-	}
-	
-	
-}]);
+	}}]);

@@ -6,31 +6,39 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-// import play.Play;
-
 // Should be migrated to DI, depends on application configuration.
 // We should define a singleton that should be injected when needed.
 public class DescriptionHelper {
 
-	private static List<String> institute;
-
-	public static void initInstitute(){
-		institute = null;
-	}
-
-	public static List<String> getInstitute() {
-		if (institute == null) {
-			// String appInstitute = Play.application().configuration().getString("institute");
-			String appInstitute = fr.cea.ig.play.IGGlobals.configuration().getString("institute");
-			if (StringUtils.isNotBlank(appInstitute)) {
-				institute = Arrays.asList(appInstitute.split("\\s*,\\s*"));
-			} else {
-				institute = new ArrayList<>();
-			}			
+	// TODO: move to some configuration access class, should be accessed through injected NGLConfig
+	public static List<String> getInstitutes() {
+		String appInstitute = fr.cea.ig.play.IGGlobals.configuration().getString("institute");
+		if (StringUtils.isNotBlank(appInstitute)) {
+			return Arrays.asList(appInstitute.split("\\s*,\\s*"));
+		} else {
+			return new ArrayList<>();
 		}
-		return institute;
-		//return new ArrayList<String>();
 	}
+
+//	private static List<String> institute;
+//
+//	public static void initInstitute() {
+//		institute = null;
+//	}
+//
+//	public static List<String> getInstitute() {
+//		if (institute == null) {
+//			// String appInstitute = Play.application().configuration().getString("institute");
+//			String appInstitute = fr.cea.ig.play.IGGlobals.configuration().getString("institute");
+//			if (StringUtils.isNotBlank(appInstitute)) {
+//				institute = Arrays.asList(appInstitute.split("\\s*,\\s*"));
+//			} else {
+//				institute = new ArrayList<>();
+//			}			
+//		}
+//		return institute;
+//		//return new ArrayList<String>();
+//	}
 
 	/*public static void _initInstitute(){
 		institute = null;

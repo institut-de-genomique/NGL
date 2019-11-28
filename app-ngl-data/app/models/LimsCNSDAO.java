@@ -19,6 +19,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import fr.cea.ig.MongoDBDAO;
+import fr.cea.ig.lfw.utils.Iterables;
 import models.laboratory.common.description.Level;
 import models.laboratory.common.instance.Comment;
 import models.laboratory.common.instance.PropertyValue;
@@ -32,8 +33,6 @@ import models.laboratory.container.instance.Container;
 import models.laboratory.container.instance.Content;
 import models.laboratory.parameter.index.IlluminaIndex;
 import models.laboratory.parameter.index.Index;
-import models.laboratory.processes.description.ProcessType;
-import models.laboratory.processes.instance.Process;
 import models.laboratory.project.instance.BioinformaticParameters;
 import models.laboratory.project.instance.Project;
 import models.laboratory.run.description.ReadSetType;
@@ -44,20 +43,16 @@ import models.laboratory.run.instance.Lane;
 import models.laboratory.run.instance.ReadSet;
 import models.laboratory.run.instance.Run;
 import models.laboratory.run.instance.Treatment;
+import models.laboratory.sample.description.ImportType;
 import models.laboratory.sample.description.SampleType;
 import models.laboratory.sample.instance.Sample;
 import models.util.DataMappingCNS;
 import models.util.MappingHelper;
-import models.utils.CodeHelper;
 import models.utils.InstanceConstants;
-import models.utils.InstanceHelpers;
-import models.utils.ListObject;
 import models.utils.dao.DAOException;
-//import play.Logger;
 import play.api.modules.spring.Spring;
 import services.instance.container.ContainerImportCNS;
 import validation.ContextValidation;
-import validation.utils.ValidationConstants;
 
 /**
  * @author mhaquell
@@ -67,13 +62,16 @@ import validation.utils.ValidationConstants;
 public class LimsCNSDAO {
 
 	private static final play.Logger.ALogger logger = play.Logger.of(LimsCNSDAO.class);
+
+	private static final Object[] NO_ARG = {};
 	
 	public    static final String LIMS_CODE                   = "limsCode";
-	private   static final String SAMPLE_ADPATER              = "isAdapters";
+	public    static final String SAMPLE_ADPATER              = "isAdapters";
 	protected static final String PROJECT_CATEGORY_CODE       = "default";
 	protected static final String PROJECT_TYPE_CODE_FG        = "france-genomique";
 	protected static final String PROJECT_TYPE_CODE_DEFAULT   = "default-project";
 	//protected static final String PROJECT_PROPERTIES_FG_GROUP = "fgGroup";
+	// EJACOBY: AD
 	protected static final String PROJECT_PROPERTIES_UNIX_GROUP = "unixGroup";
 	protected static final String NGSRG_CODE                  = "ngsrg";
 	protected static final String GLOBAL_CODE                 = "global";
@@ -90,335 +88,279 @@ public class LimsCNSDAO {
 		this.jdbcTemplate = new JdbcTemplate(dataSource);              
 	}
 
-	/* *
-	 * Find Tube Lims who have flag 'tubinNGL=0' ( this flag is update to 1 when Tube exists in NGL database)
-	 * 
-	 * @param contextError
-	 * @return
+	/**
+	 * Create containers for an SQL query ran against 'lims' database.
+	 * @param procedure             SQL query to run
+	 * @param contextError          validation context
+	 * @param containerCategoryCode container category code
+	 * @param containerStateCode    container state code
+	 * @param experimentTypeCode    experiment type code
+	 * @return                      container instances
 	 */
-	public List<Container> findContainersToCreate(String procedure, 
-			                                      ContextValidation contextError, 
-			                                      final String containerCategoryCode, 
-			                                      final String containerStateCode, 
-			                                      final String experimentTypeCode) {
-		List<Container> results = this.jdbcTemplate.query(procedure,new Object[]{} , 
-		new RowMapper<Container>() {
-
-//			@SuppressWarnings("rawtypes")
-			@Override
-			public Container mapRow(ResultSet rs, int rowNum) throws SQLException {
-
-				Container container = null;
-				try {
-					container = ContainerImportCNS.createContainerFromResultSet(rs, containerCategoryCode,containerStateCode,experimentTypeCode);
-				} catch (DAOException e) {
-					// TODO: fix silent error
-					logger.error("",e);
-				}
-				return container;
-			}
-
-		});        
-
-		return results;
+	// Find Tube LIMS who have flag 'tubinNGL=0' ( this flag is update to 1 when Tube exists in NGL database).
+	public List<Container> findContainersToCreate(String            procedure, 
+                                                  ContextValidation contextError, 
+                                                  final String      containerCategoryCode, 
+                                                  final String      containerStateCode, 
+                                                  final String      experimentTypeCode) {
+		return jdbcTemplate.query(procedure, NO_ARG, 
+				(rs, rowNum) -> {
+					try {
+						return ContainerImportCNS.createContainerFromResultSet(rs, containerCategoryCode,containerStateCode,experimentTypeCode);
+					} catch (DAOException e) {
+						logger.error("",e);
+						return null;
+					}
+				});        
 	}
-
 
 	public Sample findSampleToCreate(final ContextValidation contextError, String sampleCode) throws SQLException, DAOException {
 
-		List<Sample> results = this.jdbcTemplate.query("pl_MaterielToNGLUn @nom_materiel=?",new Object[]{sampleCode} 
-		,new RowMapper<Sample>() {
-
-//			@SuppressWarnings("rawtypes")
-			@Override
-			public Sample mapRow(ResultSet rs, int rowNum) throws SQLException {
-
-				Sample sample = new Sample();
-				InstanceHelpers.updateTraceInformation(sample.traceInformation, contextError.getUser());
-				String tadco = rs.getString("tadco");
-				String tprco = rs.getString("tprco");
-				sample.code=rs.getString("code");
-
-				logger.debug("Code Materiel (adnco) :"+rs.getString(LIMS_CODE)+" , Type Materiel (tadco) :"+tadco +", Type Projet (tprco) :"+tprco);
-
-				String sampleTypeCode=DataMappingCNS.getSampleTypeFromLims(tadco,tprco);
-
-				if(sampleTypeCode==null){
-					contextError.addErrors( "typeCode", "limsdao.error.emptymapping", tadco, sample.code);
-					return null;
-				}
-
-				SampleType sampleType=null;
-				try {
-					sampleType = SampleType.find.findByCode(sampleTypeCode);
-				} catch (DAOException e) {
-					logger.error("",e);
-					return null;
-				}
-
-
-				if (sampleType == null) {
-					contextError.addErrors("code", "error.codeNotExist", sampleTypeCode, sample.code);
-					return null;
-				}
-
-				// Logger.debug("Sample Type : "+sampleTypeCode);
-				logger.debug("Sample Type : {}", sampleTypeCode);
-
-				sample.typeCode        = sampleTypeCode;
-				sample.projectCodes    = new HashSet<>();
-				sample.projectCodes.add(rs.getString("project"));
-				sample.name            = rs.getString("name");
-				sample.referenceCollab = rs.getString("referenceCollab");
-				sample.taxonCode       = rs.getString("taxonCode");
-				sample.comments        = new ArrayList<>();
-				sample.comments.add(new Comment(rs.getString("comment"), "ngl-test"));
-				sample.categoryCode    = sampleType.category.code;
-				sample.properties      = new HashMap<>();
-				MappingHelper.getPropertiesFromResultSet(rs,sampleType.propertiesDefinitions,sample.properties);
-
-				//Logger.debug("Properties sample "+sample.properties.containsKey("taxonSize"));
-
-				boolean tara = false;
-
-				if (rs.getInt("tara") == 1) {
-					tara = true;
-				}
-
-				if (tara) {
-
-					// Logger.debug("Tara sample "+sample.code);
-					logger.debug("Tara sample {}", sample.code);
-
-					TaraDAO  taraServices = Spring.getBeanOfType(TaraDAO.class);
-					if(sample.properties==null){ sample.properties=new HashMap<>();}
-
-					Map<String, PropertyValue> map=taraServices.findTaraSampleFromLimsCode(rs.getInt(LIMS_CODE),contextError);
-
-					if(map!=null){
-						sample.properties.putAll(map);
+		List<Sample> results = jdbcTemplate.query("pl_MaterielToNGLUn @nom_materiel=?", new Object[] { sampleCode },
+				(rs, rowNum) -> {
+					Sample sample = new Sample();
+					Date creationDate = rs.getDate("uaddc");
+					if (creationDate != null) {
+						sample.getTraceInformation().forceCreationStamp(contextError.getUser(), creationDate);				
 					} else {
-						tara=false;
+						sample.setTraceCreationStamp(contextError, contextError.getUser());
 					}
 
-				}
-				//Logger.debug("Adpatateur :"+sample.properties.get("adaptateur").value.toString());
+					Date modificationDate = rs.getDate("uaddm");
+					if (modificationDate != null) {
+						sample.getTraceInformation().forceModificationStamp(contextError.getUser(), modificationDate);				
+					} else {
+						sample.setTraceModificationStamp(contextError, contextError.getUser());
+					}
+					//InstanceHelpers.updateTraceInformation(sample.traceInformation, contextError.getUser());
+					String tadco = rs.getString("tadco");
+					String tprco = rs.getString("tprco");
+					sample.code = rs.getString("code");
 
-				boolean adapter=false;
-				if(sample.properties.get(SAMPLE_ADPATER)!=null){
-					adapter= Boolean.parseBoolean(sample.properties.get(SAMPLE_ADPATER).value.toString());
-				}
+					logger.debug("Code Materiel (adnco) :"+rs.getString(LIMS_CODE)+" , Type Materiel (tadco) :"+tadco +", Type Projet (tprco) :"+tprco);
 
-				sample.importTypeCode=DataMappingCNS.getImportTypeCode(tara,adapter);
-				//Logger.debug("Import Type "+sample.importTypeCode);
-				return sample;
-			}
+					String sampleTypeCode = DataMappingCNS.getSampleTypeFromLims(tadco,tprco);
+
+					if(sampleTypeCode==null){
+						contextError.addError( "typeCode", "limsdao.error.emptymapping", tadco, sample.code);
+						return null;
+					}
+
+					SampleType sampleType=null;
+					try {
+						sampleType = SampleType.find.get().findByCode(sampleTypeCode);
+					} catch (DAOException e) {
+						logger.error("",e);
+						return null;
+					}
 
 
-		});        
+					if (sampleType == null) {
+						contextError.addError("code", "error.codeNotExist", sampleTypeCode, sample.code);
+						return null;
+					}
 
-		if(results.size()==1)
-		{
-			//	Logger.debug("One sample");
+					// Logger.debug("Sample Type : "+sampleTypeCode);
+					logger.debug("Sample Type : {}", sampleTypeCode);
+
+					sample.typeCode        = sampleTypeCode;
+					sample.projectCodes    = new HashSet<>();
+					sample.projectCodes.add(rs.getString("project"));
+					sample.name            = rs.getString("name");
+					sample.referenceCollab = rs.getString("referenceCollab");
+					sample.taxonCode       = rs.getString("taxonCode");
+					sample.comments        = new ArrayList<>();
+					sample.comments.add(new Comment(rs.getString("comment"), "ngl-test"));
+					sample.categoryCode    = sampleType.category.code;
+					sample.properties      = new HashMap<>();
+
+
+					boolean tara = false;
+					if (rs.getInt("tara") == 1) {
+						tara = true;
+					}
+					boolean adapter = rs.getBoolean("isAdapters");
+					sample.importTypeCode=DataMappingCNS.getImportTypeCode(tara,adapter);
+					ImportType importType = null;
+					try {
+						importType = ImportType.find.get().findByCode(sample.importTypeCode);
+					} catch (DAOException e) {
+						logger.error("",e);
+						return null;
+					}
+
+
+					MappingHelper.getPropertiesFromResultSet(rs,importType.propertiesDefinitions,sample.properties);
+
+					//Logger.debug("Properties sample "+sample.properties.containsKey("taxonSize"));
+
+
+
+					if (tara) {
+
+						// Logger.debug("Tara sample "+sample.code);
+						logger.debug("Tara sample {}", sample.code);
+
+						TaraDAO  taraServices = Spring.getBeanOfType(TaraDAO.class);
+						if(sample.properties==null){ sample.properties=new HashMap<>();}
+
+						Map<String, PropertyValue> map = taraServices.findTaraSampleFromLimsCode(rs.getInt(LIMS_CODE),contextError);
+
+						if (map != null) {
+							sample.properties.putAll(map);
+						} else {
+							tara = false;
+						}
+
+					}
+					//Logger.debug("Adpatateur :"+sample.properties.get("adaptateur").value.toString());
+					//Logger.debug("Import Type "+sample.importTypeCode);
+					return sample;
+				});        
+		if (results.size() == 1)
 			return results.get(0);
-		}
-		else return null;
-
+		return null;
 	}
-
-
 
 	public List<Project> findProjectToCreate(final ContextValidation contextError) throws SQLException, DAOException {
-		List<Project> results = this.jdbcTemplate.query("pl_ProjetToNGL ",new Object[]{} 
-		,new RowMapper<Project>() {
+		return jdbcTemplate.query("pl_ProjetToNGL ", NO_ARG,
+				(rs, rowNum) -> {
+					Project project = new Project();
+					project.code = rs.getString(2).trim();
+					project.name = rs.getString(1);
+					project.properties = new HashMap<>();
+					project.bioinformaticParameters = new BioinformaticParameters();
 
-//			@SuppressWarnings("rawtypes")
-			@Override
-			public Project mapRow(ResultSet rs, int rowNum) throws SQLException {
-
-
-				Project project = new Project();
-				project.code = rs.getString(2).trim();
-				project.name = rs.getString(1);
-				project.properties=new HashMap<>();
-				project.bioinformaticParameters = new BioinformaticParameters();
-
-				String fgGroupe=rs.getString("groupefg");
-				if(fgGroupe==null){
-					project.typeCode=PROJECT_TYPE_CODE_DEFAULT;
-				}
-				else {
-					project.typeCode=PROJECT_TYPE_CODE_FG;
-					project.bioinformaticParameters.fgGroup=fgGroupe;
-					
-				}
-				
-				String unixGroup = rs.getString(6);
-				if(unixGroup==null){
-					project.properties.put(PROJECT_PROPERTIES_UNIX_GROUP, new PropertySingleValue(UNIX_GROUP_DEFAULT));
-				}else{
-					project.properties.put(PROJECT_PROPERTIES_UNIX_GROUP, new PropertySingleValue(unixGroup));
-				}
-				
-				
-				project.categoryCode=PROJECT_CATEGORY_CODE;
-
-				project.state = new State(); 
-				project.state.code="IP";
-				project.state.user = contextError.getUser();
-				project.state.date = new Date();
-
-				
-
-				if(null != rs.getString("maxadnnom")){
-					project.lastSampleCode = project.code+"_"+rs.getString("maxadnnom");
-					project.nbCharactersInSampleCode = rs.getString("maxadnnom").length();
-				}
-				project.archive = rs.getBoolean("prsarch");
-				
-				project.traceInformation=new TraceInformation();
-				InstanceHelpers.updateTraceInformation(project.traceInformation, contextError.getUser());
-				return project;
-			}
-		});
-
-		return results;
-	}
-
-
-
-
-	public List<ListObject> getListObjectFromProcedureLims(String procedure) {
-		List<ListObject> listObjects = this.jdbcTemplate.query(procedure,
-				new RowMapper<ListObject>() {
-			@Override
-			public ListObject mapRow(ResultSet rs, int rowNum)
-					throws SQLException {
-				ListObject value = new ListObject();
-				value.name = rs.getString(1);
-				value.code = rs.getString(2);
-				return value;
-			}
-		});
-		return listObjects;
-	}
-
-
-	public void updateMaterielmanipLims(List<Container> containers,ContextValidation contextError) throws SQLException{
-
-		String limsCode=null;
-		String rootKeyName=null;
-
-		contextError.addKeyToRootKeyName("updateMaterielmanipLims");
-
-		for(Container container:containers){
-
-			rootKeyName="container["+container.code+"]";
-			contextError.addKeyToRootKeyName(rootKeyName);
-			limsCode=container.properties.get(LIMS_CODE).value.toString();
-
-			if(container.properties==null || limsCode==null )
-			{
-				contextError.addErrors("limsCode","error.PropertyNotExist",LIMS_CODE,container.support.code);
-
-			}else {
-				try{
-					if(!limsCode.equals("0")){
-						String sql="pm_MaterielmanipInNGL @matmaco=?";
-						logger.debug(sql+limsCode);
-						this.jdbcTemplate.update(sql, Integer.parseInt(limsCode));
+					String fgGroupe = rs.getString("groupefg");
+					if (fgGroupe==null) {
+						project.typeCode = PROJECT_TYPE_CODE_DEFAULT;
+					} else {
+						project.typeCode = PROJECT_TYPE_CODE_FG;
+						project.bioinformaticParameters.fgGroup = fgGroupe;
 					}
-				} catch(DataAccessException e){
 
-					contextError.addErrors("",e.getMessage(), container.support.code);
+					String unixGroup = rs.getString(6);
+					if (unixGroup == null) {
+						project.properties.put(PROJECT_PROPERTIES_UNIX_GROUP, new PropertySingleValue(UNIX_GROUP_DEFAULT));
+					} else {
+						project.properties.put(PROJECT_PROPERTIES_UNIX_GROUP, new PropertySingleValue(unixGroup));
+					}
+					project.categoryCode = PROJECT_CATEGORY_CODE;
+
+					project.state = new State(); 
+					project.state.code = "IP";
+					project.state.user = contextError.getUser();
+					project.state.date = new Date();
+
+					if (rs.getString("maxadnnom") != null) {
+						project.lastSampleCode = project.code + "_" + rs.getString("maxadnnom");
+						project.nbCharactersInSampleCode = rs.getString("maxadnnom").length();
+					}
+					project.archive = rs.getBoolean("prsarch");
+
+					project.traceInformation = new TraceInformation();
+//									InstanceHelpers.updateTraceInformation(project.traceInformation, contextError.getUser());
+					project.traceInformation.forceCreationStamp(contextError.getUser());
+
+					// EJACOBY: AD Get projectManager list
+					/*project.projectManagers=new ArrayList<>();
+				if(null != rs.getString("respBio"))
+					project.projectManagers.add(rs.getString("respBio"));
+				if(null != rs.getString("respBioinf"))
+					project.projectManagers.add(rs.getString("respBioinf"));*/
+					return project;
+				});
+	}
+
+//	public List<ListObject> getListObjectFromProcedureLims(String procedure) {
+//		List<ListObject> listObjects = this.jdbcTemplate.query(procedure,
+//				new RowMapper<ListObject>() {
+//			@Override
+//			public ListObject mapRow(ResultSet rs, int rowNum)
+//					throws SQLException {
+//				ListObject value = new ListObject();
+//				value.name = rs.getString(1);
+//				value.code = rs.getString(2);
+//				return value;
+//			}
+//		});
+//		return listObjects;
+//	}
+
+	public void updateMaterielmanipLims(List<Container> containers, ContextValidation contextError) throws SQLException {
+		contextError.addKeyToRootKeyName("updateMaterielmanipLims");
+		for(Container container:containers){
+			String rootKeyName = "container[" + container.code + "]";
+			contextError.addKeyToRootKeyName(rootKeyName);
+			String limsCode = container.properties.get(LIMS_CODE).value.toString();
+			if (container.properties == null || limsCode == null) {
+				contextError.addError("limsCode", "error.PropertyNotExist", LIMS_CODE,container.support.code);
+			} else {
+				try {
+					if (!limsCode.equals("0")) {
+						String sql = "pm_MaterielmanipInNGL @matmaco=?";
+						logger.debug(sql + limsCode);
+						jdbcTemplate.update(sql, Integer.parseInt(limsCode));
+					}
+				} catch(DataAccessException e) {
+					contextError.addError("",e.getMessage(), container.support.code);
 				}
 			}
-
 			contextError.removeKeyFromRootKeyName(rootKeyName);
-
-
 		}
-
 		contextError.removeKeyFromRootKeyName("updateMaterielmanipLims");
 	}
 
-
-	public void updateMaterielLims(Sample sample,ContextValidation contextError) throws SQLException{
-
-		String rootKeyName=null;
-
+	public void updateMaterielLims(Sample sample, ContextValidation contextError) throws SQLException {
 		contextError.addKeyToRootKeyName("updateMaterielLims");
-		rootKeyName="container["+sample.code+"]";
+		String rootKeyName = "container[" + sample.code + "]";
 		contextError.addKeyToRootKeyName(rootKeyName);
-
-		if(sample.code==null)
-		{
-			contextError.addErrors("code","error.NotExist",sample.code);
-
-		}else {
-			try{
-
-				String sql="pm_SampleInNGL @code=?";
-				logger.debug(sql+sample.code);
-				this.jdbcTemplate.update(sql, sample.code);
-
+		if (sample.code == null) {
+			contextError.addError("code","error.NotExist",sample.code);
+		} else {
+			try {
+				String sql = "pm_SampleInNGL @code=?";
+				logger.debug(sql + sample.code);
+				jdbcTemplate.update(sql, sample.code);
 			} catch(DataAccessException e){
-
-				contextError.addErrors("",e.getMessage(), sample.code);
+				contextError.addError("",e.getMessage(), sample.code);
 			}
 		}
-
 		contextError.removeKeyFromRootKeyName(rootKeyName);
-
 		contextError.removeKeyFromRootKeyName("updateMaterielLims");
 	}
-
 
 	/* *
 	 *  Find contents from a container code 
 	 *  
 	 *  */
 	public List<Content> findContentsFromContainer(String sqlContent, String code) throws SQLException{
-
-		List<Content> results = this.jdbcTemplate.query(sqlContent,new Object[]{code} 
-		,new RowMapper<Content>() {
-
-//			@SuppressWarnings("rawtypes")
-			@Override
-			public Content mapRow(ResultSet rs, int rowNum) throws SQLException {
-
-				Content sampleUsed = new Content(rs.getString("sampleCode"),null,null);
-				sampleUsed.projectCode = rs.getString("project");
-				//TODO add projectCode
-				// Todo add properties from ExperimentType
-				sampleUsed.properties=new HashMap<>();
-				if(rs.getString("percentPerLane")!=null){
-					sampleUsed.properties.put("percentPerLane", new PropertySingleValue(rs.getDouble("percentPerLane")));
-					sampleUsed.percentage=rs.getDouble("percentPerLane");
-				}else {	
-					sampleUsed.percentage=rs.getDouble("percentage");
-				}
-				sampleUsed.properties.put("libProcessTypeCode",new PropertySingleValue(rs.getString("libProcessTypeCode")));
-				if(rs.getString("tag")!=null){
-					sampleUsed.properties.put("tag", new PropertySingleValue(rs.getString("tag")));
-					sampleUsed.properties.put("tagCategory",new PropertySingleValue(rs.getString("tagCategory")));
-				}
-				
-				if(rs.getString("libLayoutNominalLength") != null){
-					sampleUsed.properties.put("libLayoutNominalLength", new PropertySingleValue(rs.getInt("libLayoutNominalLength")));
-				}
-				
-				if(rs.getString("sampleAliquoteCode") !=null){
-					sampleUsed.properties.put("sampleAliquoteCode", new PropertySingleValue(rs.getString("sampleAliquoteCode")));
-				}
-				
-				return sampleUsed;
-			}
-
-		});        
-
-		return results;
-
+		return jdbcTemplate.query(sqlContent, new Object[] { code },
+				(rs, rowNum) -> {
+					Content sampleUsed = new Content(rs.getString("sampleCode"), null, null);
+					sampleUsed.projectCode = rs.getString("project");
+					// GA: add projectCode
+					// GA: add properties from ExperimentType
+					sampleUsed.properties = new HashMap<>();
+					if (rs.getString("percentPerLane") != null) {
+						sampleUsed.properties.put("percentPerLane", new PropertySingleValue(rs.getDouble("percentPerLane")));
+						sampleUsed.percentage = rs.getDouble("percentPerLane");
+					} else {	
+						sampleUsed.percentage = rs.getDouble("percentage");
+					}
+					sampleUsed.properties.put("libProcessTypeCode", new PropertySingleValue(rs.getString("libProcessTypeCode")));
+					if (rs.getString("tag") != null) {
+						sampleUsed.properties.put("tag",         new PropertySingleValue(rs.getString("tag")));
+						sampleUsed.properties.put("tagCategory", new PropertySingleValue(rs.getString("tagCategory")));
+					}
+					if (rs.getString("libLayoutNominalLength") != null) {
+						sampleUsed.properties.put("libLayoutNominalLength", new PropertySingleValue(rs.getInt("libLayoutNominalLength")));
+					}
+					if (rs.getString("sampleAliquoteCode") != null) {
+						sampleUsed.properties.put("sampleAliquoteCode", new PropertySingleValue(rs.getString("sampleAliquoteCode")));
+					}
+					return sampleUsed;
+				});
 	}
 
 	public List<Run> findRunsToCreate(String sqlContent,final ContextValidation contextError)throws SQLException{
@@ -430,7 +372,7 @@ public class LimsCNSDAO {
 			public Run mapRow(ResultSet rs, int rowNum) throws SQLException {
 				logger.debug("Begin findRunsToCreate");
 
-				ContextValidation contextValidation=new ContextValidation(Constants.NGL_DATA_USER);
+				ContextValidation contextValidation = ContextValidation.createUndefinedContext(Constants.NGL_DATA_USER);
 				contextValidation.addKeyToRootKeyName(contextError.getRootKeyName());
 
 				Run run= MongoDBDAO.findByCode(InstanceConstants.RUN_ILLUMINA_COLL_NAME, Run.class, rs.getString("code"));
@@ -446,7 +388,7 @@ public class LimsCNSDAO {
 				run.containerSupportCode=rs.getString("containerSupportCode");
 				run.sequencingStartDate=rs.getDate("sequencingStartDate");
 				//Revoir l'etat en fonction du dispatch et de la validation
-				//TODO fin de tranfert
+				// GA: fin de tranfert
 
 
 				Valuation valuation=new Valuation();
@@ -456,7 +398,7 @@ public class LimsCNSDAO {
 				run.valuation.valid=TBoolean.valueOf(rs.getString("validationValid"));
 				run.valuation.user="lims";
 				run.valuation.date=rs.getDate("validationDate");
-				//TODO	run.validation.resolutionCodes
+				// GA: run.validation.resolutionCodes
 				State state = new State();
 				run.state = state;
 				run.state.code = DataMappingCNS.getStateRunFromLims(run.valuation.valid);
@@ -464,8 +406,8 @@ public class LimsCNSDAO {
 				run.state.date = new Date();
 
 				run.state.historical=new HashSet<>();		
-				run.state.historical.add(getTransientState(rs.getDate("beginNGSRG"),"IP-RG",0));
-				run.state.historical.add(getTransientState(rs.getDate("endNGSRG"),"F-RG",1));				
+				run.state.historical.add(newTransientState(rs.getDate("beginNGSRG"),"IP-RG",0));
+				run.state.historical.add(newTransientState(rs.getDate("endNGSRG"),"F-RG",1));				
 
 				TraceInformation ti = new TraceInformation(); 
 				ti.setTraceInformation(NGSRG_CODE);
@@ -481,7 +423,7 @@ public class LimsCNSDAO {
 				}
 
 				if(contextValidation.hasErrors()){
-					contextError.errors.putAll(contextValidation.errors);
+					contextError.getErrors().putAll(contextValidation.getErrors());
 					return null;
 				}else {
 					return run;
@@ -493,411 +435,354 @@ public class LimsCNSDAO {
 		return results;
 	}
 
-
-	protected TransientState getTransientState(java.sql.Date date,String state, int index) {
-		if(date!=null){
-			TransientState transientState=new TransientState();
-			transientState.date=date;
-			transientState.index=index;
-			transientState.code=state;
-			transientState.user=NGSRG_CODE;	
+	// -----------------------------------------------------------------------
+	// renamed
+	
+	/**
+	 * Create a new transient state.
+	 * @param date  date
+	 * @param state state
+	 * @param index index
+	 * @return      new transient state
+	 * @deprecated use {@link #newTransientState(Date, String, int)}
+	 */
+	@Deprecated
+	protected TransientState getTransientState_(Date date, String state, int index) {
+		return newTransientState(date, state, index);
+	}
+	
+	/**
+	 * Create a new transient state.
+	 * @param date  date
+	 * @param state state
+	 * @param index index
+	 * @return      new transient state
+	 */
+	protected TransientState newTransientState(Date date, String state, int index) {
+		if (date != null) {
+			TransientState transientState = new TransientState();
+			transientState.date  = date;
+			transientState.index = index;
+			transientState.code  = state;
+			transientState.user  = NGSRG_CODE;	
 			return transientState;
 		}
 		return null;
 	}
 
+	// -----------------------------------------------------------------------
 
-	public List<Lane> findLanesToCreateFromRun(final Run run,final ContextValidation contextError)throws SQLException{
-
-		List<Lane> results = this.jdbcTemplate.query("pl_LaneUnRunToNGL @runCode=?",new Object[]{run.code} 
-		,new RowMapper<Lane>() {
-//			@SuppressWarnings("rawtypes")
-			@Override
-			public Lane mapRow(ResultSet rs, int rowNum) throws SQLException {
-
-				Lane lane=getLane(run,rs.getInt("lanenum"));
-
-				if(lane==null){
-					logger.debug("Lane null");
-					lane=new Lane();
-					lane.number=rs.getInt("lanenum");
-				}
-				lane.valuation=new Valuation();
-				lane.valuation.valid=TBoolean.valueOf(rs.getString("validationValid"));
-				lane.valuation.user="lims";
-				lane.valuation.date=rs.getDate("validationDate");
-				//TODO 
-				contextError.addKeyToRootKeyName("lane["+lane.number+"].treatment[default]");
-				Treatment treatment=newTreatment(contextError,rs,Level.CODE.Lane,NGSRG_CODE,NGSRG_CODE,RUN_TYPE_CODE);
-				if(treatment==null){
-					return null;
-				}else{
-					lane.treatments.put(NGSRG_CODE,treatment);
-				}
-				contextError.removeKeyFromRootKeyName("lane["+lane.number+"].treatment[default]");
-				return lane;
-			}
-		});
-		return results;
-	}
-
-
-	protected Lane getLane(Run run, int int1) {
-		if(run.lanes!=null){
-			for(Lane lane:run.lanes){
-				if(lane.number==int1){
+	public List<Lane> findLanesToCreateFromRun(final Run run, final ContextValidation contextError) throws SQLException { 
+		return jdbcTemplate.query("pl_LaneUnRunToNGL @runCode=?", new Object[] { run.code },
+				(rs, rowNum) -> {
+					Lane lane = run.getLane(rs.getInt("lanenum"));
+					if (lane == null) {
+						logger.debug("Lane null");
+						lane = new Lane();
+						lane.number = rs.getInt("lanenum");
+					}
+					lane.valuation = new Valuation();
+					lane.valuation.valid = TBoolean.valueOf(rs.getString("validationValid"));
+					lane.valuation.user  = "lims";
+					lane.valuation.date  = rs.getDate("validationDate");
+					String key = "lane[" + lane.number + "].treatment[default]";
+					contextError.addKeyToRootKeyName(key);
+					Treatment treatment = newTreatment(contextError, rs, Level.CODE.Lane, NGSRG_CODE, NGSRG_CODE, RUN_TYPE_CODE);
+					if (treatment == null) {
+						return null;
+					} else {
+						lane.treatments.put(NGSRG_CODE, treatment);
+					}
+					contextError.removeKeyFromRootKeyName(key);
 					return lane;
-				}
-			}}
-		return null;
+				});
 	}
 
+//	/**
+//	 * Get the lane of a run with a given number.
+//	 * @param run        run to find lane in
+//	 * @param laneNumber lane number
+//	 * @return           lane if found, null otherwise
+//	 * @deprecated use {@link Run#getLane(Integer)}
+//	 */
+//	@Deprecated
+//	protected Lane getLane(Run run, int laneNumber) {
+//		if (run.lanes != null) {
+//			for (Lane lane : run.lanes) {
+//				if(lane.number==laneNumber){
+//					return lane;
+//				}
+//			}
+//		}
+//		return null;
+//	}
 
 	public Treatment newTreatment(ContextValidation contextError,ResultSet rs,Level.CODE level,String categoryCode,String code,String typeCode) throws SQLException{
-		Treatment treatment=new Treatment();
-		treatment.categoryCode=categoryCode;
-		treatment.code=code;
-		treatment.typeCode=typeCode;
+		Treatment treatment = new Treatment();
+		treatment.categoryCode = categoryCode;
+		treatment.code         = code;
+		treatment.typeCode     = typeCode;
 		Map<String,PropertyValue> m = new HashMap<>();
-
 		try {
-			TreatmentType treatmentType=TreatmentType.find.findByCode(treatment.typeCode);
-			if(treatmentType==null){
-				contextError.addErrors("treatmentType","error.codeNotExist",treatment.typeCode);
+			TreatmentType treatmentType = TreatmentType.find.get().findByCode(treatment.typeCode);
+			if (treatmentType == null) {
+				contextError.addError("treatmentType", "error.codeNotExist", treatment.typeCode);
 				return null;
-			}else {
+			} else {
 				MappingHelper.getPropertiesFromResultSet(rs, treatmentType.getPropertyDefinitionByLevel(level),m);
 			}
 		} catch (DAOException e) {
 			logger.error("",e);
 		}
-		treatment.results=new HashMap<>();
-		treatment.results.put("default",m);
+		treatment.results = new HashMap<>();
+		treatment.results.put("default", m);
 		return treatment;
 	}
 
-	public List<ReadSet> findReadSetToCreateFromRun(final Run run,
-			final ContextValidation contextError) throws SQLException{
-		List<ReadSet> results = this.jdbcTemplate.query("pl_ReadSetUnRunToNGL @runCode=?",new Object[]{run.code} 
-		,new RowMapper<ReadSet>() {
-//			@SuppressWarnings("rawtypes")
-			@Override
-			public ReadSet mapRow(ResultSet rs, int rowNum) throws SQLException {
-				ReadSet readSet=new ReadSet();
-				readSet.code=rs.getString("code");
-				readSet.archiveId=rs.getString("archiveId");
-				readSet.archiveDate=rs.getDate("archiveDate");
-				readSet.dispatch=rs.getBoolean("dispatch");
-				readSet.laneNumber=rs.getInt("laneNumber");
-				readSet.path=rs.getString("readSetPath");
-				readSet.projectCode=rs.getString("projectCode");
-				readSet.runCode=run.code;
-				readSet.runTypeCode=run.typeCode;
-				readSet.sampleCode=rs.getString("sampleCode");
-				readSet.state=new State();
-				readSet.state.code=DataMappingCNS.getStateReadSetFromLims(rs.getString("state"),TBoolean.valueOf(rs.getString("validationBioinformatic")));
-				readSet.state.date= new Date();
-				readSet.state.user="lims";
+	public List<ReadSet> findReadSetToCreateFromRun(final Run run, final ContextValidation contextError) throws SQLException {
+		return jdbcTemplate.query("pl_ReadSetUnRunToNGL @runCode=?", new Object[] { run.code },
+				(rs, rowNum) -> {
+					ReadSet readSet = new ReadSet();
+					readSet.code        = rs.getString("code");
+					readSet.archiveId   = rs.getString("archiveId");
+					readSet.archiveDate = rs.getDate("archiveDate");
+					readSet.dispatch    = rs.getBoolean("dispatch");
+					readSet.laneNumber  = rs.getInt("laneNumber");
+					readSet.path        = rs.getString("readSetPath");
+					readSet.projectCode = rs.getString("projectCode");
+					readSet.runCode     = run.code;
+					readSet.runTypeCode = run.typeCode;
+					readSet.sampleCode  = rs.getString("sampleCode");
+					readSet.state       = new State();
+					readSet.state.code  = DataMappingCNS.getStateReadSetFromLims(rs.getString("state"),TBoolean.valueOf(rs.getString("validationBioinformatic")));
+					readSet.state.date  = new Date();
+					readSet.state.user  = "lims";
 
-				readSet.state.historical=new HashSet<>();		
-				readSet.state.historical.add(getTransientState(rs.getDate("beginNGSRG"),"IP-RG",0));
-				readSet.state.historical.add(getTransientState(rs.getDate("endNGSRG"),"F-RG",1));
-				readSet.state.historical.add(getTransientState(rs.getDate("endNGSRG"),"IW-QC",2));
+					readSet.state.historical = new HashSet<>();		
+					readSet.state.historical.add(newTransientState(rs.getDate("beginNGSRG"), "IP-RG", 0));
+					readSet.state.historical.add(newTransientState(rs.getDate("endNGSRG"),   "F-RG",  1));
+					readSet.state.historical.add(newTransientState(rs.getDate("endNGSRG"),   "IW-QC", 2));
 
-				readSet.traceInformation=new TraceInformation();
-				readSet.traceInformation.setTraceInformation("lims");
-				readSet.typeCode=READSET_DEFAULT_CODE;
-				readSet.archiveDate=rs.getDate("archiveDate");
-				readSet.archiveId=rs.getString("archiveId");
-				readSet.runSequencingStartDate=rs.getDate("runSequencingStartDate");
-				//To valide
-				readSet.bioinformaticValuation=new Valuation();
-				readSet.bioinformaticValuation.valid=TBoolean.valueOf(rs.getString("validationBioinformatic"));
-				readSet.bioinformaticValuation.date=new Date();
-				readSet.bioinformaticValuation.user="lims";
-				readSet.productionValuation=new Valuation();
-				readSet.productionValuation.valid=TBoolean.valueOf(rs.getString("validationProduction"));
-				readSet.productionValuation.date=rs.getDate("validationProductionDate");
-				readSet.productionValuation.user="lims";
-				readSet.treatments.put(NGSRG_CODE,newTreatment(contextError,rs,Level.CODE.ReadSet,NGSRG_CODE,NGSRG_CODE,RUN_TYPE_CODE));
-				readSet.treatments.put(GLOBAL_CODE,newTreatment(contextError,rs,Level.CODE.ReadSet,GLOBAL_CODE,GLOBAL_CODE,GLOBAL_CODE));
-				return readSet;
-			}
-		});
-		return results;
+					readSet.traceInformation = new TraceInformation();
+					readSet.traceInformation.setTraceInformation("lims");
+					readSet.typeCode    = READSET_DEFAULT_CODE;
+					readSet.archiveDate = rs.getDate("archiveDate");
+					readSet.archiveId   = rs.getString("archiveId");
+					readSet.runSequencingStartDate=rs.getDate("runSequencingStartDate");
+					// To valide
+					readSet.bioinformaticValuation=new Valuation();
+					readSet.bioinformaticValuation.valid=TBoolean.valueOf(rs.getString("validationBioinformatic"));
+					readSet.bioinformaticValuation.date=new Date();
+					readSet.bioinformaticValuation.user="lims";
+					readSet.productionValuation=new Valuation();
+					readSet.productionValuation.valid=TBoolean.valueOf(rs.getString("validationProduction"));
+					readSet.productionValuation.date=rs.getDate("validationProductionDate");
+					readSet.productionValuation.user="lims";
+					readSet.treatments.put(NGSRG_CODE,newTreatment(contextError,rs,Level.CODE.ReadSet,NGSRG_CODE,NGSRG_CODE,RUN_TYPE_CODE));
+					readSet.treatments.put(GLOBAL_CODE,newTreatment(contextError,rs,Level.CODE.ReadSet,GLOBAL_CODE,GLOBAL_CODE,GLOBAL_CODE));
+					return readSet;
+				});
 	}
 
+//	public ReadSet findReadSetToUpdate(final ReadSet inReadSet, final ContextValidation contextError) throws SQLException {
+//		return jdbcTemplate.queryForObject("pl_ReadSetUnRunToNGL @readSetCode=?", new Object[] { inReadSet.code },
+//				(rs, rowNum) -> {
+//					ReadSet readSet = new ReadSet();
+//					readSet.code        = rs.getString("code");
+//					readSet.archiveId   = rs.getString("archiveId");
+//					readSet.archiveDate = rs.getDate("archiveDate");
+//					readSet.dispatch    = rs.getBoolean("dispatch");
+//					readSet.laneNumber  = rs.getInt("laneNumber");
+//					readSet.path        = rs.getString("readSetPath");
+//					readSet.projectCode = rs.getString("projectCode");
+//					readSet.runCode     = readSet.runCode;
+//					readSet.runTypeCode = readSet.runTypeCode;
+//					readSet.sampleCode  = rs.getString("sampleCode");
+//					readSet.state=new State();
+//					readSet.state.code=DataMappingCNS.getStateReadSetFromLims(rs.getString("state"),TBoolean.valueOf(rs.getString("validationBioinformatic")));
+//					readSet.state.date= new Date();
+//					readSet.state.user="lims";
+//
+//					readSet.state.historical=new HashSet<>();		
+//					readSet.state.historical.add(newTransientState(rs.getDate("beginNGSRG"),"IP-RG",0));
+//					readSet.state.historical.add(newTransientState(rs.getDate("endNGSRG"),"F-RG",1));
+//					readSet.state.historical.add(newTransientState(rs.getDate("endNGSRG"),"IW-QC",2));
+//
+//					readSet.traceInformation=new TraceInformation();
+//					readSet.traceInformation.setTraceInformation("lims");
+//					readSet.typeCode=READSET_DEFAULT_CODE;
+//					readSet.archiveDate=rs.getDate("archiveDate");
+//					readSet.archiveId=rs.getString("archiveId");
+//					readSet.runSequencingStartDate=rs.getDate("runSequencingStartDate");
+//					//To valide
+//					readSet.bioinformaticValuation=new Valuation();
+//					readSet.bioinformaticValuation.valid=TBoolean.valueOf(rs.getString("validationBioinformatic"));
+//					readSet.bioinformaticValuation.date=new Date();
+//					readSet.bioinformaticValuation.user="lims";
+//					readSet.productionValuation=new Valuation();
+//					readSet.productionValuation.valid=TBoolean.valueOf(rs.getString("validationProduction"));
+//					readSet.productionValuation.date=rs.getDate("validationProductionDate");
+//					readSet.productionValuation.user="lims";
+//					readSet.treatments.put(NGSRG_CODE,newTreatment(contextError,rs,Level.CODE.ReadSet,NGSRG_CODE,NGSRG_CODE,RUN_TYPE_CODE));
+//					readSet.treatments.put(GLOBAL_CODE,newTreatment(contextError,rs,Level.CODE.ReadSet,GLOBAL_CODE,GLOBAL_CODE,GLOBAL_CODE));
+//					return readSet;
+//				});
+//	}
 
-	public ReadSet findReadSetToUpdate(final ReadSet readSet,
-			final ContextValidation contextError) throws SQLException{
-		ReadSet results = this.jdbcTemplate.queryForObject("pl_ReadSetUnRunToNGL @readSetCode=?",new Object[]{readSet.code} 
-		,new RowMapper<ReadSet>() {
-//			@SuppressWarnings("rawtypes")
-			@Override
-			public ReadSet mapRow(ResultSet rs, int rowNum) throws SQLException {
-				ReadSet readSet=new ReadSet();
-				readSet.code=rs.getString("code");
-				readSet.archiveId=rs.getString("archiveId");
-				readSet.archiveDate=rs.getDate("archiveDate");
-				readSet.dispatch=rs.getBoolean("dispatch");
-				readSet.laneNumber=rs.getInt("laneNumber");
-				readSet.path=rs.getString("readSetPath");
-				readSet.projectCode=rs.getString("projectCode");
-				readSet.runCode=readSet.runCode;
-				readSet.runTypeCode=readSet.runTypeCode;
-				readSet.sampleCode=rs.getString("sampleCode");
-				readSet.state=new State();
-				readSet.state.code=DataMappingCNS.getStateReadSetFromLims(rs.getString("state"),TBoolean.valueOf(rs.getString("validationBioinformatic")));
-				readSet.state.date= new Date();
-				readSet.state.user="lims";
-
-				readSet.state.historical=new HashSet<>();		
-				readSet.state.historical.add(getTransientState(rs.getDate("beginNGSRG"),"IP-RG",0));
-				readSet.state.historical.add(getTransientState(rs.getDate("endNGSRG"),"F-RG",1));
-				readSet.state.historical.add(getTransientState(rs.getDate("endNGSRG"),"IW-QC",2));
-
-				readSet.traceInformation=new TraceInformation();
-				readSet.traceInformation.setTraceInformation("lims");
-				readSet.typeCode=READSET_DEFAULT_CODE;
-				readSet.archiveDate=rs.getDate("archiveDate");
-				readSet.archiveId=rs.getString("archiveId");
-				readSet.runSequencingStartDate=rs.getDate("runSequencingStartDate");
-				//To valide
-				readSet.bioinformaticValuation=new Valuation();
-				readSet.bioinformaticValuation.valid=TBoolean.valueOf(rs.getString("validationBioinformatic"));
-				readSet.bioinformaticValuation.date=new Date();
-				readSet.bioinformaticValuation.user="lims";
-				readSet.productionValuation=new Valuation();
-				readSet.productionValuation.valid=TBoolean.valueOf(rs.getString("validationProduction"));
-				readSet.productionValuation.date=rs.getDate("validationProductionDate");
-				readSet.productionValuation.user="lims";
-				readSet.treatments.put(NGSRG_CODE,newTreatment(contextError,rs,Level.CODE.ReadSet,NGSRG_CODE,NGSRG_CODE,RUN_TYPE_CODE));
-				readSet.treatments.put(GLOBAL_CODE,newTreatment(contextError,rs,Level.CODE.ReadSet,GLOBAL_CODE,GLOBAL_CODE,GLOBAL_CODE));
-				return readSet;
-			}
-		});
-		return results;
-	}
-
-	public void updateRunLims(List<Run> updateRuns,
-			ContextValidation contextError)throws SQLException {
+	public void updateRunLims(List<Run> updateRuns,	ContextValidation contextError)throws SQLException {
 		updateRunLims(updateRuns, true, contextError);
 	}
 
-	public void updateRunLims(List<Run> updateRuns, boolean inNGL,
-			ContextValidation contextError)throws SQLException {
-		String rootKeyName=null;
-
+	public void updateRunLims(List<Run> updateRuns, boolean inNGL, ContextValidation contextError) throws SQLException {
 		contextError.addKeyToRootKeyName("updateRunLims");
-
-		for(Run run:updateRuns){
-
-			rootKeyName="run["+run.code+"]";
+		for (Run run : updateRuns) {
+			String rootKeyName = "run[" + run.code + "]";
 			contextError.addKeyToRootKeyName(rootKeyName);
-
-			try{
-				String sql="pm_RunhdInNGL @runhnom=?, @InNGL=?";
-				logger.debug(sql+run.code);
-				int intInNGL = (inNGL) ? 1 : 0;
-				this.jdbcTemplate.update(sql, run.code,intInNGL);
-
-			} catch(DataAccessException e){
-				contextError.addErrors("",e.getMessage(), run.code);
+			try {
+				String sql = "pm_RunhdInNGL @runhnom=?, @InNGL=?";
+				logger.debug(sql + run.code);
+				int intInNGL = inNGL ? 1 : 0;
+				jdbcTemplate.update(sql, run.code,intInNGL);
+			} catch (DataAccessException e) {
+				contextError.addError("", e.getMessage(), run.code);
 			}
-
 			contextError.removeKeyFromRootKeyName(rootKeyName);
-
 		}
 		contextError.removeKeyFromRootKeyName("updateRunLims");
-
 	}
 
+	public List<File> findFileToCreateFromReadSet(final ReadSet readSet, final ContextValidation contextError) throws SQLException {
+		return jdbcTemplate.query("pl_FileUnReadSetToNGL @readSetCode=?", new Object[] { readSet.code },
+				(rs, rowNum) -> {
+					File file = new File();
+					file.extension = rs.getString("extension");
+					file.fullname  = rs.getString("fullname");
+					file.typeCode  = rs.getString("typeCode");
+					file.usable    = rs.getBoolean("usable");
 
-	public List<File> findFileToCreateFromReadSet(final ReadSet readSet,final ContextValidation contextError)throws SQLException {
-
-		List<File> results = this.jdbcTemplate.query("pl_FileUnReadSetToNGL @readSetCode=?",new Object[]{readSet.code} 
-		,new RowMapper<File>() {
-//			@SuppressWarnings("rawtypes")
-			@Override
-			public File mapRow(ResultSet rs, int rowNum) throws SQLException {
-				File file=new File();
-				file.extension=rs.getString("extension");
-				file.fullname=rs.getString("fullname");
-				file.typeCode=rs.getString("typeCode");
-				file.usable=rs.getBoolean("usable");
-
-				ReadSetType readSetType = null;
-
-				try {
-					readSetType = ReadSetType.find.findByCode(readSet.typeCode);
-				} catch (DAOException e) {
-					logger.error("",e);
-				}
-				file.properties=new HashMap<>();
-				MappingHelper.getPropertiesFromResultSet(rs,readSetType.getPropertyDefinitionByLevel(Level.CODE.File),file.properties);
-
-				return file;
-			}
-		});
-		return results;
-
-	}
-
-	public List<Index> findIndexIlluminaToCreate(final ContextValidation contextError)throws SQLException {
-
-		List<Index> results = this.jdbcTemplate.query("pl_TagUneEtmanip 13" 
-				,new RowMapper<Index>() {
-//					@SuppressWarnings("rawtypes")
-					@Override
-					public Index mapRow(ResultSet rs, int rowNum) throws SQLException {
-						Index index=new IlluminaIndex();
-						index.code=rs.getString("tagkeyseq");
-						index.name=rs.getString("tagkeyseq");
-						index.shortName=rs.getString("tagkeyseq");
-						index.categoryCode=rs.getString("categoryCode");
-						index.sequence=rs.getString("tagseq");
-						index.supplierName=new HashMap<>();
-						index.supplierName.put("illumina",rs.getString("tagnamefour"));
-						index.traceInformation=new TraceInformation();
-						InstanceHelpers.updateTraceInformation(index.traceInformation, contextError.getUser());
-						return index;
+					ReadSetType readSetType = null;
+					try {
+						readSetType = ReadSetType.find.get().findByCode(readSet.typeCode);
+					} catch (DAOException e) {
+						logger.error("",e);
+						throw e;
 					}
+					file.properties = new HashMap<>();
+					MappingHelper.getPropertiesFromResultSet(rs, readSetType.getPropertyDefinitionByLevel(Level.CODE.File), file.properties);
+					return file;
 				});
-		return results;
-
 	}
 
+	public List<Index> findIndexIlluminaToCreate(final ContextValidation contextError) throws SQLException {
+		return jdbcTemplate.query("pl_TagUneEtmanip 13", 
+				(rs, rowNum) -> {
+					Index index = new IlluminaIndex();
+					index.code         = rs.getString("tagkeyseq");
+					index.name         = rs.getString("tagkeyseq");
+					index.shortName    = rs.getString("tagkeyseq");
+					index.categoryCode = rs.getString("categoryCode");
+					index.sequence     = rs.getString("tagseq");
+					index.supplierName = new HashMap<>();
+					index.supplierName.put("illumina",rs.getString("tagnamefour"));
+					index.traceInformation = new TraceInformation();
+					index.traceInformation.forceModificationStamp(contextError.getUser());
+					return index;
+				});
+	}
 
 	public List<String> findSampleUpdated(List<String> sampleCodes) {
-		String sql="select code=rtrim(prsco)+'_'+rtrim(adnnom) from Materiel m, Useadn u where u.adnco=m.adnco and ";
-		if(sampleCodes==null){
-			sql=sql+"  uaddm > uadInNGL";
-		}else {
-			//Pour les tests unitaires
-			sql=sql+" rtrim(prsco)+'_'+rtrim(adnnom) in (";
-			for(String code:sampleCodes){
-				sql=sql+"'"+code+"',";
-			}
-			sql=sql+"'')";
+		String sql = "select code=rtrim(prsco)+'_'+rtrim(adnnom) from Materiel m, Useadn u where u.adnco=m.adnco and ";
+		if (sampleCodes == null) {
+			sql = sql + "  uaddm > uadInNGL";
+		} else {
+			// Pour les tests unitaires
+			sql += Iterables.map(sampleCodes, c -> "'" + c + "'")
+					        .surround(" rtrim(prsco)+'_'+rtrim(adnnom) in (", ",", ")")
+					        .asString();
 		}
-		//Search Sample to modify
-		List<String> results =  this.jdbcTemplate.query(sql 
-				,new RowMapper<String>() {
-
-			@Override
-			public String mapRow(ResultSet rs, int rowNum) throws SQLException {
-
-				return rs.getString("code");
-			}
-
-		}); 
-
-		return results;
+		// Search Sample to modify
+		return jdbcTemplate.query(sql, (rs, rowNum) -> rs.getString("code"));
 	}
 
-
-	public List<Process> findProcessToCreate(String sql, final Container container, String processTypeCode, final ContextValidation contextError) {
-		List<Process> results=null;
-
-		try {
-			final ProcessType processType = ProcessType.find.findByCode(processTypeCode);
-			if(processType!=null){
-				results = this.jdbcTemplate.query(sql ,new Object[]{container.code}
-			,new RowMapper<Process>() {
-//				@SuppressWarnings("rawtypes")
-				@Override
-				public Process mapRow(ResultSet rs, int rowNum) throws SQLException {
-					Process process=new Process();
-					process.typeCode=processType.code;
-					process.categoryCode=processType.category.code;
-					process.inputContainerCode=container.code;
-					process.projectCodes=new HashSet<>();
-					process.projectCodes.add(rs.getString("projectCode"));
-					process.sampleCodes=new HashSet<>();
-					process.sampleCodes.add(rs.getString("sampleCode"));
-					process.traceInformation=new TraceInformation();
-					process.traceInformation.createUser=contextError.getUser();
-					process.traceInformation.creationDate=new Date();
-					process.state=new State("N",contextError.getUser());
-					process.properties=new HashMap<>();
-					MappingHelper.getPropertiesFromResultSet(rs,processType.getPropertyDefinitionByLevel(Level.CODE.Process),process.properties);
-					process.code=CodeHelper.getInstance().generateProcessCode(process);
-					Content c=null;
-					for(Content content:container.contents){
-						if(content.projectCode.equals(process.projectCodes) && content.sampleCode.equals(process.sampleCodes)){
-							c=content;
-						}
-					}
-					if(c!=null){
-						process.sampleOnInputContainer=InstanceHelpers.getSampleOnInputContainer(c, container);
-					}else { contextError.addErrors("content",ValidationConstants.ERROR_CODE_NOTEXISTS_MSG,container); }
-					return process;
-				}
-			});
-			}else { contextError.addErrors("processType", ValidationConstants.ERROR_CODE_NOTEXISTS_MSG, processTypeCode); }
-			
-			
-		}	
-		catch (DAOException e) {
-			logger.error("",e);
-		}
-		return results;
-
-	}
+//	public List<Process> findProcessToCreate(String sql, final Container container, String processTypeCode, final ContextValidation contextError) {
+//		try {
+//			final ProcessType processType = ProcessType.find.get().findByCode(processTypeCode);
+//			if (processType != null)
+//				return jdbcTemplate.query(sql , new Object[] { container.code }, 
+//						(rs, rowNum) -> {
+//							Process process=new Process();
+//							process.typeCode=processType.code;
+//							process.categoryCode=processType.category.code;
+//							process.inputContainerCode=container.code;
+//							process.projectCodes=new HashSet<>();
+//							process.projectCodes.add(rs.getString("projectCode"));
+//							process.sampleCodes=new HashSet<>();
+//							process.sampleCodes.add(rs.getString("sampleCode"));
+//							process.traceInformation=new TraceInformation();
+//							process.traceInformation.createUser=contextError.getUser();
+//							process.traceInformation.creationDate=new Date();
+//							process.state=new State("N",contextError.getUser());
+//							process.properties=new HashMap<>();
+//							MappingHelper.getPropertiesFromResultSet(rs,processType.getPropertyDefinitionByLevel(Level.CODE.Process),process.properties);
+//							process.code=CodeHelper.getInstance().generateProcessCode(process);
+//							Content c=null;
+//							for (Content content:container.contents) {
+//								// Probably inverted test: process.projectCodes.contains(content.projectCode)
+//								//						if (content.projectCode.equals(process.projectCodes) && content.sampleCode.equals(process.sampleCodes)) {
+//								if (process.projectCodes.contains(content.projectCode) && process.sampleCodes.contains(content.sampleCode)) {
+//									c = content;
+//								}
+//							}
+//							if (c != null) {
+//								process.sampleOnInputContainer=InstanceHelpers.getSampleOnInputContainer(c, container);
+//							} else { 
+//								contextError.addError("content",ValidationConstants.ERROR_CODE_NOTEXISTS_MSG,container); 
+//							}
+//							return process;
+//						});
+//				contextError.addError("processType", ValidationConstants.ERROR_CODE_NOTEXISTS_MSG, processTypeCode); 
+//		} catch (DAOException e) {
+//			logger.error("",e);
+//		}
+//		return null;
+//	}
 	
-	public ReadSet findLSRunProjData(ReadSet readset){
-		
-		List<ReadSet> results = this.jdbcTemplate.query("pl_LSRunProjUnReadSetToNGL @readSetCode=?", new String[]{readset.code} 
-				,new RowMapper<ReadSet>() {
-//					@SuppressWarnings("rawtypes")
-					@Override
-					public ReadSet mapRow(ResultSet rs, int rowNum) throws SQLException {
-						ReadSet readset = new ReadSet();
-						readset.code = rs.getString("code");
-						//readset.location = rs.getString("location");
-						//readset.path = rs.getString("path");
-						if(null != rs.getString("strandOrientation")){
-							readset.properties.put("strandOrientation", new PropertySingleValue(rs.getString("strandOrientation")));
-						}
-						if(null != rs.getString("insertSizeGoal")){
-							readset.properties.put("insertSizeGoal", new PropertySingleValue(rs.getString("insertSizeGoal")));
-						}	
-						return readset;						
+	public ReadSet findLSRunProjData(ReadSet inReadset) {
+		List<ReadSet> results = jdbcTemplate.query("pl_LSRunProjUnReadSetToNGL @readSetCode=?", new String[] { inReadset.code },
+				(rs, rowNum) -> {
+					ReadSet readset = new ReadSet();
+					readset.code = rs.getString("code");
+					//readset.location = rs.getString("location");
+					//readset.path = rs.getString("path");
+					if (rs.getString("strandOrientation") != null) {
+						readset.properties.put("strandOrientation", new PropertySingleValue(rs.getString("strandOrientation")));
 					}
+					if (rs.getString("insertSizeGoal") != null) {
+						readset.properties.put("insertSizeGoal", new PropertySingleValue(rs.getString("insertSizeGoal")));
+					}	
+					return readset;						
 				});
-		
-		if(results.size() != 1 ){
-			//Logger.error("Probleme to load lsRunProjData with "+readset.code);
-			return null;
-		}else{
+		if (results.size() == 1) 
 			return results.get(0);
-		}
-		
+		return null;
 	}
 	
-	public List<ReadSet> findLSRunProjData(){
-		
-		List<ReadSet> results = this.jdbcTemplate.query("pl_LSRunProjUnReadSetToNGL" 
-				,new RowMapper<ReadSet>() {
-//					@SuppressWarnings("rawtypes")
-					@Override
-					public ReadSet mapRow(ResultSet rs, int rowNum) throws SQLException {
-						ReadSet readset = new ReadSet();
-						readset.code = rs.getString("code");
-						readset.location = rs.getString("location");
-						readset.path = rs.getString("path");
-						if(null != rs.getString("strandOrientation")){
-							readset.properties.put("strandOrientation", new PropertySingleValue(rs.getString("strandOrientation")));
-						}
-						if(null != rs.getString("insertSizeGoal")){
-							readset.properties.put("insertSizeGoal", new PropertySingleValue(rs.getString("insertSizeGoal")));
-						}	
-						return readset;						
+	public List<ReadSet> findLSRunProjData() {
+		return jdbcTemplate.query("pl_LSRunProjUnReadSetToNGL",
+				(rs, rowNum) -> {
+					ReadSet readset = new ReadSet();
+					readset.code     = rs.getString("code");
+					readset.location = rs.getString("location");
+					readset.path     = rs.getString("path");
+					if (rs.getString("strandOrientation") != null) {
+						readset.properties.put("strandOrientation", new PropertySingleValue(rs.getString("strandOrientation")));
 					}
+					if (rs.getString("insertSizeGoal") != null) {
+						readset.properties.put("insertSizeGoal", new PropertySingleValue(rs.getString("insertSizeGoal")));
+					}	
+					return readset;						
 				});
-		
-		return results;
-		
 	}
+	
 }
 

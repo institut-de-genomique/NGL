@@ -96,9 +96,11 @@ angular.module('home').controller('SearchCtrl', ['$scope', '$http','$httpParamSe
 					allData = allData.concat(result.data);
 				});
 				$scope.runCodes = allData.map(function(readSet){return readSet.runCode;}).filter((value, index, self) => self.indexOf(value) === index);
+				if($scope.runCodes.length>0){
+					$scope.runsNoValid.search({codes:$scope.runCodes});
+					$scope.runCodesUrl = $httpParamSerializer({codes:$scope.runCodes});
+				}
 				$scope.runsNoValid.config.spinner.start=false;
-				$scope.runsNoValid.search({codes:$scope.runCodes});
-				$scope.runCodesUrl = $httpParamSerializer({codes:$scope.runCodes});
 		 });
 		
 		/*$http.get(jsRoutes.controllers.readsets.api.ReadSets.list().url,{params:form}).then(function(result){

@@ -21,7 +21,7 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                        {
                        "header":"Code Container", //the title //used by default Messages
                        "headerTpl":"", //html template to custom render
-                       "property":"code", //the property to bind
+                       "property":"code", //the property to bind or function used to extract the value
                        "filter":"", angular filter to filter the value only used in read mode
                        "render" : function() //render the column used to add style around value
                        "editDirectives":""//Add directives to the edit element
@@ -126,11 +126,12 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                     showButton: true,
                     changeClass: true, //change class to success or error
                     mode: 'remote', //or local
-                    url: undefined,
-                    batch: false, //for batch mode one url with all data
-                    method: 'post',
-                    value: undefined, //used to transform the value send to the server
+                    url: undefined, //mode remote only url or function that takes the value
+                    batch: false, //for batch mode one url with all data. //mode remote only
+                    method: 'post', //mode remote only or funtion with value as parameter in batch mode an array
+                    value: undefined, //used to transform the value send to the server //mode remote only
                     callback: undefined, //used to have a callback after save all element. the datatable is pass to callback method and number of error
+                    beforeSave: undefined, //function that will be return a promise that will be executed before save (remote or local). useful to chain two url.
                     start: false, //if save started
                     number: 0, //number of element in progress
                     error: 0,
@@ -292,7 +293,7 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                     this.displayResult[index].line.errors = {};
                 }
                 this.displayResult[index].line.errors[key] = "";
-                for (var i = 0; i < data[key].length; i++) {
+                for (var i = 0; angular.isArray(data[key]) && i < data[key].length; i++) {
                     this.displayResult[index].line.errors[key] += data[key][i] + " ";
                 }
             },
@@ -414,6 +415,12 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                 this._getAllResult = function() {
                     return this.allResult;
                 };               
+            },
+            /**
+             * Return if data
+             */
+            isData: function() {
+                return (this.allResult !== null && this.allResult !== undefined && this.allResult.length > 0) ;
             },
             /**
              * Return all the data
@@ -540,8 +547,9 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
 	                            if ('sum' === column.groupMethod || 'average' === column.groupMethod) {
 	                                var result = groupData.reduce(function(value, element) {
 	                                    element.col = column; //add in experimental feature
-	                                	value += columnGetterWithoutFomat(element, context);
-										element.col = undefined;
+	                                	var num = columnGetterWithoutFomat(element, context);
+	                                	value += (num !==  undefined)?num:0;
+	                                	element.col = undefined;
 										return value;
 	                                }, 0);
 	
@@ -1350,74 +1358,102 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                          for (var i = 0; i < this.displayResult.length; i++) {
                              if (this.displayResult[i].line.edit || this.config.save.withoutEdit) {
                                  //remove datatable properties to avoid this data are retrieve in the json
+                            	 this.resetErrors(i);
                                  this.config.save.number++;
-                                 this.displayResult[i].line.trClass = undefined;
-                                 this.displayResult[i].line.selected = undefined;
-                                 this.resetErrors(i);
-                                 if (this.isRemoteMode(this.config.save.mode) && !this.config.save.batch) {
-                                     //add the url in table to used $q
-                                     data.push(this.getSaveRemoteRequest(this.displayResult[i].data, i));
-                                 } else if (this.isRemoteMode(this.config.save.mode) && this.config.save.batch) {
-                                     //add the data in table to send in once all the result
-                                     data.push({
-                                         index: i,
-                                         data: valueFunction(this.displayResult[i].data)
-                                     });
-                                 } else {
-                                     this.saveLocal(valueFunction(this.displayResult[i].data), i);
-                                 }
+                                 var dr = this.displayResult[i];
+                                 dr.line.trClass = undefined;
+                                 dr.line.selected = undefined;
+                                 data.push({
+                                     index: i,
+                                     data: dr.data
+                                 });
                              }
                          }
-                         if (!this.isRemoteMode(this.config.save.mode) || data.length === 0) {
-                             this.saveFinish();
+                         if(data.length === 0){
+                        	 return $q.when(this.saveFinish());
+                         }else if (!this.isRemoteMode(this.config.save.mode)) {
+                             return this.saveAllLocal(data);
                          } else if (this.isRemoteMode(this.config.save.mode) && !this.config.save.batch) {
-                             this.saveRemote(data);
+                        	 return this.saveAllRemote(data);
                          } else if (this.isRemoteMode(this.config.save.mode) && this.config.save.batch) {
-                             this.saveBatchRemote(data);
+                        	 return this.saveAllBatchRemote(data);
                          }
             		}                	
                 } else {
                     //console.log("save is not active !");
                 }
             },
-
-            saveBatchRemote: function(values) {
+            
+            getBeforeSavePromise : function(){
+            	var beforeSavePromise = function(context){
+					if(context.datatable.config.save.beforeSave === undefined || context.datatable.config.save.beforeSave === null){
+						return context.value;
+					}else{
+						return context.datatable.config.save.beforeSave(context.value);
+					}
+				 };
+				 return beforeSavePromise;
+            },
+            
+            saveAllLocal: function(values) {
+            	//do not transform the value            	
+           	 	var queries = values.map(function(value){
+           	 		//to backward compatibility with synchrone local save
+					if(this.config.save.beforeSave === undefined || this.context.datatable.config.save.beforeSave === null){
+						this.saveLocal(value.data, value.index);
+						this.saveFinish();
+						return $q.when();						
+					}else{
+						var context = {datatable:this, value:value.data, index:value.index};
+						return $q.when(context, this.getBeforeSavePromise()).then(function(resp){
+							context.datatable.saveLocal(context.value, context.index);
+							context.datatable.saveFinish();
+						},function(resp){
+							//error
+							context.datatable.saveOnError(context.value, context.index);
+							context.datatable.saveFinish();
+						});
+					}
+           	 		
+           	 		
+				},this)
+				
+                return $q.all(queries).then(function(results) {
+                	console.log("save global ok");
+                },function(results){
+                	console.log("save global error");
+                });
+           	 	
+            },
+            
+            saveAllBatchRemote: function(values) {
                 var nbElementByBatch = Math.ceil(values.length / 6); //6 because 6 request max in parrallel with firefox and chrome
                 var queries = [];
                 for (var i = 0; i < 6 && values.length > 0; i++) {
                     queries.push(this.getSaveRemoteRequest(values.splice(0, nbElementByBatch)));
                 }
-                $q.all(queries).then(function(results) {
-                    angular.forEach(results, function(result, key) {
-                        if (result.status !== 200) {
-                            console.log("Error for batch save");
-                        } else {
-                            angular.forEach(result.data, function(value, key) {
-                                this.datatable.saveRemoteOneElement(value.status, value.data, value.index);
-                            }, result.config);
-                        }
-
-                    });
+                return $q.all(queries).then(function(results) {
+                	console.log("save global ok");
+                },function(results){
+                	console.log("save global error");
                 });
             },
 
-            saveRemote: function(queries) {
-                $q.all(queries).then(function(results) {
-                    angular.forEach(results, function(value, key) {
-                        value.config.datatable.saveRemoteOneElement(value.status, value.data, value.config.index);
-                    });
-                });
+            saveAllRemote: function(values) {
+            	var queries = values.map(function(value){
+            		return this.getSaveRemoteRequest(value.data, value.index)
+            	},this);
+            	
+            	return $q.all(queries).then(function(results) {
+					console.log("save global ok");
+				},function(results){
+					console.log("save global error");
+				});
             },
 
             saveRemoteOneElement: function(status, value, index) {
                 if (status !== 200) {
-                    if (this.config.save.changeClass) {
-                        this.displayResult[index].line.trClass = "danger";
-                    }
-                    this.displayResult[index].line.edit = true;
-                    this.addErrors(index, value);
-                    this.config.save.error++;
-                    this.config.save.number--;
+                    this.saveOnError(value, index);
                     this.saveFinish();
                 } else {
                     this.resetErrors(index);
@@ -1425,9 +1461,12 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                     this.saveFinish();
                 }
             },
-
+            /**
+             * value = one value or array in batch mode
+             */
             getSaveRemoteRequest: function(value, i) {
                 var urlFunction = this.getUrlFunction(this.config.save.url);
+                if(urlFunction === null || urlFunction === undefined)  throw 'no url define for save !';
                 var method = this.config.save.method;
                 if (angular.isFunction(method)) {
                     method = method(value);
@@ -1438,27 +1477,65 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                 if (angular.isObject(this.config.save.httpConfig)) {
                     angular.merge(httpConfig, this.config.save.httpConfig);
                 }
-                if (urlFunction) {
-                    if (this.config.save.batch) {
-                        return $http[method](urlFunction(value), value, httpConfig);
-                    } else {
-                        var valueFunction = this.getValueFunction(this.config.save.value);
-                        httpConfig.index = i;
-                        return $http[method](urlFunction(value), valueFunction(value), httpConfig).
-                        then(function(resp) {
-                            resp.config.datatable.saveRemoteOneElement(resp.status, resp.data, resp.config.index);
-                            return resp;
-                        }, function(resp) {
-                            resp.config.datatable.saveRemoteOneElement(resp.status, resp.data, resp.config.index);
-                            return resp;
-                        });
-
-                    }
-                } else {
-                    throw 'no url define for save !';
-                }
+                
+				var valueFunction = this.getValueFunction(this.config.save.value);
+				if (this.config.save.batch) {
+					var context = {datatable:this, value:value};
+					return $q.when(context, this.getBeforeSavePromise())
+						.then(function(){
+							$http[method](urlFunction(value), value.map(function(v){return {index:v.index,data:valueFunction(v.data)};}), httpConfig).
+								then(function(resp) {
+						        	angular.forEach(resp.data, function(value, key) {
+						                this.datatable.saveRemoteOneElement(value.status, value.data, value.index);
+						            },resp.config);
+						        	return resp;
+						        }, function(resp) {
+						        	//resp.data must contain an array of map of errors
+						        	angular.forEach(resp.data, function(value, key) {
+						                this.datatable.saveRemoteOneElement(resp.status, value.data, value.index);
+						            },resp.config);
+						        	return resp;
+						        });
+						},function(resp){
+							angular.forEach(context.value, function(v, key) {
+								//can be improve because we don't have any error message
+								console.log("error on beforeSave");
+					    		this.saveRemoteOneElement("500", v.data, v.index);
+				            },context.datatable);
+				    	});
+				} else {
+				    httpConfig.index = i;
+				    var context = {datatable:this, value:value, index:i};
+				    return $q.when(context, this.getBeforeSavePromise())
+				    	.then(function(){
+					    	return $http[method](urlFunction(value), valueFunction(value), httpConfig).
+					    	 	then(function(resp) {
+						            resp.config.datatable.saveRemoteOneElement(resp.status, resp.data, resp.config.index);
+						            return resp;
+						        }, function(resp) {
+						            //resp.data must contain a map of errors
+						            resp.config.datatable.saveRemoteOneElement(resp.status, resp.data, resp.config.index);
+		                            return resp;
+						        });
+				    	},function(){
+				    		//can be improve because we don't have any error message
+				    		console.log("error on beforeSave");
+				    		context.datatable.saveRemoteOneElement("500", context.value, context.index);
+				    	});
+				       
+				
+				}    
+				
             },
-
+            saveOnError: function(value, index){
+            	 if (this.config.save.changeClass) {
+                     this.displayResult[index].line.trClass = "danger";
+                 }
+                 this.displayResult[index].line.edit = true;
+                 this.addErrors(index, value);
+                 this.config.save.error++;
+                 this.config.save.number--;
+            },
             /**
              * Call after save to update the records property
              */
@@ -1727,7 +1804,10 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                             }
                         }
                         if (angular.isFunction(this.config.select.callback)) {
+							console.warning('select.callback is deprecated. Use mouseevents.clickCallback instead.');
                         	this.config.select.callback(this.displayResult[i].line, this.displayResult[i].data);
+                        } else if (angular.isFunction(this.config.mouseevents.clickCallback)) {
+	  		                this.config.mouseevents.clickCallback(this.displayResult[i].line, this.displayResult[i].data);
                         }
                     }
                 } else {
@@ -1785,6 +1865,7 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                     /*cancel only edit and hide mode */
                     this.config.edit = angular.copy(this.configMaster.edit);
                     this.config.edit.byDefault = false;
+                    this.config.save = angular.copy(this.configMaster.save);
                     this.config.hide = angular.copy(this.configMaster.hide);
                     this.config.remove = angular.copy(this.configMaster.remove);
                     this.config.select = angular.copy(this.configMaster.select);
@@ -2272,7 +2353,6 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                     }
                 }
             },
-            
             getFinalValue : function(column, result){
             	var filter = this.getFilter(column);
             	var formatter = this.getFormatter(column);
@@ -2318,14 +2398,19 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
 				    colValue = colValue.replace(/\u00a0/g, "");
 				}else if(column.type === "number" && angular.isArray(colValue)){
 					colValue = colValue.map(function(colValue){return colValue.replace(/\u00a0/g, "");});
-				}else if(column.type === "boolean" && colValue === undefined){
-					colValue = this.messages.Messages('datatable.export.no');
-				} else if (column.type === "boolean") {
-				    if (colValue) {
-				        colValue = this.messages.Messages('datatable.export.yes');
-				    } else {
-				        colValue = this.messages.Messages('datatable.export.no');
-				    }
+				}else if(column.type === "boolean" && (colValue === undefined || (angular.isArray(colValue) && colValue.length === 0))){
+					colValue = this.messages.Messages('datatable.export.no');					
+				} else if (column.type === "boolean" && colValue !== undefined) {
+					if(!angular.isArray(colValue)){
+						colValue = [colValue];
+					}
+					colValue = colValue.map(function(colValue){
+						if (colValue === true) {
+							return this.messages.Messages('datatable.export.yes');
+						} else {
+							return this.messages.Messages('datatable.export.no');
+						}},this);					
+					colValue = '"'+colValue.join()+'"';
 				}else if((column.type === "string" || column.type === "text"  || column.type === "textarea") && colValue !== undefined){
 					if(!angular.isArray(colValue)){
 						colValue = [colValue];
@@ -2536,10 +2621,9 @@ directive('udtAutoSelect',['$parse', function($parse) {
 				if(valOption != undefined){
 					var match = valOption.match(OPTIONS_REGEXP);
 					var getModelValue = $parse(match[1].replace(match[4]+'.',''));
-					var model = $parse(match[7]);
-					scope.$watch(model, function(value){
+					scope.$watch(match[7], function(value){
 						if(value){
-			                if(value.length === 1 && ngModel.$isEmpty(ngModel.$modelValue)){
+							if(value.length === 1  && (ngModel.$modelValue === undefined || ngModel.$modelValue === '' || ngModel.$modelValue === null)){
 								
 			                	var value = (multiple)?[getModelValue(value[0])]:getModelValue(value[0]);
 			                	
@@ -2924,6 +3008,486 @@ directive('udtBtselect',  ['$parse', '$document', '$window', '$filter', function
 	      		  
   		    };
     	}]);;angular.module('ultimateDataTableServices').
+directive("udtCell", function(){
+    		return {
+    			restrict: 'A',
+  		    	replace:true,
+  		    	templateUrl:'udt-cell.html',
+	    		link: function(scope, element, attr) {
+  		    	}
+    		};
+}).directive("udtEditableCell", function(){
+    		return {
+    			restrict: 'A',
+  		    	replace:true,
+  		    	templateUrl:'udt-editableCell.html',
+	    		link: function(scope, element, attr) {	    			
+  		    	}
+    		};
+}).directive("udtCellHeader", function(){
+    		return {
+    			restrict: 'A',
+  		    	replace:true,
+  		    	templateUrl:'udt-cellHeader.html',
+  		    	link: function(scope, element, attr) {
+  	  		    }
+    		};
+})
+.directive("udtCellFilter", function(){
+    		return {
+    			restrict: 'A',
+  		    	replace:true,
+  		    	templateUrl:'udt-cellFilter.html',
+  		    	link: function(scope, element, attr) {
+  	  		    }
+    		};
+})
+.directive("udtCellEdit", function(){
+    		return {
+    			restrict: 'A',
+  		    	replace:true,
+  		    	templateUrl:'udt-cellEdit.html',
+  		    	link: function(scope, element, attr) {	    		
+  		    	}
+
+    		};
+}).directive("udtCellRead", ["$parse", function($parse){
+    		return {
+    			restrict: 'A',
+  		    	replace:true,
+  		    	templateUrl:'udt-cellRead.html' ,
+  		    	link: function(scope, element, attr) {
+			    	var getDisplayValue = function(column, value, currentScope){
+		    			if(column.watch === true && !value.line.group && (column.url === undefined || column.url === null)){
+		    				var filter  = currentScope.udtTable.getFilter(column);
+			    			var formatter = currentScope.udtTable.getFormatter(column);
+		    				
+		    				scope.$watch("value.data."+column.property+filter+formatter, function(newValue, oldValue) {
+                                    if ( newValue !== oldValue ) {
+                                    	scope.cellValue = newValue;
+                                     }
+                            	});                           
+		    			}else if(column.url != undefined || column.url != null){
+		    				var url = $parse(column.url)(value.data);
+		    				var watchValue = "udtTable.urlCache['"+url+"']."+column.property+filter+formatter;
+		    				scope.$watch("udtTable.urlCache['"+url+"']", function(newValue, oldValue) {
+                                if ( newValue !== oldValue ) {
+                                	scope.cellValue = currentScope.udtTable.getFinalValue(column, value);
+                                 }
+                        	});                           
+		    			}
+		    			return currentScope.udtTable.getFinalValue(column, value);			    		
+	    			};
+	    			
+	    			var getDisplayFunction = function(col){
+	    				if(angular.isFunction(col.property)){
+    			    		return col.property(scope.value.data);
+    			    	}else{
+    			    		return getDisplayValue(col, scope.value, scope);
+    			    	}
+			    	};
+
+	    			
+	    			scope.cellValue = getDisplayFunction(scope.col);
+	    			
+  		    	}
+    		};
+}]);;angular.module('ultimateDataTableServices').
+directive('udtChange', function() {
+	return {
+	  require: 'ngModel',
+		link: function(scope, element, attr, ngModelController) {
+			scope.$watch(attr.ngModel, function(newValue, oldValue){
+				if(newValue !== oldValue){
+					scope.$evalAsync(attr.udtChange);						
+				}
+			});									
+	  }
+	};	    	
+});;angular.module('ultimateDataTableServices').
+directive('udtCompile', ['$compile', function($compile) {
+			// directive factory creates a link function
+			return {
+				restrict: 'A',
+  		    	link: function(scope, element, attrs) {
+  		    		var value = scope.$eval(attrs.udtCompile);
+  		    		element.html(value);
+  		    		$compile(element.contents())(scope);
+  				}
+			};
+						
+		}]);;angular.module('ultimateDataTableServices').
+//This directive convert the ngModel value to a view value and then the view value to the ngModel unit value
+//The value passed to the directive must be an object with displayMeasureValue and saveMeasureValue
+directive('udtConvertvalue',['udtConvertValueServices','$filter', '$parse', function(udtConvertValueServices, $filter, $parse) {
+	return {
+				priority:1100,
+		 		require: 'ngModel',
+                link: function(scope, element, attrs, ngModelController) {
+                	//init service
+                	var convertValues = udtConvertValueServices();
+                	var property = undefined;
+                	
+                	if(attrs.udtConvertvalue){
+                		property = $parse(attrs.udtConvertvalue)(scope);    					
+    				}
+                	
+                	ngModelController.$formatters.push(function(value) {
+                		var convertedValue = convertValues.convertValue(value, property.saveMeasureValue, property.displayMeasureValue);
+        			    return convertedValue;
+        			}); 
+                	
+                	//view to model
+                	ngModelController.$parsers.push(function(value) {
+                    	value = convertValues.parse(value);
+                    	if(property != undefined){
+	                    	value = convertValues.convertValue(value, property.displayMeasureValue, property.saveMeasureValue);
+                    	}
+                    	return value;
+                    });
+                }
+            };
+}]);;angular.module('ultimateDataTableServices').
+ //Convert the date in format(view) to a timestamp date(model)
+directive('udtDateTimestamp', ['$filter', function($filter) {
+    return {
+        require: 'ngModel',
+        link: function(scope, element, attrs, ngModelController) {
+			
+			ngModelController.$formatters.push(function(data) {
+				var convertedData = data;
+				convertedData = $filter('date')(convertedData, Messages("date.format"));
+			    return convertedData;
+			}); 
+	    
+		    ngModelController.$parsers.push(function(data) {
+		    	var convertedData = data;
+	    	    if(moment && convertedData !== ""){
+	    			   convertedData = moment(data, Messages("date.format").toUpperCase()).valueOf();
+	    		   }else{
+	    			   convertedData = null;
+	    			   console.log("mission moment library to convert string to date");
+	    		   }
+		    	   
+		    	  return convertedData;
+		    }); 
+			
+        }
+    }
+}]);;angular.module('ultimateDataTableServices').
+//Write in an input or select in a list element the value passed to the directive when the list or the input ngModel is undefined or empty
+//EXAMPLE: <input type="text" default-value="test" ng-model="x">
+directive('udtDefaultValue',['$parse', function($parse) {
+	    		return {
+	    			priority:1200,					 
+	    			require: 'ngModel',
+	    			link: function(scope, element, attrs, ngModelController) {
+	    				
+	    				
+	    				var _col = $parse(attrs.udtDefaultValue)(scope);
+	    				
+	    				var currentValue = $parse(attrs.ngModel)(scope);
+	    				//inspire by ngModel.NgModelController.$isEmpty.
+	    				//not used directly this function because not work in case of inputCheckBox 
+	    				//see ngModel.NgModelController.$isEmpty documentation
+	    				var isEmpty = function(value) {
+	    				   return (angular.isUndefined(value) || value === '' || value === null);
+	    				};
+	    				
+	    				var setDefaultValue = function(){
+	    					if(_col != null && isEmpty(currentValue)){
+								if(_col.type === "boolean"){
+									if(_col.defaultValues === "true" || _col.defaultValues === true){
+										ngModelController.$setViewValue(true);
+										ngModelController.$render();
+									}else if(_col.defaultValues === "false" || _col.defaultValues === false){
+										ngModelController.$setViewValue(true); // hack to insert false value 
+										ngModelController.$setViewValue(false);
+										ngModelController.$render();
+									}											
+								}else if(!angular.isFunction(_col.defaultValues)){
+									ngModelController.$setViewValue(_col.defaultValues);
+									ngModelController.$render();
+								}else{
+									var defaultValue = _col.defaultValues(scope.value.data, _col);
+									ngModelController.$setViewValue(defaultValue);
+									ngModelController.$render();
+								}
+			                	
+							}
+	    				}
+	    				
+	    				if(_col){
+	    					setDefaultValue();	    					
+	    					if(angular.isFunction(_col.defaultValues)){ //only watch when function to limit watching
+    							scope.$watch(attrs.udtDefaultValue+".defaultValues(value.data,col)", function(newValue, oldValue){
+    								if(newValue !== oldValue){
+    									setDefaultValue();
+    								}
+	    						});
+    						}    						
+	    				}
+	    			}
+	    		};	    	
+	    	}]);;angular.module('ultimateDataTableServices').
+directive('udtForm', function(){
+    		return {
+    			restrict: 'A',
+  		    	replace:true,
+  		    	transclude:true,
+  		    	templateUrl:'udt-form.html',
+  		    	link: function(scope, element, attr) {
+  		    	}
+    		};
+    	});;angular.module('ultimateDataTableServices').directive('udtHighlight', function() {
+	var component = function(scope, element, attrs) {
+		
+		if (!attrs.highlightClass) {
+			attrs.highlightClass = 'udt-highlight';
+		}
+		
+		if (!attrs.active) {
+			scope.active = true;
+		}
+		
+		var replacer = function(match, item) {
+			return '<span class="'+attrs.highlightClass+'">'+match+'</span>';
+		}
+		
+		var tokenize = function(keywords) {
+			keywords = keywords.replace(new RegExp(',$','g'), '').split(',');
+			var i;
+			var l = keywords.length;
+			for (i=0;i<l;i++) {
+				keywords[i] = keywords[i].replace(new RegExp('^ | $','g'), '');
+			}
+			return keywords;
+		}
+		
+		scope.$watch('keywords', function(newValue, oldValue) {
+			if (!newValue || newValue === '' || !scope.active) {
+				if(scope.udtHighlight !== undefined && scope.udtHighlight !== null)
+					element.html(scope.udtHighlight.replace(/\n/g, '<br />').toString());
+				return false;
+			}
+			
+			
+			var tokenized = tokenize(newValue);
+			var regex = new RegExp(tokenized.join('|'), 'gmi');
+			
+			// Find the words
+			var html = scope.udtHighlight.replace(/\n/g, '<br />').toString().replace(regex, replacer);
+			
+			element.html(html);
+		}, true);
+	}
+	return {
+		link: 			component,
+		replace:		false,
+		scope:			{
+			active:		'=',
+			udtHighlight:	'=',
+			keywords:	'='
+		}
+	};
+});;angular.module('ultimateDataTableServices').
+directive("udtHtmlFilter", function($filter, udtI18n) {
+				return {
+					  priority:1000,
+					  require: 'ngModel',
+					  link: function(scope, element, attrs, ngModelController) {
+						  	var messagesService = udtI18n(navigator.languages || navigator.language || navigator.userLanguage);
+						  
+							ngModelController.$formatters.push(function(data) {
+								var convertedData = data;
+								  if(attrs.udtHtmlFilter === "datetime"){
+									  convertedData = $filter('date')(convertedData, messagesService.Messages("datetime.format"));
+							   }else if(attrs.udtHtmlFilter === "date"){
+								   convertedData = $filter('date')(convertedData, messagesService.Messages("date.format"));
+							   }else if(attrs.udtHtmlFilter === "number"){
+								   convertedData = $filter('number')(convertedData);
+								   }					    	
+								  return convertedData;
+							}); 
+					    
+					    ngModelController.$parsers.push(function(data) {
+					    	var convertedData = data;
+					    	   if(attrs.udtHtmlFilter === "number" && null !== convertedData && undefined !== convertedData 
+					    			   && angular.isString(convertedData)){
+					    		   convertedData = convertedData.replace(",",".").replace(/[\u00a0|\s]/g,"");
+					    		   if(!isNaN(convertedData) && convertedData !== ""){						    			   
+					    			   convertedData = convertedData*1;
+					    		   }else if( isNaN(convertedData) || convertedData === ""){
+					    			   convertedData = null;
+					    		   }
+					    	   }else if(attrs.udtHtmlFilter === "date" && null !== convertedData && undefined !== convertedData 
+					    			   && angular.isString(convertedData)){
+					    		   if(moment && convertedData !== ""){
+					    			   convertedData = moment(data, messagesService.Messages("date.format").toUpperCase()).valueOf();
+					    		   }else{
+					    			   convertedData = null;
+					    			   console.log("mission moment library to convert string to date");
+					    		   }
+					    	   }
+					    	   //TODO GA date and datetime quiz about timestamps
+					    	  return convertedData;
+					    }); 
+					  }
+					};
+			});;angular.module('ultimateDataTableServices').
+directive('udtMessages', function(){
+    		return {
+    			restrict: 'A',
+  		    	replace:true,
+  		    	templateUrl:'udt-messages.html',
+  		    	link: function(scope, element, attr) {
+  		    	}
+    		};
+});;angular.module('ultimateDataTableServices').
+directive('udtTable', function(){
+    		return {
+    			restrict: 'A',
+  		    	replace:true,
+  		    	templateUrl:'udt-table.html',
+  		    	link: function(scope, element, attr) {
+  		    		
+  		    		if(scope.udtTable && scope["datatableForm"]){
+  		    			scope.udtTable.formController = scope["datatableForm"];
+  		    		}
+					
+  		    		scope.$watch("udtTable", function(newValue, oldValue) {
+  		    			if(newValue && newValue !== oldValue && scope["datatableForm"]){
+  		    				scope.udtTable.formController = scope["datatableForm"];
+  		    			}
+		            });
+					
+  		    		var udtTableHelpers = {
+  		    				//todo in udtCell
+  		    				setImage : function(imageData, imageName, imageFullSizeWidth, imageFullSizeHeight) {
+  		  		    			scope.udtModalImage = {};
+  		  		    			scope.udtModalImage.modalImage = imageData;
+  		  		    			scope.udtModalImage.modalTitle = imageName;
+
+  		  		    			var margin = 25;		
+  		  		    			var zoom = Math.min((document.body.clientWidth - margin) / imageFullSizeWidth, 1);
+
+  		  		    			scope.udtModalImage.modalWidth = imageFullSizeWidth * zoom;
+  		  		    			scope.udtModalImage.modalHeight = imageFullSizeHeight * zoom; // in order to
+  		  		    			scope.udtModalImage.modalLeft = (document.body.clientWidth - scope.udtModalImage.modalWidth)/2;
+  		  		    			scope.udtModalImage.modalTop = (window.innerHeight - scope.udtModalImage.modalHeight)/2;
+  		  		    			scope.udtModalImage.modalTop = scope.udtModalImage.modalTop - 50; // height of header and footer
+  		  		    		},
+  		  		    		getTrClass : function(data, line, currentScope){
+  		  		    			var udtTable = scope.udtTable;
+  			    				if(line.trClass){
+  			    					return line.trClass; 
+  			    				} else if(angular.isFunction(udtTable.config.lines.trClass)){
+  			    					return udtTable.config.lines.trClass(data, line);
+  			    				} else if(angular.isString(udtTable.config.lines.trClass)){
+  			    					return currentScope.$eval(udtTable.config.lines.trClass) || udtTable.config.lines.trClass;
+  			    				} else if(line.group && !udtTable.config.group.showOnlyGroups){
+  			    					return "active";
+  			    				} else{
+  			    					return '';
+  			    				}		    				
+  			    			},
+  			    			getTdClass : function(data, col, currentScope){
+  			    				if(angular.isFunction(col.tdClass)){
+  			    					return col.tdClass(data);
+  			    				} else if(angular.isString(col.tdClass)){
+  			    					return currentScope.$eval(col.tdClass) ||  col.tdClass;
+  			    				}else{
+  			    					return '';
+  			    				}
+  			    			},
+  			    			getThClass : function(col, currentScope){
+  			    				var clazz = '';
+  			    				if(col && angular.isFunction(col.thClass)){
+  			    					clazz = col.thClass(col);
+  			    				} else if(col && angular.isString(col.thClass)){
+  			    					//we try to evaluation the string against the scope
+  			    					clazz =  currentScope.$eval(col.thClass) || col.thClass;
+  			    				}
+  			    				if((col && col.required != undefined && col.required != null)
+  			    						&& ((angular.isFunction(col.required) && col.required())
+  			    								|| col.required === true
+  			    								|| (angular.isString(col.required) && scope.$eval(col.required)))){
+  			    					clazz = clazz +' required';
+  			    				}
+  			    				return clazz;
+  			    			},
+  			    			select : function(data, line){
+  								var udtTable = scope.udtTable;
+  		                        if(line){
+	  								if(udtTable.config.select.active){
+	  				    					//separation of line type group and normal to simplify backward compatibility and avoid bugs
+	  				    					//selected is used with edit, remove, save and show button
+	  				    					if(!line.group){
+	  					    					if(!line.selected){
+	  					    						line.selected=true;
+	  					    						line.trClass="info";
+	  					    					} else{
+	  												line.selected=false;
+	  					    						line.trClass=undefined;
+	  											}
+	  				    					}else if(line.group && udtTable.config.group.enableLineSelection){
+	  				    						if(!line.groupSelected){
+	  					    						line.groupSelected=true;
+	  					    						line.trClass="info";
+	  					    					} else{
+	  												line.groupSelected=false;
+	  					    						line.trClass=undefined;
+	  											}
+	  				    					}
+	  				    				}
+	  		                            if (udtTable.config.select.active && angular.isFunction(udtTable.config.select.callback)) {
+	  		                                console.warning('select.callback is deprecated. Use mouseevents.clickCallback instead.');
+	  				    						udtTable.config.select.callback(line, data);
+	  		                            } else if (udtTable.config.mouseevents.active && angular.isFunction(udtTable.config.mouseevents.clickCallback)) {
+	  		                                udtTable.config.mouseevents.clickCallback(line, data);
+	  				                    }
+  				    				}
+  			    			},
+  			    			mouseover : function(data, line){
+  		                        var udtTable = scope.udtTable;
+  		                        if (udtTable.config.mouseevents.active) {
+  		                            var cb = udtTable.config.mouseevents.overCallback;
+  		                            if (angular.isFunction(cb)) {
+  		                                cb(line, data);
+  		                            }
+  		                        }
+  		                    },
+  		                    mouseleave : function(data, line){
+  		                        var udtTable = scope.udtTable;
+  		                        if (udtTable.config.mouseevents.active) {
+  		                            var cb = udtTable.config.mouseevents.leaveCallback;
+  		                            if (angular.isFunction(cb)) {
+  		                                cb(line, data);
+  		                            }
+  								}
+  			    			},
+  			    			getRowSpanValue : function(i,j){
+  								var udtTable = scope.udtTable;
+  								if(udtTable.config.mergeCells.active && udtTable.config.mergeCells.rowspans !== undefined){
+  									return udtTable.config.mergeCells.rowspans[i][j];
+  								}else{
+  									return 1;
+  								}
+  							},
+  							isShowCell : function(col, i, j){
+  								var udtTable = scope.udtTable;
+  								var value = !udtTable.isHide(col.id);
+  								if(udtTable.config.mergeCells.active && value && udtTable.config.mergeCells.rowspans !== undefined){
+  									value = (udtTable.config.mergeCells.rowspans[i][j] !== 0)
+  								}						
+  								return value;
+  							}
+  		    		}
+  		    		
+					scope.udtTableHelpers = udtTableHelpers;
+  		    	}
+    		};
+});;angular.module('ultimateDataTableServices').
 directive("udtTbody", function(){
 	return {
 		restrict: 'A',    	
@@ -3119,580 +3683,7 @@ directive("udtTbody", function(){
     	}
 
 	};
-})
-.directive("udtCell", function(){
-    		return {
-    			restrict: 'A',
-  		    	replace:true,
-  		    	templateUrl:'udt-cell.html',
-	    		link: function(scope, element, attr) {
-	    			
-  		    	}
-    		};
-    	}).directive("udtEditableCell", function(){
-    		return {
-    			restrict: 'A',
-  		    	replace:true,
-  		    	templateUrl:'udt-editableCell.html',
-	    		link: function(scope, element, attr) {	    			
-  		    	}
-    		};
-    	}).directive("udtCellHeader", function(){
-    		return {
-    			restrict: 'A',
-  		    	replace:true,
-  		    	templateUrl:'udt-cellHeader.html',
-  		    	link: function(scope, element, attr) {
-  	  		    }
-    		};
-    	})
-		.directive("udtCellFilter", function(){
-    		return {
-    			restrict: 'A',
-  		    	replace:true,
-  		    	templateUrl:'udt-cellFilter.html',
-  		    	link: function(scope, element, attr) {
-  	  		    }
-    		};
-    	})
-		.directive("udtCellEdit", function(){
-    		return {
-    			restrict: 'A',
-  		    	replace:true,
-  		    	templateUrl:'udt-cellEdit.html',
-  		    	link: function(scope, element, attr) {	    		
-  		    	}
-
-    		};
-    	}).directive("udtCellRead", ["$parse", function($parse){
-    		return {
-    			restrict: 'A',
-  		    	replace:true,
-  		    	templateUrl:'udt-cellRead.html' ,
-  		    	link: function(scope, element, attr) {
-  		    		
-			    	var getDisplayValue = function(column, value, currentScope){
-			    		
-		    			if(column.watch === true && !value.line.group && (column.url === undefined || column.url === null)){
-		    				var filter  = currentScope.udtTable.getFilter(column);
-			    			var formatter = currentScope.udtTable.getFormatter(column);
-		    				
-		    				scope.$watch("value.data."+column.property+filter+formatter, function(newValue, oldValue) {
-                                    if ( newValue !== oldValue ) {
-                                    	scope.cellValue = newValue;
-                                     }
-                            	});                           
-		    			}else if(column.url != undefined || column.url != null){
-		    				var url = $parse(column.url)(value.data);
-		    				var watchValue = "udtTable.urlCache['"+url+"']."+column.property+filter+formatter;
-		    				scope.$watch("udtTable.urlCache['"+url+"']", function(newValue, oldValue) {
-                                if ( newValue !== oldValue ) {
-                                	scope.cellValue = currentScope.udtTable.getFinalValue(column, value);
-                                 }
-                        	});                           
-		    			}
-		    			return currentScope.udtTable.getFinalValue(column, value);			    		
-	    			};
-	    			
-	    			var getDisplayFunction = function(col){
-	    				if(angular.isFunction(col.property)){
-    			    		return col.property(scope.value.data);
-    			    	}else{
-    			    		return getDisplayValue(col, scope.value, scope);
-    			    	}
-			    	};
-
-	    			
-	    			scope.cellValue = getDisplayFunction(scope.col);
-	    			
-  		    	}
-    		};
-    	}]);;angular.module('ultimateDataTableServices').
-directive('udtChange', function() {
-	return {
-	  require: 'ngModel',
-		link: function(scope, element, attr, ngModelController) {
-			
-			scope.$watch(attr.ngModel, function(newValue, oldValue){
-				if(newValue !== oldValue){
-					scope.$evalAsync(attr.udtChange);						
-				}
-			});									
-	  }
-	};	    	
 });;angular.module('ultimateDataTableServices').
-directive('udtCompile', ['$compile', function($compile) {
-			// directive factory creates a link function
-			return {
-				restrict: 'A',
-  		    	link: function(scope, element, attrs) {
-  		    		/*
-  		    		 * Normaly no need to watch because the attribute udtCompile not change during the life of UDT
-  		    		scope.$watch(
-  				        function(scope) {
-  				             // watch the 'compile' expression for changes
-  				            return scope.$eval(attrs.udtCompile);
-  				        },
-  				        function(newValue, oldValue) {
-  				        	//if(newValue !== oldValue){
-  				        		console.log("watch udtCompile");
-  	  				            // when the 'compile' expression changes
-  	  				            // assign it into the current DOM
-  	  				            element.html(newValue);
-
-  	  				            // compile the new DOM and link it to the current
-  	  				            // scope.
-  	  				            // NOTE: we only compile .childNodes so that
-  	  				            // we don't get into infinite loop compiling ourselves
-  	  				            $compile(element.contents())(scope);
-  				        	//}
-  				        	
-  				        }
-  				    );
-  		    		*/
-  		    		var value = scope.$eval(attrs.udtCompile);
-  		    		element.html(value);
-  		    		$compile(element.contents())(scope);
-  		    		
-  				}
-			};
-						
-		}]);;angular.module('ultimateDataTableServices').
-//This directive convert the ngModel value to a view value and then the view value to the ngModel unit value
-//The value passed to the directive must be an object with displayMeasureValue and saveMeasureValue
-directive('udtConvertvalue',['udtConvertValueServices','$filter', '$parse', function(udtConvertValueServices, $filter, $parse) {
-	return {
-				priority:1100,
-		 		require: 'ngModel',
-                link: function(scope, element, attrs, ngModelController) {
-                	//init service
-                	var convertValues = udtConvertValueServices();
-                	var property = undefined;
-                	
-                	if(attrs.udtConvertvalue){
-                		property = $parse(attrs.udtConvertvalue)(scope);    					
-    				}
-                	
-                	ngModelController.$formatters.push(function(value) {
-                		var convertedValue = convertValues.convertValue(value, property.saveMeasureValue, property.displayMeasureValue);
-        			    return convertedValue;
-        			}); 
-                	
-                	//view to model
-                	ngModelController.$parsers.push(function(value) {
-                    	value = convertValues.parse(value);
-                    	if(property != undefined){
-	                    	value = convertValues.convertValue(value, property.displayMeasureValue, property.saveMeasureValue);
-                    	}
-                    	return value;
-                    });
-                    
-                	/*
-					var watchModelValue = function(){
-						return scope.$watch(
-									function(){
-										return ngModel.$modelValue;
-									}, function(newValue, oldValue){
-										if(property != undefined){
-											var convertedValue = convertValues.convertValue(newValue, property.saveMeasureValue, property.displayMeasureValue);
-											ngModel.$setViewValue($filter('number')(convertedValue));
-											ngModel.$render();
-										}
-								});
-					};
-					
-                	scope.$watch(attr.udtConvertvalue, function(value){
-    					if(value.saveMeasureValue != undefined && value.displayMeasureValue != undefined){
-    						property = value;
-    					}
-    				});
-                	
-                	//model to view when the user go out of the input
-                	element.bind('blur', function () {
-                		var convertedValue = convertValues.convertValue(ngModel.$modelValue, property.saveMeasureValue, property.displayMeasureValue);
-                		ngModel.$setViewValue($filter('number')(convertedValue));
-						ngModel.$render();
-						//We restart the watcher when the user is out of the inputs
-						scope.currentWatcher = watchModelValue();
-                	});
-                	
-					//when the user go into the input
-					element.bind('focus', function () {
-						//We need to disable the watcher when the user is typing
-						scope.currentWatcher();
-                	});
-					
-                	//model to view whatcher
-                	scope.currentWatcher = watchModelValue();
-                	
-                    //view to model
-                    ngModel.$parsers.push(function(value) {
-                    	value = convertValues.parse(value);
-                    	if(property != undefined){
-	                    	value = convertValues.convertValue(value, property.displayMeasureValue, property.saveMeasureValue);
-                    	}
-                    	return value;
-                    });
-                    */
-                }
-            };
-}]);;angular.module('ultimateDataTableServices').
- //Convert the date in format(view) to a timestamp date(model)
-directive('udtDateTimestamp', ['$filter', function($filter) {
-    return {
-        require: 'ngModel',
-        link: function(scope, element, attrs, ngModelController) {
-			
-			ngModelController.$formatters.push(function(data) {
-				var convertedData = data;
-				convertedData = $filter('date')(convertedData, Messages("date.format"));
-			    return convertedData;
-			}); 
-	    
-		    ngModelController.$parsers.push(function(data) {
-		    	var convertedData = data;
-	    	    if(moment && convertedData !== ""){
-	    			   convertedData = moment(data, Messages("date.format").toUpperCase()).valueOf();
-	    		   }else{
-	    			   convertedData = null;
-	    			   console.log("mission moment library to convert string to date");
-	    		   }
-		    	   
-		    	  return convertedData;
-		    }); 
-			
-        }
-    }
-}]);;angular.module('ultimateDataTableServices').
-//Write in an input or select in a list element the value passed to the directive when the list or the input ngModel is undefined or empty
-//EXAMPLE: <input type="text" default-value="test" ng-model="x">
-directive('udtDefaultValue',['$parse', function($parse) {
-	    		return {
-	    			priority:1200,					 
-	    			require: 'ngModel',
-	    			link: function(scope, element, attrs, ngModelController) {
-	    				
-	    				
-	    				var _col = $parse(attrs.udtDefaultValue)(scope);
-	    				
-	    				var currentValue = $parse(attrs.ngModel)(scope);
-	    				
-	    				var setDefaultValue = function(){
-	    					if(_col != null && ngModelController.$isEmpty(currentValue)){
-								if(_col.type === "boolean"){
-									if(_col.defaultValues === "true" || _col.defaultValues === true){
-										ngModelController.$setViewValue(true);
-										ngModelController.$render();
-									}else if(_col.defaultValues === "false" || _col.defaultValues === false){
-										ngModelController.$setViewValue(true); // hack to insert false value 
-										ngModelController.$setViewValue(false);
-										ngModelController.$render();
-									}											
-								}else if(!angular.isFunction(_col.defaultValues)){
-									ngModelController.$setViewValue(_col.defaultValues);
-									ngModelController.$render();
-								}else{
-									var defaultValue = _col.defaultValues(scope.value.data, _col);
-									ngModelController.$setViewValue(defaultValue);
-									ngModelController.$render();
-								}
-			                	
-							}
-	    				}
-	    				
-	    				if(_col){
-	    					setDefaultValue();	    					
-	    					if(angular.isFunction(_col.defaultValues)){ //only watch when function to limit watching
-    							scope.$watch(attrs.udtDefaultValue+".defaultValues(value.data,col)", function(newValue, oldValue){
-    								if(newValue !== oldValue){
-    									setDefaultValue();
-    								}
-	    						});
-    						}    						
-	    				}
-	    				
-	    				/*
-	    				scope.$watch(attrs.udtDefaultValue, function(col){
-	    					if(col !== null && col !== undefined && col.defaultValues !== undefined && col.defaultValues !== null ){
-	    						_col = col;	
-	    						if(angular.isFunction(_col.defaultValues)){ //only watch when function to limit watching
-	    							setDefaultValue();
-	    							scope.$watch(attrs.udtDefaultValue+".defaultValues(value.data,col)", function(value){
-	    								setDefaultValue();
-		    						});
-	    						}
-	    					}
-	    				});
-	    				*/
-	    				
-	    				//TODO GA ?? better way with formatter
-						/*
-	    				scope.$watch(ngModelController, function(value){
-							setDefaultValue();
-					    });
-					    */
-					    
-	    			}
-	    		};	    	
-	    	}]);;angular.module('ultimateDataTableServices').
-directive('udtForm', function(){
-    		return {
-    			restrict: 'A',
-  		    	replace:true,
-  		    	transclude:true,
-  		    	templateUrl:'udt-form.html',
-  		    	link: function(scope, element, attr) {
-  		    	}
-    		};
-    	});;angular.module('ultimateDataTableServices').directive('udtHighlight', function() {
-	var component = function(scope, element, attrs) {
-		
-		if (!attrs.highlightClass) {
-			attrs.highlightClass = 'udt-highlight';
-		}
-		
-		if (!attrs.active) {
-			scope.active = true;
-		}
-		
-		var replacer = function(match, item) {
-			return '<span class="'+attrs.highlightClass+'">'+match+'</span>';
-		}
-		
-		var tokenize = function(keywords) {
-			keywords = keywords.replace(new RegExp(',$','g'), '').split(',');
-			var i;
-			var l = keywords.length;
-			for (i=0;i<l;i++) {
-				keywords[i] = keywords[i].replace(new RegExp('^ | $','g'), '');
-			}
-			return keywords;
-		}
-		
-		scope.$watch('keywords', function(newValue, oldValue) {
-			if (!newValue || newValue === '' || !scope.active) {
-				if(scope.udtHighlight !== undefined && scope.udtHighlight !== null)
-					element.html(scope.udtHighlight.replace(/\n/g, '<br />').toString());
-				return false;
-			}
-			
-			
-			var tokenized = tokenize(newValue);
-			var regex = new RegExp(tokenized.join('|'), 'gmi');
-			
-			// Find the words
-			var html = scope.udtHighlight.replace(/\n/g, '<br />').toString().replace(regex, replacer);
-			
-			element.html(html);
-		}, true);
-	}
-	return {
-		link: 			component,
-		replace:		false,
-		scope:			{
-			active:		'=',
-			udtHighlight:	'=',
-			keywords:	'='
-		}
-	};
-});;angular.module('ultimateDataTableServices').
-directive("udtHtmlFilter", function($filter, udtI18n) {
-				return {
-					  priority:1000,
-					  require: 'ngModel',
-					  link: function(scope, element, attrs, ngModelController) {
-						  	var messagesService = udtI18n(navigator.languages || navigator.language || navigator.userLanguage);
-						  
-							ngModelController.$formatters.push(function(data) {
-								var convertedData = data;
-								  if(attrs.udtHtmlFilter === "datetime"){
-									  convertedData = $filter('date')(convertedData, messagesService.Messages("datetime.format"));
-							   }else if(attrs.udtHtmlFilter === "date"){
-								   convertedData = $filter('date')(convertedData, messagesService.Messages("date.format"));
-							   }else if(attrs.udtHtmlFilter === "number"){
-								   convertedData = $filter('number')(convertedData);
-								   }					    	
-								  return convertedData;
-							}); 
-					    
-					    ngModelController.$parsers.push(function(data) {
-					    	var convertedData = data;
-					    	   if(attrs.udtHtmlFilter === "number" && null !== convertedData && undefined !== convertedData 
-					    			   && angular.isString(convertedData)){
-					    		   convertedData = convertedData.replace(",",".").replace(/[\u00a0|\s]/g,"");
-					    		   if(!isNaN(convertedData) && convertedData !== ""){						    			   
-					    			   convertedData = convertedData*1;
-					    		   }else if( isNaN(convertedData) || convertedData === ""){
-					    			   convertedData = null;
-					    		   }
-					    	   }else if(attrs.udtHtmlFilter === "date" && null !== convertedData && undefined !== convertedData 
-					    			   && angular.isString(convertedData)){
-					    		   if(moment && convertedData !== ""){
-					    			   convertedData = moment(data, messagesService.Messages("date.format").toUpperCase()).valueOf();
-					    		   }else{
-					    			   convertedData = null;
-					    			   console.log("mission moment library to convert string to date");
-					    		   }
-					    	   }
-					    	   //TODO GA date and datetime quiz about timestamps
-					    	  return convertedData;
-					    }); 
-					  }
-					};
-			});;angular.module('ultimateDataTableServices').
-directive('udtMessages', function(){
-    		return {
-    			restrict: 'A',
-  		    	replace:true,
-  		    	templateUrl:'udt-messages.html',
-  		    	link: function(scope, element, attr) {
-  		    	}
-    		};
-});;angular.module('ultimateDataTableServices').
-directive('udtTable', function(){
-    		return {
-    			restrict: 'A',
-  		    	replace:true,
-  		    	templateUrl:'udt-table.html',
-  		    	link: function(scope, element, attr) {
-  		    		
-  		    		if(scope.udtTable && scope["datatableForm"]){
-  		    			scope.udtTable.formController = scope["datatableForm"];
-  		    		}
-					
-  		    		scope.$watch("udtTable", function(newValue, oldValue) {
-  		    			if(newValue && newValue !== oldValue && scope["datatableForm"]){
-  		    				scope.udtTable.formController = scope["datatableForm"];
-  		    			}
-		            });
-					
-  		    		var udtTableHelpers = {
-  		    				//todo in udtCell
-  		    				setImage : function(imageData, imageName, imageFullSizeWidth, imageFullSizeHeight) {
-  		  		    			scope.udtModalImage = {};
-  		  		    			scope.udtModalImage.modalImage = imageData;
-  		  		    			scope.udtModalImage.modalTitle = imageName;
-
-  		  		    			var margin = 25;		
-  		  		    			var zoom = Math.min((document.body.clientWidth - margin) / imageFullSizeWidth, 1);
-
-  		  		    			scope.udtModalImage.modalWidth = imageFullSizeWidth * zoom;
-  		  		    			scope.udtModalImage.modalHeight = imageFullSizeHeight * zoom; // in order to
-  		  		    			scope.udtModalImage.modalLeft = (document.body.clientWidth - scope.udtModalImage.modalWidth)/2;
-  		  		    			scope.udtModalImage.modalTop = (window.innerHeight - scope.udtModalImage.modalHeight)/2;
-  		  		    			scope.udtModalImage.modalTop = scope.udtModalImage.modalTop - 50; // height of header and footer
-  		  		    		},
-  		  		    		getTrClass : function(data, line, currentScope){
-  		  		    			var udtTable = scope.udtTable;
-  			    				if(line.trClass){
-  			    					return line.trClass; 
-  			    				} else if(angular.isFunction(udtTable.config.lines.trClass)){
-  			    					return udtTable.config.lines.trClass(data, line);
-  			    				} else if(angular.isString(udtTable.config.lines.trClass)){
-  			    					return currentScope.$eval(udtTable.config.lines.trClass) || udtTable.config.lines.trClass;
-  			    				} else if(line.group && !udtTable.config.group.showOnlyGroups){
-  			    					return "active";
-  			    				} else{
-  			    					return '';
-  			    				}		    				
-  			    			},
-  			    			getTdClass : function(data, col, currentScope){
-  			    				if(angular.isFunction(col.tdClass)){
-  			    					return col.tdClass(data);
-  			    				} else if(angular.isString(col.tdClass)){
-  			    					return currentScope.$eval(col.tdClass) ||  col.tdClass;
-  			    				}else{
-  			    					return '';
-  			    				}
-  			    			},
-  			    			getThClass : function(col, currentScope){
-  			    				var clazz = '';
-  			    				if(col && angular.isFunction(col.thClass)){
-  			    					clazz = col.thClass(col);
-  			    				} else if(col && angular.isString(col.thClass)){
-  			    					//we try to evaluation the string against the scope
-  			    					clazz =  currentScope.$eval(col.thClass) || col.thClass;
-  			    				}
-  			    				if((col && col.required != undefined && col.required != null)
-  			    						&& ((angular.isFunction(col.required) && col.required())
-  			    								|| col.required === true
-  			    								|| (angular.isString(col.required) && scope.$eval(col.required)))){
-  			    					clazz = clazz +' required';
-  			    				}
-  			    				return clazz;
-  			    			},
-  			    			select : function(data, line){
-  								var udtTable = scope.udtTable;
-  		                        if(line){
-  								if(udtTable.config.select.active){
-  				    					//separation of line type group and normal to simplify backward compatibility and avoid bugs
-  				    					//selected is used with edit, remove, save and show button
-  				    					if(!line.group){
-  					    					if(!line.selected){
-  					    						line.selected=true;
-  					    						line.trClass="info";
-  					    					} else{
-  												line.selected=false;
-  					    						line.trClass=undefined;
-  											}
-  				    					}else if(line.group && udtTable.config.group.enableLineSelection){
-  				    						if(!line.groupSelected){
-  					    						line.groupSelected=true;
-  					    						line.trClass="info";
-  					    					} else{
-  												line.groupSelected=false;
-  					    						line.trClass=undefined;
-  											}
-  				    					}
-  				    				}
-  		                            if (udtTable.config.select.active && angular.isFunction(udtTable.config.select.callback)) {
-  		                                console.warning('select.callback is deprecated. Use mouseevents.clickCallback instead.');
-  				    						udtTable.config.select.callback(line, data);
-  		                            } else if (udtTable.config.mouseevents.active && angular.isFunction(udtTable.config.mouseevents.clickCallback)) {
-  		                                udtTable.config.mouseevents.clickCallback(line, data);
-  				                        }
-  				    				}
-  			    			},
-  			    			mouseover : function(data, line){
-  		                        var udtTable = scope.udtTable;
-  		                        if (udtTable.config.mouseevents.active) {
-  		                            var cb = udtTable.config.mouseevents.overCallback;
-  		                            if (angular.isFunction(cb)) {
-  		                                cb(line, data);
-  		                            }
-  		                        }
-  		                    },
-  		                    mouseleave : function(data, line){
-  		                        var udtTable = scope.udtTable;
-  		                        if (udtTable.config.mouseevents.active) {
-  		                            var cb = udtTable.config.mouseevents.leaveCallback;
-  		                            if (angular.isFunction(cb)) {
-  		                                cb(line, data);
-  		                            }
-  								}
-  			    			},
-  			    			getRowSpanValue : function(i,j){
-  								var udtTable = scope.udtTable;
-  								if(udtTable.config.mergeCells.active && udtTable.config.mergeCells.rowspans !== undefined){
-  									return udtTable.config.mergeCells.rowspans[i][j];
-  								}else{
-  									return 1;
-  								}
-  							},
-  							isShowCell : function(col, i, j){
-  								var udtTable = scope.udtTable;
-  								var value = !udtTable.isHide(col.id);
-  								if(udtTable.config.mergeCells.active && value && udtTable.config.mergeCells.rowspans !== undefined){
-  									value = (udtTable.config.mergeCells.rowspans[i][j] !== 0)
-  								}						
-  								return value;
-  							}
-  		    		}
-  		    		
-					scope.udtTableHelpers = udtTableHelpers;
-  		    	}
-    		};
-    	});;angular.module('ultimateDataTableServices').
 directive('udtTextareaResize', function(){
     		return {
     			restrict: 'A',
@@ -3739,9 +3730,7 @@ directive('udtToolbar', function(){
   		    	link: function(scope, element, attr) {
   		    	}
     		};
-    	});;"use strict";
-
-angular.module('ultimateDataTableServices').
+		});;angular.module('ultimateDataTableServices').
 directive('ultimateDatatable', ['$parse', '$q', '$timeout','$templateCache', function($parse, $q, $timeout, $templateCache){
     		return {
   		    	restrict: 'A',
@@ -4051,7 +4040,6 @@ factory('udtConvertValueServices', [function() {
 						if(valueToConvert !== null && valueToConvert !== undefined && !angular.isNumber(valueToConvert)){
 							var valueConverted = value.replace(/\s+/g,"").replace(',','.');
 							valueConverted = parseFloat(valueConverted);
-							
 							return valueConverted;
 						}
 						return value;

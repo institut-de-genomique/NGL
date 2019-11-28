@@ -1,8 +1,5 @@
 package controllers.commons.api;
 
-// import static play.data.Form.form;
-//import static fr.cea.ig.play.IGGlobals.form;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +8,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 
 import controllers.CommonController;
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import models.laboratory.common.description.ObjectType;
 import models.laboratory.common.description.State;
 import models.utils.ListObject;
@@ -23,26 +20,31 @@ import views.components.datatable.DatatableResponse;
 
 public class States extends CommonController {
 	
-    private final /*static*/ Form<StatesSearchForm> stateForm; // = form(StatesSearchForm.class);
+    private final Form<StatesSearchForm> stateForm;
 
+//    @Inject
+//    public States(NGLContext ctx) {
+//    	this.stateForm = ctx.form(StatesSearchForm.class);
+//    }
+    
     @Inject
-    public States(NGLContext ctx) {
+    public States(NGLApplication ctx) {
     	this.stateForm = ctx.form(StatesSearchForm.class);
     }
-    
+
     public Result list() throws DAOException {
 		Form<StatesSearchForm> stateFilledForm = filledFormQueryString(
 			stateForm, StatesSearchForm.class);
 		StatesSearchForm statesSearch = stateFilledForm.get();
 	
 		List<State> values = new ArrayList<>(0);
-		if (null != statesSearch.display) {
-		    values = State.find.findByDisplayAndObjectTypeCode(statesSearch.display, ObjectType.CODE
+		if (statesSearch.display != null) {
+		    values = State.find.get().findByDisplayAndObjectTypeCode(statesSearch.display, ObjectType.CODE
 			    .valueOf(statesSearch.objectTypeCode));
 		}
 		else {
 			if (StringUtils.isNotBlank(statesSearch.objectTypeCode)) 
-			    values = State.find.findByObjectTypeCode(ObjectType.CODE.valueOf(statesSearch.objectTypeCode));
+			    values = State.find.get().findByObjectTypeCode(ObjectType.CODE.valueOf(statesSearch.objectTypeCode));
 			else 
 				return notFound();
 		}
@@ -62,7 +64,7 @@ public class States extends CommonController {
     }
 
     public Result get(String code) throws DAOException {
-		State state = State.find.findByCode(code);
+		State state = State.find.get().findByCode(code);
 		if (state != null) 
 		    return ok(Json.toJson(state));
 		return notFound();

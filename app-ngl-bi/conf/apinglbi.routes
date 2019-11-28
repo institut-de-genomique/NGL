@@ -6,10 +6,10 @@ POST   	/api/runs									controllers.runs.api.Runs.save()
 PUT   	/api/runs/:code 							controllers.runs.api.Runs.update(code: java.lang.String)
 DELETE	/api/runs/:code								controllers.runs.api.Runs.delete(code:java.lang.String)
 
-PUT		/api/runs/batch/state						controllers.runs.api.State.updateBatch()
-PUT		/api/runs/:code/state						controllers.runs.api.State.update(code:java.lang.String)
-GET		/api/runs/:code/state						controllers.runs.api.State.get(code:java.lang.String)
-GET		/api/runs/:code/state/historical			controllers.runs.api.State.historical(code:java.lang.String)
+PUT		/api/runs/batch/state						controllers.runs.api.States.updateStateBatch()
+PUT		/api/runs/:code/state						controllers.runs.api.States.updateState(code:java.lang.String)
+GET		/api/runs/:code/state						controllers.runs.api.States.get(code:java.lang.String)
+GET		/api/runs/:code/state/historical			controllers.runs.api.States.historical(code:java.lang.String)
 
 PUT		/api/runs/:code/valuation		 			controllers.runs.api.Runs.valuation(code:java.lang.String)
 PUT		/api/runs/:code/apply-rules/:codeRules		controllers.runs.api.Runs.applyRules(code:java.lang.String, codeRules:java.lang.String)
@@ -50,8 +50,8 @@ PUT    	/api/readsets/:code							controllers.readsets.api.ReadSets.update(code)
 DELETE	/api/readsets/:code							controllers.readsets.api.ReadSets.delete(code: java.lang.String)
 DELETE	/api/runs/:code/readsets					controllers.readsets.api.ReadSets.deleteByRunCode(code: java.lang.String)
 
-PUT		/api/readsets/batch/state					controllers.readsets.api.ReadSets.stateBatch()
-PUT		/api/readsets/:code/state					controllers.readsets.api.ReadSets.state(code:java.lang.String)
+PUT		/api/readsets/batch/state					controllers.readsets.api.ReadSets.updateStateBatch()
+PUT		/api/readsets/:code/state					controllers.readsets.api.ReadSets.updateState(code:java.lang.String)
 PUT		/api/readsets/batch/valuation		 		controllers.readsets.api.ReadSets.valuationBatch()
 PUT		/api/readsets/:code/valuation		 		controllers.readsets.api.ReadSets.valuation(code:java.lang.String)
 PUT     /api/readsets/batch/properties				controllers.readsets.api.ReadSets.propertiesBatch()
@@ -85,8 +85,8 @@ POST 	/api/analyses								controllers.analyses.api.Analyses.save()
 PUT    	/api/analyses/:code							controllers.analyses.api.Analyses.update(code)
 DELETE	/api/analyses/:code							controllers.analyses.api.Analyses.delete(code: java.lang.String)
 
-PUT		/api/analyses/batch/state					controllers.analyses.api.Analyses.stateBatch()
-PUT		/api/analyses/:code/state					controllers.analyses.api.Analyses.state(code:java.lang.String)
+PUT		/api/analyses/batch/state					controllers.analyses.api.Analyses.updateStateBatch()
+PUT		/api/analyses/:code/state					controllers.analyses.api.Analyses.updateState(code:java.lang.String)
 PUT		/api/analyses/batch/valuation		 		controllers.analyses.api.Analyses.valuationBatch()
 PUT		/api/analyses/:code/valuation		 		controllers.analyses.api.Analyses.valuation(code:java.lang.String)
 PUT     /api/analyses/batch/properties				controllers.analyses.api.Analyses.propertiesBatch()
@@ -130,4 +130,10 @@ GET		/api/ngsrs/instruments						controllers.ngsrg.lims.LimsInformations.instrum
 GET		/api/ngsrs/experiments						controllers.ngsrg.lims.LimsInformations.experiments()
 GET		/api/ngsrs/container/:barCode				controllers.ngsrg.lims.LimsInformations.containerSupport(barCode: java.lang.String)
 HEAD	/api/ngsrs/container/:barCode				controllers.ngsrg.lims.LimsInformations.isContainerSupport(barCode: java.lang.String)
+
+#balance sheets
+GET		/api/balance-sheets							controllers.balancesheets.api.BalanceSheets.list()
+
+#sampletype
+GET		/api/sample-types						controllers.sampletypes.api.SampleTypes.list()
 

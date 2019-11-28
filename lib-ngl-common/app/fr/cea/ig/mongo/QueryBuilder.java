@@ -139,102 +139,26 @@ public class QueryBuilder {
 	public static DBQuery.Query getQuery(SamplesSearchForm samplesSearch) {
 		
 		Optional<QueryBuilder> qb = Optional.empty();
-		// QueryBuilder qb = null;
 		
 		List<DBQuery.Query> queryElts = new ArrayList<>();
 		
 		qb = and(qb,firstOf(in   ("code", samplesSearch.codes),
 							is   ("code", samplesSearch.code),
 							regex("code", samplesSearch.codeRegex)));
-		//if(CollectionUtils.isNotEmpty(samplesSearch.codes)){
-		//	queryElts.add(DBQuery.in("code", samplesSearch.codes));
-		//}else if(StringUtils.isNotBlank(samplesSearch.code)){
-		//	queryElts.add(DBQuery.is("code", samplesSearch.code));
-		//}else if(StringUtils.isNotBlank(samplesSearch.codeRegex)){
-		//	queryElts.add(DBQuery.regex("code", Pattern.compile(samplesSearch.codeRegex)));
-		//}
-		
-		// return and(in   ("typeCode",       samplesSearch.typeCodes),
-		//		   regex("referenceCollab",samplesSearch.referenceCollabRegex),
-		//		   in   ("projectCodes",   samplesSearch.projectCode)).query();
-		
 		qb = and(qb,in("typeCode", samplesSearch.typeCodes));
-		//if(CollectionUtils.isNotEmpty(samplesSearch.typeCodes)){
-		//	queryElts.add(DBQuery.in("typeCode", samplesSearch.typeCodes));
-		//}
-		
 		qb = and(qb,regex("referenceCollab",samplesSearch.referenceCollabRegex));
-		//if(StringUtils.isNotBlank(samplesSearch.referenceCollabRegex)){
-		//	queryElts.add(DBQuery.regex("referenceCollab", Pattern.compile(samplesSearch.referenceCollabRegex)));
-		//}
-		
 		qb = and(qb,in("projectCodes", samplesSearch.projectCode));
-		//if(StringUtils.isNotBlank(samplesSearch.projectCode)){
-		//	queryElts.add(DBQuery.in("projectCodes", samplesSearch.projectCode));
-		//}
-
 		qb = and(qb,in("projectCodes", samplesSearch.projectCodes));
-		//if(CollectionUtils.isNotEmpty(samplesSearch.projectCodes)){ 				//samplesSearch.projectCodes != null && samplesSearch.projectCodes.size() > 0
-		//	queryElts.add(DBQuery.in("projectCodes", samplesSearch.projectCodes));
-		//}
-
 		qb = and(qb,regex("life.path",samplesSearch.treeOfLifePathRegex));
-		//if(StringUtils.isNotBlank(samplesSearch.treeOfLifePathRegex)){
-		//	queryElts.add(DBQuery.regex("life.path", Pattern.compile(samplesSearch.treeOfLifePathRegex)));
-		//}
-		
-		// TODO: redundant code, done at method end 
-		//if(queryElts.size() > 0){
-		//	query = DBQuery.and(queryElts.toArray(new DBQuery.Query[queryElts.size()]));
-		//}
-		
 		qb = and(qb,greaterThanEquals("traceInformation.creationDate", samplesSearch.fromDate));
-		// if(null != samplesSearch.fromDate){
-		//	queryElts.add(DBQuery.greaterThanEquals("traceInformation.creationDate", samplesSearch.fromDate));
-		//}
-
 		qb = and(qb,lessThan("traceInformation.creationDate",samplesSearch.toDate));
-		//if(null != samplesSearch.toDate){
-		//	queryElts.add(DBQuery.lessThan("traceInformation.creationDate", (DateUtils.addDays(samplesSearch.toDate, 1))));
-		//}
-		
 		qb = and(qb,
 				firstOf(in("traceInformation.createUser", samplesSearch.createUsers),
 			 		    is("traceInformation.createUser", samplesSearch.createUser)));
-		// if(CollectionUtils.isNotEmpty(samplesSearch.createUsers)){
-		// 	queryElts.add(DBQuery.in("traceInformation.createUser", samplesSearch.createUsers));
-		//}else if(StringUtils.isNotBlank(samplesSearch.createUser)){
-		//	queryElts.add(DBQuery.is("traceInformation.createUser", samplesSearch.createUser));
-		//}
-		
 		qb = and(qb,elemMatch("comments",regex("comment",samplesSearch.commentRegex)));
-		//if(StringUtils.isNotBlank(samplesSearch.commentRegex)){
-		//	queryElts.add(DBQuery.elemMatch("comments", DBQuery.regex("comment", Pattern.compile(samplesSearch.commentRegex))));
-		//}
-		
 		qb = and(qb,is("taxonCode", samplesSearch.taxonCode));
-		// if(StringUtils.isNotBlank(samplesSearch.taxonCode)){
-		//	queryElts.add(DBQuery.is("taxonCode", samplesSearch.taxonCode));
-		// }
-		
 		qb = and(qb,regex("ncbiScientificName",samplesSearch.ncbiScientificNameRegex));
-		//if(StringUtils.isNotBlank(samplesSearch.ncbiScientificNameRegex)){
-		//	queryElts.add(DBQuery.regex("ncbiScientificName", Pattern.compile(samplesSearch.ncbiScientificNameRegex)));
-		//}
 		
-		/*
-		Optional<QueryBuilder> existingProcessTypeCode = 
-				elemMatch("processes", is("typeCode",samplesSearch.existingProcessTypeCode));
-		Optional<QueryBuilder> existingTransformationTypeCode = 
-				is("experiments.typeCode",samplesSearch.existingTransformationTypeCode);
-		Optional<QueryBuilder> notExistingTransformationTypeCode = 
-				notEquals("experiments.typeCode",samplesSearch.notExistingTransformationTypeCode);
-		
-		qb = and(qb,
-				firstOf(and(existingProcessTypeCode,existingTransformationTypeCode,notExistingTransformationTypeCode)),
-					    and(existingTransformationTypeCode,notExistingTransformationTypeCode)
-				);
-				*/
 		if(StringUtils.isNotBlank(samplesSearch.existingProcessTypeCode)
 				&& StringUtils.isNotBlank(samplesSearch.existingTransformationTypeCode)
 				&& StringUtils.isNotBlank(samplesSearch.notExistingTransformationTypeCode)){
@@ -270,23 +194,11 @@ public class QueryBuilder {
 		}
 		
 		qb = and(qb,in("processes.experiments.protocolCode",samplesSearch.experimentProtocolCodes));
-		// if(CollectionUtils.isNotEmpty(samplesSearch.experimentProtocolCodes)){
-		//	queryElts.add(DBQuery.in("processes.experiments.protocolCode",samplesSearch.experimentProtocolCodes));
-		//}
 		
 		queryElts.addAll(NGLControllerHelper.generateQueriesForProperties(samplesSearch.properties,Level.CODE.Sample, "properties"));
 		queryElts.addAll(NGLControllerHelper.generateQueriesForProperties(samplesSearch.experimentProperties,Level.CODE.Experiment, "processes.experiments.properties"));
 
 		qb = generateQueriesForExistingProperties(qb,samplesSearch.existingFields);
-		// queryElts.addAll(NGLControllerHelper.generateQueriesForExistingProperties(samplesSearch.existingFields));
-		
-		
-//		// TODO: simply build return value at method end
-//		Query query = DBQuery.empty();
-//		if(queryElts.size() > 0){
-//			query = DBQuery.and(queryElts.toArray(new DBQuery.Query[queryElts.size()]));
-//		}		
-//		// return query;
 		
 		return query(qb); 
 	}

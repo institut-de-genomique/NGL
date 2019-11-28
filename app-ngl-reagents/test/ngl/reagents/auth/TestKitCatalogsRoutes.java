@@ -12,7 +12,6 @@ public class TestKitCatalogsRoutes {
 		Global.af.authURL(Identity.Read,"/kit-catalogs/spongebob/home");
 	}	
 	
-	// TODO: check route name as there is a mismatch
 	@Test
 	public void testJsRoutes() {
 		Global.af.authNobody("/tpl/reagent-catalogs/js-routes");

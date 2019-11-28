@@ -5,7 +5,6 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import controllers.authorisation.PermissionHelper;
 import fr.cea.ig.authorization.authorizators.UserDAOAuthorizator;
 import fr.cea.ig.ngl.dao.api.APIException;
 import models.administration.authorisation.Permission;
@@ -15,6 +14,8 @@ import play.api.modules.spring.Spring;
 
 @Singleton
 public class PermissionAPI {
+
+	private static final play.Logger.ALogger logger = play.Logger.of(PermissionAPI.class);
 	
 	private final PermissionDAO dao;
 	
@@ -26,7 +27,6 @@ public class PermissionAPI {
 	public List<Permission> byUserLogin(String login) throws DAOException, APIException {
 		return dao.byUserLogin(login);
 	}
-
 	
 	 /**
      * Does the user exist ?
@@ -68,7 +68,16 @@ public class PermissionAPI {
      * @return           true if the user has the requested permission
      */
     public boolean hasPermission(String login, String permission) {
-        return PermissionHelper.checkPermission(login, permission);
+//        return PermissionHelper.checkPermission(login, permission);
+    	try {
+    		for (Permission p : byUserLogin(login))
+    			if (p.code.equals(permission))
+    				return true;
+    		return false;
+    	} catch (APIException e) {
+    		logger.warn("error while reading permissions", e);
+    		return false;
+    	}
     }
 
     /**

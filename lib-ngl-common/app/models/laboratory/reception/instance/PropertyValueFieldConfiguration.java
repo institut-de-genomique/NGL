@@ -10,8 +10,7 @@ import validation.ContextValidation;
 
 public class PropertyValueFieldConfiguration extends AbstractFieldConfiguration {
 
-	// Would probably be better to have the class instead of the name.
-	public String className = PropertySingleValue.class.getName();
+	public String                     className = PropertySingleValue.class.getName();
 	public AbstractFieldConfiguration value;
 	public AbstractFieldConfiguration unit;
 	
@@ -31,6 +30,13 @@ public class PropertyValueFieldConfiguration extends AbstractFieldConfiguration 
 			unit.populateField(psv.getClass().getField("unit"), psv, rowMap, contextValidation, action);	
 		if (value != null) // only if value not unit
 			populateField(field, dbObject, psv);
+	}
+
+	@Override
+	public void updateFromHeader(ContextValidation vc, Map<Integer, String> header) {
+		value.updateFromHeader(vc, header);
+		if (unit != null)
+			unit.updateFromHeader(vc, header);
 	}
 	
 }

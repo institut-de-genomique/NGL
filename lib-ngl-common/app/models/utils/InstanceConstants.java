@@ -4,10 +4,6 @@ package models.utils;
 
 /**
  * MongoDB collection names.
- * TODO: possibly use a name that represents this set of constants such as CollectionNames, possibly in an enclosing class named Constants.
- * 
- * @author vrd
- *
  */
 public interface InstanceConstants {
 	
@@ -65,7 +61,13 @@ public interface InstanceConstants {
 	public static final String RECEPTION_CONFIG_COLL_NAME   = "ngl_common.ReceptionConfiguration";
 	
 	//public static final String SRA_MAP_LIBPROCESSTYPECODEVALUE_ORIENTATION_COLL_NAME="ngl_sub.map_libProcessTypeCodeValue_orientation";
-		
-	
+
 	public static final String TAG_PROPERTY_NAME = "tag";
+	public static final String SECONDARY_TAG_PROPERTY_NAME = "secondaryTag";
+	
+	/**
+	 * Name of the collection of {@link models.laboratory.balancesheet.instance.BalanceSheet}. 
+	 */
+	public static final String BALANCE_SHEET_COLL_NAME             = "ngl_bi.BalanceSheet";
+	
 }

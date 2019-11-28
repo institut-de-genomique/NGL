@@ -2,18 +2,14 @@ package services.instance.sample;
 
 import javax.inject.Inject;
 
-import fr.cea.ig.play.migration.NGLContext;
-import scala.concurrent.duration.FiniteDuration;
+import fr.cea.ig.ngl.NGLApplication;
 import services.ncbi.TaxonomyServices;
 
 public class UpdateSampleNCBITaxonCNG extends AbstractUpdateSampleNCBITaxon {
 
 	@Inject
-	public UpdateSampleNCBITaxonCNG(FiniteDuration durationFromStart,
-			                        FiniteDuration durationFromNextIteration, 
-			                        NGLContext ctx, 
-			                        TaxonomyServices taxonomyServices) {
-		super("UpdateSampleNCBI", durationFromStart, durationFromNextIteration, ctx, taxonomyServices);
+	public UpdateSampleNCBITaxonCNG(NGLApplication app, TaxonomyServices taxonomyServices) {
+		super("UpdateSampleNCBI", app, taxonomyServices);
 	}
 
 }

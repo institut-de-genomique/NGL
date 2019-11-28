@@ -4,7 +4,7 @@ angular.module('home').controller('SearchCtrl',['$scope', '$routeParams','datata
                                                 function($scope, $routeParams, datatable,mainService,tabService,projectsSearchService) {
 	
 	var datatableConfig = {
-			order :{by:'code', reverse:false},
+			order :{mode:'local', by:'code', reverse:false},
 			search:{
 				url:jsRoutes.controllers.projects.api.Projects.list()
 			},

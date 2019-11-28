@@ -24,7 +24,6 @@ import models.laboratory.sample.description.SampleType;
 import models.laboratory.sample.instance.Sample;
 import models.utils.InstanceConstants;
 import models.utils.InstanceHelpers;
-//import play.Logger;
 import services.io.reception.Mapping;
 import validation.ContextValidation;
 import validation.utils.ValidationConstants;
@@ -55,13 +54,13 @@ public class ContainerMapping extends Mapping<Container> {
 						object.code = code;
 						object = MongoDBDAO.findByCode(collectionName, type, object.code);	
 						if(errorIsNotFound && null == object){
-							contextValidation.addErrors("Error", "not found "+type.getSimpleName()+" for code "+code);
+							contextValidation.addError("Error", "not found "+type.getSimpleName()+" for code "+code);
 						}
 					} else {
 						object = super.get(object, rowMap, errorIsNotFound);
 					}
 				} else if(supportConfig.required) {
-					contextValidation.addErrors("Error", "not found "+type.getSimpleName()+" support !!!");
+					contextValidation.addError("Error", "not found "+type.getSimpleName()+" support !!!");
 				} else {
 					object = super.get(object, rowMap, errorIsNotFound);
 				}
@@ -70,7 +69,7 @@ public class ContainerMapping extends Mapping<Container> {
 			}
 		} catch (Exception e) {
 			logger.error("Error", e.getMessage(), e);
-			contextValidation.addErrors("Error", e.getMessage());
+			contextValidation.addError("Error", e.getMessage());
 			throw new RuntimeException(e);
 		}		
 		return object;
@@ -78,7 +77,7 @@ public class ContainerMapping extends Mapping<Container> {
 	
 	@Override
 	protected void update(Container container) {
-		// TODO: update categoryCode if not a code but a label.
+		// GA: update categoryCode if not a code but a label.
 		if (Action.update.equals(action)) {
 			container.traceInformation.setTraceInformation(contextValidation.getUser());
 		} else {
@@ -88,17 +87,17 @@ public class ContainerMapping extends Mapping<Container> {
 	}
 	/**
 	 * Compute the container code if possible
-	 * @param container
-	 * @return
+	 * @param  container container
+	 * @return           container code
 	 */
 	private String computeCode(Container container) {
 		String code = null;
-		if(container.support != null && container.support.code != null && container.support.line != null && container.support.column != null){
+		if (container.support != null && container.support.code != null && container.support.line != null && container.support.column != null) {
 			// FDS 03/03/2018 verifier que container.support.categoryCode existe bien !!
-			if ( null == ContainerSupportCategory.find.findByCode(container.support.categoryCode)) {
-				contextValidation.addErrors("container.support.categoryCode", ValidationConstants.ERROR_NOTEXISTS_MSG, container.support.categoryCode);
+			if (ContainerSupportCategory.find.get().findByCode(container.support.categoryCode) == null) {
+				contextValidation.addError("container.support.categoryCode", ValidationConstants.ERROR_NOTEXISTS_MSG, container.support.categoryCode);
 			} else {
-				ContainerSupportCategory csc = ContainerSupportCategory.find.findByCode(container.support.categoryCode);
+				ContainerSupportCategory csc = ContainerSupportCategory.find.get().findByCode(container.support.categoryCode);
 				if(csc.nbLine == 1 && csc.nbColumn == 1){
 					code= container.support.code;
 				}else if(csc.nbLine > 1 && csc.nbColumn == 1){
@@ -124,7 +123,7 @@ public class ContainerMapping extends Mapping<Container> {
 			c.state.user = contextValidation.getUser();
 		}
 		if (c.categoryCode == null && c.support.categoryCode != null) {
-			c.categoryCode = ContainerCategory.find.findByContainerSupportCategoryCode(c.support.categoryCode).code;
+			c.categoryCode = ContainerCategory.find.get().findByContainerSupportCategoryCode(c.support.categoryCode).code;
 		}
 		c.projectCodes = new TreeSet<>();
 		c.sampleCodes  = new TreeSet<>();
@@ -169,11 +168,11 @@ public class ContainerMapping extends Mapping<Container> {
 	}
 
 	private void setPropertiesFromSample(Map<String, PropertyValue> properties, Sample sample) {
-		SampleType sampleType = SampleType.find.findByCode(sample.typeCode);
+		SampleType sampleType = SampleType.find.get().findByCode(sample.typeCode);
 		if (sampleType != null) {
 			InstanceHelpers.copyPropertyValueFromPropertiesDefinition(sampleType.getPropertyDefinitionByLevel(Level.CODE.Content), sample.properties,properties);
 		}
-		ImportType importType = ImportType.find.findByCode(sample.importTypeCode);
+		ImportType importType = ImportType.find.get().findByCode(sample.importTypeCode);
 		if (importType != null) {
 			InstanceHelpers.copyPropertyValueFromPropertiesDefinition(importType.getPropertyDefinitionByLevel(Level.CODE.Content), sample.properties,properties);
 		}

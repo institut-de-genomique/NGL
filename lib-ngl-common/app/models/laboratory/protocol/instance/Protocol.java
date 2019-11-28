@@ -11,6 +11,7 @@ import models.laboratory.common.instance.PropertyValue;
 import models.utils.InstanceConstants;
 import validation.ContextValidation;
 import validation.IValidation;
+import validation.common.instance.CommonValidationHelper;
 import validation.protocol.instance.ProtocolValidationHelper;
 
 public class Protocol extends DBObject implements IValidation {
@@ -21,30 +22,32 @@ public class Protocol extends DBObject implements IValidation {
 	public String categoryCode;
 	public List<String> experimentTypeCodes;
 	public Map<String, PropertyValue> properties;
-	public Boolean active = Boolean.TRUE;
+	public Boolean active; // = Boolean.TRUE;
 	
 	public Protocol() {		
-//		super();
-		this.experimentTypeCodes = new ArrayList<>();
+		experimentTypeCodes = new ArrayList<>();
+		active              = true;
 	}
 	
-	public Protocol(String code, String name, String filePath, String version, String categoryCode) {
-		this();
-		this.code = code;
-		this.name = name;
-		this.filePath = filePath;
-		this.version = version;
-		this.categoryCode = categoryCode;
-		
+	public Protocol(String code, String name, String filePath, String version, String categoryCode, 
+			        List<String> experimentTypeCodes,  Map<String, PropertyValue> properties, Boolean active) {
+		this.code                = code.toLowerCase().replace("\\s+", "-");
+		this.name                = name;
+		this.filePath            = filePath;
+		this.version             = version;
+		this.categoryCode        = categoryCode;
+		this.experimentTypeCodes = experimentTypeCodes;
+		this.properties          = properties;
+		this.active              = active;
 	}
 	
 	@JsonIgnore
 	@Override
 	public void validate(ContextValidation contextValidation) {
-		ProtocolValidationHelper.validateId(this,contextValidation);
-		ProtocolValidationHelper.validateCode(this,InstanceConstants.PROTOCOL_COLL_NAME, contextValidation);
-		ProtocolValidationHelper.validateExperimentTypeCodes(experimentTypeCodes, contextValidation);
-		ProtocolValidationHelper.validateProtocolCategoryCode(this.categoryCode, contextValidation);
+		CommonValidationHelper  .validateIdPrimary                   (contextValidation, this);
+		CommonValidationHelper  .validateCodePrimary                 (contextValidation, this, InstanceConstants.PROTOCOL_COLL_NAME);
+		CommonValidationHelper  .validateExperimentTypeCodes         (contextValidation, experimentTypeCodes);
+		ProtocolValidationHelper.validateProtocolCategoryCodeRequired(contextValidation, categoryCode);
 		// filePath ( required ??), version (required ??)	
 	}
 	

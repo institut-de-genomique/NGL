@@ -21,8 +21,8 @@ public class SraParameter extends DBObject {
 	public SraParameter() { }
 	
 	public SraParameter(String code, String type, String value) {
-		this.code = code;
-		this.type = type;
+		this.code  = code;
+		this.type  = type;
 		this.value = value;
 	}
 	

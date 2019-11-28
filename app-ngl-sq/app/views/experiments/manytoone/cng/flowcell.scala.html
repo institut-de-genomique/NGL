@@ -41,16 +41,16 @@
 </div>
 <div class="row col-md-12 col-lg-12">
 <ul class="nav nav-tabs margin-bottom-5" role="tablist">
-  <li class="active"><a href="" role="tab" data-target="#tube" data-toggle="tab" ng-click="atmService.data.updateFromDatatable()">@Messages("experiments.flowcell.design")</a></li>
+  <li class="active"><a href="" role="tab" data-target="#design" data-toggle="tab" ng-click="atmService.data.updateFromDatatable()">@Messages("experiments.flowcell.design")</a></li>
   <li><a href="" role="tab"  data-target="#roadmap" data-toggle="tab" ng-click="atmService.data.updateDatatable()">@Messages("experiments.calculation.sheet")</a></li>  
 </ul>
 
 <div class="tab-content"  >
-	<div class="tab-pane active" id="tube">	
+	<div class="tab-pane active" id="design">	
 		<div class="row">
 		<div class="col-md-12 col-lg-12">
 		<div class="row">
-		<div class="col-md-12 col-lg-5" droppable drop-fn="atmService.data.drop" ng-model="atmService.data.inputContainers"  ng-if="mainService.isEditMode()">
+		<div class="col-md-12 col-lg-5" droppable drop-fn="atmService.data.drop" ng-model="atmService.data.inputContainers"  ng-if="mainService.isEditMode() && isNewState()">
 			<div class="panel panel-primary"  style="border-style:dashed">				
 			<div class="panel-body" ng-if="atmService.data.inputContainers.length==0">		
 				<p><i class="fa fa-download"></i> @Messages("experiments.inputs")</p>
@@ -223,7 +223,7 @@
 									<input class="form-control input-sm" type="text" 
 										title='@Messages("containers.table.percentage")' 
 										ng-model="inputContainer.percentage"
-										ng-change="changeValueOnFlowcellDesign()"
+										ng-change="changeValueOnFlowcellDesign(atm.line)"
 										udt-html-filter="number" />								
 								</div>
 							</div>	

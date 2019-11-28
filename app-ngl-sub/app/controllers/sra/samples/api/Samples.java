@@ -1,8 +1,5 @@
 package controllers.sra.samples.api;
 
-//import static play.data.Form.form;
-//import static fr.cea.ig.play.IGGlobals.form;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -16,13 +13,9 @@ import org.mongojack.DBQuery.Query;
 
 import controllers.DocumentController;
 import fr.cea.ig.MongoDBDAO;
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import models.sra.submit.common.instance.AbstractSample;
 import models.utils.InstanceConstants;
-
-//import com.gargoylesoftware.htmlunit.javascript.host.Console;
-
-//import play.Logger;
 import play.data.Form;
 import play.libs.Json;
 import play.mvc.Result;
@@ -33,13 +26,18 @@ public class Samples extends DocumentController<AbstractSample> {
 	
 	private static final play.Logger.ALogger logger = play.Logger.of(Samples.class);
 
-//	private final /*static*/ Form<SamplesSearchForm> samplesSearchForm;// = form(SamplesSearchForm.class);
-	private final /*static*/ Form<AbstractSample> sampleForm ;//= form(AbstractSample.class);
+	private final Form<AbstractSample> sampleForm ;
+
+//	@Inject
+//	public Samples(NGLContext ctx) {
+//		super(ctx,InstanceConstants.SRA_SAMPLE_COLL_NAME, AbstractSample.class);
+////		samplesSearchForm = ctx.form(SamplesSearchForm.class);
+//		sampleForm = ctx.form(AbstractSample.class);
+//	}
 
 	@Inject
-	public Samples(NGLContext ctx) {
-		super(ctx,InstanceConstants.SRA_SAMPLE_COLL_NAME, AbstractSample.class);
-//		samplesSearchForm = ctx.form(SamplesSearchForm.class);
+	public Samples(NGLApplication ctx) {
+		super(ctx, InstanceConstants.SRA_SAMPLE_COLL_NAME, AbstractSample.class);
 		sampleForm = ctx.form(AbstractSample.class);
 	}
 
@@ -77,7 +75,9 @@ public class Samples extends DocumentController<AbstractSample> {
 		//Get Submission from DB 
 		AbstractSample sample = getSample(code);
 		Form<AbstractSample> filledForm = getFilledForm(sampleForm, AbstractSample.class);
-		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm); 	
+//		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm); 	
+//			ctxVal.setUpdateMode();
+		ContextValidation ctxVal = ContextValidation.createUpdateContext(getCurrentUser(), filledForm);
 		if (sample == null) {
 //			filledForm.reject("Sample " +  code, "not exist in database");  // si solution filledForm.reject
 //			return badRequest(filledForm.errorsAsJson( )); // legit
@@ -89,8 +89,8 @@ public class Samples extends DocumentController<AbstractSample> {
 
 		if (code.equals(sampleInput.code)) {
 //			ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm.errors()); 	
-			ctxVal.setUpdateMode();
-			ctxVal.getContextObjects().put("type", "sra");
+//			ctxVal.getContextObjects().put("type", "sra");
+			ctxVal.putObject("type", "sra");
 			sampleInput.traceInformation.setTraceInformation(getCurrentUser());
 			sampleInput.validate(ctxVal);	
 			if (!ctxVal.hasErrors()) {
@@ -100,7 +100,7 @@ public class Samples extends DocumentController<AbstractSample> {
 				logger.debug(Json.toJson(sampleInput).toString());
 				return ok(Json.toJson(sampleInput));
 			} else {
-				System.out.println(" ok je suis dans Samples.update et erreurs \n");
+				logger.debug(" ok je suis dans Samples.update et erreurs \n");
 				logger.debug(Json.toJson(sampleInput).toString());
 				// return badRequest(filledForm.errors-AsJson());
 				return badRequest(errorsAsJson(ctxVal.getErrors()));
@@ -145,7 +145,7 @@ public class Samples extends DocumentController<AbstractSample> {
 		if(CollectionUtils.isNotEmpty(form.externalIds)) {
 			queries.add(DBQuery.in("externalId", form.externalIds));
 		} else if(StringUtils.isNotBlank(form.externalIdRegex)){
-			queries.add(DBQuery.regex("external", Pattern.compile(form.externalIdRegex)));
+			queries.add(DBQuery.regex("externalId", Pattern.compile(form.externalIdRegex)));
 		}
 		if (queries.size() > 0) {
 			query = DBQuery.and(queries.toArray(new Query[queries.size()]));

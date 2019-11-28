@@ -1,4 +1,5 @@
-@()
+@(defaultGroupAccess: String, ouGroupLaboName: String)
+
 
 @column()(value: Html) = {
 	<div class="col-md-4 col-lg-4">
@@ -23,7 +24,7 @@
 		 </h1>
 	</div>
 </div>
-
+</div>
 <div class="row">
 	<div class="col-md-12 col-lg-12"  messages="messages"></div>
 </div>
@@ -32,15 +33,17 @@
 <div class="row margin-bottom-7">
 <div class="col-md-12 col-lg-12">
    <ul class="nav nav-tabs margin-bottom-5">
-   	<li class="active"><a href="#" data-target="#general" data-toggle="tab">@Messages("projects.details.general")</a></li>
-   	<li ><a href="#" data-target="#bioinformaticParameters" data-toggle="tab">@Messages("projects.details.bioinformaticParameters")</a></li>    	
+   	<li ng-class="getTabClass('general')"><a href="#" data-target="#general" data-toggle="tab" ng-click="setActiveTab('general')">@Messages("projects.details.general")</a></li>
+   	<li ng-class="getTabClass('bioinfoParam')"><a href="#" data-target="#bioinformaticParameters" data-toggle="tab" ng-click="setActiveTab('bioinfoParam')">@Messages("projects.details.bioinformaticParameters")</a></li> 
+   	<li ng-class="getTabClass('systemParam')"><a href="#" data-target="#systemParameters" data-toggle="tab" ng-click="setActiveTab('systemParam')">@Messages("projects.details.systemParameters")</a></li> 
+   	<li ng-if="isGroupAdminMember" ng-class="getTabClass('admin')"><a href="#" data-target="#admin" data-toggle="tab" ng-click="setUsers('@defaultGroupAccess','@ouGroupLaboName','admin')">@Messages("projects.details.admin")</a></li>     	
    </ul>
    
    <form class="form-horizontal">
 
 	<div class="tab-content">
 	
-		<div class="tab-pane active" id="general">
+		<div class="tab-pane {{getTabClass('general')}}" id="general">
 
 			<div class="row margin-bottom-7">
 				<div class="col-md-12 col-lg-12">
@@ -131,13 +134,13 @@
 										<input type="text" class="form-control" ng-switch-when="true" ng-model="project.nbCharactersInSampleCode">										
 									</div>
 								}
-								@views.html.helper.columnLabelValue(Messages("projects.unixGroup")){
+								<!-- Deplacer dans onglet parametres systemes-->
+								<!-- @views.html.helper.columnLabelValue(Messages("projects.unixGroup")){
 									<div ng-switch on="mainService.isEditMode()">
 										<p class="form-control-static" ng-switch-when="false">{{project.properties.unixGroup.value}}</p>
 										<div ng-switch-when="true"><div bt-select  class="form-control" ng-model="project.properties.unixGroup.value" bt-options='v.code as v.code for v in lists.getValues({},"values")'></div></div>
-										<!-- <input type="text" class="form-control" ng-switch-when="true" ng-model="project.properties.unixGroup.value">	 -->									
 									</div>
-								}
+								} -->
 							}				
 						</div>
 						
@@ -146,7 +149,7 @@
 			
 		</div>
 		
-		<div class="tab-pane" id="bioinformaticParameters">
+		<div class="tab-pane {{getTabClass('bioinfoParam')}}" id="bioinformaticParameters">
 		
 			<div class="row margin-bottom-7">
 				<div class="col-md-12 col-lg-12">
@@ -201,19 +204,95 @@
 										<i ng-switch-when="true" class="fa fa-check-square-o  fa-lg"></i>
 										<i ng-switch-default class="fa fa-square-o  fa-lg"></i>
 									</p>					
-								}							
+								}	
+								@views.html.helper.columnLabelValue(Messages("projects.bioinformaticParameters.ccrtAutomaticTransfer")){
+									<div class="checkbox" ng-if="mainService.isEditMode()">
+					 					<label>
+											<input type="checkbox"  ng-model="project.bioinformaticParameters.ccrtAutomaticTransfer">&nbsp;	
+										</label>
+									</div>				
+									<p class="form-control-static" ng-if="!mainService.isEditMode() && project.bioinformaticParameters.fgGroup!=null" ng-switch on="project.bioinformaticParameters.ccrtAutomaticTransfer">
+										<i ng-switch-when="true" class="fa fa-check-square-o  fa-lg"></i>
+										<i ng-switch-default class="fa fa-square-o  fa-lg"></i>
+									</p>					
+								}
+														
 							}
 						</div>
 						
 				</div>
 			</div>
-
+			
 		
 		</div>
+		<div class="tab-pane {{getTabClass('systemParam')}}" id="systemParameters">
+		
+			<div class="row margin-bottom-7">
+				<div class="col-md-12 col-lg-12">
+						<div class="row">
+							@column(){
+								<div class="form-group">
+	    							<label ng-show="project.properties.synchroProj!=undefined" class="col-md-6 col-lg-6 control-label">@Messages("projects.synchroProj")</label>
+	    							<div class="col-md-6 col-lg-6">
+	    								<p class="form-control-static" ng-show="project.properties.synchroProj!=undefined" ng-switch on="project.properties.synchroProj.value">
+										<i ng-switch-when="true" class="fa fa-check-square-o  fa-lg"></i>
+										<i ng-switch-default class="fa fa-square-o  fa-lg"></i>
+										</p>
+	    							</div>
+								</div>
+							
+								<!-- TODO EJACOBY AD-->
+								@views.html.helper.columnLabelValue(Messages("projects.unixGroup")){
+									<div ng-switch on="mainService.isEditMode()">
+										<p class="form-control-static" ng-switch-when="false">{{project.properties.unixGroup.value}}</p>
+										<div ng-switch-when="true"><div bt-select  class="form-control" ng-model="project.properties.unixGroup.value" bt-options='v.code as v.code for v in lists.getValues({},"values")'></div></div>
+										<!-- <input type="text" class="form-control" ng-switch-when="true" ng-model="project.properties.unixGroup.value">	 -->									
+									</div>
+								}
+								
+								<div class="form-group">
+	    							<label ng-show="project.archive!=undefined" class="col-md-6 col-lg-6 control-label">@Messages("projects.archive")</label>
+	    							<div class="col-md-6 col-lg-6">
+	    								<p class="form-control-static" ng-show="project.archive!=undefined" ng-switch on="project.archive">
+										<i ng-switch-when="true" class="fa fa-check-square-o  fa-lg"></i>
+										<i ng-switch-default class="fa fa-square-o  fa-lg"></i>
+										</p>
+	    							</div>
+								</div>
+							}
+						</div>
+						<div class="row">
+			<div class="col-md-3 col-lg-3">
+			<table class="table table-condensed table-hover table-bordered">
+			<thead>
+				<tr>
+					<th>@Messages("projects.archiveDate")</th>
+					<th>@Messages("projects.archiveNetbackupId")</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr ng-repeat="archive in project.properties.archives.value">
+					<td>{{archive.date| date:'@Messages("datetime.format")'}}</td>
+					<td>{{archive.archiveNetbackupId}}</td>
+				</tr>
+			</tbody>
+		</table>
 	</div>
+</div>
+</div>
+				</div>
+			</div>
+		<div class="tab-pane {{getTabClass('admin')}}" id="admin">
+				@partials.details_admin()		
+					
+		</div>
+		
 	
 	</form>
 	</div>
+	@partials.addModalUser()
+	@partials.addModalAdmin()
+	@partials.deleteModal()
 </div>
 		
 		

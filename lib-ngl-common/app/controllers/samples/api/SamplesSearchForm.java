@@ -12,7 +12,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.mongojack.DBQuery;
-import org.mongojack.DBQuery.Query;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -26,6 +25,9 @@ public class SamplesSearchForm extends DBObjectListForm<Sample> {
 	public String code; 
 	public String codeRegex;
 	public String treeOfLifePathRegex;
+	public List<String> lifeFromProjectCodes;
+	public List<String> lifeFromSampleCodes;
+	public List<String> lifeFromSampleTypeCodes;
 	public Set<String> codes;
 	public String projectCode;
 	public List<String> projectCodes;
@@ -62,13 +64,9 @@ public class SamplesSearchForm extends DBObjectListForm<Sample> {
 				+ "]";
 	}
 
-	
 	@Override
 	@JsonIgnore
 	public DBQuery.Query getQuery() {
-		// TODO: simply build return value at method end
-		Query query = DBQuery.empty();
-		
 		List<DBQuery.Query> queryElts = new ArrayList<>();
 
 		if(CollectionUtils.isNotEmpty(codes)){
@@ -98,11 +96,21 @@ public class SamplesSearchForm extends DBObjectListForm<Sample> {
 		if(StringUtils.isNotBlank(treeOfLifePathRegex)){
 			queryElts.add(DBQuery.regex("life.path", Pattern.compile(treeOfLifePathRegex)));
 		}
-
-		// TODO: redundant code, done at method end 
-		if(queryElts.size() > 0){
-			query = DBQuery.and(queryElts.toArray(new DBQuery.Query[queryElts.size()]));
+		if(CollectionUtils.isNotEmpty(lifeFromProjectCodes)){
+			queryElts.add(DBQuery.in("life.from.projectCode", lifeFromProjectCodes));
 		}
+		if(CollectionUtils.isNotEmpty(lifeFromSampleCodes)){
+			queryElts.add(DBQuery.in("life.from.sampleCode", lifeFromSampleCodes));
+		}
+		if(CollectionUtils.isNotEmpty(lifeFromSampleTypeCodes)){
+			queryElts.add(DBQuery.in("life.from.sampleTypeCode", lifeFromSampleTypeCodes));
+		}
+//
+//		Query query = DBQuery.empty();
+//		
+//		if(queryElts.size() > 0){
+//			query = DBQuery.and(queryElts.toArray(new DBQuery.Query[queryElts.size()]));
+//		}
 
 
 		if(null != fromDate){
@@ -174,10 +182,15 @@ public class SamplesSearchForm extends DBObjectListForm<Sample> {
 		queryElts.addAll(NGLControllerHelper.generateExistsQueriesForFields(existingFields));
 
 
-		if(queryElts.size() > 0){
-			query = DBQuery.and(queryElts.toArray(new DBQuery.Query[queryElts.size()]));
-		}		
-
-		return query;
+//		Query query = DBQuery.empty();
+//		if(queryElts.size() > 0){
+//			query = DBQuery.and(queryElts.toArray(new DBQuery.Query[queryElts.size()]));
+//		}		
+//
+//		return query;
+		if (queryElts.size() == 0)
+			return  DBQuery.empty();
+		return DBQuery.and(queryElts.toArray(new DBQuery.Query[queryElts.size()]));
 	}
+	
 }

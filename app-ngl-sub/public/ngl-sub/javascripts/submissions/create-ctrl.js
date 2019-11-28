@@ -80,6 +80,8 @@ angular.module('home').controller('CreateCtrl',[ '$http', '$scope', '$routeParam
 				$scope.createService.userFileReadSet=null;
 				$scope.createService.acStudy=null;
 				$scope.createService.acSample=null;
+				angular.element('#idUserFileReadSet')[0].value = null;
+				angular.element('#idUserFileClonesToAc')[0].value = null;	
 			});
 	};
 	
@@ -91,7 +93,8 @@ angular.module('home').controller('CreateCtrl',[ '$http', '$scope', '$routeParam
 		$scope.createService.userFileReadSet=null;
 		$scope.createService.acStudy=null;
 		$scope.createService.acSample=null;
-		
+		angular.element('#idUserFileReadSet')[0].value = null;
+		angular.element('#idUserFileClonesToAc')[0].value = null;	
 		//$scope.messages.clear();
 	};	
 	

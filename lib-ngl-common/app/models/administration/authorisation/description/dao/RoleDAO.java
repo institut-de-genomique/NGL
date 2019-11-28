@@ -19,18 +19,11 @@ import models.utils.dao.DAOException;
 @Repository
 public class RoleDAO extends AbstractDAOMapping<Role> {
 	
-//	protected RoleDAO(){
-//		super("role", Role.class, RoleMappingQuery.class,
-//				"SELECT r.id, r.label FROM role as r ", true);
-//	}
 	protected RoleDAO() {
 		super("role", Role.class, RoleMappingQuery.factory,
 				"SELECT r.id, r.label FROM role as r ", true);
 	}
 	
-	/*
-	 * findAll()
-	 */
 	@SuppressWarnings("deprecation")
 	@Override
 	public List<Role> findAll() throws DAOException {
@@ -39,29 +32,22 @@ public class RoleDAO extends AbstractDAOMapping<Role> {
 		return this.jdbcTemplate.query(sql, mapper);
 	}
 	
-	/*
-	 * findByUserLogin()
-	 */
-	public List<Role> findByUserLogin(String aLogin) throws DAOException{
-		if(null == aLogin){
-			throw new DAOException("login is mandatory");
-		}
+	public List<Role> findByUserLogin(String login) throws DAOException{
+		DAOException.daoAssertNotNull("login", login);
 		String sql = sqlCommon
 				+ "INNER JOIN user_role as ur ON r.id = ur.role_id "
 				+ "INNER JOIN user as u ON ur.user_id = u.id "
 				+ "WHERE u.login=?";
-		return initializeMapping(sql, new SqlParameter("login", Types.VARCHAR)).execute(aLogin);
+		return initializeMapping(sql, new SqlParameter("login", Types.VARCHAR)).execute(login);
 	}
 
 	@Override
 	public long save(Role value) throws DAOException {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	public void update(Role value) throws DAOException {
-		// TODO Auto-generated method stub
-		
 	}
+	
 }

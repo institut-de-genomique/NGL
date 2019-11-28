@@ -13,8 +13,6 @@ angular.module('home', ['ngRoute', 'ultimateDataTableServices','commonsServices'
 		controller : 'BalanceSheetsYearCtrl'
 	});
 	
-	
-	
 	$routeProvider.otherwise({redirectTo: '/balance-sheets/general/home'});
 
 	// configure html5 to get links working with bookmarked

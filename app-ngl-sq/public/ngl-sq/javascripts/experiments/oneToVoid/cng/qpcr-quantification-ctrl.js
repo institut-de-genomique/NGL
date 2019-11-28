@@ -42,14 +42,20 @@ angular.module('home').controller('OneToVoidQPCRQuantificationCNGCtrl',['$scope'
 					inputContainerUsed.newConcentration = concentration1;
 				}
 			}
-			
-		});			
+		});
 	};
 	
-	var importData = function(){
+	//NGL-2237 ajout parametre !! voir CNS/reception-fluo-quantificatio-ctrl.js
+	// 28/01/2019 NGL-2368/NGL-2389 ajout  tecan+lightcycler =>ProdTecan
+	var importData = function(typeQC){
+		console.log("importData =>"+typeQC);
 		$scope.messages.clear();
+		if       (typeQC === "ProdBravo") { uploadFile=$scope.fileProd; }
+		else if  (typeQC === "DevBravo")  { uploadFile=$scope.fileDev;  }
+		else if  (typeQC === "ProdTecan") { uploadFile=$scope.fileProdTecan;  }
+		console.log("File :"+uploadFile.fullname+", mode :"+typeQC);
 		
-		$http.post(jsRoutes.controllers.instruments.io.IO.importFile($scope.experiment.code).url, $scope.file)
+		$http.post(jsRoutes.controllers.instruments.io.IO.importFile($scope.experiment.code).url+"?mode="+typeQC,  uploadFile )
 		.success(function(data, status, headers, config) {
 			$scope.messages.clazz="alert alert-success";
 			$scope.messages.text=Messages('experiments.msg.import.success');
@@ -57,30 +63,71 @@ angular.module('home').controller('OneToVoidQPCRQuantificationCNGCtrl',['$scope'
 			$scope.messages.open();	
 			//only atm because we cannot override directly experiment on scope.parent
 			$scope.experiment.atomicTransfertMethods = data.atomicTransfertMethods;
-			$scope.file = undefined;
-			angular.element('#importFile')[0].value = null;
-			$scope.$emit('refresh');
 			
+			$scope.fileProd = undefined;
+			$scope.fileDev = undefined;
+			$scope.fileProdTecan= undefined;
+			
+			angular.element('#importFileProd')[0].value = null;
+			angular.element('#importFileDev')[0].value = null;
+			angular.element('#importFileProdTecan')[0].value = null;
+			
+			$scope.$emit('refresh');
 		})
 		.error(function(data, status, headers, config) {
 			$scope.messages.clazz = "alert alert-danger";
 			$scope.messages.text = Messages('experiments.msg.import.error');
 			$scope.messages.setDetails(data);
 			$scope.messages.open();	
-			$scope.file = undefined;
-			angular.element('#importFile')[0].value = null;
+			
+			$scope.fileProd = undefined;
+			$scope.fileDev = undefined;
+			$scope.fileProdTecan= undefined;
+			
+			angular.element('#importFileProd')[0].value = null;
+			angular.element('#importFileDev')[0].value = null;
+			angular.element('#importFileProdTecan')[0].value = null;
 		});
 	};
 	
-	$scope.button = {
-		isShow:function(){
-			return ($scope.isInProgressState() && !$scope.mainService.isEditMode() || Permissions.check("admin"))
+	// NGL-2237 renommer en buttons; voir CNS/reception-fluo-quantification-ctrl.js
+	// 28/01/2019 NGL-2368/NGL-2389 ajout  tecan+lihtcycler =>ProdTecan
+	// 06/02/2019 dans le cas de lightCycler seul pas de bouton d'import ???
+	$scope.buttons= {
+		isShowBravo:function(){
+			return ( ($scope.isInProgressState() && !$scope.mainService.isEditMode() && $scope.buttons.isBravo()) || (Permissions.check("admin") && !$scope.buttons.isTecan()) )
 			},
-		isFileSet:function(){
-			return ($scope.file === undefined)?"disabled":"";
+		isShowTecan:function(){
+			return ( ($scope.isInProgressState() && !$scope.mainService.isEditMode() && $scope.buttons.isTecan()) || (Permissions.check("admin") && !$scope.buttons.isTecan()) )
+			},
+		isFileSetProd:function(){
+			return ($scope.fileProd ===null || $scope.fileProd === undefined)?"disabled":"";
 		},
-		click:importData,		
+		isFileSetDev:function(){
+			return ($scope.fileDev === null || $scope.fileDev === undefined)?"disabled":"";
+		},
+		isFileSetProdTecan:function(){
+			return ($scope.fileProdTecan === null || $scope.fileProdTecan === undefined)?"disabled":"";
+		},
+		clickProd:function(){ 
+			return importData("ProdBravo");
+		},
+		clickDev:function() { 
+			return importData("DevBravo");
+		},
+		clickProdTecan:function(){ 
+			console.log("click on ProdTecan...");
+			return importData("ProdTecan");
+		},
+		isTecan:function(){
+			return ($scope.experiment.instrument.typeCode === 'tecan-evo-150-and-qpcr-lightcycler-480II');
+		},
+		isBravo:function(){
+			return ($scope.experiment.instrument.typeCode === 'bravows-and-qpcr-lightcycler-480II');
+		}
+		
 	};
+	
 	
 	// NGL-1055: mettre les getArray et codes'' dans filter et pas dans render
 	var columns = $scope.atmService.data.getColumnsConfig();

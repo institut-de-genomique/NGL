@@ -31,16 +31,16 @@ public abstract class Mapping<T extends DBObject> {
 		container
 	}
 	
-	// Seems that it's supposed to be 3 maps and not 1.
-	protected Map<String, Map<String, DBObject>> objects;
+	// Seems that it's supposed to be 3 maps (samples, supports, containers) and not 1.
+	// Each map indexes its element by code (string).
+	protected Map<String, Map<String, DBObject>>                objects;
 	protected Map<String, ? extends AbstractFieldConfiguration> configuration;
-	protected Action action;
-	protected ContextValidation contextValidation;
-	protected String collectionName;
-	protected Class<T> type;
-	private Keys key;
+	protected Action                                            action;
+	protected ContextValidation                                 contextValidation;
+	protected String                                            collectionName;
+	protected Class<T>                                          type;
+	private   Keys                                              key;
 	
-	// TODO: fix doc generation error for unqualified parameter type (Keys -> Mapping.Keys)
 	protected Mapping(Map<String, Map<String, DBObject>> objects, 
 			          Map<String, ? extends AbstractFieldConfiguration> configuration, 
 			          Action action,
@@ -48,7 +48,6 @@ public abstract class Mapping<T extends DBObject> {
 			          Class<T> type, 
 			          Mapping.Keys key, 
 			          ContextValidation contextValidation) {
-//		super();
 		this.objects           = objects;
 		this.configuration     = configuration;
 		this.action            = action;
@@ -70,9 +69,8 @@ public abstract class Mapping<T extends DBObject> {
 		} else if(Action.save.equals(action)) {
 			T objectInDB = get(object, rowMap, false);
 			if (objectInDB != null) {
-				contextValidation.addErrors("Error", "error.objectexist", type.getSimpleName(), objectInDB.code);
+				contextValidation.addError("Error", "error.objectexist", type.getSimpleName(), objectInDB.code);
 			} else if (object.code != null) {
-				// TODO: probably use properly typed separate object collections so the cast is not needed
 				@SuppressWarnings("unchecked")
 				T objectInObjects = (T)objects.get(key.toString()).get(object.code);
 				if (objectInObjects != null) {
@@ -94,10 +92,10 @@ public abstract class Mapping<T extends DBObject> {
 	 * Update the current object alone without any information from other object
 	 * @param object
 	 */
-	protected abstract void update(T object) ;
+	protected abstract void update(T object);
 
 	/*
-	 * Add missing property from otehr objectType
+	 * Add missing property from other objectType
 	 * @param c
 	 */
 	public abstract void consolidate(T object);
@@ -105,31 +103,46 @@ public abstract class Mapping<T extends DBObject> {
 	public void synchronizeMongoDB(DBObject c) {
 		if (Action.save.equals(action)) {
 			MongoDBDAO.save(collectionName, c);
-		} else if(Action.update.equals(action)) {
+		} else if (Action.update.equals(action)) {
 			MongoDBDAO.update(collectionName, c);
 		}		
 	}
 	
 	public void rollbackInMongoDB(DBObject c) {
-		if (Action.save.equals(action) && c._id == null) { // Delete sample and support if already exist !!!!
+		if (Action.save.equals(action) && c._id == null) { 
+			// Delete sample and support if already exist !!!!
 			MongoDBDAO.deleteByCode(collectionName, c.getClass(), c.code);
-		} else if(Action.update.equals(action)) {
-			//replace by old version of the object
+		} else if (Action.update.equals(action)) {
+			// replace by old version of the object
 		}		
 	}
 	
 	public void validate(DBObject c) {
-		ContextValidation cv = new ContextValidation(contextValidation.getUser());
+		ContextValidation cv =
+				Action.save.equals(action) ? ContextValidation.createCreationContext(contextValidation.getUser())
+						                   : ContextValidation.createUpdateContext  (contextValidation.getUser());
 		cv.setRootKeyName(contextValidation.getRootKeyName());
 		cv.addKeyToRootKeyName(c.code);
-		cv.setMode(cv.getMode());
 		((IValidation)c).validate(cv);
 		if (cv.hasErrors()) {
-			contextValidation.addErrors(cv.errors);
+			contextValidation.addErrors(cv.getErrors());
 		}
 		cv.removeKeyFromRootKeyName(c.code);	
 	}
 	
+//	public <A extends DBObject & IValidation>void validate(A c) {
+//		ContextValidation cv =
+//				Action.save.equals(action) ? ContextValidation.createCreationContext(contextValidation.getUser())
+//						                   : ContextValidation.createUpdateContext  (contextValidation.getUser());
+//		cv.setRootKeyName(contextValidation.getRootKeyName());
+//		cv.addKeyToRootKeyName(c.code);
+//		c.validate(cv);
+//		if (cv.hasErrors()) {
+//			contextValidation.addErrors(cv.getErrors());
+//		}
+//		cv.removeKeyFromRootKeyName(c.code);	
+//	}
+
 	protected void populateField(Field field, DBObject dbObject, Map<Integer, String> rowMap) {
 		if (configuration.containsKey(field.getName())) {
 			AbstractFieldConfiguration fieldConfiguration = configuration.get(field.getName());
@@ -137,7 +150,7 @@ public abstract class Mapping<T extends DBObject> {
 				fieldConfiguration.populateField(field, dbObject, rowMap, contextValidation, action);
 			} catch (Exception e) {
 				logger.error("Error", e.getMessage(), e);
-				contextValidation.addErrors("Error", e.getMessage());
+				contextValidation.addError("Error", e.getMessage());
 				throw new RuntimeException(e);
 			}
 		}			
@@ -152,10 +165,10 @@ public abstract class Mapping<T extends DBObject> {
 					String code = object.code;
 					object = MongoDBDAO.findByCode(collectionName, type, object.code);	
 					if (errorIsNotFound && object == null) {
-						contextValidation.addErrors("Error", "not found " + type.getSimpleName() + " for code " + code);
+						contextValidation.addError("Error", "not found " + type.getSimpleName() + " for code " + code);
 					}
 				} else if (codeConfig.required) {
-					contextValidation.addErrors("Error", "not found " + type.getSimpleName() + " code !!!");
+					contextValidation.addError("Error", "not found " + type.getSimpleName() + " code !!!");
 				} else {
 					object = null;
 				}
@@ -164,19 +177,17 @@ public abstract class Mapping<T extends DBObject> {
 			}
 		} catch (Exception e) {
 			logger.error("Error", e.getMessage(), e);
-			contextValidation.addErrors("Error", e.getMessage());
+			contextValidation.addError("Error", e.getMessage());
 			throw new RuntimeException(e);
 		}
 		return object;
 	}
 
 	protected ContainerSupport getContainerSupport(String code) {
-		if (objects.containsKey("support")) {
-			ContainerSupport cs = (ContainerSupport)objects.get("support").get(code);
-			return cs;
-		} else {
+		if (!objects.containsKey("support")) 
 			throw new RuntimeException("Support must be load from Excel file, check configuration");
-		}
+		ContainerSupport cs = (ContainerSupport)objects.get("support").get(code);
+		return cs;
 	}
 	
 	protected Sample getSample(String code) {

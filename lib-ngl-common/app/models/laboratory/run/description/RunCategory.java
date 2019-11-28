@@ -1,35 +1,22 @@
 package models.laboratory.run.description;
 
+import java.util.function.Supplier;
+
+import fr.cea.ig.ngl.utils.SpringSupplier;
 import models.laboratory.common.description.AbstractCategory;
 import models.laboratory.run.description.dao.RunCategoryDAO;
-import models.utils.dao.AbstractDAO;
-import models.utils.dao.DAOException;
+import ngl.refactoring.MiniDAO;
 
-public class RunCategory extends AbstractCategory<RunCategory> {
+public class RunCategory extends AbstractCategory {
 	
-	public static final RunCategoryFinder find = new RunCategoryFinder(); 
+	public static final Supplier<RunCategoryDAO> find = new SpringSupplier<>(RunCategoryDAO.class);
+	public static final Supplier<MiniDAO<RunCategory>> miniFind = MiniDAO.createSupplier(find); 
 		
-	public RunCategory() {
-		super(RunCategoryDAO.class.getName());
+	// Serialization constructor
+	public RunCategory() {}
+	
+	public RunCategory(String code, String name) {
+		super(code,name);
 	}
 	
-	@Override
-	protected Class<? extends AbstractDAO<RunCategory>> daoClass() {
-		return RunCategoryDAO.class;
-	}
-	
-	public static class RunCategoryFinder extends Finder<RunCategory,RunCategoryDAO> {
-
-//		public RunCategoryFinder() {
-//			super(RunCategoryDAO.class.getName());			
-//		}
-		public RunCategoryFinder() { super(RunCategoryDAO.class); }
-		
-		public RunCategory findByTypeCode(String typeCode) throws DAOException{
-//			return ((RunCategoryDAO)getInstance()).findByTypeCode(typeCode);
-			return getInstance().findByTypeCode(typeCode);
-		}
-		
-	}
-
 }

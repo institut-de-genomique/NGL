@@ -2,11 +2,11 @@ package controllers.main.tpl;
 
 import javax.inject.Inject;
 
+import controllers.NGLController;
 import fr.cea.ig.authentication.Authenticated;
 import fr.cea.ig.lfw.Historized;
 import fr.cea.ig.lfw.utils.JavascriptGeneration.Codes;
 import fr.cea.ig.ngl.NGLApplication;
-import fr.cea.ig.ngl.NGLController;
 import fr.cea.ig.ngl.support.Executor;
 import fr.cea.ig.ngl.support.NGLJavascript;
 import fr.cea.ig.ngl.support.api.CodeLabelAPIHolder;

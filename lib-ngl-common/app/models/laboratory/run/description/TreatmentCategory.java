@@ -1,13 +1,13 @@
 package models.laboratory.run.description;
 
+import java.util.function.Supplier;
+
+import fr.cea.ig.ngl.utils.SpringSupplier;
 import models.laboratory.common.description.AbstractCategory;
 import models.laboratory.run.description.dao.TreatmentCategoryDAO;
-import models.utils.dao.AbstractDAO;
+import ngl.refactoring.MiniDAO;
 
-public class TreatmentCategory extends AbstractCategory<TreatmentCategory> {
-	
-//	public static Finder<TreatmentCategory> find = new Finder<TreatmentCategory>(TreatmentCategoryDAO.class.getName());
-	public static final Finder<TreatmentCategory,TreatmentCategoryDAO> find = new Finder<>(TreatmentCategoryDAO.class);
+public class TreatmentCategory extends AbstractCategory {
 	
 	public static enum CODE {
 		ngsrg, 
@@ -17,13 +17,18 @@ public class TreatmentCategory extends AbstractCategory<TreatmentCategory> {
 		ba
 	}
 
-	public TreatmentCategory() {
-		super(TreatmentCategoryDAO.class.getName());
-	}
+	public static final Supplier<TreatmentCategoryDAO>       find     = new SpringSupplier<>(TreatmentCategoryDAO.class);
+	public static final Supplier<MiniDAO<TreatmentCategory>> miniFind = MiniDAO.createSupplier(find);
 
-	@Override
-	protected Class<? extends AbstractDAO<TreatmentCategory>> daoClass() {
-		return TreatmentCategoryDAO.class;
+	// Serialization constructor
+	public TreatmentCategory() {}
+	
+	public TreatmentCategory(String code, String name) {
+		super(code,name);
 	}
-
+	
+	public TreatmentCategory(CODE code, String name) {
+		this(code.name(),name);
+	}
+	
 }

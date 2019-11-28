@@ -1,0 +1,28 @@
+//created on: Feb 2, 2015
+package rules
+
+//list any import classes here.
+
+
+
+//declare any global variables here
+rule "Check RefCollab in sample "
+	@nglSQ( validations )
+	dialect "java"
+	salience 900
+	no-loop
+    when
+        $sample : Sample($referenceCollab:referenceCollab, $referenceCollab!=null)
+        $contextValidation:ContextValidation()	
+    then
+    	Logger.debug("Check refCollab : "+$sample.code+" "+$referenceCollab);  
+       	
+       	//La refCollab ne doit contenir que des chiffres, lettres _- ou .
+       	//et max 25 caracteres
+       	if( (!$referenceCollab.matches("^[\\.A-Za-z0-9_-]+$"))  || ($referenceCollab.length() >25)){
+       	//Pour l'ajout de l'erreur il faut que la clé soit differente pour chaque sample de la liste à créer =>"referenceCollab "+$sample.code
+       	$contextValidation.addErrors("referenceCollab "+$sample.code, ValidationConstants.ERROR_VALUENOTAUTHORIZED_MSG, $sample.code+" / "+$referenceCollab, "Sample");
+       	Logger.debug("Incorrect refCollab : "+$sample.code+" "+$referenceCollab);  
+	  }
+	end
+	

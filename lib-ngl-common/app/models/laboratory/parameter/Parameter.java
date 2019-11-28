@@ -18,11 +18,12 @@ import fr.cea.ig.DBObject;
 
 @JsonTypeInfo(use=Id.NAME, include=As.EXISTING_PROPERTY, property="typeCode", defaultImpl=models.laboratory.parameter.index.Index.class)
 @JsonSubTypes({
-	@JsonSubTypes.Type(value =  models.laboratory.parameter.index.IlluminaIndex.class, name = "index-illumina-sequencing"),
-	@JsonSubTypes.Type(value =  models.laboratory.parameter.index.NanoporeIndex.class, name = "index-nanopore-sequencing"),
-	@JsonSubTypes.Type(value =  models.laboratory.parameter.printer.BBP11.class, name = "BBP11"),
-	@JsonSubTypes.Type(value =  models.laboratory.parameter.map.MapParameter.class, name = "map-parameter"),
+	@JsonSubTypes.Type(value =  models.laboratory.parameter.index.IlluminaIndex       .class, name = "index-illumina-sequencing"),
+	@JsonSubTypes.Type(value =  models.laboratory.parameter.index.NanoporeIndex       .class, name = "index-nanopore-sequencing"),
+	@JsonSubTypes.Type(value =  models.laboratory.parameter.printer.BBP11             .class, name = "BBP11"),
+	@JsonSubTypes.Type(value =  models.laboratory.parameter.map.MapParameter          .class, name = "map-parameter"),
 	@JsonSubTypes.Type(value =  models.laboratory.parameter.context.ContextDescription.class, name = "context-description"),
+	@JsonSubTypes.Type(value =  models.laboratory.parameter.map.MapQPCR.               class, name = "map-qpcr-parameter")
 
 })
 public abstract class Parameter extends DBObject implements IValidation, ITracingAccess {
@@ -33,16 +34,15 @@ public abstract class Parameter extends DBObject implements IValidation, ITracin
 	public String           name;
 	
 	protected Parameter(String typeCode) {
-		super();
 		this.typeCode = typeCode;
 	}
 	
 	@JsonIgnore
 	@Override
 	public void validate(ContextValidation contextValidation) {
-		CommonValidationHelper.validateCode(this, InstanceConstants.PARAMETER_COLL_NAME, contextValidation);
-		ValidationHelper.required(contextValidation, categoryCode, "categoryCode");
-		ValidationHelper.required(contextValidation, name, "name");
+		CommonValidationHelper.validateCodePrimary(contextValidation, this, InstanceConstants.PARAMETER_COLL_NAME);
+		ValidationHelper      .validateNotEmpty   (contextValidation, categoryCode, "categoryCode");
+		ValidationHelper      .validateNotEmpty   (contextValidation, name,         "name");
 	}
 	
 	@Override
@@ -51,5 +51,4 @@ public abstract class Parameter extends DBObject implements IValidation, ITracin
 			traceInformation = new TraceInformation(); 
 		return traceInformation;
 	}
-	
 }

@@ -22,4 +22,9 @@ public class InstrumentCategoryDAO extends AbstractDAODefault<InstrumentCategory
 		return this.jdbcTemplate.query(sql, mapper, intrumentUsedTypeCode);
 	}
 	
+	@Override
+	protected List<String> getColumns() {
+		return enumColumns;
+	}
+
 }

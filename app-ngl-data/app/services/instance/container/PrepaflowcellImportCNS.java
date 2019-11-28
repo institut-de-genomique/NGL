@@ -6,22 +6,25 @@ import javax.inject.Inject;
 
 import com.mongodb.MongoException;
 
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import models.utils.dao.DAOException;
-import scala.concurrent.duration.FiniteDuration;
+import validation.ContextValidation;
 
 public class PrepaflowcellImportCNS extends ContainerImportCNS {
 	
 	@Inject
-	public PrepaflowcellImportCNS(FiniteDuration durationFromStart,
-			FiniteDuration durationFromNextIteration, NGLContext ctx) {
-		super("Container Prepaflowcell CNS", durationFromStart, durationFromNextIteration, ctx);
+	public PrepaflowcellImportCNS(NGLApplication app) {
+		super("Container Prepaflowcell CNS", app);
 	}
 
+//	@Override
+//	public void runImport() throws SQLException, DAOException, MongoException {
+//		createContainers(contextError,"pl_PrepaflowcellToNGL","lane","F","prepa-flowcell","pl_BanquesolexaUneLane @nom_lane=?");
+//	}
+	
 	@Override
-	public void runImport() throws SQLException, DAOException, MongoException {
+	public void runImport(ContextValidation contextError) throws SQLException, DAOException, MongoException {
 		createContainers(contextError,"pl_PrepaflowcellToNGL","lane","F","prepa-flowcell","pl_BanquesolexaUneLane @nom_lane=?");
 	}
-	
 
 }

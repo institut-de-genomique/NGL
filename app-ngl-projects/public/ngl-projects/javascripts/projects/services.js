@@ -44,7 +44,7 @@
 			
 			columns.push({	property:"properties.unixGroup.value",
 				header: "projects.unixGroup",
-				type :"String",
+				type :"text",
 				order:true,
 				edit:false,
 				choiceInList:false
@@ -75,6 +75,7 @@
 				searchService.lists.refresh.states({objectTypeCode:"Project", display:true},'statetrue');				
 				searchService.lists.refresh.states({objectTypeCode:"Project"});							
 				searchService.lists.refresh.types({objectTypeCode:"Project"});
+				/*TODO EJACOBY AD*/
 				searchService.lists.refresh.values({propertyDefinitionCode:"unixGroup"},"values");
 				isInit=true;
 			}

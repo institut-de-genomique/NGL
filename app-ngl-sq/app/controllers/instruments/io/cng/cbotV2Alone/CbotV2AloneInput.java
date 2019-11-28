@@ -127,7 +127,7 @@ public class CbotV2AloneInput extends AbstractInput {
 	        		 {
 	        			// l'instrument est une cbot seule
 	        			 if ( ! cbot.toUpperCase().equals(experiment.instrument.code.toUpperCase()) ) {
-	        				 contextValidation.addErrors("Erreurs fichier", "Le fichier ne correspond pas à la cBot sélectionnée");
+	        				 contextValidation.addError("Erreurs fichier", "Le fichier ne correspond pas à la cBot sélectionnée");
 	        			 }
 	        		 } else if (experiment.instrument.typeCode.equals("janus-and-cBotV2")) {
 	        			 
@@ -136,29 +136,29 @@ public class CbotV2AloneInput extends AbstractInput {
 	        			 String realCbot=janusAndCbot[2];
 	        			 //System.out.println("realcbot:" + realCbot);
 	        			 if ( ! cbot.toUpperCase().equals(realCbot.toUpperCase()) ) {
-	        				 contextValidation.addErrors("Erreurs fichier", "Le fichier ne correspond pas à la cBot sélectionnée");
+	        				 contextValidation.addError("Erreurs fichier", "Le fichier ne correspond pas à la cBot sélectionnée");
 	        			 }
 	        		 }
 	        		 
 	        	 } else {
-	        		 contextValidation.addErrors("Erreurs fichier", "'RunFolderName' incorrect");
+	        		 contextValidation.addError("Erreurs fichier", "'RunFolderName' incorrect");
 	        	 }   
 	         }
 	         
 	         //-2- s'il existe, verifier le barcode Flowcell 
 	         if (flowcellId.length() > 0 ) {
 	        	 if ( ! experiment.instrumentProperties.get("containerSupportCode").value.equals(flowcellId))  {
-	        		 contextValidation.addErrors("Erreurs fichier", "Le barcode flowcell du fichier ne correspond pas à celui qui est déclaré");
+	        		 contextValidation.addError("Erreurs fichier", "Le barcode flowcell du fichier ne correspond pas à celui qui est déclaré");
 	        	 }
 			 }
 	         
 	         //-3- s'il existe, vérifier le barcode Strip 
 	         // NGL-1141 le barcode Strip de l'experience n'est plus obligatoire et peut etre manquant
 	         if ( null == experiment.instrumentProperties.get("stripCode").value ) {
-        		 contextValidation.addErrors("Erreurs fichier", "Veuillez entrer un barcode de strip avant d'importer le fichier");
+        		 contextValidation.addError("Erreurs fichier", "Veuillez entrer un barcode de strip avant d'importer le fichier");
         		 
 	         } else if ( (stripId.length() > 0 ) && ( ! experiment.instrumentProperties.get("stripCode").value.equals(stripId)) ){
-				 contextValidation.addErrors("Erreurs fichier", "Le barcode strip du fichier ne correspond pas à celui qui est déclaré");
+				 contextValidation.addError("Erreurs fichier", "Le barcode strip du fichier ne correspond pas à celui qui est déclaré");
 	         }
 		      
 		     if (contextValidation.hasErrors()){
@@ -178,7 +178,7 @@ public class CbotV2AloneInput extends AbstractInput {
 		     ReagentUsed reagent=new ReagentUsed();    
 		     String reag[] = reagentId.split("-");
 		     if ( reag.length != 2 ){
-		    	 contextValidation.addErrors("Erreurs fichier","Barcode réactif '"+reagentId+ "' incorrect!!");
+		    	 contextValidation.addError("Erreurs fichier","Barcode réactif '"+reagentId+ "' incorrect!!");
 		     } else {
 		    	 reagent.code=reagentId;  
 		     
@@ -213,7 +213,7 @@ public class CbotV2AloneInput extends AbstractInput {
 		    	 
 		    	 } else {
 		    		 // on fait quoi ???
-		    		 contextValidation.addErrors("Erreurs fichier","Réactif '-"+ reag[1]+ "' non géré !!");
+		    		 contextValidation.addError("Erreurs fichier","Réactif '-"+ reag[1]+ "' non géré !!");
 		    	 }
 		     }
 		     
@@ -221,25 +221,25 @@ public class CbotV2AloneInput extends AbstractInput {
 		     experiment.reagents.add(reagent);
 		     
 	      } catch (SAXException e) {
-	    	  contextValidation.addErrors("Erreurs fichier", "filchier XML incorrect (structure,encodage,...)");
+	    	  contextValidation.addError("Erreurs fichier", "filchier XML incorrect (structure,encodage,...)");
 	      } catch (IOException e) {
-	    	  contextValidation.addErrors("Erreurs fichier", "IOException");
+	    	  contextValidation.addError("Erreurs fichier", "IOException");
 	      } catch (XPathExpressionException e) {
 	    	  // erreur de (String)xpath.evaluate("XX", root);=> erreur du programmeur
-	    	  contextValidation.addErrors("Erreurs fichier", "Probleme XPathExpressionException !!!");
+	    	  contextValidation.addError("Erreurs fichier", "Probleme XPathExpressionException !!!");
 	      }      
   
 		  return experiment;
 	}
 	
-	private void checkMandatoryXMLTag ( ContextValidation contextValidation, String tagName, String tagValue){
+	private void checkMandatoryXMLTag (ContextValidation contextValidation, String tagName, String tagValue){
 		//if (null == tagValue )  {
 		//	 contextValidation.addErrors("Erreurs fichier","Balise <"+ tagName+"> manquante");
 		// } else 
 		if ( tagValue.equals("NULL") ) {
-			contextValidation.addErrors("Erreurs fichier","Balise <"+ tagName+"> incorrecte (NULL)");
+			contextValidation.addError("Erreurs fichier","Balise <"+ tagName+"> incorrecte (NULL)");
 		} else if ( tagValue.equals("") ) {
-			contextValidation.addErrors("Erreurs fichier","Balise <"+ tagName+"> manquante ou non renseignée (vide)");
+			contextValidation.addError("Erreurs fichier","Balise <"+ tagName+"> manquante ou non renseignée (vide)");
 		}
 	}
 	

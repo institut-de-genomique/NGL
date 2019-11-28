@@ -1,14 +1,14 @@
 package controllers.instance.parameters;
 
-import static fr.cea.ig.play.IGGlobals.configuration;
+import javax.inject.Inject;
 
 import models.Constants;
+import nglapps.IApplicationData;
 //import play.Logger;
 //import play.Logger.ALogger;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
-import services.instance.parameter.PrinterCNS;
 //import services.instance.protocol.ProtocolServiceCNG;
 //import services.instance.protocol.ProtocolServiceCNS;
 import validation.ContextValidation;
@@ -28,29 +28,54 @@ public class Printers extends Controller { // extends NGLBaseController { //Comm
 //		super(ctx);
 //	}
 	
-	public Result save(){
-		ContextValidation ctx = new ContextValidation(Constants.NGL_DATA_USER);
-		ctx.setCreationMode();
-		try {
-			String institute = configuration().getString("institute");
-//			if (play.Play.application().configuration().getString("institute").equals("CNS")) {
-//				PrinterCNS.main(ctx);
-//			} else if(play.Play.application().configuration().getString("institute").equals("CNG")) {
-//				
-//			} else if(play.Play.application().configuration().getString("institute").equals("TEST")) {
-//				
-//			} else {
-//				Logger.error("You need to specify only one institute ! Now, it's "+ play.Play.application().configuration().getString("institute"));
+	public final IApplicationData appData;
+	
+	@Inject
+	public Printers(IApplicationData appData) {
+		this.appData = appData;
+	}
+	
+//	public Result save() {
+//		ContextValidation ctx = new ContextValidation(Constants.NGL_DATA_USER);
+//		ctx.setCreationMode();
+//		try {
+//			String institute = configuration().getString("institute");
+////			if (play.Play.application().configuration().getString("institute").equals("CNS")) {
+////				PrinterCNS.main(ctx);
+////			} else if(play.Play.application().configuration().getString("institute").equals("CNG")) {
+////				
+////			} else if(play.Play.application().configuration().getString("institute").equals("TEST")) {
+////				
+////			} else {
+////				Logger.error("You need to specify only one institute ! Now, it's "+ play.Play.application().configuration().getString("institute"));
+////			}
+//			switch (institute) {
+//			case "CNS"  : PrinterCNS.main(ctx); break; 
+//			case "CNG"  : break;
+//			case "TEST" : break;
+//			default     : logger.error("You need to specify only one institute ! Now, it's " + institute);
 //			}
-			switch (institute) {
-			case "CNS"  : PrinterCNS.main(ctx); break; 
-			case "CNG"  : break;
-			case "TEST" : break;
-			default     : logger.error("You need to specify only one institute ! Now, it's " + institute);
-			}
+//			if (ctx.hasErrors()) {
+//				ctx.displayErrors(logger);
+//				return badRequest(Json.toJson(ctx.errors));
+//			} else {
+//				return ok();
+//			}
+//		} catch (Exception e) {
+//			logger.error(e.getMessage(), e);
+//			return internalServerError(e.getMessage());
+//		}	
+//	}
+
+	public Result save() {
+//		ContextValidation ctx = new ContextValidation(Constants.NGL_DATA_USER);
+//		ctx.setCreationMode();
+		ContextValidation ctx = ContextValidation.createCreationContext(Constants.NGL_DATA_USER);
+		try {
+			appData.getPrinterService().accept(ctx);
 			if (ctx.hasErrors()) {
 				ctx.displayErrors(logger);
-				return badRequest(Json.toJson(ctx.errors));
+				return badRequest(Json.toJson(ctx.getErrors()));
 			} else {
 				return ok();
 			}
@@ -59,6 +84,6 @@ public class Printers extends Controller { // extends NGLBaseController { //Comm
 			return internalServerError(e.getMessage());
 		}	
 	}
-	
+
 }
 

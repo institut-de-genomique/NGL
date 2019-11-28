@@ -1,22 +1,3 @@
-//
-// Configuration from command line or environment
-//
-//   embedded.auth=true
-//     configures the build to use the authentication directory
-//     in ngl instead of an external dependency.
-//
-//   NGL_CONF_TEST_DIR=<path>
-//   ngl.test.conf.dir=<path>
-//     Those definitions are added to the build classpath and the test
-//     infrastructure will locate the test configuration through the
-//     classpath.
-//
-//   ngl.test.logger.file
-//   ngl.test.logger.ressource
-//   logger.file
-//   logger.resource
-//     those definitions are used for the test logger configuration
-// 
 
 import sbt._
 import Keys._
@@ -44,24 +25,25 @@ object ApplicationBuild extends Build {
 	val embeddedAuth   = System.getProperty("embedded.auth")   == "true"
 	val embeddedSpring = System.getProperty("embedded.spring") == "true"
 	val embeddedMongo  = System.getProperty("embedded.mongo")  == "true"
-  val nglLite        = System.getProperty("ngl.lite")        == "true"
-  
-	// Workaround for missing properties in test vms. Build the test child
-	// VM option for the logger.
-	val tjl =
-	  if (System.getProperty("ngl.test.logger.file") != null)
-	    Seq("-Dlogger.file=" + System.getProperty("ngl.test.logger.file"))
-	  else if (System.getProperty("ngl.test.logger.resource") != null)
-	    Seq("-Dlogger.resource=" + System.getProperty("ngl.test.logger.resource"))
-	  else if (System.getProperty("logger.file") != null)
-	    Seq("-Dlogger.file=" + System.getProperty("logger.file"))
-	  else if (System.getProperty("logger.resource") != null)
-	    Seq("-Dlogger.resource=" + System.getProperty("logger.resource"))
-	  else
-	    Seq()
-	    
-	// val testJavaOptions = tj0 ++ tjl ++ Seq("-Dngl.in=true"/*,"-bad.stuf=zen"*/)
-	val testJavaOptions = tjl;
+//	// Workaround for missing properties in test vms. Build the test child
+//	// VM option for the logger.
+//	val tjl =
+//	  if (System.getProperty("ngl.test.logger.file") != null)
+//	    Seq("-Dlogger.file=" + System.getProperty("ngl.test.logger.file"))
+//	  else if (System.getProperty("ngl.test.logger.resource") != null)
+//	    Seq("-Dlogger.resource=" + System.getProperty("ngl.test.logger.resource"))
+//	  else if (System.getProperty("logger.file") != null)
+//	    Seq("-Dlogger.file=" + System.getProperty("logger.file"))
+//	  else if (System.getProperty("logger.resource") != null)
+//	    Seq("-Dlogger.resource=" + System.getProperty("logger.resource"))
+//	  else
+//	    Seq()
+//	    
+//	// val testJavaOptions = tj0 ++ tjl ++ Seq("-Dngl.in=true"/*,"-bad.stuf=zen"*/)
+//	val testJavaOptions = tjl;
+//	
+//	// Disable paralell test execution (hoped to fixed test failure but didn't work)
+//	// parallelExecution in Global := false
 	
 	// Disable paralell test execution (hoped to fixed test failure but didn't work)
 	// parallelExecution in Global := false
@@ -78,34 +60,33 @@ object ApplicationBuild extends Build {
 	val buildVersion           = "2.1"    + distSuffix
 	val nglVersion             = "2.0"    + distSuffix
 	
-	val sqVersion              = "2.2.2" + distSuffix	
-	val biVersion              = "2.3.0" + distSuffix
+	val sqVersion              = "2.10.0" + distSuffix
+	val biVersion              = "2.8.0" + distSuffix
 
-	val projectsVersion        = "2.4.0"  + distSuffix
-	val reagentsVersion        = "2.2.0"  + distSuffix
-	val subVersion             = "2.3.0"  + distSuffix
+	val projectsVersion        = "2.7.0"  + distSuffix
+	val reagentsVersion        = "2.4.0"  + distSuffix
 	// val dataVersion            = "2.0.0"  + distSuffix
 	val nglAssetsVersion       = "2.0.0"  + distSuffix
-	val nglDataVersion         = "2.6.0"  + distSuffix
-	val nglPlatesVersion       = "2.2.0"  + distSuffix
+
+	val nglDataVersion         = "2.14.0"  + distSuffix
+	val nglPlatesVersion       = "2.4.0"  + distSuffix
 	val nglDevGuideVersion     = "2.0.0"  + distSuffix
+	val subVersion             = "2.9.5"  + distSuffix
 	
 	val libDatatableVersion    = "2.0.0"  + distSuffix
 	val libFrameworkWebVersion = "2.0.0"  + distSuffix
-	val nglCommonVersion       = "2.1.0"  + distSuffix
+	val nglCommonVersion       = "2.6.0"  + distSuffix
 
 	// IG libraries
-  val ceaAuth     = "fr.cea.ig.modules"   %% "authentication"     % "2.1.3"
-  val ceaSpring   = "fr.cea.ig"           %% "play-spring-module" % "2.0.2"
-  val ceaMongo    = "fr.cea.ig"           %% "mongodbplugin"      % "2.0.5"
+  val ceaAuth     = "fr.cea.ig.modules"   %% "authentication"     % "2.1.4-SNAPSHOT"
+  val ceaSpring   = "fr.cea.ig"           %% "play-spring-module" % "2.0.5"
+  val ceaMongo    = "fr.cea.ig"           %% "mongodbplugin"      % "2.0.9"
 	// The fix concerns the Query "in" constructs for collection properties
 	// that should be converted roughly like :
 	// Query.in(a,b)     -> Query.in(a,Arrays.asList(b))
 	// Query.in(a,b,c,d) -> Query.in(a,Arrays.asList(b,c,d))
   val mongoJack   = "org.mongojack"        % "mongojack"          % "2.6.1.IG"
-//      "org.mongojack" % "mongojack" % "2.6.1",
-//      "org.mongojack" % "mongojack" % "2.7.0",
-    // External libraries versions
+  // External libraries versions
 	val postgresql  = "org.postgresql"       % "postgresql"         % "9.4-1206-jdbc41"  
   val commonsLang = "commons-lang"         % "commons-lang"       % "2.4"
   val jsMessages  = "org.julienrf"        %% "play-jsmessages"    % "3.0.0" 
@@ -125,20 +106,22 @@ object ApplicationBuild extends Build {
 //    EclipseKeys.createSrc := EclipseCreateSrc.ValueSet(EclipseCreateSrc.ManagedClasses, EclipseCreateSrc.ManagedResources)	
 //  )
 
+//  concurrentRestrictions in Global += Tags.limit(Tags.Test, 1)
+  
 	object BuildSettings {
 	  
-		// Probably poor scala style
-    val tev0 = if (System.getProperty("ngl.test.conf.dir") != null)
-	        Seq(// unmanagedResourceDirectories in Compile += file(System.getProperty("ngl.test.conf.dir")),
-	            // dependencyClasspath in Compile += file(System.getProperty("ngl.test.conf.dir")),
-	            dependencyClasspath in Test    += file(System.getProperty("ngl.test.conf.dir")))
-	      else
-	        Seq()
-	  val tev1 = if (System.getProperty("NGL_CONF_TEST_DIR") != null)
-	        Seq(//dependencyClasspath in Compile += file(System.getProperty("NGL_CONF_TEST_DIR"),
-	            dependencyClasspath in Test    += file(System.getProperty("NGL_CONF_TEST_DIR")))
-	      else
-	        Seq()
+//		// Probably poor scala style
+//    val tev0 = if (System.getProperty("ngl.test.conf.dir") != null)
+//	        Seq(// unmanagedResourceDirectories in Compile += file(System.getProperty("ngl.test.conf.dir")),
+//	            // dependencyClasspath in Compile += file(System.getProperty("ngl.test.conf.dir")),
+//	            dependencyClasspath in Test    += file(System.getProperty("ngl.test.conf.dir")))
+//	      else
+//	        Seq()
+//	  val tev1 = if (System.getProperty("NGL_CONF_TEST_DIR") != null)
+//	        Seq(//dependencyClasspath in Compile += file(System.getProperty("NGL_CONF_TEST_DIR"),
+//	            dependencyClasspath in Test    += file(System.getProperty("NGL_CONF_TEST_DIR")))
+//	      else
+//	        Seq()
 	  
 	  val globSettings = Seq(
 	    // -- Scala compilation options are not defined as there are no scala sources
@@ -174,9 +157,22 @@ object ApplicationBuild extends Build {
 			dependencyOverrides  += "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8"   % "2.7.3",
 			dependencyOverrides  += "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % "2.7.3",
 			
-			javaOptions in Test ++= testJavaOptions,
-			// fork        in Test  := true,
-			fork                 := true,
+//			javaOptions in Test ++= testJavaOptions,
+			fork        in Test  := true,
+//			parallelExecution in ThisBuild := false,
+//			fork        in Test  := false,
+//			fork                 := true,
+//			fork                 := false,
+			
+			testOptions += Tests.Argument(TestFrameworks.JUnit, "-a", "-q"), // -a: show line number when AssertionError is raised, -q: Suppress stdout for successful tests. 
+      //refer to https://github.com/sbt/junit-interface
+			
+			// Propagate ngl test configuration directory to test properties
+			testOptions += Tests.Argument("-Dngl.test.conf.dir=" + System.getProperty("ngl.test.conf.dir")),
+			// Propagate logger file to test properties
+			testOptions += Tests.Argument("-Dlogger.file=" + System.getProperty("logger.file")),
+			// testOptions += Tests.Argument("play.server.netty.maxInitialLineLength=16384")),
+			
 			// --- javadoc configuration
 			// Remove scala files from the doc process so javadoc is used. 
 			sources in (Compile, doc) <<= sources in (Compile, doc) map { _.filterNot(_.getName endsWith ".scala") },
@@ -203,7 +199,7 @@ object ApplicationBuild extends Build {
 			// Use .class files instead of generated .scala files for views and routes,
 			// This requires that the project is compiled using sbt to avoid unresolved symbols.
 			EclipseKeys.createSrc := EclipseCreateSrc.ValueSet(EclipseCreateSrc.ManagedClasses, EclipseCreateSrc.ManagedResources)	
-		) ++ tev0 ++ tev1
+		) // ++ tev0 ++ tev1
 
 		val buildSettings =  Seq (
 		  organization   := buildOrganization + "." + appName
@@ -268,7 +264,7 @@ object ApplicationBuild extends Build {
 		  "mysql"                % "mysql-connector-java"      % "5.1.18",
 		  "net.sf.opencsv"       % "opencsv"                   % "2.0",
  		  // "commons-collections"  % "commons-collections"       % "3.2.1",
-          "org.apache.commons"   % "commons-collections4"      % "4.1",
+      "org.apache.commons"   % "commons-collections4"      % "4.1",
 //		  "org.springframework"  % "spring-jdbc"               % "4.0.3.RELEASE",		
 //		  "org.springframework"  % "spring-test"               % "4.0.3.RELEASE",
 		  "org.springframework"  % "spring-jdbc"               % springVersion,		
@@ -277,7 +273,11 @@ object ApplicationBuild extends Build {
 		  "org.codehaus.janino"  % "janino"                    % "2.5.15",
 		  "de.flapdoodle.embed"  % "de.flapdoodle.embed.mongo" % "1.50.0",
 		  "org.javassist"        % "javassist"                 % "3.20.0-GA",
-		  "com.sybase"		       % "jdbc4"                 	   % "7.0"
+		  "com.sybase"	  	     % "jdbc4"                 	   % "7.0",
+      "org.hsqldb"           % "hsqldb"                    % "2.4.1" % Test
+//      "junit" % "junit" % "4.11" % Test,
+////      crossPaths := false,
+//      "com.novocode" % "junit-interface" % "0.11" % Test
 		)	
 			   
 	  val ngldatatableDependencies = Seq(
@@ -291,8 +291,6 @@ object ApplicationBuild extends Build {
 		val nglframeworkwebDependencies = Seq(
 		  javaCore,
 		  javaWs,
-		  //ceaAuth,
-		  // ceaMongo,
 		  "javax.mail"   % "mail"            % "1.4.2",
 		  "org.drools"   % "drools-core"     % "6.1.0.Final",
 		  "org.drools"   % "drools-compiler" % "6.1.0.Final",
@@ -300,7 +298,8 @@ object ApplicationBuild extends Build {
 		  "org.kie"      % "kie-api"         % "6.1.0.Final",
 		  "org.kie"      % "kie-internal"    % "6.1.0.Final",
 	      "commons-lang" % "commons-lang"    % "2.2"
-		) // ++ (if (embeddedAuth) Seq() else Seq(ceaAuth))
+	      // "net.jodah"    % "typetools"       % "0.6.0"
+		)
 		
 		val nglbiDependencies = Seq(
 			javaCore, 
@@ -344,7 +343,6 @@ object ApplicationBuild extends Build {
 	  )
 
 	  val nglPlayMigrationDependencies = Seq(
-	    // ceaMongo,
 	    ehcache,
 	    ws,
 	    jsMessages
@@ -354,7 +352,6 @@ object ApplicationBuild extends Build {
       javaCore,
 		  ws,
 		  javaJdbc,
-		  // ceaSpring,
   		"org.springframework.security"  % "spring-security-web"    % springSecVersion,
 		  "org.springframework.security"  % "spring-security-ldap"   % springSecVersion,
       "org.springframework.security"  % "spring-security-config" % springSecVersion,
@@ -433,6 +430,9 @@ object ApplicationBuild extends Build {
           resolvers            := nexus
         )
            
+  // -------------------------------------------------------------------------
+  // -- Regular NGL projects
+        
   val nglPlayMigration =  Project("ngl-play-migration",file("lib-ngl-play-migration"),settings = buildSettings)
       .enablePlugins(play.sbt.PlayJava)
       .settings(
@@ -441,7 +441,6 @@ object ApplicationBuild extends Build {
         javacOptions in (Compile,doc) := Seq("-link", "https://docs.oracle.com/javase/7/docs/api/"),
         // javacOptions in (Compile,doc) := Seq("-doctitle", "ngl-play-migration-0.1"),
         // javacOptions in (Compile,doc) := Seq("-top", "ngl-play-migration-0.1"),
-        
         resolvers            := nexus
 	    ).dependsOn(mongoPlugin)
 	
@@ -491,16 +490,15 @@ object ApplicationBuild extends Build {
           val assets: java.io.File = (PlayKeys.playPackageAssets in Compile).value
           artifacts + (Artifact(moduleName.value, "asset", "jar", "assets") -> assets)
         }
-      ).dependsOn(ngldatatable, authentication, springPlugin)
+      ).dependsOn(ngldatatable, authentication, springPlugin, nglTesting)
   
   val nglcommon = Project(appName + "-common", file("lib-ngl-common"), settings = buildSettings).enablePlugins(play.sbt.PlayJava).settings(
-    // version                    := appVersion,
     version                    := nglCommonVersion,
     libraryDependencies       ++= nglcommonDependencies,
     resolvers                  := nexus,
     resolvers                  += "julienrf.github.com" at "http://julienrf.github.com/repo/",
     sbt.Keys.fork in Test      := false,
-    publishTo                  := Some(nexusigpublish),
+    publishTo                  := Some(nexusigpublish)
     // resourceDirectory in Test <<= baseDirectory / "conftest" 
     // baseDirectory : RichFileSetting
     //   /(c: String): Def.Initialize[File]
@@ -508,20 +506,13 @@ object ApplicationBuild extends Build {
     //   <<=(app: Def.Initialize[S]): Def.Setting[S]
     // (resourceDirectory.in(Test)).<<=(baseDirectory.value./("conftest"))
     // resourceDirectory.in(Test).:=(baseDirectory.value./("conftest"))
-    resourceDirectory in Test  := baseDirectory.value / "conftest"
+    //resourceDirectory in Test  := baseDirectory.value / "conftest",
+    //testOptions += Tests.Argument(TestFrameworks.JUnit, "-a") // show line number when AssertionError is raised
   // ).dependsOn(nglframeworkweb % "compile->compile;test->test;doc->doc", nglPlayMigration, nglTesting % "test->test")
 //  ).dependsOn(nglframeworkweb, nglPlayMigration, nglTesting % "test->test")
   ).dependsOn(nglframeworkweb, nglPlayMigration, nglTesting % "compile->test")
     
-  val nglbi = Project(appName + "-bi", file("app-ngl-bi"), settings = buildSettings).enablePlugins(play.sbt.PlayJava).settings(
-    version                    := biVersion,
-    libraryDependencies       ++= nglbiDependencies,
-    resolvers                  := nexus,
-    publishArtifact in makePom := false,
-    publishTo                  := Some(nexusigpublish)
-  ).dependsOn(nglcommon % "compile;test->test" , nglTesting % "test->test")
-
-  val ngldata = Project(appName + "-data", file("app-ngl-data"), settings = buildSettings).enablePlugins(play.sbt.PlayJava).settings(
+  val ngldataapi = Project(appName + "-data-api", file("lib-ngl-data"), settings = buildSettings).enablePlugins(play.sbt.PlayJava).settings(
     version                    := nglDataVersion,
     libraryDependencies       ++= ngldataDependencies,
     resolvers                  := nexus,
@@ -531,11 +522,42 @@ object ApplicationBuild extends Build {
     publishArtifact in packageDoc := false,
     sources in (Compile,doc) := Seq.empty
   ).dependsOn(nglcommon % "test->test;compile->compile", nglTesting % "test->test")
+  
+  val nglbi = Project(appName + "-bi", file("app-ngl-bi"), settings = buildSettings).enablePlugins(play.sbt.PlayJava).settings(
+    version                    := biVersion,
+    libraryDependencies       ++= nglbiDependencies,
+    resolvers                  := nexus,
+    publishArtifact in makePom := false,
+    publishTo                  := Some(nexusigpublish)
+  ).dependsOn(nglcommon % "compile;test->test" , ngldataapi % "compile->test", nglTesting % "test->test")
 
+  val ngldata = Project(appName + "-data", file("app-ngl-data"), settings = buildSettings).enablePlugins(play.sbt.PlayJava).settings(
+    version                    := nglDataVersion,
+    //libraryDependencies       ++= ngldataDependencies,
+    resolvers                  := nexus,
+    publishArtifact in makePom := false,
+    publishTo                  := Some(nexusigpublish),
+    publishArtifact in (Compile, packageDoc) := false,
+    publishArtifact in packageDoc := false,
+    sources in (Compile,doc) := Seq.empty
+  // ).dependsOn(ngldataapi, nglcommon % "test->test;compile->compile", nglTesting % "test->test")
+  ).dependsOn(ngldataapi)
+
+  val nglcommontests = Project(appName + "-common-tests", file("lib-ngl-common-tests"), settings = buildSettings).enablePlugins(play.sbt.PlayJava).settings(
+    // version                    := appVersion,
+    version                    := nglCommonVersion,
+    libraryDependencies       ++= nglcommonDependencies,
+    resolvers                  := nexus,
+    resolvers                  += "julienrf.github.com" at "http://julienrf.github.com/repo/",
+    sbt.Keys.fork in Test      := false,
+    publishTo                  := Some(nexusigpublish) ,
+    resourceDirectory in Test  := baseDirectory.value / "conftest",
+    testOptions += Tests.Argument(TestFrameworks.JUnit, "-a", "-q") // -a: show line number when AssertionError is raised, -q: Suppress stdout for successful tests. 
+    //refer to https://github.com/sbt/junit-interface
+  ).dependsOn(nglframeworkweb, nglPlayMigration, nglcommon, ngldataapi % "compile->test", nglTesting % "compile->test")
+  
   val nglsq = Project(appName + "-sq", file("app-ngl-sq"), settings = buildSettings)
                  .enablePlugins(play.sbt.PlayJava)
-                 .configs( IntegrationTest )
-                 .settings(Defaults.itSettings : _*)
                  .settings(                    
     version                    := sqVersion,
     libraryDependencies       ++= nglsqDependencies,
@@ -545,7 +567,7 @@ object ApplicationBuild extends Build {
     //sources in (Compile,doc)   := Seq.empty,
     publishArtifact in makePom := false, 
     publishTo                  := Some(nexusigpublish)
-  ).dependsOn(nglcommon % "test->test;compile->compile", nglTesting % "test->test")
+  ).dependsOn(nglcommon % "test->test;compile->compile", ngldataapi % "compile->test", nglTesting % "compile->test")
 
   val nglsub = Project(appName + "-sub", file("app-ngl-sub"), settings = buildSettings).enablePlugins(play.sbt.PlayJava).settings(
     version                    := subVersion,
@@ -553,7 +575,7 @@ object ApplicationBuild extends Build {
     resolvers                  := nexus,
     publishArtifact in makePom := false,
     publishTo                  := Some(nexusigpublish)
-  ).dependsOn(nglcommon % "test->test;compile->compile", nglTesting % "test->test")
+  ).dependsOn(nglcommon % "test->test;compile->compile", ngldataapi % "compile->test", nglTesting % "test->test")
 
   val nglassets = Project(appName + "-assets", file("app-ngl-asset"),settings = buildSettings).enablePlugins(play.sbt.PlayJava).settings(
 		version                    := nglAssetsVersion,
@@ -563,21 +585,25 @@ object ApplicationBuild extends Build {
 		publishTo                  := Some(nexusigpublish)
   )
    
-  val nglplates = Project(appName + "-plates", file("app-ngl-plaques"),settings = buildSettings).enablePlugins(play.sbt.PlayJava).settings(
-    version                    := nglPlatesVersion,
-		libraryDependencies       ++= nglplaquesDependencies,	
-    resolvers                  := nexus,
-    publishArtifact in makePom := false,
-    publishTo                  := Some(nexusigpublish)
-  ).dependsOn(nglcommon % "test->test;compile->compile", nglTesting % "test->test")
+  val nglplates = Project(appName + "-plates", file("app-ngl-plaques"),settings = buildSettings)
+    .enablePlugins(play.sbt.PlayJava)
+    .settings(
+      version                    := nglPlatesVersion,
+		  libraryDependencies       ++= nglplaquesDependencies,	
+      resolvers                  := nexus,
+      publishArtifact in makePom := false,
+      publishTo                  := Some(nexusigpublish)
+    ).dependsOn(nglcommon % "test->test;compile->compile", ngldataapi % "compile->test", nglTesting % "test->test")
 
-  val ngldevguide = Project(appName + "-devguide", file("app-ngl-devguide"),settings = buildSettings).enablePlugins(play.sbt.PlayJava).settings(
-    version                    := nglDevGuideVersion,
-		libraryDependencies       ++= ngldevguideDependencies,
-    resolvers                  := nexus,
-    publishArtifact in makePom := false,
-    publishTo                  := Some(nexusigpublish) 
-  ).dependsOn(nglcommon % "test->test;compile->compile")
+  val ngldevguide = Project(appName + "-devguide", file("app-ngl-devguide"),settings = buildSettings)
+    .enablePlugins(play.sbt.PlayJava)
+    .settings(
+      version                    := nglDevGuideVersion,
+		  libraryDependencies       ++= ngldevguideDependencies,
+      resolvers                  := nexus,
+      publishArtifact in makePom := false,
+      publishTo                  := Some(nexusigpublish) 
+    ).dependsOn(nglcommon % "test->test;compile->compile")
   
   val nglprojects = Project(appName + "-projects", file("app-ngl-projects"),settings = buildSettings)
     .enablePlugins(play.sbt.PlayJava)
@@ -587,7 +613,7 @@ object ApplicationBuild extends Build {
       resolvers                  := nexus,
       publishArtifact in makePom := false,
       publishTo                  := Some(nexusigpublish)
-    ).dependsOn(nglcommon % "test->test;compile->compile", nglTesting % "test->test")
+    ).dependsOn(nglcommon % "test->test;compile->compile", ngldataapi % "compile->test", nglTesting % "test->test")
 	 
 	val nglreagents = Project(appName + "-reagents", file("app-ngl-reagents"), settings = buildSettings)
 	  .enablePlugins(play.sbt.PlayJava)
@@ -597,11 +623,11 @@ object ApplicationBuild extends Build {
       resolvers                  := nexus,
       publishArtifact in makePom := false,
       publishTo                  := Some(nexusigpublish)
-    ).dependsOn(nglcommon % "test->test;compile->compile", nglTesting % "test->test")
+    ).dependsOn(nglcommon % "test->test;compile->compile", ngldataapi % "compile->test", nglTesting % "test->test")
     
   val main = Project(appName, file("."), settings = buildSettings)
-        .enablePlugins(play.sbt.PlayJava)
-        .settings(
+    .enablePlugins(play.sbt.PlayJava)
+    .settings(
 	  	version                    := nglVersion,			  
       resolvers                  := nexus,
       publishArtifact in makePom := false,
@@ -609,6 +635,7 @@ object ApplicationBuild extends Build {
     ).aggregate(
       // libs
    	  nglcommon,
+   	  nglcommontests,
      	nglframeworkweb,
       ngldatatable,
       // applications

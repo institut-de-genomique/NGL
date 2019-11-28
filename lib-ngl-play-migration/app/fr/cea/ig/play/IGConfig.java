@@ -56,7 +56,6 @@ public class IGConfig {
 	public String getCheckedString(String path, String[] values) {
 		if (!config.hasPath(path))
 			throw new RuntimeException(path + " has no value in configuration");
-		// TODO: use some common contains method
 		String value = config.getString(path);
 		for (String s : values)
 			if (s.equals(value))

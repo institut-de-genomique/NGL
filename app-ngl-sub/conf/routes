@@ -5,8 +5,8 @@
 GET		/											    controllers.main.tpl.Main.home()
 
 
-GET		/sra/scripts/noRest/:clazz/:method				controllers.sra.scripts.ScriptController.noRest(clazz : java.lang.String, method : java.lang.String)
-GET		/sra/scripts/run/:clazz							controllers.sra.scripts.ScriptController.run(clazz : java.lang.String)
+# GET		/sra/scripts/noRest/:clazz/:method				fr.cea.ig.lfw.controllers.scripts.ScriptController.noRest(clazz : java.lang.String, method : java.lang.String)
+GET		/sra/scripts/run/:clazz							fr.cea.ig.lfw.controllers.scripts.ScriptController.run(clazz : java.lang.String)
 
 #------------
 # Submission
@@ -127,6 +127,7 @@ GET		/tpl/sra/experiments/details			    controllers.sra.experiments.tpl.Experime
 
 PUT		/api/sra/experiments/:code/rawDatas/:relatifName	controllers.sra.experiments.api.ExperimentsRawDatas.update(code: java.lang.String, relatifName: java.lang.String)
 GET		/api/sra/experiments/:code/rawDatas/:relatifName	controllers.sra.experiments.api.ExperimentsRawDatas.get(code: java.lang.String, relatifName: java.lang.String)
+DELETE	/api/sra/experiments/:code/rawDatas/:relatifName	controllers.sra.experiments.api.ExperimentsRawDatas.delete(code: java.lang.String, relatifName: java.lang.String)
 
 #-----------------
 # ExperimentsRuns

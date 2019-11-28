@@ -1,7 +1,9 @@
 package controllers.projects.api;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -14,6 +16,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import controllers.DBObjectListForm;
 import controllers.ListObject;
+import controllers.NGLControllerHelper;
+import models.laboratory.common.description.Level;
 import models.laboratory.project.instance.Project;
 
 
@@ -33,6 +37,7 @@ public class ProjectsSearchForm extends DBObjectListForm<Project> {
 	
 	public List<String> unixGroups;
 	
+	public Map<String, List<String>> properties = new HashMap<>();
 	
 	public Set<String> existingFields, notExistingFields;
 
@@ -50,14 +55,14 @@ public class ProjectsSearchForm extends DBObjectListForm<Project> {
 		}
 		
 		if(CollectionUtils.isNotEmpty(this.fgGroups)){
-			queries.add(DBQuery.in("biointhisaticParameters.fgGroup", this.fgGroups));
+			queries.add(DBQuery.in("bioinformaticParameters.fgGroup", this.fgGroups));
 		}
 		
 		if (this.isFgGroup != null) {
 			if(this.isFgGroup){
-				queries.add(DBQuery.exists("biointhisaticParameters.fgGroup"));
+				queries.add(DBQuery.exists("bioinformaticParameters.fgGroup"));
 			} else{
-				queries.add(DBQuery.notExists("biointhisaticParameters.fgGroup"));
+				queries.add(DBQuery.notExists("bioinformaticParameters.fgGroup"));
 			}
 		}
 		
@@ -67,6 +72,7 @@ public class ProjectsSearchForm extends DBObjectListForm<Project> {
 			queries.add(DBQuery.in("state.code", this.stateCodes));
 		}
 		
+		// EJACOBY AD
 		if (CollectionUtils.isNotEmpty(this.unixGroups)) {
 			queries.add(DBQuery.in("properties.unixGroup.value", this.unixGroups));
 		}
@@ -82,13 +88,14 @@ public class ProjectsSearchForm extends DBObjectListForm<Project> {
 			}		
 		}
 		
+		queries.addAll(NGLControllerHelper.generateQueriesForProperties(this.properties, Level.CODE.Project, "properties"));
+		
 		if(queries.size() > 0){
 			query = DBQuery.and(queries.toArray(new Query[queries.size()]));
 		}
 
 		return query;
 	}
-
 
 	@Override
 	@JsonIgnore

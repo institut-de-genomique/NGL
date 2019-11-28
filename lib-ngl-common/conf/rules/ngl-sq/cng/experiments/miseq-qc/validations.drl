@@ -13,7 +13,7 @@ rule "Miseq-qc Init object ATMInfo in WM"
     not ATMInfo("1"==position)
     then
     
-    ATMInfo ATMInfo = new ATMInfo("1",new ArrayList());
+    ATMInfo ATMInfo = new ATMInfo("1",new ArrayList(), new ArrayList(),false,false);
     insert(ATMInfo);
     
 	end
@@ -38,6 +38,13 @@ rule "Miseq-qc Init objects ContentInfo in WM"
     String sequence = "VIDE";
     String fromCode="VIDE";
     
+    //ajout propriété pour etre coherent avec modif regle commune manyToOne double index
+    String secondaryTag="VIDE";
+    String secondaryTagCategory="VIDE";
+    Integer secondaryTagRealSize = 0;
+    String secondarySequence="VIDE";
+    String concatSequence="VIDE";
+    
     if($content.properties.containsKey("tag")){
     	tag=$content.properties.get("tag").value.toString();
     	Index index=MongoDBDAO.findOne(InstanceConstants.PARAMETER_COLL_NAME, Index.class, DBQuery.in("typeCode", "index-illumina-sequencing","index-nanopore-sequencing").is("code", tag));
@@ -58,7 +65,7 @@ rule "Miseq-qc Init objects ContentInfo in WM"
 		fromCode=$container.fromTransformationTypeCodes.iterator().next();
 	
 
-	ContentInfo contentInfo= new ContentInfo("1",$container.code,tag,tagCategory,$content.sampleCode, tagRealSize, sequence, libProcessTypeCode,fromCode);
+	ContentInfo contentInfo= new ContentInfo("1",$container.code,tag,tagCategory,secondaryTag, secondaryTagCategory,$content.sampleCode, tagRealSize, sequence, secondaryTagRealSize, secondarySequence, concatSequence,libProcessTypeCode,fromCode,$container.fromPurificationTypeCode,$container.fromTransfertTypeCode);
 	Logger.debug("Content Info Position : "+$atomicTransfert.line+ ", Sample Code :"+$content.sampleCode + ", Container Code :"+$container.code+", Tag :"+tag +", tagCategory :"+tagCategory+", size :"+tagRealSize+", sequence :"+sequence + ",libProcessTypeCode :"+libProcessTypeCode+", fromExperimentTypeCode :"+fromCode);
     $ATMInfo.getContentInfos().add(contentInfo);
 	insert(contentInfo);

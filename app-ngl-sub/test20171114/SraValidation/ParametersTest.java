@@ -69,7 +69,6 @@ import org.mongojack.DBQuery.Query;
 
 
 public class ParametersTest extends AbstractTestsSRA {
-		
 
 	//@Test
 	public void test_map_libProcessTypeCodeValue_orientation() {
@@ -84,10 +83,8 @@ public class ParametersTest extends AbstractTestsSRA {
 		if (map.get("TA")!= null){
 			System.out.println("ok pour TA voici sa valeur "+ map.get("TA"));
 		}
-		
+
 	}
-	
-	
 	
 	//@Test
 	public void genere_sraParameter_libProcessTypeCodeValue_orientation() {
@@ -96,6 +93,7 @@ public class ParametersTest extends AbstractTestsSRA {
 		libProcessTypeCodeValues_1.add("A");
 		libProcessTypeCodeValues_1.add("C");
 		List <String> libProcessTypeCodeValues_2 = new ArrayList<String>();
+		libProcessTypeCodeValues_2.add("E");
 		libProcessTypeCodeValues_2.add("F");
 		libProcessTypeCodeValues_2.add("H");
 		libProcessTypeCodeValues_2.add("K");
@@ -335,8 +333,7 @@ public class ParametersTest extends AbstractTestsSRA {
 		  MongoDBDAO.save(InstanceConstants.SRA_PARAMETER_COLL_NAME, param);
 		}
 	}
-	
-	
+		
 	//@Test
 	public void genere_sraParameter_libraryLayout() { 
 		System.out.println("Generation des libraryLayout");	
@@ -495,9 +492,6 @@ public class ParametersTest extends AbstractTestsSRA {
 			  MongoDBDAO.save(InstanceConstants.SRA_PARAMETER_COLL_NAME, param);
 		}
 	}
-	
-	
-	
 	
 	
 }

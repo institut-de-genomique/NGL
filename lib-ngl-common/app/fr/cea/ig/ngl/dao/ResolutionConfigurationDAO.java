@@ -5,20 +5,13 @@ import javax.inject.Singleton;
 
 import models.laboratory.resolutions.instance.ResolutionConfiguration;
 import models.utils.InstanceConstants;
-import models.utils.dao.DAOException;
 
 @Singleton
-public class ResolutionConfigurationDAO {
+public class ResolutionConfigurationDAO extends GenericMongoDAO<ResolutionConfiguration>{
 
-	private final GenericMongoDAO<ResolutionConfiguration> gdao;
-	
 	@Inject
 	public ResolutionConfigurationDAO() {
-		gdao = new GenericMongoDAO<>(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class);
-	}
-	
-	public Iterable<ResolutionConfiguration> all() throws DAOException {
-		return gdao.all();
+		super(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class);
 	}
 	
 }

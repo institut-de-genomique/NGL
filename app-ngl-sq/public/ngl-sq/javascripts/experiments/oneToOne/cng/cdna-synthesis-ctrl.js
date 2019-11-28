@@ -1,6 +1,9 @@
 angular.module('home').controller('cDNASynthesisCtrlCNG',['$scope', '$parse', 'atmToSingleDatatable','lists','mainService',
                                                     function($scope, $parse, atmToSingleDatatable,lists,mainService){
                                                     
+	var inputExtraHeaders=Messages("experiments.inputs");
+	var outputExtraHeaders=Messages("experiments.outputs");	
+	
 	var datatableConfig = {
 					name: $scope.experiment.typeCode.toUpperCase(),
 					columns:[   
@@ -13,7 +16,7 @@ angular.module('home').controller('cDNASynthesisCtrlCNG',['$scope', '$parse', 'a
 								 "hide":true,
 					        	 "type":"text",
 					        	 "position":1,
-					        	 "extraHeaders":{0:Messages("experiments.inputs")}
+					        	 "extraHeaders":{0:inputExtraHeaders}
 					         },
 					         */		         
 					         {
@@ -24,7 +27,7 @@ angular.module('home').controller('cDNASynthesisCtrlCNG',['$scope', '$parse', 'a
 					 			"type":"text",
 					 			"position":2,
 					 			"render":"<div list-resize='cellValue' list-resize-min-size='3'>",
-					        	 "extraHeaders":{0:Messages("experiments.inputs")}
+					        	 "extraHeaders":{0:inputExtraHeaders}
 						     },
 						     {
 					        	"header":Messages("containers.table.sampleCodes"),
@@ -34,7 +37,7 @@ angular.module('home').controller('cDNASynthesisCtrlCNG',['$scope', '$parse', 'a
 					 			"type":"text",
 					 			"position":3,
 					 			"render":"<div list-resize='cellValue' list-resize-min-size='3'>",
-					        	 "extraHeaders":{0:Messages("experiments.inputs")}
+					        	 "extraHeaders":{0:inputExtraHeaders}
 						     },
 						     {
 					        	 "header":Messages("containers.table.fromTransformationTypeCodes"),
@@ -45,7 +48,7 @@ angular.module('home').controller('cDNASynthesisCtrlCNG',['$scope', '$parse', 'a
 					        	 "type":"text",
 					        	 "render":"<div list-resize='cellValue | unique | codes:\"type\"' list-resize-min-size='3'>",
 					        	 "position":4,
-					        	 "extraHeaders":{0:Messages("experiments.inputs")}
+					        	 "extraHeaders":{0:inputExtraHeaders}
 					         },
 					         {
 					        	 "header":Messages("containers.table.volume") + " (µL)",
@@ -55,7 +58,7 @@ angular.module('home').controller('cDNASynthesisCtrlCNG',['$scope', '$parse', 'a
 								 "hide":true,
 					        	 "type":"number",
 					        	 "position":6,
-					        	 "extraHeaders":{0:Messages("experiments.inputs")}
+					        	 "extraHeaders":{0:inputExtraHeaders}
 					         },
 					         {
 					        	 "header":Messages("containers.table.concentration") + " (ng/µL)",
@@ -65,9 +68,9 @@ angular.module('home').controller('cDNASynthesisCtrlCNG',['$scope', '$parse', 'a
 								 "hide":true,
 					        	 "type":"number",
 					        	 "position":7,
-					        	 "extraHeaders":{0:Messages("experiments.inputs")}
+					        	 "extraHeaders":{0:inputExtraHeaders}
 					         },
-					         //------------------------ OUTPUT containers section -------------------
+
 					         {
 					        	 "header":Messages("containers.table.state.code"),
 					        	 "property":"inputContainer.state.code",
@@ -77,8 +80,9 @@ angular.module('home').controller('cDNASynthesisCtrlCNG',['$scope', '$parse', 'a
 					        	 "type":"text",
 					        	 "filter":"codes:'state'",
 					        	 "position":7,
-					        	 "extraHeaders":{0:Messages("experiments.inputs")}
-					         },			        
+					        	 "extraHeaders":{0:inputExtraHeaders}
+					         },
+					         //------------------------ OUTPUT containers section -------------------
 					         {
 					        	 "header":Messages("containers.table.volume")+" (µL)",
 					        	 "property":"outputContainerUsed.volume.value",
@@ -87,7 +91,7 @@ angular.module('home').controller('cDNASynthesisCtrlCNG',['$scope', '$parse', 'a
 								 "hide":true,
 								 "type":"number",
 					        	 "position":51,
-					        	 "extraHeaders":{0:Messages("experiments.outputs")}
+					        	 "extraHeaders":{0:outputExtraHeaders}
 					         },
 					         /*
 					         {
@@ -98,7 +102,7 @@ angular.module('home').controller('cDNASynthesisCtrlCNG',['$scope', '$parse', 'a
 								 "hide":true,
 								 "type":"text",
 					        	 "position":499,
-					        	 "extraHeaders":{0:Messages("experiments.outputs")}
+					        	 "extraHeaders":{0:outputExtraHeaders}
 					         },
                              */
 					         {
@@ -109,7 +113,7 @@ angular.module('home').controller('cDNASynthesisCtrlCNG',['$scope', '$parse', 'a
 								 "hide":true,
 								"type":"text",
 					        	 "position":500,
-					        	 "extraHeaders":{0:Messages("experiments.outputs")}
+					        	 "extraHeaders":{0:outputExtraHeaders}
 					         },
 					         {
 					        	 "header":Messages("containers.table.storageCode"),
@@ -119,7 +123,7 @@ angular.module('home').controller('cDNASynthesisCtrlCNG',['$scope', '$parse', 'a
 								 "hide":true,
 					        	 "type":"text",
 					        	 "position":600,
-					        	 "extraHeaders":{0:Messages("experiments.outputs")}
+					        	 "extraHeaders":{0:outputExtraHeaders}
 					         }
 					         ],
 					compact:true,
@@ -223,8 +227,7 @@ angular.module('home').controller('cDNASynthesisCtrlCNG',['$scope', '$parse', 'a
 			"hide" : true,
 			"type" : "text",
 			"position" : 1,
-			"extraHeaders" : {
-				0 : Messages("experiments.inputs")
+			"extraHeaders" : {0 : Messages("experiments.inputs")
 			}
 		});
 		datatableConfig.columns.push({
@@ -235,8 +238,7 @@ angular.module('home').controller('cDNASynthesisCtrlCNG',['$scope', '$parse', 'a
 			"hide" : true,
 			"type" : "text",
 			"position" : 1.1,
-			"extraHeaders" : {
-				0 : Messages("experiments.inputs")
+			"extraHeaders" : {0 : Messages("experiments.inputs")
 			}
 		});
 		datatableConfig.columns.push({
@@ -247,8 +249,7 @@ angular.module('home').controller('cDNASynthesisCtrlCNG',['$scope', '$parse', 'a
 			"hide" : true,
 			"type" : "number",
 			"position" : 1.2,
-			"extraHeaders" : {
-				0 : Messages("experiments.inputs")
+			"extraHeaders" : {0 : Messages("experiments.inputs")
 			}
 		});
 
@@ -261,8 +262,7 @@ angular.module('home').controller('cDNASynthesisCtrlCNG',['$scope', '$parse', 'a
 			"hide" : true,
 			"type" : "text",
 			"position" : 1,
-			"extraHeaders" : {
-				0 : Messages("experiments.inputs")
+			"extraHeaders" : {0 : Messages("experiments.inputs")
 			}
 		});
 		
@@ -277,8 +277,7 @@ angular.module('home').controller('cDNASynthesisCtrlCNG',['$scope', '$parse', 'a
 			"hide" : true,
 			"type" : "text",
 			"position" : 400,
-			"extraHeaders" : {
-				0 : Messages("experiments.outputs")
+			"extraHeaders" : {	0 : outputExtraHeaders
 			}
 		});
 		datatableConfig.columns.push({
@@ -290,8 +289,7 @@ angular.module('home').controller('cDNASynthesisCtrlCNG',['$scope', '$parse', 'a
 			"hide" : true,
 			"type" : "text",
 			"position" : 401,
-			"extraHeaders" : {
-				0 : Messages("experiments.outputs")
+			"extraHeaders" : {0 : outputExtraHeaders
 			}
 		});
 		datatableConfig.columns.push({
@@ -305,8 +303,7 @@ angular.module('home').controller('cDNASynthesisCtrlCNG',['$scope', '$parse', 'a
 			"hide" : true,
 			"type" : "number",
 			"position" : 402,
-			"extraHeaders" : {
-				0 : Messages("experiments.outputs")
+			"extraHeaders" : {0 : outputExtraHeaders
 			}
 		});
 
@@ -315,18 +312,28 @@ angular.module('home').controller('cDNASynthesisCtrlCNG',['$scope', '$parse', 'a
 		datatableConfig.columns.push({
 			"header" : Messages("containers.table.code"),
 			"property" : "outputContainerUsed.locationOnContainerSupport.code",
+			"editDirectives":"udt-change='atmService.emptyToNull(value.data, col.property)'", //NGL-2487 bug si empty
 			"order" : true,
 			"edit" : true,
 			"hide" : true,
 			"type" : "text",
 			"position" : 400,
-			"extraHeaders" : {
-				0 : Messages("experiments.outputs")
+			"extraHeaders" : {0 : outputExtraHeaders
 			}
 		});		
 	}
 	
+	// insertion dynamique des propriétés d'instrument de niveau containerOut
+	$scope.$watch("instrumentType", function(newValue, OldValue){
+		if(newValue)
+			$scope.atmService.addInstrumentPropertiesToDatatable(newValue.propertiesDefinitions);
+	});
+	
+	
+	// Init
+	
 	var atmService = atmToSingleDatatable($scope, datatableConfig);
+	
 	//defined new atomictransfertMethod
 	atmService.newAtomicTransfertMethod = function(line, column){
 		var getLine = function(line){
@@ -353,13 +360,12 @@ angular.module('home').controller('cDNASynthesisCtrlCNG',['$scope', '$parse', 'a
 			volume : "µL"
 	}
 	
-	
 	atmService.experimentToView($scope.experiment, $scope.experimentType);
 
 	if($scope.experiment.instrument.inContainerSupportCategoryCode === $scope.experiment.instrument.outContainerSupportCategoryCode){
 		$scope.messages.clear();
 		$scope.atmService = atmService;
 	}else{
-		$scope.messages.setError(Messages('experiments.input.error.must-be-same-out'));					
+		$scope.messages.setError(Messages('experiments.input.error.must-be-same-out'));
 	}
 }]);

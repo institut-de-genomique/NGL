@@ -7,7 +7,7 @@ import models.laboratory.common.instance.TraceInformation;
 import validation.ContextValidation;
 import validation.IValidation;
 
-public class ValuationCriteria extends DBObject implements IValidation{
+public class ValuationCriteria extends DBObject implements IValidation {
 
 	public String name;
 	
@@ -23,7 +23,6 @@ public class ValuationCriteria extends DBObject implements IValidation{
 	
 	@Override
 	public void validate(ContextValidation contextValidation) {
-		// TODO Auto-generated method stub		
 	}
 
 }

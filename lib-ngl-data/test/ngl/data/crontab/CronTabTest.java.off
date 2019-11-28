@@ -1,0 +1,296 @@
+//package ngl.data.crontab;
+//
+//import static ngl.data.crontab.Job.Tag.*;
+//
+//import static org.junit.Assert.assertEquals;
+//import static org.junit.Assert.assertFalse;
+//import static org.junit.Assert.assertNotNull;
+//import static org.junit.Assert.assertTrue;
+//
+//import java.util.ArrayList;
+//import java.util.Calendar;
+//import java.util.List;
+//
+//import org.bson.types.ObjectId;
+//import org.junit.Test;
+//
+//import fr.cea.ig.util.function.CC1;
+//import ngl.data.Global;
+//import nglapps.IApplicationData;
+//import play.Application;
+//
+//public class CronTabTest {
+//
+//	private static final play.Logger.ALogger logger = play.Logger.of(CronTabTest.class);
+//	
+//	private static final CC1<Application> app = 
+//			Global.afCNSNoPop
+//			.cc1()
+//			.insert(() -> TestJob01.initialize());
+//	
+//	//@Test
+//	public void testGlobalNoRelock() throws Exception {
+//		try {
+//		Global.afCNSNoPop.run(app -> {
+//			String lockKey = "ngl.global.lock";
+//			CronTabAPI cd = app.injector().instanceOf(CronTabAPI.class);
+//			ObjectId id = cd.getId(lockKey);
+//			cd.relaseLock(id);
+//			logger.debug("got id for '{}' : {}", lockKey, id);
+//			assertNotNull(id);
+//			boolean locked = cd.getLock(id,500);
+//			assertTrue(locked);
+//			logger.debug("locked {}", id);
+//			locked = cd.getLock(id,500);
+//			assertFalse(locked);
+//			logger.debug("expected failed locking for {}", id);
+//		});	
+//		} catch (Exception e) {
+//			logger.error(e.getMessage(),e);
+//			throw e;
+//		}
+//	}
+//	
+//	//@Test
+//	public void testGlobalLockTimeout() throws Exception {
+//		Global.afCNSNoPop.run(app -> {
+//			String lockKey = "ngl.global.lock";
+//			CronTabAPI cd = app.injector().instanceOf(CronTabAPI.class);
+//			ObjectId id = cd.getId(lockKey);
+//			cd.relaseLock(id);
+//			logger.debug("got id for '{}' : {}", lockKey, id);
+//			assertNotNull(id);
+//			boolean locked = cd.getLock(id,500);
+//			assertTrue(locked);
+//			logger.debug("locked {}", id);
+//			Thread.sleep(1000);
+//			locked = cd.getLock(id,500);
+//			assertTrue(locked);
+//			logger.debug("expected locking for {}", id);
+//		});		
+//	}
+//	
+//	public static CronSchedule cdef() {
+//		return new CronSchedule()
+//				.minutes(15,45)
+//				.hours(3,9,15,21)
+//				.monthDays(2,9,16,23,30) 
+//				.months(1,3,5,7,9,11); // zero based
+//	}
+//	
+//	// Definition for to test end of month day problems.
+//	public static CronSchedule cdDayDef() {
+//		return new CronSchedule()
+//				.minutes(0)
+//				.hours(12)
+//				.monthDays(25,26,27,28,29,30,31,32)
+//				.months(0,1,2,3,4,5,6,7,8,9,10,11);
+//	}
+//	
+//	public static CronSchedule cdFebDef() {
+//		return new CronSchedule()
+//				.minutes(0)
+//				.hours(12)
+//				.monthDays(29)
+//				.months(1);
+//	}
+//	
+//	public static Calendar cal(int year, int month, int day, int hour, int minute) {
+//		Calendar c = Calendar.getInstance();
+//		c.set(year,month,day,hour,minute);
+//		return c;
+//	}
+//	
+////	public static Calendar cal(int minute, int hour, int day, int month) {
+////		Calendar c = Calendar.getInstance();
+////		c.set(Calendar.MINUTE, minute);
+////		c.set(Calendar.HOUR_OF_DAY, hour);
+////		c.set(Calendar.DAY_OF_MONTH, day);
+////		c.set(Calendar.MONTH, month);
+////		return c;
+////	}
+//	
+//	public static void calDate(Calendar c, int year, int month, int day, int hour, int minute) {
+//		logger.debug("cal date {}, {} {} {} {} {}", c.getTime(), year, month, day, hour, minute);
+//		assertEquals("minute", c.get(Calendar.MINUTE),       minute);
+//		assertEquals("hour",   c.get(Calendar.HOUR_OF_DAY),  hour);
+//		assertEquals("day",    c.get(Calendar.DAY_OF_MONTH), day);
+//		assertEquals("month",  c.get(Calendar.MONTH),        month);
+//		assertEquals("year",   c.get(Calendar.YEAR),         year);
+//	}
+//	
+//	public static void testCronDate(CronSchedule cd, 
+//			                        int iYear, int iMth, int iDay, int iHor, int iMin, 
+//			                        int oYear, int oMth, int oDay, int oHor, int oMin) {
+////		testCronDate(cd, iMin, iHor, iDay, iMth, oMin, oHor, oDay, oMth, 0);
+//		Calendar c  = cal(iYear,iMth,iDay,iHor,iMin);
+//		Calendar ed = JobRunner.getLastScheduledDate(cd, c);
+//		calDate(c,  iYear, iMth, iDay, iHor, iMin);
+//		calDate(ed, oYear, oMth, oDay, oHor, oMin);		
+//	}
+//	
+////	public static void testCronDate(CronDefinition cd, int iMin, int iHor, int iDay, int iMth, int oMin, int oHor, int oDay, int oMth, int oYear) {
+////		Calendar c  = cal(2018,iMth,iDay,iHor,iMin);
+////		Calendar ed = JobRunner.getLastScheduledDate(cd, c);
+////		calDate(c,  c.get(Calendar.YEAR), iMth, iDay, iHor, iMin);
+////		calDate(ed, oYear, oMth, oDay, oHor, oMin);		
+////	}
+//	
+//	//@Test
+////	public void testCronExecutionDate() {
+////		CronDefinition cd = cdef();
+////		Calendar c = cal(2,5,6,10,2018);
+////		Calendar ed = JobRunner.getLastScheduledDate(cd, c);
+////		calDate(c,  10, 6, 5, 2, c.get(Calendar.YEAR));
+////		calDate(ed, 45, 3, 2, 1, c.get(Calendar.YEAR));
+////	}
+//	
+//	//@Test
+//	public void testCronExecutionDate2() {
+//		testCronDate(cdef(),
+//				2018, 2, 5, 6, 10,
+//				2018, 1, 2, 3, 45);
+//	}
+//	
+//	//@Test
+//	public void testCronExecutionDate3() {
+//		testCronDate(cdef(),
+//				2018, 8, 12, 12, 30,
+//				2018, 7,  9,  9, 15);
+//	}
+//	
+//	//@Test
+//	public void testCronExecutionDate4() {
+//		testCronDate(cdef(),
+//				2018,  0,  1,  0,  1, 
+//				2017, 11, 30, 21, 45);
+//	}
+//	
+//	//@Test
+//	public void testEOMED01() {
+//		testCronDate(cdDayDef(),
+//				2018, 1,  1, 13,  0,  // feb  1, 13:00
+//				2018, 0, 31, 12,  0); // jan 31, 12:00
+//	}
+//	
+//	//@Test
+//	public void testEOMED02() {
+//		testCronDate(cdDayDef(),
+//				2018, 2,  3, 13, 0,  // mar  3, 13:00
+//				2018, 1, 28, 12, 0); // feb 28, 12:00
+//	}	
+//	
+//	//@Test
+//	public void testEOMED03() {
+//		testCronDate(cdFebDef(),
+//				2018, 2,  3, 13, 0,  // mar  3, 13:00
+//				2016, 1, 29, 12, 0); // feb 28, 12:00 2016
+//	}	
+//	
+//	
+//	public static class TestJob01 implements Runnable {
+//
+//		static List<TestJob01> procs = new ArrayList<>();
+//		
+//		@Override
+//		public void run() {
+//			logger.debug("running test thingy 01");
+//			procs.add(this);
+//		}
+//	
+//		public static void initialize() {
+//			procs.clear();
+//		}
+//		
+//	}
+//	
+//	private CronTabEntry persistAndFetch(Application app, CronTabEntry e) {
+//		CronTabAPI api = app.injector().instanceOf(CronTabAPI.class);
+//		api.createOrUpdate(e);
+//		// Get job by name
+//		return api.getJobByName(e.getJob().getName());
+//	}
+//	
+//	private CronTabEntry job01(Application app) {
+//		return persistAndFetch(app, new CronTabEntry(new CronSchedule().everyHour().minutes(15), new Job("test job 01", TEST, TestJob01.class)));
+//	}
+//	
+//	//@Test
+//	public void testRunJob1() throws Exception {
+//		app.accept(app -> {
+//			CronTabEntry je = job01(app);
+//			JobRunner jr = app.injector().instanceOf(JobRunner.class);
+//			jr.runJob(je);
+//			Thread.sleep(500);
+//			assertEquals(1, TestJob01.procs.size());
+//		});		
+//	}
+//	
+//	//@Test
+//	public void testRunJob2() throws Exception {
+//		app.accept(app -> {
+//			CronTabEntry je = job01(app);
+//			JobRunner jr = app.injector().instanceOf(JobRunner.class);
+//			jr.runJob(je);
+//			jr.runJob(je);
+//			Thread.sleep(500);
+//			assertEquals(1, TestJob01.procs.size());
+//		});		
+//	}
+//
+//	//@Test
+//	public void testRunJob3() throws Exception {
+//		app.accept(app -> {
+//			CronTabEntry je = job01(app);
+//			JobRunner jr = app.injector().instanceOf(JobRunner.class);
+//			jr.runJob(je);
+//			Thread.sleep(500);
+//			jr.runJob(je);
+//			Thread.sleep(500);
+//			assertEquals(2, TestJob01.procs.size());
+//		});		
+//	}
+//	
+//	// Not a test (visual check in mongo collection).
+//	//@Test
+//	public void testJobSerialization() throws Exception {
+//		// We must provide the job entry to test. 
+//		app.accept(app -> {
+//			CronTabEntry je = job01(app);
+//			logger.debug("cron id {}", je.getId());
+//			JobRunner jr = app.injector().instanceOf(JobRunner.class);
+//			jr.runJob(je);
+//			Thread.sleep(500);			
+//		});
+//	}
+//	
+//	@Test
+//	public void testCronSericeStart() throws Exception {
+//		app.accept(app -> {
+//			IApplicationData ad = app.injector().instanceOf(IApplicationData.class);
+//			logger.debug("using data instance {}", ad);
+//			CronTabAPI api = app.injector().instanceOf(CronTabAPI.class);
+//			for (CronTabEntry e : ad.getCronTabEntries())
+//				api.createOrUpdate(e);
+//			// This is some auto start stuff....
+//			//CronService cs = 
+//					app.injector().instanceOf(CronService.class);
+//			// Wait some time, the best would be to wait for job completion.
+//			Thread.sleep(500);			
+//		});
+//	}
+//	
+////	// @Test
+////	public void test() throws Exception {
+////		Global.afCNSNoPop.run(app -> {
+////			String lockKey = getClass().getName();
+////			// Acquire lock
+////			MDBLock lock0 = MDBLock.acquire(lockKey);
+////			// Try to acquire lock
+////			MDBLock lock1 = MDBLock.acquire(lockKey);
+////			assertNotNull(lock0);
+////			assertNull(lock1);
+////		});
+////	}
+//	
+//}

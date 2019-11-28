@@ -9,6 +9,11 @@ public class PropertyDefinitionsSearchForm extends ListForm {
 	public String objectTypeCode;
 	public List<String> objectTypeCodes;
 	
+	public String code;
+	public List<String> codes;
+	public String typeName;
+	public List<String> typeNames;
+	
 	public String levelCode;
 	
 	

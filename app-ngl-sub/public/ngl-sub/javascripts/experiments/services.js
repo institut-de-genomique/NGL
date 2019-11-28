@@ -4,10 +4,18 @@
 angular.module('ngl-sub.ExperimentsServices', []).
 	factory('experimentsConsultationService', ['$http', 'mainService', 'lists', 'datatable', 
 		function($http, mainService, lists, datatable) {
+		
+		
+  // utilisation d'une var au niveau du datatable il faut que cette var soit dans le scope.
 
    //methode utilisée pour definir les colonnes 
    var getColumns = function() {				
 		var columns = [];
+		columns.push({property:"traceInformation.creationDate",
+					  header: Messages("experiment.traceInformation.creationDate"),
+					  type :"date",		    	  	
+					  order:false
+				     });		
 		columns.push({property:"code",
 					  header: Messages("experiment.code"),
 					  type :"text",		    	  	
@@ -162,13 +170,38 @@ angular.module('ngl-sub.ExperimentsServices', []).
 	
 	var initListService = function() {
 		if(!isInit) {
-			console.log("dans experiments.services.initListService.js");
+			
 			consultationService.lists.refresh.projects();
 			lists.refresh.states({objectTypeCode:"SRASubmission"});
+			
+			console.log("Dans InitListService");
+			$http.get(jsRoutes.controllers.sra.api.Variables.list().url, {params:{type:'librarySelection'}})
+				.success(function(data) {
+				// initialisation de la variable consultationService.sraVariables.librarySelection utilisée dans datatable
+				consultationService.sraVariables.librarySelection = data;																									
+				});			
+			$http.get(jsRoutes.controllers.sra.api.Variables.list().url, {params:{type:'libraryStrategy'}})
+				.success(function(data) {
+				// initialisation de la variable consultationService.sraVariables.libraryStrategy utilisée dans datatable
+				consultationService.sraVariables.libraryStrategy = data;																									
+				});					
+			$http.get(jsRoutes.controllers.sra.api.Variables.list().url, {params:{type:'librarySource'}})
+				.success(function(data) {
+				// initialisation de la variable consultationService.sraVariables.librarySource utilisée dans datatable
+				consultationService.sraVariables.librarySource = data;																									
+				});						
+			$http.get(jsRoutes.controllers.sra.api.Variables.list().url, {params:{type:'libraryLayoutOrientation'}})
+				.success(function(data) {
+				// initialisation de la variable consultationService.sraVariables.libraryLayoutOrientation utilisée dans datatable
+				consultationService.sraVariables.libraryLayoutOrientation = data;																									
+				});						
+		
+			console.log("consultationService.sraVariables.librarySelection="+ consultationService.sraVariables.librarySelection);
+		
 			isInit=true;
 		}
 	};
-	
+
 	var consultationService = {
 			//console.log("dans experiments.services.consultationService.js");
 			isRouteParam : false,
@@ -176,8 +209,8 @@ angular.module('ngl-sub.ExperimentsServices', []).
 			form : undefined,
 			datatable : undefined,
 			sraVariables : {},
-			//console.log("dans experiments.services.js");
-
+			//console.log("dans experiments.services.consultationServicejs");
+	
 			//console.log("sraVariables :" + sraVariables); 
 			// Recherche l'ensemble de experiments pour un projCode :
 			

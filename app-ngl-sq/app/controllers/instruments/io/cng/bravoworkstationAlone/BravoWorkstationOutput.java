@@ -9,18 +9,17 @@ import controllers.instruments.io.utils.AbstractOutput;
 import controllers.instruments.io.utils.File;
 import controllers.instruments.io.utils.OutputHelper;
 import models.laboratory.experiment.instance.Experiment;
-import play.Logger;
 import validation.ContextValidation;
 
 public class BravoWorkstationOutput extends AbstractOutput {
 
+	private static final play.Logger.ALogger logger = play.Logger.of(BravoWorkstationOutput.class);
+	
 	@Override
-	public File generateFile(Experiment experiment,ContextValidation contextValidation) throws Exception {
-		
-		Logger.info("generation feuille de route BravoWorkstation / exp="+ experiment.typeCode );
+	public File generateFile(Experiment experiment, ContextValidation contextValidation) throws Exception {
+		logger.info("generation feuille de route BravoWorkstation / exp={}", experiment.typeCode);
 		String content = OutputHelper.format(sampleSheet_1.render(experiment).body());
-		
-		File file = new File(getFileName(experiment)+".csv", content);
+		File file = new File(getFileName(experiment) + ".csv", content);
 		return file;
 	}
 	
@@ -28,9 +27,9 @@ public class BravoWorkstationOutput extends AbstractOutput {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyMMdd");
 		// c'est le premier container qui donne son nom a la feuille de route. Ce mecanisme était fait pour un ouput container Support plaque
 		// pas tres pertinent pour tubes... mettre plutot la plaque input dans le nom ???
-		
-		// return experiment.typeCode.toUpperCase()+"_"+experiment.atomicTransfertMethods.get(0).outputContainerUseds.get(0).locationOnContainerSupport.code+"_"+sdf.format(new Date());
-		return experiment.typeCode.toUpperCase()+"_"+experiment.atomicTransfertMethods.get(0).inputContainerUseds.get(0).locationOnContainerSupport.code+"_"+sdf.format(new Date());
+		return experiment.typeCode.toUpperCase()
+				+ "_" + experiment.atomicTransfertMethods.get(0).inputContainerUseds.get(0).locationOnContainerSupport.code
+				+ "_" + sdf.format(new Date());
 	}
 	
 }

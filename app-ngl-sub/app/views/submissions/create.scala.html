@@ -30,18 +30,19 @@
 		bt-options = createService.lists.getReadSets() defini dans ngl-common/common.js
 		ng-focus = appelle refreshReadSets de createService
 		**@
+		
 		@formGroup{
-			<div class="form-control" bt-select ng-model="createService.form.readSetCodes" filter="true" multiple="true" placeholder='@Messages("create.placeholder.submissions.readSet")' bt-options="readSet.code as readSet.code for readSet in createService.lists.getReadSets()" ng-focus="createService.refreshReadSets()"></div>			
+			<div class="form-control" bt-select ng-model="createService.form.readSetCodes" filter="true" multiple="true" placeholder='@Messages("create.placeholder.submissions.readSet")' bt-options="readSet.code as readSet.code for readSet in createService.readSets"></div>			
 		}	
 		<div>
 			<label>@Messages("userFileReadSet")</label> 
-			<input type="file" id="file" base64-file="createService.userFileReadSet"/>
+			<input type="file" id="idUserFileReadSet" base64-file="createService.userFileReadSet"/>
 		</div>
-		<!--div>
+		<div>
 			<label>@Messages("acStudy")</label> 
 			<input type="text" class="form-control" ng-model="createService.form.acStudy" placeholder='@Messages("create.placeholder.acStudy")' >
 		</div>	
-		<div>	
+		<!--div>	
 			<label>@Messages("AcSample")</label> 
 			<input type="text" class="form-control" ng-model="createService.form.acSample" placeholder='@Messages("create.placeholder.acSample")' >
 		</div-->					
@@ -68,7 +69,7 @@
 		
 		<div> 
 			<label>@Messages("userFileCloneToAc")</label> 
-			<input type="file" base64-file="createService.userFileClonesToAc" />
+			<input type="file" id="idUserFileClonesToAc" base64-file="createService.userFileClonesToAc" />
 		</div>	
 								
 	}

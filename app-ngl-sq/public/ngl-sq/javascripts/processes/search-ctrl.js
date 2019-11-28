@@ -95,6 +95,9 @@ angular.module('home').controller('SearchStateCtrl', ['$scope','$location','$rou
 				value:function(process){
 					return process.state;
 				}
+			},
+			objectsMustBeAddInGetFinalValue:{
+				"searchService":processesSearchService
 			}
 	};
 
@@ -161,6 +164,9 @@ angular.module('home').controller('SearchRemoveCtrl', ['$scope','$location','$ro
 			},
 			exportCSV:{
 				active:true,
+			},
+			objectsMustBeAddInGetFinalValue:{
+				"searchService":processesSearchService
 			}
 	};
 

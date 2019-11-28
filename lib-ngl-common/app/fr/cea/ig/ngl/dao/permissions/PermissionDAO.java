@@ -17,7 +17,7 @@ public class PermissionDAO {
 	}
 	
 	public List<Permission> byUserLogin(String login) throws DAOException {
-		return Permission.find.findByUserLogin(login);
+		return Permission.find.get().findByUserLogin(login);
 	}
 	
 }

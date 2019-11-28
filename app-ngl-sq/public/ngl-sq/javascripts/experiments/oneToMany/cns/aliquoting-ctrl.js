@@ -55,7 +55,7 @@ angular.module('home').controller('AliquotingCtrl',['$scope', '$parse', 'atmToGe
 				showButton:false
 			},			
 			select:{
-				active:true
+				active:($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('IP'))
 			},
 			edit:{
 				active: ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('IP')),
@@ -528,7 +528,7 @@ angular.module('home').controller('AliquotingCtrl',['$scope', '$parse', 'atmToGe
 	
 	$scope.$on('activeEditMode', function(e) {
 		console.log("call event activeEditMode");
-		$scope.atmService.data.datatableParam.selectAll(true);
+		$scope.atmService.data.datatableParam.selectAll($scope.isEditModeAvailable() && $scope.isNewState());
 		$scope.atmService.data.datatableParam.setEdit();
 		
 		$scope.atmService.data.datatableConfig.selectAll(true);

@@ -5,15 +5,15 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 
 import fr.genoscope.lis.devsi.birds.api.entity.ResourceProperties;
+import fr.genoscope.lis.devsi.birds.api.exception.FatalException;
+import fr.genoscope.lis.devsi.birds.impl.properties.ProjectProperties;
 
 public class SRAFilesUtil {
 
@@ -60,17 +60,40 @@ public class SRAFilesUtil {
 		return false;
 	}
 	
-	public static boolean checkDataCCRT(Set<ResourceProperties> rpsRawData, String submissionDirectory)
+	public static boolean checkDataCCRT(Set<ResourceProperties> rpsRawData, String submissionCode) throws FatalException
 	{
 		boolean checkDataCCRT = true;
 		for(ResourceProperties rawData: rpsRawData){
 			if(rawData.getProperty("location").equals("CCRT")){
-				File filePath = new File(submissionDirectory+File.separator+rawData.getProperty("relatifName"));
+				File filePath = new File(ProjectProperties.getProperty("tmpDirectory")+File.separator+submissionCode+File.separator+rawData.getProperty("relatifName"));
 				if(!filePath.exists())
 					checkDataCCRT=false;
 			}
 		}
 		return checkDataCCRT;
+	}
+	
+	public static void createBigTmpDirectory(Set<ResourceProperties> rpsRawData, String submissionCode) throws FatalException
+	{
+		boolean createBigTmpDir = false;
+		for(ResourceProperties rawData: rpsRawData){
+			if(rawData.getProperty("gzipForSubmission").equals("true") || rawData.getProperty("location").equals("CCRT")){
+				createBigTmpDir=true;
+				break;
+			}
+		}
+		if(createBigTmpDir){
+			File fileDir = new File(ProjectProperties.getProperty("tmpDirectory")+File.separator+submissionCode);
+			if(!fileDir.exists()){
+				fileDir.mkdir();
+				//Set permission for group
+				try {
+					Runtime.getRuntime().exec("chmod 774 "+fileDir.getAbsolutePath());
+				} catch (IOException e) {
+					throw new FatalException(e);
+				}
+			}
+		}
 	}
 	
 	public static boolean isDataCCRT(Set<ResourceProperties> rpsRawData)

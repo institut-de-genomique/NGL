@@ -15,8 +15,7 @@ import controllers.instruments.io.utils.OutputHelper;
 public class Output extends AbstractOutput {
 
 	@Override
-	public File generateFile(Experiment experiment,
-			ContextValidation contextValidation) throws Exception {
+	public File generateFile(Experiment experiment, ContextValidation contextValidation) throws Exception {
 		Integer stripDestination = Integer.valueOf((String)OutputHelper.getInstrumentProperty(experiment, "stripDestination"));
 		
 		String content = OutputHelper.format(sampleSheet_1.render(experiment, stripDestination).body());

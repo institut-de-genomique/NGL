@@ -5,24 +5,35 @@
 GET     /                           			controllers.Application.index()
 
 GET		/api/description/all					controllers.description.All.save()
+GET		/api/description/init-all    			controllers.description.All.init()
 GET		/api/description/ngl-sq					controllers.description.NGLSeq.save()
 GET		/api/description/ngl-bi					controllers.description.NGLBI.save()
 GET		/api/description/projects				controllers.description.projects.Projects.save()
 
-GET		/api/instance/resolutions				controllers.instance.resolution.Resolutions.save()
+GET		/api/instance/resolutions				controllers.instance.resolution.Resolutions.save()       
 GET		/api/instance/protocols					controllers.instance.protocol.Protocols.save()
 GET		/api/instance/parameters/printers		controllers.instance.parameters.Printers.save()
 
+#Description state necessite de lancer sans exception les descriptions de bi, sq, project avant la description de state
+#A activer uniquement si besoin en prod sinon utiliser all
+#GET		/api/description/commons/states			controllers.description.commons.States.save()
+
 GET		/migrationTaxonSample					controllers.admin.supports.api.MigrationUpdateNCBITaxonSample.migration(code: java.lang.String ?= "all", onlyNull:Boolean ?=false)
+GET		/migrationFungi							controllers.admin.supports.api.MigrationTaxonomyFungi.migration(code: java.lang.String ?= "all")
 
+GET		/scripts/run/:clazz						fr.cea.ig.lfw.controllers.scripts.ScriptController.run(clazz : java.lang.String)
+POST	/scripts/run/:clazz						fr.cea.ig.lfw.controllers.scripts.ScriptController.run(clazz : java.lang.String)
 
-GET		/migration/primers						controllers.migration.Primers.migration()
+# GET		/migration/primers						controllers.migration.Primers.migration()
 
-GET		/migrationUnixGroupProject				controllers.migration.MigrationUnixGroupProject.migration(fileName: java.lang.String)
+# GET		/migrationUnixGroupProject				controllers.migration.MigrationUnixGroupProject.migration(fileName: java.lang.String)
+
+# prototype not implemented
+# GET     /cron/all                               controllers.crontab.CronController.getEntries()
 
 ####remove old part (not used anymore)
 #GET		/api/description/ngl-sample				controllers.description.NGLSample.save()
-#GET		/api/description/commons/states			controllers.description.commons.States.save()
+
 #GET		/api/description/commons/measures		controllers.description.commons.Measures.save()
 #GET		/api/description/commons/levels			controllers.description.commons.Levels.save()
 #GET		/api/description/commons/institutes		controllers.description.commons.Institutes.save()

@@ -16,13 +16,13 @@ import validation.ContextValidation;
 
 public class Input extends AbstractInput {
 	
-   /* Description du fichier a traiter: VERSION TXT...TAB délimité... ficjier original recu en UTF-16 Litle Endian
+   /* Description du fichier a traiter: VERSION TXT...TAB délimité... fichier original recu en UTF-16 Litle Endian
     |##BLOCKS= 1
     |Group: UnknownsDilution
-    |Sample	Wells	RFU	Valeur	dilution ng/µl	Dilution_1	ConcStock ng/ul	Moyenne	
-    |A10_	A10	216.58	21.19	5.000	5.000	105.949	105.949	
-    |A1_	A1	206.00	20.01	5.000	5.000	100.075	100.075	
-    |A2_	A2	265.96	26.67	5.000	5.000	133.362	133.362	
+    |Sample		Wells	RFU		Valeur	dilution ng/µl	Dilution_1	ConcStock ng/ul		Moyenne	
+    |A10_		A10		216.58	21.19	5.000			5.000		105.949				105.949	
+    |A1_		A1		206.00	20.01	5.000			5.000		100.075				100.075	
+    |A2_		A2		265.96	26.67	5.000			5.000		133.362				133.362	
     |...
     |...
     |<ligne vide>
@@ -50,7 +50,6 @@ public class Input extends AbstractInput {
 		Map<String,SpectramaxData> dataMap = new HashMap<>(0);
 		
 		// charset detection (N. Wiart)
-//		byte[] ibuf = pfv.value;
 		byte[] ibuf = pfv.byteValue();
 		String charset = "UTF-8"; //par defaut, convient aussi pour de l'ASCII pur
 		
@@ -59,82 +58,79 @@ public class Input extends AbstractInput {
 			charset = "UTF-16LE";
 		}
 		
-		InputStream is = new ByteArrayInputStream(ibuf);
-		
-		BufferedReader reader = new BufferedReader(new InputStreamReader(is, charset));
-		int n = 0;
-		boolean lastwell=false;
-		String line="";
-		
 		// String unit="";  ne marche pas car le compilateur reclame un objet final...utiliser StringBuilder (N Wiart)
 		StringBuilder unit = new StringBuilder();
 		
-		// code pour trouver la bonne unité si jamais celle ci est variable dans le fichier!!!
-		//if ( fields[?????].matches("(.*)Conc.(.*)")){
-		//	unit.append("ng/µL");
-		//} else {
-		//	unit.append("nM");
-		//}
-		
-		unit.append("ng/µL");
-		
-		while (((line = reader.readLine()) != null) && !lastwell ){	 
-			 // attention si le fichier vient d'une machine avec LOCALE = FR les décimaux utilisent la virgule!!!
-			 String[] cols = line.replace (",", ".").split("\t");
-
-			// verifier la ligne d'entete (3 eme ligne du fichier)
-			if (n == 2) {
-				if ( ! cols[1].equals("Wells") ) {
-					contextValidation.addErrors("Erreurs fichier","experiments.msg.import.header-label.missing","1", "Wells");
-					return experiment;
-				}
-				if ( ! cols[7].equals("Moyenne") ) {
-					contextValidation.addErrors("Erreurs fichier","experiments.msg.import.header-label.missing","1", "Moyenne");
-					return experiment;
-				}
-			}
+		try (InputStream is = new ByteArrayInputStream(ibuf);
+		     BufferedReader reader = new BufferedReader(new InputStreamReader(is, charset))) {
+			int n = 0;
+			boolean lastwell=false;
+			String line="";
 			
-			// commencer le traitement en sautant les 3 premieres lignes
-			if (n > 2 ) {
-				// ligne vide trouvée=fin des data intéressantes
-				if ( cols[0].equals("")){
-					lastwell=true;
-					continue;
-				} else {
-				    // description d'une ligne de donnees:A10_	A10	216.58	21.19	5.000	5.000	105.949	105.949
-				    if (( cols.length  != 8 )) {
-					    contextValidation.addErrors("Erreurs fichier", "experiments.msg.import.linefields.unexpected",n );
-					    n++;
-					    continue; // ne pas sortir permet de verifier le fichier
-				    } else {
-				        String pos96=cols[1];
-				        // verifier que c'est une position 96 valide ???
-				        if ( !InputHelper.isPlatePosition(contextValidation, pos96 , 96, n)){
-					          n++;
-					         continue; // ne pas sortir permet de verifier le fichier
-				        } else {
-				             // Logger.info ("conc moyenne="+cols[7]);
-				             double conc=Double.parseDouble(cols[7]);
-				             // si la valeur trouv2ée est négative ????
-
-				             SpectramaxData data=new SpectramaxData(conc);
-				             dataMap.put(pos96, data);
-				        }
-				    }
-		        } 
-			}
-		
-			n++;
-		} //end while
-
-		reader.close();
-		
-		if (contextValidation.hasErrors()){ 
+			// code pour trouver la bonne unité si jamais celle ci est variable dans le fichier!!!
+			//if ( fields[?????].matches("(.*)Conc.(.*)")){
+			//	unit.append("ng/µL");
+			//} else {
+			//	unit.append("nM");
+			//}
+			
+			unit.append("ng/µL");
+			
+			while (((line = reader.readLine()) != null) && !lastwell ){	 
+				// attention si le fichier vient d'une machine avec LOCALE = FR les décimaux utilisent la virgule!!!
+				String[] cols = line.replace (",", ".").split("\t");
+				
+				// verifier la ligne d'entete (3 eme ligne du fichier)
+				if (n == 2) {
+					if ( ! cols[1].equals("Wells") ) {
+						contextValidation.addError("Erreurs fichier","experiments.msg.import.header-label.missing","1", "Wells");
+						return experiment;
+					}
+					if ( ! cols[7].equals("Moyenne") ) {
+						contextValidation.addError("Erreurs fichier","experiments.msg.import.header-label.missing","1", "Moyenne");
+						return experiment;
+					}
+				}
+				
+				// commencer le traitement en sautant les 3 premieres lignes
+				if (n > 2 ) {
+					// ligne vide trouvée=fin des data intéressantes
+					if ( cols[0].equals("")){
+						lastwell=true;
+						continue;
+					} else {
+						// description d'une ligne de donnees:A10_	A10	216.58	21.19	5.000	5.000	105.949	105.949
+						if (( cols.length  != 8 )) {
+							contextValidation.addError("Erreurs fichier", "experiments.msg.import.linefields.unexpected",n );
+							n++;
+							continue; // ne pas sortir permet de verifier tout le fichier
+						} else {
+							String pos96=cols[1];
+							// verifier que c'est une position 96 valide ???
+							if ( !InputHelper.isPlatePosition(contextValidation, pos96 , 96, n)){
+								n++;
+								continue; // ne pas sortir permet de verifier tout le fichier
+							} else {
+								// Logger.info ("conc moyenne="+cols[7]);
+								double conc=Double.parseDouble(cols[7]);
+								// si la valeur trouv2ée est négative ????
+								
+								SpectramaxData data=new SpectramaxData(conc);
+								dataMap.put(pos96, data);
+							}
+						}
+					} 
+				}
+				
+				n++;
+			} //end while
+		}
+		if (contextValidation.hasErrors()) { 
 			return experiment;
 		}
 		
+		/*
 		// Verifier que tous les puits de l'experience ont des données dans le fichier  ???
-		/* 
 		if (!contextValidation.hasErrors()) {
 			experiment.atomicTransfertMethods
 				.stream()
@@ -155,14 +151,13 @@ public class Input extends AbstractInput {
 				.stream()
 				.map(atm -> atm.inputContainerUseds.get(0))
 				.forEach(icu -> {
-					String icupos=InputHelper.getCodePosition(icu.code);				
-					PropertySingleValue concentration1 = getPSV(icu, "concentration1");
+					String icupos=InputHelper.getIcuPosition(icu);				
+					PropertySingleValue concentration1 = getOrCreatePSV(icu, "concentration1");
 					if(dataMap.containsKey(icupos)){
 						concentration1.value = dataMap.get(icupos).concentration;
 						// concentration1.unit = unit; ne marche pas si unit n'est pas "final"
 						concentration1.unit = unit.toString();
 					}
-									
 				});
 		}
 		
@@ -173,7 +168,7 @@ public class Input extends AbstractInput {
 	public class SpectramaxData {
 		private double concentration;
 
-		public SpectramaxData ( double conc) {
+		public SpectramaxData (double conc) {
 			concentration=conc;
 		}
 	}

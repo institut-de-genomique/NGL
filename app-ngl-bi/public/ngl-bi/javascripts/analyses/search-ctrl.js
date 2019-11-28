@@ -122,7 +122,7 @@ angular.module('home').controller('SearchStateCtrl', ['$scope', '$routeParams', 
 			},			
 			save : {
 				active:Permissions.check("writing")?true:false,
-				url: jsRoutes.controllers.analyses.api.Analyses.stateBatch().url,				
+				url: jsRoutes.controllers.analyses.api.Analyses.updateStateBatch().url,				
 				batch:true,
 				method:'put',
 				value:function(line){return {code:line.code,state:line.state};}				

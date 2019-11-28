@@ -1,135 +1,95 @@
 package controllers.experiments.api;
 
-import java.util.Collection;
-import java.util.Date;
-
 import javax.inject.Inject;
 
-import org.mongojack.DBQuery;
-import org.mongojack.DBQuery.Query;
-import org.mongojack.DBUpdate;
-
-import controllers.SubDocumentController;
-import controllers.authorisation.Permission;
-import fr.cea.ig.play.migration.NGLContext;
+import controllers.NGLController;
+import fr.cea.ig.authentication.Authenticated;
+import fr.cea.ig.authorization.Authorized;
+import fr.cea.ig.ngl.NGLApplication;
+import fr.cea.ig.ngl.dao.api.APIException;
+import fr.cea.ig.ngl.dao.api.APISemanticException;
+import fr.cea.ig.ngl.dao.api.APIValidationException;
+import fr.cea.ig.ngl.dao.experiments.ExperimentCommentsAPI;
+import fr.cea.ig.ngl.dao.experiments.ExperimentsAPI;
+import fr.cea.ig.ngl.support.NGLForms;
 import models.laboratory.common.instance.Comment;
 import models.laboratory.experiment.instance.Experiment;
-import models.utils.CodeHelper;
-import models.utils.InstanceConstants;
-import play.data.Form;
 import play.mvc.Result;
-import validation.ContextValidation;
 
-// @Controller
-public class ExperimentComments extends SubDocumentController<Experiment, Comment> {
-	
-	@Inject
-	public ExperimentComments(NGLContext ctx) {
-		super(ctx,InstanceConstants.EXPERIMENT_COLL_NAME, Experiment.class, Comment.class);
-	}
-	
-	@Override
-	protected Query getSubObjectQuery(String parentCode, String code) {
-		return DBQuery.and(DBQuery.is("code", parentCode), DBQuery.is("comments.code",code));
-	}
-	
-	@Override
-	protected Collection<Comment> getSubObjects(Experiment object) {
-		return object.comments;
-	}
-	
-	@Override
-	protected Comment getSubObject(Experiment object, String code) {
-		for(Comment c : object.comments){
-			if(code.equals(c.code)){
-				return c;
-			}
-		}
-		return null;
-	}
-	
-	@Permission(value={"writing"})
-	public Result save(String parentCode) {
-		Experiment objectInDB = getObject(parentCode);
-		if (objectInDB == null)
-			return notFound();
+public class ExperimentComments extends NGLController implements NGLForms {
 
-		Form<Comment> filledForm = getSubFilledForm();
-		Comment inputComment = filledForm.get();
-		
-		if (inputComment.code == null) {
-			inputComment.createUser = getCurrentUser();
-			inputComment.creationDate = new Date();
-			inputComment.code = CodeHelper.getInstance().generateExperimentCommentCode(inputComment);									
-		} else {
-			return badRequest("use PUT method to update the comment");
-		}
+    private final ExperimentCommentsAPI api;
+    private final ExperimentsAPI parentApi;
 
-//		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm.errors()); 
-		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm); 
-		ctxVal.setCreationMode();
-		ctxVal.putObject("experiment", objectInDB);		
-		inputComment.validate(ctxVal);
-		if (!ctxVal.hasErrors()) {
-			updateObject(DBQuery.is("code", parentCode), 
-					DBUpdate.push("comments", inputComment)
-					.set("traceInformation", getUpdateTraceInformation(objectInDB.traceInformation)));
-			return get(parentCode, inputComment.code);
-		} else {
-			// return badRequest(filledForm.errors-AsJson());
-			return badRequest(errorsAsJson(ctxVal.getErrors()));
-		}		
-	}
 
-	@Permission(value={"writing"})
-	public Result update(String parentCode, String code){
-		Experiment objectInDB = getObject(getSubObjectQuery(parentCode, code));
-		if (objectInDB == null)
-			return notFound();
-		
-		Form<Comment> filledForm = getSubFilledForm();
-//		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm.errors()); 
-		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm); 
-		
-		Comment inputComment = filledForm.get();
-		if(getCurrentUser().equals(inputComment.createUser)){
-			if (code.equals(inputComment.code)) {
-				ctxVal.setUpdateMode();
-				ctxVal.putObject("experiment", objectInDB);
-				inputComment.validate(ctxVal);
-				if (!ctxVal.hasErrors()) {
-					updateObject(DBQuery.is("code", parentCode).is("comments.code", inputComment.code), 
-							DBUpdate.set("comments.$", inputComment)
-							.set("traceInformation", getUpdateTraceInformation(objectInDB.traceInformation)));
-					return get(parentCode, code);
-				} else {
-					// return badRequest(filledForm.errors-AsJson());
-					return badRequest(errorsAsJson(ctxVal.getErrors()));
-				}
-			} else {
-				return badRequest("treatment code are not the same");
-			}
-		} else {
-			return forbidden();
-		}
-	}
-	
-	@Permission(value={"writing"})
-	public Result delete(String parentCode, String code){
-		Experiment objectInDB = getObject(getSubObjectQuery(parentCode, code));
-		if (objectInDB == null) {
-			return notFound();			
-		}	
-		Comment deleteComment = getSubObject(objectInDB, code);
-		if(getCurrentUser().equals(deleteComment.createUser)){
-			updateObject(DBQuery.is("code", parentCode), 
-					DBUpdate.pull("comments", deleteComment)
-					.set("traceInformation", getUpdateTraceInformation(objectInDB.traceInformation)));
-			return ok();	
-		}else{
-			return forbidden();
-		}
-			
-	}
-	
+    @Inject
+    public ExperimentComments(NGLApplication app, ExperimentCommentsAPI api, ExperimentsAPI parentApi) {
+        super(app);
+        this.api = api;
+        this.parentApi = parentApi;
+    }
+
+    @Authenticated
+    @Authorized.Write
+    public Result save(String parentCode) {
+        return globalExceptionHandler(() -> {
+            Experiment objectInDB = parentApi.get(parentCode);	
+            if (objectInDB == null) {
+                return notFound();
+            } else {
+                Comment inputComment = getFilledForm(Comment.class).get();
+                try {
+                    Comment comment = api.save(objectInDB, inputComment, getCurrentUser());
+                    return okAsJson(comment);
+                } catch (APIValidationException e) {
+                    return badRequestLoggingForValidationException(e);
+                } catch (APISemanticException e) {
+                    if (getLogger().isDebugEnabled()) getLogger().warn(e.getMessage(), e);
+                    return badRequestAsJson("use PUT method to update");
+                } 
+            }
+        });
+    }
+
+    @Authenticated
+    @Authorized.Write
+    public Result update(String parentCode, String code){
+        return globalExceptionHandler(() -> {
+            Experiment objectInDB = parentApi.get(parentCode);
+            if (objectInDB == null) {
+                return notFound();
+            } else {
+                Comment input = getFilledForm(Comment.class).get();
+                try {
+                    Comment comment = api.update(parentApi.get(parentCode), input, getCurrentUser());
+                    return okAsJson(comment);
+                } catch (APIValidationException e) {
+                    return badRequestLoggingForValidationException(e);
+                } catch (APIException e) {
+                    if (getLogger().isDebugEnabled()) getLogger().warn(e.getMessage(), e);
+                    return forbidden();
+                }
+            }
+
+        });
+    }
+
+    @Authenticated
+    @Authorized.Write
+    public Result delete(String parentCode, String code){
+        return globalExceptionHandler(() -> {
+            Experiment objectInDB = parentApi.get(parentCode);
+            if (objectInDB == null) {
+                return notFound();
+            } else {
+                try {
+                    api.delete(objectInDB, code, getCurrentUser());
+                } catch (APIException e) {
+                    if (getLogger().isDebugEnabled()) getLogger().warn(e.getMessage(), e);
+                    return forbidden();
+                }
+                return ok();
+            }
+        });
+    }
 }

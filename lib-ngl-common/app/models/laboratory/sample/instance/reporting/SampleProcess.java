@@ -9,16 +9,12 @@ import models.laboratory.common.instance.TraceInformation;
 import models.laboratory.processes.instance.SampleOnInputContainer;
 
 /**
- * TODO: validate the description
- * 
  * Projection of a {@link models.laboratory.processes.instance.Process} 
  * and of a Experiment that is 
  * stored in a {@link models.laboratory.sample.instance.Sample}.
  * 
  * The trace information means that this object is user editable, this is not 
  * a real projection, if any at all.
- *   
- * @author vrd
  *
  */
 public class SampleProcess {

@@ -10,6 +10,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import fr.cea.ig.DBObject;
 import fr.cea.ig.MongoDBDAO;
+import fr.cea.ig.lfw.utils.Iterables;
+import fr.cea.ig.ngl.dao.api.sra.SubmissionAPI;
 import models.laboratory.common.description.ObjectType;
 import models.laboratory.common.instance.State;
 import models.laboratory.common.instance.TraceInformation;
@@ -17,12 +19,12 @@ import models.sra.submit.sra.instance.Configuration;
 import models.utils.InstanceConstants;
 import validation.ContextValidation;
 import validation.IValidation;
-import validation.sra.SraValidationHelper;
+import validation.common.instance.CommonValidationHelper;
 import validation.utils.ValidationHelper;
-import workflows.sra.submission.TransitionObject;
+import workflows.sra.submission.StateContainer;
 
 // objet qui decrit ce qu'on soumet à l'EBI à l'instant t.
-public class Submission extends DBObject implements IValidation, TransitionObject {
+public class Submission extends DBObject implements IValidation, StateContainer {
 
 	//public String alias;         // required mais remplacé par code herité de DBObject, et valeur = CNS_projectCode_date_num
 	//public String projectCode = null;     // required pour nos stats //Reference code de la collection project NGL
@@ -60,30 +62,33 @@ public class Submission extends DBObject implements IValidation, TransitionObjec
 	// pour gerer les differents etats de l'objet en fonction de l'avancement dans le workflow de la soumission
 	
 	public TraceInformation traceInformation = new TraceInformation();// .Reference sur "models.laboratory.common.instance.TraceInformation" 
-	private Object validationDate;
+//	private Object validationDate; // aucune utilite et normalement champs jamais present en prod.
 		// pour loguer les dernieres modifications utilisateurs
-
+	public String adminComment;
 	public Submission(String user, List<String>projectCodes) {
 		//DateFormat dateFormat = new SimpleDateFormat("dd_MM_yyyy");	
 		//String st_my_date = dateFormat.format(courantDate);	
 		// determination du repertoire de soumission dans methode activate SubmissionServices
-		Date courantDate = new java.util.Date();
-		this.creationDate = courantDate;
+//		Date courantDate = new Date();
+//		this.creationDate = courantDate;
+		this();
 		this.traceInformation = new TraceInformation();
 		this.traceInformation.setTraceInformation(user);
 		this.creationUser = user;
-		for (String projectCode: projectCodes) {
+		for (String projectCode : projectCodes) {
 			if (StringUtils.isNotBlank(projectCode)) {
 				this.projectCodes.add(projectCode);
 			}
 		}
+		this.projectCodes = Iterables.filter(projectCodes, StringUtils::isNotBlank).toList();  
 	}
 
 	public Submission() {
-//		DateFormat dateFormat = new SimpleDateFormat("dd_MM_yyyy");	
-		Date courantDate = new java.util.Date();
-//		String st_my_date = dateFormat.format(courantDate);	
-		this.creationDate = courantDate;
+////		DateFormat dateFormat = new SimpleDateFormat("dd_MM_yyyy");	
+//		Date courantDate = new java.util.Date();
+////		String st_my_date = dateFormat.format(courantDate);	
+//		this.creationDate = courantDate;
+		creationDate = new Date();
 	}
 	
 	@Override
@@ -100,127 +105,141 @@ public class Submission extends DBObject implements IValidation, TransitionObjec
 	public TraceInformation getTraceInformation() {
 		return traceInformation;
 	}
-	@Override
-	public void validate(ContextValidation contextValidation) {
-		contextValidation.addKeyToRootKeyName("submission");
-		
-		if(contextValidation.isUpdateMode()){
-			ValidationHelper.required(contextValidation, this.creationUser, "creationUser");
+	
+	public void validateInvariants(ContextValidation contextValidation) {
+		String undifinedValueInRepriseHistorique = "undefinedValue_repriseHistorique";
+		contextValidation = contextValidation.appendPath("submission");
+		if (contextValidation.isUpdateMode()) {
+			ValidationHelper  .validateNotEmpty    (contextValidation, creationUser, "creationUser");
 		}
-		
 		// verifier que projectCode est bien renseigné et existe dans lims :
-		SraValidationHelper.validateProjectCodes(this.projectCodes, contextValidation);
+		CommonValidationHelper.validateProjectCodes(contextValidation, projectCodes);
 
 		// Verifier que status est bien renseigné avec valeurs autorisees et que submissionDirectory est bien renseigné une
 		// fois que l'objet est en status "inWaiting" (etape activate de la soumission)
-		/*if(SraValidationHelper.requiredAndConstraint(contextValidation, this.state.code , VariableSRA.mapStatus, "state.code")){
-			if(this.state.code.equalsIgnoreCase("inwaiting") 
-					||this.state.code.equalsIgnoreCase("inprogress")
-					|| this.state.code.equalsIgnoreCase("submitted")) {
-				ValidationHelper.required(contextValidation, this.	submissionDirectory , "submissionDirectory");
-				ValidationHelper.required(contextValidation, this.submissionDate , "submissionDate");
-			}
-		}*/
-		SraValidationHelper.validateState(ObjectType.CODE.SRASubmission, this.state, contextValidation);
-		if (StringUtils.isNotBlank(this.state.code)){
-			if(this.state.code.equalsIgnoreCase("IW-SUB") 
-					|| this.state.code.equalsIgnoreCase("IW-SUB-R")
-					|| this.state.code.equalsIgnoreCase("IP-SUB")
-					|| this.state.code.equalsIgnoreCase("IP-SUB-R")
-					|| this.state.code.equalsIgnoreCase("F-SUB")) {
-				ValidationHelper.required(contextValidation, this.submissionDirectory , "submissionDirectory");
-				ValidationHelper.required(contextValidation, this.creationDate , "creationDate");
-				ValidationHelper.required(contextValidation, this.validationDate , "validationDate");
-			}
-		}
-		/*ValidationHelper.required(contextValidation, this.xmlStudys , "xmlStudys");
-		ValidationHelper.required(contextValidation, this.xmlSamples , "xmlSamples");
-		ValidationHelper.required(contextValidation, this.xmlExperiments , "xmlExperiments");
-		ValidationHelper.required(contextValidation, this.xmlRuns , "xmlRuns");
-		ValidationHelper.required(contextValidation, this.xmlSubmission , "xmlSubmission");
-		ValidationHelper.required(contextValidation, this.resultSendXml , "resultSendXml");
-		*/	
-		SraValidationHelper.validateId(this, contextValidation);
-		SraValidationHelper.validateTraceInformation(traceInformation, contextValidation);			
-		if (!StringUtils.isNotBlank((CharSequence) contextValidation.getContextObjects().get("type"))){	
-			contextValidation.addErrors("submission non evaluable ", "sans type de contexte de validation");
-			contextValidation.removeKeyFromRootKeyName("submission");
-			return;
-		} 
-		
-		// Dans le cas d'une soumission pour une release, on n'applique pas le reste des validations
-		if (this.release){
-			return;
-		}
-		
-		if (StringUtils.isBlank(this.configCode)){
-			contextValidation.addErrors("submission non evaluable ", "sans configCode dans la soumission '" + this.code + "'");
-			contextValidation.removeKeyFromRootKeyName("submission");
-			return;
-		} 
-		Configuration config = MongoDBDAO.findByCode(InstanceConstants.SRA_CONFIGURATION_COLL_NAME, Configuration.class, this.configCode);
+		CommonValidationHelper.validateStateRequired(contextValidation, ObjectType.CODE.SRASubmission, state);
 
-		if (contextValidation.getContextObjects().get("type").equals("sra")) {
-			if (config == null) {
-				contextValidation.addErrors("submission.configCode", "objet configuration '" + this.configCode + "' qui n'existe pas dans base");
-			} else { 
-				// pas de validation integrale de config qui a ete stocke dans la base donc valide mais verification
-				// de quelques contraintes en lien avec soumission.
-				if (StringUtils.isBlank(config.state.code)){
-					contextValidation.addErrors("config.state.code", "'" + config.state.code + "' n'est pas à la valeur attendue 'used'");
-				}
-				
-				if (StringUtils.isBlank(config.strategyStudy)||StringUtils.isBlank(config.strategySample)){
-					
-				}
-				if (StringUtils.isBlank(config.strategyStudy)){
-					contextValidation.addErrors("strategy_study", "champs qui doit etre renseigne dans la configuration passee dans le contexte de validation");
-				} else if (config.strategyStudy.equalsIgnoreCase("strategy_internal_study")) {
-					// Le champs studyCode est rempli ssi le study est à soumettre (state = N)
-					/*if (StringUtils.isBlank(this.studyCode)) {
+		if (StringUtils.isNotBlank(state.code)) {
+			switch (state.code.toUpperCase()) {
+			case "IW-SUB"   :
+			case "IW-SUB-R" :
+			case "IP-SUB"   :
+			case "IP-SUB-R" :
+			case "F-SUB"    :
+				ValidationHelper.validateNotEmpty(contextValidation, this.submissionDirectory , "submissionDirectory");
+				ValidationHelper.validateNotEmpty(contextValidation, this.creationDate ,        "creationDate");
+				break;
+			default:
+				// Do nothing
+			}
+		}
+		CommonValidationHelper.validateIdPrimary(contextValidation, this);
+		CommonValidationHelper.validateTraceInformationRequired(contextValidation, traceInformation);			
+
+		// Dans le cas d'une soumission pour une release, on n'applique pas le reste des validations
+		if (release)
+			return;
+		if (StringUtils.isBlank(this.configCode)) {
+//			contextValidation.addError("submission non evaluable ", "sans configCode dans la soumission '" + code + "'");
+			return;
+		} 
+		
+		Configuration config = MongoDBDAO.findByCode(InstanceConstants.SRA_CONFIGURATION_COLL_NAME, Configuration.class, configCode);
+		if (config == null) {
+			if (this.configCode.equals(undifinedValueInRepriseHistorique)) {
+				// pas de configuration associé pour une soumission hors ngl-sub
+			} else {
+				contextValidation.addError("submission.configCode", "objet configuration '" + configCode + "' qui n'existe pas dans base");
+			}
+		} else { 
+			// pas de validation integrale de config qui a ete stocke dans la base donc valide mais verification
+			// de quelques contraintes en lien avec soumission.
+			if (StringUtils.isBlank(config.state.code)){
+				contextValidation.addError("config.state.code", "'" + state.code + "' n'est pas à la valeur attendue 'used'");
+			}
+			if (StringUtils.isBlank(config.strategyStudy)){
+				contextValidation.addError("strategy_study", "champs qui doit etre renseigne dans la configuration passee dans le contexte de validation");
+			} else if (config.strategyStudy.equalsIgnoreCase("strategy_internal_study")) {
+				// Le champs studyCode est rempli ssi le study est à soumettre (state = N)
+				/*if (StringUtils.isBlank(this.studyCode)) {
 						contextValidation.addErrors("strategy_study", "strategy_internal_study incompatible avec studyCode vide");
 					}*/
-				} else if (config.strategyStudy.equalsIgnoreCase("strategy_external_study")) {
-					if (StringUtils.isNotBlank(this.studyCode)){
-						contextValidation.addErrors("strategy_study", "strategy_external_study incompatible avec studyCode renseigne : '" + this.studyCode +"'");
-					}
-					// On peut avoir donné un seul studyAc externe pour toute la soumission via l'interface
-					/*if (this.mapUserClone == null || this.mapUserClone.isEmpty()){
-						contextValidation.addErrors("strategy_study", "strategy_external_study incompatible avec mapUserClone non renseigné");
-					}*/
-				} else {
-					contextValidation.addErrors("strategy_study", "valeur non attendue '" + config.strategyStudy + "'");
+			} else if (config.strategyStudy.equalsIgnoreCase("strategy_external_study")) {
+				if (StringUtils.isNotBlank(studyCode)){
+					contextValidation.addError("strategy_study", "strategy_external_study incompatible avec studyCode renseigne : '" + studyCode +"'");
 				}
-				if (StringUtils.isBlank(config.strategySample)){
-					contextValidation.addErrors("strategy_sample", "champs qui doit etre renseigne dans la configuration passee dans le contexte de validation");
-				} else {
-					if(config.strategySample.equalsIgnoreCase("strategy_external_sample")) {
-						if (this.sampleCodes.size() != 0) {
-							contextValidation.addErrors("strategy_external_sample incompatible avec samples à soumettre : ", "taille sampleCode = "  + this.sampleCodes.size());
-						}
-						// On peut avoir donné un seul sampleAc externe pour toute la soumission via l'interface
-						/*if (this.mapUserClone == null || this.mapUserClone.isEmpty()){
-							contextValidation.addErrors("strategy_sample", "strategy_external_sample incompatible avec mapUserClone non renseigné");
-						}*/
+				// On peut avoir donné un seul studyAc externe pour toute la soumission via l'interface
+			} else {
+				contextValidation.addError("strategy_study", "valeur non attendue '" + config.strategyStudy + "'");
+			}
+			if (StringUtils.isBlank(config.strategySample)){
+				contextValidation.addError("strategy_sample", "champs qui doit etre renseigne dans la configuration passee dans le contexte de validation");
+			} else {
+				if (config.strategySample.equalsIgnoreCase("strategy_external_sample")) {
+					if (sampleCodes.size() != 0) {
+						contextValidation.addError("strategy_external_sample incompatible avec samples à soumettre : ", "taille sampleCode = "  + sampleCodes.size());
 					}
+					// On peut avoir donné un seul sampleAc externe pour toute la soumission via l'interface
 				}
 			}
-		
-			if (StringUtils.isBlank(this.studyCode) && this.sampleCodes.size() == 0 &&  this.experimentCodes.size() == 0) {
-				contextValidation.addErrors("studyCode, sampleCodes et experimentCodes ::", "Les 3 champs ne peuvent pas etre vides pour une soumission" + "taille des experiments = " +  this.experimentCodes.size() + ", taille des sample = "+ this.sampleCodes.size());
-			}		
-			SraValidationHelper.validateCode(this, InstanceConstants.SRA_SUBMISSION_COLL_NAME, contextValidation);
-		} else if (contextValidation.getContextObjects().get("type").equals("wgs")) {
-			if (this.studyCode == null || this.analysisCode == null ||this.sampleCodes.size() == 0) {
-				contextValidation.addErrors("studyCode, analysisCode et sampleCodes ::", "Les 3 champs doivent etre renseignés pour une soumission WGS" );
-			}
-			SraValidationHelper.validateCode(this, InstanceConstants.SRA_SUBMISSION_WGS_COLL_NAME, contextValidation);
-		} else {
-			contextValidation.addErrors("submission non evaluable ", "avec type de contexte de validation " + contextValidation.getContextObjects().get("type"));	
 		}
-		contextValidation.removeKeyFromRootKeyName("submission");
+		
+		if (StringUtils.isBlank(studyCode) && sampleCodes.size() == 0 &&  experimentCodes.size() == 0) {
+			contextValidation.addError("studyCode, sampleCodes et experimentCodes ::", "Les 3 champs ne peuvent pas etre vides pour une soumission" + "taille des experiments = " +  this.experimentCodes.size() + ", taille des sample = "+ this.sampleCodes.size());
+		}		
+		CommonValidationHelper.validateCodePrimary(contextValidation, this, InstanceConstants.SRA_SUBMISSION_COLL_NAME);		
+	}
+	private void validateCreation(ContextValidation contextValidation) {
+		contextValidation = contextValidation.appendPath("submission");
+		if (ValidationHelper.validateNotEmpty(contextValidation, code, "code")) 
+			contextValidation = contextValidation.appendPath(code);
+//		if(! MongoDBDAO.checkObjectExist(InstanceConstants.SRA_EXPERIMENT_COLL_NAME, Experiment.class, "code", code)) {
+//			contextValidation.addError("code", code + " n'existe pas dans la base de données et MODE DELETE");
+//		}	
+		SubmissionAPI submissionAPI = SubmissionAPI.get();
+		if(submissionAPI.dao_checkObjectExist("code", code)) {
+			contextValidation.addError("code", code + " existe deja dans la base de données et MODE CREATION");
+		}	
+	}
+
+	private void validateDelete(ContextValidation contextValidation) {
+		contextValidation = contextValidation.appendPath("submission");
+		if (ValidationHelper.validateNotEmpty(contextValidation, code, "code")) 
+			contextValidation = contextValidation.appendPath(code);
+		SubmissionAPI submissionAPI = SubmissionAPI.get();
+		if(! submissionAPI.dao_checkObjectExist("code", code)) {
+			contextValidation.addError("code", code + " n'existe pas dans la base de données et MODE DELETE");
+		}	
 	}
 	
 
+	private void validateUpdate(ContextValidation contextValidation) {
+		contextValidation = contextValidation.appendPath("submission");
+		if (ValidationHelper.validateNotEmpty(contextValidation, code, "code")) 
+			contextValidation = contextValidation.appendPath(code);
+		SubmissionAPI submissionAPI = SubmissionAPI.get();
+		if(! submissionAPI.dao_checkObjectExist("code", code)) {
+			contextValidation.addError("code", code + " n'existe pas dans la base de données et MODE UPDATE");
+		}	
+	}
+
+	@Override
+	public void validate(ContextValidation contextValidation) {
+		switch (contextValidation.getMode()) {
+		case CREATION:
+			validateCreation(contextValidation);
+			break;
+		case UPDATE:
+			validateUpdate(contextValidation);
+			break;
+		case DELETE:
+			validateDelete(contextValidation);
+			break;
+		default: // autre cas undefined notamment
+			contextValidation.addError("ERROR", "contextValidation.getMode() != de CREATION, UPDATE ou DELETE (undefined ?)");
+			break;	
+		} 
+		validateInvariants(contextValidation);
+	}
 
 }

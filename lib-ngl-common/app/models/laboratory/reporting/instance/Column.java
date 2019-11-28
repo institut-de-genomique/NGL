@@ -1,12 +1,11 @@
 package models.laboratory.reporting.instance;
 
-
 import java.util.Map;
 
 import validation.ContextValidation;
 import validation.IValidation;
 
-public class Column implements IValidation{
+public class Column implements IValidation {
 	
 	public String header; //text or message key
 	public String headerTpl; //template html
@@ -18,6 +17,7 @@ public class Column implements IValidation{
 	public Boolean hide;
 	public Boolean group; //active or not the group
 	public String groupMethod; //sum, average, distinct
+	public String groupHeader; //Group property by header name 
 	
 	public String format; //number decimal or date format
 	public String render; //angular expression
@@ -46,8 +46,6 @@ public class Column implements IValidation{
 	
 	@Override
 	public void validate(ContextValidation contextValidation) {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

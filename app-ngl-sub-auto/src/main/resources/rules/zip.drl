@@ -33,12 +33,14 @@ dialect 'java'
 				ResourceProperties newRp = new ResourceProperties();
 				newRp.setProperty("fileName",rpRawDataFilter.getProperty("relatifName"));
 				if(rpRawDataFilter.getProperty("location").equals("CCRT")){
-					newRp.setProperty("directory",groupJobResource.getProperty("submissionDirectory"));
+					//newRp.setProperty("directory",groupJobResource.getProperty("submissionDirectory"));
+					newRp.setProperty("directory",ProjectProperties.getProperty("tmpDirectory")+File.separator+groupJobResource.getProperty("code"));
 				}else{
 					newRp.setProperty("directory",rpRawDataFilter.getProperty("directory"));
 				}
 				newRp.setProperty("submissionDirectory",groupJobResource.getProperty("submissionDirectory"));
 				newRp.setProperty("experimentCode",tabExperimentCodes[i]);
+				newRp.setProperty("code",groupJobResource.getProperty("code"));
 				newRp.setProperty("idGroupJob",""+$groupJob.getId());
 				resourceProperties.add(newRp);
 			}
@@ -61,8 +63,10 @@ rule "Set parameter for command line Zip"
 			log.debug("Set parameter for zip command");
 			//Get input resource
 			JobResource jobResource = $job.getUniqueJobResource("inputRawDataZip");
+			JobResource jobResourceSub = $job.getUniqueJobResource("inputSubZip");
 			$job.setParameterValue("fileToZip", jobResource.getProperty("directory")+File.separator+jobResource.getProperty("fileName"));
-			$job.setParameterValue("endArg", ">"+jobResource.getProperty("submissionDirectory")+File.separator+jobResource.getProperty("fileName")+".gz");
+			//$job.setParameterValue("endArg", ">"+jobResource.getProperty("submissionDirectory")+File.separator+jobResource.getProperty("fileName")+".gz");
+			$job.setParameterValue("endArg", ">"+ProjectProperties.getProperty("tmpDirectory")+File.separator+jobResourceSub.getProperty("code")+File.separator+jobResource.getProperty("fileName")+".gz");
 end
 
 rule "POST DONE EXECUTION of zip : Update relatifName of RawData"
@@ -109,6 +113,8 @@ rule "add resources in internalRefMd5 to fire md5"
 	  	resourceProperties.setProperty("directory",jobResource.getProperty("directory"));
 	  	resourceProperties.setProperty("experimentCode",jobResource.getProperty("experimentCode"));
 	  	resourceProperties.setProperty("submissionDirectory",jobResource.getProperty("submissionDirectory"));
+	  	JobResource jobResourceSub = $job.getUniqueJobResource("inputSubZip");
+	  	resourceProperties.setProperty("code",jobResourceSub.getProperty("code"));
 		$flag.setDone(true);
 		modify($flag){};
 		modify($resourceSet){};

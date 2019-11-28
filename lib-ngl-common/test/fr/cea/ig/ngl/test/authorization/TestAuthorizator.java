@@ -45,10 +45,10 @@ public class TestAuthorizator implements IAuthorizator {
 	}
 	
 	@Override
-	public boolean authorize(String login, String[] perms) {
+	public boolean authorize(String login, String... perms) {
 		if (perms.length == 0)
 			throw new RuntimeException("invalid permission request with no permission");
-		Identity id = Identity.valueOf(login);
+		Identity id = Identity.lowerValueOf(login);
 		if (id == null)
 			throw new RuntimeException("invalid login '" + login + "'");
 		Set<String> idRights = rights.get(id);
@@ -64,7 +64,7 @@ public class TestAuthorizator implements IAuthorizator {
 
 	@Override
 	public Set<String> getPermissions(String login) {
-		Identity id = Identity.valueOf(login);
+		Identity id = Identity.lowerValueOf(login);
 		if (id == null) 
 			return noPermissions;
 		Set<String> idRights = rights.get(id);

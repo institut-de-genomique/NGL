@@ -331,14 +331,14 @@ public class SubmissionServices implements ISubmissionServices{
 		updateSubmissionAC(submissionCode, submissionAc);
 		
 		if (SRAFilesUtil.isNotNullValue(ebiStudyCode)) {	
-			message += "studyCode = " + ebiStudyCode + ",   AC = "+ studyAc + "\n";  
+			message += "studyCode = " + ebiStudyCode + ",   AC = "+ studyAc + ",   BioProjectId = "+studyExtId+"\n";  
 			updateStudyAC(ebiStudyCode, studyAc, studyExtId);
 		}
 		for(Entry<String, String> entry : mapSamples.entrySet()) {
 			String code = entry.getKey();
 			String ac = entry.getValue();
 			String ext_id_ac = mapExtIdSamples.get(code);
-			message += "sampleCode = " + code + ",   AC = "+ ac + "\n";  
+			message += "sampleCode = " + code + ",   AC = "+ ac + ", External Id "+ext_id_ac+"\n";  
 			updateSampleAC(code, ac, ext_id_ac);
 			
 		}
@@ -376,11 +376,11 @@ public class SubmissionServices implements ISubmissionServices{
 	private void updateStudyAC(String code, String accession, String externalId) throws FatalException, JSONDeviceException
 	{
 		JSONDevice jsonDevice = new JSONDevice();
-		String study = "{\"code\":\""+code+"\",\"accession\":\""+accession+"\"}";
+		String study = "{\"code\":\""+code+"\",\"accession\":\""+accession+"\",\"externalId\":\""+externalId+"\"}";
 		//Call PUT update with submission modified
-		log.debug("Call PUT "+ProjectProperties.getProperty("server")+"/sra/studies/internal/"+code+"?fields=accession");
+		log.debug("Call PUT "+ProjectProperties.getProperty("server")+"/sra/studies/internal/"+code+"?fields=accession&fields=externalId");
 		log.debug("with JSON "+study);
-		jsonDevice.httpPut(ProjectProperties.getProperty("server")+"/sra/studies/internal/"+code+"?fields=accession", study,"bot");
+		jsonDevice.httpPut(ProjectProperties.getProperty("server")+"/sra/studies/internal/"+code+"?fields=accession&fields=externalId", study,"bot");
 	}
 
 	private void updateSampleAC(String code, String accession, String externalId) throws FatalException, JSONDeviceException

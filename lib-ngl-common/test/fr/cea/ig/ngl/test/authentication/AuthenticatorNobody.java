@@ -9,7 +9,8 @@ import play.mvc.Result;
 import play.mvc.Http.Context;
 
 /**
- * Authenticates as {@link Identity.Nobody}.
+ * Authenticates as {@link fr.cea.ig.ngl.test.authentication.Identity#Nobody}.
+ * 
  * @author vrd
  *
  */

@@ -1,0 +1,78 @@
+@this(inputtubes_ : inputtubes, inputplates_ : inputplates, outputplatesbatch_ : outputplatesbatch, outputtubesbatch_ : outputtubesbatch)
+
+@()
+<div class="col-md-12 col-lg-12" ng-switch="supportCategoryCode">
+	
+	<div ng-switch-when="tube">
+		<div class="col-md-12 col-lg-12">
+			<div class="row">
+				<div class="col-md-10 col-lg-10" ng-if="mainService.isEditMode() && isNewState()">
+					<!-- InputContainers table -->
+					@inputtubes_()
+				</div>
+				<div class="col-md-2 col-lg-2" ng-if="mainService.isEditMode() && isNewState()">
+					<!-- Drop buttons -->	
+		  			<div class="page-header">
+			 		<button class="btn btn-default btn-lg btn-block" ng-click="atmService.data.dropInSelectInputContainer()" 
+			                       ng-disabled="!atmService.data.isSelectInputContainers()">
+			 			<i class="fa fa-sign-in fa-2x"></i>
+			 		</button>
+		 			</div>
+				</div>
+			</div>
+			<div class="row">
+			<div ng-switch="atmService.outputContainerSupportCategoryCode">
+            	<div ng-switch-when="96-well-plate">
+            		<div class="col-md-10 col-lg-10 flowcellTable">
+            			@outputplatesbatch_()
+			   		</div>
+				</div>
+				<div ng-switch-when="tube">
+					<div class="col-md-10 col-lg-10 flowcellTable">
+						@outputtubesbatch_()	
+			   		</div>
+				</div>
+			</div>
+			</div>
+		</div>
+	</div>
+	
+	<div ng-switch-when="96-well-plate">
+		<div class="row"  ng-if="mainService.isEditMode() && isNewState()">
+			<div class="col-md-10 col-lg-10"> 
+				@inputplates_()
+			</div>
+			<div class="col-md-2 col-lg-2"> 
+				<div class="page-header">
+			 	<!-- desactiver si pooling mode libre et rien selectionné OU pooling auto et qq chose selectionné OU pas de choix fait -->
+					<button class="btn btn-default btn-lg btn-block"         
+			          		ng-click="atmService.data.dropInSelectInputContainer()"
+			          		ng-disabled="!atmService.data.isSelectInputContainers()">
+			  			<i class="fa fa-sign-in fa-2x"></i>
+					</button>	
+	        	</div>
+				<button 
+					ng-repeat="supportCode in atmService.data.inputContainerSupports" type="button" 
+			   		ng-class="atmService.data.getPlateBtnClass(supportCode)" 
+			   		ng-click="atmService.data.setCurrentSupportCode(supportCode)">
+					{{supportCode}}
+				</button>	
+			</div>
+		</div>
+		<div class="row">
+			<div ng-switch="atmService.outputContainerSupportCategoryCode">
+            	<div ng-switch-when="96-well-plate">
+            		<div class="col-md-10 col-lg-10 flowcellTable">
+            			@outputplatesbatch_()
+			   		</div>
+				</div>
+				<div ng-switch-when="tube">
+					<div class="col-md-10 col-lg-10 flowcellTable">
+						@outputtubesbatch_()
+			   		</div>
+				</div>
+			</div>
+		</div>	
+	</div>
+		
+</div>

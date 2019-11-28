@@ -2,7 +2,6 @@ package services;
 
 import java.io.File;
 import java.io.IOException;
-// import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -11,54 +10,33 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-// import java.util.regex.Matcher;
-// import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-// import javax.xml.xpath.XPath;
-// import javax.xml.xpath.XPathExpressionException;
-// import javax.xml.xpath.XPathFactory;
-// import com.typesafe.config.ConfigFactory;
 
 import org.apache.commons.lang3.StringUtils;
 import org.mongojack.DBQuery;
 import org.mongojack.DBUpdate;
-
-// import java.util.Date;
-
-
-// import javax.xml.parsers.DocumentBuilder;
-// import javax.xml.parsers.DocumentBuilderFactory;
-// import javax.xml.parsers.ParserConfigurationException;
-// import javax.xml.xpath.XPath;
-// import javax.xml.xpath.XPathExpressionException;
-// import javax.xml.xpath.XPathFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-// import org.apache.commons.lang3.StringUtils;
 
-import fr.cea.ig.MongoDBDAO;
 import fr.cea.ig.ngl.NGLConfig;
+import fr.cea.ig.ngl.dao.api.sra.ExperimentAPI;
+import fr.cea.ig.ngl.dao.api.sra.SampleAPI;
+import fr.cea.ig.ngl.dao.api.sra.StudyAPI;
+import fr.cea.ig.ngl.dao.api.sra.SubmissionAPI;
 import mail.MailServiceException;
 import mail.MailServices;
 import models.laboratory.common.instance.State;
-// import models.laboratory.run.instance.ReadSet;
-import models.sra.submit.common.instance.Sample;
-import models.sra.submit.common.instance.Study;
+
 import models.sra.submit.common.instance.Submission;
-import models.sra.submit.sra.instance.Experiment;
 import models.sra.submit.util.SraException;
-// import models.sra.submit.util.VariableSRA;
-import models.utils.InstanceConstants;
-//import play.Logger;
-// import play.Play;
-// import play.api.modules.spring.Spring;
+
 import validation.ContextValidation;
 import workflows.sra.submission.SubmissionWorkflows;
 
@@ -70,11 +48,27 @@ public class FileAcServices  {
 
 	private final NGLConfig           config;
 	private final SubmissionWorkflows submissionWorkflows;
-	
+	private SubmissionAPI   submissionAPI;
+	private final StudyAPI  studyAPI;
+	private final SampleAPI sampleAPI;
+	private ExperimentAPI   experimentAPI;
+
+
 	@Inject
-	public FileAcServices(NGLConfig config, SubmissionWorkflows submissionWorkflows) {
+	public FileAcServices(NGLConfig           config, 
+						  SubmissionWorkflows submissionWorkflows,
+						  SubmissionAPI       submissionAPI,
+						  StudyAPI            studyAPI,
+						  SampleAPI           sampleAPI, 
+						  ExperimentAPI       experimentAPI) {
 		this.config              = config;
 		this.submissionWorkflows = submissionWorkflows;
+		this.submissionAPI       = submissionAPI;
+		this.studyAPI            = studyAPI;
+		this.sampleAPI           = sampleAPI;
+		this.experimentAPI       = experimentAPI;
+
+
 	}
 	
 
@@ -83,7 +77,8 @@ public class FileAcServices  {
 		if (StringUtils.isBlank(submissionCode) || (ebiFileAc == null)) {
 			throw new SraException("traitementFileAC :: parametres d'entree à null" );
 		}
-		Submission submission = MongoDBDAO.findByCode(InstanceConstants.SRA_SUBMISSION_COLL_NAME, Submission.class, submissionCode);
+//		Submission submission = MongoDBDAO.findByCode(InstanceConstants.SRA_SUBMISSION_COLL_NAME, Submission.class, submissionCode);
+		Submission submission = submissionAPI.dao_getObject(submissionCode);
 		if (submission == null) {
 			throw new SraException(" soumission " + submissionCode + " impossible à recuperer dans base");
 		}
@@ -209,20 +204,17 @@ public class FileAcServices  {
 				    	mapExperiments.put(elt.getAttribute("alias"), elt.getAttribute("accession"));	
 					} else if(elt.getTagName().equalsIgnoreCase("RUN")) {
 						mapRuns.put(elt.getAttribute("alias"), elt.getAttribute("accession"));
-					} else {		
+					} else {
+						// Ignore other nodes
 					}
 				}
 			}  // end for  
-		} catch (final ParserConfigurationException e) {
-			e.printStackTrace();
-		} catch (final SAXException e) {
-			e.printStackTrace();
-		} catch (final IOException e) {
+		} catch (final ParserConfigurationException | SAXException | IOException e) {
 			e.printStackTrace();
 		} 
 		
 		if (! ebiSuccess ) {
-			System.out.println("success=true absent du fichier  " + ebiFileAc);
+			logger.debug("pattern 'success=true' absent du fichier  {}", ebiFileAc);
 			// mettre status à jour
 			State errorState = new State(errorStatus, user);
 			submissionWorkflows.setState(ctxVal, submission, errorState);
@@ -242,49 +234,50 @@ public class FileAcServices  {
 			}
 			destinataires.add(destinataire);
 		}
-		if (StringUtils.isBlank(ebiSubmissionCode)) {
+		if (ebiSubmissionCode == null || StringUtils.isBlank(ebiSubmissionCode)) { // Duplicate test to avoid warning
 			//System.out.println("Pas de Recuperation de ebiSubmissionCode");
 		    message += "- ne contient pas ebiSubmissionCode \n";
 			error = true;
-		} 
-		if (! ebiSubmissionCode.equals(submissionCode)) {
-			//System.out.println("ebiSubmissionCode != submissionCode");
-			message += "- contient un ebiSubmissionCode ("  + ebiSubmissionCode + ") different du submissionCode passé en parametre "+ submissionCode + "</br>"; 
-			error = true;
-		}
-		// Verifier que le nombre d'ac recuperés dans le fichier est bien celui attendu pour l'objet submission:
-		if (StringUtils.isNotBlank(submission.studyCode)) {
-			if (StringUtils.isBlank(studyAc)) {
-				//System.out.println("studyAc attendu non trouvé pour " + submission.studyCode);
-			    message += "- ne contient pas de valeur pour le studyCode " + submission.studyCode+"</br>";
+		} else {
+			if (! ebiSubmissionCode.equals(submissionCode)) {
+				//System.out.println("ebiSubmissionCode != submissionCode");
+				message += "- contient un ebiSubmissionCode ("  + ebiSubmissionCode + ") different du submissionCode passé en parametre "+ submissionCode + "</br>"; 
+				error = true;
 			}
-		}
-		if (submission.sampleCodes != null) {
-			for (int i = 0; i < submission.sampleCodes.size() ; i++) {
-				if (!mapSamples.containsKey(submission.sampleCodes.get(i))){
-					//System.out.println("sampleAc attendu non trouvé pour " + submission.sampleCodes.get(i));
-					message += "- ne contient pas d'AC pour le sampleCode " + submission.sampleCodes.get(i)+"</br>";
-					error = true;
-				}	
+			// Verifier que le nombre d'ac recuperés dans le fichier est bien celui attendu pour l'objet submission:
+			if (StringUtils.isNotBlank(submission.studyCode)) {
+				if (StringUtils.isBlank(studyAc)) {
+					//System.out.println("studyAc attendu non trouvé pour " + submission.studyCode);
+					message += "- ne contient pas de valeur pour le studyCode " + submission.studyCode+"</br>";
+				}
 			}
-		}
-		if (submission.experimentCodes != null){
-			for (int i = 0; i < submission.experimentCodes.size() ; i++) {
-				if (!mapExperiments.containsKey(submission.experimentCodes.get(i))){
-					//System.out.println("experimentAc attendu non trouvé pour " + submission.experimentCodes.get(i));
-					message += "- ne contient pas d'AC pour l'experimentCode " + submission.experimentCodes.get(i) + "</br>";
-					error = true;
-				}	
+			if (submission.sampleCodes != null) {
+				for (int i = 0; i < submission.sampleCodes.size() ; i++) {
+					if (!mapSamples.containsKey(submission.sampleCodes.get(i))){
+						//System.out.println("sampleAc attendu non trouvé pour " + submission.sampleCodes.get(i));
+						message += "- ne contient pas d'AC pour le sampleCode " + submission.sampleCodes.get(i)+"</br>";
+						error = true;
+					}	
+				}
 			}
-		}
-		if (submission.runCodes != null){
-			for (int i = 0; i < submission.runCodes.size() ; i++) {
-				//System.out.println("runCode========="+ submission.runCodes.get(i));
-				if (!mapRuns.containsKey(submission.runCodes.get(i))){
-					//System.out.println("runAc attendu non trouvé pour " + submission.runCodes.get(i));
-					message += "- ne contient pas d'AC pour le runCode " + submission.runCodes.get(i) + "</br>";
-					error = true;
-				}	
+			if (submission.experimentCodes != null){
+				for (int i = 0; i < submission.experimentCodes.size() ; i++) {
+					if (!mapExperiments.containsKey(submission.experimentCodes.get(i))){
+						//System.out.println("experimentAc attendu non trouvé pour " + submission.experimentCodes.get(i));
+						message += "- ne contient pas d'AC pour l'experimentCode " + submission.experimentCodes.get(i) + "</br>";
+						error = true;
+					}	
+				}
+			}
+			if (submission.runCodes != null){
+				for (int i = 0; i < submission.runCodes.size() ; i++) {
+					//System.out.println("runCode========="+ submission.runCodes.get(i));
+					if (!mapRuns.containsKey(submission.runCodes.get(i))){
+						//System.out.println("runAc attendu non trouvé pour " + submission.runCodes.get(i));
+						message += "- ne contient pas d'AC pour le runCode " + submission.runCodes.get(i) + "</br>";
+						error = true;
+					}	
+				}
 			}
 		}
 		if (error) {
@@ -307,30 +300,47 @@ public class FileAcServices  {
 //		String retourChariot = "</br>";
 		message += "submissionCode = " + submissionCode + ",   AC = "+ submissionAc + "</br>";  
 		submission.accession=submissionAc;
-		
-		MongoDBDAO.update(InstanceConstants.SRA_SUBMISSION_COLL_NAME, Submission.class, 
-				DBQuery.is("code", submissionCode).notExists("accession"),
-				DBUpdate.set("accession", submissionAc).set("submissionDate", date).set("traceInformation.modifyUser", user).set("traceInformation.modifyDate", date));	
+//		
+//		MongoDBDAO.update(InstanceConstants.SRA_SUBMISSION_COLL_NAME, Submission.class, 
+//				DBQuery.is("code", submissionCode).notExists("accession"),
+//				DBUpdate.set("accession", submissionAc).set("submissionDate", date).set("traceInformation.modifyUser", user).set("traceInformation.modifyDate", date));	
+		submissionAPI.dao_update(DBQuery.is("code", submissionCode).notExists("accession"),
+								 DBUpdate.set("accession", submissionAc)
+								 .set("submissionDate", date)
+								 .set("traceInformation.modifyUser", user)
+								 .set("traceInformation.modifyDate", date));	
 
 		if (StringUtils.isNotBlank(ebiStudyCode)) {	
-			message += "studyCode = " + ebiStudyCode + ",   AC = "+ studyAc + "</br>";
+			message += "studyCode = " + ebiStudyCode + ",   AC = "+ studyAc + ", bioProjectId = " + studyExtId + "</br>";
 			logger.debug("Mise à jour du study {} avec AC={} et externalId={}", ebiStudyCode, studyAc, studyExtId);
-			MongoDBDAO.update(InstanceConstants.SRA_STUDY_COLL_NAME, Study.class, 
-					DBQuery.is("code", ebiStudyCode).notExists("accession"),
-					DBUpdate.set("accession", studyAc).set("externalId", studyExtId).set("firstSubmissionDate", date).set("releaseDate", release_date).set("traceInformation.modifyUser", user).set("traceInformation.modifyDate", date));
+//			MongoDBDAO.update(InstanceConstants.SRA_STUDY_COLL_NAME, Study.class, 
+//					DBQuery.is("code", ebiStudyCode).notExists("accession"),
+//					DBUpdate.set("accession", studyAc).set("externalId", studyExtId).set("firstSubmissionDate", date).set("releaseDate", release_date).set("traceInformation.modifyUser", user).set("traceInformation.modifyDate", date));
+			studyAPI.dao_update(DBQuery.is("code", ebiStudyCode).notExists("accession"),
+								DBUpdate.set("accession", studyAc)
+								.set("externalId", studyExtId)
+								.set("firstSubmissionDate", date)
+								.set("releaseDate", release_date)
+								.set("traceInformation.modifyUser", user)
+								.set("traceInformation.modifyDate", date));
 			
 		}
-		
+
 		for(Entry<String, String> entry : mapSamples.entrySet()) {
 			String code = entry.getKey();
 			String ac = entry.getValue();
 			String ext_id_ac = mapExtIdSamples.get(code);
-			message += "sampleCode = " + code + ",   AC = "+ ac + "</br>";  
+			message += "sampleCode = " + code + ",   AC = "+ ac + " , externalId = " + ext_id_ac +"</br>";  
 			logger.debug("Mise à jour du sample {} avec AC={} et externalId={}", code, ac, ext_id_ac);
 
-			MongoDBDAO.update(InstanceConstants.SRA_SAMPLE_COLL_NAME, Sample.class,
-					DBQuery.is("code", code).notExists("accession"),
-					DBUpdate.set("accession", ac).set("externalId", ext_id_ac).set("traceInformation.modifyUser", user).set("traceInformation.modifyDate", date)); 		
+//			MongoDBDAO.update(InstanceConstants.SRA_SAMPLE_COLL_NAME, Sample.class,
+//					DBQuery.is("code", code).notExists("accession"),
+//					DBUpdate.set("accession", ac).set("externalId", ext_id_ac).set("traceInformation.modifyUser", user).set("traceInformation.modifyDate", date)); 		
+			sampleAPI.dao_update(DBQuery.is("code", code).notExists("accession"),
+								 DBUpdate.set("accession", ac)
+								 .set("externalId", ext_id_ac)
+								 .set("traceInformation.modifyUser", user)
+								 .set("traceInformation.modifyDate", date)); 		
 			
 		}
 		for(Entry<String, String> entry : mapExperiments.entrySet()) {
@@ -338,9 +348,13 @@ public class FileAcServices  {
 			String ac = entry.getValue();
 			message += "experimentCode = " + code + ",   AC = "+ ac + "</br>";  
 			logger.debug("Mise à jour de l'exp {} avec AC={}", code, ac);
-			MongoDBDAO.update(InstanceConstants.SRA_EXPERIMENT_COLL_NAME, Experiment.class,
-					DBQuery.is("code", code).notExists("accession"),
-					DBUpdate.set("accession", ac).set("traceInformation.modifyUser", user).set("traceInformation.modifyDate", date)); 	
+//			MongoDBDAO.update(InstanceConstants.SRA_EXPERIMENT_COLL_NAME, Experiment.class,
+//					DBQuery.is("code", code).notExists("accession"),
+//					DBUpdate.set("accession", ac).set("traceInformation.modifyUser", user).set("traceInformation.modifyDate", date)); 	
+			experimentAPI.dao_update(DBQuery.is("code", code).notExists("accession"),
+								     DBUpdate.set("accession", ac)
+								     .set("traceInformation.modifyUser", user)
+								     .set("traceInformation.modifyDate", date)); 	
 		}
 		for(Entry<String, String> entry : mapRuns.entrySet()) {
 			String code = entry.getKey();
@@ -348,19 +362,23 @@ public class FileAcServices  {
 			message += "runCode = " + code + ",   AC = "+ ac  + "</br>";  
 			logger.debug("Mise à jour du run {} avec AC={}", code, ac);
 			
-			MongoDBDAO.update(InstanceConstants.SRA_EXPERIMENT_COLL_NAME, Experiment.class,
-					DBQuery.is("run.code", code).notExists("run.accession"),
-					DBUpdate.set("run.accession", ac)); 			
+//			MongoDBDAO.update(InstanceConstants.SRA_EXPERIMENT_COLL_NAME, Experiment.class,
+//					DBQuery.is("run.code", code).notExists("run.accession"),
+//					DBUpdate.set("run.accession", ac)); 			
+			experimentAPI.dao_update(DBQuery.is("run.code", code).notExists("run.accession"),
+									 DBUpdate.set("run.accession", ac)); 			
 		}
-		
+		logger.debug("submission.studyCode = {}", submission.studyCode);
+
 		State state = new State(okStatus, user);
 		submissionWorkflows.setState(ctxVal, submission, state);
-		System.out.println("expediteur =" + expediteur);
-		System.out.println("destinataires =" + destinataires);
-		System.out.println("subjectSuccess =" + subjectSuccess);
+		logger.debug("expediteur = {}", expediteur);
+		logger.debug("destinataires = {}", destinataires);
+		logger.debug("subjectSuccess = {}", subjectSuccess);
 		mailService.sendMail(expediteur, destinataires, subjectSuccess, new String(message.getBytes(), "iso-8859-1"));
 		// Recuperer l'objet submission mis à jour pour le status :
-		submission = MongoDBDAO.findByCode(InstanceConstants.SRA_SUBMISSION_COLL_NAME, Submission.class, submissionCode);
+//		submission = MongoDBDAO.findByCode(InstanceConstants.SRA_SUBMISSION_COLL_NAME, Submission.class, submissionCode);
+		submission = submissionAPI.dao_getObject(submissionCode);
 		return submission;
 	}
 

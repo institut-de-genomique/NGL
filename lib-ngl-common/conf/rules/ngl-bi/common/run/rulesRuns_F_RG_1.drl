@@ -125,25 +125,27 @@ end
 
 //run.lane.treatments.ngsrg.default.seqLossPercent=
 //(100-SOMME(readset.treatments.ngsrg.default.validSeqPercent))
-rule "Calculate seqLossPercent Lane"
-	@nglBI( F_RG_1 )
-	dialect "java"
-	salience 200
-	no-loop
-	when
-		$LaneInfoBI : LaneInfoBI(sizeReadSets == readSets.size(), $treatment : lane.treatments["ngsrg"], $treatment!=null)
-		$mapValue : Map() from $treatment.results.values()
-		$sumValidSeqPercent : Double() from accumulate (ReadSetInfo(lane==$LaneInfoBI.lane, validSeqPercent!=null, $value : validSeqPercent), sum($value))
-	then
-		Double seqLossPercent =roundValue(100-$sumValidSeqPercent);
+//NGL-2306 Metabarconding (tag Iair et 2ndaire) desactivation de la règle
+//Calculer par RG car %seq valide dans RG ou dans nouveau nouveau traitement si tag 2ndaire
+//rule "Calculate seqLossPercent Lane"
+//	@nglBI( F_RG_1 )
+//	dialect "java"
+//	salience 200
+//	no-loop
+//	when
+//		$LaneInfoBI : LaneInfoBI(sizeReadSets == readSets.size(), $treatment : lane.treatments["ngsrg"], $treatment!=null)
+//		$mapValue : Map() from $treatment.results.values()
+//		$sumValidSeqPercent : Double() from accumulate (ReadSetInfo(lane==$LaneInfoBI.lane, validSeqPercent!=null, $value : validSeqPercent), sum($value))
+//	then
+//		Double seqLossPercent =roundValue(100-$sumValidSeqPercent);
 		//Create new PropertyValue seqLossPercent
-		PropertySingleValue propertySeqLossPercent = new PropertySingleValue(seqLossPercent);
-		$mapValue.put("seqLossPercent", propertySeqLossPercent);
+//		PropertySingleValue propertySeqLossPercent = new PropertySingleValue(seqLossPercent);
+//		$mapValue.put("seqLossPercent", propertySeqLossPercent);
 		//Update treatment for lane 
-		MongoDBDAO.update(InstanceConstants.RUN_ILLUMINA_COLL_NAME, Run.class, 
-						DBQuery.and(DBQuery.is("code", $LaneInfoBI.getRun().code), DBQuery.is("lanes.number", $LaneInfoBI.getLane().number)),
-						DBUpdate.set("lanes.$.treatments."+$treatment.code, $treatment));
-end
+//		MongoDBDAO.update(InstanceConstants.RUN_ILLUMINA_COLL_NAME, Run.class, 
+//						DBQuery.and(DBQuery.is("code", $LaneInfoBI.getRun().code), DBQuery.is("lanes.number", $LaneInfoBI.getLane().number)),
+//						DBUpdate.set("lanes.$.treatments."+$treatment.code, $treatment));
+//end
 
 rule "Calculate 1DForward basesPercent and readPercent for ngsrg-nanopore"
 	@nglBI( F_RG_1 )

@@ -25,7 +25,7 @@ public class Roles extends CommonController {
 	 */
 	public /*static*/ Result list() throws DAOException{
 		try{
-			List<Role> roles = Role.find.findAll();
+			List<Role> roles = Role.find.get().findAll();
 			
 			//if(form.list){
 			List<ListObjectNumber> lop = new ArrayList<>();

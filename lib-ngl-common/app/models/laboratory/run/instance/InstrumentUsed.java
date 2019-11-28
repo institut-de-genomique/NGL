@@ -9,7 +9,8 @@ import validation.IValidation;
 import validation.common.instance.CommonValidationHelper;
 
 /**
- * Instrument used to obtain the run
+ * Instrument used to obtain the run.
+ * 
  * @author galbini
  *
  */
@@ -19,16 +20,14 @@ public class InstrumentUsed implements IValidation {
 	public String code;
 	public String typeCode;
 
-
+	/**
+	 * Validate the required instrument code and the required instrument type code. 
+	 */
 	@JsonIgnore
 	@Override
 	public void validate(ContextValidation contextValidation) {
-
-		CommonValidationHelper.validateRequiredDescriptionCode(contextValidation, this.code, "code", Instrument.find);
-		
-		CommonValidationHelper.validateRequiredDescriptionCode(contextValidation, this.typeCode, "typeCode", InstrumentUsedType.find);
-		
+		CommonValidationHelper.validateCodeForeignRequired(contextValidation, Instrument.miniFind.get(),         code,     "code");
+		CommonValidationHelper.validateCodeForeignRequired(contextValidation, InstrumentUsedType.miniFind.get(), typeCode, "typeCode");
 	}
-
 
 }

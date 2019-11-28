@@ -1,36 +1,17 @@
 package models.laboratory.container.instance;
 
-import static validation.common.instance.CommonValidationHelper.FIELD_IMPORT_TYPE_CODE;
-import static validation.common.instance.CommonValidationHelper.FIELD_STATE_CODE;
-import static validation.common.instance.CommonValidationHelper.validateCode;
-import static validation.common.instance.CommonValidationHelper.validateExperimentTypeCodes;
-import static validation.common.instance.CommonValidationHelper.validateId;
-import static validation.common.instance.CommonValidationHelper.validateProjectCodes;
-import static validation.common.instance.CommonValidationHelper.validateSampleCodes;
-import static validation.common.instance.CommonValidationHelper.validateTraceInformation;
-import static validation.container.instance.ContainerValidationHelper.validateConcentration;
-import static validation.container.instance.ContainerValidationHelper.validateContainerCategoryCode;
-import static validation.container.instance.ContainerValidationHelper.validateContainerSupport;
-import static validation.container.instance.ContainerValidationHelper.validateContents;
-import static validation.container.instance.ContainerValidationHelper.validateImportType;
-import static validation.container.instance.ContainerValidationHelper.validateInputProcessCodes;
-import static validation.container.instance.ContainerValidationHelper.validateQualityControlResults;
-import static validation.container.instance.ContainerValidationHelper.validateQuantity;
-import static validation.container.instance.ContainerValidationHelper.validateRules;
-import static validation.container.instance.ContainerValidationHelper.validateSize;
-import static validation.container.instance.ContainerValidationHelper.validateState;
-import static validation.container.instance.ContainerValidationHelper.validateVolume;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import controllers.ICommentable;
 import fr.cea.ig.DBObject;
+import fr.cea.ig.ngl.dao.containers.ContainersDAO;
+import fr.cea.ig.ngl.utils.GuiceSupplier;
 import models.laboratory.common.instance.Comment;
 import models.laboratory.common.instance.ITracingAccess;
 import models.laboratory.common.instance.PropertyValue;
@@ -40,18 +21,14 @@ import models.laboratory.common.instance.Valuation;
 import models.laboratory.common.instance.property.PropertySingleValue;
 import models.laboratory.container.instance.tree.TreeOfLifeNode;
 import models.utils.InstanceConstants;
-
-// import org.mongojack.MongoCollection;
-
 import validation.ContextValidation;
-import validation.ICRUDValidation;
 import validation.IValidation;
-// import validation.experiment.instance.ContainerUsedValidationHelper;
+import validation.common.instance.CommonValidationHelper;
+import validation.container.instance.ContainerValidationHelper;
 
 // link to this : {@link models.laboratory.container.instance.Container}
 
 /**
- * 
  * Container is referenced from Experiment, Purifying, TransferMethod, 
  * Extraction, QC in embedded class ListInputOutputContainer.
  * The Relationship between containers aren't stored in the container 
@@ -62,16 +39,14 @@ import validation.IValidation;
  * Container collection name is defined as {@link models.utils.InstanceConstants#CONTAINER_COLL_NAME}.
  * 
  * @author mhaquell
- * @author vrd
  *
  */
-// @MongoCollection(name="Container")
-@SuppressWarnings("unused") // IValidation duplicates ICRUDValidation
-public class Container extends DBObject implements IValidation, ITracingAccess, ICommentable, ICRUDValidation<Container> {
+public class Container extends DBObject implements IValidation, ITracingAccess {
 
-	//duplication for input in exp : code, categoryCode, contents, mesured*, //contents just for tag and tagCategory 
-	//duplication for output in exp :code, categoryCode, contents, mesured*, //contents just for tag and tagCategory
+	public static final Supplier<ContainersDAO> find = new GuiceSupplier<>(ContainersDAO.class);
 	
+	// duplication for input in exp : code, categoryCode, contents, mesured*, // contents just for tag and tagCategory 
+	// duplication for output in exp :code, categoryCode, contents, mesured*, // contents just for tag and tagCategory
 	
 	public String importTypeCode;
 	
@@ -146,52 +121,96 @@ public class Container extends DBObject implements IValidation, ITracingAccess, 
 	 */
 	public TreeOfLifeNode treeOfLife;
 	
-	
 	public Container() {
-		//properties=new HashMap<String, PropertyValue>();
 		contents          = new ArrayList<>();
 		traceInformation  = new TraceInformation();
 		projectCodes      = new HashSet<>();
 		sampleCodes       = new HashSet<>();
-		//comments = new ArrayList<>();
-		//qualityControlResults = new HashSet<>();
 		fromTransformationTypeCodes = new HashSet<>();
 		valuation         = new Valuation();	
 	}
 		
+//	/**
+//	 * Validate a container (optional context parameter {@link CommonValidationHelper#FIELD_IMPORT_TYPE_CODE}).
+//	 */
+//	@JsonIgnore
+//	@Override
+//	@Deprecated
+//	public void validate(ContextValidation contextValidation) {
+//		
+//		if (contextValidation.getObject(CommonValidationHelper.FIELD_STATE_CODE) == null)
+//			contextValidation.putObject(CommonValidationHelper.FIELD_STATE_CODE , state.code);			
+//		
+//		CommonValidationHelper.   validateIdPrimary               (contextValidation, this);
+//		CommonValidationHelper.   validateCodePrimary             (contextValidation, this, InstanceConstants.CONTAINER_COLL_NAME);
+//		ContainerValidationHelper.validateContainerStateRequired  (contextValidation, state);
+//		CommonValidationHelper.   validateTraceInformationRequired(contextValidation, traceInformation);
+//		ContainerValidationHelper.validateContainerCategoryCodeRequired   (contextValidation, categoryCode, support.categoryCode);
+//		// GA: processTypeCodes
+//		CommonValidationHelper   .validateProjectCodes            (contextValidation, projectCodes);
+//		CommonValidationHelper   .validateSampleCodes             (contextValidation, sampleCodes);
+//		CommonValidationHelper   .validateExperimentTypeCodes     (contextValidation, fromTransformationTypeCodes);
+//		ContainerValidationHelper.validateImportTypeOptional              (contextValidation, importTypeCode ,properties);
+//		
+//		if (importTypeCode != null) 
+//			contextValidation.putObject(CommonValidationHelper.FIELD_IMPORT_TYPE_CODE , importTypeCode);			
+//		
+//		ContainerValidationHelper.validateContents                (contextValidation, contents);
+//		ContainerValidationHelper.validateContainerSupportRequired        (contextValidation, support);       // bug here Yann
+//		ContainerValidationHelper.validateInputProcessCodes       (contextValidation, processCodes);
+//		
+//		ContainerValidationHelper.validateQualityControlResults   (contextValidation, qualityControlResults);
+//		
+//		ContainerValidationHelper.validateConcentrationOptional   (contextValidation, concentration);
+//		ContainerValidationHelper.validateQuantityOptional        (contextValidation, quantity);
+//		ContainerValidationHelper.validateVolumeOptional          (contextValidation, volume);
+//		ContainerValidationHelper.validateSizeOptional            (contextValidation, size);
+//		ContainerValidationHelper.validateRules                   (contextValidation, this);
+//	}
+	
+	/**
+	 * Validate a container (optional context parameter {@link CommonValidationHelper#FIELD_IMPORT_TYPE_CODE}).
+	 */
 	@JsonIgnore
 	@Override
-	public void validate(ContextValidation contextValidation){
+	@Deprecated
+	public void validate(ContextValidation contextValidation) {
+		validate(contextValidation, null, null);
+	}
+	
+	// Root calls look like validate(ctx, null, null) 
+	public void validate(ContextValidation contextValidation, String importTypeCode_, String stateCode) {
 		
-		if (contextValidation.getObject(FIELD_STATE_CODE) == null) {
-			contextValidation.putObject(FIELD_STATE_CODE , state.code);			
-		}
+//		if (contextValidation.getObject(CommonValidationHelper.FIELD_STATE_CODE) == null)
+//			contextValidation.putObject(CommonValidationHelper.FIELD_STATE_CODE , state.code);			
+		if (stateCode == null)
+			stateCode = state.code;
 		
-    	validateId(this, contextValidation);
-		validateCode(this, InstanceConstants.CONTAINER_COLL_NAME, contextValidation);
-		validateState(this.state, contextValidation);
-		validateTraceInformation(this.traceInformation, contextValidation);
-		validateContainerCategoryCode(categoryCode, contextValidation);
-		//TODO GA processTypeCodes
-		validateProjectCodes(projectCodes, contextValidation);
-		validateSampleCodes(sampleCodes, contextValidation);
-		validateExperimentTypeCodes(fromTransformationTypeCodes, contextValidation);
-		validateImportType(importTypeCode, properties ,contextValidation);
+		CommonValidationHelper.   validateIdPrimary                    (contextValidation, this);
+		CommonValidationHelper.   validateCodePrimary                  (contextValidation, this, InstanceConstants.CONTAINER_COLL_NAME);
+		ContainerValidationHelper.validateContainerStateRequired       (contextValidation, state);
+		CommonValidationHelper.   validateTraceInformationRequired     (contextValidation, traceInformation);
+		ContainerValidationHelper.validateContainerCategoryCodeRequired(contextValidation, categoryCode, support.categoryCode);
+		// GA: processTypeCodes
+		CommonValidationHelper   .validateProjectCodes                 (contextValidation, projectCodes);
+		CommonValidationHelper   .validateSampleCodes                  (contextValidation, sampleCodes);
+		CommonValidationHelper   .validateExperimentTypeCodes          (contextValidation, fromTransformationTypeCodes);
+		ContainerValidationHelper.validateImportTypeOptional           (contextValidation, importTypeCode, properties);
 		
-		if (importTypeCode != null) {
-			contextValidation.putObject(FIELD_IMPORT_TYPE_CODE , importTypeCode);			
-		}
-		validateContents(contents,contextValidation);
-		validateContainerSupport(support,contextValidation);//bug here Yann
-		validateInputProcessCodes(processCodes,contextValidation);
+//		if (importTypeCode != null) 
+//			contextValidation.putObject(CommonValidationHelper.FIELD_IMPORT_TYPE_CODE , importTypeCode);			
+		if (importTypeCode != null)
+			importTypeCode_ = importTypeCode;
 		
-		validateQualityControlResults(qualityControlResults, contextValidation);
-		
-		validateConcentration(concentration, contextValidation);
-		validateQuantity(quantity, contextValidation);
-		validateVolume(volume, contextValidation);
-		validateSize(size, contextValidation);
-		validateRules(this, contextValidation);
+		ContainerValidationHelper.validateContents                     (contextValidation, contents, importTypeCode_);
+		ContainerValidationHelper.validateContainerSupportRequired     (contextValidation, support);       // bug here Yann
+		ContainerValidationHelper.validateInputProcessCodes            (contextValidation, processCodes, stateCode);		
+		ContainerValidationHelper.validateQualityControlResults        (contextValidation, qualityControlResults);
+		ContainerValidationHelper.validateConcentrationOptional        (contextValidation, concentration);
+		ContainerValidationHelper.validateQuantityOptional             (contextValidation, quantity);
+		ContainerValidationHelper.validateVolumeOptional               (contextValidation, volume);
+		ContainerValidationHelper.validateSizeOptional                 (contextValidation, size);
+		ContainerValidationHelper.validateRules                        (contextValidation, this);
 	}
 
 	// IAccessTracking
@@ -203,16 +222,16 @@ public class Container extends DBObject implements IValidation, ITracingAccess, 
 		return traceInformation;
 	}
 
-	// ICommentable
-	
-	@Override
-	public List<Comment> getComments() {
-		return comments;
-	}
-
-	@Override
-	public void setComments(List<Comment> comments) {
-		this.comments = comments;
-	}
+//	// ICommentable
+//	
+//	@Override
+//	public List<Comment> getComments() {
+//		return comments;
+//	}
+//
+//	@Override
+//	public void setComments(List<Comment> comments) {
+//		this.comments = comments;
+//	}
 
 }

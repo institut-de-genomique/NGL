@@ -17,7 +17,14 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 				withoutSelect : true,
 				columnMode : true
 			},
-			columns : [
+			exportCSV:{
+				active:true
+			},
+			columns : [{property:"traceInformation.creationDate",
+			        	header: Messages("experiment.traceInformation.creationDate"),
+			        	type :"date",		    	  	
+			        	order:true
+			           },
 			           {property:"code",
 			        	header: Messages("run.code"),
 			        	type :"text",		    	  	
@@ -37,15 +44,13 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 		    ]	        
  	};
 		
-	var rawDatasDTConfig = {
+	var rawDatasDTConfig = {	
 			name:'rawDataDT',
 			order :{by:'code',mode:'local', reverse:true},
-			search:{active:false},
 			pagination:{
 				active:true,
 				mode:'local'
-			},
-			select:{active:true},
+			},			
 			showTotalNumberRecords:true,
 			edit : {
 				active:true,
@@ -53,16 +58,16 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 				withoutSelect : true,
 				columnMode : true
 			},
-			cancel : {
-				showButton:true
-			},
-			hide:{
+			exportCSV:{
 				active:true
 			},
-			exportCSV:{
-				active:false
-			},
-			columns : [
+			
+			
+			columns : [{property:"traceInformation.creationDate",
+			        	header: Messages("rawData.traceInformation.creationDate"),
+			        	type :"text",		    	  	
+			        	order:true
+			           },
 			           {property:"relatifName",
 			        	header: Messages("rawData.relatifName"),
 			        	type :"text",		    	  	
@@ -113,7 +118,7 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 			$scope.rawDataDT = datatable(rawDatasDTConfig);
 			$scope.rawDataDT.setData(maListRawDatas, maListRawDatas.length);
 		}).error(function(data){
-			//$scope.messages.addDetails(data);
+			//$scope.messages.addDetails(data); // addDetail(cle, valeur) mais data de la forme cle valeur
 			//$scope.messages.setError("save");
 		});
 		

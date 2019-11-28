@@ -7,242 +7,304 @@ factory('balanceSheetsGeneralSrv', ['$http', 'mainService', 'datatable', '$parse
 	 
 		var balanceSheetsGeneralService = {
 		
-			computeDataByYear : function(data,startYear,dataByYear){
-			/*	var actualYear = new Date().getFullYear();
-				var startYear = 2008;
-				if(typeCode=='rsnanopore'){
-					startYear=2014;
-				}
-				var dataByYear = [];
-				 for (var i = startYear; i <= actualYear; i++){
-					 dataByYear[i-startYear] = {
-							 nbBases : 0,
-							 year : i
-					 };
-				 }*/
-						 
-				 // Calculating our bases for each year
-				 for(var i = 0; i < data.length; i++){
-					var readsetDate =  balanceSheetsGeneralService.convertToDate(data[i].runSequencingStartDate);
-					dataByYear[readsetDate.getFullYear() - startYear].nbBases += balanceSheetsGeneralService.getProperty(data[i]);
-				 }
-				 return dataByYear;
+			computeYearlyData: function(balanceSheets){
+				return balanceSheets.sort((bs1, bs2) => parseInt(bs1.year) - parseInt(bs2.year)).map(bs => {
+					return {
+						nbBases : bs.computations
+						.filter(computation => computation.collection == "readsets")
+						.map(computation => computation.result.value)
+						.reduce((a, b) => a + b, 0),
+						year : bs.year
+					}
+				});
 			},
-			
-			computeDataForYear : function(data,runTypes,projectData, year){
-				var dataReadSet = {
-						total : 0,
-						totalProject : 0,
-						readsets : [],
-						months : [],
-						quarters :[],
-						dataQuarterDT:[],
-						lineToColorQuarter:[],
-						dataSequencingDT:[],
-						dataProjectDT:[],
-						dataSampleDT:[]
-				};
-				
-				//initialize months
-				for(var i = 0; i <12; i++){
-					dataReadSet.months[i] = {
-						quarter : balanceSheetsGeneralService.getQuarter(i),
-						month : balanceSheetsGeneralService.getMonthName(i),
-						nbBases : 0
-					 }
-				 }
-				//initialize quarters
-				for(var i=1;i<=4;i++){
-					dataReadSet.quarters[i] = {
-						nbBases : 0,
-						data : []
+
+			mergeCategories: function(categories, toMerges){
+				var categoryMap = new Map();
+				var categoryMonthlyMap = new Map();
+				categories.forEach(category => {
+					categoryMap.set(category.label, category);
+					categoryMonthlyMap.set(category.label, new Map());
+					category.monthly.forEach(monthData => categoryMonthlyMap.get(category.label).set(monthData.month, monthData));
+				});
+				toMerges.forEach(toMerge => {
+					toMerge.forEach(category => {
+						categoryMap.get(category.label).result.value += category.result.value;
+						let localMonthlyMap = categoryMonthlyMap.get(category.label);
+						category.monthly.forEach(monthData => {
+							localMonthlyMap.get(monthData.month).result.value += monthData.result.value;
+						});
+					});
+				});
+			},
+
+			mergeReadSetComputations: function(readSetComputations) {
+				var readSetComputation = readSetComputations[0];
+				if(readSetComputations.length > 1){
+					var monthlyMap = new Map();
+					readSetComputation.monthly.forEach(monthData => monthlyMap.set(monthData.month, monthData));
+					var sequencingTypes = [];
+					var projects = [];
+					var sampleTypes = [];
+					for(var i=1;i<readSetComputations.length;i++){
+						let currentComputation = readSetComputations[i];
+						readSetComputation.result.value += currentComputation.result.value;
+						currentComputation.monthly.forEach(monthData => monthlyMap.get(monthData.month).result.value += monthData.result.value);
+						sequencingTypes.push(currentComputation.by.sequencingTypes);
+						projects.push(currentComputation.by.projects)
+						sampleTypes.push(currentComputation.by.sampleTypes)
+					}
+					balanceSheetsGeneralService.mergeCategories(readSetComputation.by.sequencingTypes, sequencingTypes);
+					balanceSheetsGeneralService.mergeCategories(readSetComputation.by.projects, projects);
+					balanceSheetsGeneralService.mergeCategories(readSetComputation.by.sampleTypes, sampleTypes);
+				}
+				return readSetComputation;
+			},
+
+			computeMonthlyData: function(readsetStats, total){
+				var monthly = readsetStats.monthly
+				.sort((data1, data2) => data1.month - data2.month)
+				.reduce(function fillGaps(array, data) {
+					let nextMonth = array.length === 0 ? 1 : array[array.length - 1].month + 1;
+					if(data.month === nextMonth){
+						array.push(data);
+						return array;
+					} else {
+						array.push({
+							month: nextMonth,
+							result: {
+								value: 0
+							}
+						});
+						return fillGaps(array, data);
+					}
+				}, []);
+				let lastMonth = monthly[monthly.length - 1].month;
+				if(lastMonth < 12){
+					for(var i=(lastMonth + 1); i <= 12; i++){
+						monthly.push({
+							month: i,
+							result: {
+								value: 0
+							}
+						});
 					}
 				}
+				var accumulator = monthly.map(data => {
+					return {
+						quarter : balanceSheetsGeneralService.getQuarter(data.month),
+						month : balanceSheetsGeneralService.getMonthName(data.month),
+						nbBases: data.result.value
+					}
+				})
+				.reduce((accumulator, data) => {
+					if(accumulator.results.length > 0 && accumulator.quarterCounter === 3){
+						accumulator.results.push({
+							quarter : '',
+							month : Messages("balanceSheets.sum"),
+							nbBases : accumulator.quarterSum
+						});
+						accumulator.quarterSum = 0;
+						accumulator.quarterCounter = 0;
+						accumulator.quarterIndex++;
+					} 
+					accumulator.results.push(data);
+					accumulator.quarterSum += data.nbBases;
+					accumulator.quarterCounter++;
+					accumulator.quarters[accumulator.quarterIndex].push({
+						name: data.month,
+						y: data.nbBases,
+						x: ((accumulator.quarterIndex - 1) * 3) + accumulator.quarterCounter,
+						_value: data.nbBases,
+						_group: data.quarter
+					});
+					return accumulator;
+				}, {results: [], quarterSum: 0, quarterCounter: 0, quarterIndex: 1, quarters: [null, [], [], [], []]});
+				accumulator.results.push({
+					quarter : '',
+					month : Messages("balanceSheets.sum"),
+					nbBases : accumulator.quarterSum
+				}); 
+				accumulator.results.push({
+					quarter : '',
+					month : Messages("balanceSheets.totalSum"),
+					nbBases : total
+				});
+				return accumulator;
+			},
+
+			computeSequencingData: function(readsetStats, runTypes, total){
 				//Initialize runTypeMap
 				var sequencerMap = new Map();
 				for(var i=0; i<runTypes.length;i++){
 					sequencerMap.set(runTypes[i].code, runTypes[i].name);
 				}
-				 
-				//Initialize projectMap
-				var projectMap = new Map();
-				for(var i=0; i<projectData.length;i++){
-					projectMap.set(projectData[i].code,projectData[i].name);
-				}
-				var dataSequencing = new Map();
-				var dataProject = new Map();
-				var dataSample = new Map();
-				
-				for(var i = 0; i < data.length; i++){
-					data[i].runSequencingStartDate = balanceSheetsGeneralService.convertToDate(data[i].runSequencingStartDate);
-					 var fullYear = data[i].runSequencingStartDate.getFullYear();
-					 var monthValue = data[i].runSequencingStartDate.getMonth();
-					 
-					 if(data[i].runSequencingStartDate.getFullYear() == year){
-						 var valueNbBases = balanceSheetsGeneralService.getProperty(data[i]);
-						 dataReadSet.total += valueNbBases;
-						 dataReadSet.months[data[i].runSequencingStartDate.getMonth()].nbBases += valueNbBases;
-						 dataReadSet.quarters[balanceSheetsGeneralService.getQuarter(data[i].runSequencingStartDate.getMonth())].nbBases += valueNbBases;
-						 if(data[i].sampleOnContainer == null || data[i].sampleOnContainer == undefined){
-							 data[i].sampleOnContainer = {
-									 sampleTypeCode : 'not-defined',
-									 sampleCategoryCode : 'unknown'
-							 };
-						 }
-						 var codeSequencer = data[i].runTypeCode;
-						 if(dataSequencing.get(codeSequencer) != undefined){
-							 dataSequencing.get(codeSequencer).nbBases +=valueNbBases;
-						 }else{
-							 dataSequencing.set(codeSequencer, {name : sequencerMap.get(codeSequencer),
-																			nbBases : valueNbBases,
-																			percentage : null});
-						 }
-						 var projectCode = data[i].projectCode;
-						 if(dataProject.get(projectCode) != undefined){
-							 dataProject.get(projectCode).nbBases += valueNbBases;
-						 }else{
-							 dataProject.set(projectCode, {code : projectCode,
-								 							name : projectMap.get(projectCode),
-								 							nbBases : valueNbBases,
-								 							percentageForTenProjects:null,
-								 							percentageForYear:null
-								 							})
-						 }
-						 if(dataSample.get(data[i].sampleOnContainer.sampleTypeCode) != undefined){
-							 dataSample.get(data[i].sampleOnContainer.sampleTypeCode).nbBases += valueNbBases;
-						 }else{
-							 dataSample.set(data[i].sampleOnContainer.sampleTypeCode, {category : data[i].sampleOnContainer.sampleCategoryCode,
-								 														type : data[i].sampleOnContainer.sampleTypeCode,
-								 														nbBases : valueNbBases,
-								 														percentage : null
-							 															})
-						 }
-						 dataReadSet.readsets.push(data[i]);
-					 }
-				}
-				
-				//calculate dataSample
-				var dataSampleArray = Array.from(dataSample.values());
-				dataSampleArray.sort(function(a, b){return parseInt(b.nbBases) - parseInt(a.nbBases)});
-				dataReadSet.dataSampleDT = dataSampleArray;
-				
-				 // Percentage
-				 for(var i = 0; i < dataReadSet.dataSampleDT.length; i++){
-					 dataReadSet.dataSampleDT[i].percentage = parseFloat((dataReadSet.dataSampleDT[i].nbBases * 100 / dataReadSet.total).toFixed(2)).toLocaleString() + " %";
-				 }
-				 
-				//Calculate TenFirstProject
-				 // We sort the projects by balanceSheetsFirstTen.nbBases
-				var dataProjectArray = Array.from(dataProject.values());
-				dataProjectArray.sort(function(a, b){return parseInt(b.nbBases) - parseInt(a.nbBases)});
-				 
-				 // We only keep the top ten
-				dataReadSet.dataProjectDT = dataProjectArray.slice(0,10);
-				 
-				 var nbBasesForTenProjects = 0;
-				 
-				 for(var i = 0; i < dataReadSet.dataProjectDT.length; i++){
-					 nbBasesForTenProjects += dataReadSet.dataProjectDT[i].nbBases;
-				 }
-				 dataReadSet.totalProject = nbBasesForTenProjects;
-				 
-				 // We calculate percentage for each project
-				 for(var i = 0; i < dataReadSet.dataProjectDT.length; i++){
-					 dataReadSet.dataProjectDT[i].percentageForTenProjects = parseFloat((dataReadSet.dataProjectDT[i].nbBases * 100 / nbBasesForTenProjects).toFixed(2)).toLocaleString() + " %";
-					 dataReadSet.dataProjectDT[i].percentageForYear = parseFloat((dataReadSet.dataProjectDT[i].nbBases *100 / dataReadSet.total).toFixed(2)).toLocaleString() + " %";
-				 }
-				 
-				
-				//Calculate percentage for dataSequencingDT
-				var index=0;
-				for(var key of dataSequencing.keys()){
-					dataSequencing.get(key).percentage = (dataSequencing.get(key).nbBases /  dataReadSet.total *100).toFixed(2) + " %";
-					dataReadSet.dataSequencingDT[index]=dataSequencing.get(key);
-					index++;
-				}
-
-				var previousQuarter=1;
-				var valueQuarter = 1;
-				var pos=0;
-				for(i=0;i<12;i++){
-					valueQuarter=dataReadSet.months[i].quarter;
-					if(previousQuarter!=valueQuarter){
-						//Add somme quarter
-						var line = {
-								 quarter : '',
-								 month : Messages("balanceSheets.sum"),
-								 nbBases : dataReadSet.quarters[previousQuarter].nbBases
-						 };
-						dataReadSet.dataQuarterDT.push(line);
-						pos=i+valueQuarter-2;
-						dataReadSet.lineToColorQuarter.push(pos);
-						
+				var bySequencingType = readsetStats.by.sequencingTypes;
+				return bySequencingType.map(sequencingType => {
+					return {
+						name : sequencerMap.get(sequencingType.label),
+						nbBases : sequencingType.result.value,
+						percentage : (sequencingType.result.value / total * 100).toFixed(2) + " %"
 					}
-					dataReadSet.dataQuarterDT.push(dataReadSet.months[i]);
-					dataReadSet.quarters[valueQuarter].data.push({
-						name : dataReadSet.months[i].month,
-						y :  dataReadSet.months[i].nbBases,
-						x : i,
-						_value : dataReadSet.months[i].nbBases,
-						_group : valueQuarter
-					});
-					previousQuarter=valueQuarter;
-				}
-				
-				var line = {
-						 quarter : '',
-						 month : Messages("balanceSheets.sum"),
-						 nbBases : dataReadSet.quarters[4].nbBases
-				 };
-				dataReadSet.dataQuarterDT.push(line);
-				//Add somme total
-				var yearLine = {
-						quarter : '',
-						month : Messages("balanceSheets.totalSum"),
-				 		nbBases : dataReadSet.total
-				 };
-				dataReadSet.dataQuarterDT.push(yearLine);
-				
-				dataReadSet.lineToColorQuarter.push(dataReadSet.dataQuarterDT.length-2);
-				dataReadSet.lineToColorQuarter.push(dataReadSet.dataQuarterDT.length-1);
-				return dataReadSet;
-			
+				});
 			},
-				
-			
-			getProperty : function(data){
-				var value=0;
-				if(data.typeCode=="rsillumina"){
-					if(data.treatments.ngsrg!=null){
-						value=data.treatments.ngsrg.default.nbBases.value;
-					}
+
+			getTenBiggestProjects: function(readsetStats){
+				return readsetStats.by.projects
+				.sort((byProjectA, byProjectB) => byProjectB.result.value - byProjectA.result.value)
+				.slice(0, 10);
+			},
+
+			computeProjectData: function(tenProjects, projects, totalProject, total){
+				var projectMap = new Map();
+				for(var i=0; i<projects.length;i++){
+					projectMap.set(projects[i].code, projects[i].name);
 				}
-				if(data.typeCode=="rsnanopore"){
-					if(data.treatments.ngsrg!=null){
-						value=data.treatments.ngsrg.default['1DForward'].value.nbBases;
-						if(data.treatments.ngsrg.default['1DReverse']!=null){
-							value+=data.treatments.ngsrg.default['1DReverse'].value.nbBases;
-						}
-					}else if(data.treatments.readQuality!=null){
-						value=data.treatments.readQuality.default['1DForward'].value.nbBases;
-						if(data.treatments.readQuality.default['1DReverse']!=null){
-							value+=data.treatments.readQuality.default['1DReverse'].value.nbBases;
-						}
+				return tenProjects.map(project => {
+					return {
+						code: project.label,
+						name : projectMap.get(project.label),
+						nbBases : project.result.value,
+						percentageForTenProjects: (project.result.value / totalProject * 100).toFixed(2) + " %",
+						percentageForYear : (project.result.value / total * 100).toFixed(2) + " %"
 					}
+				});
+			},
+
+			computeSampleData: function(readsetStats, sampleTypes, total){
+				var sampleTypeMap = new Map();
+				for(var i=0; i<sampleTypes.length;i++){
+					sampleTypeMap.set(sampleTypes[i].code, sampleTypes[i].category.code);
 				}
-				return value;
+				var bySampleType = readsetStats.by.sampleTypes;
+				return bySampleType.sort((dataA, dataB) => dataB.result.value - dataA.result.value)
+				.map(sampleType => {
+					return {
+						category: sampleTypeMap.get(sampleType.label),
+						type : sampleType.label,
+						nbBases : sampleType.result.value,
+						percentage : (sampleType.result.value / total * 100).toFixed(2) + " %"
+					}
+				});
+			},
+
+			computeRunSequencingTypes(runStats, runTypes){
+				var sequencerMap = new Map();
+				for(var i=0; i<runTypes.length;i++){
+					sequencerMap.set(runTypes[i].code, runTypes[i].name);
+				}
+				return runStats.by.sequencingTypes.map(sequencingType => {
+					return {
+						code: sequencingType.label, 
+						name: sequencerMap.get(sequencingType.label)
+					}
+				});
+			},
+
+			computeRunSequencingData: function(runStats, runFailedStats, runExtStats){
+				/* init total by month arrays */
+				var runStatsTotalMonth = Array(13).fill(0, 1, 13);
+				var runFailedStatsTotalMonth = Array(13).fill(0, 1, 13);
+				runStats.by.sequencingTypes.flatMap(sequencingType => sequencingType.monthly).forEach(monthdata => {
+					runStatsTotalMonth[monthdata.month] += monthdata.result.nbElements;
+				});
+				runFailedStats.by.sequencingTypes.flatMap(sequencingType => sequencingType.monthly).forEach(monthdata => {
+					runFailedStatsTotalMonth[monthdata.month] += monthdata.result.nbElements;
+					runStatsTotalMonth[monthdata.month] -= monthdata.result.nbElements;
+				});
+				if(runExtStats) {
+					runExtStats.by.sequencingTypes.flatMap(sequencingType => sequencingType.monthly).forEach(monthdata => {
+						runStatsTotalMonth[monthdata.month] -= monthdata.result.nbElements;
+					});
+				}
+				/* init result array */
+				var dataRunDT = [];
+				for(var i=1;i<=12;i++){
+					dataRunDT[i-1] = {
+						month: balanceSheetsGeneralService.getMonthName(i),
+						nbAborted: runFailedStatsTotalMonth[i],
+						total: runStatsTotalMonth[i]
+					};
+				}
+				runStats.by.sequencingTypes.forEach(sequencingType => {
+					for(var i=0;i<12;i++){
+						dataRunDT[i][sequencingType.label] = 0;
+					}
+				});
+				/* add nb success runs */
+				runStats.by.sequencingTypes.forEach(sequencingType => {
+					sequencingType.monthly.forEach(monthdata => {
+						dataRunDT[monthdata.month - 1][sequencingType.label] = monthdata.result.nbElements;
+					});
+				});
+				/* substract nb failed runs */
+				runFailedStats.by.sequencingTypes.forEach(sequencingType => {
+					sequencingType.monthly
+					.filter(monthdata => dataRunDT[monthdata.month - 1][sequencingType.label] > 0)
+					.forEach(monthdata => {
+						dataRunDT[monthdata.month - 1][sequencingType.label] -= monthdata.result.nbElements;
+					});
+				});
+				/* substract nb external runs */
+				if(runExtStats) {
+					runExtStats.by.sequencingTypes.forEach(sequencingType => {
+						sequencingType.monthly
+						.filter(monthdata => dataRunDT[monthdata.month - 1][sequencingType.label] > 0)
+						.forEach(monthdata => {
+							dataRunDT[monthdata.month - 1][sequencingType.label] -= monthdata.result.nbElements;
+						});
+					});
+				}
+				/* annotate nb failed runs */
+				runFailedStats.by.sequencingTypes.forEach(sequencingType => {
+					sequencingType.monthly.forEach(monthdata => {
+						dataRunDT[monthdata.month - 1][sequencingType.label] += " (+" + monthdata.result.nbElements + " en echec)";
+					});
+				});
+				/* annotate nb external runs  */
+				if(runExtStats) {
+					runExtStats.by.sequencingTypes.map(sequencingType => {
+						sequencingType.monthly.forEach(monthdata => {
+							dataRunDT[monthdata.month - 1][sequencingType.label] += " [+" + monthdata.result.nbElements + " externe]";
+						});
+					});
+				}			
+				//Add sum by typeSeq
+				var dataRunTypeSeq = {month: Messages("balanceSheets.sumNoAborting")};
+				/* add nb success runs */
+				runStats.by.sequencingTypes.forEach(sequencingType => {
+					dataRunTypeSeq[sequencingType.label] = sequencingType.result.nbElements;
+				});
+				/* substract nb failed runs */
+				runFailedStats.by.sequencingTypes.forEach(sequencingType => {
+					dataRunTypeSeq[sequencingType.label] -= sequencingType.result.nbElements;
+				});
+				/* substract nb external runs */
+				if(runExtStats) {
+					runExtStats.by.sequencingTypes.forEach(sequencingType => {
+						dataRunTypeSeq[sequencingType.label] -= sequencingType.result.nbElements;
+					});
+				}
+				dataRunDT.push(dataRunTypeSeq);
+				//Add external sum by typeSeq
+				if(runExtStats){
+					var dataExtRunTypeSeq = {month: Messages("balanceSheets.sumExternal")};
+					runStats.by.sequencingTypes.forEach(sequencingType => {
+						dataExtRunTypeSeq[sequencingType.label] = 0;
+					});
+					runExtStats.by.sequencingTypes.forEach(sequencingType => {
+						dataExtRunTypeSeq[sequencingType.label] = sequencingType.result.nbElements;
+					});
+					dataRunDT.push(dataExtRunTypeSeq);
+				}
+				return dataRunDT;
 			},
 			
 			computeSumData : function(data){
-				 var sum = [{
-						property : Messages('balanceSheets.sum'),
-						value : 0
-				 }];
-				// Calculing sum
-				 for(var i = 0; i < data.length; i++){
-					 sum[0].value += data[i].nbBases;
-				 }
-				return sum;
+				return [{
+					property : Messages('balanceSheets.sum'),
+					value : data.map(obj => obj.nbBases).reduce((a, b) => a + b)
+			 	}];;
 			},
 					
 			computeChartYearlyBalanceSheets : function(data){
@@ -302,12 +364,11 @@ factory('balanceSheetsGeneralSrv', ['$http', 'mainService', 'datatable', '$parse
 			},
 			
 			computeChartQuarters : function(data){
-				 
 				 var allSeries = [];
 				 for(var i=1;i<=4;i++){
 					 allSeries.push({
-						data : data.quarters[i].data,
-						name : "T"+i,
+						data : data.quarters[i],
+						name : "T" + i,
 						type : 'column',
 						turboThreshold : 0
 					});	
@@ -524,7 +585,7 @@ factory('balanceSheetsGeneralSrv', ['$http', 'mainService', 'datatable', '$parse
 				                   Messages("balanceSheets.april"), Messages("balanceSheets.may"), Messages("balanceSheets.june"),
 				                   Messages("balanceSheets.july"),Messages("balanceSheets.august"), Messages("balanceSheets.september"),
 				                   Messages("balanceSheets.october"), Messages("balanceSheets.november"), Messages("balanceSheets.december")];
-				 return monthNames[month];
+				 return monthNames[month - 1];
 			 }
 	};
 			

@@ -2,12 +2,12 @@ package controllers.sra.api;
 
 import javax.inject.Inject;
 
+import controllers.NGLController;
 import fr.cea.ig.authentication.Authenticated;
 import fr.cea.ig.lfw.Historized;
 import fr.cea.ig.lfw.support.LFWRequestParsing;
 import fr.cea.ig.lfw.utils.CodeAndNameList;
 import fr.cea.ig.ngl.NGLApplication;
-import fr.cea.ig.ngl.NGLController;
 import fr.cea.ig.ngl.support.Executor;
 import fr.cea.ig.ngl.support.api.SraParameterAPIHolder;
 import models.sra.submit.util.SraParameter;
@@ -50,16 +50,16 @@ public class Variables extends NGLController
 			/*SraParameter parameter = new SraParameter();
 			parameter.code  = code;
 			parameter.type  = type;
-			parameter.value = VariableSRA.mapStrategySample.get("code"); // TODO: fix null
+			parameter.value = VariableSRA.mapStrategySample.get("code");
 			return ok(Json.toJson(parameter)); */
-			return okAsJson(new SraParameter(code,type, VariableSRA.mapStrategySample.get("code"))); // TODO: fix null
+			return okAsJson(new SraParameter(code,type, VariableSRA.mapStrategySample.get("code"))); 
 		} else if ("strategyStudy".equalsIgnoreCase(type)) {
 			/*SraParameter parameter = new SraParameter();
 			parameter.code  = code;
 			parameter.type  = type;
-			parameter.value = VariableSRA.mapStrategyStudy.get("code"); // TODO : fix null
+			parameter.value = VariableSRA.mapStrategyStudy.get("code");
 			return ok(Json.toJson(parameter));*/
-			return okAsJson(new SraParameter(code,type,VariableSRA.mapStrategyStudy.get("code"))); // TODO : fix null
+			return okAsJson(new SraParameter(code,type,VariableSRA.mapStrategyStudy.get("code")));
 		} else {
 			/* SraParameter parameter = MongoDBDAO.findOne(InstanceConstants.SRA_PARAMETER_COLL_NAME, SraParameter.class, DBQuery.and(DBQuery.is("code", code),DBQuery.is("type", type)));
 			logger.debug("parameter " + parameter);
@@ -86,7 +86,6 @@ public class Variables extends NGLController
 		}
 	}
 
-	// TODO: pack creation source using builder
 	/*private Query getQuery(VariablesSearchForm form) {
 		List<Query> queries = new ArrayList<Query>();
 		Query query = null;

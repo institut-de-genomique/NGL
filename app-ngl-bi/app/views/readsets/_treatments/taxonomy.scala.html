@@ -2,11 +2,11 @@
 <div class="row">
 	<div class="col-md-12 col-lg-12">
 		<ul class="nav nav-tabs margin-bottom-5">
-   			<li ng-if="readset.treatments.taxonomy.pairs!==undefined" ng-class="{'active':(readset.treatments.taxonomy.pairs!==undefined)}"><a href="#" data-target="#pairs" data-toggle="tab">@Messages("readsets.treatments.taxonomy.tabs.pairs")</a></li>
-   			<li ng-if="readset.treatments.taxonomy.read1!==undefined" ng-class="{'active':readset.treatments.taxonomy.read1!==undefined && readset.treatments.taxonomy.pairs==undefined}"><a href="#" data-target="#read1" data-toggle="tab">@Messages("readsets.treatments.taxonomy.tabs.read1")</a></li>    	
+   			<li ng-if="readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs!==undefined" ng-class="{'active':(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs!==undefined)}"><a href="#" data-target="#pairs" data-toggle="tab">@Messages("readsets.treatments.taxonomy.tabs.pairs")</a></li>
+   			<li ng-if="readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].read1!==undefined" ng-class="{'active':readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].read1!==undefined && readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs==undefined}"><a href="#" data-target="#read1" data-toggle="tab">@Messages("readsets.treatments.taxonomy.tabs.read1")</a></li>    	
    		</ul>
 		<div class="tab-content">	
-			<div class="tab-pane" ng-class="{'active':readset.treatments.taxonomy.pairs!==undefined}" id="pairs">
+			<div class="tab-pane" ng-class="{'active':readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs!==undefined}" id="pairs">
 				<div class="row">
 					<div class="col-md-12 col-lg-12">
 	  					<ul class="nav nav-tabs margin-bottom-5">
@@ -32,7 +32,7 @@
 					</div>
 				</div>
 			</div>	
-			<div class="tab-pane" ng-class="{'active':(readset.treatments.taxonomy.read1!==undefined && readset.treatments.taxonomy.pairs==undefined)}" id="read1">	
+			<div class="tab-pane" ng-class="{'active':(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].read1!==undefined && readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs==undefined)}" id="read1">	
 				<div class="row">
 					<div class="col-md-12 col-lg-12">
 	  					<ul class="nav nav-tabs margin-bottom-5">

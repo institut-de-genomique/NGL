@@ -14,10 +14,10 @@ import java.util.regex.Pattern;
 import models.sra.submit.util.SraException;
 
 /**
+ * 
  * @author sgas
  *
  */
-
 public class ColumnParser {
 
 	//private Map<String, String> mapAllowedFields =  new HashMap<String, String>();
@@ -159,8 +159,9 @@ public class ColumnParser {
 				valFieldsInFile = ligne.split(separator);
 				//System.out.println("valFieldsInFile = " + valFieldsInFile.length);
 				//System.out.println("nameFieldsInFile = " + nameFieldsInFile.length);	
-				
-				if (valFieldsInFile.length != nameFieldsInFile.length) {
+				if (nameFieldsInFile == null) {
+					throw new SraException("pas de nom de champ dans le fichier");
+				} else if (valFieldsInFile.length != nameFieldsInFile.length) {
 					throw new SraException("line no match whith legend, line=: '" + ligne +"' legend='"+ legend);
 				}
 				Map<String, String> mapLine =  new HashMap<>();
@@ -229,13 +230,15 @@ public class ColumnParser {
 					continue;
 				}
 				valFieldsInFile = ligne.split(separator);
-				if (valFieldsInFile.length != nameFieldsInFile.length) {
+				if (nameFieldsInFile == null) {
+					throw new SraException("pas de nom de champ dans le fichier");
+				} else if (valFieldsInFile.length != nameFieldsInFile.length) {
 					//System.out.println("!!!!!!!!!!!!!!!!!ligne  :" + ligne);
 					throw new SraException("no match pour la ligne : '" + ligne + "'");
 				}
 				Map<String, String> mapLine =  new HashMap<>();
 				Tools tools = new Tools();
-				for(int i =0; i < nameFieldsInFile.length ; i++) {
+				for (int i =0; i < nameFieldsInFile.length ; i++) {
 					mapLine.put(nameFieldsInFile[i], tools.clean(valFieldsInFile[i]));
 					//System.out.println("Champ '" + nameFieldsInFile[i] + "' et valeur '"+tools.clean(valFieldsInFile[i])+"'");
 				} 

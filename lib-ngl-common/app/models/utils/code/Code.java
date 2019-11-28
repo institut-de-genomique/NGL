@@ -5,6 +5,9 @@ import models.laboratory.experiment.instance.Experiment;
 import models.laboratory.processes.instance.Process;
 import models.laboratory.project.instance.Project;
 
+/**
+ * Code generation factory (bound through spring). 
+ */
 public interface Code {
 	
 	public String generateContainerSupportCode();

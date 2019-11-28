@@ -2,7 +2,13 @@
 
 <div ng-controller="OneToVoidQCCtrl" class="col-md-12 col-lg-12">	
 	<div ng-controller="OneToVoidChipMigrationCNSCtrl">
-	
+	<div class="row">
+	<div class="col-md-12 col-lg-12">
+	<ul class="list-unstyled">
+	<li><i class="fa fa-info-circle"></i> Calcul automatique volume final = volume du container d'entrée - vol. engagé</li>
+	</ul>	
+	</div>
+	</div>
 	
 	
 	<div class="row">
@@ -136,7 +142,7 @@
 			            <tr ng-repeat="y in ['A','B','C','D','E','F','G','H']" class="total">
 			                <td><strong>{{y}}</strong></td>
 			                <td class="plates" ng-repeat="x in [1,2,3,4,5,6,7,8,9,10,11,12]" class="browser">
-			                	    <div ng-bind="plateUtils.getCellPlateData(y, x)"/>    						    					
+			                	  <div list-resize="plateUtils.getCellPlateData(y, x)"  list-resize-min-size='3' vertical/>    	  						    					
 			                 </td>          
 			            </tr>			          
 			        <tbody>			    

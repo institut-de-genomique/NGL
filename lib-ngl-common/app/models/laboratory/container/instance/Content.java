@@ -1,6 +1,5 @@
 package models.laboratory.container.instance;
 
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,21 +7,17 @@ import java.util.Map;
 import models.laboratory.common.instance.Comment;
 import models.laboratory.common.instance.PropertyValue;
 import validation.ContextValidation;
-import validation.IValidation;
+import validation.common.instance.CommonValidationHelper;
 import validation.container.instance.ContentValidationHelper;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
-// TODO: comment
 
 /**
  * {@link models.laboratory.container.instance.Container} content.
  * Container contains a number of embedded Content {@link models.laboratory.container.instance.Container#contents}.
  *  
- * @author vrd
- *
  */
-public class Content implements IValidation {
+public class Content {
 
 	// Embedded Sample information
 	
@@ -66,7 +61,6 @@ public class Content implements IValidation {
 	 */
 	public String ncbiScientificName;
 
-	// TODO: use PropertyValue<?>
 	public Map<String,PropertyValue> properties;
 
 	/* Put process properties to analyse container*/
@@ -77,7 +71,7 @@ public class Content implements IValidation {
 	public List<Comment> processComments;
 
 	public Content() {
-		properties = new HashMap<>(); // String, PropertyValue>();		
+		properties = new HashMap<>();
 	}
 
 	@JsonIgnore
@@ -85,40 +79,60 @@ public class Content implements IValidation {
 		this.sampleCode         = sampleCode;
 		this.sampleTypeCode     = typeCode;
 		this.sampleCategoryCode = categoryCode;
-		this.properties         = new HashMap<>(); // <String, PropertyValue>();		
+		this.properties         = new HashMap<>();		
 	}
 
 
+	/**
+	 * Validate this content (context parameter {@link CommonValidationHelper#FIELD_IMPORT_TYPE_CODE}).
+	 * @param contextValidation validation context
+	 * @deprecated use {@link #validate(ContextValidation, String)}
+	 */
 	@JsonIgnore
-	@Override
+	@Deprecated
 	public void validate(ContextValidation contextValidation) {
-		ContentValidationHelper.validateSampleCode(sampleCode, contextValidation);
-		ContentValidationHelper.validateProjectCode(projectCode, contextValidation);
-		ContentValidationHelper.validateSampleCodeWithProjectCode(projectCode, sampleCode, contextValidation);
-		ContentValidationHelper.validateSampleCategoryCode(sampleCategoryCode,contextValidation);
-		ContentValidationHelper.validateSampleTypeCode(sampleTypeCode,contextValidation);
-		ContentValidationHelper.validatePercentageContent(percentage, contextValidation);
-		ContentValidationHelper.validateProperties(sampleTypeCode, properties, contextValidation);
+		ContentValidationHelper.validateSampleCodeRequired        (contextValidation, sampleCode);
+		CommonValidationHelper .validateProjectCodeRequired       (contextValidation, projectCode);
+		ContentValidationHelper.validateSampleCodeWithProjectCode (contextValidation, projectCode, sampleCode);
+		ContentValidationHelper.validateSampleCategoryCodeRequired(contextValidation, sampleCategoryCode);
+		ContentValidationHelper.validateSampleTypeCodeRequired    (contextValidation, sampleTypeCode);
+		ContentValidationHelper.validatePercentageContentRequired (contextValidation, percentage);
+		ContentValidationHelper.validateProperties                (contextValidation, sampleTypeCode, properties);
+	}
+	
+	/**
+	 * Validate this context using an optional import type code.
+	 * @param contextValidation validation context
+	 * @param importTypeCode    optional import type code
+	 */
+	public void validate(ContextValidation contextValidation, String importTypeCode) {
+		ContentValidationHelper.validateSampleCodeRequired        (contextValidation, sampleCode);
+		CommonValidationHelper .validateProjectCodeRequired       (contextValidation, projectCode);
+		ContentValidationHelper.validateSampleCodeWithProjectCode (contextValidation, projectCode, sampleCode);
+		ContentValidationHelper.validateSampleCategoryCodeRequired(contextValidation, sampleCategoryCode);
+		ContentValidationHelper.validateSampleTypeCodeRequired    (contextValidation, sampleTypeCode);
+		ContentValidationHelper.validatePercentageContentRequired (contextValidation, percentage);
+		ContentValidationHelper.validateProperties                (contextValidation, sampleTypeCode, properties, importTypeCode);
 	}
 
 	@Override
 	public Content clone() {
-		Content finalContent = new Content();
+		Content clone = new Content();
 
-		finalContent.projectCode        = projectCode;
-		finalContent.sampleCode         = sampleCode;
-		finalContent.sampleCategoryCode = sampleCategoryCode;
-		finalContent.sampleTypeCode     = sampleTypeCode;
-		finalContent.referenceCollab    = referenceCollab;
-		finalContent.percentage         = percentage;
+		clone.projectCode        = projectCode;
+		clone.sampleCode         = sampleCode;
+		clone.sampleCategoryCode = sampleCategoryCode;
+		clone.sampleTypeCode     = sampleTypeCode;
+		clone.referenceCollab    = referenceCollab;
+		clone.percentage         = percentage;
 		if (properties != null)
-			finalContent.properties = new HashMap<>(properties); // new HashMap<String,PropertyValue>(properties);
-		finalContent.taxonCode          = taxonCode;
-		finalContent.ncbiScientificName = ncbiScientificName;
-		if(processProperties != null)
-			finalContent.processProperties = new HashMap<>(processProperties); //new HashMap<String,PropertyValue>(processProperties);
-		finalContent.processComments    = processComments;
-		return finalContent;
+			clone.properties = new HashMap<>(properties);
+		clone.taxonCode          = taxonCode;
+		clone.ncbiScientificName = ncbiScientificName;
+		if (processProperties != null)
+			clone.processProperties = new HashMap<>(processProperties);
+		clone.processComments    = processComments;
+		return clone;
 	}
 	
 }

@@ -46,7 +46,7 @@ search.tab.addcolumns = Colonnes supplémentaires
 search.tab.addfilters = Filtres supplémentaires
 search.tab.filters = Filtres
 search.tab.expSearchMode = Experimental search mode
-search.tab.aggregateSearchMode = Aggregate query
+
 
 valuation.menu = Evaluation
 valuation.menu.runs = Runs
@@ -108,6 +108,7 @@ search.placeholder.analyseValuationUser = Analyse évaluée par :
 search.placeholder.stats.configuration = Configuration
 search.placeholder.treatment = Traitement
 
+
 search.placeholder.fromEndRGDate = Fin RG depuis le (jj/mm/aaaa)
 search.placeholder.toEndRGDate = Fin RG jusqu''au (jj/mm/aaaa)
 
@@ -116,6 +117,8 @@ search.placeholder.toEvalDate = Eval. jusqu''au (jj/mm/aaaa)
 
 search.placeholder.userLogin = Login utilisateur
 search.placeHolder.config.context = Contexte
+
+search.placeholder.fromAbundanceClusterPercentSum= Somme % abundance (extraction ou pcr1 ou pcr2)
 
 button.search = Rechercher
 button.reset = Réinitialiser
@@ -198,7 +201,7 @@ runs.lane.ngsrg_illumina.nbBaseInternalAndIlluminaFilter = Nb Bases (filtre illu
 runs.lane.ngsrg_illumina.phasing = Phasing
 runs.lane.ngsrg_illumina.prephasing = Prephasing
 runs.lane.ngsrg_illumina.nbCycles = Nb Cycles Utiles
-runs.lane.ngsrg_illumina.seqLossPercent = % Perte
+runs.lane.ngsrg_illumina.seqLossPercent = % Perte après démultiplexage (Imaire)
 runs.lane.ngsrg_illumina.occupiedPatternedWellPercentage = % puits occupés
 runs.lane.ngsrg_illumina.nbMismatch = Nb Mismatch Démultiplexage 
 
@@ -257,6 +260,7 @@ runs.lane.sav.alerts = Alertes
 runs.lane.showOrHide = Afficher/Masquer la lane 
 
 runs.readsets.title = Readsets
+runs.primaryDemultiplexing.title = Démultiplexage primaire
 
 runs.modal.header.text = Run status flow
 
@@ -303,6 +307,8 @@ sequencingProgramType.value.SR = Single Read
 
 runs.treatments.images.margin=25
 
+readsets.treatments.contaminationPCR = Contam. PCR
+readsets.treatments.taxonomyPcrDecontam = Taxonomy (vs PASS)
 ############
 #
 # READSETS
@@ -368,6 +374,8 @@ readsets.sampleOnContainer.percentPerLane = % déposé
 readsets.endOfRG = Date fin RG
 readsets.endOfQC = Date fin QC
 
+readsets.primaryTag = Tag Iaire
+
 #treatments properties
 readsets.treatments.contamination.read1_2 = Read 1 + Read 2
 readsets.treatments.contamination.single = Single
@@ -376,6 +384,7 @@ readsets.treatments.contamination.removedReads = Removed reads
 readsets.treatments.contamination.remainingReads = Remaining reads 
 readsets.treatments.contamination.removedReadsPercent = % removed reads
 readsets.treatments.contamination.remainingNucleotides = Reamining nucleotides
+readsets.treatments.contamination.contadb = PCR contaminant database used
 
 readsets.treatments.duplicates.estimateDuplicatedReads = Estimation de lectures dupliquées
 readsets.treatments.duplicates.estimateDuplicatedReadsPercent = Estimation % lectures dupliquées
@@ -422,6 +431,12 @@ readsets.treatments.ngsrg_illumina.validSeqPercent = % Séquences valides / pist
 readsets.treatments.ngsrg_illumina.fraction = Fraction de run
 readsets.treatments.ngsrg_illumina.nbReadIllumina = Nb Read Illumina
 readsets.treatments.ngsrg_illumina.percentOccupied = % puits occupés
+
+readsets.treatments.ngsrg_primary.Q30 = % >= Q30 (Imaire)
+readsets.treatments.ngsrg_primary.qualityScore = Score qualité moyen (Imaire)
+readsets.treatments.ngsrg_primary.nbCluster = Nb séquences valides (Imaire)
+readsets.treatments.ngsrg_primary.validSeqPercent = % séquences valides / piste (Imaire)
+readsets.treatments.ngsrg_primary.seqLossPctbetweenImaryAnd2ndaryDmplxing = % Perte entre démultiplexage Imaire et 2ndaire
 
 treatments.nanopore.1DForward = 1D forward
 treatments.nanopore.1DReverse = 1D reverse
@@ -638,6 +653,7 @@ readsets.treatments.exome.sdCover = SD cover
 #treatments names
 readsets.treatments.global = Global
 readsets.treatments.ngsrg = NGS-RG
+readsets.treatments.primaryDemultiplexing = Démultiplexage primaire
 readsets.treatments.duplicatesRaw = Duplicates (vs RAW)
 readsets.treatments.duplicatesClean = Duplicates (vs CLEAN)
 readsets.treatments.duplicatesTrim = Duplicates (vs TRIM)
@@ -751,7 +767,15 @@ readsets.treatments.chromium.numberReads=Number of reads
 readsets.treatments.chromium.read1Q30BaseRatio=Q30 of read 1
 readsets.treatments.chromium.read2Q30BaseRatio=Q30 of read 2
 
-readsets.treatments.ClustersDbAssignation=Clusters Db Assignation
+readsets.treatments.checkFastqIndex=Check Fastq Index
+readsets.treatments.checkFastqIndex.kmersBilan.kmer=Kmer
+readsets.treatments.checkFastqIndex.kmersBilan.kmerName=Nom Kmer
+readsets.treatments.checkFastqIndex.kmersBilan.kmerNumber=Nb. Kmer
+readsets.treatments.checkFastqIndex.kmersBilan.kmerPercent=Pourcent. Kmer
+readsets.treatments.checkFastqIndex.expectedSequences=Séquences attendues
+filterKmerPercent = Seuil % Kmer
+
+readsets.treatments.clustersDbAssignation=Clusters Db Assignation
 readsets.files.fullname = Nom du fichier
 readsets.files.typeCode = Type de fichier
 readsets.files.usable = Utilisable
@@ -908,6 +932,7 @@ treatments.assignation.assignationBilan.cluster=Cluster
 treatments.assignation.assignationBilan.otu=OTU
 treatments.assignation.assignationBilan.abundance=Abundance
 treatments.assignation.assignationBilan.abundanceClusterPercent=Abundance readset %
+treatments.assignation.assignationBilan.abundanceControlPercent=Abundance témoin %
 treatments.assignation.assignationBilan.taxonomy=Taxonomy
 treatments.assignation.assignationBilan.idPercent=% id
 treatments.assignation.assignationBilan.matchLength=% match length
@@ -1034,10 +1059,12 @@ balanceSheets.value = Valeur
 balanceSheets.noSampleTypeCode = default-sample-cns
 balanceSheets.percentageForTenProjects = Pourcentage sur dix projets
 balanceSheets.percentageForYear = Pourcentage sur cette année
-
+balanceSheets.nbAborted = Nb. en echec
+balanceSheets.total = Total
 balanceSheets.info.projectType = * Les readsets en cours de Read Generation ont le type d''échantillon ''non défini'' tant que le transfert n''est pas terminé.
 balanceSheets.danger.noData = Aucune donnée pour cette année
-
+balanceSheets.sumNoAborting = Total (runs internes hors échec)
+balanceSheets.sumExternal = Total (runs externes)
 
 balanceSheets.export.firstTen = 10Projets
 balanceSheets.export.sequencingType = TypeSeq
@@ -1052,6 +1079,7 @@ balanceSheets.tab.sequencingType = Bilan par type séquençage
 balanceSheets.tab.firstTen = Bilan des 10 premiers projets de cette année
 balanceSheets.tab.quarters = Bilan par trimestre
 balanceSheets.tab.projectType = Bilan par type d''échantillon *
+balanceSheets.tab.runType = Bilan mensuel par type séquençage
 
 balanceSheets.january = Janvier
 balanceSheets.february = Février
@@ -1157,6 +1185,7 @@ readsets.sampleOnContainer.properties.depth = Profondeur
 readsets.sampleOnContainer.properties.porosity = Porosité
 readsets.sampleOnContainer.properties.iteration = Itération
 readsets.sampleOnContainer.properties.percentPerLane = % Déposé
+readsets.sampleOnContainer.properties.sumPercentPerLane = Somme % Déposé
 readsets.treatments.duplicatesRaw.pairs.estimateDuplicatedReadsPercent = % Duplicats Pairs
 readsets.treatments.duplicatesRaw.read1.estimateDuplicatedReadsPercent = % Duplicats R1
 readsets.treatments.duplicatesRaw.read2.estimateDuplicatedReadsPercent = % Duplicats R2

@@ -282,45 +282,66 @@ angular.module('home').controller('SearchCtrl', ['$scope', '$http', '$q', '$filt
 			var containerCodes = result.data.map(function(container){return container.code;});
 			console.log("nb containers"+containerCodes.length);
 			
-			var promises = [];
-			promises[0] = $http.get(jsRoutes.controllers.processes.api.Processes.list().url, {params:{"outputContainerCodes":containerCodes,"stateCode":"IP","includes":"experimentCodes"}});
-			promises[1] = $http.get(jsRoutes.controllers.processes.api.Processes.list().url, {params:{"inputContainerCodes":containerCodes,"stateCode":"IP","includes":"experimentCodes"}});
-			
-			
-			$q.all(promises).then(function(results){
+			if (containerCodes.length > 0 ) {		
+				var promises = [];
+				var nbElementByBatch = Math.ceil(containerCodes.length / 3); //6 because 6 request max in parrallel with firefox and chrome
+				var queries = [];
+				for (var i = 0; i < 3 && containerCodes.length > 0; i++) {
+					if (containerCodes[i] == ""){
+						containerCodes.splice(i,i+1); 
+					}else{
+						var subContainerCode = containerCodes.splice(0, nbElementByBatch); 
+						promises.push($http.get(jsRoutes.controllers.processes.api.Processes.list().url, {params:{"outputContainerCodes":subContainerCode,"stateCode":"IP","includes":"experimentCodes"}}));  
+						promises.push($http.get(jsRoutes.controllers.processes.api.Processes.list().url, {params:{"inputContainerCodes":subContainerCode,"stateCode":"IP","includes":"experimentCodes"}}));               		
+					}
+				}			
 				
-				var extractDate = function(value){
-					return value.split(/(\d+_\d+)/)[1];
-				}
-				var experimentCodes = [];
-				experimentCodes = experimentCodes.concat(results[0].data.map(function(process){
+				//promises[0] = $http.get(jsRoutes.controllers.processes.api.Processes.list().url, {params:{"outputContainerCodes":containerCodes,"stateCode":"IP","includes":"experimentCodes"}});
+				//promises[1] = $http.get(jsRoutes.controllers.processes.api.Processes.list().url, {params:{"inputContainerCodes":containerCodes,"stateCode":"IP","includes":"experimentCodes"}});
+				
+				
+				$q.all(promises).then(function(results){
+					
+					var extractDate = function(value){
+						return value.split(/(\d+_\d+)/)[1];
+					}
+					var experimentCodes = [];
+					angular.forEach(results, function(result){
+						experimentCodes = experimentCodes.concat(result.data.map(function(process){
+							return $filter('orderBy')(process.experimentCodes,extractDate,true)[0];
+						})										
+					);
+					});
+					/*experimentCodes = experimentCodes.concat(results[0].data.map(function(process){
+							return $filter('orderBy')(process.experimentCodes,extractDate,true)[0];
+						})										
+					);
+					experimentCodes = experimentCodes.concat(results[1].data.map(function(process){
 						return $filter('orderBy')(process.experimentCodes,extractDate,true)[0];
-					})										
-				);
-				experimentCodes = experimentCodes.concat(results[1].data.map(function(process){
-					return $filter('orderBy')(process.experimentCodes,extractDate,true)[0];
-				 })										
-				);
-			
+					 })										
+					);*/
 				
-				experimentCodes = $filter('unique')(experimentCodes);
-				console.log("nb experimentCode"+experimentCodes.length);
-				
-				$scope.experimentDispatchDatatable = datatable(datatableExperimentConfig);			
-				if(experimentCodes.length > 0){
-					$scope.experimentDispatchDatatable.search({codes:experimentCodes});
-				}
-				var params = "";
-				experimentCodes.forEach(function(code){
-					params +="codes="+code+"&"
-				}, params);
-				params.replace(/&$/,"");
-				
-				$scope.getExperimentCodesParams = function(){
-					return params
-				}
-			});
-			
+					
+					experimentCodes = $filter('unique')(experimentCodes);
+					console.log("nb experimentCode"+experimentCodes.length);
+					
+					$scope.experimentDispatchDatatable = datatable(datatableExperimentConfig);			
+					if(experimentCodes.length > 0){
+						$scope.experimentDispatchDatatable.search({codes:experimentCodes});
+					}
+					var params = "";
+					experimentCodes.forEach(function(code){
+						params +="codes="+code+"&"
+					}, params);
+					params.replace(/&$/,"");
+					
+					$scope.getExperimentCodesParams = function(){
+						return params
+					}
+				});
+			}else {
+				return null;
+			}
 			
 		});
 		

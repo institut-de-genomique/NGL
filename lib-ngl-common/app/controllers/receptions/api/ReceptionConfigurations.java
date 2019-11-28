@@ -1,10 +1,6 @@
 package controllers.receptions.api;
 
 
-// import static play.data.Form.form;
-//import static fr.cea.ig.play.IGGlobals.form;
-
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -20,12 +16,11 @@ import controllers.DocumentController;
 import controllers.ListForm;
 import controllers.authorisation.Permission;
 import fr.cea.ig.MongoDBResult;
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import models.laboratory.common.instance.TraceInformation;
 import models.laboratory.reception.instance.ReceptionConfiguration;
 import models.utils.InstanceConstants;
 import models.utils.ListObject;
-//import play.Logger;
 import play.data.Form;
 import play.libs.Json;
 import play.mvc.Result;
@@ -36,14 +31,18 @@ import views.components.datatable.DatatableResponse;
 public class ReceptionConfigurations extends DocumentController<ReceptionConfiguration> {
 	
 	private static final play.Logger.ALogger logger = play.Logger.of(ReceptionConfigurations.class);
-//	private final Form<ReceptionConfiguration> reportConfigForm;// = form(ReceptionConfiguration.class);
+	
+//	@Inject
+//	public ReceptionConfigurations(NGLContext ctx) {
+//		super(ctx,InstanceConstants.RECEPTION_CONFIG_COLL_NAME, ReceptionConfiguration.class);	
+////		reportConfigForm = ctx.form(ReceptionConfiguration.class);
+//	}
 	
 	@Inject
-	public ReceptionConfigurations(NGLContext ctx) {
-		super(ctx,InstanceConstants.RECEPTION_CONFIG_COLL_NAME, ReceptionConfiguration.class);	
-//		reportConfigForm = ctx.form(ReceptionConfiguration.class);
+	public ReceptionConfigurations(NGLApplication app) {
+		super(app,InstanceConstants.RECEPTION_CONFIG_COLL_NAME, ReceptionConfiguration.class);	
 	}
-	
+
 	@Permission(value={"reading"})
 	public Result list() {
 		ListForm searchForm = filledFormQueryString(ListForm.class);
@@ -85,8 +84,9 @@ public class ReceptionConfigurations extends DocumentController<ReceptionConfigu
 		}
 
 //		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm.errors());
-		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm);
-		ctxVal.setCreationMode();
+//		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm);
+//		ctxVal.setCreationMode();
+		ContextValidation ctxVal = ContextValidation.createCreationContext(getCurrentUser(), filledForm);
 		input.validate(ctxVal);
 		if (!ctxVal.hasErrors()) {
 			input = saveObject(input);			
@@ -113,8 +113,9 @@ public class ReceptionConfigurations extends DocumentController<ReceptionConfigu
 				logger.error("traceInformation is null !!");
 			}
 //			ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm.errors()); 	
-			ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm); 	
-			ctxVal.setUpdateMode();
+//			ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm); 	
+//			ctxVal.setUpdateMode();
+			ContextValidation ctxVal = ContextValidation.createUpdateContext(getCurrentUser(), filledForm); 
 			input.validate(ctxVal);
 			if (!ctxVal.hasErrors()) {
 				updateObject(input);

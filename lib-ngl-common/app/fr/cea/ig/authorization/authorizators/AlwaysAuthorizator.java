@@ -26,7 +26,7 @@ public class AlwaysAuthorizator implements IAuthorizator {
 	 * Always authorized.
 	 */
 	@Override
-	public boolean authorize(String login, String[] perms) {
+	public boolean authorize(String login, String... perms) {
 		logger.debug("authorizing");
 		return true;
 	}

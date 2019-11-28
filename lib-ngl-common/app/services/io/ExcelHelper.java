@@ -1,9 +1,12 @@
 package services.io;
 
-import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.DateUtil;
 
+/**
+ * Some static methods relative to excel files.
+ */
 public class ExcelHelper {
 	
 //	public static String getStringValue(Cell cell){
@@ -15,6 +18,11 @@ public class ExcelHelper {
 //			return null;
 //		}
 //	}
+	/**
+	 * Interprets a possibly null cell as a possibly null string. 
+	 * @param cell cell to get value from
+	 * @return     string if the cell is formula or string, null otherwise
+	 */
 	public static String getStringValue(Cell cell) {
 		if (cell == null)
 			return null;
@@ -36,6 +44,11 @@ public class ExcelHelper {
 //		}
 //		
 //	}
+	/**
+	 * Interprets a possibly null cell as a possibly null value.
+	 * @param cell cell to get value from
+	 * @return     double value if the cell is numeric, string or formula, null otherwise
+	 */
 	public static Double getNumericValue(Cell cell) {
 		if (cell == null)
 			return null;
@@ -45,6 +58,15 @@ public class ExcelHelper {
 		case Cell.CELL_TYPE_STRING  : return Double.valueOf(cell.getStringCellValue());
 		default                     : return null;
 		}
+	}
+	
+	public static boolean isNumericValue(Cell cell)
+	{
+		if(cell.getCellType()==Cell.CELL_TYPE_NUMERIC || cell.getCellType()==Cell.CELL_TYPE_FORMULA)
+			return true;
+		else
+			return false;
+				
 	}
 	
 //	public static String convertToStringValue(Cell cell){
@@ -74,6 +96,12 @@ public class ExcelHelper {
 //			return null;
 //		}
 //	}
+	
+	/**
+	 * Convert cell value to a string.
+	 * @param cell cell 
+	 * @return     string value
+	 */
 	public static String convertToStringValue(Cell cell) {
 		if (cell == null)
 			return null;
@@ -81,7 +109,7 @@ public class ExcelHelper {
 		case Cell.CELL_TYPE_STRING : 
 			return cell.getStringCellValue();
 		case Cell.CELL_TYPE_NUMERIC : 
-			if (HSSFDateUtil.isCellDateFormatted(cell)) {
+			if (DateUtil.isCellDateFormatted(cell)) {
 				return Long.toString(cell.getDateCellValue().getTime());
 			} else {
 				DataFormatter df = new DataFormatter();

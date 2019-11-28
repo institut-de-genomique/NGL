@@ -22,7 +22,7 @@ import validation.ContextValidation;
 import validation.experiment.instance.ExperimentValidationHelper;
 import experiments.ExperimentTestHelper;
 
-public class SolutionStockRulesTests extends AbstractTests{
+public class SolutionStockRulesTests extends AbstractTests {
 	
 	protected static ALogger logger=Logger.of("SolutionStockRulesTests");
 	
@@ -33,7 +33,6 @@ public class SolutionStockRulesTests extends AbstractTests{
 		ExperimentValidationHelper.validateRules(exp, contextValidation);
 		contextValidation.displayErrors(logger);
 		assertThat(contextValidation.hasErrors()).isFalse();
-
 	}
 	
 	@Test

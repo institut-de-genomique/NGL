@@ -213,6 +213,7 @@ angular.module('home').controller('NanoporeFrgCtrl',['$scope', '$parse','atmToSi
 		console.log("call event save1");
 		$scope.atmService.data.save();
 		$scope.atmService.viewToExperimentOneToOne($scope.experiment);
+		removeTagCategoryIfNeeded($scope.experiment);
 		copyOutputContainerUsedAttributesToContentProperties($scope.experiment);
 		$scope.$emit('childSaved', callbackFunction);
 	});
@@ -251,8 +252,8 @@ angular.module('home').controller('NanoporeFrgCtrl',['$scope', '$parse','atmToSi
 					
 		if (col.property === 'outputContainerUsed.volume.value' || col.property === 'outputContainerUsed.concentration.value'  ){
 			computeInputQuantityToContentProperties(value.data);
-			
 		}
+		
 	}
 	
 	
@@ -285,7 +286,21 @@ angular.module('home').controller('NanoporeFrgCtrl',['$scope', '$parse','atmToSi
 	           }
 	  }
 	
-
+	  var removeTagCategoryIfNeeded = function(experiment){
+			if(null !== experiment.atomicTransfertMethods && undefined !== experiment.atomicTransfertMethods){
+				experiment.atomicTransfertMethods.forEach(function(atm){
+					var tagCategory = $parse("outputContainerUseds[0].experimentProperties.tagCategory")(atm);
+					var tag = $parse("outputContainerUseds[0].experimentProperties.tag")(atm);
+					
+					if((tag === null || tag === undefined) && 
+							tagCategory !== null && tagCategory !== undefined 
+							){
+						atm.outputContainerUseds[0].experimentProperties.tagCategory = undefined;
+					}
+				})
+			}
+		};
+	  
 	
 	var atmService = atmToSingleDatatable($scope, datatableConfig);
 	

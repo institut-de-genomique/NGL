@@ -1,12 +1,12 @@
-@this(ctx : fr.cea.ig.play.migration.NGLContext)
-
+@this(ctx : fr.cea.ig.ngl.NGLApplication)
+@* @this(ctx : fr.cea.ig.play.migration.NGLContext) *@
 @()
 
 @import play.mvc.Http.Context
 @import controllers.authorisation.PermissionHelper
 @import views.html.helper._
 
-@barCodePrintingEnabled = @{ ctx.config().isBarCodePrintingEnabled() }
+@barCodePrintingEnabled = @{ ctx.nglConfig().isBarCodePrintingEnabled() }
 
 @formMain() = {
 	@columnSearchForm{

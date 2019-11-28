@@ -15,7 +15,7 @@ import org.mongojack.DBQuery;
 import org.mongojack.DBUpdate;
 
 import fr.cea.ig.MongoDBDAO;
-import fr.cea.ig.lfw.controllers.AbstractScript;
+import fr.cea.ig.lfw.controllers.scripts.buffered.ScriptNoArgs;
 import models.sra.submit.common.instance.Sample;
 import models.utils.InstanceConstants;
 import sra.scripts.utils.DateTools;
@@ -25,7 +25,7 @@ import sra.scripts.utils.iteration.CSVIterable;
 
 
 
-public class OriRepriseHistoSample_extId extends AbstractScript {
+public class OriRepriseHistoSample_extId extends ScriptNoArgs {
 
 	/* version 1 : on demande à play d'instancier la classe avec un objet WSClient et on instantiera 
 	un objet EbiAPI avec ws
@@ -155,7 +155,7 @@ public class OriRepriseHistoSample_extId extends AbstractScript {
 		
 	@Override
 	public LogLevel logLevel() {
-		return LogLevel.Info;
+		return LogLevel.INFO;
 	}
 	
 }

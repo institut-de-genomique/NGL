@@ -1,5 +1,5 @@
-angular.module('home').controller('TagPCRCtrl',['$scope', '$parse','$filter', 'atmToSingleDatatable','lists','mainService',
-                                                    function($scope, $parse, $filter, atmToSingleDatatable,lists,mainService){
+angular.module('home').controller('TagPCRCtrl',['$scope', '$parse','$filter', 'atmToSingleDatatable','lists','mainService','$http',
+                                                    function($scope, $parse, $filter, atmToSingleDatatable,lists,mainService,$http){
                                                     
 	var datatableConfig = {
 					name: $scope.experiment.typeCode.toUpperCase(),
@@ -248,10 +248,10 @@ angular.module('home').controller('TagPCRCtrl',['$scope', '$parse','$filter', 'a
 		var blank2;
 		var sampleCodeAvailable;
 
-		var nestedDetectionBlank1  = $filter('filter')(experiment.atomicTransfertMethods,{inputContainerUseds:{contents:{properties:{tagPcrBlank1SampleCode:{value:'CEB'}}}}});
-		var nestedDetectionBlank2  = $filter('filter')(experiment.atomicTransfertMethods,{inputContainerUseds:{contents:{properties:{tagPcrBlank2SampleCode:{value:'CEB'}}}}});
-		var nestedNonBlanck =  $filter('filter')(experiment.atomicTransfertMethods,{inputContainerUseds:{contents:{properties:{tagPcrBlank2SampleCode:{value:'!CEA'}}}}});
-		nestedNonBlanck =  $filter('filter')(nestedNonBlanck,{inputContainerUseds:{contents:{properties:{tagPcrBlank2SampleCode:{value:'!CAM'}}}}});
+		var nestedDetectionBlank1  = $filter('filter')(experiment.atomicTransfertMethods,{inputContainerUseds:{contents:{properties:{tagPcrBlank1SampleCode:{value:'CEB_'}}}}});
+		var nestedDetectionBlank2  = $filter('filter')(experiment.atomicTransfertMethods,{inputContainerUseds:{contents:{properties:{tagPcrBlank2SampleCode:{value:'CEB_'}}}}});
+		var nestedNonBlanck =  $filter('filter')(experiment.atomicTransfertMethods,{inputContainerUseds:{contents:{properties:{tagPcrBlank2SampleCode:{value:'!CEA_'}}}}});
+		nestedNonBlanck =  $filter('filter')(nestedNonBlanck,{inputContainerUseds:{contents:{properties:{tagPcrBlank2SampleCode:{value:'!CAM_'}}}}});
 		
 		var isNested = false;
 		if(nestedDetectionBlank1.length > 0 && nestedDetectionBlank2.length > 0){
@@ -264,13 +264,17 @@ angular.module('home').controller('TagPCRCtrl',['$scope', '$parse','$filter', 'a
 			return false;
 		}
 		//search atm with output with CEB as new sampleCode
-		var atmWithBlanckSamples = $filter('filter')(experiment.atomicTransfertMethods,{outputContainerUseds:{experimentProperties:{sampleCode:{value:'CEB'}}}});
+		var atmWithBlanckSamples = $filter('filter')(experiment.atomicTransfertMethods,{outputContainerUseds:{experimentProperties:{sampleCode:{value:'CEB_'}}}});
 		if(isNested){
 			//search only where input is on CEB project
 			atmWithBlanckSamples = $filter('filter')(atmWithBlanckSamples,{inputContainerUseds:{contents:{projectCode:'CEB'}}});
-			$parse("protocolCode").assign(experiment,"tag16s_full_length_16s_v4v5_fuhrman");
-			$parse("experimentProperties.amplificationPrimers.value").assign(experiment,'16S FL 27F/1492R + Fuhrman primers');
-			$parse("experimentProperties.targetedRegion.value").assign(experiment,'16S_Full Length + 16S_V4V5');
+			if(experiment.protocolCode==="metab-primer-fusion-dev"){
+				$parse("experimentProperties.targetedRegion.value").assign(experiment,'16S_Full Length + 16S_V4V5');
+			}else{
+				$parse("protocolCode").assign(experiment,"tag16s_full_length_16s_v4v5_fuhrman");
+				$parse("experimentProperties.amplificationPrimers.value").assign(experiment,'16S FL 27F/1492R + Fuhrman primers');
+				$parse("experimentProperties.targetedRegion.value").assign(experiment,'16S_Full Length + 16S_V4V5');
+			}
 			
 		}
 		
@@ -512,6 +516,8 @@ angular.module('home').controller('TagPCRCtrl',['$scope', '$parse','$filter', 'a
 			column.editTemplate='<div class="form-control" bt-select #ng-model filter="true" placeholder="'+Messages("search.placeholder.projects")+'" bt-options="project.code as project.code+\' (\'+project.name+\')\' for project in lists.getProjects()" ></div>';
 		}else if(property.code=="sampleTypeCode"){
 			column.filter="getArray:'sampleTypeCode' | unique | codes:\"type\"";
+		}else if(property.code=="secondaryTag"){
+			column.editTemplate='<input class="form-control" type="text" #ng-model typeahead="v.code as v.code for v in tags | filter:{code:$viewValue} | limitTo:20" typeahead-min-length="1" udt-change="updatePropertyFromUDT(value,col)"/>';        											
 		}
 		return column;
 	};
@@ -540,6 +546,10 @@ angular.module('home').controller('TagPCRCtrl',['$scope', '$parse','$filter', 'a
 			computeInputQuantityToContentProperties(value.data);
 			
 		}
+		
+		if(col.property === 'outputContainerUsed.experimentProperties.secondaryTag.value'){
+			computeTagCategory(value.data);			
+		}
 	}
 	
 	 var computeInputQuantityToContentProperties  = function(udtData){
@@ -566,7 +576,123 @@ angular.module('home').controller('TagPCRCtrl',['$scope', '$parse','$filter', 'a
                getter.assign(udtData, inputQtty);
            }
   }
+	 
+	 $http.get(jsRoutes.controllers.commons.api.Parameters.list().url,{params:{typeCode:"index-illumina-sequencing",categoryCode:"MID"}})
+		.success(function(data, status, headers, config) {
+				$scope.tags = data;		
+		})
 	
+		var computeTagCategory = function(udtData){
+			var getter = $parse("outputContainerUsed.experimentProperties.secondaryTagCategory.value");
+			var tagCategory = getter(udtData);
+			
+			var compute = {
+					tagValue : $parse("outputContainerUsed.experimentProperties.secondaryTag.value")(udtData),
+					tag : $filter("filter")($scope.tags,{code:$parse("outputContainerUsed.experimentProperties.secondaryTag.value")(udtData)},true),
+					isReady:function(){
+						return (this.tagValue && this.tag && this.tag.length === 1);
+					}
+				};
+			if(compute.isReady()){
+				var result = compute.tag[0].categoryCode;
+				console.log("result secondaryTagCategory = "+result);
+				if(result){
+					tagCategory = result;				
+				}else{
+					tagCategory = undefined;
+				}	
+				getter.assign(udtData, tagCategory);
+			}else{
+				getter.assign(udtData, undefined);
+			}
+			
+		}
+		
+		
+		var populateIndexLinePlate = function(prefix, startIndex, endIndex){
+		 var currentIndex = startIndex;
+
+		 var values={};
+		 var lines = ["A","B","C","D","E","F","G","H"];
+
+		 for(var i = 1 ; i <= 12; i++){
+			 var pos = currentIndex+i-1;
+				
+			 for(var j=0; j < lines.length; j++){
+				 var line = lines[j];
+				 var computePrefix = null;
+				 if(pos < 10){
+					 computePrefix = prefix+"0";
+				 }else if(pos < 100){
+					 computePrefix = prefix;
+				 }else {
+					 computePrefix = prefix;
+				 }
+				 values[line+i]=computePrefix+pos;
+			 }
+		 }
+		 return values
+	 }
+
+		var populateSpecialIndexLinePlate = function(prefix, startIndex, endIndex, excludedIndex, maxCol){
+			 var currentIndex = startIndex;
+
+			 var values={};
+			 var lines = ["A","B","C","D","E","F","G","H"];
+			 var pos=1;
+			 for(var i = 1 ; i <= maxCol; i++){
+				 while(excludedIndex.includes(pos) && pos<=endIndex){
+					 pos=pos+1;
+				 }
+					
+				 for(var j=0; j < lines.length; j++){
+					 var line = lines[j];
+					 var computePrefix = null;
+					 if(pos < 10){
+						 computePrefix = prefix+"0";
+					 }else if(pos < 100){
+						 computePrefix = prefix;
+					 }else {
+						 computePrefix = prefix;
+					 }
+					 values[line+i]=computePrefix+pos;
+				 }
+				 pos=pos+1;
+			 }
+			 return values
+		 }
+		
+		
+		
+		
+		$scope.indexPlates = [];
+		
+		$scope.indexPlates.push({label:"BID01 col.1, BID02 col.2 ... à BID12 col.12", value:populateIndexLinePlate("BID", 1, 12)});
+		$scope.indexPlates.push({label:"BID01 col.1, BID02 col.2, (exclusion BID03, 07, 10), à BID12 col.9", value:populateSpecialIndexLinePlate("BID", 1, 12, [3,7,10],9)});
+		$scope.indexPlates.push({label:"BID01 col.1, BID02 col.2, (exclusion BID03, 06, 07, 10, 12, 14), à BID18 col.12", value:populateSpecialIndexLinePlate("BID", 1, 18, [3,6,7,10,12,14],12)});
+		
+		
+		$scope.updatePlateWithIndex = function(selectedPlateIndex){
+			console.log("choose : "+selectedPlateIndex);
+			var getter = $parse("experimentProperties.secondaryTag.value");
+			var wells = atmService.data.displayResult;
+			angular.forEach(wells, function(well){
+				var outputContainerUsed = well.data.outputContainerUsed;;
+				var pos = outputContainerUsed.locationOnContainerSupport.line+outputContainerUsed.locationOnContainerSupport.column;
+				if(selectedPlateIndex){
+					var index = selectedPlateIndex[pos];
+					if(index){
+						getter.assign(outputContainerUsed,index);
+					}else{
+						getter.assign(outputContainerUsed,null);
+					}
+				}else{
+					getter.assign(outputContainerUsed,null);
+				}
+				computeTagCategory(well.data);
+										
+			})	
+		};
 	/*
 	 * Supprime la poss de remplir le champs manuellement
 	 * $scope.refreshExtractionBlankSampleTagCodeLists=function(){

@@ -12,7 +12,7 @@ import com.mongodb.BasicDBObject;
 
 import controllers.DocumentController;
 import fr.cea.ig.MongoDBDAO;
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import models.laboratory.run.instance.ReadSet;
 import models.laboratory.run.instance.SampleOnContainer;
 import models.utils.InstanceConstants;
@@ -21,20 +21,27 @@ import play.mvc.Result;
 
 /**
  * Update SampleOnContainer on ReadSet
+ * 
  * @author galbini
  *
  */
-public class MigrationUpdateSampleOnContainer extends DocumentController<ReadSet> { //CommonController {
+public class MigrationUpdateSampleOnContainer extends DocumentController<ReadSet> {
 	
 	private static final play.Logger.ALogger logger = play.Logger.of(MigrationUpdateSampleOnContainer.class);
 	
-	@Inject
-	public MigrationUpdateSampleOnContainer(NGLContext ctx) {
-		super(ctx, InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class);
-	}
 	private static SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmm");
+
+	//	@Inject
+//	public MigrationUpdateSampleOnContainer(NGLContext ctx) {
+//		super(ctx, InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class);
+//	}
 	
-	public /*static*/ Result migration(String code, Boolean onlyNull){
+	@Inject
+	public MigrationUpdateSampleOnContainer(NGLApplication app) {
+		super(app, InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class);
+	}
+	
+	public Result migration(String code, Boolean onlyNull) {
 		BasicDBObject keys = new BasicDBObject();
 		keys.put("treatments", 0);
 		logger.info("Migration sample on container start");
@@ -50,8 +57,10 @@ public class MigrationUpdateSampleOnContainer extends DocumentController<ReadSet
 		} else if (onlyNull.booleanValue()) {
 			readSets = MongoDBDAO.find(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, DBQuery.notExists("sampleOnContainer"), keys).toList();						
 		} else {
-			logger.error("code: " + code + " is not authorized");
+			String message = "code: " + code + " is not authorized"; 
+			logger.error(message);
 			//readSets = MongoDBDAO.find(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, DBQuery.exists("code"), keys).toList();
+			return internalServerError("migration failed : " + message);
 		}
 		logger.debug("migre " + readSets.size() + " readSets");
 //		if (readSets != null) {

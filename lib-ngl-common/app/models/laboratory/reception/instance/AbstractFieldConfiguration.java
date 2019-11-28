@@ -42,7 +42,14 @@ public abstract class AbstractFieldConfiguration {
 	
 	public static final String deleteFieldValue          = "A_EFFACER";
 
-	public String _type;
+	/**
+	 * Jackson class discriminator.
+	 */
+	public String  _type;
+	
+	/**
+	 * Is the input value required ? / is the field value required ?.
+	 */
 	public Boolean required = Boolean.FALSE;
 
 	public AbstractFieldConfiguration(String _type) {
@@ -55,39 +62,40 @@ public abstract class AbstractFieldConfiguration {
 	 * @param dbObject
 	 * @param rowMap
 	 * @param contextValidation
-	 * @param action TODO
+	 * @param action 
 	 */
 	// * @throws Exception
-	public abstract void populateField(Field field, 
-			                           Object dbObject,
-			                           Map<Integer, 
-			                           String> rowMap, 
-			                           ContextValidation contextValidation, 
-			                           Action action) throws Exception;
+	public abstract void populateField(Field                field, 
+			                           Object               dbObject,
+			                           Map<Integer, String> rowMap, 
+			                           ContextValidation    contextValidation, 
+			                           Action               action) throws Exception;
 
-	/*
-	 * Set value directly in object
-	 * @param field
-	 * @param dbObject
-	 * @param value
+	/**
+	 * Set field value using a value cast that depends on the field type.
+	 * Like {@link Field#set(Object, Object)} but with some transformation
+	 * of the value to fit the field type.
+	 * @param field      field to set value of
+	 * @param dbObject   object whose field is to be set
+	 * @param value      field value
+	 * @throws Exception error
 	 */
-	// * @throws Exception
 	protected void populateField(Field field, Object dbObject, Object value) throws Exception {
-		//in case of collection, we tranform single value to the good collection type
+		// in case of collection, we transform single value to the good collection type
 		if (Collection.class.isAssignableFrom(field.getType()) && !Collection.class.isAssignableFrom(value.getClass())) {
 			if (Set.class.isAssignableFrom(field.getType())) {
 				field.set(dbObject, Collections.singleton(value));
 			} else {
 				field.set(dbObject, Collections.singletonList(value));
 			}			
-		} else if(String.class.isAssignableFrom(field.getType()) && null != value) {
+		} else if (String.class.isAssignableFrom(field.getType()) && value != null) {
 			field.set(dbObject, value.toString());
-		} else if(Number.class.isAssignableFrom(field.getType()) && null != value) {
+		} else if (Number.class.isAssignableFrom(field.getType()) && value != null) {
 			if (Double.class.isAssignableFrom(field.getType())) {
 				field.set(dbObject, Double.valueOf(value.toString()));
-			} else if(Integer.class.isAssignableFrom(field.getType())) {
+			} else if (Integer.class.isAssignableFrom(field.getType())) {
 				field.set(dbObject, Integer.valueOf(value.toString()));
-			} else if(Long.class.isAssignableFrom(field.getType())) {
+			} else if (Long.class.isAssignableFrom(field.getType())) {
 				field.set(dbObject, Long.valueOf(value.toString()));
 			}
 		} else {
@@ -95,4 +103,8 @@ public abstract class AbstractFieldConfiguration {
 		}
 	}
 
+	// Reverse logic implementation (polymorphism instead of class tests) of the 
+	// AbstractFieldConfiguration header computation.
+	public abstract void updateFromHeader(ContextValidation vc, Map<Integer,String> header);
+	
 }

@@ -36,12 +36,30 @@
 
 		</div>
 			</form>-->
-		<div class="row">
-	<div class="col-md-12 col-lg-12">
-	<ul class="list-unstyled">
-	<li><u>Attention</u>,  <strong>passer par étape démarrer</strong>, <span class="label label-danger">ne pas terminer avant étape démarrer</span> pour permettre la génération des codes ech témoin</li>
-	</ul>	
+			<div class="row" ng-show="plateUtils.isPlate()" ng-if="mainService.isEditMode()">
+	<div class="col-md-4 col-lg-4">
+		<form class="form-horizontal">
+			<div class="form-group">
+				<label class="col-md-6 col-lg-6 control-label">Choisissez un
+					plan de tag 2ndaire : </label>
+				<div class="input-group col-md-6 col-lg-6">
+					<div bt-select class="form-control" ng-model="selectedPlateIndex"
+						bt-options="value as label for plate in indexPlates"
+						ng-change="updatePlateWithIndex(selectedPlateIndex)"></div>
+				</div>
+			</div>
+		</form>
 	</div>
+	</div>
+	<div class="row">
+		<div class="col-md-12 col-lg-12">
+			<ul class="list-unstyled">
+				<li><u>Attention</u>, <strong>passer par étape
+						démarrer</strong>, <span class="label label-danger">ne pas terminer
+						avant étape démarrer</span> pour permettre la génération des codes ech
+					témoin</li>
+			</ul>
+		</div>
 	</div>
 
 	@views.html.experiments.onetoone.defaults.partials.udtAndPlateDesign()

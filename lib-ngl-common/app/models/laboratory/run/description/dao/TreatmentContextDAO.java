@@ -1,5 +1,9 @@
 package models.laboratory.run.description.dao;
 
+import static models.utils.dao.DAOException.daoAssertNotNull;
+
+import java.util.List;
+
 import org.springframework.stereotype.Repository;
 
 import models.laboratory.run.description.TreatmentContext;
@@ -12,7 +16,6 @@ public class TreatmentContextDAO extends AbstractDAODefault<TreatmentContext> {
 	protected TreatmentContextDAO() {
 		super("treatment_context",TreatmentContext.class,true);
 	}
-	
 		
 	@SuppressWarnings("deprecation")
 	private void removeTreatmentTypesContexts(Long id) {
@@ -22,12 +25,19 @@ public class TreatmentContextDAO extends AbstractDAODefault<TreatmentContext> {
 	
 	@Override
 	public void remove(TreatmentContext treatmentContext) throws DAOException {
-		if(null == treatmentContext){
-			throw new IllegalArgumentException("treatmentContext is null");
-		}
+//		if(null == treatmentContext){
+//			throw new IllegalArgumentException("treatmentContext is null");
+//		}
+		daoAssertNotNull("treatmentContext",treatmentContext);
+		
 		removeTreatmentTypesContexts(treatmentContext.id);
 		//Remove treatmentContext
 		super.remove(treatmentContext);
+	}
+
+	@Override
+	protected List<String> getColumns() {
+		return enumColumns;
 	}
 
 }

@@ -18,7 +18,7 @@ public class AuthenticatorRead extends AbstractSimpleAuthenticator {
 
 	@Override
 	public CompletionStage<Result> authenticate(Context context, Action<?> delegate) {
-		Authentication.authenticateSession(context.session(), Identity.Admin.toString());
+		Authentication.authenticateSession(context.session(), Identity.Read.toString());
 		return delegate.call(context);
 	}
 

@@ -15,7 +15,6 @@ import controllers.instruments.io.cns.brandlhs.tpl.txt.normalisation_x_to_plate_
 import controllers.instruments.io.utils.AbstractOutput;
 import controllers.instruments.io.utils.File;
 import controllers.instruments.io.utils.OutputHelper;
-// import play.Logger;
 import models.laboratory.experiment.instance.AtomicTransfertMethod;
 import models.laboratory.experiment.instance.Experiment;
 import models.laboratory.experiment.instance.InputContainerUsed;
@@ -34,7 +33,7 @@ public class Output extends AbstractOutput {
 	private String name2 = "pipette_P200";
 	
 	@Override
-	public File generateFile(Experiment experiment,ContextValidation contextValidation) throws Exception {
+	public File generateFile(Experiment experiment, ContextValidation contextValidation) throws Exception {
 		String type = (String)contextValidation.getObject("type");
 
 		String adnContent    = null;

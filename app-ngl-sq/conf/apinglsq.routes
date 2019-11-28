@@ -4,11 +4,12 @@ GET		/api/samples/:code												controllers.samples.api.Samples.get(code: jav
 POST	/api/samples													controllers.samples.api.Samples.save()
 PUT		/api/samples/:code												controllers.samples.api.Samples.update(code:java.lang.String)
 
+GET		/api/import-types												controllers.samples.api.ImportTypes.list()
 
 #supports api	
 GET		/api/supports													controllers.containers.api.ContainerSupports.list()
 GET		/api/supports/:code												controllers.containers.api.ContainerSupports.get(code:java.lang.String)
-PUT     /api/supports/:code                                             controllers.containers.api.ContainerSupports.update(code:java.lang.String)
+PUT		/api/supports/:code												controllers.containers.api.ContainerSupports.update(code:java.lang.String)
 HEAD	/api/supports/:code												controllers.containers.api.ContainerSupports.head(code:java.lang.String)
 PUT		/api/supports/batch/state										controllers.containers.api.ContainerSupports.updateStateBatch()
 PUT		/api/supports/:code/state										controllers.containers.api.ContainerSupports.updateState(code:java.lang.String)
@@ -30,7 +31,7 @@ GET		/api/container-categories										controllers.containers.api.ContainerCate
 #processes api
 GET		/api/processes													controllers.processes.api.Processes.list()
 GET		/api/processes/:code											controllers.processes.api.Processes.get(code:java.lang.String)
-HEAD	/api/processes/:code               								controllers.processes.api.Processes.head(code: java.lang.String)
+HEAD	/api/processes/:code											controllers.processes.api.Processes.head(code: java.lang.String)
 POST	/api/processes/:from											controllers.processes.api.Processes.save(from: java.lang.String)
 POST	/api/processes/:from/batch										controllers.processes.api.Processes.saveBatch(from: java.lang.String)
 PUT		/api/processes/batch											controllers.processes.api.Processes.updateBatch()
@@ -56,11 +57,9 @@ POST	/api/experiments/:code/comments									controllers.experiments.api.Experim
 PUT		/api/experiments/:code/comments/:commentCode					controllers.experiments.api.ExperimentComments.update(code:java.lang.String, commentCode:java.lang.String)
 DELETE	/api/experiments/:code/comments/:commentCode					controllers.experiments.api.ExperimentComments.delete(code:java.lang.String, commentCode:java.lang.String)
 
-
-GET	/api/experiments/:code/file/generation							controllers.instruments.io.IO.generateFile(code:java.lang.String)
+GET	    /api/experiments/:code/file/generation							controllers.instruments.io.IO.generateFile(code:java.lang.String)
 #FDS 25/10/2017 ajout extraInstrument:java
 POST	/api/experiments/:code/file/import								controllers.instruments.io.IO.importFile(code:java.lang.String, extraInstrument:java.lang.String ?= "")
-
 
 GET		/api/experiment-categories										controllers.experiments.api.ExperimentCategories.list()
 GET		/api/experiment-types											controllers.experiments.api.ExperimentTypes.list()
@@ -76,6 +75,7 @@ GET		/api/reagents													controllers.experiments.api.ExperimentReagents.li
 #protocols api
 GET		/api/protocols													controllers.protocols.api.Protocols.list()
 
-
+#tags api
 GET		/api/printing/tags												controllers.printing.api.Tags.list()
 POST	/api/printing/tags/print										controllers.printing.api.Tags.print()
+
