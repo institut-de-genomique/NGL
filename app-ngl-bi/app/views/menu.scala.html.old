@@ -1,0 +1,150 @@
+
+@this(ctx : fr.cea.ig.play.NGLContext)
+
+@(nav: String = "")
+
+@import play.mvc.Http.Context
+@import play.api.Play
+@import controllers.authorisation.PermissionHelper
+
+@user = @{ ctx.currentUser() }
+@writePermission = @{ PermissionHelper.checkPermission(user, "writing") }
+@adminPermission = @{ PermissionHelper.checkPermission(user, "admin") }
+@always          = @{ true }
+
+<!-- this should be extracted to twirl files --> 
+
+@ddmenu(name : String,  message : String)(entries : Html) = {
+  <li class="dropdown @("active".when(nav.startsWith(name)))">
+	<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" id="process">
+	  @Messages(message)
+	  <b class="caret"></b>
+	</a>
+	<ul class="dropdown-menu" role="menu" aria-labelledby="process">
+	  @entries
+	</ul>					
+  </li>
+}
+
+@ddentry(key : String, route : play.api.mvc.Call, message : String) = {
+  <li class="@("active".when(nav==key))">
+	<a href="@route">
+	  @Messages(message)
+	</a>
+  </li>
+}
+
+@ddme(enabled : Boolean, key : String, route : play.api.mvc.Call, message : String) = @{
+  if (enabled)
+    ddentry(key,route,message);
+}
+
+<!-- end of should be extracted stuff -->
+
+
+  <!-- Navbar
+    ================================================== -->
+		
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+	<div class="container-fluid">
+		<div class="navbar-header">
+			<a class="navbar-brand" href="@controllers.main.tpl.routes.Main.home()">@ctx.messageEnv("application.name") @helper.version()</a>
+    	</div>
+
+    	<div class="collapse navbar-collapse">
+    		<ul class="nav navbar-nav">
+    			@if(writePermission){
+					<li class="dropdown @("active".when(nav.endsWith("valuation")))">
+						<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" id="valuation">@Messages("valuation.menu")<b class="caret"></b></a>
+						<ul class="dropdown-menu" role="menu" aria-labelledby="valuation">
+							<li class="@("active".when(nav == "runs.valuation"))"><a href="@controllers.runs.tpl.routes.Runs.home("valuation")">@Messages("valuation.menu.runs")</a></li>																				
+							<li class="@("active".when(nav == "readsets.valuation"))"><a href="@controllers.readsets.tpl.routes.ReadSets.home("valuation")">@Messages("valuation.menu.readsets")</a></li>
+							<li class="@("active".when(nav == "analyses.valuation"))"><a href="@controllers.analyses.tpl.routes.Analyses.home("valuation")">@Messages("valuation.menu.analyses")</a></li>														
+						</ul>
+					</li>
+				}
+									
+				<li class="dropdown @("active".when(nav.startsWith("runs")))">
+					<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" id="runs">@Messages("runs.menu")<b class="caret"></b></a>
+					<ul class="dropdown-menu" role="menu" aria-labelledby="runs">
+						<li class="@("active".when(nav == "runs.search"))"><a href="@controllers.runs.tpl.routes.Runs.home("search")">@Messages("runs.menu.search")</a></li>																				
+						@if(writePermission){
+							<li class="@("active".when(nav == "runs.valuation"))"><a href="@controllers.runs.tpl.routes.Runs.home("valuation")">@Messages("runs.menu.valuation")</a></li>																												
+							<li class="@("active".when(nav == "runs.state"))"><a href="@controllers.runs.tpl.routes.Runs.home("state")">@Messages("runs.menu.state")</a></li>
+						}
+					</ul>
+				</li>
+				
+	  			<li class="dropdown @("active".when(nav.startsWith("readsets")))">
+					<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" id="readsets">@Messages("readsets.menu")<b class="caret"></b></a>
+					<ul class="dropdown-menu" role="menu" aria-labelledby="readsets">
+						<li class="@("active".when(nav == "readsets.search"))"><a href="@controllers.readsets.tpl.routes.ReadSets.home("search")">@Messages("readsets.menu.search")</a></li>																				
+						@if(writePermission){	
+							<li class="@("active".when(nav == "readsets.valuation"))"><a href="@controllers.readsets.tpl.routes.ReadSets.home("valuation")">@Messages("readsets.menu.valuation")</a></li>	
+							<li class="@("active".when(nav == "readsets.state"))"><a href="@controllers.readsets.tpl.routes.ReadSets.home("state")">@Messages("readsets.menu.state")</a></li>
+							<li class="@("active".when(nav == "readsets.batch"))"><a href="@controllers.readsets.tpl.routes.ReadSets.home("batch")">@Messages("readsets.menu.batch")</a></li>
+						}
+					</ul>
+				</li>
+		
+				<li class="dropdown @("active".when(nav.startsWith("analyses")))">
+					<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" id="readsets">@Messages("analyses.menu")<b class="caret"></b></a>
+					<ul class="dropdown-menu" role="menu" aria-labelledby="readsets">
+						<li class="@("active".when(nav == "analyses.search"))"><a href="@controllers.analyses.tpl.routes.Analyses.home("search")">@Messages("analyses.menu.search")</a></li>																				
+						@if(writePermission){
+							<li class="@("active".when(nav == "analyses.valuation"))"><a href="@controllers.analyses.tpl.routes.Analyses.home("valuation")">@Messages("analyses.menu.valuation")</a></li>	
+							<li class="@("active".when(nav == "analyses.state"))"><a href="@controllers.analyses.tpl.routes.Analyses.home("state")">@Messages("analyses.menu.state")</a></li>
+						}
+					</ul>
+				</li>
+				
+				<li class="dropdown @("active".when(nav.startsWith("stats")))">
+					<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" id="readsets">@Messages("stats.menu")<b class="caret"></b></a>
+					<ul class="dropdown-menu" role="menu" aria-labelledby="readsets">
+						<li class="@("active".when(nav == "stats.readsets"))"><a href="@controllers.stats.tpl.routes.Stats.home("readsets")">@Messages("stats.menu.readsets")</a></li>																				
+					</ul>
+				</li>
+				
+				<li class="@("active".when(nav == "archives.search"))">
+					<a href="@controllers.archives.tpl.routes.ReadSets.home("search")">@Messages("archives.menu")</a>
+				</li>	
+				
+				<li class="dropdown @("active".when(nav.startsWith("balance")))">
+					<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" id="readsets">@Messages("balanceSheets.menu")<b class="caret"></b></a>
+					<ul class="dropdown-menu" role="menu" aria-labelledby="readsets">
+						<li class="@("active".when(nav == "balanceSheets.illumina"))"><a href="@controllers.balancesheets.tpl.routes.BalanceSheets.home("rsillumina","general")">@Messages("balanceSheets.menu.illumina")</a></li>
+						<li class="@("active".when(nav == "balanceSheets.nanopore"))"><a href="@controllers.balancesheets.tpl.routes.BalanceSheets.home("rsnanopore","general")">@Messages("balanceSheets.menu.nanopore")</a></li>																				
+					</ul>
+				</li>
+									
+				<li class="@("active".when(nav.startsWith("help")))">
+					<a href="@routes.Assets.at("ngl-bi/documentation/DOC_UTILISATEUR.pdf")" target="doc">@Messages("docs.menu")</a>
+				</li>
+				
+				@if(adminPermission){
+					<li class="dropdown @("active".when(nav.startsWith("admin")))">
+						<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" id="admin"><i class="fa fa-users"></i> @Messages("authorisation.menu")<b class="caret"></b></a>
+						<ul class="dropdown-menu" role="menu" aria-labelledby="users">
+							<li class="@("active".when(nav == "admin.search"))"><a href="@controllers.authorisation.tpl.routes.Users.home("search")">@Messages("authorisation.menu.userroles")</a></li>
+						</ul>
+					</li>
+				} 
+				<!-- 	<li><a href="#">@PermissionHelper.checkPermission(Context.current().request().username(), "admin")</a></li>	-->
+				
+								
+			</ul>
+
+			<ul class="nav navbar-nav navbar-right">
+				<li>
+				<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" id="user">
+				<i class="fa fa-user"></i> @user <b class="caret"></b></a>
+				<ul class="dropdown-menu" role="menu" aria-labelledby="user">
+						<li><a href="/authentication/logout">@Messages("authentification.dropdown_list.signout")</a></li>
+				</ul>
+				</li>				
+			</ul>
+		</div>
+	</div>		
+</nav>
+
+

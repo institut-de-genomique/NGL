@@ -1,0 +1,236 @@
+ @(dataForm: Form[controllers.utils.DataTableForm], tableForm: Form[models.administration.authorisation.User])
+@import helper._
+@import models.administration.authorisation.User
+@implicitField = @{ FieldConstructor(helper.tbformvertical.f) }
+
+@searchForm(handler: FieldConstructor) = {
+	
+	@helper.form(action = controllers.administration.authorisation.routes.Users.list(), args = 'class -> "well form-search") {		
+		
+				@helper.tbInputText(
+				field = dataForm("search_1"), 
+                args = 'placeholder -> "Firstname",
+                'class -> "search-query",
+                '_label -> "Firstname"  
+            )(handler = handler)
+            
+            	@helper.tbInputText(
+				field = dataForm("search_2"), 
+                args = 'placeholder -> "Lastname",
+                'class -> "search-query",
+                '_label -> "Lastname"  
+            )(handler = handler)
+            
+            	@helper.tbInputText(
+				field = dataForm("search_3"), 
+                args = 'placeholder -> "Login",
+                'class -> "search-query",
+                '_label -> "Login"  
+            )(handler = handler)
+            
+            	@helper.tbInputText(
+				field = dataForm("search_4"), 
+                args = 'placeholder -> "Email",
+                'class -> "search-query",
+                '_label -> "Email"  
+            )(handler = handler)
+                          				
+	}
+} 
+
+@scripts(handler: FieldConstructor, lang : Lang = implicitly[Lang]) = {
+  <script type="text/javascript">
+$(document).ready( function () {
+    var myDatatable = $('#table_id').dataTable({
+         "sDom":"Trti",
+         "sPaginationType": "bootstrap",
+    	 "bFilter": true,
+    	 "bDeferRender": true,
+    	 "bLengthChange": false,    	 
+         "bProcessing": true,
+         "bServerSide": true,
+         "sAjaxSource": "@controllers.administration.authorisation.routes.Users.list()",
+         "sServerMethod": "GET",
+         "aoColumnDefs": [
+                  { "sTitle": "#ID", "mData": "id","aTargets": [ 0 ] },
+                  { "sTitle": "Firstname", "mData": "firstname","aTargets": [ 1 ],
+                  "mRender": function ( data, type, full ) {if(type==='edit'){return getEdit("edit1",data);}else{return data;}}},
+                  { "sTitle": "Lastname", "mData": "lastname","aTargets": [ 2 ], 
+                	  "mRender": function ( data, type, full ) {if(type==='edit'){return getEdit("edit2",data);}else{return data;}}},
+                	  { "sTitle": "Login", "mData": "login","aTargets": [ 3 ], 
+                	  "mRender": function ( data, type, full ) {if(type==='edit'){return getEdit("edit3",data);}else{return data;}}},
+                	  { "sTitle": "Email", "mData": "email","aTargets": [ 4 ], 
+                    	  "mRender": function ( data, type, full ) {if(type==='edit'){return getEdit("edit4",data);}else{return data;}}}
+         ],
+         "oTableTools": {	
+        	"sRowSelect": "multi",
+        	"sSelectedClass": "row_selected",
+        	"aButtons": [
+							{
+								 "sExtends":    "btngroup",
+								 "aButtons":    [
+									{
+									    "sExtends":    "text",
+									    "sButtonText": "New",
+									    "sButtonClass" : "btn-primary",			                    
+									    "fnClick": function ( nButton, oConfig, oFlash ) {
+									    	if($('#newelt').length == 0){
+									        	//see ngl.js to see the custom tab event
+									            $('#searchTab').append('<li><a id="newelt" href="#" data-toggle="pilldyn" data-target="#newelement" data-href="@controllers.administration.authorisation.routes.Users.add()">New<button class="close" data-dismiss="pilldyn">&times;</button></a></li>');					                    		
+									        }	
+									    	$('#newelt').click();
+									    }
+									},
+									{
+									    "sExtends":    "text",
+									    "sButtonText": "Show",
+									    "sButtonClass" : "btn-primary",			                    
+									    "fnClick": function ( nButton, oConfig, oFlash ) {
+									    	var oTT = TableTools.fnGetInstance( 'table_id' );
+									    	var aDatas = oTT.fnGetSelectedData();
+									    	if(aDatas){
+									        	for(var i = 0; i < aDatas.length; i++){	
+									        	    var aData = aDatas[i];
+									        	    var id = 'dyn_'+aData.id + '_id';
+									        		if($('#'+id).length == 0){
+									        			//see ngl.js to see the custom tab event
+									        			var url = jsRoutes.controllers.administration.authorisation.Users.show(aData.id).url;
+									            	    $('#searchTab').append('<li><a id="'+id+'" href="#" data-toggle="pilldyn" data-target="#onelement" data-href="'+url+'">'+aData.login+'<button class="close" data-dismiss="pilldyn">&times;</button></a></li>');					                    		
+									        		}
+									        	}
+									        	if(aDatas.length == 1){
+									        		var id = 'dyn_'+aDatas[0].id + '_id';
+									        		$('#'+id).click();
+									        	}
+									    	}			                    				                    			                    
+									    }
+									}
+								]
+							}			                
+			                ,
+			                {
+			                    "sExtends":    "btngroup",
+			                    "sButtonText": "Edit",
+			                    "sDropdown":	true,
+			                    "mainButton":	"edit",
+			                    "aButtons":	[{
+			                    	"sExtends":    "edit",
+			                    	"aTargets": 1, 
+			                    	"sButtonText":  "Firstname",
+			                    	"mRender": function ( data, type ) {if(type==='edit'){return getEdit("edit1",data);}else{return data;}}
+			                   	 	},
+			                   	 	{
+				                    	"sExtends":    "edit",
+				                    	"aTargets": 2, 
+				                    	"sButtonText":  "Lastname",
+				                    	"mRender": function ( data, type ) {if(type==='edit'){return getEdit("edit2",data);}else{return data;}}
+				                   	 	},
+				                   	 {
+					                    	"sExtends":    "edit",
+					                    	"aTargets": 3, 
+					                    	"sButtonText":  "Login",
+					                    	"mRender": function ( data, type ) {if(type==='edit'){return getEdit("edit3",data);}else{return data;}}
+				                   	 },
+				                   	{
+					                    	"sExtends":    "edit",
+					                    	"aTargets": 4, 
+					                    	"sButtonText":  "Email",
+					                    	"mRender": function ( data, type ) {if(type==='edit'){return getEdit("edit4",data);}else{return data;}}
+					                   	 	}	   
+			                    ]
+			                    
+			                },
+			                {
+		                		 "sExtends":    "refresh"
+			                }
+			                ,
+			                {
+			                	 "sExtends":    "btngroup",
+			                	 "aButtons":    [ {
+			                		 "sExtends":    "save",
+			                		 "playJSRoute":jsRoutes.controllers.administration.authorisation.Users.createOrUpdate("json")
+			                		 },
+			                		 "cancel","select_all" ]
+			                },
+							    {
+				                		 "sExtends":    "remove",
+				                		 "textModal":"test",
+				                		 "playJSRoute":jsRoutes.controllers.administration.authorisation.Users.remove()
+				                }
+				            
+							    
+			            ]
+		            	 
+        }
+    });
+
+    $("#search_1").keyup( function () {
+        myDatatable.fnFilter( $(this).val(), 1 );
+        
+    } );
+    
+    $("#search_2").keyup( function () {
+        myDatatable.fnFilter( $(this).val(), 2 );
+        
+    } );
+    
+    $("#search_3").keyup( function () {
+        myDatatable.fnFilter( $(this).val(), 3 );
+        
+    } );
+    
+    $("#search_4").keyup( function () {
+        myDatatable.fnFilter( $(this).val(), 4 );
+        
+    } );
+    $("#searchTab").click(function() {
+    	myDatatable.fnClearTable(0);
+    	myDatatable.fnDraw();
+	});
+    
+    
+    function getEdit(id, value){
+    	var html = $($('#'+id).html()).clone();
+    	if(html.children("input, select").size() > 0){
+    		html.children("input, select").val(value);
+    	}else{
+    		html.val(value);
+    	}
+    	return html;
+    }
+   
+    
+    //myDatatable.dataTablEditable();
+    
+} );
+
+
+</script>
+<script type="text/html" id="edit1">
+<div class="control-group control-group-datatable">
+@helper.inputText(field = dataForm("firstname"), 'class -> "input-medium")(handler = handler, lang)
+</div>
+</script>
+<script type="text/html" id="edit2">
+<div class="control-group control-group-datatable">
+@helper.inputText(field = dataForm("lastname"), 'class -> "input-medium")(handler = handler, lang)
+</div>
+</script>
+<script type="text/html" id="edit3">
+<div class="control-group control-group-datatable">
+@helper.inputText(field = dataForm("login"), 'class -> "input-medium")(handler = handler, lang)
+</div>
+</script>
+<script type="text/html" id="edit4">
+<div class="control-group control-group-datatable">
+@helper.inputText(field = dataForm("email"), 'class -> "input-medium")(handler = handler, lang)
+</div>
+</script>
+}
+
+@search("Admin users", "users", scripts(implicitField))(searchForm(implicitField)){
+	<form class="form-inline">
+		<table id="table_id" class="table table-bordered table-condensed table-hover"></table>   
+	</form> 
+}
+

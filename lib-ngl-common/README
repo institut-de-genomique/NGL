@@ -1,0 +1,6 @@
+
+Migration to 2.5
+
+https://www.playframework.com/documentation/2.6.x/JavaBodyParsers#content-length-limits
+Temporary fix is remove the maxLength in BodyParser annotations and to set application wide limits using conf file.
+The other way around is build a specific maxlength json parser class.

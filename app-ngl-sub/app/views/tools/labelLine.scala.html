@@ -1,0 +1,5 @@
+@(field: String)
+
+@views.html.helper.columnLabelValue(Messages(field)){
+  <p class="form-control-static" ng-bind="@{field}.code|codes:'state'" ></p>
+}

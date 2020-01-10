@@ -1,0 +1,1 @@
+GET		/api/experiment-types											controllers.experiments.api.ExperimentTypes.list()

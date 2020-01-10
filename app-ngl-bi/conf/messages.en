@@ -1,0 +1,78 @@
+#application
+application.name=NGL-BI
+home.title.name=Welcome to NGL-BI
+
+#home page main
+home.h10.header=Welcome to NGL - Bio Informatics
+home.p.comment=This a simple and flexible LIMS for next-generation sequencing.
+home.a.comment=Learn more...
+
+#authentification
+authentification.dropdown_list.username=Username
+authentification.dropdown_list.profile=Profile
+authentification.dropdown_list.signout=Sign Out
+
+#page title
+runs.page.title=Runs
+run.legend.title=Run
+archives.page.title=Archives
+
+#menu
+menu.runs.search = Runs
+menu.archives.search = Archives
+runs.menu.search = Search
+## dno, from my personal point of view, must be removed, but, to have the same comportement as before, i prefer put it
+archives.menu.search = Search
+
+#run - main
+runs.table.code=Code
+runs.table.creationdate=Creation date
+runs.table.dispatch=Dispatch
+runs.dt.nb_cluster_total=Cluster total
+runs.dt.nb_cluster_illumina=Illumina filter cluster
+runs.dt.nb_bases_en_gb=Number of Bases (Gb)
+runs.dt.lanes=Lanes
+runs.dt.readsets=Read Sets
+
+#runs - detail
+runs.table.lanes_number=Lane Number
+runs.table.readset_number=Read Set Number
+runs.table.lost_pct=Lost (%)
+
+runs.table.lane_number=Lane Number
+runs.table.readset_code=Read Set Code
+runs.table.sample_container_code=Sample Container Code
+runs.table.project_code=Project Code
+runs.table.iaifc=Internal And Illumina Filter Cluster
+runs.table.iaifb=Internal And Illumina Filter Base (Gb)
+runs.table.q30=Q30
+
+#archives filter value
+archives.input_radio.0 = All
+archives.input_radio.1 = Backed Up
+archives.input_radio.2 = Non Backed Up
+
+#archives - datatable
+archives.table.runcode=Run Code
+archives.table.projectcode=Project Code
+archives.table.readsetcode=Read Set Code
+archives.table.path=Path
+archives.table.date=Backup Date
+archives.table.backupid=Backup Id
+
+#propertiesDefinition
+property.nbRead.label=Nb Read
+property.asciiEncoding.label=ASCII Encoding
+property.label.label=Label
+
+date.format=MM/dd/yyyy
+
+
+
+
+
+
+
+
+
+

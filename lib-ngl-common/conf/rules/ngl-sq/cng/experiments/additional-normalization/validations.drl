@@ -1,0 +1,42 @@
+package rules
+
+// 19/07/2017 Copie de lib-normalization...vérification du volume de sortie des containers additional-normalization
+// NOTE: il faut passer par drools pour les verification sur les attributs
+rule "Volume not null in additional-normalization outputContainer"
+    @nglSQ( validations )
+	dialect "java"
+	salience 940
+	no-loop
+    when
+    	$experiment:Experiment($typeCode:typeCode,$typeCode=="additional-normalization")
+    	State($stateCode:code=="IP")
+		$atomicTransfert: OneToOneContainer($inputContainerUsed:inputContainerUseds.get(0), $outputContainerUsed: outputContainerUseds.get(0))
+	   	OutputContainerUsed($outputVolume: volume) from $outputContainerUsed
+    	$contextValidation:ContextValidation()
+    	// volume 0 est autorisé...
+    	eval($outputVolume == null || $outputVolume.value == null || $outputVolume.value == "")
+    then
+    	Logger.debug("Volume not null in additional-normalization outputContainer");   
+    	// voir fichier ngl-common/conf/messages pour le libellé des erreurs
+   		$contextValidation.addErrors("additional-normalization","error.validationexp.outputvolumenotnull", $outputContainerUsed.code);
+end
+
+// 19/07/2017 Copie de lib-normalization...vérifier aussi la concentration de sortie !!!
+rule "Concentration not null in additional-normalization outputContainer"
+    @nglSQ( validations )
+	dialect "java"
+	salience 940
+	no-loop
+    when
+    	$experiment:Experiment($typeCode:typeCode,$typeCode=="additional-normalization")
+    	State($stateCode:code=="IP")
+		$atomicTransfert: OneToOneContainer($outputContainerUsed: outputContainerUseds.get(0))
+	   	OutputContainerUsed($outputConcentration: concentration) from $outputContainerUsed
+    	$contextValidation:ContextValidation()
+    	// concentration 0 est autorisé ??????
+    	eval($outputConcentration == null || $outputConcentration.value == null || $outputConcentration.value == "")
+    then
+    	Logger.debug("Concentration not null in additional-normalization outputContainer");   
+    	// voir fichier  ngl-common/conf/messages pour le libellé des erreurs
+   		$contextValidation.addErrors("additional-normalization","error.validationexp.outputconcentrationnotnull", $outputContainerUsed.code);
+end

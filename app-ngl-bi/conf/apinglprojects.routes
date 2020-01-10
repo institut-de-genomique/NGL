@@ -1,0 +1,4 @@
+#projects
+GET		/api/projects								controllers.projects.api.Projects.list()
+GET		/api/projects/:code							controllers.projects.api.Projects.get(code: java.lang.String)
+GET		/api/projects/bionformaticsParameters		controllers.projects.api.ProjectBioinformaticParameters.list()

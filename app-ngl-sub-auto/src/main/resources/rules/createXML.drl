@@ -1,0 +1,119 @@
+#created on: Jul 7, 2014
+package birds
+
+rule "get input submissionZip resources from NGL and internal referential for create XML"
+@BirdsRule ( selectionRule )
+dialect 'java'
+ salience 200
+ //no-loop
+	when
+		$input : InputSpecificationElement(name=="inputXMLSubZip", treatmentSpecification.name=="createXML", project.name == "SRA")
+		$resourcesReferential : InternalReferential(name=="internalRefSubmission")
+		$referentialDevice : InternalReferentialDevice ()
+		$rps : ResourcePropertiesSet(initialized==false, inputSpecificationElement==$input, resourcesReferential==$resourcesReferential)
+		$groupJob : Job( treatmentSpecification.specificationGroup == true)
+	then
+        Logger log = Logger.getLogger("ngl.sub.rules");
+        log.debug("group internal referential device resources query from referential " + $resourcesReferential.getName());
+        $rps.initialize();
+        log.debug("Get data first from NGLSUB");
+        Set<ResourceProperties> resourceProperties = new HashSet<ResourceProperties>();
+        
+        JobResource groupJobResource = $groupJob.getUniqueJobResource("subData");
+        
+        JSONDevice jsonDevice = new JSONDevice();
+		Set<ResourceProperties> rpsRawData = jsonDevice.httpGetJSON(ProjectProperties.getProperty("server")+"/api/sra/experiments/rawDatas?submissionCode="+groupJobResource.getProperty("code"),"bot");
+		boolean gzipForSubmission = SRAFilesUtil.checkGzipForSubmission(rpsRawData);
+		if(!gzipForSubmission){
+			ResourceProperties newRp = new ResourceProperties();
+			newRp.setProperty("code",groupJobResource.getProperty("code"));
+			newRp.setProperty("gzipForSubmission","false");
+			newRp.setProperty("submissionDirectory",groupJobResource.getProperty("submissionDirectory"));
+			newRp.setProperty("experimentCodes",groupJobResource.getProperty("experimentCodes").replaceAll("\"",""));
+			resourceProperties.add(newRp);
+		}else{
+        	Set<ResourceProperties> rpZips = $referentialDevice.getResourcesWithType($rps.getResourceType().getName(), $resourcesReferential);
+        	//Check submissionCode
+        	for(ResourceProperties rpZip : rpZips){
+        		if(rpZip.getProperty("code").equals(groupJobResource.getProperty("code")))
+        			resourceProperties.add(rpZip);
+        	}
+        	
+		}
+		$rps.setResourcePropertiesSet(resourceProperties);
+		modify($rps) {};
+end
+
+rule "Define variable lineParmeter for createXML specification"
+	@BirdsRule(ExecutionService)
+	dialect 'java'
+	salience 300
+	no-loop
+    when
+       $executionService : ExecutionService( status == ExecutionService.PRE_JOB_EXECUTION_STATUS)
+       $job : Job( treatmentSpecification!=null, treatmentSpecification.name == "createXML", treatmentSpecification.project.name == "SRA" )
+    then
+       Logger log = Logger.getLogger("ngl.sub.rules");
+       log.debug("Set code in url for spec createXML");
+       $job.setUnixCommand($job.getUnixCommand().replace("%code%", $job.getUniqueJobResource("subToXML").getProperty("code")));
+       log.debug("Unix command "+$job.getUnixCommand());
+       log.debug("Code "+$job.getUniqueJobResource("subToXML").getProperty("code"));
+end
+
+rule "create xml file for submission"
+    @BirdsRule( ExecutionService )
+    salience 500
+	dialect 'java'
+	no-loop 
+	when
+	    $executionService : ExecutionService( status == ExecutionService.JOB_PROCESSING_STATUS, caught==false )
+	    $job : Job( treatmentSpecification!=null, treatmentSpecification.name == "createXML" )
+	then
+	    Logger log = Logger.getLogger("ngl.sub.rules");
+	   	log.debug("Call create xml for submission");
+	    JobResource jobResource = $job.getUniqueJobResource("subToXML");
+	    String codeSubmission = jobResource.getProperty("code");
+	    String submissionDirectory = jobResource.getProperty("submissionDirectory");
+	    String studyCode = jobResource.getProperty("studyCode");
+	    String sampleCodes = jobResource.getProperty("sampleCodes");
+	    String experimentCodes = jobResource.getProperty("experimentCodes");
+	    String runCodes = jobResource.getProperty("runCodes");
+	     log.debug("Call createXML with "+codeSubmission+"/"+submissionDirectory+"/"+studyCode);
+	     try{
+	    	SubmissionServicesFactory.getInstance().createXMLSubmission(codeSubmission, submissionDirectory,studyCode,sampleCodes,experimentCodes,runCodes);
+	    }catch(Exception e){
+	    	e.printStackTrace();
+	    	//Set job in error to send email in rules post execution ERROR
+	    	$job.setExecutionState(Job.ERROR_STATUS);
+	    	$job.setProperty("Exception",e.getMessage());
+	    }
+end
+
+
+
+rule "add submissionXML resources in internalRefSubmission_xml to fire sendXML"
+	@BirdsRule( addResources ) 
+	dialect 'java'
+	salience 200
+	when
+		$flag : Flag ( done == false ) 
+		$output : OutputSpecificationElement(treatmentSpecification.name == "createXML")
+	  	$referential : ResourcesReferential ( name == "internalRefSubmissionXML" )
+		$resourceSet : ResourceSet( ioSpecificationElement == $output )
+		$job : Job(treatmentSpecification!=null, treatmentSpecification.name == "createXML")
+	then
+		Logger log = Logger.getLogger("ngl.sub.rules");
+		log.debug("Add resources rules for sendXML from file "+$job.getProperty(Job.STDOUT));
+		//Get submission 
+		JobResource jobResource = $job.getUniqueJobResource("subToXML");
+		String codeSubmission  = jobResource.getProperty("code");
+		JSONDevice jsonDevice = new JSONDevice();
+		Set<ResourceProperties> resourcePropertiesSet = jsonDevice.httpGetJSON(ProjectProperties.getProperty("server")+"/api/sra/submissions/"+codeSubmission, "bot");
+		for(ResourceProperties rp : resourcePropertiesSet){
+			JobResource outputResource = $resourceSet.createJobResource($output.getResourceType(),$referential.getName());
+	   		outputResource.setResourceProperties(rp);
+		}
+		$flag.setDone(true);
+		modify($flag){};
+		modify($resourceSet){};
+end

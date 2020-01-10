@@ -1,0 +1,47 @@
+@this()
+@()
+
+@import views.html.helper._
+
+<div class="row"> 
+<div class="col-md-12 col-lg-12" >
+<form class="well well-small">
+		<div class="row">
+		
+		@columnSearchForm{
+			@formGroup{
+					<div  class="form-control" bt-select ng-model="statsConfigService.select.properties" multiple="true" placeholder="@Messages("search.placeholder.property")" bt-options="type.header as type.header for type in statsConfigService.getStatColumns()"></div>			
+			}
+		}
+		@columnSearchForm{
+			@formGroup{
+				<div  class="form-control" bt-select ng-model="statsConfigService.select.typeCode" placeholder="@Messages("search.placeholder.type")" bt-options="type.code as type.name for type in statsConfigService.getStatsTypes()"></div>			
+			}
+		}		
+		@columnSearchForm{
+			@formGroup{
+			<div class="btn-toolbar">
+				<button type="submit" title='@Messages("button.add")' data-toggle="tooltip" ng-click="statsConfigService.add()" class="btn btn-primary" >
+					<i class="fa fa-plus"></i>
+				</button>
+				<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="statsConfigService.reset()"  class="btn btn-default">
+					<i class="fa fa-undo"></i>
+				</button>
+											 	
+			</div>	
+			}	
+		
+		}
+		</div>
+	</form>	
+</div>
+</div>
+
+<div class="row">
+<div class="col-md-6 col-lg-6" >
+	<div ultimate-datatable="statsConfigService.datatable"></div>
+</div> 
+<div class="col-md-6 col-lg-6" >
+	<div ultimate-datatable="queriesConfigService.datatable"></div>
+</div>
+</div>

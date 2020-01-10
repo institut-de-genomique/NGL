@@ -1,0 +1,25 @@
+@this(menu_ : menu)
+@(code: String, year: String)
+
+@scripts() = {
+		<script src="@controllers.balancesheets.tpl.routes.BalanceSheets.javascriptRoutes" type="text/javascript" charset="utf-8"></script>  
+		<script src="@controllers.main.tpl.routes.Main.jsCodes" type="text/javascript" charset="utf-8"></script> 
+		<script src="@routes.Assets.at("ngl-bi/javascripts/balancesheets/app.js")" type="text/javascript" charset="utf-8"></script> 
+		<script src="@routes.Assets.at("ngl-bi/javascripts/balancesheets/controllers.js")" type="text/javascript" charset="utf-8"></script>
+		<script src="@routes.Assets.at("ngl-bi/javascripts/balancesheets/services.js")" type="text/javascript" charset="utf-8"></script>
+		<script src="@routes.Assets.at("lib/datatable/datatable/javascripts/services/ultimate-datatable.js")" type="text/javascript" charset="utf-8"></script>
+		<script src="@routes.Assets.at("lib/lib-frameworkweb/ngl-common/javascripts/controllers/mainctrl.js")" type="text/javascript" charset="utf-8"></script> 
+		<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/commons.js")" type="text/javascript" charset="utf-8"></script> 
+		<script src="@helper.getAsset("javascripts","simple-statistics","140513","simple_statistics.js")" type="text/javascript" charset="utf-8"></script>
+	 	<script src="@helper.getAsset("javascripts","highcharts","4.1.4","highcharts_4.1.4.js")" type="text/javascript" charset="utf-8"></script>	 		 	
+	 	<script src="@helper.getAsset("javascripts","highcharts","4.1.4","highcharts-3d_4.1.4.js")" type="text/javascript" charset="utf-8"></script>
+	 	<script src="@helper.getAsset("javascripts","highcharts","4.1.4","exporting_4.1.4.js")" type="text/javascript" charset="utf-8"></script>	
+	 	<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/list-resize.js")" type="text/javascript" charset="utf-8"></script> 	
+	 	
+}
+
+@css() = {
+	<link rel="stylesheet" href="@routes.Assets.at("ngl-bi/css/balancesheets/balancesheets.css")">
+}
+
+@views.html.main("balanceSheets.page.title", menu_("balanceSheets." + code), scripts, css)(views.html.contents.lefttabs())

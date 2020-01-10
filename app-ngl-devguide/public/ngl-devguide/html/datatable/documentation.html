@@ -1,0 +1,231 @@
+<h2>Présentation: <a class="btn" href="datatable/demo">Voir demo</a></h2>	
+Datatable est un module angularJS qui permet de gérer plus facilement le composant dadatable de HTML. Il ajoute beaucoup de fonctionnalités comme la gestion de l'édition, la sauvegarde, la recupération de données. 
+Pour faciliter son utilisation, il existe une directive. Il suffit de passer à cette directive la configuration souhaitée en JSON, et le datatable se génére automatiquement.
+<h2>Exemple de datatable simple:</h2>
+<ul><li><h4>- En html:</h4>
+<pre class="prettyprint">
+	&lt;div datatable="datatable.getConfig()"&gt;
+	&lt;/div&gt;
+</pre></li>
+<li>
+<h4>- En javacript:</h4>
+<ul>
+<li><h5>  - Initialisation:</h5>
+	<p><i>Il faut au préalable injecter le service Datatable dans le controller AngularJS. Ensuite on initialise le datatable:</i></p>
+	<pre><code>$scope.datatable = datatable($scope, $scope.datatableConfig);</code></pre></li>
+	<li>
+<h5>  - Configuration:</h5>
+<pre>
+<code>
+	$scope.datatableConfig = {
+			"columns" : [{	"header":"Code Container", //the title
+							"property":"code", //the property to bind
+							"id":'test', //the column id
+							"edit":false, //can be edited or not
+							"hide":true, //can be hidden or not
+							"order":true, //can be ordered or not
+							"type":"String", //the column type
+							"choiceInList":false, //when the column is in edit mode, the edition is a list of choices or not
+						},
+						{	"header":"test 1", //the title
+							"property":"test", //the property to bind
+							"id":'test2', //the column id
+							"edit":false, //can be edited or not
+							"hide":true, //can be hidden or not
+							"order":true, //can be ordered or not
+							"type":"String", //the column type
+							"choiceInList":false, //when the column is in edit mode, the edition is a list of choices or not
+						}],
+			"compact":false,
+			"pagination":{
+				active:true
+			},		
+			"search":{
+				url:""
+				active:false
+			},
+			"order":{
+				mode:'local', //or 
+				active:true,
+				by:'ContainerInputCode'
+			},
+			"remove":{
+				active:false,
+			},
+			"save":{
+				active:true,
+				mode:'local',
+			},
+			"hide":{
+				active:true
+			},
+			"edit":{
+				active:true
+			},
+			"messages":{
+				active:true
+			},
+			"extraHeaders":{
+				number:0,
+				dynamic:true,
+			},
+			"name":"datatable"
+	};</code></pre></li></ul></li>
+	</ul>
+	<h3 ng-init="init()">Resultat:</h3>
+	<div datatable="datatable.getConfig()">
+	</div>
+	<h2>Configuration:</h2>
+	<ul><li><h4>- Les colonnes <i>(columns/columnsUrl)</i>:</h4> 
+		<p><i>L'attribut columns dans la configuration représente la liste des colonnes dans le datatable. C'est un tableau.</i></p>
+		<ul><li> <h5>Configuration manuelle :</h5><pre><code>[{"header":"Code Container", 
+					"property":"code",
+					"id":'test',
+					"edit":false, 
+					"hide":true, 
+					"order":true, 
+					"type":"String", 
+					"choiceInList":false,
+					}]</code></pre>
+					<ul>
+					<li><b>header: </b>Le libélé de la colonne</li>
+					<li><b>property: </b>Le nom de l'objet sur lequel on veut attacher la valeur de la ligne</li>
+					<li><b>id: </b>L'identifiant (unique) de la colonne</li>
+					<li><b>edit: </b>Peut on editer cette colonne ? (true/false)</li>
+					<li><b>hide: </b>Peut on cacher cette colonne ? (true/false)</li>
+					<li><b>order: </b>Peut on ordonner cette colonne ? (true/false)</li>
+					<li><b>type: </b>Type de la colonne ("String"/"Number"/"Month"/"Week"/"Time"/"DateTime"/"Range"/"Color"/"Mail"/"Tel"/"Url"/"Date")</li>
+					<li><b>choiceInList: </b>Dans l'édition, est-ce une liste de choix ou un champ libre ? (true <i>liste de choix</i>/false <i>champ libre</i>)</li>
+					<li><b>listStyle: </b>Si choiceInList est à true, quel style de liste ? (select (<i> liste déroulante</i>)/radio (<i>liste radio</i>/multiselect (<i>liste choix multiple</i>)</li>
+					<li><b>possibleValues: </b>Si choiceInList est à true, c'est la liste des choix possibles pour l'utilisateur sous la forme: "possibleValues":[{"code":"test","name":"test"},{"code":"test2","name":"test2"}]</li>
+					<li><b>extraHeaders: </b>La liste des extra header, les headers au dessus du header principal auquel la colonne appartient</li>
+					</ul>
+			</li>
+			<li> <h5>Configuration automatique :</h5>
+				<p><i>L'attribut columnsUrl dans la configuration représente la liste des colonnes dans le datatable chargé depuis une url.</i></p>
+				<ul>
+				<li><b>columnsUrl</b> : <i>URL</i></li>
+				</ul>
+			</li>
+		</ul>
+	</li>
+	<li>
+	<h4>- Le style des buttons (<i>compact</i>):</h4> 
+	<p><i>L'attribut compact dans la configuration permet de masquer les libélés des buttons si il est à true</i></p>
+	</li>
+	<li>
+		<h4>- La pagination (<i>pagination</i>):</h4> 
+		<p><i>L'attribut pagination dans la configuration permet de faire apparaitre les fonctions de pagination du datatable</i></p>
+		<ul>
+			<li><b>active: </b>Active ou pas la fonctionnalité (<i>true/false</i>)</li>
+			<li><b>mode: </b>Defini si le datatable doit faire un appel serveur lors du changement de page(<i>remote</i>) ou si il utilise les données déja chargées(<i>local</i>) (<i>"remote"/"local"</i>)</li>
+			<li><b>pageNumber: </b></li>
+			<li><b>numberPageListMax: </b>le nombre de page que l'on peut séléctionner dans la barre</li>
+			<li><b>pageList: </b></li>
+			<li><b>numberRecordsPerPage: Le nombre d'élément affiché par page</b></li>
+			<li><b>numberRecordsPerPageList:</b> la liste des paginations possible. exemple: <i>[{number:10, clazz:'active'},{number:25, clazz:''}]</i></li>
+		</ul>
+	</li>
+	<li>
+		<h4>- La recherche (<i>search</i>):</h4> 
+		<p><i>L'attribut search dans la configuration permet de faire des recherches sur le serveur et donc de charger des données</i></p>
+		<ul>
+			<li><b>active: </b>Active ou pas la fonctionnalité (<i>true/false</i>)</li>
+			<li><b>mode: </b>Defini si le datatable doit faire un appel serveur lors de la recherche(<i>remote</i>) ou si il recherche dans les données déja chargées(<i>local</i>) (<i>"remote"/"local"</i>)</li>
+			<li><b>url: </b>L'url à appeler pour charger les données</li>
+		</ul>
+	</li>
+	<li>
+		<h4>- Le tri (<i>order</i>):</h4> 
+		<p><i>L'attribut order dans la configuration permet de definir les options de tri</i></p>
+		<ul>
+			<li><b>active: </b>Active ou pas la fonctionnalité (<i>true/false</i>)</li>
+			<li><b>mode: </b>Defini si le datatable doit faire un appel serveur lors du tri(<i>remote</i>) ou si il tri les données déja chargées(<i>local</i>) (<i>"remote"/"local"</i>)</li>
+		</ul>
+	</li>
+	<li>
+		<h4>- Nombre d'éléments (<i>showTotalNumberRecords</i>):</h4> 
+		<p><i>L'attribut showTotalNumberRecords dans la configuration permet d'afficher le nombre total d'éléments (<i>true/false</i>)</i></p>
+	</li>
+	<li>
+		<h4>- La fonction suppression (<i>remove</i>):</h4> 
+		<p><i>L'attribut remove dans la configuration permet de géré la fonction de suppression dans le tableau</i></p>
+		<ul>
+			<li><b>active: </b>Active ou pas la fonctionnalité (<i>true/false</i>)</li>
+			<li><b>withEdit: </b>Oblige l'utilisateur à être en mode édition sur la ligne avant de pouvoir la supprimer(<i>false</i>) (<i>true/false</i>)</li>
+			<li><b>showButton: </b>Affiche ou pas le button (<i>true/false</i>)</li>
+			<li><b>mode: </b>Defini si le datatable doit faire un appel serveur lors du tri(<i>remote</i>) ou si il tri les données déja chargées(<i>local</i>) (<i>"remote"/"local"</i>)</li>
+			<li><b>url: </b>l'url à appelé pour effectuer une supression en mode remote</li>
+			<li><b>callback: </b>Cette fonction est appelé une fois la suppression effectuée</li>
+		</ul>
+	</li>
+	<li>
+		<h4>- La fonction édition (<i>edit</i>):</h4> 
+		<p><i>L'attribut edit dans la configuration permet de géré la fonction d'édition dans le tableau</i></p>
+		<ul>
+			<li><b>active: </b>Active ou pas la fonctionnalité (<i>true/false</i>)</li>
+			<li><b>withoutSelect: </b>Oblige l'utilisateur à selectionner les lignes avant de pouvoir editer(<i>false</i>) (<i>true/false</i>)</li>
+			<li><b>showButton: </b>Affiche ou pas le button (<i>true/false</i>)</li>
+		</ul>
+	</li>
+	<li>
+		<h4>- La fonction sauvegarde (<i>save</i>):</h4> 
+		<p><i>L'attribut edit dans la configuration permet de géré la fonction d'édition dans le tableau</i></p>
+		<ul>
+			<li><b>active: </b>Active ou pas la fonctionnalité (<i>true/false</i>)</li>
+			<li><b>withoutEdit: </b>Oblige l'utilisateur à selectionner les lignes avant de pouvoir editer(<i>false</i>) (<i>true/false</i>)</li>
+			<li><b>showButton: </b>Affiche ou pas le button (<i>true/false</i>)</li>
+			<li><b>mode: </b>Defini si le datatable doit faire un appel serveur lors de la sauvegarde(<i>remote</i>) ou si il sauvegardera en local(<i>local</i>) (<i>"remote"/"local"</i>)</li>
+			<li><b>url: </b>l'url à appelé pour effectuer une sauvegarde en mode remote</li>
+			<li><b>callback: </b>Cette fonction est appelé une fois la sauvegarde effectuée</li>
+		</ul>
+	</li>
+	<li>
+		<h4>- La fonction apparition/disparition des colonnes (<i>hide</i>):</h4> 
+		<p><i>L'attribut edit dans la configuration permet de géré la fonction d'apparition/disparition de colonne</i></p>
+		<ul>
+			<li><b>active: </b>Active ou pas la fonctionnalité (<i>true/false</i>)</li>
+		</ul>
+	</li>
+	<li>
+		<h4>- La fonction selection (<i>selection</i>):</h4> 
+		<p><i>L'attribut cancel dans la configuration permet de géré la fonction de selection</i></p>
+		<ul>
+			<li><b>active: </b>Active ou pas la fonctionnalité (<i>true/false</i>)</li>
+			<li><b>showButton: </b>Affiche ou pas le button (<i>true/false</i>)</li>
+		</ul>
+	</li>
+	<li>
+		<h4>- La fonction annuler (<i>cancel</i>):</h4> 
+		<p><i>L'attribut cancel dans la configuration permet de géré la fonction d'annulation</i></p>
+		<ul>
+			<li><b>active: </b>Active ou pas la fonctionnalité (<i>true/false</i>)</li>
+			<li><b>showButton: </b>Affiche ou pas le button (<i>true/false</i>)</li>
+		</ul>
+	</li>
+	<li>
+		<h4>- La fonction messages (<i>message</i>):</h4> 
+		<p><i>L'attribut messages dans la configuration permet de géré la fonction d'internationalisation</i></p>
+		<ul>
+			<li><b>active: </b>Active ou pas la fonctionnalité (<i>true/false</i>)</li>
+		</ul>
+	</li>
+	<li>
+		<h4>- La fonction detail (<i>show</i>):</h4>
+		<p><i>L'attribut show dans la configuration permet de pouvoir implementer une fonction detail avec les données du tableau.</i></p>
+		<ul>
+			<li><b>active: </b>Active ou pas la fonctionnalité (<i>true/false</i>)</li>
+			<li><b>showButton: </b>Affiche ou pas le button (<i>true/false</i>)</li>
+			<li><b>add(la ligne): </b>La fonction à implementer</li>
+		</ul>
+	</li>
+	<li>
+		<h4>- La fonction ajout de header (<i>extraHeaders</i>):</h4>
+		<p><i>L'attribut extraHeaders dans la configuration permet de pouvoir ajouter autant de header que vous souhaité au dessus du header de base avec le libellé des colonnes </i></p>
+		<ul>
+			<li><b>number: </b>Le nombre de header en plus que vous souhaitez</li>
+			<li><b>list: </b>la liste des headers exemple: {0:[{"label":"test","colspan":"1"},{"label":"a","colspan":"1"}],1:[{"label":"test2","colspan":"5"}]</li>
+			<li><b>dynamic: </b>Si dynamic est a false il va utilisé la "list" sinon il va se générer automatique avec la déclaration des colonnes</li>
+		</ul>
+	</li>
+	</ul>

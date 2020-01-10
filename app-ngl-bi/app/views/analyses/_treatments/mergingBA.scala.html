@@ -1,0 +1,30 @@
+@()
+<div class="row">
+ <div class="col-md-10 col-lg-10">
+	 <table class="table table-condensed table-hover table-bordered">
+		<thead>
+		<tr>
+			<th>@Messages("analyses.treatments.merging_ba.readsInput")</th>
+			<th>@Messages("analyses.treatments.merging_ba.mergedReads")</th>
+			<th>@Messages("analyses.treatments.merging_ba.mergedReadsPercent")</th>
+			<th>@Messages("analyses.treatments.merging_ba.medianeSize")</th>
+			<th>@Messages("analyses.treatments.merging_ba.avgSize")</th>
+			<th>@Messages("analyses.treatments.merging_ba.minSize")</th>
+			<th>@Messages("analyses.treatments.merging_ba.maxSize")</th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.readsInput.value | number}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.mergedReads.value | number}}</td>
+			<td ng-class="highLight('treatments.'+treatments.getTreatment().code+'.pairs.mergedReadsPercent.value')">{{analysis.treatments[treatments.getTreatment().code].pairs.mergedReadsPercent.value | number:2}}</td>	
+			<td ng-class="highLight('treatments.'+treatments.getTreatment().code+'.pairs.medianeSize.value')">{{analysis.treatments[treatments.getTreatment().code].pairs.medianeSize.value | number}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.avgSize.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.minSize.value | number}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.maxSize.value | number}}</td>
+		
+		</tr>						
+	</tbody>
+	 </table>
+ </div>	 
+</div>

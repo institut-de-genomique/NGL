@@ -1,0 +1,53 @@
+
+->  / nglcommon.Routes  
+
+# Home page
+GET     /                           controllers.main.tpl.Main.home()
+
+# plates tpl
+GET	   	/plates/:homecode/home						controllers.plates.tpl.Plates.home(homecode:java.lang.String)
+GET	   	/plates/:code								controllers.plates.tpl.Plates.get(code:java.lang.String)
+GET		/tpl/plates/search-manips					controllers.plates.tpl.Plates.searchManips()
+GET		/tpl/plates/from-file						controllers.plates.tpl.Plates.fromFile()
+GET		/tpl/plates/search							controllers.plates.tpl.Plates.search()
+GET		/tpl/plates/details							controllers.plates.tpl.Plates.details()
+GET		/tpl/plates/js-routes						controllers.plates.tpl.Plates.javascriptRoutes()
+
+#plates api
+POST	/api/plates									controllers.plates.api.Plates.save()
+GET		/api/plates									controllers.plates.api.Plates.list()
+GET    	/api/plates/:code               			controllers.plates.api.Plates.get(code: String)
+DELETE	/api/plates/:code               			controllers.plates.api.Plates.remove(code: String)
+
+POST	/api/plates/file/import/:emnco				controllers.plates.io.Plates.importFile(emnco:java.lang.Integer)
+
+
+#manip api
+GET    	/api/manip                					controllers.manips.api.Manips.list()
+
+
+#bar code
+GET		/barcodes/:homecode/home					controllers.barcodes.tpl.Barcodes.home(homecode:java.lang.String)
+GET		/tpl/barcodes/create						controllers.barcodes.tpl.Barcodes.create()
+GET		/tpl/barcodes/search						controllers.barcodes.tpl.Barcodes.search()
+GET		/tpl/barcodes/js-routes						controllers.barcodes.tpl.Barcodes.javascriptRoutes()
+
+
+GET		/api/barcodes								controllers.barcodes.api.Barcodes.list()
+POST	/api/barcodes								controllers.barcodes.api.Barcodes.save()
+DELETE	/api/barcodes/:code							controllers.barcodes.api.Barcodes.delete(code:java.lang.String)
+
+
+# list api
+GET /api/combo/projects								controllers.combo.api.Lists.projects()
+GET /api/combo/samples								controllers.combo.api.Lists.samples()
+GET /api/combo/etmanips								controllers.combo.api.Lists.etmanips()
+GET /api/combo/etmateriels							controllers.combo.api.Lists.etmateriels()
+GET /api/combo/users								controllers.combo.api.Lists.users()
+
+->  /authentication authentication.Routes
+
+# Map static resources from the /public folder to the /assets URL path
+# GET     /assets/*file               controllers.Assets.at(path="/public", file)
+GET     /messages.js                controllers.main.tpl.Main.jsMessages()
+GET     /codes.js        	        controllers.main.tpl.Main.jsCodes()

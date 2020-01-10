@@ -1,0 +1,19 @@
+@this()
+@()
+
+@import views.html.helper._
+<div class="row"> 
+<div class="col-md-12 col-lg-12">
+
+<script type="text/ng-template" id="myChoice.html">
+      <div class="modal-header">
+        <h4 class="modal-title">@Messages("stats.choice.question")</h4>
+      </div>
+      <div class="modal-body">
+      	<button type="button" class="btn btn-primary btn-lg btn-block" ng-click="choice('manual')">@Messages("stats.choice.1")</button>
+		<button type="button" class="btn btn-default btn-lg btn-block" ng-click="choice('preset')">@Messages("stats.choice.2")</button>      
+      </div>
+</script>
+
+</div>
+</div>

@@ -1,0 +1,14 @@
+
+
+GET 	/supports/:homecode/home						controllers.admin.supports.tpl.Supports.home(homecode:java.lang.String)
+GET 	/tpl/supports/:homecode/search					controllers.admin.supports.tpl.Supports.search(homecode:java.lang.String)
+GET		/tpl/supports/js-routes							controllers.admin.supports.tpl.Supports.javascriptRoutes()
+
+
+
+GET		/api/ngl-objects								controllers.admin.supports.api.NGLObjects.list()
+PUT		/api/ngl-objects/:code							controllers.admin.supports.api.NGLObjects.update(code:java.lang.String)
+
+
+
+			

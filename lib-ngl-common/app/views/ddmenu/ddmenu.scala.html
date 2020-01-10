@@ -1,0 +1,19 @@
+@(nav : String, name : String, message : String)(entries : Html)
+
+@* 
+  arg 1 : nav = reperage dans page navigation
+  arg 2 : identifiant du sous-menu qui doit commencer par meme nom que menu
+  arg 3 : url destination
+  arg 4 : texte traduit via Messages
+*@
+
+<li class="dropdown @("active".when(nav.startsWith(name)))">
+	<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" id="process">
+		@Messages(message)
+		<b class="caret"></b>
+	</a>
+	<ul class="dropdown-menu" role="menu" aria-labelledby="process">
+		@entries
+	</ul>					
+</li>
+

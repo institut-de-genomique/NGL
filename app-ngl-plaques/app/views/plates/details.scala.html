@@ -1,0 +1,164 @@
+@this()
+@()
+<div class="row">
+<div class="col-md-12 col-lg-12 ">
+<div class="page-header">
+<h1  ng-switch on="plate.validQC">
+	<span ng-switch-when="FALSE" class="text-danger">{{plate.code}} </span> 
+	<span ng-switch-when="TRUE" class="text-success">{{plate.code}} </span> 
+	<span ng-switch-default class="mute">{{plate.code}} </span>
+ 	<small>  {{plate.typeName}} </small>
+</h1>
+</div>
+</div>
+</div>
+<div class="row margin-bottom-5 hidden-print">
+<div class="col-md-12 col-lg-12 ">
+<div class="btn-toolbar">
+<div class="btn-group">
+<button class="btn btn-default"  data-target="#tab1" data-toggle="tab" data-toggle="tooltip" title="@Messages("plates.button.table")">@Messages("plates.button.table")</button>
+<button class="btn btn-default"  data-target="#tab2" data-toggle="tab" data-toggle="tooltip" title="@Messages("plates.button.plate")">@Messages("plates.button.plate")</button>
+</div>
+<div class="btn-group">
+<button class="btn btn-default" ng-click="save()" data-toggle="tooltip" title="@Messages("plates.button.save")" ng-disabled="!isEditMode()"><i class="fa fa-save"></i></button>	
+<button class="btn btn-default" ng-click="computeXY()" data-toggle="tooltip" title="@Messages("plates.button.compute")" ng-disabled="!isEditMode()"><i class="fa fa-magic"></i> </button>
+</div>
+<div class="btn-group" ng-switch on="isEditMode()">
+	<button class="btn btn-default" ng-click="edit()" ng-switch-when="false" data-toggle="tooltip" title="@Messages("plates.button.edit")"><i class="fa fa-edit"></i></button>
+	<button class="btn btn-default" ng-click="unedit()" ng-switch-when="true" data-toggle="tooltip" title="@Messages("plates.button.unedit")"><i class="fa fa-undo"></i></button>	
+</div>
+
+<div class="btn-group">
+<button class="btn btn-default" ng-click="remove()" data-toggle="tooltip" ng-show="plate.code !== undefined" title="@Messages("plates.button.delete")"><i class="fa fa-trash-o"></i></button>
+</div>
+
+<div class="btn-group">
+	<button data-toggle="dropdown" class="btn btn-default dropdown-toggle" data-toggle="tooltip" title="@Messages("datatable.button.hide")">
+  		    		<i class="fa fa-eye-slash"></i>   		    		
+  		    		<span class="caret"></span>  		    		
+    </button>
+    <ul class="dropdown-menu">
+	<li ng-repeat="column in datatable.getHideColumns()">
+	<a href="#" ng-click="datatable.setHideColumn(column)" ng-switch on="datatable.isHide(column.id)">
+		<i class="fa fa-eye" ng-switch-when="true"></i><i class="fa fa-eye-slash" ng-switch-when="false"></i> 
+		<span ng-bind="column.header"/></a>
+	</li>
+	</ul>
+</div>
+
+<div class="btn-group">
+<button class="btn btn-default" ng-click="datatable.exportCSV('all')" title="@Messages("datatable.button.exportCSV")">
+<i class="fa fa-file-text-o"></i> 
+</button>	
+</div>
+
+</div>
+</div>
+</div>
+<div class="row hidden-print">
+<div class="col-md-12 col-lg-12 ">
+<div ng-class="message.clazz" ng-show="message.text !== undefined">
+	<button class="close" data-dismiss="alert" type="button">×</button>
+	<strong>{{message.text}}</strong><button class="btn btn-link" ng-click="message.showDetails=!message.showDetails" ng-show="message.isDetails">@(Messages("plates.msg.details"))</button>
+	<div ng-show="message.showDetails">
+	    <ul>
+    		<li ng-repeat="(key1, value1) in message.details">{{key1}}
+    		<ul>
+    			<li ng-repeat="(key2, value2) in value1"> {{key2}} == {{value2}} </li>
+    		</ul>
+    		</li>
+    	</ul>	
+	</div>
+</div>
+</div>
+</div>
+
+
+<div class="row">
+<div class="col-md-12 col-lg-12 col-xs-12">
+
+<form class="form-horizontal">
+<div class="row">
+
+<div class="col-md-4 col-lg-4 col-xs-4">
+@views.html.helper.columnLabelValue(Messages("plates.validQC")){
+		<div ng-switch on="isEditMode()">
+			<p ng-switch-when="false" class="form-control-static" ng-model='plate.validQC' codes="valuation"/>
+			<div ng-switch-when="true">
+				<div bt-select class="form-control" ng-model="plate.validQC" bt-options="valid.code as valid.name for valid in lists.getValuations()"></div>
+			</div>
+		</div>	
+	}
+
+</div>
+<div class="col-md-4 col-lg-4 col-xs-4">
+@views.html.helper.columnLabelValue(Messages("plates.validRun")){
+		<div ng-switch on="isEditMode()">
+			<p ng-switch-when="false" class="form-control-static" ng-model='plate.validRun' codes="valuation"/>
+			<div ng-switch-when="true">
+				<div bt-select class="form-control" ng-model="plate.validRun" bt-options="valid.code as valid.name for valid in lists.getValuations()"></div>
+			</div>
+		</div>		
+	}
+
+</div>
+
+<div class="col-md-4 col-lg-4 col-xs-4">
+	@views.html.helper.columnLabelValue(Messages("plates.comment")){
+		<div ng-switch on="isEditMode()">
+			<p class="form-control-static" ng-switch-when="false" ng-bind="plate.comment"></p>
+			<textarea class="form-control" ng-model="plate.comment" ng-switch-when="true"></textarea>					
+		</div>	
+	}		
+</div>
+
+</div>
+<div class="row hidden-print">
+	<div class="col-md-4 col-lg-4 col-xs-4">
+		@views.html.helper.columnLabelValue(Messages("plates.create.user")){
+			<p class="form-control-static" >{{plate.creationUser.perlog}} ({{plate.creationDate|date:'@Messages("date.format")'}})</p>
+		}
+		@views.html.helper.columnLabelValue(Messages("plates.modify.user")){
+			<p class="form-control-static" >{{plate.modificationUser.perlog}} ({{plate.modificationDate|date:'@Messages("date.format")'}})</p>
+		}		
+	</div>
+</div>
+
+</form>
+</div>
+</div>
+<div class="row">
+<div class="col-md-12 col-lg-12 col-xs-12">
+<div class="tab-content">
+<div class="tab-pane active" id="tab1">
+	<div class="datatable" ultimate-datatable="datatable"></div>
+</div>
+
+
+<div class="tab-pane" id="tab2">
+<table class="table table-bordered table-condensed">
+       <thead>
+            <tr>
+                <th></th>
+                <th ng-repeat="i in [1,2,3,4,5,6,7,8,9,10,11,12]">{{i}}</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="y in ['A','B','C','D','E','F','G','H']" class="total">
+                <td><strong>{{y}}</strong></td>
+                <td class="plates" ng-repeat="x in [1,2,3,4,5,6,7,8,9,10,11,12]" class="browser">
+                	    <div ng-class="getClass(x, y)" ng-bind="displayCellPlaque(x, y)"/>
+                	    <div class="visible-print-block" ng-bind="displayCellPlaque(x, y)"/>    						    					
+                 </td>          
+            </tr>
+          
+        <tbody>
+    
+        </table>
+</div>
+
+</div>
+</div>
+</div>
+
+

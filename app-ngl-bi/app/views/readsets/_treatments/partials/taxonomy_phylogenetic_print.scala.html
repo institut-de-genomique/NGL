@@ -1,0 +1,7 @@
+@()
+
+<div class="row page-break" ng-show="isDataExistsForPhylogeneticTree(treament.code!=undefined?treament.code:treatments.getTreatment().code)">
+	<div class="col-xs-12">
+		<img id="phylogeneticTree" ng-src="data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code][(readset.treatments.taxonomy.pairs!==undefined)?'pairs':'read1'].phylogeneticTree.value}}" />
+	</div>
+</div>	 

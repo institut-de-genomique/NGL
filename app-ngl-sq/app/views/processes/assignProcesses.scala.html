@@ -1,0 +1,50 @@
+@this()
+@()
+@import views.html.helper._
+<div class="row">
+<div class="col-md-12 col-lg-12">
+<div ng-class="assignService.messages.clazz" ng-show="assignService.messages.text !== undefined">
+	<strong ng-bind="assignService.messages.text"></strong><button class="btn btn-link" ng-click="assignService.messages.showDetails=!assignService.messages.showDetails" ng-show="assignService.messages.isDetails">@(Messages("experiments.msg.details"))</button>
+	<div ng-show="assignService.messages.showDetails">
+	    <ul>
+    		<li ng-repeat="(key1, value1) in assignService.messages.details track by $index">{{key1}}
+    		<ul>
+    			<li ng-repeat="(key2, value2) in value1 track by $index">{{key2}} : {{value2}} </li>
+    		</ul>
+    		</li>
+    	</ul>	
+	</div>
+</div>
+</div>
+</div>
+<div class="row SelectContainerProcess">
+<div class="col-md-12 col-lg-12" ultimate-datatable="assignService.datatable">
+	<div udt-form>
+		<form class="well well-small">
+			<div ng-show="assignService.isProcessFiltered" class="row">				
+				<div class="col-md-2 col-lg-2" ng-repeat="processFilters in assignService.getAddProcessFiltersToForm()">
+					<div class="form-group" ng-repeat="filter in processFilters">
+						<div udt-compile="filter.html"></div> <!-- used directive from datatable to compile html -->
+					</div>
+				</div>	
+				@columnSearchForm{
+					@formGroup{
+					<div class="btn-toolbar">
+						<button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="assignService.searchProcesses()" class="btn btn-primary" >
+							<i class="fa fa-search"></i>
+						</button>
+						<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="assignService.reset()"  class="btn btn-default">
+							<i class="fa fa-undo"></i>
+						</button>
+													 	
+					</div>	
+					}				
+				}								
+			</div>
+			
+		</form>	
+	</div>
+
+</div>
+</div>		
+

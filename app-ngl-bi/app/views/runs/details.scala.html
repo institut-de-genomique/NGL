@@ -1,0 +1,164 @@
+@this(ctx : fr.cea.ig.ngl.NGLApplication)
+@* @this(ctx : fr.cea.ig.play.migration.NGLContext) *@
+@()
+
+@import play.mvc.Http.Context
+@import controllers.authorisation.PermissionHelper
+
+@user            = @{ ctx.currentUser() }
+@writePermission = @{ PermissionHelper.checkPermission(user, "writing") }
+
+<!-- ----------------------------------------------------------------------------- -->
+<!-- Modal to display image in full size -->
+	<div id="myImageModal" class="modal fade"  tabindex="-1" role="dialog"
+		aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog" style="margin-left:{{modalLeft}}px">
+    		<div class="modal-content" style="width:{{modalWidth+2}}px">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h3 class="modal-title">{{readset.code}}</h3>	
+					<h4 id="myModalLabel">{{modalTitle}}</h4>
+				</div>
+				<div class="modal-body" style="padding:0px">
+					<img ng-src="data:image/png;base64,{{modalImage}}" style="width:{{modalWidth}}px; height:{{modalHeight}}px;" />
+				</div>
+				<div class="modal-footer">
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	
+<!-- -------------------------------------------------------------------------------- -->
+
+<div class="row">
+	<div class="col-md-12 col-lg-12 ">
+	<div class="page-header" ng-init="init()">
+		<div class="btn-toolbar pull-right">
+			@if(writePermission){
+				<button class="btn btn-default" ng-if="mainService.isEditMode()" ng-click="save()" data-toggle="tooltip" title="@Messages("button.validate")" ><i class="fa fa-save"></i> @Messages("button.validate")</button>
+				<button class="btn btn-default" ng-if="mainService.isEditMode()" ng-click="cancel()" data-toggle="tooltip" title="@Messages("button.cancel")" ><i class="fa fa-undo"></i> @Messages("button.cancel")</button>
+			 	<button class="btn btn-default" ng-if="!mainService.isEditMode()" ng-click="activeEditMode()" data-toggle="tooltip" title="@Messages("button.edit")" ><i class="fa fa-edit"></i> @Messages("button.edit")</button>		 					
+			}
+		</div>
+	
+	 	<h1  ng-switch on="run.valuation.valid">
+	
+		 	<span ng-switch-when="FALSE" class="text-danger">{{run.code}}</span> 
+		 	<span ng-switch-when="TRUE" class="text-success">{{run.code}}</span> 
+		 	<span ng-switch-default>{{run.code}}</span> 
+		
+			<small>   
+				<span ng-model="run.state.code" codes="state"/>
+			</small>
+
+		 </h1>
+	</div>
+</div>
+</div>
+<div class="row">
+<div class="col-md-12 col-lg-12"  messages="messages"></div>
+</div>
+
+<div class="row margin-bottom-7">
+<div class="col-md-12 col-lg-12">
+	<ul class="nav nav-tabs margin-bottom-5">
+		<li ng-class="getTabClass('general')"><a href="#" data-target="#general" data-toggle="tab" ng-click="setActiveTab('general')">@Messages("readsets.tabs.general")</a></li>
+		<li ng-class="getTabClass('workflow')"><a href="#" data-target="#workflow" data-toggle="tab" ng-click="setActiveTab('workflow')">@Messages("readsets.tabs.workflow")</a></li>    
+	</ul>
+
+
+<div class="tab-content">
+			<div class="tab-pane {{getTabClass('general')}}" id="general">
+			@partials.details_general()
+			</div>
+			<div class="tab-pane {{getTabClass('workflow')}}" id="workflow">
+				<div class="row">
+					<div class="col-md-4 col-lg-4">
+						<table class="table table-condensed table-hover table-bordered">
+						<thead>
+							<tr>
+								<th>@Messages("readsets.workflow.state")</th>
+								<th>@Messages("readsets.workflow.date")</th>
+								<th>@Messages("readsets.workflow.who")</th>								
+							</tr>
+						</thead>
+						<tbody>
+							<tr ng-repeat="state in run.state.historical|orderBy:'date'">
+								<td>{{state.code|codes:'state'}}</td>
+								<td>{{state.date|date:'@Messages("datetime.format")'}}</td>
+								<td>{{state.user}}</td>
+							</tr>
+						</tbody>
+					</table>
+					
+					</div>
+				</div>			
+			</div>
+		</div>
+</div>
+</div>
+
+
+
+<div class="row" ng-if="isLanesExist()">
+	<div class="col-md-9 col-lg-9">
+		@views.html.commons.treatments()		
+	</div>
+	<div class="col-md-3 col-lg-3" >
+		<ul class="nav nav-tabs margin-bottom-7">
+			   <li class="active"><a href="#">@Messages("runs.lane.valuation.title")</a></li>		   
+		</ul>
+		<div class="tab-content">
+			<div class="tab-pane active">		
+	  			<div ultimate-datatable="lanesDT"></div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row" ng-if="!isLanesExist()">
+	<div class="col-md-12 col-lg-12">
+		@views.html.commons.treatments()		
+	</div>	
+</div>
+
+
+<div class="row" ng-if="readSetsDT.totalNumberRecords > 0">
+<div class="col-md-12 col-lg-12">
+	<ul class="nav nav-tabs margin-bottom-5">
+		<li ng-class="getTabClassRS('RSgeneral')"><a href="#" data-target="#RSgeneral" data-toggle="tab" ng-click="setActiveTabRS('RSgeneral')">@Messages("runs.readsets.title") ({{readSetsDT.totalNumberRecords}})</a></li>		
+		<li ng-if="readSetsPrimaryDT.totalNumberRecords > 0" ng-class="getTabClassRS('primary')"><a href="#" data-target="#primary" data-toggle="tab" ng-click="setActiveTabRS('primary')">@Messages("runs.primaryDemultiplexing.title")</a></li>	   
+	</ul>
+	<div class="tab-content">
+		<div class="tab-pane {{getTabClassRS('RSgeneral')}}" id="RSgeneral">	
+		<form class="well well-small form-inline">		
+			<div class="row">
+				<div class="col-md-2 col-lg-2">
+				<div class="form-group" ng-if="run.lanes.length > 0">
+					<div bt-select class="form-control" ng-model="form.laneNumbers" multiple="true" placeholder="@Messages("search.placeholder.lanes")" bt-options="l.number as l.number for l in laneOptions"></div>
+				</div>
+				</div>
+				<div class="col-md-4 col-md-offset-6 col-lg-4 col-lg-offset-6">
+				<div class="form-group pull-right">
+				<div class="btn-group">
+					<button type="submit"  ng-if="run.lanes.length > 0" ng-click="search()"  	class="btn btn-info" title='@Messages("button.search")' data-toggle="tooltip"  ><i class="fa fa-search"></i></button>
+					<button ng-click="showReadSets()" class="btn btn-default" >@Messages("button.readsets.show")</button>
+					<button ng-click="valuateReadSets()" class="btn btn-default" ng-if="mainService.isEditMode()">@Messages("button.readsets.valuation")</button>
+				</div>
+				</div>
+				</div>
+			</div>						
+				
+																					 						
+		</form>				
+		<div ultimate-datatable="readSetsDT"></div>
+		</div>
+		<div ng-if="readSetsPrimaryDT.totalNumberRecords > 0" class="tab-pane {{getTabClassRS('primary')}}" id="primary">	
+		<div ultimate-datatable="readSetsPrimaryDT"></div>
+		</div>
+	</div>
+</div>
+</div>
+
+       

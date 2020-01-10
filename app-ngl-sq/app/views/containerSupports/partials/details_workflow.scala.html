@@ -1,0 +1,26 @@
+@()
+<div class="row">
+	<div class="col-md-4 col-lg-4">
+		<table class="table table-condensed table-hover table-bordered">
+		<thead>
+			<tr>
+				<th>@Messages("containers.workflow.state")</th>
+				<th>@Messages("containers.workflow.date")</th>
+				<th>@Messages("containers.workflow.who")</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr ng-if="support.state.historical !== null" ng-repeat="state in support.state.historical|orderBy:'date'">
+				<td ng-bind="state.code|codes:'state'" />
+				<td ng-bind="state.date|date:'@Messages("datetime.format")'" />
+				<td ng-bind="state.user" />
+			</tr>
+			<tr ng-if="support.state.historical === null">
+				<td ng-bind="support.state.code|codes:'state'" />
+				<td ng-bind="support.state.date|date:'@Messages("datetime.format")'" />
+				<td ng-bind="support.state.user" />
+			</tr>
+		</tbody>
+		</table>
+	</div>
+</div>

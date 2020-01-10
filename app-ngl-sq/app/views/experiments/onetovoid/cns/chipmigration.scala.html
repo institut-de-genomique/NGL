@@ -1,0 +1,157 @@
+@()
+
+<div ng-controller="OneToVoidQCCtrl" class="col-md-12 col-lg-12">	
+	<div ng-controller="OneToVoidChipMigrationCNSCtrl">
+	<div class="row">
+	<div class="col-md-12 col-lg-12">
+	<ul class="list-unstyled">
+	<li><i class="fa fa-info-circle"></i> Calcul automatique volume final = volume du container d'entrée - vol. engagé</li>
+	</ul>	
+	</div>
+	</div>
+	
+	
+	<div class="row">
+	<ul class="nav nav-tabs margin-bottom-5" role="tablist">
+  	<li class="active"><a href="" role="tab" data-target="#table"" data-toggle="tab" >Tableau</a></li>
+  	<li><a href="" role="tab"  data-target="#profils" data-toggle="tab" >Profils</a></li>  
+	<li ng-if="plateUtils.isPlate()"><a href="" role="tab"  data-target="#plate" data-toggle="tab" ng-click="plateUtils.computePlateCells(atmService)">@Messages("experiments.plate.design")</a></li>  
+	</ul>
+	
+	
+<div class="tab-content"  >
+	<div class="tab-pane active" id="table">
+	<div class="row margin-bottom-7" ng-show="importButton.isShow()">
+	<div class="col-md-6 col-lg-6">
+	<form class="form-horizontal">
+  	<div class="form-group">
+   		<label  class="col-md-4 col-lg-4 control-label">WellTable LabChip_GX : </label>
+		<div class="input-group col-md-8 col-lg-8" >
+		<input id="importFile" type="file" class="form-control" base64-file="file">
+		<span class="input-group-btn">
+			<button class="btn btn-primary" ng-click="importButton.click()" ng-disabled="importButton.isFileSet()" title="@Messages("button.import.file")"><i class="fa fa-upload"></i></button>
+		</span>
+		</div>
+	</div>
+	</form>
+	</div>
+	</div>	
+	<div class="row">
+		<div class="col-md-12 col-lg-12" ultimate-datatable="atmService.data"></div>
+	</div>
+	
+	</div>
+	
+	<div class="tab-pane" id="profils" >	
+	<div class="row margin-bottom-7" ng-show="button.isShow()">
+	<div class="col-md-5 col-lg-5">
+	<form class="form-horizontal">
+  	<div class="form-group">
+   		<label  class="col-md-3 col-lg-3 control-label">Profils : </label>
+		<div class="input-group col-md-9 col-lg-9" >
+		<input id="importProfils" type="file" class="form-control" base64-img="profils" multiple=true/>		
+		</div>
+	</div>
+	</form>
+	</div>
+	</div>
+	
+	<div class="row">
+		<div class="col-md-12 col-lg-12">
+	<table class="table table-bordered table-condensed datatable" ng-if="('labchip-gx' === experiment.instrument.typeCode)">
+				
+	<thead>
+	     <tr>
+	         <th></th>
+	         <th ng-repeat="i in [1,2,3,4,5,6,7,8,9,10,11,12]">{{i}}</th>
+	     </tr>
+	</thead>
+	<tbody>
+	    <tr ng-repeat="line in ['A','B','C','D','E','F','G','H']">
+	        <td><strong>{{line}}</strong></td>
+	        
+	        <td ng-repeat="column in [1,2,3,4,5,6,7,8,9,10,11,12] track by $index">
+	        
+	        <div  ng-click="setImage(getProfil(line,column).value,getProfil(line,column).fullname,getProfil(line,column).width,getProfil(line,column).height)"  
+	        	 ng-show="getProfil(line,column) !== undefined" > 
+	        	<div data-target="#modalImage" role="button" data-toggle="modal" >
+	        		<a href="#">
+	        		<img ng-src="data:image/{{getProfil(line,column).extension}};base64,{{getProfil(line,column).value}}"width="{{getProfil(line,column).width*0.15}}" height="{{getProfil(line,column).height*0.15}}"  class="center-block"/>
+	        		</a>
+	        		</div>
+	        	</div>
+	                		        	    						    					
+	        </td>          
+	    </tr>
+	  
+	<tbody>				 
+</table>
+	</div>
+	</div>
+	
+	<div class="row">
+		<div class="col-md-6 col-lg-6">
+	<table class="table table-bordered table-condensed datatable" ng-if="('agilent-2100-bioanalyzer' === experiment.instrument.typeCode)">
+				
+	<thead>
+	     <tr>
+	         <th>Source</th>
+	         <th></th>
+	     </tr>
+	</thead>
+	<tbody>
+	    <tr ng-repeat="source in [1,2,3,4,5,6,7,8,9,10,11]">
+	        <td><strong>{{source}}</strong></td>
+	        
+	        <td>
+	        
+	        <div  ng-click="setImage(getProfil(source).value,getProfil(source).fullname,getProfil(source).width,getProfil(source).height)"  
+	        	 ng-show="getProfil(source) !== undefined" > 
+	        	<div data-target="#modalImage" role="button" data-toggle="modal" >
+	        		<a href="#">
+	        		<img ng-src="data:image/{{getProfil(source).extension}};base64,{{getProfil(source).value}}"width="{{getProfil(source).width*0.15}}" height="{{getProfil(source).height*0.15}}"  class="center-block"/>
+	        		</a>
+	        		</div>
+	        	</div>
+	                		        	    						    					
+	        </td>          
+	    </tr>
+	  
+	<tbody>				 
+</table>
+	</div>
+	</div>
+	</div>
+	
+	<div class="tab-pane" id="plate" ng-if="plateUtils.isPlate()">
+	<div class="row">
+		<div class="col-md-12 col-lg-12">
+			<h3 ng-bind="plateUtils.getPlateCode()"></h3>
+		</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12 col-lg-12">
+				<table class="table table-bordered table-condensed">
+			       <thead>
+			            <tr>
+			                <th></th>
+			                <th ng-repeat="i in [1,2,3,4,5,6,7,8,9,10,11,12]">{{i}}</th>
+			            </tr>
+			        </thead>
+			        <tbody>
+			            <tr ng-repeat="y in ['A','B','C','D','E','F','G','H']" class="total">
+			                <td><strong>{{y}}</strong></td>
+			                <td class="plates" ng-repeat="x in [1,2,3,4,5,6,7,8,9,10,11,12]" class="browser">
+			                	  <div list-resize="plateUtils.getCellPlateData(y, x)"  list-resize-min-size='3' vertical/>    	  						    					
+			                 </td>          
+			            </tr>			          
+			        <tbody>			    
+			        </table>						
+			</div>
+		</div>
+		</div>
+</div>
+
+</div>
+</div>
+</div>

@@ -1,0 +1,38 @@
+#Kit catalogs API
+GET 	/api/kit-catalogs/:code					controllers.reagents.api.KitCatalogs.get(code: java.lang.String)
+GET 	/api/kit-catalogs						controllers.reagents.api.KitCatalogs.list()
+POST 	/api/kit-catalogs						controllers.reagents.api.KitCatalogs.save()
+DELETE 	/api/kit-catalogs/:code					controllers.reagents.api.KitCatalogs.delete(code: java.lang.String)
+PUT 	/api/kit-catalogs/:code					controllers.reagents.api.KitCatalogs.update(code: java.lang.String)
+
+#Box catalogs API
+GET 	/api/box-catalogs						controllers.reagents.api.BoxCatalogs.list()
+POST 	/api/box-catalogs						controllers.reagents.api.BoxCatalogs.save()
+PUT 	/api/box-catalogs/:code					controllers.reagents.api.BoxCatalogs.update(code: java.lang.String)
+DELETE 	/api/box-catalogs/:code					controllers.reagents.api.BoxCatalogs.delete(code: java.lang.String)
+
+#Reagent catalogs API
+GET 	/api/reagent-catalogs					controllers.reagents.api.ReagentCatalogs.list()
+POST 	/api/reagent-catalogs					controllers.reagents.api.ReagentCatalogs.save()
+PUT 	/api/reagent-catalogs/:code				controllers.reagents.api.ReagentCatalogs.update(code: java.lang.String)
+DELETE 	/api/reagent-catalogs/:code				controllers.reagents.api.ReagentCatalogs.delete(code: java.lang.String)
+
+
+#Kits API
+GET 	/api/kits/:code							controllers.reagents.api.Kits.get(code: java.lang.String)
+GET 	/api/kits								controllers.reagents.api.Kits.list()
+POST 	/api/kits								controllers.reagents.api.Kits.save()
+DELETE 	/api/kits/:code							controllers.reagents.api.Kits.delete(code: java.lang.String)
+PUT 	/api/kits/:code							controllers.reagents.api.Kits.update(code: java.lang.String)
+
+#Boxes API
+GET 	/api/boxes								controllers.reagents.api.Boxes.list()
+POST 	/api/boxes								controllers.reagents.api.Boxes.save()
+PUT 	/api/boxes/:code						controllers.reagents.api.Boxes.update(code: java.lang.String)
+DELETE 	/api/boxes/:code						controllers.reagents.api.Boxes.delete(code: java.lang.String)
+
+#Reagents API
+GET 	/api/reagents							controllers.reagents.api.Reagents.list()
+POST 	/api/reagents							controllers.reagents.api.Reagents.save()
+PUT 	/api/reagents/:code						controllers.reagents.api.Reagents.update(code: java.lang.String)
+DELETE 	/api/reagents/:code						controllers.reagents.api.Reagents.delete(code: java.lang.String)

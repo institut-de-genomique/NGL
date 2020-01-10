@@ -1,0 +1,51 @@
+package rules
+
+rule "Code Flowcell without bad chars"
+    @nglSQ( validations )
+	dialect "java"
+	salience 900
+	no-loop
+    when
+    $experiment:Experiment($typeCode:typeCode,$typeCode=="prepa-flowcell",$instrumentProperties:instrumentProperties)
+    $containerSupportCode: PropertyValue($code:value, $code matches ".*[^a-zA-Z0-9].*") from $instrumentProperties.get("containerSupportCode")
+    $contextValidation:ContextValidation()
+    then
+    Logger.debug("Code Flowcell without bad chars");
+    $contextValidation.addErrors("instrument",	"error.validationexp.codewithbadchar", "Code Flowcell");
+end
+
+rule "Prepaflowcell validate contenant sortie avec instrument"
+	@nglSQ (validations )
+	dialect "java"
+	salience 400
+	no-loop
+    when
+    	Experiment($typeCode:typeCode,$typeCode=="prepa-flowcell",$instrumentCode:instrument.code
+    			,$outputContainerSupport:instrument.outContainerSupportCategoryCode, 
+    		( $instrumentCode in("cBot Fluor A","cBot Fluor B","cBot Platine A","cBot Platine B") && $outputContainerSupport=="flowcell-1")
+    		 || 
+    		 ($instrumentCode in("cBot Melisse","cBot Mimosa") && $outputContainerSupport=="flowcell-2") )
+    	$contextValidation:ContextValidation($errors : errors)
+    then
+    	Logger.debug("outputcontainersupport "+$outputContainerSupport + ", instrument code "+$instrumentCode);
+    	$contextValidation.addErrors("instrument",	"error.validationexp.badoutputprepaflowcell", $outputContainerSupport,$instrumentCode);
+    end
+
+rule "Prepaflowcell validate piste controle"
+	@nglSQ (validations )
+	dialect "java"
+	salience 400
+	no-loop
+    when
+    	Experiment($typeCode:typeCode,$typeCode=="prepa-flowcell",$instrumentProperties:instrumentProperties,$outputContainerSupport:instrument.outContainerSupportCategoryCode)
+    	$control :PropertyValue($value:value, 
+    		($value in ("3","4","5","6","7","8")  && $outputContainerSupport=="flowcell-2" )
+			||
+			( $value in ("2","3","4","5","6","7","8") && $outputContainerSupport=="flowcell-1")    	
+    	) from $instrumentProperties.get("control")
+    	$contextValidation:ContextValidation($errors : errors)
+    then
+    	Logger.debug("outputcontainersupport "+$outputContainerSupport + ", piste controle ");
+    	$contextValidation.addErrors("instrument",	"error.validationexp.badcontrolprepaflowcell", $value,$outputContainerSupport);
+    end    
+

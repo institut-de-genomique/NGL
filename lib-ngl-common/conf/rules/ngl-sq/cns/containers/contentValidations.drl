@@ -1,0 +1,56 @@
+//created on: Apr 21, 2015
+package rules
+
+
+
+rule "Check content extractionBlankSampleCode properties"
+	@nglSQ( validations )
+	dialect "java"
+	salience 1000
+	no-loop
+    when
+    Container($code:code)
+	Content(properties != null, $extractionBlankSampleCode:properties.get("extractionBlankSampleCode"))
+	$contextValidation:ContextValidation()	
+	eval($extractionBlankSampleCode !=null) 
+	then
+		Logger.debug("Check content extractionBlankSampleCode properties "+$extractionBlankSampleCode.value.toString());
+		if(!MongoDBDAO.checkObjectExistByCode(InstanceConstants.SAMPLE_COLL_NAME, Sample.class,  $extractionBlankSampleCode.value.toString())){
+			$contextValidation.addErrors("properties.extractionBlankSampleCode", ValidationConstants.ERROR_CODE_NOTEXISTS_MSG, $extractionBlankSampleCode.value.toString(), "Sample");
+		}		
+	end
+
+rule "Check content tagPcrBlank1SampleCode properties"
+	@nglSQ( validations )
+	dialect "java"
+	salience 1000
+	no-loop
+    when
+    Container($code:code)
+	Content(properties != null, $tagPcrBlank1SampleCode:properties.get("tagPcrBlank1SampleCode"))
+	$contextValidation:ContextValidation()	
+	eval($tagPcrBlank1SampleCode !=null) 
+	then
+		Logger.debug("Check content tagPcrBlank1SampleCode properties "+$tagPcrBlank1SampleCode.value.toString());
+		if(!MongoDBDAO.checkObjectExistByCode(InstanceConstants.SAMPLE_COLL_NAME, Sample.class,  $tagPcrBlank1SampleCode.value.toString())){
+			$contextValidation.addErrors("properties.tagPcrBlank1SampleCode", ValidationConstants.ERROR_CODE_NOTEXISTS_MSG, $tagPcrBlank1SampleCode.value.toString(), "Sample");
+		}		
+	end
+
+rule "Check content tagPcrBlank2SampleCode properties"
+	@nglSQ( validations )
+	dialect "java"
+	salience 1000
+	no-loop
+    when
+    Container($code:code)
+	Content(properties != null, $tagPcrBlank2SampleCode:properties.get("tagPcrBlank2SampleCode"))
+	$contextValidation:ContextValidation()	
+	eval($tagPcrBlank2SampleCode !=null) 
+	then
+		Logger.debug("Check content tagPcrBlank2SampleCode properties "+$tagPcrBlank2SampleCode.value.toString());
+		if(!MongoDBDAO.checkObjectExistByCode(InstanceConstants.SAMPLE_COLL_NAME, Sample.class,  $tagPcrBlank2SampleCode.value.toString())){
+			$contextValidation.addErrors("properties.tagPcrBlank2SampleCode", ValidationConstants.ERROR_CODE_NOTEXISTS_MSG, $tagPcrBlank2SampleCode.value.toString(), "Sample");
+		}		
+	end
+

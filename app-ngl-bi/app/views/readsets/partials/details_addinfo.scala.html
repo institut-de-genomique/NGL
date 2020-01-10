@@ -1,0 +1,63 @@
+@()
+
+@column()(value: Html) = {
+	<div class="col-md-5 col-lg-5 col-xs-5">
+		@value
+	</div>
+}
+
+<form class="form-horizontal">
+	<div class="row">
+	@column(){
+		@views.html.helper.columnLabelValue(Messages("readset.sampleOnContainer.sampleCode")){
+			<p class="form-control-static" ng-bind="readset.sampleOnContainer.sampleCode"></p>
+		}
+		
+		@views.html.helper.columnLabelValue(Messages("readset.sampleOnContainer.referenceCollab")){
+			<p class="form-control-static" ng-bind="readset.sampleOnContainer.referenceCollab"></p>
+		}
+		
+		@views.html.helper.columnLabelValue(Messages("readset.sampleOnContainer.taxonCode")){
+			<p class="form-control-static" ng-bind="readset.sampleOnContainer.taxonCode"></p>
+		}
+		
+		@views.html.helper.columnLabelValue(Messages("readset.sampleOnContainer.ncbiScientificName")){
+			<p class="form-control-static" ng-bind="readset.sampleOnContainer.ncbiScientificName"></p>
+		}
+		
+		@views.html.helper.columnLabelValue(Messages("readset.sampleOnContainer.sampleTypeCode")){
+			<p class="form-control-static" ng-bind="readset.sampleOnContainer.sampleTypeCode|codes:'type'"></p>
+		}
+
+		@views.html.helper.columnLabelValue(Messages("readset.sampleOnContainer.sampleCategoryCode")){
+			<p class="form-control-static" ng-bind="readset.sampleOnContainer.sampleCategoryCode|codes:'sample_cat'"></p>
+		}
+       	
+       	@views.html.helper.columnLabelValue(Messages("readset.sampleOnContainer.containerSupportCode")){
+			<p class="form-control-static" ng-bind="readset.sampleOnContainer.containerSupportCode"></p>
+		}
+       	
+		@views.html.helper.columnLabelValue(Messages("readset.sampleOnContainer.containerCode")){
+			<p class="form-control-static" ng-bind="readset.sampleOnContainer.containerCode"></p>
+		}
+		
+		
+				
+       	
+	}
+	@column(){
+		@views.html.helper.columnLabelValue(Messages("readset.sampleOnContainer.percentage")){
+			<p class="form-control-static" ng-bind="readset.sampleOnContainer.percentage"></p>
+		}
+		
+		
+		<div ng-repeat="(key, value) in readset.sampleOnContainer.properties">
+			<property-value key-ng-model="key" value-ng-model="value"/>
+		</div>
+		
+	}
+	
+	</div>
+	
+	
+</form>		

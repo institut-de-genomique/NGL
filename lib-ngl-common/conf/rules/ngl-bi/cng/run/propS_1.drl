@@ -1,0 +1,38 @@
+//created on: Nov 21, 2013
+package rules
+
+rule "Copy Properties SampleAliquotCode from Support and Container to Run"
+	@nglBI(IP_S_1)
+	dialect "java"
+	salience 150
+	no-loop
+	when
+		$run : Run()		
+	then
+		Logger.debug("Copy properties codeAliquot to Run "+$run.code);
+		ContainerSupport cs = MongoDBDAO.findByCode(InstanceConstants.CONTAINER_SUPPORT_COLL_NAME, ContainerSupport.class, $run.containerSupportCode);
+		if(null != cs){
+			
+			List<Container> containers = MongoDBDAO.find(InstanceConstants.CONTAINER_COLL_NAME, Container.class, DBQuery.is("support.code", $run.containerSupportCode)).toList();
+			
+			Set<String> sampleAliquoteCodes = new TreeSet<String>();
+			for(Container container:containers){
+				for(Content content:container.contents){
+					if(content.properties.containsKey("sampleAliquoteCode")){
+						sampleAliquoteCodes.add((String)(content.properties.get("sampleAliquoteCode").value));
+					}
+				}
+			}
+			if(sampleAliquoteCodes.size() > 0){
+					$run.properties.put("sampleAliquoteCodes", new PropertyListValue(new ArrayList(sampleAliquoteCodes)));
+			}
+			
+			MongoDBDAO.update(InstanceConstants.RUN_ILLUMINA_COLL_NAME, Run.class, 
+							DBQuery.is("code", $run.code),
+							DBUpdate.set("properties", $run.properties));
+		}else{
+			Logger.error("ContainerSupport null for "+$run.containerSupportCode);
+		}
+		
+			
+end

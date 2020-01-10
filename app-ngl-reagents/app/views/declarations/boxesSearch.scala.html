@@ -1,0 +1,41 @@
+@this()
+@() 
+@import views.html.helper._
+
+@form() = {
+	@columnSearchForm{
+		@formGroup{
+			<input type="text" class="form-control" ng-model="searchService.form.providerID" placeholder='@Messages("boxes.providerID")'>
+		}
+		@formGroup{
+			<input type="text" class="form-control" ng-model="searchService.form.orderCode" placeholder='@Messages("order.code")'>
+		}
+	}
+	@columnSearchForm{
+	@formGroup{
+			<input type="text" class="form-control" ng-model="searchService.form.lotNumber" placeholder='@Messages("boxes.lotNumber")'>
+		}
+	@formGroup{
+			<input class="form-control" type="text" ng-model="searchService.form.fromReceptionDate" date-timestamp placeholder='@Messages("kits.placeholder.fromReceptionDate")' title='@Messages("kits.placeholder.fromReceptionDate")'>	
+						
+		}
+		
+	}	
+	@columnSearchForm{	
+	@formGroup{
+			<input type="text" class="form-control" ng-model="searchService.form.catalogRefCode " placeholder='@Messages("boxes.catalogRefCode")'>
+		}
+	@formGroup{
+			<input class="form-control" type="text" ng-model="searchService.form.toReceptionDate" date-timestamp placeholder='@Messages("kits.placeholder.toReceptionDate")' title='@Messages("kits.placeholder.toReceptionDate")'>	
+						
+		}
+		
+	}	
+	@columnSearchForm{	
+		@formGroup{
+			<input placeholder="@Messages("boxes.toExpirationDate")" date-timestamp class="form-control" ng-model="searchService.form.toExpirationDate" />
+		}
+	}
+}
+
+@searchForm(form)()("searchService.datatable")

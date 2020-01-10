@@ -1,0 +1,111 @@
+//created on: May 5, 2015
+package rules
+
+rule "Debug pool-tube"
+	@nglSQ( calculations )
+	dialect "java"
+	salience 1000
+	no-loop
+    when
+		$experiment:Experiment($typeCode:typeCode,$typeCode=="pool-tube")
+    eval(true)
+    then
+		Logger.debug("Rules annotation @nglSQ(calculations) pool-tube");    
+end
+
+rule "InputVolume"
+    @nglSQ( calculations )
+	dialect "java"
+	salience 900
+	no-loop
+    when
+		$experiment:Experiment($typeCode:typeCode,$typeCode=="pool-tube")
+		$atomicTransfert: ManyToOneContainer($inputContainerUseds : inputContainerUseds, $inputContainerUseds!=null , $outputContainerUsed: outputContainerUseds, $outputContainerUsed!=null )
+		$containerUsed: InputContainerUsed($percentage: percentage, $percentage!=null) from $inputContainerUseds
+		OutputContainerUsed($finalVolume: volume, $finalVolume!=null) from $outputContainerUsed
+		eval( Double.class.isInstance($percentage) && $finalVolume.getValue()!=null)
+    then
+        Logger.debug("InputVolume calculation");
+        Double inputVolume = roundValue( ((Double)$percentage/100.0) * Double.parseDouble($finalVolume.getValue().toString()));
+        PropertySingleValue propertySingle = new PropertySingleValue(inputVolume, "\u00B5L");
+        if($containerUsed.experimentProperties==null){
+			$containerUsed.experimentProperties = new HashMap<String, PropertyValue>();		
+		}else if($containerUsed.experimentProperties.containsKey("inputVolume")){
+			$containerUsed.experimentProperties.remove("inputVolume");
+		}		
+		$containerUsed.experimentProperties.put("inputVolume", propertySingle);
+		Logger.debug("inputVolume=",propertySingle.getValue());
+		update($experiment);
+
+end
+
+
+rule "outputConcentration"
+    @nglSQ( calculations )
+	dialect "java"
+	salience 800
+	no-loop
+ 	when
+ 	$experiment:Experiment($typeCode:typeCode,$typeCode=="pool-tube")
+	$atomicTransfert: ManyToOneContainer(inputContainerUseds!=null , $outputContainerUseds: outputContainerUseds, $outputContainerUseds!=null, $inputContainerUseds:inputContainerUseds )
+	 $inputConcentrations : Set(empty==false, size==1) from accumulate( InputContainerUsed( $inputConcentration : concentration) from $inputContainerUseds,
+                        collectSet( $inputConcentration) )
+ 	$outputContainerUsed : OutputContainerUsed($concentration: concentration) from $outputContainerUseds
+ 	eval($atomicTransfert.inputContainerUseds.get(0).getConcentration()!=null && ($concentration==null || $concentration.value==null))
+ 	then
+ 		Logger.debug("input concentration to outputconcentration");
+	 	$outputContainerUsed.concentration=$atomicTransfert.inputContainerUseds.get(0).getConcentration();
+ 		
+end
+
+/*rule "Same concentrations in  Pool-tube"
+    @nglSQ( validations )
+	dialect "java"
+	salience 950
+	no-loop
+    when
+		$experiment:Experiment($typeCode:typeCode,$typeCode=="pool-tube")
+		$atomicTransfert: ManyToOneContainer($inputContainerUseds : inputContainerUseds, $inputContainerUseds!=null)
+		$total : Double() from accumulate(InputContainerUsed($c: concentration, $c!=null) from $inputContainerUseds, sum( Double.parseDouble($c.getValue().toString()) ) )
+		$containerUsed: InputContainerUsed($code: code,$concentration: concentration, $concentration!=null) from $inputContainerUseds				
+		$contextValidation:ContextValidation()
+		eval( Double.parseDouble($concentration.getValue().toString())!= (Double) $total/$inputContainerUseds.size())
+    then
+    	Double value = Double.parseDouble($concentration.getValue().toString());
+    	Logger.debug("value = " + value);
+    	Logger.debug("Same concentrations in  Pool-tube");
+    	$contextValidation.addErrors("pool-tube","error.validationexp.sameconcentration",$code, value);
+end
+*/
+
+
+rule "more than one inputContainer"
+	@nglSQ (validations )
+	dialect "java"
+	salience 400
+	no-loop
+    when
+    Experiment($typeCode:typeCode,$typeCode=="pool-tube")
+    $atomicTransfert: ManyToOneContainer(inputContainerUseds!=null, $inputContainerUseds:inputContainerUseds,$inputContainerUseds.size()<=1 )
+    $contextValidation:ContextValidation($errors : errors)
+    $inputContainer:InputContainerUsed() from $inputContainerUseds
+    then 
+       	//Logger.debug("Nb inputContainerSupportCodes "+$inputContainerSupportCodes.size());
+    	$contextValidation.addErrors("inputContainerSupportCodes","error.validationexp.manyInputSupport", $inputContainer.code);
+    end
+
+rule "Volume not null in pool-tube outputContainer"
+    @nglSQ( validations )
+	dialect "java"
+	salience 940
+	no-loop
+    when
+    	$experiment:Experiment($typeCode:typeCode,$typeCode=="pool-tube")
+		$atomicTransfert: ManyToOneContainer($outputContainerUsed: outputContainerUseds.get(0))
+	   	OutputContainerUsed($finalVolume: volume) from $outputContainerUsed
+    	$contextValidation:ContextValidation()
+    	eval($finalVolume == null || $finalVolume.value == null || $finalVolume.value == "")
+    then
+    	Logger.debug("Volume not null in pool-tube outputContainer");
+    	$contextValidation.addErrors("pool-tube","error.validationexp.outputvolumenotnull.light");    	      
+end

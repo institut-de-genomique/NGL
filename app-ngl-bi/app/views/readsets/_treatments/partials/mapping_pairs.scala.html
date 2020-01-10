@@ -1,0 +1,106 @@
+@()
+
+<div class="row">
+	@mapping_softwareVersion()
+</div>
+
+<div class="row"> 
+	<div class="col-md-12 col-lg-12">
+	 <table class="table table-condensed table-hover table-bordered">
+		<thead>
+			<tr>
+				<th></th>
+				<th>@Messages("readsets.treatments.mapping.sampleInput")</th>
+				<th>@Messages("readsets.treatments.mapping.chimericAlignedReads")</th>
+				<th>@Messages("readsets.treatments.mapping.nonChimericAlignedReads")</th>
+				<th>@Messages("readsets.treatments.mapping.FRAlignedReads")</th>
+				<th>@Messages("readsets.treatments.mapping.RFAlignedReads")</th>
+				<th>@Messages("readsets.treatments.mapping.FFAlignedReads")</th>
+				<th>@Messages("readsets.treatments.mapping.RRAlignedReads")</th>
+				<th>@Messages("readsets.treatments.mapping.transAlignedReads")</th>
+				<th>@Messages("readsets.treatments.mapping.singleAlignedReads")</th>				
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<th>@Messages("readsets.treatments.mapping.number")</th>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.sampleInput.value | number}}</td>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.chimericAlignedReads.value | number}}</td>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.nonChimericAlignedReads.value | number}}</td>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.FRAlignedReads.value | number}}</td>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.RFAlignedReads.value | number}}</td>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.FFAlignedReads.value | number}}</td>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.RRAlignedReads.value | number}}</td>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.transAlignedReads.value | number}}</td>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.singleAlignedReads.value | number}}</td>
+			</tr>
+			<tr>
+				<th>@Messages("readsets.treatments.mapping.totalReadsPercent")</th>
+				<td>@Messages("readsets.treatments.mapping.100percent")</td>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.chimericAlignedReadsPercent.value | number:2}} @Messages("unit.percent")</td>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.nonChimericAlignedReadsPercent.value | number:2}} @Messages("unit.percent")</td>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.FRAlignedReadsPercent.value | number:2}} @Messages("unit.percent")</td>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.RFAlignedReadsPercent.value | number:2}} @Messages("unit.percent")</td>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.FFAlignedReadsPercent.value | number:2}} @Messages("unit.percent")</td>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.RRAlignedReadsPercent.value | number:2}} @Messages("unit.percent")</td>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.transAlignedReadsPercent.value | number:2}} @Messages("unit.percent")</td>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.singleAlignedReadsPercent.value | number:2}} @Messages("unit.percent")</td>
+			</tr>					
+		</tbody>
+	</table>
+	</div>	
+</div>
+
+<div class="row" ng-if="readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.forwardAlignedReads!=null || readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.reverseAlignedReads!=null"> 
+	<div class="col-md-5 col-lg-5">
+	 <table class="table table-condensed table-hover table-bordered">
+		<thead>
+			<tr>
+				<th></th>
+				<th>@Messages("readsets.treatments.mapping.forwardAlignedReads")</th>
+				<th>@Messages("readsets.treatments.mapping.reverseAlignedReads")</th>			
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<th>@Messages("readsets.treatments.mapping.number")</th>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.forwardAlignedReads.value | number}}</td>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.reverseAlignedReads.value | number}}</td>
+			</tr>
+			<tr>
+				<th>@Messages("readsets.treatments.mapping.alignedReadsPercent")</th>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.forwardAlignedReadsPercent.value | number:2}} @Messages("unit.percent")</td>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.reverseAlignedReadsPercent.value | number:2}} @Messages("unit.percent")</td>
+			</tr>					
+		</tbody>
+	</table>
+	</div>	
+</div>
+
+<div class="row">
+    <div class="col-md-4 col-lg-4 col-xs-6">
+	    <div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+		ng-click="setImage(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.PEReadDistanceSeparation.value,'PEReadDistanceSeparation','',treament.code!=undefined?treament.code:treatments.getTreatment().code,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.PEReadDistanceSeparation.width,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.PEReadDistanceSeparation.height)">
+		 <a href="#">
+		    <img id="pairs_PEReadDistanceSeparation" ng-src="data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.PEReadDistanceSeparation.value}}" />
+		 </a> 
+	    </div>
+    </div>
+    <div class="col-md-4 col-lg-4 col-xs-6">
+	    <div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+		ng-click="setImage(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.MPReadDistanceSeparation.value,'MPReadDistanceSeparation','',treament.code!=undefined?treament.code:treatments.getTreatment().code,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.MPReadDistanceSeparation.width,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.MPReadDistanceSeparation.height)">
+		 <a href="#">
+		    <img id="pairs_MPReadDistanceSeparation" ng-src="data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.MPReadDistanceSeparation.value}}" />
+		 </a>   
+	    </div>
+    </div>
+</div>
+
+<div class="row">
+	@mapping_estimatedPEInsertSize()
+	@mapping_estimatedMPInsertSize()
+</div>

@@ -1,0 +1,60 @@
+@()
+<div class="col-md-12 col-lg-12" ng-controller="IlluminaDepotCtrl">
+
+ 	<!--  code pourrait aller dans un partial utilisable cng/cng -->
+ 	<!-- pour l'instant restreindre au CNRGH, le Novaseq6000 CNS pas encore arrivé -->
+    <!-- NGL-1769: import fichier XML pour NOVASEQ6000 -->
+	<div class="col-md-12 col-lg-offset-7" ng-show="('NOVASEQ6000' === experiment.instrument.typeCode)">
+	  <form class="form-horizontal" role="form">
+	   <div class="row margin-bottom-7">
+	        <div class="form-group col-lg-6"  ng-show="buttonNOVASEQ6000XMLfile.isShow()">
+	             <div class="col-lg-6">
+	             <label for="importNOVASEQ6000XMLfile" class="control-label">Fichier NovaSeq 6000 (RunParameter.xml)</label>
+	             <div class="input-group" style="width:100%">
+	                <input class="form-control input-sm" type="file" 
+	                                                     base64-file="file" 
+	                                                     id="NOVASEQ6000XMLfile" />
+	                <span class="input-group-btn">									 
+	                     <button class="btn btn-primary" ng-click="buttonNOVASEQ6000XMLfile.click()" 
+	                                                     ng-disabled="buttonNOVASEQ6000XMLfile.isFileSet()" 
+	                                                     title="@Messages("button.import.file")"><i class="fa fa-upload"></i> 
+	                     </button>     
+	                </span> 
+	            </div> 
+	            </div>    				  
+	         </div>              			
+	       </div>  
+	  </form>
+	</div>
+	
+    
+	<div class="row">
+		<div class="col-md-12 col-lg-12" ultimate-datatable="atmService.data"></div>
+	</div>	
+</div>
+
+<!-- imbriques ou pas c'est pareil l'evenement isEditMode n'est pas visible... -->
+<!-- FDS 08/11/2017 NGL-1326 ajout bouton pour import fichier Mettler/LabX !! specifique CNG -->
+
+<div class="col-md-12 col-lg-12" ng-controller="IlluminaDepotCNGCtrl"> 
+  <form class="form-horizontal" role="form">
+   <div class="row margin-bottom-7">
+        <div class="form-group col-lg-6" ng-show="buttonMettler.isShow()">      
+            <div class="col-lg-6">
+             <label for="importFileMettler" class="control-label">Fichier Mettler (CSV)</label>
+             <div class="input-group" style="width:100%">
+                <input class="form-control input-sm" type="file" 
+                                                     base64-file="file" 
+                                                     id="importFileMettler" />
+                <span class="input-group-btn">									 
+                     <button class="btn btn-primary" ng-click="buttonMettler.click()" 
+                                                     ng-disabled="buttonMettler.isFileSet()" 
+                                                     title="@Messages("button.import.file")"><i class="fa fa-upload"></i> 
+                     </button>     
+                </span> 
+            </div> 
+            </div>                				  
+         </div>              			
+       </div>  
+  </form>
+</div>

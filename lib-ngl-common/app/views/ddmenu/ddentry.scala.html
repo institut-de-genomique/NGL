@@ -1,0 +1,7 @@
+@(nav : String, key : String, route : play.api.mvc.Call, message : String)
+<li class="@("active".when(nav==key))">
+	<a href="@route">
+		@Messages(message)
+	</a>
+</li>
+

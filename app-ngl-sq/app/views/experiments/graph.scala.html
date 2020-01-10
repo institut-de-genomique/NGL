@@ -1,0 +1,53 @@
+@()
+@import views.html.helper._
+@form() = {
+	<div class="col-md-12 col-lg-12">
+	<div class="row">
+		@columnFormGroup{
+			<div bt-select placeholder="@Messages("processes.select.processCategory")" class="form-control" ng-model="form.processCategory" bt-options="processCategory.code as processCategory.name for processCategory in lists.getProcessCategories()" ng-change="changeProcessCategory()" auto-select>
+		</div>
+		}
+		@columnFormGroup{
+			<div bt-select placeholder="@Messages("processes.select.processType")" class="form-control" ng-disabled="form.processCategory === undefined || graphNodes === undefined" ng-model="form.processTypeCode" bt-options="processType.code as processType.name for processType in  lists.getProcessTypes()" ng-change="changeProcessTypes()" auto-select>
+		</div>
+		}
+		@columnFormGroup{
+		}
+		@columnFormGroup{
+		}
+		@columnFormGroup{
+		}
+		@columnFormGroup{
+		<div class="btn-toolbar">
+			<button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="search()" class="btn btn-primary" >
+				<i class="fa fa-search"></i>
+			</button>
+			<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="reset()"  class="btn btn-default">
+				<i class="fa fa-undo"></i>
+			</button>
+										 	
+		</div>
+		}
+	</div>
+	
+	</div>
+	
+}
+
+
+<div class="row"> 
+<div class="col-md-12 col-lg-12">
+	<form class="well well-small">
+	<div class="row">
+		@form			
+	</div>		
+	</form>		
+</div>
+</div>
+
+
+<div class="row">
+	<div class="col-md-12 col-lg-12">
+		<div id="graph"></div>
+	</div>
+</div>

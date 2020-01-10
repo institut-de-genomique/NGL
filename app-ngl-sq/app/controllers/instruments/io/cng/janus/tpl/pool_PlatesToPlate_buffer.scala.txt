@@ -1,0 +1,29 @@
+@(experiment:models.laboratory.experiment.instance.Experiment)
+
+@import controllers.instruments.io.utils._;
+
+@*** FDS: déclarations de variables avec le mot clé 'var' et toutes sur une seule ligne 
+ en float on a trop de decimales....
+ @import java.lang.Float; var buffer_vol=0.0
+***@
+@import java.math.BigInteger; var dest_pos=0;
+@import java.lang.Double; var buffer_vol=0.0;
+
+@*** FDS  26/10/2016
+CRLF pour le header
+séparateur "," 
+FDS correction 14/11/2016 le destination rack doit s'appeller "poolplate" [ 1 seule plaque en sortie possible ? ]
+FDS 13/01/2017 ajout de la transformation en 0.0 si  > -1.0 et < 0.0
+***@
+
+Destination rack,Destination position,volume\u000D\u000A
+@for((a,index) <- experiment.atomicTransfertMethods.sortWith(_.line<_.line).sortWith(_.column.toInt<_.column.toInt).zipWithIndex){
+		@for(c <- a.outputContainerUseds){
+			
+			 @{dest_pos=OutputHelper.getNumberPositionInPlateByColumn(c.locationOnContainerSupport.line, c.locationOnContainerSupport.column)}
+			 @{buffer_vol=Double.parseDouble( a.outputContainerUseds.get(0).experimentProperties.get("bufferVolume").value.toString())}
+			 @if( (buffer_vol > -1.0) && ( buffer_vol < 0.0) ) { @{buffer_vol=0.0}  }
+			 
+			 poolplate,@(dest_pos),@(buffer_vol)\u000D\u000A
+		}	
+} 

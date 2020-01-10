@@ -1,0 +1,54 @@
+@(experiment: models.laboratory.experiment.instance.Experiment, containers: List[models.laboratory.container.instance.Container])
+
+@import controllers.instruments.io.utils._;
+@import java.text.SimpleDateFormat
+@import java.util.Locale
+
+@*** déclarations de variables avec le mot clé 'var'
+  fichier pour index dual => chemistry=Amplicon
+  pour les lignes vides: utiliser "#"
+***@
+
+@import java.lang.String; var i7_index_name=""; var i7_index_seq=""; var i5_index_name=""; var i5_index_seq=""; 
+@import java.lang.String; var sample_id=""; var description=""; 
+
+[Header]\u000D\u000A
+IEMFileVersion,5\u000D\u000A
+Experiment Name,@experiment.code\u000D\u000A
+Date,@(new SimpleDateFormat("MM/dd/yyyy").format(experiment.traceInformation.creationDate))\u000D\u000A
+Workflow,GenerateFASTQ\u000D\u000A
+Application,NovaSeq FASTQ Only\u000D\u000A
+Instrument Type,NovaSeq\u000D\u000A
+Assay,\u000D\u000A
+Index Adapters,\u000D\u000A
+Description,@(containers{0}.support.code)\u000D\u000A
+Chemistry,Amplicon\u000D\u000A
+#\u000D\u000A
+[Reads]\u000D\u000A
+@experiment.instrumentProperties.get("nbCyclesRead1").value\u000D\u000A
+@experiment.instrumentProperties.get("nbCyclesRead2").value\u000D\u000A
+#\u000D\u000A
+[Settings]\u000D\u000A
+Adapter,AGATCGGAAGAGCACACGTCTGAACTCCAGTCA\u000D\u000A
+AdapterRead2,AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT\u000D\u000A
+#\u000D\u000A
+[Data]\u000D\u000A
+Sample_ID,Sample_Name,Sample_Plate,Sample_Well,I7_Index_ID,index,I5_Index_ID,index2,Sample_Project,Description\u000D\u000A
+@for(c <- containers.sortWith(_.code<_.code)){ 
+	@for(co <- c.contents){
+		
+		@{sample_id=c.support.line +"_"+ co.sampleCode+"_"+OutputHelper.getContentProperty(co,"libProcessTypeCode")+"_"+OutputHelper.getContentProperty(co,"tag")}
+		
+		@*** 13/02/2018ATTENTION tous les noms d'index dual ne suivent pas la nomenclature Illumina <index1>-<index2>=> ne pas splitter, ne pas mettre les noms dans la FDR
+		@{i7_index_name=OutputHelper.getContentProperty(co,"tag").split("-")(0)}
+		@{i5_index_name=OutputHelper.getContentProperty(co,"tag").split("-")(1)}
+		***@
+
+		@{i7_index_seq=OutputHelper.getSequence(OutputHelper.getIndex("index-illumina-sequencing",OutputHelper.getContentProperty(co,"tag"))).split("-")(0)}
+		@{i5_index_seq=OutputHelper.getSequence(OutputHelper.getIndex("index-illumina-sequencing",OutputHelper.getContentProperty(co,"tag"))).split("-")(1)}
+	
+		@{description=OutputHelper.getContentProperty(co,"tag")+"_"+co.percentage}
+	
+		@sample_id,,,,,@i7_index_seq,,@i5_index_seq,@co.projectCode,@description\u000D\u000A
+	}
+} 

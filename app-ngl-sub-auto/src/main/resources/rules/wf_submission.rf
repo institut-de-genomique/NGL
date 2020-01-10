@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<process xmlns="http://drools.org/drools-5.0/process"
+         xmlns:xs="http://www.w3.org/2001/XMLSchema-instance"
+         xs:schemaLocation="http://drools.org/drools-5.0/process drools-processes-5.0.xsd"
+         type="RuleFlow" name="fr.cea.ig.auto.submission.WorkflowSubmission" id="fr.cea.ig.auto.submission.WorkflowSubmission" package-name="birds" >
+
+  <header>
+    <imports>
+      <import name="fr.genoscope.lis.devsi.birds.impl.model.Birds" />
+    </imports>
+  </header>
+
+  <nodes>
+    <start id="1" name="Start" x="377" y="22" width="48" height="48" />
+    <end id="2" name="End" x="470" y="579" width="48" height="48" />
+    <actionNode id="3" name="createXML" x="502" y="254" width="163" height="48" >
+        <action type="expression" dialect="java" >Birds.generateJobs("createXML", "SRA", (org.drools.spi.ProcessContext)kcontext);</action>
+    </actionNode>
+    <actionNode id="5" name="transfertRawData" x="258" y="255" width="162" height="55" >
+        <action type="expression" dialect="java" >Birds.generateJobs("transfertRawData", "SRA", (org.drools.spi.ProcessContext)kcontext);</action>
+    </actionNode>
+    <actionNode id="7" name="sendXML" x="423" y="478" width="131" height="48" >
+        <action type="expression" dialect="java" >Birds.generateJobs("sendXML", "SRA", (org.drools.spi.ProcessContext)kcontext);</action>
+    </actionNode>
+    <split id="8" name="Gateway" x="418" y="133" width="49" height="49" type="1" />
+    <join id="9" name="Gateway" x="460" y="354" width="49" height="49" type="1" />
+  </nodes>
+
+  <connections>
+    <connection from="7" to="2" />
+    <connection from="8" to="3" />
+    <connection from="8" to="5" />
+    <connection from="9" to="7" />
+    <connection from="1" to="8" />
+    <connection from="5" to="9" />
+    <connection from="3" to="9" />
+  </connections>
+
+</process>

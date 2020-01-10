@@ -1,0 +1,38 @@
+@(keyBilan: String, filterKeyBilan: String, read: String)
+
+<div class="panel panel-info">
+  <div class="panel-heading"><strong>@(Messages("readsets.treatments.taxonomy."+keyBilan))</strong></div>	
+   <div class="treatmentOverflow">
+   	<label for="inputFilter">@(Messages(filterKeyBilan)) </label>
+   	<input type="text" ng-model='@(filterKeyBilan)' placeholder='@(Messages(filterKeyBilan))' title='@(Messages(filterKeyBilan))' ng-value='@(filterKeyBilan)' ng-change='@("setFilterTaxonBilanCommon(\""+keyBilan+"\","+filterKeyBilan+")")' id="inputFilter">
+   	<table class="table table-condensed table-hover table-bordered">
+   		<thead>							
+			<tr>
+				<th>
+					@Messages("readsets.treatments.taxonomy.taxonBilan.taxon")
+				</th>
+				<th>
+					@Messages("readsets.treatments.taxonomy.taxonBilan.nbSeq")
+				</th>
+				<th>
+					@Messages("readsets.treatments.taxonomy.taxonBilan.percent")
+				</th>
+			</tr>
+		</thead>
+		<tbody>
+		<tr ng-repeat='obj in @("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+"."+keyBilan+".value")|orderBy:"nbSeq":true' ng-if='obj.percent>@(filterKeyBilan)'>
+			<td>									
+				 <a href="{{ncbiUrl + obj.taxon.replace(' ','+') }}" target="_blank">{{obj.taxon}}</a>									
+			</td>
+			<td>
+				 {{obj.nbSeq | number}}													
+			</td>
+			<td>
+				{{ obj.percent | number:2}} @Messages("unit.percent")												
+			</td>
+		</tr>
+		</tbody>
+   	</table>
+   </div>
+</div>	
+	

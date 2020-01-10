@@ -1,0 +1,24 @@
+@()
+<div ng-controller="OneToVoidQCCtrl">	
+	<div class="col-md-12 col-lg-12" ng-controller="OneToVoidQCMiseqCNGCtrl">
+	<div class="row margin-bottom-7" ng-show="button.isShow()">
+	<div class="col-md-5 col-lg-5">
+	<form class="form-horizontal">
+  	<div class="form-group">
+   		<label  class="col-md-3 col-lg-3 control-label">Fichier résultats Miseq : </label>
+		<div class="input-group col-md-9 col-lg-9" >
+		<input id="importFile" type="file" class="form-control" base64-file="file">
+		<span class="input-group-btn">
+			<button class="btn btn-primary" ng-click="button.click()" ng-disabled="button.isFileSet()" title="@Messages("button.import.file")"><i class="fa fa-upload"></i></button>
+		</span>
+		</div>
+	</div>
+	</form>
+	</div>
+	</div>
+	<div class="row">
+		<div class="col-md-12 col-lg-12" ultimate-datatable="atmService.data"></div>
+	</div>
+	
+	</div>						
+</div>

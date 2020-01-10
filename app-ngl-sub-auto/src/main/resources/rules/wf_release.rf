@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<process xmlns="http://drools.org/drools-5.0/process"
+         xmlns:xs="http://www.w3.org/2001/XMLSchema-instance"
+         xs:schemaLocation="http://drools.org/drools-5.0/process drools-processes-5.0.xsd"
+         type="RuleFlow" name="fr.cea.ig.auto.submission.WorkflowRelease" id="fr.cea.ig.auto.submission.WorkflowRelease" package-name="birds" >
+
+  <header>
+    <imports>
+      <import name="fr.genoscope.lis.devsi.birds.impl.model.Birds" />
+    </imports>
+  </header>
+
+  <nodes>
+    <start id="1" name="Start" x="436" y="27" width="48" height="48" />
+    <end id="2" name="End" x="470" y="579" width="48" height="48" />
+    <actionNode id="3" name="createReleaseXML" x="385" y="254" width="163" height="48" >
+        <action type="expression" dialect="java" >Birds.generateJobs("createReleaseXML", "SRA", (org.drools.spi.ProcessContext)kcontext);</action>
+    </actionNode>
+    <actionNode id="7" name="sendReleaseXML" x="410" y="480" width="158" height="48" >
+        <action type="expression" dialect="java" >Birds.generateJobs("sendReleaseXML", "SRA", (org.drools.spi.ProcessContext)kcontext);</action>
+    </actionNode>
+  </nodes>
+
+  <connections>
+    <connection from="7" to="2" />
+    <connection from="1" to="3" />
+    <connection from="3" to="7" />
+  </connections>
+
+</process>

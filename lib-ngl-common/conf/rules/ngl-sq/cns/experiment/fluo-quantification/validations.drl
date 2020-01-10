@@ -1,0 +1,39 @@
+//created on: Apr 21, 2015
+package rules
+
+
+
+rule "fluo-quantification validation concentration final mandatory if not non quantifiable"
+	@nglSQ( validations )
+	dialect "java"
+	salience 1000
+	no-loop
+    when
+	Experiment($typeCode:typeCode,$typeCode=="fluo-quantification")
+	$contextValidation:ContextValidation()
+	State($stateCode:code=="F")
+	OneToVoidContainer($inputContainerUseds:inputContainerUseds)
+    InputContainerUsed($code:code, experimentProperties != null, $method:experimentProperties.get("calculationMethod"),$concentration1:experimentProperties.get("concentration1")) from $inputContainerUseds
+	eval($method !=null && !"Non quantifiable".equals($method.value) && ($concentration1 == null || $concentration1.value == null)) 
+	then
+		Logger.debug("Debug mandatory concentration if not non quantifiable "+$method.value);
+		$contextValidation.addErrors("Concentration finale","error.validationexp.outputconcentrationnotnull", $code);
+	end
+
+rule "fluo-quantification validation concentration final not negative"
+	@nglSQ( validations )
+	dialect "java"
+	salience 1000
+	no-loop
+    when
+	Experiment($typeCode:typeCode,$typeCode=="fluo-quantification")
+	$contextValidation:ContextValidation()
+	State($stateCode:code=="F")
+	OneToVoidContainer($inputContainerUseds:inputContainerUseds)
+	InputContainerUsed($code:code,$experimentProperties : experimentProperties,$experimentProperties!=null) from $inputContainerUseds
+	$concentration1 : PropertyValue() from $experimentProperties.get("concentration1")
+	eval($concentration1 != null && convertPVToDouble($concentration1) < 0) 
+	then
+		Logger.debug("Debug not negative concentration");
+		$contextValidation.addErrors("Concentration finale","error.validationexp.outputconcentrationnotnegative", $code);
+end

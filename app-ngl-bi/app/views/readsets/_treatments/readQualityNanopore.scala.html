@@ -1,0 +1,185 @@
+@()
+<!-- Tableau a 2 dimensions -->
+ <div class="row">
+	<div class="col-md-6 col-lg-6">	
+		 <table class="table table-condensed table-hover table-bordered">
+			<thead>
+				<tr>
+					<th></th>
+					<th>@Messages("treatments.nanopore.1DForward")</th>
+					<th>@Messages("treatments.nanopore.1DReverse")</th>
+					<th>@Messages("treatments.nanopore.2DAll")</th>
+					<th>@Messages("treatments.nanopore.2DPass")</th>
+					<th>@Messages("treatments.nanopore.useful")</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<th>@Messages("treatments.ngsrg_nanopore.nbBases")</th>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DForward'].value.nbBases | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DReverse'].value.nbBases | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DAll'].value.nbBases | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DPass'].value.nbBases | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['useful'].value.nbBases | number}}</td>
+				</tr>	
+				
+				<tr>
+					<th>@Messages("treatments.ngsrg_nanopore.nbReads")</th>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DForward'].value.nbReads | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DReverse'].value.nbReads | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DAll'].value.nbReads | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DPass'].value.nbReads | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['useful'].value.nbReads | number}}</td>
+				</tr>						
+				<tr>
+					<th>@Messages("readsets.treatments.ngsrg_nanopore.avgSize")</th>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DForward'].value.avgSize | number:2}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DReverse'].value.avgSize | number:2}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DAll'].value.avgSize | number:2}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DPass'].value.avgSize | number:2}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['useful'].value.avgSize | number:2}}</td>
+				</tr>	
+				<tr>
+					<th>@Messages("readsets.treatments.ngsrg_nanopore.maxSize")</th>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DForward'].value.maxSize | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DReverse'].value.maxSize | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DAll'].value.maxSize | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DPass'].value.maxSize | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['useful'].value.maxSize | number}}</td>
+				</tr>
+				<tr>
+					<th>@Messages("readsets.treatments.ngsrg_nanopore.N50")</th>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DForward'].value.N50 | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DReverse'].value.N50 | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DAll'].value.N50 | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DPass'].value.N50 | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['useful'].value.N50 | number}}</td>
+				</tr>	
+				<tr>
+					<th>@Messages("readsets.treatments.ngsrg_nanopore.nbReadsOver10kb")</th>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DForward'].value.nbReadsOver10kb | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DReverse'].value.nbReadsOver10kb | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DAll'].value.nbReadsOver10kb | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DPass'].value.nbReadsOver10kb | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['useful'].value.nbReadsOver10kb | number}}</td>
+				</tr>		
+				<tr>
+					<th>@Messages("readsets.treatments.ngsrg_nanopore.nbReadsOver30kb")</th>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DForward'].value.nbReadsOver30kb | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DReverse'].value.nbReadsOver30kb | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DAll'].value.nbReadsOver30kb | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DPass'].value.nbReadsOver30kb | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['useful'].value.nbReadsOver30kb | number}}</td>
+				</tr>
+				<tr>
+					<th>@Messages("readsets.treatments.ngsrg_nanopore.nbReadsOver50kb")</th>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DForward'].value.nbReadsOver50kb | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DReverse'].value.nbReadsOver50kb | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DAll'].value.nbReadsOver50kb | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DPass'].value.nbReadsOver50kb | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['useful'].value.nbReadsOver50kb | number}}</td>
+				</tr>
+				<tr>
+					<th>@Messages("readsets.treatments.ngsrg_nanopore.nbReadsOver100kb")</th>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DForward'].value.nbReadsOver100kb | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DReverse'].value.nbReadsOver100kb | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DAll'].value.nbReadsOver100kb | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DPass'].value.nbReadsOver100kb | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['useful'].value.nbReadsOver100kb | number}}</td>
+				</tr>		
+				<tr>
+					<th>@Messages("readsets.treatments.ngsrg_nanopore.GCPercent")</th>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DForward'].value.GCPercent | number:2}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DReverse'].value.GCPercent | number:2}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DAll'].value.GCPercent | number:2}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DPass'].value.GCPercent | number:2}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['useful'].value.GCPercent | number:2}}</td>
+				</tr>	
+				<tr>
+					<th>@Messages("readsets.treatments.ngsrg_nanopore.qualityAvg")</th>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DForward'].value.qualityAvg | number:2}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DReverse'].value.qualityAvg | number:2}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DAll'].value.qualityAvg | number:2}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DPass'].value.qualityAvg | number:2}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['useful'].value.qualityAvg | number:2}}</td>
+				</tr>					
+			</tbody>
+		 </table>
+	</div>
+</div>
+
+<!-- Image -->
+
+
+
+<div class="row">
+	<div class="col-md-5 col-lg-5">
+	<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+		ng-click="setImage(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.readLengthVsreadQuality.value,'readLengthVsreadQuality','',treament.code!=undefined?treament.code:treatments.getTreatment().code,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.readLengthVsreadQuality.width,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.readLengthVsreadQuality.height)">
+		 <a href="#">
+		    <img id="default_readLengthVsreadQuality" ng-src="data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.readLengthVsreadQuality.value}}" />
+		 </a> 
+	    </div>
+	</div>
+	<div class="col-md-5 col-lg-5">
+	<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+		ng-click="setImage(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.readLengthDistribution.value,'readLengthDistribution','',treament.code!=undefined?treament.code:treatments.getTreatment().code,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.readLengthDistribution.width,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.readLengthDistribution.height)">
+		 <a href="#">
+		    <img id="default_readLengthDistribution" ng-src="data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.readLengthDistribution.value}}" />
+		 </a> 
+	    </div>
+	 </div>
+	
+</div>
+
+<div class="row">
+	 <div class="col-md-5 col-lg-5">
+	<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+		ng-click="setImage(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.GCDistribution.value,'GCDistribution','',treament.code!=undefined?treament.code:treatments.getTreatment().code,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.GCDistribution.width,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.GCDistribution.height)">
+		 <a href="#">
+		    <img id="default_GCDistribution" ng-src="data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.GCDistribution.value}}" />
+		 </a> 
+	    </div>
+	    </div>
+	  <div class="col-md-5 col-lg-5">
+	<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+		ng-click="setImage(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.KmersDistribution.value,'KmersDistribution','',treament.code!=undefined?treament.code:treatments.getTreatment().code,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.KmersDistribution.width,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.KmersDistribution.height)">
+		 <a href="#">
+		    <img id="default_KmersDistribution" ng-src="data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.KmersDistribution.value}}" />
+		 </a> 
+	    </div>
+	    </div>
+	 
+	</div>
+<div class="row">
+	 <div class="col-md-5 col-lg-5">
+	<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+		ng-click="setImage(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.readQualityDistribution.value,'readQualityDistribution','',treament.code!=undefined?treament.code:treatments.getTreatment().code,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.readQualityDistribution.width,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.readQualityDistribution.height)">
+		 <a href="#">
+		    <img id="default_readQualityDistribution" ng-src="data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.readQualityDistribution.value}}" />
+		 </a> 
+	   </div>
+	   </div>
+	   
+	   <div class="col-md-5 col-lg-5">
+	<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+		ng-click="setImage(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.basesCumulativeDistribution.value,'basesCumulativeDistribution','',treament.code!=undefined?treament.code:treatments.getTreatment().code,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.basesCumulativeDistribution.width,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.basesCumulativeDistribution.height)">
+		 <a href="#">
+		    <img id="default_basesCumulativeDistribution" ng-src="data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.basesCumulativeDistribution.value}}" />
+		 </a> 
+	   </div>
+	   </div>
+	
+</div>

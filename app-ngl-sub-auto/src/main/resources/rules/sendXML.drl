@@ -1,0 +1,68 @@
+#created on: Jul 7, 2014
+package birds
+
+import java.util.Date;
+import java.text.SimpleDateFormat;
+
+rule "Define variable lineParmeter for sendXML specification"
+	@BirdsRule(fsRule)
+	dialect 'java'
+	salience 300
+	no-loop
+    when
+       $treatSpec : TreatmentSpecification(name=="sendXML", project.name=="SRA")
+       $job : Job()
+    then
+       Logger log = Logger.getLogger("ngl.sub.rules");
+       log.debug("Set parameter for spec sendXML");
+       updateParameterXML("xmlSubmission",$job, "subToSend");
+       updateParameterXML("xmlStudys",$job, "subToSend");
+       updateParameterXML("xmlSamples",$job, "subToSend");
+       updateParameterXML("xmlExperiments",$job, "subToSend");
+       updateParameterXML("xmlRuns",$job, "subToSend");
+       $job.setParameterValue("listAC",$job.getParameterValue("listAC").getValue().replace("%submissionCode%",$job.getUniqueJobResource("subToSend").getProperty("code")));
+       SimpleDateFormat dt = new SimpleDateFormat("yyyyMMddhhmm");
+       String dateSubmission = dt.format(new Date());
+       $job.setParameterValue("listAC",$job.getParameterValue("listAC").getValue().replace("%submissionDate%",dateSubmission));
+       $job.setParameterValue("OptionCD",$job.getParameterValue("OptionCD").getValue().replace("%submissionDirectory%",$job.getUniqueJobResource("subToSend").getProperty("submissionDirectory")));
+	
+end
+
+rule "POST DONE EXECUTION of sendXML : File AC results operation"
+	@BirdsRule( ExecutionService )
+	dialect 'java'
+	salience 200
+	when
+		$executionService : ExecutionService( status == ExecutionService.POST_JOB_EXECUTION_STATUS)
+		$job : Job( treatmentSpecification!=null, treatmentSpecification.name == "sendXML", treatmentSpecification.project.name == "SRA", executionState == Job.DONE_STATUS )
+	then
+		Logger log = Logger.getLogger("ngl.sub.rules");
+		//Call service treatment AC files results 
+		JobResource jobResource = $job.getUniqueJobResource("subToSend");
+		String codeSubmission = jobResource.getProperty("code");
+		String studyCode = jobResource.getProperty("studyCode");
+		String sampleCodes = jobResource.getProperty("sampleCodes");
+		String experimentCodes = jobResource.getProperty("experimentCodes");
+		String runCodes = jobResource.getProperty("runCodes");
+		String creationUser = jobResource.getProperty("creationUser");
+		String pathAC = jobResource.getProperty("submissionDirectory")+File.separator+$job.getParameterValue("listAC").getValue();
+		//File fileAC = new File(pathAC);
+		log.debug("path AC="+pathAC);
+		log.debug("Call treatmentFileSubmission with "+codeSubmission+" studyCode="+studyCode+" sampleCodes="+sampleCodes+" experimentCodes="+experimentCodes+" runCodes="+runCodes+" creationUser="+creationUser);
+		boolean ebiSuccess = false;
+		try{
+			ebiSuccess = SubmissionServicesFactory.getInstance().treatmentFileSubmission(pathAC, codeSubmission, studyCode, sampleCodes, experimentCodes, runCodes, creationUser);
+		}catch(Exception e){
+	    	$job.setExecutionState(Job.ERROR_STATUS);
+	    	log.debug("Exception "+e.getMessage());
+	    	$job.setProperty("Exception",e.getMessage());
+	    }
+		JSONDevice jsonDevice = new JSONDevice();
+		if(ebiSuccess){
+			jsonDevice.httpPut(ProjectProperties.getProperty("server")+"/sra/submissions/"+codeSubmission+"/state", "{\"code\":\"F-SUB\"}", "bot");
+		}else{
+			jsonDevice.httpPut(ProjectProperties.getProperty("server")+"/sra/submissions/"+codeSubmission+"/state", "{\"code\":\"FE-SUB\"}", "bot");
+			$job.setExecutionState(Job.ERROR_STATUS);
+		}
+end
+

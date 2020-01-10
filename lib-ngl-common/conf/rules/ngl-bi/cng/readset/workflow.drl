@@ -1,0 +1,43 @@
+//created on: Nov 21, 2013
+package rules
+
+rule "Set state to In Waiting Transfert CCRT from In Waiting BI Analyse readSet"
+	@nglBI( IW_BA_1 )
+	dialect "java"
+	salience 600
+	no-loop
+	when
+		$nextState : State(code=="IW-BA")
+		$project : Project(bioinformaticParameters!=null, bioinformaticParameters.fgGroup!=null, !StringUtils.isBlank(bioinformaticParameters.fgGroup))
+		$readSet : ReadSet(location==null || (location!=null && location!="CCRT"))
+	then
+		Logger.debug("Set state readSet to IW-TF "+$readSet.code);
+		$nextState.code="IW-TF";
+end
+
+rule "Set state to In Waiting BI Analyse from Finished Transfert CCRT"
+	@nglBI( F_TF_1 )
+	dialect "java"
+	salience 600
+	no-loop
+	when
+		$nextState : State(code=="F-TF")
+		$project : Project(bioinformaticParameters!=null, bioinformaticParameters.fgGroup!=null, !StringUtils.isBlank(bioinformaticParameters.fgGroup))
+	then
+		Logger.debug("Set state readSet to IW-BA");
+		$nextState.code="IW-BA";
+end
+
+rule "Set state to In Progress BI Analyse from In Waiting BI Analyse CCRT"
+	@nglBI( IW_BA_1 )
+	dialect "java"
+	salience 600
+	no-loop
+	when
+		$nextState : State(code=="IW-BA")
+		$project : Project(bioinformaticParameters!=null, bioinformaticParameters.fgGroup!=null, !StringUtils.isBlank(bioinformaticParameters.fgGroup))
+		$readSet : ReadSet(location!=null, location=="CCRT")
+	then
+		Logger.debug("Set state readSet to IP-BA "+$readSet.code);
+		$nextState.code="IP-BA";
+end

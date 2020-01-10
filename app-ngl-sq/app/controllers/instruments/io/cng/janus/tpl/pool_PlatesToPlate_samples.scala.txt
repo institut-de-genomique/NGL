@@ -1,0 +1,19 @@
+@** 
+21/09/2016 (GA->FDS) trop complexe a faire en scala--> passer par une  liste d'objet java intermédiaire: SampleSheetPoolLine
+**@
+@(lines: List[controllers.instruments.io.cng.janus.SampleSheetPoolLine])
+
+@import controllers.instruments.io.utils._;
+
+@*** FDS corrections 26/10/2016
+CRLF pour le header
+correction séparateur "," 
+***@
+
+Source rack,Source position,Destination rack,Destination position,Volume\u000D\u000A
+@for((line) <- lines.sorted){
+  @*** pour debug uniqt 
+  @line.inputSupportCode;
+  **@
+  @line.inputSupportSource,@line.inputSupportContainerPosition,@line.outputSupportDest,@line.outputSupportPosition,@line.inputSupportContainerVolume\u000D\u000A
+} 

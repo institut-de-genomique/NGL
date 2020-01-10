@@ -1,0 +1,30 @@
+@(experiment:models.laboratory.experiment.instance.Experiment)
+
+@import controllers.instruments.io.utils._;
+
+@***** FDS: 25/07/2016 declaration de variables avec le mot cle 'var' et toutes sur une seule ligne *******@
+@import java.lang.String; var sample_code=""; var sample_vol=""; var buffer_vol=""; var source_well_line=""; var source_well_col=""; 
+@import java.math.BigInteger; var num=0; var source_pos=0; var dest_pos=0;
+
+Nr,SampleID,Volume librairie,Volume RSB,Source Plate,Source position,Source Well,Destination Plate,Destination position\u000D\u000A
+@for((atm, index) <- experiment.atomicTransfertMethods.sortWith(OutputHelper.sortBylocationSupportOneToOne).zipWithIndex){
+	@*** 
+	   FDS 31/05/2016 
+	   Pour l'instant, ne pas utiliser @(index+1) pour num mais le calcul getNumberPositionInPlateByColumn  pour le cas ou  il y a des trous
+	   dans la plaque (ou des puits exclus a l'expérience précédente).
+	   ...Attente des informations du technicien, il semblerait que le robot ait absolument besoin d'une ligne par puit meme s'il est vide
+	   on pourrait alors utiliser @(index+1) pour Nr, mais il faut forcer les volumes a 0 dans ces lignes
+	@(index+1),@(atm.inputContainerUseds.get(0).code),@(OutputHelper.getExperimentProperty(atm.inputContainerUseds.get(0), "inputVolume")),@(OutputHelper.getExperimentProperty(atm.inputContainerUseds.get(0), "bufferVolume")),Source,@(OutputHelper.getNumberPositionInPlateByColumn(atm.inputContainerUseds.get(0).locationOnContainerSupport.line,atm.inputContainerUseds.get(0).locationOnContainerSupport.column)),@(atm.inputContainerUseds.get(0).locationOnContainerSupport.line)@(atm.inputContainerUseds.get(0).locationOnContainerSupport.column),Normalized,@(OutputHelper.getNumberPositionInPlateByColumn(atm.outputContainerUseds.get(0).locationOnContainerSupport.line,atm.outputContainerUseds.get(0).locationOnContainerSupport.column))\u000D\u000A
+	***@
+
+	@{num=OutputHelper.getNumberPositionInPlateByColumn(atm.inputContainerUseds.get(0).locationOnContainerSupport.line,atm.inputContainerUseds.get(0).locationOnContainerSupport.column)}	
+	@{sample_code=atm.inputContainerUseds.get(0).code}
+	@{sample_vol=OutputHelper.getExperimentProperty(atm.inputContainerUseds.get(0), "inputVolume").toString()}
+	@{buffer_vol=OutputHelper.getExperimentProperty(atm.inputContainerUseds.get(0), "bufferVolume").toString()}
+	@{source_pos=OutputHelper.getNumberPositionInPlateByColumn(atm.inputContainerUseds.get(0).locationOnContainerSupport.line,atm.inputContainerUseds.get(0).locationOnContainerSupport.column)}
+	@{source_well_line=atm.inputContainerUseds.get(0).locationOnContainerSupport.line}
+	@{source_well_col=atm.inputContainerUseds.get(0).locationOnContainerSupport.column}
+	@{dest_pos=OutputHelper.getNumberPositionInPlateByColumn(atm.outputContainerUseds.get(0).locationOnContainerSupport.line,atm.outputContainerUseds.get(0).locationOnContainerSupport.column)}
+	
+	@(num),@(sample_code),@(sample_vol),@(buffer_vol),Source,@(source_pos),@(source_well_line)@(source_well_col),Normalized,@(dest_pos)\u000D\u000A
+}

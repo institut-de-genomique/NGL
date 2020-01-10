@@ -1,0 +1,40 @@
+#datatable
+datatable.button.selectall=Tout Sélectionner
+datatable.button.unselectall =Tout Désélectionner
+datatable.button.cancel=Annuler
+datatable.button.hide=Cacher
+datatable.button.show=Afficher Details
+datatable.button.edit=Editer
+datatable.button.sort=Ordonner
+datatable.button.save=Sauver
+datatable.button.remove=Supprimer
+datatable.button.group = Grouper / Dégrouper
+datatable.button.generalGroup = Grouper toute la sélection
+datatable.button.length=Taille ({0})
+datatable.totalNumberRecords = {0} Résultats
+datatable.button.exportCSV = CSV Export
+datatable.button.basicExportCSV = Exporter toutes les lignes
+datatable.button.groupedExportCSV = Exporter les lignes groupées
+datatable.button.showOnlyGroups = Voir uniquement les groupes
+datatable.button.top = Aller au début du tableau
+
+datatable.msg.success.save = Toutes les sauvegardes ont réussi.
+datatable.msg.error.save = Il y a {0} sauvegarde(s) en erreur.
+datatable.msg.success.remove = Toutes les suppressions ont réussi.
+datatable.msg.error.remove =  Il y a {0} suppression(s) en erreur.
+
+datatable.export.sum =  (Somme)
+datatable.export.average =  (Moyenne)
+datatable.export.unique =  (Valeur uniq.)
+datatable.export.count = (Nb. valeurs)
+datatable.export.countDistinct =  (Nb. valeurs différentes)
+datatable.export.collect =  (Liste valeurs.)
+datatable.export.collectDistinct =  (Liste valeurs différentes)
+datatable.export.yes = Oui
+datatable.export.no = Non
+
+datatable.remove.confirm = Pouvez-vous confirmer la suppression ?
+
+#format date
+datetime.format=dd/MM/yyyy HH:mm:ss
+date.format=dd/MM/yyyy

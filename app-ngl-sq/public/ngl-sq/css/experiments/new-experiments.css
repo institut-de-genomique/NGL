@@ -1,0 +1,8 @@
+/*custom bootrap for new experiments*/
+
+/* MAIN */
+
+.preconfigTable .datatable .table>tbody>tr>td{	
+	max-width: 80px;
+	overflow-wrap: break-word;	
+}

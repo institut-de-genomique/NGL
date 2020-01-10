@@ -1,0 +1,166 @@
+@(read: String)
+
+@camelCase(text: String) = @{
+  text.replace('r','R')
+}
+
+
+<div class="row"> 
+
+    <div class="col-md-12 col-lg-12">
+	    <div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+		ng-click='setImage(@("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".qualScore.value"),"qualScore","@camelCase(read)","read_quality",
+		@("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".qualScore.width"),
+		@("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".qualScore.height"))'>
+		 <a href="#">
+		    <img id='@(read+".qualscore")' ng-src='@("data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".qualScore.value}}")' />
+		    <p>@Messages("readsets.treatments.read_quality.nuclDistribution")</p>		    
+		 </a>
+		 </div> 
+    </div>
+    
+</div>
+
+<div class="row"> 
+   
+    <div class="col-md-3 col-lg-3">
+	    <div class="thumbnail" data-target="#myImageModal" role="button" class="btn btn-sm btn-primary pull-right" data-toggle="modal" 
+		ng-click='setImage(@("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".nuclDistribution.value"),"nuclDistribution","@camelCase(read)","read_quality",
+		@("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".nuclDistribution.width"),
+		@("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".nuclDistribution.height"))'>
+		 <a href="#">
+		    <img id='@(read+".nuclDistribution")' ng-src='@("data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".nuclDistribution.value}}")' />
+		    <p>@Messages("readsets.treatments.read_quality.nuclDistribution")</p>
+		 </a>
+	    </div>
+    </div>
+    
+   <div class="col-md-3 col-lg-3">
+	    <div class="thumbnail" data-target="#myImageModal" role="button" class="btn btn-sm btn-primary pull-right" data-toggle="modal" 
+		ng-click='setImage(@("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".readSizeDistribution.value"),"readSizeDistribution","@camelCase(read)","read_quality",
+		@("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".readSizeDistribution.width"),
+		@("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".readSizeDistribution.height"))'>
+		 <a href="#">
+		    <img id='@(read+".readSizeDistribution")' ng-src='@("data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".readSizeDistribution.value}}")' />
+		    <p>@Messages("readsets.treatments.read_quality.readSizeDistribution")</p>
+		 </a>   
+	    </div>
+    </div> 	
+    
+    <div class="col-md-3 col-lg-3">
+	    <div class="thumbnail" data-target="#myImageModal" role="button" class="btn btn-sm btn-primary pull-right" data-toggle="modal" 
+		ng-click='setImage(@("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".readWithNpercent.value"),"readWithNpercent","@camelCase(read)","read_quality",
+		@("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".readWithNpercent.width"),
+		@("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".readWithNpercent.height"))'>
+		 <a href="#">
+		    <img id='@(read+".readWithNpercent")' ng-src='@("data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".readWithNpercent.value}}")' />
+		    <p>@Messages("readsets.treatments.read_quality.readWithNpercent")</p>
+		 </a>
+	    </div>
+    </div>    	
+
+    <div class="col-md-3 col-lg-3">
+	    <div class="thumbnail" data-target="#myImageModal" role="button" class="btn btn-sm btn-primary pull-right" data-toggle="modal" 
+		ng-click='setImage(@("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".positionN.value"),"positionN","@camelCase(read)","read_quality",
+		@("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".positionN.width"),
+		@("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".positionN.height"))'>
+		 <a href="#">
+		    <img id='@(read+".positionN")' ng-src='@("data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".positionN.value}}")' />
+		    <p>@Messages("readsets.treatments.read_quality.positionN")</p>
+	     </a>
+	    </div>
+    </div>
+    
+ </div>
+ 
+ 
+ <div class="row"> 
+   			    
+    <div class="col-md-3 col-lg-3">
+	    <div class="thumbnail" data-target="#myImageModal" role="button" class="btn btn-sm btn-primary pull-right" data-toggle="modal" 
+		ng-click='setImage(@("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".adapterContamination.value"),"adapterContamination","@camelCase(read)","read_quality",
+		@("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".adapterContamination.width"),
+		@("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".adapterContamination.height"))'>
+		 <a href="#">
+		    <img id='@(read+".adapterContamination")' ng-src='@("data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".adapterContamination.value}}")' />
+		    <p>@Messages("readsets.treatments.read_quality.adapterContamination")</p>
+		 </a>   
+	    </div>
+    </div>	
+    
+	<div class="col-md-3 col-lg-3" ng-if='showPropertyData("@read",treament.code!=undefined?treament.code:treatments.getTreatment().code,"adapters")'>
+		<div class="panel panel-default">
+			<div class="panel-heading"><strong>@Messages("readsets.treatments.read_quality.adapters")</strong></div>
+			<div class="panel-body">
+				<ul class="treatmentOverflow">
+					<li ng-repeat='strValue in @("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".adapters.value")'>
+						{{strValue}}
+					</li>
+				</ul>
+			</div>	
+		</div>					
+	</div>
+	
+    <div class="col-md-3 col-lg-3" ng-if='showPropertyData("@read",treament.code!=undefined?treament.code:treatments.getTreatment().code,"maxSizeReads")'>
+		<div class="panel panel-default" >
+			<div class="panel-heading">
+				<strong>@(Messages("readsets.treatments.read_quality.maxSizeReads") + " ")<span ng-bind='@("lane.treatments.ngsrg['default'].nbUsefulCycle"+camelCase(read)+".value")'></span> :</strong>
+			</div>
+    		<div class="panel-body">
+				{{@("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".maxSizeReads.value") | number}} 
+			({{@("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".maxSizeReadsPercent.value") | number:2}} @Messages("unit.percent"))	
+			 </div>
+		</div>											
+	</div>
+	
+    <div class="col-md-3 col-lg-3">
+	    <div class="thumbnail" data-target="#myImageModal" role="button" class="btn btn-sm btn-primary pull-right" data-toggle="modal" 
+		ng-click='setImage(@("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".GCDistribution.value"),"GCDistribution","@camelCase(read)","read_quality",
+		@("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".GCDistribution.width"),
+		@("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".GCDistribution.height"))'>
+		 <a href="#">
+		    <img id='@(read+".GCDistribution")' ng-src='@("data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".GCDistribution.value}}")' />
+		    <p>@Messages("readsets.treatments.read_quality.GCDistribution")</p>
+		 </a>
+	    </div>
+    </div>
+       
+    <div class="col-md-3 col-lg-3" ng-if='showPropertyData("@read",treament.code!=undefined?treament.code:treatments.getTreatment().code,"suspectedKmers")'>
+    	<div class="panel panel-default">
+			<div class="panel-heading"><strong>@Messages("readsets.treatments.read_quality.suspectedKmers")</strong>
+			({{@("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".suspectedKmers.value.length")}})
+			</div>
+			<div class="panel-body">
+				<ul class="treatmentOverflow">
+					<li ng-repeat='strValue in @("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".suspectedKmers.value") | orderBy:"nbOccurences":true'>
+						{{strValue.Kmer}} ({{strValue.nbOccurences | number}})
+					</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+		
+	<div class="col-md-3 col-lg-3" ng-if='showPropertyData("@read",treament.code!=undefined?treament.code:treatments.getTreatment().code,"suspectedPrimers")'>
+		<div class="panel panel-default" >
+			<div class="panel-heading"><strong>@Messages("readsets.treatments.read_quality.suspectedPrimers")</strong>
+			({{@("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".suspectedPrimers.value.length")}})
+			</div>
+			<div class="panel-body">
+				<ul class="treatmentOverflow">
+					<li ng-repeat='strValue in @("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".suspectedPrimers.value")'>
+						{{strValue}}
+					</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+ 
+ </div>
+
+		 
+		 
+
+
+			
+			
+			

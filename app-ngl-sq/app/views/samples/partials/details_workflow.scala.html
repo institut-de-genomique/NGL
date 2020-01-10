@@ -1,0 +1,31 @@
+@()
+<div class="row">
+	<div class="col-md-4 col-lg-4">
+		<table class="table table-condensed table-hover table-bordered">
+		<thead>
+			<tr>
+				<th>@Messages("samples.table.creationDate")</th>
+				<th>@Messages("samples.table.typeCode")</th>
+				<th>@Messages("samples.table.processState")</th>
+				<th>@Messages("samples.table.stateResolutions")</th>				
+				<th>@Messages("samples.table.currentExperiment")</th>
+				<th>@Messages("samples.table.readsets")</th>
+				<th>@Messages("samples.table.createProcessUser")</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr ng-if="sample.processes !== null" ng-repeat="process in sample.processes|orderBy:'traceInformation.creationDate'">
+				<td ng-bind="process.traceInformation.creationDate|date:'@Messages("datetime.format")'" />	
+				<td ng-bind="process.typeCode|codes:'type':false" />
+				<td ng-bind="process.state.code|codes:'state'" />
+				<td list-resize="process.state.resolutionCodes|codes:'resolution'" />
+				<td ng-bind="process.currentExperimentTypeCode|codes:'type'" />
+				<td ng-if="process.readsets !== null" ><p ng-repeat="readset in process.readsets" ng-bind="readset.code" /></td>
+				<td ng-if="process.readsets == null" />
+				<td ng-bind="process.traceInformation.createUser" />
+			</tr>
+			
+		</tbody>
+		</table>
+	</div>
+</div>

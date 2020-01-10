@@ -1,0 +1,138 @@
+@()
+
+<div class="row">
+	<div class="col-md-11 col-lg-11">	
+		 <table class="table table-condensed table-hover table-bordered">
+			<thead>
+				<tr>
+					<th></th>
+					<th>@Messages("readsets.treatments.trimming.nanopore.input")</th>
+					<th>@Messages("readsets.treatments.trimming.nanopore.output")</th>
+					<th>@Messages("readsets.treatments.trimming.nanopore.trimmed")</th>
+					<th>@Messages("readsets.treatments.trimming.nanopore.startTrimmed")</th>
+					<th>@Messages("readsets.treatments.trimming.nanopore.endTrimmed")</th>
+					<th>@Messages("readsets.treatments.trimming.nanopore.bothTrimmed")</th>
+					<th>@Messages("readsets.treatments.trimming.nanopore.inside")</th>
+					<th>@Messages("readsets.treatments.trimming.nanopore.short")</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<th>@Messages("readsets.treatments.trimming.nanopore.read")</th>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.inputNbReads.value | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.outputNbReads.value | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.trimmedNbReads.value | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.trimmedStartNbReads.value | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.trimmedEndNbReads.value | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.trimmedBothNbReads.value | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.insideMatchNbReads.value | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.shortNbReads.value | number}}</td>
+				</tr>						
+				<tr>
+					<th>@Messages("readsets.treatments.trimming.nanopore.base")</th>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.inputNbBases.value | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.outputNbBases.value | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.trimmedNbBases.value | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.trimmedStartNbBases.value | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.trimmedEndNbBases.value | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.trimmedBothNbBases.value | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.insideMatchNbBases.value | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.shortNbBases.value | number}}</td>
+				</tr>						
+			</tbody>
+		 </table>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-6 col-lg-6">
+		<table class="table table-condensed table-hover table-bordered">
+			<thead>
+				<tr>
+					<th>@Messages("readsets.treatments.trimming.nanopore.name")</th>
+					<th>@Messages("readsets.treatments.trimming.nanopore.trimmed")</th>
+					<th>@Messages("readsets.treatments.trimming.nanopore.startTrimmed")</th>
+					<th>@Messages("readsets.treatments.trimming.nanopore.endTrimmed")</th>
+					<th>@Messages("readsets.treatments.trimming.nanopore.bothTrimmed")</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr ng-repeat="adapterConta in readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.adapterConta.value">
+					<td>{{adapterConta.seqName}}</td>
+					<td>{{adapterConta.trimNbReads}}</td>
+					<td>{{adapterConta.trimStartNbReads}}</td>
+					<td>{{adapterConta.trimEndNbReads}}</td>
+					<td>{{adapterConta.trimBothNbReads}}</td>
+				</tr>		
+			</tbody>
+		</table>			
+	</div>
+</div>		
+
+<div class="row"> 
+   
+    <div class="col-md-6 col-lg-6">
+	   <div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+		ng-click="setImage(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.curveKnownAdaptersStart.value,'curveKnownAdaptersStart','',treament.code!=undefined?treament.code:treatments.getTreatment().code,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.curveKnownAdaptersStart.width,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.curveKnownAdaptersStart.height)">
+		 <a href="#">
+		    <img id="default_curveKnownAdaptersStart" ng-src="data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.curveKnownAdaptersStart.value}}" />
+		 </a> 
+	    </div>
+    </div>
+    
+   <div class="col-md-6 col-lg-6">
+	    <div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+		ng-click="setImage(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.curveKnownAdaptersEnd.value,'curveKnownAdaptersEnd','',treament.code!=undefined?treament.code:treatments.getTreatment().code,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.curveKnownAdaptersEnd.width,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.curveKnownAdaptersEnd.height)">
+		 <a href="#">
+		    <img id="default_curveKnownAdaptersEnd" ng-src="data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.curveKnownAdaptersEnd.value}}" />
+		 </a> 
+	    </div>
+    </div> 	
+</div>
+
+<div class="row"> 
+   
+    <div class="col-md-6 col-lg-6">
+	   <div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+		ng-click="setImage(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.histKnownAdaptersStart.value,'histKnownAdaptersStart','',treament.code!=undefined?treament.code:treatments.getTreatment().code,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.histKnownAdaptersStart.width,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.histKnownAdaptersStart.height)">
+		 <a href="#">
+		    <img id="default_histKnownAdaptersStart" ng-src="data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.histKnownAdaptersStart.value}}" />
+		 </a> 
+	    </div>
+    </div>
+    
+   <div class="col-md-6 col-lg-6">
+	    <div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+		ng-click="setImage(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.histKnownAdaptersEnd.value,'histKnownAdaptersEnd','',treament.code!=undefined?treament.code:treatments.getTreatment().code,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.histKnownAdaptersEnd.width,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.histKnownAdaptersEnd.height)">
+		 <a href="#">
+		    <img id="default_histKnownAdaptersEnd" ng-src="data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.histKnownAdaptersEnd.value}}" />
+		 </a> 
+	    </div>
+    </div> 	
+</div>
+
+<div class="row"> 
+   
+    <div class="col-md-6 col-lg-6">
+	   <div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+		ng-click="setImage(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.histInsideMatch.value,'histInsideMatch','',treament.code!=undefined?treament.code:treatments.getTreatment().code,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.histInsideMatch.width,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.histInsideMatch.height)">
+		 <a href="#">
+		    <img id="default_histInsideMatch" ng-src="data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.histInsideMatch.value}}" />
+		 </a> 
+	    </div>
+    </div>
+    
+  	
+</div>
+
+

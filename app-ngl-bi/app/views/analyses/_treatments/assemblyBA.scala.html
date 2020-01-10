@@ -1,0 +1,112 @@
+@()
+<div class="row">
+	<div class="col-md-2 col-lg-2 col-xs-4">
+		<div id="panel_softwareVersion" class="panel panel-default text-center" ng-if="analysis.treatments.assemblyBA.pairs.software != null">
+			<div class="panel-heading">
+				<strong>@Messages("analyses.treatments.assemblyBA.software") : </strong>
+			</div>
+			<div class="panel-body">
+				{{analysis.treatments.assemblyBA.pairs.software.value}}
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row">
+ <div class="col-md-6 col-lg-6">
+ 	<table class="table table-condensed table-hover table-bordered">
+ 		<thead>
+			<tr>
+				<th></th>
+				<th>@Messages("analyses.treatments.assembly_ba.NXContigSize")</th>
+				<th>@Messages("analyses.treatments.assembly_ba.NXContigNb")</th>			
+ 			</tr>
+ 		</thead>
+ 		<tbody>
+ 			<tr>
+ 				<th>@Messages("analyses.treatments.assembly_ba.N50Contig")</th>
+				<td ng-class="highLight('treatments.'+treatments.getTreatment().code+'.pairs.N50ContigSize.value')">
+				{{analysis.treatments[treatments.getTreatment().code].pairs.N50ContigSize.value | number}}</td>
+				<td>{{analysis.treatments[treatments.getTreatment().code].pairs.N50ContigNb.value | number}}</td>
+				
+				</tr>
+ 			<tr>
+ 				<th>@Messages("analyses.treatments.assembly_ba.N80Contig")</th>
+				<td>{{analysis.treatments[treatments.getTreatment().code].pairs.N80ContigSize.value | number}}</td>
+				<td>{{analysis.treatments[treatments.getTreatment().code].pairs.N80ContigNb.value | number}}</td>				
+ 			</tr>
+ 			<tr>
+ 				<th>@Messages("analyses.treatments.assembly_ba.N90Contig")</th>	
+				<td>{{analysis.treatments[treatments.getTreatment().code].pairs.N90ContigSize.value | number}}</td>
+ 				<td>{{analysis.treatments[treatments.getTreatment().code].pairs.N90ContigNb.value | number}}</td>
+ 			</tr>
+ 		</tbody>
+ 	</table>
+ </div>
+ 
+ <div class="col-md-6 col-lg-6">
+ 
+ 	<table class="table table-condensed table-hover table-bordered">
+ 		<thead>
+			<tr>
+ 				<th>@Messages("analyses.treatments.assembly_ba.contigSizeRepartition.size")</th>
+				<th>@Messages("analyses.treatments.assembly_ba.contigSizeRepartition.contigNumber")</th>
+				<th>@Messages("analyses.treatments.assembly_ba.contigSizeRepartition.contigPercent")</th>
+				<th>@Messages("analyses.treatments.assembly_ba.contigSizeRepartition.cumulativeSize")</th>
+				<th>@Messages("analyses.treatments.assembly_ba.contigSizeRepartition.cumulativeSizePercent")</th>
+			</tr>
+ 		</thead>
+ 		<tbody>
+ 			<tr ng-repeat="value in analysis.treatments[treatments.getTreatment().code].pairs.contigSizeRepartition.value | orderBy:'contigNumber'">
+ 				<td>>= {{value.size | number}}</td>
+ 				<td>{{value.contigNumber | number}}</td>
+ 				<td>{{value.contigPercent | number:2}} %</td>
+ 				<td>{{value.cumulativeSize | number}}</td>
+ 				<td>{{value.cumulativeSizePercent | number:2}} %</td>
+ 			</tr>
+ 		</tbody>
+ </table>
+ </div>
+ 
+</div>
+
+<div class="row">
+<div class="col-md-12 col-lg-12">
+	 <table class="table table-condensed table-hover table-bordered">
+		<thead>
+		<tr>
+			<th>@Messages("analyses.treatments.assembly_ba.readsUsed")</th>
+			<th>@Messages("analyses.treatments.assembly_ba.basesUsed")</th>
+			<th>@Messages("analyses.treatments.assembly_ba.coverageUsed")</th>
+			<th>@Messages("analyses.treatments.assembly_ba.readsAssembled")</th>
+			<th>@Messages("analyses.treatments.assembly_ba.assemblyContigSize")</th>
+			<th>@Messages("analyses.treatments.assembly_ba.GCpercent")</th>
+			<th>@Messages("analyses.treatments.assembly_ba.readsAssembledPercent")</th>
+			<th>@Messages("analyses.treatments.assembly_ba.expectedPoolSizePercent")</th>
+			<th>@Messages("analyses.treatments.assembly_ba.assemblyContigNb")</th>
+			<th>@Messages("analyses.treatments.assembly_ba.minContigSize")</th>
+			<th>@Messages("analyses.treatments.assembly_ba.maxContigSize")</th>
+			<th>@Messages("analyses.treatments.assembly_ba.averageContigSize")</th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.readsUsed.value | number}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.basesUsed.value | number}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.coverageUsed.value | number}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.readsAssembled.value | number}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.assemblyContigSize.value | number}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.GCpercent.value | number:2}} %</td>
+			<td ng-class="highLight('treatments.'+treatments.getTreatment().code+'.pairs.readsAssembledPercent.value')">
+			{{analysis.treatments[treatments.getTreatment().code].pairs.readsAssembledPercent.value | number:2}} %</td>
+			<td ng-class="highLight('treatments.'+treatments.getTreatment().code+'.pairs.expectedPoolSizePercent.value')">
+			{{analysis.treatments[treatments.getTreatment().code].pairs.expectedPoolSizePercent.value | number:2}} %</td>					
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.assemblyContigNb.value | number}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.minContigSize.value | number}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.maxContigSize.value | number}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.averageContigSize.value | number:2}}</td>
+		</tr>						
+	</tbody>
+	 </table>
+ </div>	
+</div>	 

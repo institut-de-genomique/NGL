@@ -1,0 +1,63 @@
+@()
+<div class="row">
+	<div class="col-md-12 col-lg-12">
+		<ul class="nav nav-tabs margin-bottom-5">
+   			<li ng-if="readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs!==undefined" ng-class="{'active':(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs!==undefined)}"><a href="#" data-target="#pairs" data-toggle="tab">@Messages("readsets.treatments.taxonomy.tabs.pairs")</a></li>
+   			<li ng-if="readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].read1!==undefined" ng-class="{'active':readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].read1!==undefined && readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs==undefined}"><a href="#" data-target="#read1" data-toggle="tab">@Messages("readsets.treatments.taxonomy.tabs.read1")</a></li>    	
+   		</ul>
+		<div class="tab-content">	
+			<div class="tab-pane" ng-class="{'active':readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs!==undefined}" id="pairs">
+				<div class="row">
+					<div class="col-md-12 col-lg-12">
+	  					<ul class="nav nav-tabs margin-bottom-5">
+	   						<li class="active"><a href="#" data-target="#mainPairs" data-toggle="tab">@Messages("readsets.treatments.taxonomy.tabs.bilan")</a></li>
+	   						<li><a href="#" data-target="#kronaPairs" data-toggle="tab">@Messages("readsets.treatments.taxonomy.tabs.krona")</a></li>    
+	   						<li ng-show="isDataExistsForPhylogeneticTree(treament.code!=undefined?treament.code:treatments.getTreatment().code)"><a href="#" data-target="#phylogeneticTreePairs" data-toggle="tab">@Messages("readsets.treatments.taxonomy.tabs.phylogeneticTree")</a></li>	    	
+	   					</ul>
+			
+					<div class="tab-content">
+		
+						<div class="tab-pane active" id="mainPairs">
+							@partials.taxonomy_main("pairs")			
+						</div>
+		
+						<div class="tab-pane" id="kronaPairs">
+							@partials.taxonomy_krona("pairs")
+						</div>
+						<div class="tab-pane" id="phylogeneticTreePairs"  ng-show="isDataExistsForPhylogeneticTree(treament.code!=undefined?treament.code:treatments.getTreatment().code)">
+	 						@partials.taxonomy_phylogenetic("pairs")
+						</div>
+					</div>
+				
+					</div>
+				</div>
+			</div>	
+			<div class="tab-pane" ng-class="{'active':(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].read1!==undefined && readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs==undefined)}" id="read1">	
+				<div class="row">
+					<div class="col-md-12 col-lg-12">
+	  					<ul class="nav nav-tabs margin-bottom-5">
+	   						<li class="active"><a href="#" data-target="#mainRead" data-toggle="tab">@Messages("readsets.treatments.taxonomy.tabs.bilan")</a></li>
+	   						<li><a href="#" data-target="#kronaRead" data-toggle="tab">@Messages("readsets.treatments.taxonomy.tabs.krona")</a></li>    
+	   						<li ng-show="isDataExistsForPhylogeneticTree(treament.code!=undefined?treament.code:treatments.getTreatment().code)"><a href="#" data-target="#phylogeneticTreeRead" data-toggle="tab">@Messages("readsets.treatments.taxonomy.tabs.phylogeneticTree")</a></li>	    	
+	   					</ul>
+			
+					<div class="tab-content">
+		
+						<div class="tab-pane active" id="mainRead">
+							@partials.taxonomy_main("read1")			
+						</div>
+		
+						<div class="tab-pane" id="kronaRead">
+							@partials.taxonomy_krona("read1")
+						</div>
+						<div class="tab-pane" id="phylogeneticTreeRead"  ng-show="isDataExistsForPhylogeneticTree(treament.code!=undefined?treament.code:treatments.getTreatment().code)">
+	 						@partials.taxonomy_phylogenetic("read1")
+						</div>
+					</div>
+				
+					</div>
+				</div>
+			</div>	
+		</div>	
+	</div>			
+</div>

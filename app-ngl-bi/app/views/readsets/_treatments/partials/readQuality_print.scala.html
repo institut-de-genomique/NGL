@@ -1,0 +1,193 @@
+@(read: String)
+
+@camelCase(text: String) = @{
+  text.replace('r','R')
+}
+
+<div>
+
+		<div class="row">
+			<div class="col-xs-12">
+				<div class="thumbnail">
+					<img id='@(read+"_qualScore")' ng-src='@("data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".qualScore.value}}")' />
+					<p>@Messages("readsets.treatments.read_quality.nuclDistribution")</p>  
+				</div>
+			</div>
+		</div>
+		
+		<div class="row page-break">
+			<div class="col-xs-12">
+				<div class="page-header visible-print">
+			  		<h4><small>@("{{treament.name}}" + " ") @Messages("readsets.treatments.read_quality.tabs." + read)</small></h4>
+				</div>
+			</div>
+		</div>
+		
+		<div class="row">
+			<div class="col-xs-6">				
+				<div class="thumbnail">
+				    <img id='@(read+"_nuclDistribution")' ng-src='@("data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".nuclDistribution.value}}")' />
+				    <p>@Messages("readsets.treatments.read_quality.nuclDistribution")</p>
+				</div>
+				<div class="thumbnail">
+				    <img id='@(read+"_readSizeDistribution")'  ng-src='@("data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".readSizeDistribution.value}}")' />
+				    <p>@Messages("readsets.treatments.read_quality.readSizeDistribution")</p>
+				</div>
+			</div>
+			<div class="col-xs-6">
+				<div class="thumbnail">
+				    <img id='@(read+"_readWithNpercent")' ng-src='@("data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".readWithNpercent.value}}")' />
+				    <p>@Messages("readsets.treatments.read_quality.readWithNpercent")</p>
+				</div>
+				<div class="thumbnail">
+				    <img id='@(read+"_positionN")' ng-src='@("data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".positionN.value}}")' />
+				    <p>@Messages("readsets.treatments.read_quality.positionN")</p>
+				</div>
+			</div>
+		</div>
+		
+		<div class="row page-break">
+			<div class="col-xs-12">
+				<div class="page-header visible-print">
+			  		<h4><small>@("{{treament.name}}" + " ") @Messages("readsets.treatments.read_quality.tabs." + read)</small></h4>
+				</div>
+			</div>
+		</div>
+			
+		<div class="row">
+			<div class="col-xs-12">
+				<div class="thumbnail">
+				    <img id='@(read+"_adapterContamination")' ng-src='@("data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".adapterContamination.value}}")' />
+				    <p>@Messages("readsets.treatments.read_quality.adapterContamination")</p>
+				    
+				    <div class="panel panel-default" ng-if='showPropertyData("@read",treament.code!=undefined?treament.code:treatments.getTreatment().code,"adapters")'>
+						<div class="panel-heading"><strong>@Messages("readsets.treatments.read_quality.adapters")</strong></div>
+						<div class="panel-body">
+							<ul>
+								<li ng-repeat='strValue in @("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".adapters.value")'>
+									{{strValue}}
+								</li>
+							</ul>
+						</div>	
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		
+		<div class="row page-break">
+			<div class="col-xs-12">
+				<div class="page-header visible-print">
+			  		<h4><small>@("{{treament.name}}" + " ") @Messages("readsets.treatments.read_quality.tabs." + read)</small></h4>
+				</div>
+			</div>
+		</div>
+			
+		<div class="row">
+			<div class="col-xs-12">	
+				<div class="panel panel-default" ng-if='showPropertyData("@read",treament.code!=undefined?treament.code:treatments.getTreatment().code,"maxSizeReads")'>		
+				  	<div class="panel-heading"><strong>@(Messages("readsets.treatments.read_quality.maxSizeReads")+" ")<span ng-bind='@("lane.treatments.ngsrg['default'].nbUsefulCycle" + camelCase(read) + ".value")'></span> :</strong></div>
+				  	<div class="panel-body">
+						{{@("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".maxSizeReads.value") | number}} 
+							({{@("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".maxSizeReadsPercent.value") | number:2}} @Messages("unit.percent"))	
+					 </div>
+				</div>
+			</div>	
+		</div>										
+			
+		<div class="row">
+			<div class="col-xs-12">	
+				<div class="thumbnail">
+				    <img id='@(read+"_GCDistribution")' ng-src='@("data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".GCDistribution.value}}")' />
+				    <p>@Messages("readsets.treatments.read_quality.GCDistribution")</p>
+				</div>
+			</div>
+		</div>
+		
+		
+		<div ng-controller="DetailsPrintCtrl">
+		
+
+			<div ng-if='showPropertyData("@read",treament.code!=undefined?treament.code:treatments.getTreatment().code,"suspectedKmers")'
+				ng-repeat='pageArray in getArray(@("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".suspectedKmers.value"), treament.code!=undefined?treament.code:treatments.getTreatment().code, "@read", "suspectedKmers") track by pageArray.id'>
+				
+				<div class="row page-break">
+					<div class="col-xs-12">					
+						<div class="visible-print">
+					  		<h4> <small>@("{{treament.name}}" + " ") @Messages("readsets.treatments.read_quality.tabs." + read)</small></h4>
+						</div>
+					</div>
+				</div>	
+			
+				<div class="row">
+					<div class="col-xs-12">
+						<div class="panel panel-default">
+							<div class="panel-heading" ng-if="$index==0"><strong>@Messages("readsets.treatments.read_quality.suspectedKmers")</strong>
+						  	({{@("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".suspectedKmers.value.length")}})
+							</div>
+							<div class="panel-heading" ng-if="$index>0"><strong>@Messages("readsets.treatments.read_quality.suspectedKmers") (suite)</strong></div>
+						  	<div class="panel-body">
+						  		<table class="table table-condensed table-small-cell">
+						  			<thead></thead>
+						  			<tbody>
+							  			<tr>
+								  			<td ng-repeat="colArray in pageArray.pages track by colArray.id">
+								  				<ul>
+									  				<li ng-repeat="column in colArray.columns track by column.id">
+									  						{{column.line.data.Kmer}}  ({{column.line.data.nbOccurences | number}})
+									  				</li>
+								  				</ul>	
+								  			</td>
+							  			</tr>	
+						  			</tbody>	  				
+						  		</table>
+							 </div>																
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<div ng-if='showPropertyData("@read",treament.code!=undefined?treament.code:treatments.getTreatment().code,"suspectedPrimers")'
+				ng-repeat='pageArray in getArray(@("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".suspectedPrimers.value"), treament.code!=undefined?treament.code:treatments.getTreatment().code, "@read", "suspectedPrimers") track by pageArray.id'>
+				
+				<div class="row page-break">
+					<div class="col-xs-12">
+						<div class="visible-print">
+					  		<h4> <small>@("{{treament.name}}" + " ") @Messages("readsets.treatments.read_quality.tabs." + read)</small></h4>
+						</div>
+					</div>
+				</div>
+			
+				<div class="row">
+					<div class="col-xs-12">
+						<div class="panel panel-default">
+							<div class="panel-heading" ng-if="$index==0"><strong>@Messages("readsets.treatments.read_quality.suspectedPrimers")</strong>
+						  	({{@("readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".suspectedPrimers.value.length")}})
+							</div>
+							<div class="panel-heading" ng-if="$index>0"><strong>@Messages("readsets.treatments.read_quality.suspectedPrimers") (suite)</strong></div>
+						  	<div class="panel-body">
+						  		<table class="table table-condensed table-small-cell">
+						  			<thead></thead>
+						  			<tbody>
+							  			<tr>
+								  			<td ng-repeat="colArray in pageArray.pages track by colArray.id">
+								  				<ul>
+									  				<li ng-repeat="column in colArray.columns track by column.id">
+									  						{{column.line.data}}
+									  				</li>
+								  				</ul>	
+								  			</td>
+							  			</tr>	
+						  			</tbody>	  				
+						  		</table>
+							 </div>																
+						</div>
+					</div>
+				</div>
+			</div>
+	
+		</div>
+
+</div>
+
+

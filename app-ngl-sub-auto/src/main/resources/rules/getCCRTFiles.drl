@@ -1,0 +1,58 @@
+#created on: Jul 15, 2014
+package birds
+
+import  fr.genoscope.lis.devsi.birds.impl.factory.ResourcesReferentialServiceFactory;
+import fr.cea.ig.auto.submission.SubmissionServicesFactory;
+import fr.genoscope.lis.devsi.birds.impl.properties.ProjectProperties;
+import fr.cea.ig.auto.submission.SRAFilesUtil;
+
+
+rule "set parameter for getCCRTFiles"
+	@BirdsRule(fsRule)
+	dialect 'java'
+	salience 300
+	no-loop
+		when
+			$treatSpec : TreatmentSpecification(name=="getCCRTFile", project.name=="SRA")
+			$job : Job()
+		then
+			Logger log = Logger.getLogger("ngl.sub.rules");
+			log.debug("set parameter value");
+			
+			String fileName = $job.getUniqueJobResource("inputGetCCRT").getProperty("relatifName");
+			String fileCCRT =  $job.getUniqueJobResource("inputGetCCRT").getProperty("directory")+File.separator+fileName;
+			//String filePath = $job.getUniqueJobResource("inputGetCCRT").getProperty("submissionDirectory")+File.separator+fileName;
+			String filePath = ProjectProperties.getProperty("tmpDirectory")+File.separator+$job.getUniqueJobResource("inputGetCCRT").getProperty("code")+File.separator+fileName;
+			String userCCRT = $job.getTreatmentSpecification().getProject().getProjectProperties().get("ccrt_user");
+			
+			String gsisshParam = $job.getParameterValue("gsisshParam").getValue().replace("%userCCRT%",userCCRT).replace("%ccrtFileName%",fileCCRT);
+			$job.setParameterValue("gsisshParam", gsisshParam);
+			
+			String endArg = $job.getParameterValue("endArg").getValue().replace("%filePath%",filePath);
+			$job.setParameterValue("endArg", endArg);
+end
+
+rule "add resources in internalRefGetCCRT to fire touch file"
+	@BirdsRule( addResources ) 
+	dialect 'java'
+	salience 200
+	when
+		$flag : Flag ( done == false ) 
+		$output : OutputSpecificationElement(treatmentSpecification.name == "getCCRTFile")
+	  	$referential : ResourcesReferential ( name == "internalRefTouchCCRT" )
+		$resourceSet : ResourceSet( ioSpecificationElement == $output )
+		$job : Job(treatmentSpecification!=null, treatmentSpecification.name == "getCCRTFile")
+	then
+		Logger log = Logger.getLogger("ngl.sub.rules");
+		log.debug("Add resources rules for getCCRT from file "+$job.getProperty(Job.STDOUT));
+		JobResource jobResource = $job.getUniqueJobResource("inputGetCCRT");
+		JobResource outputResource = $resourceSet.createJobResource($output.getResourceType(),$referential.getName());
+		ResourceProperties resourceProperties = outputResource.getResourceProperties();
+	  	resourceProperties.setProperty("code",jobResource.getProperty("code"));
+	  	resourceProperties.setProperty("submissionDirectory",jobResource.getProperty("submissionDirectory"));
+	  	resourceProperties.setProperty("relatifName",jobResource.getProperty("relatifName"));
+	  	resourceProperties.setProperty("directory",jobResource.getProperty("directory"));
+		$flag.setDone(true);
+		modify($flag){};
+		modify($resourceSet){};
+end

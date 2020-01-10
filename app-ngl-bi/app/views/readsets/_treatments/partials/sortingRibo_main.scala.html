@@ -1,0 +1,123 @@
+@()
+<div class="row">
+	<div class="col-md-2 col-lg-2 col-xs-4">
+		<div id="panel_softwareVersion" class="panel panel-default text-center" ng-if="readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.software != null">
+			<div class="panel-heading">
+				<strong>@Messages("readsets.treatments.sorting_ribo.software") : </strong>
+			</div>
+			<div class="panel-body">
+				{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.software.value}}
+			</div>
+		</div>
+	</div>
+</div>
+
+	<div class="row">	
+		<div class="col-md-11 col-lg-11 col-xs-11">
+			<table class="table table-bordered table-condensed table-hover">
+				<thead>
+					<tr>
+						<th class="col-md-2 col-lg-2 col-xs-2"></th>
+						<th class="col-md-2 col-lg-2 col-xs-2">@Messages("readsets.treatments.sorting_ribo.readsInput")</th>
+						<th class="col-md-2 col-lg-2 col-xs-2">@Messages("readsets.treatments.sorting_ribo.no_rRNA")</th>
+						<th class="col-md-2 col-lg-2 col-xs-2">@Messages("readsets.treatments.sorting_ribo.rRNA")</th>
+						<th class="col-md-2 col-lg-2 col-xs-2">@Messages("readsets.treatments.sorting_ribo.rRNAPercent")</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<th>@Messages("readsets.treatments.sorting_ribo.read1")</th>
+						<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].read1.readsInput.value | number}}</td>
+						<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].read1.no_rRNA.value | number}}</td>
+						<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].read1.rRNA.value | number}}</td>
+						<td ng-class="highLight('treatments.' + treatments.getTreatment().code + '.read1.rRNAPercent.value')">
+							{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].read1.rRNAPercent.value | number:2}} @Messages("unit.percent")
+						</td>
+					</tr>		
+					<tr>
+						<th>@Messages("readsets.treatments.sorting_ribo.read2")</th>
+						<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].read2.readsInput.value | number}}</td>
+						<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].read2.no_rRNA.value | number}}</td>
+						<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].read2.rRNA.value | number}}</td>
+						<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].read2.rRNAPercent.value | number:2}} @Messages("unit.percent")</td>
+					</tr>		
+					<tr>
+						<th>@Messages("readsets.treatments.sorting_ribo.single")</th>
+						<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].single.readsInput.value | number}}</td>
+						<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].single.no_rRNA.value | number}}</td>
+						<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].single.rRNA.value | number}}</td>
+						<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].single.rRNAPercent.value | number:2}} @Messages("unit.percent")</td>
+					</tr>		
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+	<div class="row">		
+		<div class="col-md-5 col-lg-5 col-xs-5">		
+			 <table class="table table-condensed table-hover table-bordered">
+				<thead>
+					<tr>
+						<th class="col-md-1 col-lg-1"></th>
+						<th class="col-md-1 col-lg-1">@Messages("readsets.treatments.sorting_ribo.usefulSequences")</th>
+						<th class="col-md-1 col-lg-1">@Messages("readsets.treatments.sorting_ribo.usefulBases")</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<th>@Messages("readsets.treatments.sorting_ribo.paired")</th>
+						<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.usefulSequences.value | number}}</td>
+						<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.usefulBases.value | number}}</td>
+					</tr>		
+				</tbody>
+			</table>
+		</div>	
+  		<div class="col-md-6 col-lg-6 col-xs-6">	
+	  		<table class="table table-condensed table-hover table-bordered">
+				<thead>
+					 <tr>
+					 	<th class="col-md-2 col-lg-2">@Messages("readsets.treatments.sorting_ribo.rRNABilan")</th>
+						<th class="col-md-1 col-lg-1">@Messages("readsets.treatments.sorting_ribo.read1")</th>
+						<th class="col-md-1 col-lg-1">@Messages("readsets.treatments.sorting_ribo.read2")</th>
+						<th class="col-md-1 col-lg-1">@Messages("readsets.treatments.sorting_ribo.single")</th>
+					 </tr>
+				</thead>
+				<tbody>
+					<tr>
+					 	<th>
+					 		<ul class="list-unstyled">
+								<li ng-repeat="obj in readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].read1.rRNABilan.value">
+									{{obj.type}} :
+								</li>
+					 		</ul>
+					 	</th>
+					 	<td>
+					 		<ul class="list-unstyled">
+								<li ng-repeat="obj in readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].read1.rRNABilan.value">
+									{{obj.percent| number:2}} @Messages("unit.percent")
+								</li>
+							</ul>
+						</td>	
+						<td>
+					 		<ul class="list-unstyled">
+								<li ng-repeat="obj in readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].read2.rRNABilan.value">
+									{{obj.percent| number:2}} @Messages("unit.percent")
+								</li>
+							</ul>
+						</td>		
+						<td>
+					 		<ul class="list-unstyled">
+								<li ng-repeat="obj in readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].single.rRNABilan.value">
+									{{obj.percent| number:2}} @Messages("unit.percent")
+								</li>
+							</ul>
+						</td>					
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+
+	
+

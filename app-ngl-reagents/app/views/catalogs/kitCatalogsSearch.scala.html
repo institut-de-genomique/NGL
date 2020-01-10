@@ -1,0 +1,55 @@
+@this()
+@() 
+@import views.html.helper._
+
+@form() = {
+	@columnSearchForm{
+		@formGroup{
+			<!-- <input type="text" class="form-control" ng-model="searchService.form.name" placeholder='@Messages("kits.name")'> -->
+			<div class="form-control" bt-select ng-model="searchService.form.codes" multiple="true" filter="true" placeholder='@Messages("kits.name")' 
+			bt-options="kit.code as kit.name for kit in searchService.lists.getKitCatalogs()" ></div>
+			<!-- ng-change="searchService.updateBoxCatalogsList()" -->
+		}
+			
+		@formGroup{
+			<div class="form-control" bt-select ng-model="searchService.form.codesFromBoxCatalog" multiple="true" filter="true" placeholder='@Messages("kits.boxName")' 
+			bt-options="box.code as box.name for box in searchService.lists.getBoxCatalogs()"></div>
+		}
+	}
+	
+	@columnSearchForm{
+
+		@formGroup{
+			<input type="text" class="form-control" ng-model="searchService.form.providerRefName" placeholder='@Messages("kits.providerRefNameFiltre")'>
+		}
+		
+		@formGroup{
+			<div class="form-control" bt-select ng-model="searchService.form.codesFromReagentCatalog" multiple="true" filter="true" placeholder='@Messages("kits.reagentName")' 
+			bt-options="reagent.code as reagent.name for reagent in searchService.lists.getReagentCatalogs()"></div>	
+		}
+	}
+	
+	@columnSearchForm{
+		@formGroup{
+			<input type="text" class="form-control" ng-model="searchService.form.providerCode" placeholder='@Messages("kits.providerFiltre")'>
+		}
+		
+		@formGroup{
+			<div class="form-control" bt-select ng-model="searchService.form.experimentTypeCodes" multiple="true" filter="true" placeholder='@Messages("experiments.name")'
+			bt-options="experiment.code as experiment.name for experiment in searchService.lists.getExperimentTypes()"></div>
+		}
+	}
+	
+	@columnSearchForm{
+		@formGroup{
+			<input type="text" class="form-control" ng-model="searchService.form.catalogRefCode" placeholder='@Messages("kits.catalogRefCode")'>
+		}
+		
+		@formGroup{
+			<div class="form-control" bt-select ng-model="searchService.form.isActive" filter="true" placeholder="@Messages("kits.state")" 
+			bt-options="valid.code as valid.name for valid in searchService.lists.get('booleans')"></div>
+		}
+	}
+}
+
+@searchForm(form)()("searchService.datatable")

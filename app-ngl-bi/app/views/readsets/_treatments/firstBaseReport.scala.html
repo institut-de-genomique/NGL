@@ -1,0 +1,73 @@
+@()
+
+
+<h3>@Messages("readsets.treatments.firstBaseReport.topSurface")</h3>	
+<div class="row">
+	<div class="col-md-12 col-lg-12">
+		 <table class="table table-condensed table-hover table-bordered">
+			<thead>
+				<tr>
+					<th>#</th>
+					<th>@Messages("readsets.treatments.firstBaseReport.clusterDensityTop")</th>
+					<th>@Messages("readsets.treatments.firstBaseReport.intensityATop")</th>
+					<th>@Messages("readsets.treatments.firstBaseReport.intensityCTop")</th>
+					<th>@Messages("readsets.treatments.firstBaseReport.intensityGTop")</th>
+					<th>@Messages("readsets.treatments.firstBaseReport.intensityTTop")</th>
+					<th>@Messages("readsets.treatments.firstBaseReport.focusScoreATop")</th>
+					<th>@Messages("readsets.treatments.firstBaseReport.focusScoreCTop")</th>
+					<th>@Messages("readsets.treatments.firstBaseReport.focusScoreGTop")</th>
+					<th>@Messages("readsets.treatments.firstBaseReport.focusScoreTTop")</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr ng-repeat="value in readsets.treatments[treatments.getTreatment().code].clusterDensityTop.value">
+					<td>{{$index + 1}}</td>
+					<td>{{value.clusterDensityTop}}</td>
+					<td>{{value.intensityATop}}</td>
+					<td>{{value.intensityCTop}}</td>
+					<td>{{value.intensityGTop}}</td>
+					<td>{{value.intensityTTop}}</td>
+					<td>{{value.focusScoreATop}}</td>
+					<td>{{value.focusScoreCTop}}</td>
+					<td>{{value.focusScoreGTop}}</td>
+					<td>{{value.focusScoreTTop}}</td>
+				</tr>	
+			</tbody>
+		</table>
+	</div>
+</div>
+<h3>@Messages("readsets.treatments.firstBaseReport.bottomSurface")</h3>
+<div class="row">
+	<div class="col-md-12 col-lg-12">
+		<table class="table table-condensed table-hover table-bordered">
+			<thead>
+				<tr>
+					<th>#</th>
+					<th>@Messages("readsets.treatments.firstBaseReport.clusterDensityBottom")</th>
+					<th>@Messages("readsets.treatments.firstBaseReport.intensityABottom")</th>
+					<th>@Messages("readsets.treatments.firstBaseReport.intensityCBottom")</th>
+					<th>@Messages("readsets.treatments.firstBaseReport.intensityGBottom")</th>
+					<th>@Messages("readsets.treatments.firstBaseReport.intensityTBottom")</th>
+					<th>@Messages("readsets.treatments.firstBaseReport.focusScoreABottom")</th>
+					<th>@Messages("readsets.treatments.firstBaseReport.focusScoreCBottom")</th>
+					<th>@Messages("readsets.treatments.firstBaseReport.focusScoreGBottom")</th>
+					<th>@Messages("readsets.treatments.firstBaseReport.focusScoreTBottom")</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr ng-repeat="value in readsets.treatments[treatments.getTreatment().code].clusterDensityTop.value">
+					<td>{{ $index + 1 }}</td>
+					<td>{{value.clusterDensityBottom}}</td>
+					<td>{{value.intensityABottom}}</td>
+					<td>{{value.intensityCBottom}}</td>
+					<td>{{value.intensityGBottom}}</td>
+					<td>{{value.intensityTBottom}}</td>
+					<td>{{value.focusScoreABottom}}</td>
+					<td>{{value.focusScoreCBottom}}</td>
+					<td>{{value.focusScoreGBottom}}</td>
+					<td>{{value.focusScoreTBottom}}</td>
+					</tr>			
+			</tbody>
+		</table>	
+	</div>
+</div>

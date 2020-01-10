@@ -1,0 +1,54 @@
+@this()
+@()
+@import views.html.helper._
+@form() = {
+	@columnSearchForm{
+		@formGroup{
+			<select class="form-control" ng-model="form.etmanips.selected" ng-options="etmanip.name for etmanip in form.etmanips.options" id="etmanip" ng-change="search()">
+				<option value="">@Messages("plates.select.etapemanips")</option>
+			</select>
+		}
+	}
+	@columnSearchForm{
+		@formGroup{		
+			<select class="form-control" ng-model="form.etmateriels.selected" ng-options="etmateriel.name for etmateriel in form.etmateriels.options" id="etmateriel" ng-change="search()">
+				<option value="">@Messages("plates.select.etatmanips")</option>
+			</select>
+		}
+	}
+	@columnSearchForm{
+		@formGroup{		
+			<select class="form-control" ng-model="form.projects.selected" id="project" ng-options="project.name for project in form.projects.options" ng-change="search()">
+				<option value="">@Messages("plates.select.project")</option>
+			</select>
+		}
+	}
+}
+<div class="row" ng-init="init()"> 
+<div class="col-md-12 col-lg-12" ultimate-datatable="datatable">
+
+	
+	<div udt-form>
+	<form class="well well-small">
+		<div class="row">
+		@form
+		@columnSearchForm{
+			@formGroup{
+			<div class="btn-toolbar">
+				<button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="search()" class="btn btn-primary" >
+					<i class="fa fa-search"></i>
+				</button>
+				<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="reset()"  class="btn btn-default">
+					<i class="fa fa-undo"></i>
+				</button>
+											 	
+			</div>	
+			}	
+			
+		}
+		</div>
+	</form>	
+	</div>
+
+</div>
+</div>

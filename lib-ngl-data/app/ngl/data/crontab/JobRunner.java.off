@@ -1,0 +1,313 @@
+//package ngl.data.crontab;
+//
+//import java.util.Calendar;
+//import java.util.Date;
+//import java.util.List;
+//import java.util.TimeZone;
+//import java.util.concurrent.TimeUnit;
+//
+//import javax.inject.Inject;
+//import javax.inject.Singleton;
+//
+//import org.bson.types.ObjectId;
+//
+//import akka.actor.ActorSystem;
+//import akka.actor.Cancellable;
+//import play.inject.Injector;
+//import scala.concurrent.duration.FiniteDuration;
+//
+//
+//// Force singleton behavior and do cleanup on application shutdown.
+//// The instance can be disabled or enabled using commands.
+//@Singleton
+//public class JobRunner {
+//	
+//	/**
+//	 * Logger.
+//	 */
+//	private static final play.Logger.ALogger logger = play.Logger.of(JobRunner.class);
+//
+//	/**
+//	 * Lock duration in milliseconds (1 minute).
+//	 */
+//	private static final long lockDuration = 60 * 1000;
+// 
+//	/**
+//	 * Crontab API. 
+//	 */
+//	private final CronTabAPI api;
+//	
+//	/**
+//	 * Akka API.
+//	 */
+//	private final ActorSystem akka;
+//
+//	/**
+//	 * Injector.
+//	 */
+//	private final Injector injector;
+//	
+//	@Inject
+//	public JobRunner(Injector injector, CronTabAPI api, ActorSystem akka) {
+//		this.injector = injector;
+//		this.api      = api;
+//		this.akka     = akka;
+//		// Fire some garbage collected server declaration.
+//		// We could build some time garbage collected collections. We extend a
+//		// time bound object and we're good to go.
+//	}
+//	
+//	// We assume that the dates are interpreted using the server locale so everyone
+//	// agrees on the current date (and thus the job dates).
+//	// We want the server locale time as our time. A time table looks
+//	// reasonable. The last cron date must include the year but the data type
+//	// does not allow it. The cron date should include the year which in turn is
+//	// a proper date (calendar) that provide date ordering.
+//	
+//	public List<CronTabEntry> getJobs() {
+//		// throw new RuntimeException();
+//		// return Arrays.asList(new CronTabEntry());
+//		return api.getJobs();
+//	}
+//	
+//	// This assumes that some kind of clock synchronization exists (NTP).
+////	public Date getNowDate() {
+////		return new Date();
+////	}
+//	
+//	public Date getCronLastExecutionDate(CronTabEntry e) {
+//		return e.getLastExecutionDate();		
+//	}
+//	
+////	public static CronDate getLastScheduledCronDate(CronDefinition cd, Calendar d) {
+//	public static Calendar getLastScheduledDate(CronSchedule cd, Calendar d) {
+//		// As we are using rolling intervals, we have to take into account
+//		// if we are back one year (implicit execution every year).
+//		// The day of month is a problem as we may have more declared days than
+//		// in the month so may we end with February 31 which will be understood
+//		// as March something. The day of month has to be interpreted in some
+//		// month.
+////		logger.debug("minute : {} -> {}", );
+////		logger.debug("hour   : {} -> {}", );
+////		logger.debug("day    : {} -> {}", );
+////		logger.debug("month  : {} -> {}", );
+//		int iMinute = d.get(Calendar.MINUTE);
+//		int iHour   = d.get(Calendar.HOUR_OF_DAY);
+//		int iDay    = d.get(Calendar.DAY_OF_MONTH);
+//		int iMonth  = d.get(Calendar.MONTH);
+//		int iYear   = d.get(Calendar.YEAR);
+//		
+//		int oMinute = previous(cd.getMinutes(),   iMinute);
+//		int oHour   = previous(cd.getHours(),     iHour);
+//		int oDay    = previous(cd.getMonthDays(), iDay);
+//		int oMonth  = previous(cd.getMonths(),    iMonth);
+//		int oYear   = iYear;
+//		
+//		// Test is: do we use the last entry of the cron definition ?
+//		if (oMinute > iMinute)
+//			oHour = previous(cd.getHours(), iHour - 1);
+//		if (oHour > iHour)
+//			oDay = previous(cd.getMonthDays(), iDay -1);
+//		if (oDay > iDay)
+//			oMonth = previous(cd.getMonths(), iMonth -1);
+//		if (oMonth > iMonth)
+//			oYear -= 1;
+//		
+//		Calendar c = Calendar.getInstance(d.getTimeZone());
+//		c.set(oYear, oMonth, oDay, oHour, oMinute,0);
+//		// Test for invalid date, lenient calendar will modify the month and day to interpret
+//		// date as a valid date (32 jan -> 1 feb). Testing is the day or the month is the same
+//		// as the input is probably enough (it makes no sense to modify the day without
+//		// modifying the month).
+//		while ((c.get(Calendar.MONTH) != oMonth) || (c.get(Calendar.DAY_OF_MONTH) != oDay)) {
+//			logger.debug("calendar month {} vs {}, day {} vs {}", c.get(Calendar.MONTH), oMonth, c.get(Calendar.DAY_OF_MONTH), oDay);
+//			oMinute = previous(cd.getMinutes(), 60); // use last minute 
+//			oHour   = previous(cd.getHours(),   24); // use last hour
+//			iDay    = oDay;
+//			iMonth  = oMonth;
+//			iYear   = oYear;
+//			// take previous day from cron
+//			oDay = previous(cd.getMonthDays(), -- iDay);
+//			if (oDay > iDay)
+//				oMonth = previous(cd.getMonths(), -- iMonth);
+//			else
+//				oMonth = iMonth;
+//			if (oMonth > iMonth)
+//				oYear = iYear - 1;
+//			c.set(oYear, oMonth, oDay, oHour, oMinute,0); 
+//		}
+//		return c;
+////		int minute = previous(cd.minutes,   d.get(Calendar.MINUTE));
+////		int hour   = previous(cd.hours,     d.get(Calendar.HOUR_OF_DAY));
+////		int day    = previous(cd.monthDays, d.get(Calendar.DAY_OF_MONTH));
+////		int month  = previous(cd.months,    d.get(Calendar.MONTH));
+////		int year   = d.get(Calendar.YEAR);
+////		
+////		Calendar c = Calendar.getInstance(d.getTimeZone());
+////		c.set(year, month, day, hour, minute); 
+////		
+////		return new CronDate(previous(cd.minutes,   d.get(Calendar.MINUTE)),
+////				            previous(cd.hours,     d.get(Calendar.HOUR_OF_DAY)),
+////				            previous(cd.monthDays, d.get(Calendar.DAY_OF_MONTH)),
+////				            previous(cd.months,    d.get(Calendar.MONTH)));
+//	}
+//	
+////	public static Calendar getLastScheduledDate(CronDefinition cd, Calendar d) {
+////		CronDate rd = getLastScheduledCronDate(cd,d);
+////		Calendar lsd = Calendar.getInstance();
+////		lsd.setTime(d.getTime());
+////		lsd.set(d.get(Calendar.YEAR), rd.month, rd.day, rd.hour, rd.minute);
+////		if (lsd.after(d))
+////			lsd.set(Calendar.YEAR, lsd.get(Calendar.YEAR) - 1);
+////		logger.debug("least scheduled date {} -> {}", d.getTime(), lsd.getTime());
+////		return lsd;
+////	}
+//	
+//	private static int previous(int[] vs, int v) {
+//		for (int i=vs.length-1; i>=0; i--)
+//			if (v >= vs[i])
+//				return vs[i];
+//		return vs[vs.length-1];
+//	}
+//	
+//	public boolean shouldRunJob(CronTabEntry je, Calendar c) {
+//		if (je.getLastExecutionDate() == null)
+//			return true;
+//		if (!je.getJob().isActive())
+//			return true;
+//		Calendar lsd = getLastScheduledDate(je.getSchedule(), c);
+//		Calendar led = Calendar.getInstance();
+//		led.setTime(je.getLastExecutionDate());
+//		logger.debug("checking {} > {}", lsd.getTime(), led.getTime());
+//		return led.before(lsd);
+//	}
+//	
+//	public boolean shouldRunJob(CronTabEntry e) {
+//		Calendar c = Calendar.getInstance(TimeZone.getTimeZone(e.getSchedule().getTimeZone()));
+//		Date d = e.getCheckDate();
+//		if (d == null)
+//			throw new RuntimeException("no check date is set for cron entry " + e.getId());
+//		c.setTime(d);
+//		return shouldRunJob(e, c);
+//	}
+//	
+//	public void checkJobs(List<CronTabEntry> jobs, Calendar cal) throws Exception {
+//		for (CronTabEntry je : jobs)
+//			if (shouldRunJob(je,cal))
+//				runJob(je);
+//	}
+//	
+//	public void checkJobs() throws Exception {
+//		List<CronTabEntry> jobs = getJobs();
+//		logger.debug("checking {} jobs", jobs.size());
+//		for (CronTabEntry e : jobs) {
+//			TimeZone tz = TimeZone.getDefault();
+//			if (e.getSchedule().getTimeZone() != null)
+//				// defaults to GMT if not understood
+//				tz = TimeZone.getTimeZone(e.getSchedule().getTimeZone());
+//			logger.debug("using time zone {}", tz);
+//			// This is a real date, not a cron date.
+//			// Date ed = getCronLastExecutionDate(e);
+//			Calendar ed = Calendar.getInstance();
+//			ed.setTimeZone(tz);
+//			ed.setTime(getCronLastExecutionDate(e));
+//			// Real date, "server now". As we expect times to be correct, the
+//			// mongo time and us is expected to be the same.
+//			// Date nd = getNowDate();
+//			Calendar nd = Calendar.getInstance();
+//			nd.setTimeZone(tz);
+//			// Should extract the date from job updated data. 
+//			nd.setTime(new Date());
+//			// Cron date
+//			Calendar csd = getLastScheduledDate(e.getSchedule(),nd);
+//			// Transform the cron date to some date using the current stuff.
+////			Calendar cd = Calendar.getInstance(); 
+//			// Must add the current year of the previous year to find
+//			// the actual date. If the date is later than now using the current year,
+//			// we need to use the previous year. Last scheduled date is
+//			// in the past. Build a calendar and set the fields.
+//			//   set(int year, int month, int date, int hourOfDay, int minute)
+//			// Execution time is direct
+////			Calendar ec = Calendar.getInstance();
+////			ec.set(currentYear, ed.month, ed.day, ed.hours, ed.minutes);
+////			// Schedule calendar is indirect 
+////			Calendar sc = Calendar.getInstance();
+////			sc.set(currentYear, sd.month, sd.day, sd.hours, sd.minutes);
+////			// Now calendar is direct
+////			Calendar nc = Calendar.getInstance();
+////			nc.set(currentYear, nd.month, nd.day, nd.hours, nd.minutes);
+////			// If the scheduled data is after now, take the previous year.
+////			if (sc.after(nc))
+////				sc.set(previousYear, sd.month, sd.day, sd.hours, sd.minutes);
+////			if (sc.after(ec) && sc.before(nc)) 
+////				// Run job
+////				runJob(e);
+//			if (csd.after(ed))
+//				runJob(e);
+//		}
+//	}
+//
+//	public ObjectId getJobId(CronTabEntry j) {
+//		return api.getId(j.getJob().getName());
+//	}
+//	
+//	// Must be called in the scheduler as the execution is supposed to be
+//	// fired.
+//	public void runJob(CronTabEntry e) throws Exception {
+//		if (e.getId() == null)
+//			throw new IllegalArgumentException("cron entry has no id");
+//		// lock and run lock refresher (use delay locking and delay/2 refresh)
+//		CronTabAPI cd = api;
+//		// Get job oid. The oid should be stored in the definition so
+//		// we run stuff directly.
+//		ObjectId jid = getJobId(e);
+//		Runnable jr = () -> {
+//			logger.debug("trying to acquire lock to run {} ({})", e.getJob().getName(), jid);
+//			if (cd.getLock(jid, lockDuration)) {
+//				// Create and run half duration refresher so we are almost guaranteed to 
+//				// keep the lock. Losing the lock is not handled.
+//				long halfLockDuration = lockDuration / 2;
+//				logger.debug("got lock {}, starting refresher with interval {}ms", jid, halfLockDuration);
+//				Cancellable refresher = akka.scheduler().schedule(
+//						FiniteDuration.create(               0, TimeUnit.MILLISECONDS),
+//						FiniteDuration.create(lockDuration / 2, TimeUnit.MILLISECONDS),
+//						new LockRefresher(cd,jid), 
+//						akka.dispatcher());
+//				// run
+//				try {
+//					logger.debug("instanciating job class {}", e.getJob().getImplementation());
+//					Runnable r = (Runnable)injector.instanceOf(Class.forName(e.getJob().getImplementation()));
+//					logger.debug("running job {}",r);
+//					r.run();
+//					logger.debug("ran job {}", r);
+//					// Update job execution date
+//				} catch (Exception ex) {
+//					logger.error("job error",ex);
+//					throw new RuntimeException(ex);
+//				} finally {
+//					// cancel lock refresher and release lock
+//					refresher.cancel();
+//					// update job execution date
+//					cd.updateLastExecutionDate(e);
+//					// Release lock
+//					cd.relaseLock(jid);
+//				}
+//			} else {
+//				logger.debug("job not run as it's locked ({})", jid);
+//			}
+//		};
+//		logger.debug("firing async execution for '{}' ({})", e.getJob().getName(), jid);
+//		akka.scheduler().scheduleOnce(FiniteDuration.create(0, TimeUnit.SECONDS),jr,akka.dispatcher());
+//	}
+//	
+//	// Runnable implementation, checks the job table at some
+//	// frequency.
+//	public void run() {
+//		try {
+//			checkJobs();
+//		} catch (Exception e) {
+//			throw new RuntimeException();
+//		}
+//	}
+//	
+//}

@@ -1,0 +1,11 @@
+
+-> /               libframeworkweb.Routes
+-> /authentication authentication.Routes
+
+
+# Could bind indirectly this definition. Use injected Main and we're good.
+# GET     /                           					@controllers.main.tpl.Main.home()
+# GET     /messages.js                					@controllers.main.tpl.Main.jsMessages()
+# GET     /codes.js        	        					@controllers.main.tpl.Main.jsCodes()
+
+

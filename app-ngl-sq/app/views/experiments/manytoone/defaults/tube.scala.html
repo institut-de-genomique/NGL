@@ -1,0 +1,216 @@
+@()
+
+<div class="col-md-12 col-lg-12" ng-controller="TubesToTubeCtrl">
+
+<ul class="nav nav-tabs margin-bottom-5" role="tablist">
+  <li class="active"><a href="" role="tab" data-target="#tube" data-toggle="tab">@Messages("experiments.tube.design")</a></li>
+  <li><a href="" role="tab"  data-target="#roadmap" data-toggle="tab" ng-click="atmService.data.updateDatatable()">@Messages("experiments.calculation.sheet")</a></li>
+</ul>
+
+<div class="tab-content"  >
+	<div class="tab-pane active" id="tube">
+		<div class="row">
+		<div class="col-md-12 col-lg-12">
+		<div class="row">
+		
+		<!-- InputContainers table -->
+		<div ng-model="atmService.data.inputContainers"  class="col-md-5 col-lg-5" droppable ng-if="mainService.isEditMode()">
+			<div class="panel panel-primary"  style="border-style:dashed">				
+			<div class="panel-body" ng-if="atmService.data.inputContainers.length==0">		
+				<p><i class="fa fa-download"></i> @Messages("experiments.inputs")</p>
+			</div>
+			
+			<table class="table" ng-if="atmService.data.inputContainers.length > 0">
+			<thead>
+				<tr>
+					<th>
+					</th>
+					<th>
+						@Messages("containers.table.code")
+					</th>
+					<th>
+						@Messages("containers.table.projectCodes")
+					</th>
+					<th>
+						@Messages("containers.table.sampleCodes")
+					</th>
+					<th>
+						@Messages("containers.table.fromTransformationTypeCodes")
+					</th>
+					<th>
+						@Messages("containers.table.tags")
+					</th>
+					<th>
+						@Messages("containers.table.state.code")
+					</th>
+					<th>
+						@Messages("containers.table.volume") (µL)
+					</th>
+					<th>
+						@Messages("containers.table.concentration") 
+					</th>									
+				</tr>
+				</thead>				
+				<tr ng-model="container" ng-repeat="container in atmService.data.inputContainers | orderBy:'code' track by $index" >
+					<td>
+						<button class="btn btn-default btn-xs"  ng-click="atmService.data.deleteInputContainer(container)" ng-disabled="!mainService.isEditModeAvailable() && !isNewState()"><i class="fa fa-trash-o"></i></button>
+					</td>
+					<td>
+						{{container.code}}
+					</td>
+					<td>
+						<div list-resize='container.fromTransformationTypeCodes | unique | codes:"type"' list-resize-min-size='3'>
+						
+					</td>
+					<td>
+						<div list-resize='container.projectCodes' list-resize-min-size='3'>
+						
+					</td>
+					<td>
+						<div list-resize='container.sampleCodes' list-resize-min-size='3'>
+						
+					</td>					
+					<td>
+						<div list-resize='container.contents | getArray:"properties.tag.value"| unique' list-resize-min-size='5' below vertical>																
+					</td>
+					<td>
+						{{container.state.code | codes:'state'}}
+					</td>
+					<td>
+						{{container.volume.value}}
+					</td>
+					<td>
+						{{container.concentration.value | number}} {{container.concentration.unit}}
+					</td>						
+				</tr>				
+			</table>
+			</div>	
+		</div>
+		<div class="col-md-1 col-lg-1" ng-if="mainService.isEditMode()">
+		<!-- Drop buttons -->
+		
+		<div ng-if="(atmService.data.atm[0].inputContainerUseds.length==0 || atmService.data.inputContainers.length>0 )">
+		<button class="btn btn-default btn-lg center-block" ng-click="atmService.data.dropInAllInputContainer(0)" >
+		<i class="fa fa-sign-in fa-2x"></i>
+		</button>
+		</div>
+		<div ng-if="atmService.data.inputContainers.length==0">
+		<button class="btn btn-default btn-lg center-block" ng-click="atmService.data.dropOutAllInputContainer(0)" >
+		<i class="fa fa-sign-in fa-2x fa-rotate-180"></i>
+		</button>
+		</div>
+
+		</div>
+		<!-- OutputContainers table -->
+		<div class="col-md-6 col-lg-6 flowcellTable ">		
+			<table class="table" >
+				<thead>
+					<tr>
+						<th colspan="7">
+							@Messages("experiments.inputs")
+						</th>
+						<th colspan="2">
+							@Messages("experiments.outputs")
+						</th>												
+					</tr>
+					<tr>
+						<th>
+							@Messages("containers.table.code")
+						</th>
+						<th>
+							@Messages("containers.table.fromTransformationTypeCodes")
+						</th>						
+						<th>
+							@Messages("containers.table.project_sample")
+						</th>						
+						<th>
+							@Messages("containers.table.tags")
+						</th>
+						<th>
+							@Messages("containers.table.state.code")
+						</th>
+						<th>
+							@Messages("containers.table.volume") (µL)
+						</th>
+						<th>
+							@Messages("containers.table.concentration")
+						</th>									
+						<th>
+							@Messages("containers.table.percentageInsidePool")
+						</th>
+						<th>
+							@Messages("containers.table.code")
+						</th>
+						<th>
+							@Messages("containers.table.volume") (µL)
+						</th>		
+					</tr>
+				<thead>
+				<tbody>
+						<tr ng-model="inputContainerUsed" ng-repeat="inputContainerUsed in atmService.data.atm[0].inputContainerUseds | orderBy:'code' track by $index" draggable >									
+							<td>
+								{{inputContainerUsed.code}}
+							</td>
+							<td>
+								<div list-resize='inputContainerUsed.fromTransformationTypeCodes | unique | codes:"type"' list-resize-min-size='5' below vertical>
+							</td>
+							<td>
+								<div list-resize="inputContainerUsed.contents | collect:'projectCode+&quot; / &quot;+sampleCode' | unique" list-resize-min-size="5" vertical="true">																					
+							</td>						
+							<td>
+								<div list-resize='inputContainerUsed.contents | getArray:"properties.tag.value"| unique' list-resize-min-size='5' below vertical>															
+							</td>
+							<td>
+								{{inputContainerUsed.state.code | codes:'state'}}
+							</td>
+							<td>
+								{{inputContainerUsed.volume.value}}
+							</td>
+							<td>
+								{{inputContainerUsed.concentration.value | number}} {{inputContainerUsed.concentration.unit}}
+							</td> 														
+							<td>
+								<div ng-switch on="mainService.isEditMode()">						
+									<p class="form-control-static" ng-switch-when="false" ng-bind="inputContainerUsed.percentage" />						 
+									<div ng-switch-when="true">
+										<input class="form-control input-sm" 
+											type="text"
+											ng-model="inputContainerUsed.percentage" 
+											title='@Messages("containers.table.percentage")' 
+											ng-change="atmService.data.updateDatatable()"/>									
+									</div>
+								</div>
+							</td>
+						
+							<td rowspan="{{atmService.data.atm[0].inputContainerUseds.length}}"
+								ng-if="$index === 0">
+								<p class="form-control-static"  ng-bind="atmService.data.atm[0].outputContainerUseds[0].code" />
+							</td>
+							<td rowspan="{{atmService.data.atm[0].inputContainerUseds.length}}"	ng-if="$index === 0">
+								<div ng-switch on="mainService.isEditMode()">						
+									<p class="form-control-static" ng-switch-when="false" ng-bind="atmService.data.atm[0].outputContainerUseds[0].volume.value" />						 
+									<div ng-switch-when="true">
+										<input class="form-control input-sm" type="text" title="Messages("containers.table.volume")"									
+										ng-model="atmService.data.atm[0].outputContainerUseds[0].volume.value"
+							   			ng-change="atmService.data.updateDatatable()"								   			
+						   				/>										
+									</div>
+								</div>						
+							</td>							
+						</tr>						
+				</tbody>
+				
+			</table>
+		</div>
+		</div>
+	</div>
+	</div>
+	</div>		
+		
+	<div class="tab-pane" id="roadmap">
+	<div class="row roadmap">
+		<div class="col-md-12 col-lg-12" ultimate-datatable="atmService.data.datatable"></div>
+	</div>
+	</div>
+</div>		
+</div>

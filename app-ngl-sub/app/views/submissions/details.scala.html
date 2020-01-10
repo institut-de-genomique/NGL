@@ -1,0 +1,105 @@
+@this()
+@()
+
+@import views.html.tools._
+
+@column()(value: Html) = {
+	<div class="col-md-4 col-lg-4">
+		@value
+	</div>
+}
+
+
+
+@standard_header("submission", "TRUE") { 
+   <!--Afficher boutons  uniquement si submission.state.code='N' => ng-if="submission.state.code=='N'"
+    Variable submission declarée dans scope de details.ctrl.js-->
+   <button class="btn btn-default" ng-if="submission.state.code=='N'" ng-disabled="!(studyCheck &&sampleCheck && experimentCheck && runCheck && rawDataCheck)" ng-click="userValidate()" data-toggle="tooltip" title="@Messages("button.validate")" ><i class="fa fa-save"></i> @Messages("button.validate")</button>
+   <button class="btn btn-default" ng-if="mainService.isEditMode() && submission.state.code=='N'" ng-click="cancel()" data-toggle="tooltip" title="@Messages("button.cancel")" ><i class="fa fa-undo"></i> @Messages("button.cancel")</button>
+   <button class="btn btn-default" ng-if="!mainService.isEditMode() && submission.state.code=='N'" ng-click="activeEditMode()" data-toggle="tooltip" title="@Messages("button.edit")" ><i class="fa fa-edit"></i> @Messages("button.edit")</button>		 					  
+   <button class="btn btn-default" id="myTooltipStudy" data-toggle="tooltip" data-placement="bottom"> <i class="fa fa-info"> Visibilité du study à l'EBI</i>
+   <button class="btn btn-default" id="myTooltipSample" data-toggle="tooltip" data-placement="bottom" > <i class="fa fa-info"> Visibilité du sample à l'EBI</i>
+	</button>
+	}
+
+
+
+@* commentaire
+<div id="overlay" style="position: absolute;top: 50%;left: 50%;font-size: 50px;color: white;transform: translate(-50%,-50%);-ms-transform: translate(-50%,-50%);z-index: 500000000;">
+	<img src="/assets/images/visibiliteEbi_sample.png" />
+</div>
+
+<div id="overlay" style="position: absolute;top: 50%;left: 50%;z-index: 500000000;">
+	<img src="/assets/images/visibiliteEbi_sample.png" />
+</div>
+
+<a href="/assets/images/visibiliteEbi_sample.png">help</a>
+<button class="btn btn-default" data-toggle="tooltip" title="@Messages("button.edit")" ><i class="fa fa-edit"></i> @Messages("button.edit")</button>		 					 
+
+*@
+
+<script type="text/javascript" ">
+$(document).ready(function(){
+    $("#myTooltipStudy").tooltip({
+        title: "<img src='/assets/images/visibiliteEbi_study.png' style='width:800px' />",
+        html: true,
+    });
+});
+
+</script> 
+
+<script type="text/javascript" ">
+$(document).ready(function(){
+    $("#myTooltipSample").tooltip({
+        title: "<img src='/assets/images/visibiliteEbi_sample.png' style='width:800px' />",
+        html: true,
+    });
+});
+
+</script> 
+
+
+
+<!-- stopPropagation on checkbox prevent parents default behavior (stop <a> call) -->
+
+
+<div class="row margin-bottom-7">
+	<div class="col-md-12 col-lg-12">
+		<ul class="nav nav-tabs margin-bottom-5">
+			<li class="active"> <a a href="#" data-target="#study" data-toggle="tab">@Messages("submissions.tabs.study")</a></li>
+			<li><a a href="#" data-target="#sample" data-toggle="tab"> @Messages("submissions.tabs.sample")</a></li>
+			<li><a a href="#" data-target="#experiment" data-toggle="tab">@Messages("submissions.tabs.experiment")</a></li>
+			<li><a a href="#" data-target="#run" data-toggle="tab">@Messages("submissions.tabs.run")</a></li>
+			<li><a a href="#" data-target="#rawData" data-toggle="tab">@Messages("submissions.tabs.rawData")</a></li>
+		</ul>
+		<div class="tab-content">
+			<div class="tab-pane active" id="study">
+				<div class="checkbox" ng-hide="submission.state.code!='N'"><label><input type="checkbox" ng-model="studyCheck"/>Validate Study</label></div>
+				<div ultimate-datatable="studyDT"></div>
+			</div>
+			
+			<div class="tab-pane" id="sample">
+			<!--Afficher boutons de check uniquement si submission.state.code='N' => ng-if="submission.state.code=='N'"
+			Variable submission declarée dans scope de details.ctrl.js-->
+				<div class="checkbox" ng-hide="submission.state.code!='N'"><label><input type="checkbox" ng-model="sampleCheck"/>Validate Sample</label></div>
+				<div ultimate-datatable="sampleDT"></div>
+			</div>
+			
+			<div class="tab-pane" id="experiment">
+				<div class="checkbox" ng-hide="submission.state.code!='N'"><label><input type="checkbox" ng-model="experimentCheck"/>Validate Experiment</label></div>
+				<div ultimate-datatable="experimentDT"></div>
+			</div>
+		
+			<div class="tab-pane" id="run">
+				<div class="checkbox" ng-hide="submission.state.code!='N'"><label><input type="checkbox" ng-model="runCheck"/>Validate Run</label></div>
+				<div ultimate-datatable="runDT"></div>
+			</div>
+		
+			<div class="tab-pane" id="rawData">
+				<div class="checkbox" ng-hide="submission.state.code!='N'"><label><input type="checkbox" ng-model="rawDataCheck"/>Validate Raw Data</label></div>
+				<div ultimate-datatable="rawDataDT"></div>
+			</div>
+		
+		</div>
+	</div>
+</div>
