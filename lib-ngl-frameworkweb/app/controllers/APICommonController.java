@@ -1,6 +1,5 @@
 package controllers;
 
-// import static play.data.Form.form;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,15 +16,10 @@ import org.springframework.beans.PropertyAccessorFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import controllers.history.UserHistory;
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.lfw.LFWApplication;
 import play.data.DynamicForm;
 import play.data.Form;
-// import play.data.validation.ValidationError;
 import play.libs.Json;
-// import play.mvc.Controller;
-// import play.mvc.Result;
-// import play.mvc.Http.Context;
-// import play.routing.JavaScriptReverseRouter;
 import play.mvc.With;
 
 @With({fr.cea.ig.authentication.Authenticate.class, UserHistory.class})
@@ -33,23 +27,19 @@ public abstract class APICommonController<T> extends NGLBaseController {
 
 //	private static final play.Logger.ALogger logger = play.Logger.of(APICommonController.class);
 	
-	// TODO: fix initialization
 	protected final DynamicForm listForm;
 	protected final Class<T> type;
 	private final Form<T> mainForm; 
 	
-//	protected NGLContext ctx;
-	
-	public APICommonController(NGLContext ctx, Class<T> type) {
+	public APICommonController(LFWApplication ctx, Class<T> type) {
 		super(ctx);
 		this.type = type;
-//		this.ctx = ctx;
 		listForm = ctx.form();
 		mainForm = ctx.form(type);
 	}
 
-	public final NGLContext getNGLContext(){
-		return ctx;
+	public final LFWApplication getNGLContext(){
+		return app;
 	}
 	
 	/*
@@ -124,7 +114,7 @@ public abstract class APICommonController<T> extends NGLBaseController {
 	 * @return      built form
 	 */
 	protected <A> Form<A> getQueryStringForm(Class<A> clazz) {
-		return filledFormQueryString(ctx.form(clazz),clazz);
+		return filledFormQueryString(app.form(clazz),clazz);
 	}
 
 	/*
@@ -137,7 +127,6 @@ public abstract class APICommonController<T> extends NGLBaseController {
 	protected <U> U filledFormQueryString(Class<U> clazz) {		
 		try {
 			Map<String, String[]> queryString = request().queryString();
-//			BeanWrapper wrapper = PropertyAccessorFactory.forBeanPropertyAccess(clazz.newInstance());
 			U wrapped = clazz.newInstance();
 			BeanWrapper wrapper = PropertyAccessorFactory.forBeanPropertyAccess(wrapped);
 			wrapper.setAutoGrowNestedPaths(true);
@@ -147,7 +136,7 @@ public abstract class APICommonController<T> extends NGLBaseController {
 						Object value = queryString.get(key);
 						if(wrapper.isWritableProperty(key)){
 							Class<?> c = wrapper.getPropertyType(key);
-							//TODO used conversion spring system
+							// GA: used conversion spring system
 							if(null != c && Date.class.isAssignableFrom(c)){
 								//wrapper.setPropertyValue(key, new Date(Long.valueOf(value[0])));
 								value = new Date(Long.valueOf(((String[])value)[0]));
@@ -159,7 +148,6 @@ public abstract class APICommonController<T> extends NGLBaseController {
 					throw new RuntimeException(e);
 				} 
 			}
-//			return (U)wrapper.getWrappedInstance();
 			return wrapped;
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -167,9 +155,12 @@ public abstract class APICommonController<T> extends NGLBaseController {
 	}
 
 	private boolean isNotEmpty(String[] strings) {
-		if(null == strings)return false;
-		if(strings.length == 0)return false;
-		if(strings.length == 1 && StringUtils.isBlank(strings[0]))return false;
+		if (strings == null)
+			return false;
+		if (strings.length == 0)
+			return false;
+		if (strings.length == 1 && StringUtils.isBlank(strings[0]))
+			return false;
 		return true;
 	}
 

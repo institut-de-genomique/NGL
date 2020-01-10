@@ -16,7 +16,6 @@
 			}
 			@columnLabelValue(Messages("containers.table.fromTransformationTypeCodes")){
 				<div class="form-control-static" list-resize="container.fromTransformationTypeCodes|unique|codes:'type'" list-resize-min-size='3' />
-
 			}
 			@columnLabelValue(Messages("containers.table.fromPurificationTypeCode"), Html(" ng-if='container.fromPurificationTypeCode'")){
 				<p class="form-control-static" ng-bind="container.fromPurificationTypeCode|unique|codes:'type'" />
@@ -40,11 +39,11 @@
 				<div ng-switch on="isEditMode()">
 					<p ng-switch-when="false"  class="form-control-static" ng-bind-html="convertToBr(container.comments[0].comment)" />	
 					<textarea ng-switch-when="true" class="form-control" ng-model="container.comments[0].comment" rows="3"></textarea>
-				</div>			
+				</div>
 			}
 		}
 		
-		@column(){				
+		@column(){
 			@columnLabelValue(Messages("containers.table.concentration")){
 				<div ng-switch on="isEditMode()">
 					<p ng-switch-when="false" class="form-control-static">
@@ -75,7 +74,7 @@
 						<div bt-select class="form-control" placeholder="@Messages("container.placeholder.unit")"  ng-model="container.volume.unit" bt-options="unit.code as unit.name for unit in getUnits('volume')" auto-select ng-change="computeQuantity()"></div>								
 					</div>
 					</div>
-				</div>					
+				</div>
 			}
 			@columnLabelValue(Messages("containers.table.quantity")){
 				<p class="form-control-static">
@@ -96,7 +95,7 @@
 						<div bt-select class="form-control" placeholder="@Messages("container.placeholder.unit")"  ng-model="container.quantity.unit" bt-options="unit.code as unit.name for unit in getUnits('quantity')" auto-select></div>								
 					</div>
 					</div>
-				</div-->				
+				</div-->
 			}
 			@columnLabelValue(Messages("containers.table.sizeqc")){
 				<div ng-switch on="isEditMode()">
@@ -112,15 +111,22 @@
 						<div bt-select class="form-control" placeholder="@Messages("container.placeholder.unit")"  ng-model="container.size.unit" bt-options="unit.code as unit.name for unit in getUnits('size')" auto-select></div>								
 					</div>
 					</div>
-				</div>				
+				</div>
 			}
 			
 			<div class="row">
 				<div class="col-md-12 col-lg-12">
 					<div ng-repeat="(key, value) in container.properties">
-							<property-value key-ng-model="key" value-ng-model="value"/>						
+							<property-value key-ng-model="key" value-ng-model="value"/>
 					</div>
 				</div>
+			</div>
+			
+			<!-- NGL-2685 -->
+			<div class="row" ng-if="container.importTypeCode !== undefined && container.importTypeCode !== null">
+			@columnLabelValue(Messages("containers.table.importTypeCode")){	
+				<div class="form-control-static" ng-bind="container.importTypeCode|codes:'type'" />
+			}
 			</div>
 		}
 		

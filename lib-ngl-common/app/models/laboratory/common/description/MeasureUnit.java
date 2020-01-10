@@ -1,40 +1,18 @@
 package models.laboratory.common.description;
 
+import java.util.function.Supplier;
+
+import fr.cea.ig.ngl.utils.SpringSupplier;
 import models.laboratory.common.description.dao.MeasureUnitDAO;
 import models.utils.Model;
-import models.utils.dao.AbstractDAO;
-import models.utils.dao.DAOException;
 
-public class MeasureUnit extends Model<MeasureUnit> {
+public class MeasureUnit extends Model {
 
-	public static MeasureUnitFinder find = new MeasureUnitFinder();
+	public static Supplier<MeasureUnitDAO> find = new SpringSupplier<>(MeasureUnitDAO.class);
 
 	public String value;   	
 	public Boolean defaultUnit = Boolean.FALSE;
-	//multiple par rapport à une référence ex L et µL 10-6
+	// multiple par rapport à une référence ex L et µL 10-6
 	public MeasureCategory category;
 	
-	public MeasureUnit() {
-		super(MeasureUnitDAO.class.getName());
-	}
-	
-	@Override
-	protected Class<? extends AbstractDAO<MeasureUnit>> daoClass() {
-		return MeasureUnitDAO.class;
-	}
-
-	public static class MeasureUnitFinder extends Finder<MeasureUnit,MeasureUnitDAO> {
-
-//		public MeasureUnitFinder() {
-//		    super(MeasureUnitDAO.class.getName());
-//		}
-		public MeasureUnitFinder() { super(MeasureUnitDAO.class); }
-		
-		public MeasureUnit findByValue(String value) throws DAOException {
-//			return ((MeasureUnitDAO) getInstance()).findByValue(value);
-			return getInstance().findByValue(value);
-		}
-		
-	}
-
 }

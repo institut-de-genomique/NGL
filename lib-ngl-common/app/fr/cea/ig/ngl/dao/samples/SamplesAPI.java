@@ -37,11 +37,8 @@ public class SamplesAPI extends GenericAPI<SamplesDAO, Sample> {
 															     "comments",
 															     "traceInformation");
 	
-	//private final SamplesDAO dao;
-	
 	@Inject
 	public SamplesAPI(SamplesDAO dao) {
-		//this.dao = dao;
 		super(dao);
 	}
 	
@@ -51,7 +48,7 @@ public class SamplesAPI extends GenericAPI<SamplesDAO, Sample> {
 	}
 
 	@Override
-	public List<String> defaultKeys() { //TODO AJ: NGL-2038: quick fix it will be deleted in version 2.3.0
+	protected List<String> defaultKeys() {
 		return this.DEFAULT_KEYS;
 	}
 	
@@ -60,53 +57,50 @@ public class SamplesAPI extends GenericAPI<SamplesDAO, Sample> {
 	 */
 	@Override
 	public Sample create(Sample input, String currentUser) throws APIValidationException, APISemanticException {
-		ContextValidation ctxVal = new ContextValidation(currentUser);
+//		ContextValidation ctxVal = new ContextValidation(currentUser);
+//		ctxVal.setCreationMode();
+		ContextValidation ctxVal = ContextValidation.createCreationContext(currentUser);
 		if (input._id == null) { 
 			input.traceInformation = new TraceInformation();
 			input.traceInformation.creationStamp(ctxVal, currentUser);
 		} else {
-			throw new APISemanticException("create method does not update existing objects"); 
+			throw new APISemanticException(CREATE_SEMANTIC_ERROR_MSG); 
 		}
-		ctxVal.setCreationMode();
-		SampleHelper.executeRules(input, "sampleCreation");
+		SampleHelper.executeSampleCreationRules(input);
 		input.validate(ctxVal);
 		if (!ctxVal.hasErrors()) {
 			return dao.saveObject(input);
 		} else {
-			throw new APIValidationException("invalid input", ctxVal.getErrors());
+			throw new APIValidationException(INVALID_INPUT_ERROR_MSG, ctxVal.getErrors());
 		}
 	}
 	
 	/**
-	 * Define only some fields to update (not the entire object) <br>
+	 * Define only some fields to update (not the entire object). 
+	 * <br>
 	 * list of editable field list is defined in {@link #AUTHORIZED_UPDATE_FIELDS} constant
 	 * @see SamplesAPI#AUTHORIZED_UPDATE_FIELDS
-	 * @param input       input sample       
-	 * @param currentUser current user
-	 * @param fields      fields
-	 * @return            updated sample
-	 * @throws APIException if the code doesn't correspond to a sample 
-	 * @throws APIValidationException validation failure
 	 */
 	@Override
 	public Sample update(Sample input, String currentUser, List<String> fields) throws APIException, APIValidationException {
 		Sample sampleInDb = get(input.code);
-		if(sampleInDb == null) {
+		if (sampleInDb == null) {
 			throw new APIException("Sample with code " + input.code + " not exist");
 		} else {
-			ContextValidation ctxVal = new ContextValidation(currentUser);
-			ctxVal.setUpdateMode();
+//			ValidationContext ctxVal = new ContextValidation(currentUser);
+//			ctxVal.setUpdateMode();
+			ContextValidation ctxVal = ContextValidation.createUpdateContext(currentUser);
 			checkAuthorizedUpdateFields(ctxVal, fields);
 			checkIfFieldsAreDefined(ctxVal, fields, input);
 			if (!ctxVal.hasErrors()) {
-				input.comments = InstanceHelpers.updateComments(input.comments, ctxVal);
+				input.comments = InstanceHelpers.updateComments(ctxVal, input.comments);
 				TraceInformation ti = sampleInDb.traceInformation;
-				if(ti != null){
+				if (ti != null) {
 					ti.modificationStamp(ctxVal, currentUser);
-				} else{
+				} else {
 					logger.error("traceInformation is null !!");
 				}
-				if(fields.contains("valuation")){
+				if (fields.contains("valuation")) {
 					input.valuation.user = currentUser;
 					input.valuation.date = new Date();
 				}
@@ -128,21 +122,22 @@ public class SamplesAPI extends GenericAPI<SamplesDAO, Sample> {
 	@Override
 	public Sample update(Sample input, String currentUser) throws APIException, APIValidationException {
 		Sample sampleInDb = get(input.code);
-		if(sampleInDb == null) {
+		if (sampleInDb == null) {
 			throw new APIException("Sample with code " + input.code + " not exist");
 		} else {
-			ContextValidation ctxVal = new ContextValidation(currentUser);
-			if(input.traceInformation != null){
+//			ContextValidation ctxVal = new ContextValidation(currentUser);
+//			ctxVal.setUpdateMode();
+			ContextValidation ctxVal = ContextValidation.createUpdateContext(currentUser);
+			if (input.traceInformation != null) {
 				input.traceInformation.modificationStamp(ctxVal, currentUser);
 			} else {
 				logger.error("traceInformation is null !!");
 			}
-			ctxVal.setUpdateMode();
-			input.comments = InstanceHelpers.updateComments(input.comments, ctxVal);
+			input.comments = InstanceHelpers.updateComments(ctxVal, input.comments);
 			input.validate(ctxVal);
 			if (!ctxVal.hasErrors()) {
 				dao.updateObject(input);
-				return input;
+				return get(input.code);
 			} else {
 				throw new APIValidationException("Invalid Sample object", ctxVal.getErrors());
 			}

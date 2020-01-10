@@ -5,24 +5,22 @@ import static fr.cea.ig.play.IGGlobals.configuration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.mongojack.DBQuery;
 
 import fr.cea.ig.MongoDBDAO;
-import models.laboratory.container.instance.Container;
-import models.laboratory.run.instance.ReadSet;
+import fr.cea.ig.lfw.utils.Iterables;
 import models.laboratory.sample.instance.Sample;
 import models.utils.InstanceConstants;
-//import play.Logger;
-// import play.Play;
 import rules.services.RulesServices6;
-import validation.ContextValidation;
 
 public class SampleHelper {
 	
-	private static play.Logger.ALogger logger = play.Logger.of(SampleHelper.class);
+//	/**
+//	 * Logger.
+//	 */
+//	private static play.Logger.ALogger logger = play.Logger.of(SampleHelper.class);
 	
 	/* 10/11/2016 GA DO NOT USED ANYMORE
 	public static void updateSampleProperties(String sampleCode, Map<String,PropertyValue>  properties,ContextValidation contextValidation){
@@ -57,32 +55,48 @@ public class SampleHelper {
 		
 	}
 	*/
-	//Return true if sample deleted 
-	//Return false if error sample => Sample must be update
-	public static boolean deleteSample(String sampleCode,ContextValidation contextValidation) {
-		ContextValidation ctx = new ContextValidation(contextValidation.getUser());
-//		List<String> sampleCodes=new ArrayList<String>();
-		if (MongoDBDAO.checkObjectExist(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, DBQuery.is("sampleOnContainer.sampleCode",sampleCode))) {
-			logger.debug("Sample "+sampleCode+" dans ReadSet");
-			ctx.addErrors("readSet.sampleOnContainer.sampleCode","Code {0} existe dans ReadSet" , sampleCode);
-		}		
-		if (MongoDBDAO.checkObjectExist(InstanceConstants.CONTAINER_COLL_NAME, Container.class, DBQuery.notEquals("categoryCode","tube").in("sampleCodes", sampleCode))){
-			logger.debug("Sample "+sampleCode+" dans Container");
-			ctx.addErrors("container.sampleOnContainer.sampleCode","Code {0} existe dans ReadSet" , sampleCode);
-		}
-		if (!ctx.hasErrors()) {
-			MongoDBDAO.delete(InstanceConstants.CONTAINER_COLL_NAME, Container.class, DBQuery.in("sampleCodes", sampleCode).notExists("fromTransformationTypeCodes"));
-			logger.info("Delete container for sampleCode "+sampleCode);
-			MongoDBDAO.delete(InstanceConstants.SAMPLE_COLL_NAME,Sample.class,DBQuery.is("code", sampleCode));
-			logger.info("Delete sample for sampleCode "+sampleCode);
-		} else {
-			return false;
-		}
-		// TODO: ctx has no errors so this seems not needed
-		contextValidation.errors.putAll(ctx.errors);
-		return true;
-	}
-	/* 10/11/2016 GA DO NOT USED ANYMORE
+
+	// -------------------------------------------------------------------------------
+	// arguments reordered
+	
+//	public static boolean deleteSample_(String sampleCode, ContextValidation contextValidation) {
+//		return SampleHelper.deleteSample(sampleCode, contextValidation);
+//	}
+//
+//	/**
+//	 * Delete sample.
+//	 * @param sampleCode        code of sample to delete from database
+//	 * @param contextValidation validation context
+//	 * @return                  true if the sample was delete, false otherwise
+//	 */
+//	//Return true if sample deleted 
+//	//Return false if error sample => Sample must be update
+//	public static boolean deleteSample(String sampleCode, ContextValidation contextValidation) {
+//		ContextValidation ctx = ContextValidation.createUndefinedContext(contextValidation.getUser());
+//		if (MongoDBDAO.checkObjectExist(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, DBQuery.is("sampleOnContainer.sampleCode", sampleCode))) {
+//			logger.debug("sample {} dans ReadSet", sampleCode);
+//			ctx.addError("readSet.sampleOnContainer.sampleCode", "Code {0} existe dans ReadSet" , sampleCode);
+//		}		
+//		if (MongoDBDAO.checkObjectExist(InstanceConstants.CONTAINER_COLL_NAME, Container.class, DBQuery.notEquals("categoryCode","tube").in("sampleCodes", sampleCode))) {
+//			logger.debug("sample {} dans Container", sampleCode);
+//			ctx.addError("container.sampleOnContainer.sampleCode","Code {0} existe dans ReadSet" , sampleCode);
+//		}
+//		if (!ctx.hasErrors()) {
+//			MongoDBDAO.delete(InstanceConstants.CONTAINER_COLL_NAME, Container.class, DBQuery.in("sampleCodes", sampleCode).notExists("fromTransformationTypeCodes"));
+//			logger.info("delete container for sampleCode {}", sampleCode);
+//			MongoDBDAO.delete(InstanceConstants.SAMPLE_COLL_NAME,Sample.class,DBQuery.is("code", sampleCode));
+//			logger.info("delete sample for sampleCode {}", sampleCode);
+//		} else {
+//			return false;
+//		}
+//		// TO DO: ctx has no errors so this seems not needed
+//		contextValidation.getErrors().putAll(ctx.getErrors());
+//		return true;
+//	}
+
+	// -------------------------------------------------------------------------------
+	
+	/* 10/11/2016 GA_ DO NOT USED ANYMORE
 	public static void updateSampleReferenceCollab(Sample sample, ContextValidation contextError) {
 			
 			MongoDBDAO.update(InstanceConstants.SAMPLE_COLL_NAME,Sample.class, 
@@ -104,16 +118,28 @@ public class SampleHelper {
 	}
 	*/
 	
-	public static void executeRules(Sample sample,String rulesName){
+	/**
+	 * Execute drools rules for the creation of a given sample.
+	 * @param sample created sample to trigger rules for
+	 */
+	public static void executeSampleCreationRules(Sample sample) {
+		executeRules(sample, "sampleCreation");
+	}
+	
+	private static void executeRules(Sample sample, String rulesName) {
 		ArrayList<Object> facts = new ArrayList<>();
 		facts.add(sample);
-		// List<Object> factsAfterRules = RulesServices6.getInstance().callRulesWithGettingFacts(Play.application().configuration().getString("rules.key"), rulesName, facts);				
 		RulesServices6.getInstance().callRulesWithGettingFacts(configuration().getString("rules.key"), rulesName, facts);
 	}
 
+	/**
+	 * Set of parent samples of a sample.
+	 * @param sampleCode sample code
+	 * @return           set of parent sample codes
+	 */
 	public static Set<String> getSampleParent(String sampleCode) {
-		Sample sample = MongoDBDAO.findOne(InstanceConstants.SAMPLE_COLL_NAME,Sample.class,DBQuery.is("code", sampleCode));
-		Set<String> sampleCodes=new HashSet<>();
+		Sample sample = MongoDBDAO.findOne(InstanceConstants.SAMPLE_COLL_NAME, Sample.class, DBQuery.is("code", sampleCode));
+		Set<String> sampleCodes = new HashSet<>();
 		sampleCodes.add(sampleCode);
 		if (sample.life != null && sample.life.path != null) {
 			sampleCodes.addAll(Arrays.asList(sample.life.path.substring(1).split(",")));
@@ -121,13 +147,23 @@ public class SampleHelper {
 		return sampleCodes;
 	}
 
+	/**
+	 * Set of project codes of a sample set.
+	 * @param sampleCodes sample codes
+	 * @return            set of project codes
+	 */
+//	public static Set<String> getProjectParent(Set<String> sampleCodes) {
+//		Set<String> projectCodes = new HashSet<>();
+//		List<Sample> samples = MongoDBDAO.find(InstanceConstants.SAMPLE_COLL_NAME, Sample.class, DBQuery.in("code", sampleCodes)).toList();
+//		for (Sample s : samples) {
+//			projectCodes.addAll(s.projectCodes);
+//		}
+//		return projectCodes;
+//	}
 	public static Set<String> getProjectParent(Set<String> sampleCodes) {
-		Set<String> projectCodes = new HashSet<>();
-		List<Sample> samples = MongoDBDAO.find(InstanceConstants.SAMPLE_COLL_NAME,Sample.class,DBQuery.in("code", sampleCodes)).toList();
-		for (Sample s : samples) {
-			projectCodes.addAll(s.projectCodes);
-		}
-		return projectCodes;
+		return Iterables.zen(MongoDBDAO.find(InstanceConstants.SAMPLE_COLL_NAME, Sample.class, DBQuery.in("code", sampleCodes)).cursor)
+				        .flatMap(s -> s.projectCodes)
+				        .toSet();
 	}
 
 }

@@ -7,7 +7,7 @@ angular.module('commonsServices', []).
 						
 						configDefault : {
 							errorClass:'alert alert-danger',
-							successClass: 'alert alert-success',							
+							successClass: 'alert alert-success',
 							errorKey:{save:'msg.error.save',remove:'msg.error.remove', get:'msg.error.get'},
 							successKey:{save:'msg.success.save',remove:'msg.success.remove', get:'msg.success.get'}
 						},
@@ -21,12 +21,12 @@ angular.module('commonsServices', []).
 						details : [],
 						opening : false,
 						getConfig: function(){
-		    				return this.config;		    				
+		    				return this.config;
 		    			},
 		    			setConfig: function(config){
 		    				var settings = $.extend(true, {}, this.configDefault, config);
 		    	    		this.config = angular.copy(settings);
-		    	    		this.configMaster = angular.copy(settings);		    	    		
+		    	    		this.configMaster = angular.copy(settings);
 		    			},
 						clear : function() {
 							this.clazz = undefined;
@@ -49,7 +49,7 @@ angular.module('commonsServices', []).
 										this.details[pName] = this.details[pName].concat(details[pName]);
 									}else{
 										this.details[pName].push(details[pName]);
-									}									
+									}
 								}
 							}
 							this.isDetails = true;
@@ -71,7 +71,7 @@ angular.module('commonsServices', []).
 								this.text=this.transformKey(this.config.errorKey[type]);
 							}else{
 								this.text=type;
-							}							
+							}
 							this.open();
 						},
 						open : function(){
@@ -91,24 +91,25 @@ angular.module('commonsServices', []).
 				return messages;
     		}
     		return constructor;
-    	}).factory('lists', ['$http', function($http){
+    	}).factory('lists', ['$http','$filter', function($http,$filter){   // FDS 29/11/2018 ajout $filter pour getTagGroupNames et getTacCategories
     		var inProgress = {};
     		var results = {
-    				valuations : [{code:"TRUE", name:Messages("valuation.TRUE")},
-    				                 {code:"FALSE", name:Messages("valuation.FALSE")},
-    				                 {code:"UNSET", name:Messages("valuation.UNSET")}],    				
-    				status : [{code:"TRUE", name:Messages("status.TRUE")},
-    				                 {code:"FALSE", name:Messages("status.FALSE")},
-    				                 {code:"UNSET", name:Messages("status.UNSET")}],    				
-	    				                 
-    				booleans : [{code:"true", name:Messages("boolean.TRUE")}, 
-    				            {code:"false", name:Messages("boolean.FALSE")}]
-    		
-    			};    		
+    				valuations : [{code:"TRUE",  name:Messages("valuation.TRUE")},
+    				              {code:"FALSE", name:Messages("valuation.FALSE")},
+    				              {code:"UNSET", name:Messages("valuation.UNSET")}],
+    				status :     [{code:"TRUE",  name:Messages("status.TRUE")},
+    				              {code:"FALSE", name:Messages("status.FALSE")},
+    				              {code:"UNSET", name:Messages("status.UNSET")}],
+    				booleans :   [{code:"true",  name:Messages("boolean.TRUE")}, 
+    				              {code:"false", name:Messages("boolean.FALSE")}],
+    				// FDS ne marche que ici !!!! valeurs en dur
+    				tagTypes :   [{code:'index-illumina-sequencing', name:Messages("techno.index-illumina-sequencing")},
+    				      		  {code:'index-nanopore-sequencing', name:Messages("techno.index-nanopore-sequencing")}],
+    			};
     		
     		var refresh = {
     				resolutions : function(params, key){
-    					load(jsRoutes.controllers.resolutions.api.Resolutions.list().url,params,(key)?key:'resolutions');
+    					load(jsRoutes.controllers.resolutions.api.Resolutions.list().url,params,(key)?key:'resolutions', true);
     				},
     				instruments : function(params, key){
     					load(jsRoutes.controllers.instruments.api.Instruments.list().url,params,(key)?key:'instruments');
@@ -120,16 +121,16 @@ angular.module('commonsServices', []).
     					load(jsRoutes.controllers.instruments.api.InstrumentUsedTypes.list().url,params,(key)?key:'instrumentUsedTypes');
     				},
     				containerSupportCategories : function(params, key){
-    					load(jsRoutes.controllers.containers.api.ContainerSupportCategories.list().url,params,(key)?key:'containerSupportCategories');
+    					load(jsRoutes.controllers.containers.api.ContainerSupportCategories.list().url,params,(key)?key:'containerSupportCategories', true);
     				},
     				processes : function(params, key){
     					load(jsRoutes.controllers.processes.api.Processes.list().url,params,(key)?key:'processes');
     				},
     				processCategories : function(params, key){
-    					load(jsRoutes.controllers.processes.api.ProcessCategories.list().url,params,(key)?key:'processCategories');
+    					load(jsRoutes.controllers.processes.api.ProcessCategories.list().url,params,(key)?key:'processCategories', true);
     				},
     				processTypes : function(params, key){
-    					load(jsRoutes.controllers.processes.api.ProcessTypes.list().url,params,(key)?key:'processTypes');
+    					load(jsRoutes.controllers.processes.api.ProcessTypes.list().url,params,(key)?key:'processTypes', true);
     				},
     				kitCatalogs : function(params, key){
     					load(jsRoutes.controllers.reagents.api.KitCatalogs.list().url,params,(key)?key:'kitCatalogs');
@@ -153,40 +154,40 @@ angular.module('commonsServices', []).
     					load(jsRoutes.controllers.projects.api.ProjectBioinformaticParameters.list().url,params,(key)?key:'bioinformaticParameters');
     				},
     				valuationCriterias: function(params, key){
-    					load(jsRoutes.controllers.valuation.api.ValuationCriterias.list().url,params,(key)?key:'valuationCriterias');    					
+    					load(jsRoutes.controllers.valuation.api.ValuationCriterias.list().url,params,(key)?key:'valuationCriterias');
     				},
     				containerSupports : function(params, key){
-    					load(jsRoutes.controllers.containers.api.ContainerSupports.list().url,params,(key)?key:'containerSupports'); 
+    					load(jsRoutes.controllers.containers.api.ContainerSupports.list().url,params,(key)?key:'containerSupports');
     				},
     				projects : function(params, key){
-    					load(jsRoutes.controllers.projects.api.Projects.list().url,params,(key)?key:'projects');    					
+    					load(jsRoutes.controllers.projects.api.Projects.list().url,params,(key)?key:'projects');
     				},
     				samples : function(params, key){
     					if(params)params.limit=-1
     					else params = {limit:-1};
-    					load(jsRoutes.controllers.samples.api.Samples.list().url,params,(key)?key:'samples');    					
+    					load(jsRoutes.controllers.samples.api.Samples.list().url,params,(key)?key:'samples');
     				},
     				users : function(params, key){
-    					load(jsRoutes.controllers.commons.api.Users.list().url,params,(key)?key:'users');    					
+    					load(jsRoutes.controllers.commons.api.Users.list().url,params,(key)?key:'users');
     				},
     				roles : function(params, key){
     					load(jsRoutes.controllers.commons.api.Roles.list().url, params, (key)?key:'roles');
     				},
     				experiments : function(params, key){
-    					load(jsRoutes.controllers.experiments.api.Experiments.list().url,params,(key)?key:'experiments');    					
+    					load(jsRoutes.controllers.experiments.api.Experiments.list().url,params,(key)?key:'experiments');
     				},
     				states : function(params, key){
-    					load(jsRoutes.controllers.commons.api.States.list().url,params,(key)?key:'states');    				
+    					load(jsRoutes.controllers.commons.api.States.list().url,params,(key)?key:'states', true);
     				},
     				protocols : function(params, key){
-    					load(jsRoutes.controllers.protocols.api.Protocols.list().url,params,(key)?key:'protocols');    				
+    					load(jsRoutes.controllers.protocols.api.Protocols.list().url,params,(key)?key:'protocols');
     				},
     				types : function(params, multi, key){
     					var name = "types";
     					if(multi!=undefined){
     						name = params.objectTypeCode+'Types';
     					}
-    					load(jsRoutes.controllers.commons.api.CommonInfoTypes.list().url,params,(key)?key:name);    				
+    					load(jsRoutes.controllers.commons.api.CommonInfoTypes.list().url,params,(key)?key:name);
     				},
     				containerCategories : function(params, key){
     					load(jsRoutes.controllers.containers.api.ContainerCategories.list().url,params,(key)?key:'containerCategories');
@@ -195,63 +196,118 @@ angular.module('commonsServices', []).
     					load(jsRoutes.controllers.experiments.api.ExperimentCategories.list().url,params,(key)?key:'experimentCategories');
     				},
     				experimentTypes : function(params, key){
-    					load(jsRoutes.controllers.experiments.api.ExperimentTypes.list().url,params,(key)?key:'experimentTypes');
+    					load(jsRoutes.controllers.experiments.api.ExperimentTypes.list().url,params,(key)?key:'experimentTypes', true);
     				},    				
     				runs : function(params, key){
-    					load(jsRoutes.controllers.runs.api.Runs.list().url,params,(key)?key:'runs');    				
+    					load(jsRoutes.controllers.runs.api.Runs.list().url,params,(key)?key:'runs');
     				},
     				runCategories : function(params, key){
     					load(jsRoutes.controllers.runs.api.RunCategories.list().url,params,(key)?key:'runCategories');
     				},
     				reportConfigs : function(params, key){
-    					load(jsRoutes.controllers.reporting.api.ReportingConfigurations.list().url,params,(key)?key:'reportConfigs');    				
+    					load(jsRoutes.controllers.reporting.api.ReportingConfigurations.list().url,params,(key)?key:'reportConfigs', true);
     				},
     				receptionConfigs : function(params, key){
-    					load(jsRoutes.controllers.receptions.api.ReceptionConfigurations.list().url,params,(key)?key:'receptionConfigs');    				
+    					load(jsRoutes.controllers.receptions.api.ReceptionConfigurations.list().url,params,(key)?key:'receptionConfigs', true);
     				},
     				filterConfigs : function(params, key){
-    					load(jsRoutes.controllers.reporting.api.FilteringConfigurations.list().url,params,(key)?key:'filterConfigs');    				
+    					load(jsRoutes.controllers.reporting.api.FilteringConfigurations.list().url,params,(key)?key:'filterConfigs');
     				},
     				statsConfigs : function(params, key){
-    					load(jsRoutes.controllers.stats.api.StatsConfigurations.list().url, params, (key)?key:'statsConfigs');
+    					load(jsRoutes.controllers.stats.api.StatsConfigurations.list().url, params, (key)?key:'statsConfigs', true);
     				},
     				propertyDefinitions : function(params, key){
-    					load(jsRoutes.controllers.commons.api.PropertyDefinitions.list().url,params,(key)?key:'propertyDefinitions');    				
+    					load(jsRoutes.controllers.commons.api.PropertyDefinitions.list().url,params,(key)?key:'propertyDefinitions');
     				},
     				treatmentTypes : function(params, key){
-    					load(jsRoutes.controllers.treatmenttypes.api.TreatmentTypes.list().url,params,(key)?key:'treatmentTypes');    				
+    					load(jsRoutes.controllers.treatmenttypes.api.TreatmentTypes.list().url,params,(key)?key:'treatmentTypes');
     				},
     				values : function(params, key){
-    					load(jsRoutes.controllers.commons.api.Values.list().url,params,(key)?key:'values');    				
+    					load(jsRoutes.controllers.commons.api.Values.list().url,params,(key)?key:'values');
     				},
     				tags : function(params, key){
     					if(angular.isUndefined(params)){
     	    				params = {typeCodes:['index-illumina-sequencing','index-nanopore-sequencing']};
     	    			}
-    				//GA 24/07/2015 un peu spécial pour tags car fait partie de la collection parameters...
+    					//GA 24/07/2015 un peu spécial pour tags car fait partie de la collection parameters...
     					load(jsRoutes.controllers.commons.api.Parameters.list().url,params,(key)?key:'tags');
+    				},
+    				// FDS 29/11/2018  ==> voir aussi tag-plate-helper.js
+    				tagGroupNames: function(key){
+    					var types = {typeCodes:['index-illumina-sequencing','index-nanopore-sequencing']};
+    					if(inProgress[key] === undefined){
+    						inProgress[key] = true; //avoid multiple load in parallele
+    						$http.get(jsRoutes.controllers.commons.api.Parameters.list().url,{params:types})
+    							.success(function(data, status, headers, config) {
+    							//console.log('index récupérés depuis Mongo...');
+    							//  certains tags appartiennent a plusieurs groupes, faire une Map pour obtenir une liste sans doublons
+    								var groupsMap = new Map();
+    								data.forEach (function(tag){
+    									if ( tag.groupNames != null) {
+    										tag.groupNames.forEach (function(group){
+    											groupsMap.set(group,"group");
+    										});
+    									}
+    								});
+    								
+    								// convertir la map en tableau
+    								var grps=Array.from(groupsMap.keys());
+    								results[key]=[];
+    								grps.forEach( function (grp){
+    									results[key].push( {'name':grp} );
+    								});
+    								// trier le tableau
+    								results[key] = $filter('orderBy')(results[key],'name');
+    								inProgress[key] = undefined; // reset boolean
+    							});
+    					} 
+    				},
+    				// FDS 29/11/2018 sur le meme principe que tagGroupNames creation de tagCategories 
+    				tagCategories: function(key){
+    					var types = {typeCodes:['index-illumina-sequencing','index-nanopore-sequencing']};
+    					if(inProgress[key] === undefined){
+    						inProgress[key] = true; //avoid multiple load in parallele
+    						$http.get(jsRoutes.controllers.commons.api.Parameters.list().url,{params:types})
+								.success(function(data, status, headers, config) {
+									//console.log('index récupérés depuis Mongo...');
+									var categoryMap = new Map();
+									data.forEach (function(tag){
+										categoryMap.set(tag.categoryCode,"code");
+									});
+									
+									// convertir la map en tableau
+									var cats=Array.from(categoryMap.keys());
+									results[key]=[];
+									cats.forEach( function (cat){
+										results[key].push( {'code':cat} );
+									});
+									// trier le tableau
+									results[key] = $filter('orderBy')(results[key],'code');
+									inProgress[key] = undefined; // reset boolean
+								});
+    					}
     				},
     				sampleTypes : function(params, key){
     					if(angular.isUndefined(params)){
     	    				params = {};
     	    			}
     					params.objectTypeCode='Sample';
-    					load(jsRoutes.controllers.commons.api.CommonInfoTypes.list().url,params,(key)?key:'sampleTypes');
+    					load(jsRoutes.controllers.commons.api.CommonInfoTypes.list().url,params,(key)?key:'sampleTypes', true);
     				},
     				sraStudies : function(params, key){
-    					load(jsRoutes.controllers.sra.studies.api.Studies.list().url,params,(key)?key:'sraStudies');    				
+    					load(jsRoutes.controllers.sra.studies.api.Studies.list().url,params,(key)?key:'sraStudies');
     				},
     				sraSamples : function(params, key){
-    					load(jsRoutes.controllers.sra.samples.api.Samples.list().url,params,(key)?key:'sraSamples');    				
+    					load(jsRoutes.controllers.sra.samples.api.Samples.list().url,params,(key)?key:'sraSamples');
     				},
     				sraExperiments : function(params, key){
-    					load(jsRoutes.controllers.sra.experiments.api.Experiments.list().url,params,(key)?key:'sraExperiments');    				
+    					load(jsRoutes.controllers.sra.experiments.api.Experiments.list().url,params,(key)?key:'sraExperiments');
     				},
     				sraConfigurations : function(params, key){
-    					load(jsRoutes.controllers.sra.configurations.api.Configurations.list().url,params,(key)?key:'sraConfigurations');    				
+    					load(jsRoutes.controllers.sra.configurations.api.Configurations.list().url,params,(key)?key:'sraConfigurations');
     				},
     				readSets : function(params, key){
-    					load(jsRoutes.controllers.readsets.api.ReadSets.list().url,params,(key)?key:'readSets');    				
+    					load(jsRoutes.controllers.readsets.api.ReadSets.list().url,params,(key)?key:'readSets');
     				},
     				//Solution temporaire en attendant le passage de la description SQL dans Mongo
     				context : function(params,key){
@@ -260,6 +316,7 @@ angular.module('commonsServices', []).
     	    			}
     					load(jsRoutes.controllers.commons.api.Parameters.list().url,params,(key)?key:'context');
     				},
+    				// FDS 22/11/2018  il en manque plein dans cette liste !!!!!!!! c'est appelé ou ?
     				all : function(params){
     					this.resolutions(params);
     					this.containerCategories(params);
@@ -284,17 +341,19 @@ angular.module('commonsServices', []).
    				}
     		};
     		
-    		
-    		
-    		function load(url, params, key){
+    		function load(url, params, key, preventSorting=false){
     			if(inProgress[key] === undefined){
 	    			inProgress[key] = true; //avoid multiple load in parallele
 	    			if(angular.isUndefined(params)){
 	    				params = {};
 	    			}
-	    			params.list = true;
+					params.list = true;
 	    			$http.get(url,{params:params,key:key}).success(function(data, status, headers, config) {
-	    				results[config.key]=data;
+	    				results[config.key]= preventSorting ? data : data.sort(function(a, b){
+							if(a.code < b.code) { return -1; }
+							if(a.code > b.code) { return 1; }
+							return 0;
+						});    // pourquoi config ??
 	    				inProgress[key] = undefined;
 	    			});
     			}
@@ -315,7 +374,6 @@ angular.module('commonsServices', []).
     				}else{
     					return results[key];
     				}
-    				
     			},
     			clear : function(key){results[key] = null;},
     			getResolutions : function(){return results['resolutions'];},
@@ -348,11 +406,8 @@ angular.module('commonsServices', []).
     			getContainerSupports : function(){return results['containerSupports'];},
     			getContainerCategories : function(){return results['containerCategories'];},
     			getExperimentCategories : function(){return results['experimentCategories'];},
-    			
     			getExperimentTypes : function(){return results['experimentTypes'];},
-    			getStates : function(){
-    				return results['states'];
-    				},
+    			getStates : function(){return results['states'];},
     			getRuns : function(){return results['runs'];},
     			getRunCategories : function(){return results['runCategories'];},
     			getInstrumentCategories : function(){return results['instrumentCategories'];},
@@ -378,16 +433,14 @@ angular.module('commonsServices', []).
     				return results[key];
     			},
     			getReagentCatalogs : function(params,key){
-    				key = (key)?key:'reagentCatalogs';					
+    				key = (key)?key:'reagentCatalogs';
     				if (results[key] === undefined) {
     					refresh.reagentCatalogs(params,key);
     				}
     				return results[key];
     			},
-    			getInstruments : function(){return results['instruments'];},		   
-    			getValuations : function(params,key){
-    				return results['valuations'];
-    			},
+    			getInstruments : function(){return results['instruments'];},
+    			getValuations : function(params,key){return results['valuations'];},
     			getValues : function(params, key){
     				if(results[key] === undefined){
     					refresh.values(params, key);
@@ -427,14 +480,30 @@ angular.module('commonsServices', []).
     			getTags : function(params,key){
     				key = (key)?key:'tags';
     				if(results[key] === undefined){
-    					refresh.tags(params, key);
+    					refresh.tags(params,key);
+    				}
+    				return results[key];
+    			},
+    			getValuations : function(){return results['valuations'];},
+    			getTagTypes : function(){return results['tagTypes'];},  // FDS 22/11/2018 ajout; liste en dur 
+    			getTagCategories : function(key){    // FDS 29/11/2018 ajout; version dynamique
+    				key = (key)?key:'tagCategories';
+    				if(results[key] === undefined){
+    					refresh.tagCategories(key);
+    				}
+    				return results[key];
+    			},
+    			getTagGroupNames : function(key){// FDS 29/11/2018 ajout; voir aussi tag-plate-helper.js
+      				key = (key)?key:'tagGroupNames';
+    				if(results[key] === undefined){
+    					refresh.tagGroupNames(key);
     				}
     				return results[key];
     			},
     			getContext : function(params,key){
     				key = (key)?key:'context';
     				if(results[key] === undefined){
-    					refresh.tags(params, key);
+    					refresh.tags(params, key); // pourquoi refresh tags ??????????   mise en comm change rien pour recherge tags (effets ailleurs ??)
     				}
     				return results[key];
     			}
@@ -638,7 +707,11 @@ angular.module('commonsServices', []).
 				    ngModelController.$parsers.push(function(data) {
 				    	var convertedData = data;
 			    	    if(moment && convertedData !== ""){
-			    			   convertedData = moment(data, Messages("date.format").toUpperCase()).valueOf();
+			    			var momentDate = moment(data, Messages("date.format").toUpperCase());
+			    	    	if(attrs.endOfDay !== undefined ){
+			    	    		momentDate.endOf('day');
+			    			}   
+			    	    	convertedData = momentDate.valueOf();
 			    		   }else{
 			    			   convertedData = null;
 			    			   console.log("mission moment library to convert string to date");
@@ -1278,8 +1351,8 @@ angular.module('commonsServices', []).
 				*/
 				function toArray(object) {
 				    var i = -1,
-				        props = Object.keys(object),
-				        result = new Array(props.length);
+				    props = Object.keys(object),
+				    result = new Array(props.length);
 				
 				    while(++i < props.length) {
 				        result[i] = object[props[i]];
@@ -1373,7 +1446,8 @@ angular.module('commonsServices', []).
     	    				data.push(get);    	    			
     	    			}
     	    		});    	    		
-    	    	}     	    	
+    	    	}   
+    	    	
     	    	return data;
     	    };
     	}]).filter('codes', function(){
@@ -1403,9 +1477,7 @@ angular.module('commonsServices', []).
     				return tmp;    				
     			}
     			return undefined;
-    		}
-
-    		
+    		}	
     	}).filter('convert', ['convertValueServices', function(convertValueServices){
     		return function(input, property){
 				var convertValues = convertValueServices();
@@ -1414,11 +1486,15 @@ angular.module('commonsServices', []).
 				}
     			return input;
     		}
-    	}]).filter('messages', function(){
+    	}]).filter('messages', function(){   //FDS 27/11/2018 never used in NGL !!!???
     		return function(input){
-    			return Messages(input);    			
+    			return Messages(input);
     		}
-    	}).filter('inttostring', function(){
+    	}).filter('messagesPrefix', function(){   //FDS 27/11/2018: add a prefix before calling Messages
+    		return function(input, prefix){
+    			return Messages(prefix+'.'+input);
+    		}
+    	}).filter('inttostring', function(){   //FDS 27/11/2018  never used in NGL  !!!???
     		return function(input){
     			return String(input);    			
     		}
@@ -1434,7 +1510,7 @@ angular.module('commonsServices', []).
     			else if(angular.isArray(array) && ifOnlyOne === true && array.length === 1)return array[0]
     			else return array;   			    			
     		}
-    	}).filter('countDistinct', ['$parse',function($parse) {
+    	}).filter('countDistinct', ['$parse',function($parse) {    //FDS 27/11/2018  never used in NGL  !!!???
     	    return function(array, key) {
     	    	if (!array || array.length === 0)return undefined;
     	    	if (!angular.isArray(array) && (angular.isObject(array) || angular.isNumber(array) || angular.isString(array) || angular.isDate(array))) array = [array];
@@ -1555,5 +1631,28 @@ angular.module('commonsServices', []).
 				  }
 				 
 	  		  };
-		}])
-    	
+		}]).filter('length', function(){  // FDS 27/11/2018 :get length of input string
+    		return function(input){
+    				return input.length; 
+    		}
+		}).filter('tagLength', function(){  // FDS 03/01/2019 :get length of TAG ( a tag is a string but could contain several "-" which must not be counted !!)
+    		return function(input){
+				return input.replace(/-/g,'').length;
+    		}
+		}).filter('toArrayProps', function() { // FDS 28/11/2018 : return array of properties values from an object
+    		return function (object) {
+				// only for objects (ie: json object)
+    			var result=[];
+    			if(angular.isObject(object)){
+					var i = -1,
+					props = Object.keys(object);
+					//console.log('props='+ props)
+
+					while(++i < props.length) {
+					  result[i] = props;
+					  ///result[i+1] = 'toto'; // pour test plusieurs cles....
+					}
+				}
+    			return result;
+    		}
+    	});

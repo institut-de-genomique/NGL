@@ -1,0 +1,29 @@
+//FDS creation 25/07/2019 NGL-2607; d'apres CNS/dna-extraction
+package rules
+
+
+rule "Set project code for new samples"
+    @nglSQ( calculations )
+	dialect "java"
+	salience 900
+	no-loop
+    when
+		$experiment:Experiment($typeCode:typeCode,$typeCode=="permeabilization-transposition-purification", state.code == "N")
+		$atomicTransfert: OneToOneContainer($inputContainerUseds : inputContainerUseds, $inputContainerUseds!=null , $outputContainerUseds: outputContainerUseds, $outputContainerUseds!=null )
+		$inputContainerUsed: InputContainerUsed($inputProjectCode:contents.get(0).projectCode, $inputProjectCode != null) from $inputContainerUseds
+		// NON, laisser le type d'entree libre ( pour l'instaant...)
+		$outputContainerUsed: OutputContainerUsed($outputSampleTypeCode:experimentProperties.get("sampleTypeCode"), $outputSampleTypeCode != null) from $outputContainerUseds
+    	//eval("cells".equals($outputSampleTypeCode.value))
+    then
+        //Logger.debug("Set project code for new sample (start)");
+        //Logger.debug("outputSampleTypeCode.value="+$outputSampleTypeCode.value);
+    	//Logger.debug("inputProjectCode="+ $inputProjectCode);
+    	// mettre par défaut dans atm.outputContainerUsed.experiment.properties.projectCode = projectCode de l'inputContainerUsed 
+		PropertySingleValue outputProjectCode = (PropertySingleValue)$outputContainerUsed.experimentProperties.get("projectCode");
+		if(null == outputProjectCode){
+			Logger.debug("setting outputProjectCode !");
+			outputProjectCode=new PropertySingleValue();
+			$outputContainerUsed.experimentProperties.put("projectCode",outputProjectCode);
+			outputProjectCode.value =$inputProjectCode;
+		}
+end

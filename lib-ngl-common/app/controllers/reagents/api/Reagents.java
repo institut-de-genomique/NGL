@@ -16,12 +16,7 @@ import com.mongodb.BasicDBObject;
 import controllers.DocumentController;
 import fr.cea.ig.MongoDBDAO;
 import fr.cea.ig.MongoDBResult;
-import fr.cea.ig.play.migration.NGLContext;
-
-// import static play.data.Form.form;
-//import static fr.cea.ig.play.IGGlobals.form;
-
-
+import fr.cea.ig.ngl.NGLApplication;
 import models.laboratory.common.instance.TraceInformation;
 import models.laboratory.reagent.description.AbstractCatalog;
 import models.laboratory.reagent.instance.Box;
@@ -39,12 +34,18 @@ import views.components.datatable.DatatableResponse;
 
 public class Reagents extends DocumentController<Reagent> {
 	
-	private final /*static*/ Form<ReagentSearchForm> reagentSearchForm; // = form(ReagentSearchForm.class);
+	private final Form<ReagentSearchForm> reagentSearchForm;
+
+//	@Inject
+//	public Reagents(NGLContext ctx) {
+//		super(ctx,InstanceConstants.REAGENT_INSTANCE_COLL_NAME, Reagent.class);
+//		reagentSearchForm = ctx.form(ReagentSearchForm.class);
+//	}
 
 	@Inject
-	public Reagents(NGLContext ctx) {
-		super(ctx,InstanceConstants.REAGENT_INSTANCE_COLL_NAME, Reagent.class);
-		reagentSearchForm = ctx.form(ReagentSearchForm.class);
+	public Reagents(NGLApplication app) {
+		super(app,InstanceConstants.REAGENT_INSTANCE_COLL_NAME, Reagent.class);
+		reagentSearchForm = app.form(ReagentSearchForm.class);
 	}
 
 	@Override
@@ -71,8 +72,9 @@ public class Reagents extends DocumentController<Reagent> {
 		reagent.traceInformation.creationDate = new Date();
 		
 //		ContextValidation contextValidation = new ContextValidation(getCurrentUser(), reagentFilledForm.errors());
-		ContextValidation contextValidation = new ContextValidation(getCurrentUser(), reagentFilledForm);
-		contextValidation.setCreationMode();
+//		ContextValidation contextValidation = new ContextValidation(getCurrentUser(), reagentFilledForm);
+//		contextValidation.setCreationMode();
+		ContextValidation contextValidation = ContextValidation.createCreationContext(getCurrentUser(), reagentFilledForm);
 		/*if(ValidationHelper.required(contextValidation, reagent.name, "name")){
 			reagentCatalog.code = CodeHelper.getInstance().generateReagentCatalogCode(reagentCatalog.name);
 		}*/
@@ -92,9 +94,9 @@ public class Reagents extends DocumentController<Reagent> {
 		reagent.traceInformation.modifyDate = new Date();
 		
 //		ContextValidation contextValidation = new ContextValidation(getCurrentUser(), reagentFilledForm.errors());
-		ContextValidation contextValidation = new ContextValidation(getCurrentUser(), reagentFilledForm);
-		contextValidation.setUpdateMode();
-
+//		ContextValidation contextValidation = new ContextValidation(getCurrentUser(), reagentFilledForm);
+//		contextValidation.setUpdateMode();
+		ContextValidation contextValidation = ContextValidation.createUpdateContext(getCurrentUser(), reagentFilledForm);
 //		reagent = (Reagent)InstanceHelpers.save(InstanceConstants.REAGENT_INSTANCE_COLL_NAME, reagent, contextValidation);
 		reagent = InstanceHelpers.save(InstanceConstants.REAGENT_INSTANCE_COLL_NAME, reagent, contextValidation);
 		if (contextValidation.hasErrors())
@@ -103,7 +105,7 @@ public class Reagents extends DocumentController<Reagent> {
 		 // legit, spaghetti above
 	}
 
-	public Result list(){
+	public Result list() {
 		Form<ReagentSearchForm> reagentFilledForm = filledFormQueryString(reagentSearchForm,ReagentSearchForm.class);
 		ReagentSearchForm reagentSearch = reagentFilledForm.get();
 		BasicDBObject keys = getKeys(reagentSearch);

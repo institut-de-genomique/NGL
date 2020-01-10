@@ -1,5 +1,5 @@
-angular.module('tools', [])
-.factory('helpers', ['$parse',  
+angular.module('toolsHelpers', [])
+.factory('helpers', ['$parse',
     function($parse){
 
 	var constructor =  {
@@ -56,7 +56,6 @@ angular.module('tools', [])
 			}
 		};
 	
-
 	return constructor;
 
 }]);

@@ -1,14 +1,31 @@
 package validation.reagent.instance;
 
 import models.laboratory.reagent.description.KitCatalog;
-import models.utils.InstanceConstants;
 import validation.ContextValidation;
 import validation.common.instance.CommonValidationHelper;
 
-public class KitValidationHelper extends CommonValidationHelper {
+public class KitValidationHelper {
 	
-	public static void validateKitCatalogCode(String code, ContextValidation contextValidation){
-		validateExistInstanceCode(contextValidation, code, KitCatalog.class, InstanceConstants.REAGENT_CATALOG_COLL_NAME);
+	// renamed and arguments reordered
+	
+	/**
+	 * Validate kit catalog code.
+	 * @param code              kit catalog code
+	 * @param contextValidation validation context
+	 * @deprecated use {@link #validateKitCatalogCodeOptional(ContextValidation, String)}
+	 */
+	@Deprecated
+	public static void validateKitCatalogCode(String code, ContextValidation contextValidation) {
+		KitValidationHelper.validateKitCatalogCodeOptional(contextValidation, code);
 	}
 	
+	/**
+	 * Validate kit catalog code.
+	 * @param contextValidation validation context
+	 * @param code              kit catalog code
+	 */
+	public static void validateKitCatalogCodeOptional(ContextValidation contextValidation, String code) {
+		CommonValidationHelper.validateCodeForeignOptional(contextValidation, KitCatalog.catalogFind.get(), code);
+	}
+
 }

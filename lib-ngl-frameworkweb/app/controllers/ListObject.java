@@ -1,17 +1,19 @@
 package controllers;
 
 public class ListObject {
-	public String name;
-	public String code;
 	
-	public ListObject(){
-		this.name = "";
-		this.code = "";
+	public String code;
+	public String name;
+	
+	public ListObject() {
+//		this.name = "";
+//		this.code = "";
+		this("","");
 	}
 	
-	public ListObject(String code, String label){
-		this.name = label;
+	public ListObject(String code, String label) {
 		this.code = code;
+		this.name = label;
 	}
 	
 }

@@ -42,7 +42,7 @@ angular.module('home').controller('SearchCtrl', ['$scope',  '$window','datatable
 			active:Permissions.check("writing")?true:false,
 			url:function(value){
 				var fields = "fields=valuation";
-				if(value.state)fields = fields+"&fields=state";
+				if(value.state && value.state.resolutionCodes)fields = fields+"&fields=state.resolutionCodes";
 				if(value.comments)fields = fields+"&fields=comments";
 				if(value.concentration)fields = fields+"&fields=concentration";
 				if(value.volume)fields = fields+"&fields=volume";
@@ -99,7 +99,8 @@ angular.module('home').controller('SearchCtrl', ['$scope',  '$window','datatable
 
 
 "use strict"
-angular.module('home').controller('SearchStateCtrl', ['$scope','$location','$routeParams', 'datatable','lists','$filter','$http','mainService','tabService','containersSearchService', function($scope,$location,$routeParams, datatable, lists,$filter,$http,mainService,tabService,containersSearchService) {
+angular.module('home').controller('SearchStateCtrl', ['$scope','$location','$routeParams', 'datatable','lists','$filter','$http','$q','mainService','tabService','containersSearchService', 
+	function($scope,$location,$routeParams, datatable, lists,$filter,$http,$q,mainService,tabService,containersSearchService) {
 	var datatableConfig = {
 			search:{
 				url:jsRoutes.controllers.containers.api.Containers.list()
@@ -126,11 +127,23 @@ angular.module('home').controller('SearchStateCtrl', ['$scope','$location','$rou
 			},
 			save:{
 				active:Permissions.check("writing")?true:false,
-				url:function(line){return jsRoutes.controllers.containers.api.Containers.updateStateBatch().url;},
+				url:jsRoutes.controllers.containers.api.Containers.updateStateBatch().url,
 				mode:'remote',
 				method:'put',
 				batch:true,
-				value:function(line){return {code:line.code,state:line.state};}
+				value:function(line){return {code:line.code,state:line.state};},	
+				beforeSave:function(values){
+					
+					var queries = values.map(function(value){
+						var fields = "fields=valuation";
+						if(value.data.state && value.data.state.resolutionCodes)fields = fields+"&fields=state.resolutionCodes";
+						if(value.data.comments)fields = fields+"&fields=comments";
+						return $http.put(jsRoutes.controllers.containers.api.Containers.update(value.data.code).url+"?"+fields,value.data);																	
+					});
+					
+					return $q.all(queries);
+					
+				}
 			},
 			show:{
 				active:true,

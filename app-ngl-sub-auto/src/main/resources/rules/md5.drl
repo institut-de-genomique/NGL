@@ -20,7 +20,7 @@ rule "Set parameter for command line md5"
 			log.debug("Set parameter for md5 command");
 			//Get input resource
 			JobResource jobResource = $job.getUniqueJobResource("inputRawDataMd5");
-			$job.setParameterValue("fileZipped", jobResource.getProperty("submissionDirectory")+File.separator+jobResource.getProperty("fileName"));
+			$job.setParameterValue("fileZipped", ProjectProperties.getProperty("tmpDirectory")+File.separator+jobResource.getProperty("code")+File.separator+jobResource.getProperty("fileName"));
 end
 
 rule "POST DONE EXECUTION of md5 : Update MD5 of RawData"
@@ -38,7 +38,7 @@ rule "POST DONE EXECUTION of md5 : Update MD5 of RawData"
 		read.close();
 		//Write in md5 file
 		JobResource jobResource = $job.getUniqueJobResource("inputRawDataMd5");
-		String md5FileName = jobResource.getProperty("submissionDirectory")+File.separator+"md5.txt";
+		String md5FileName = ProjectProperties.getProperty("tmpDirectory")+File.separator+jobResource.getProperty("code")+File.separator+"md5.txt";
 		PrintWriter out = new PrintWriter(new FileWriter(new File(md5FileName),true));
 		out.println(md5+" "+jobResource.getProperty("fileName"));
 		out.close();

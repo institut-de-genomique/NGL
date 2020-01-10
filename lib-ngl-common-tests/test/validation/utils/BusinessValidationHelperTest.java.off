@@ -1,0 +1,30 @@
+// BusinessValidationHelper is not used anymore.
+
+//package validation.utils;
+//
+//import static org.junit.Assert.assertFalse;
+//
+//import org.junit.Test;
+//
+//import fr.cea.ig.util.function.CC1;
+//import ngl.common.Global;
+//import play.Application;
+//import validation.ContextValidation;
+//
+//public class BusinessValidationHelperTest {
+//
+//	private static final CC1<Application> af = Global.afSq.cc1();
+//	private static final String TEST_USER = "test";
+//	
+//	// null code always exists  
+//	@Test
+//	public void testValidateExistInstanceCode_0() throws Exception {
+//		af.accept(app -> {
+//			ContextValidation ctx = ContextValidation.createUndefinedContext(TEST_USER);
+//			BusinessValidationHelper.validateExistInstanceCode(ctx, null, null, null);
+//			assertFalse(ctx.hasErrors());
+//		});
+//	}
+//
+//	
+//}

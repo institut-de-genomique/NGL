@@ -21,8 +21,7 @@ import validation.ContextValidation;
 public class Output extends AbstractOutput {
 
 	@Override
-	public File generateFile(Experiment experiment,
-			ContextValidation contextValidation) {
+	public File generateFile(Experiment experiment, ContextValidation contextValidation) {
 		String content="";
 		
 		if("solution-stock".equals(experiment.typeCode)){

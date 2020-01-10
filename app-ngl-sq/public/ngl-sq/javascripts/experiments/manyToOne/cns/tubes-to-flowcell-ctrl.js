@@ -44,7 +44,7 @@ angular.module('home').controller('CNSTubesToFlowcellCtrl',['$scope', '$parse', 
 		 			"position":2,
 		 			"render":"<div list-resize='cellValue' list-resize-min-size='3'>",
 		        	"extraHeaders":{0:"solution stock"}
-		         },				         
+		         },			         
 				 {
 		        	 "header":Messages("containers.table.concentration") + " (nM)",
 		        	 "property":"inputContainerUsed.concentration.value",
@@ -138,6 +138,22 @@ angular.module('home').controller('CNSTubesToFlowcellCtrl',['$scope', '$parse', 
 			$scope.messages.showDetails = false;
 			$scope.messages.open();
 		}
+	};
+	
+	$scope.getSampleAndTagsWithSecondary = function(container){
+		var sampleCodeAndTags = [];
+		angular.forEach(container.contents, function(content){
+			if(content.properties.secondaryTag != undefined && content.properties.tag != undefined && content.sampleCode != undefined){
+				sampleCodeAndTags.push(content.sampleCode+" / "+content.properties.secondaryTag.value+" / "+content.properties.tag.value);
+			}else if(content.properties.tag != undefined && content.sampleCode != undefined){
+ 				sampleCodeAndTags.push(content.sampleCode+" / / "+content.properties.tag.value);
+ 			}else if(content.properties.secondaryTag != undefined && content.sampleCode != undefined){
+ 				sampleCodeAndTags.push(content.sampleCode+" / "+content.properties.secondaryTag.value+" / ");
+ 			}else if(content.sampleCode != undefined){
+ 				sampleCodeAndTags.push(content.sampleCode);
+ 			}
+		});
+		return sampleCodeAndTags;
 	};
 	
 }]);

@@ -1,0 +1,93 @@
+//package ngl.data.crontab;
+//
+//import java.util.Date;
+//
+//import org.bson.types.ObjectId;
+////
+////
+//// Given a collection of objects that extends TimeGCObject, we can provide
+//// the collection manager that will GC things properly. The objects are
+//// kept alive using a refresh process that should be cancelled either
+//// when the application is shutdown or when the object is released.
+////  
+//// 
+//class TimeGCObject extends RawMongoObject {
+//	
+//	private Date lastRefreshDate;
+//	private long duration;
+//	private String owner;
+//	private Date lastVerificationDate;
+//	
+//	public TimeGCObject() {}
+//	
+//	public TimeGCObject(ObjectId id, long duration, String owner) {
+//		super(id);
+//		this.duration = duration;
+//		this.owner = owner;
+//	}
+//	
+//	public Date getLastRefreshDate() {
+//		return lastRefreshDate;
+//	}
+//	public void setLastRefreshDate(Date date) {
+//		lastRefreshDate = date;
+//	}
+//	
+//	public long getDuration() {
+//		return duration;
+//	}
+//	public void setDuration(long duration) {
+//		this.duration = duration;
+//	}
+//	
+//	public String getOwner() {
+//		return owner;
+//	}
+//	public void setOwner(String owner) {
+//		this.owner = owner;
+//	}
+//	public Date getLastVerificationDate() {
+//		return lastVerificationDate;
+//	}
+//	public void setLastVerificationDate(Date date) {
+//		lastVerificationDate = date;
+//	}
+//}
+//
+////@Singleton
+////class TimeGCObjectManager {
+////	
+////}
+//
+//public class Lock extends TimeGCObject {
+//	public Lock() {}
+//	public Lock(ObjectId id, long duration, String owner) { super(id,duration,owner); }
+//}
+//
+////// Mongojack definition of the lock.
+////public class Lock extends RawMongoObject {
+////	
+////	// Last refresh date (to be compared with the check date).
+////	public Date lastRefreshDate;
+////	
+////	// Duration ins milliseconds.
+////	public long duration;
+////	
+////	// Owner.
+////	public String owner;
+////	
+////	public Date lastVerificationDate;
+////	
+////	// Dates indexed using the vm id. If we're assuming NTP clock synchronization,
+////	// we could remove that thing.
+////	public Map<String,Date> checkDates = new HashMap<>();
+////
+////	public Lock() {}
+////	
+////	public Lock(ObjectId id, long duration, String owner) {
+////		super(id);
+////		this.duration = duration;
+////		this.owner = owner;
+////	}
+////	
+////}

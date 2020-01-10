@@ -1,0 +1,16 @@
+@** 
+Recup code Janus au CNG: passer par une  liste d'objet java intermédiaire: SampleSheetPoolLine
+**@
+@(lines: List[controllers.instruments.io.cns.biomekfx.SampleSheetPoolLine])
+
+@import controllers.instruments.io.utils._;
+
+
+
+Container code entree,Container code sortie,Source-ADN,Swell-ADN,Destination,Dwell,Volume ADN\u000D\u000A
+@for((line) <- lines.sorted){
+  @*** pour debug uniqt 
+  @line.inputSupportCode;
+  **@
+  @line.inputContainerCode,@line.outputContainerCode,@line.inputSupportSource,@line.inputSupportContainerPosition,@line.outputSupportDest,@line.outputSupportPosition,@line.inputSupportContainerVolume\u000D\u000A
+} 

@@ -134,6 +134,66 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 			]
 	};
 	
+	var readSetsPrimaryDTConfig = {
+			name:'readSetsPrimaryDT',
+			order :{by:'laneNumber',mode:'local'},
+			search:{active:false},
+			pagination:{active:false},
+			select:{active:false},
+			showTotalNumberRecords:false,
+			cancel : {active:false},		
+			columns : [
+				{  	"property":"laneNumber",
+					"header": Messages("readsets.laneNumber"),
+					"type":"text",
+					"order":true,
+					"position":1
+				}, 
+				{  	"property":"primaryIndex",
+					"header": Messages("readsets.primaryTag"),
+					"type":"text",
+					"order":true,
+					"position":2
+				},
+				{	"property":"primaryQ30",
+					"header": Messages("readsets.treatments.ngsrg_primary.Q30"),
+					"type":"number",
+					"order":true,
+					"tdClass": "valuationService.valuationCriteriaClass(value.data, run.valuation.criteriaCode, col.property)",
+					"position":3
+				},
+				{  	
+					"property":"primaryQualityScore",
+					"header": Messages("readsets.treatments.ngsrg_primary.qualityScore"),
+					"type":"number",
+					"order":true,
+					"tdClass": "valuationService.valuationCriteriaClass(value.data, run.valuation.criteriaCode, col.property)",
+					"position":4
+				},	
+				{	"property":"primaryNbCluster",
+					"header": Messages("readsets.treatments.ngsrg_primary.nbCluster"),
+					"type":"number",
+					"order":true,
+					"position":5
+				},	
+				{	"property":"lossDmplxImaryIIndary",
+					"header": Messages("readsets.treatments.ngsrg_primary.seqLossPctbetweenImaryAnd2ndaryDmplxing"),
+					"type":"number",
+					"order":true,
+					"tdClass": "valuationService.valuationCriteriaClass(value.data, run.valuation.criteriaCode, col.property)",
+					"position":6
+				},
+				{	"property":"sumPercentPerIndex",
+					"header": Messages("readsets.sampleOnContainer.properties.sumPercentPerLane"),
+					"type":"number",
+					"format":2,
+					"order":true,
+					"position":7
+				}
+			    
+			]
+	};
+	
 	var saveRun = function(){
 		var queries = [];
 		queries.push($http.put(jsRoutes.controllers.runs.api.Runs.update($scope.run.code).url+"?fields=keep", {keep:$scope.run.keep}));
@@ -167,6 +227,18 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 	 $scope.setActiveTab = function(value){
 		 mainService.put('runActiveTab', value);
 	 };
+	 
+	 $scope.getTabClassRS = function(value){
+		 if(value === mainService.get('readSetActiveTab')){
+			 return 'active';
+		 }
+	 };
+	 
+	 $scope.setActiveTabRS = function(value){
+		 mainService.put('readSetActiveTab', value);
+	 };
+	 
+	 
 	 
 	
 	/* buttons section */
@@ -341,6 +413,7 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 		$scope.mainService.stopEditMode();
 		$scope.valuationService = valuationService();
 		$scope.run = {};
+		$scope.dataReadSetPrimary = [];
 		
 		$http.get(jsRoutes.controllers.runs.api.Runs.get($routeParams.code).url).success(function(data) {
 			
@@ -467,8 +540,36 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 				$scope.statesHierarchy = data;	
 			});	
 			
+			//get readSet with primaryDemultiplexing
+			$http.get(jsRoutes.controllers.readsets.api.ReadSets.list().url,{params:{runCode:$scope.run.code, includes:["code","laneNumber","treatments.primaryDemultiplexing", "sampleOnContainer"],existingFields:["treatments.primaryDemultiplexing"]}}).success(function(data) {
+				var mapReadSetPrimary = new Map();
+				for (var i=0; i<data.length; i++) {
+					//Get tag value
+					var tag = data[i].sampleOnContainer.properties.tag.value;
+					var laneNumber = data[i].laneNumber;
+					var keyTag = tag+''+laneNumber;
+					 if(mapReadSetPrimary.get(keyTag) != undefined){
+						 mapReadSetPrimary.get(keyTag).sumPercent +=data[i].sampleOnContainer.percentage;
+					 }else{
+						 mapReadSetPrimary.set(keyTag, {		laneNumber : data[i].laneNumber,	
+							 						primaryIndex : tag,
+													primaryQ30 : data[i].treatments.primaryDemultiplexing.default.Q30.value,
+													primaryQualityScore : data[i].treatments.primaryDemultiplexing.default.qualityScore.value,
+													primaryNbCluster : data[i].treatments.primaryDemultiplexing.default.nbCluster.value,
+													lossDmplxImaryIIndary : data[i].treatments.primaryDemultiplexing.default.seqLossPctbetweenImaryAnd2ndaryDmplxing.value,
+													sumPercentPerIndex : data[i].sampleOnContainer.percentage});
+					 }
+				}
+				var dataReadSetPrimary=Array.from(mapReadSetPrimary.values());
+				$scope.readSetsPrimaryDT = datatable(readSetsPrimaryDTConfig);
+				$scope.readSetsPrimaryDT.setData(dataReadSetPrimary, dataReadSetPrimary.length);	
+			});
+			
 			if(undefined == mainService.get('runActiveTab')){
 				 mainService.put('runActiveTab', 'general');
+			}
+			if(undefined == mainService.get('readSetActiveTab')){
+				 mainService.put('readSetActiveTab', 'RSgeneral');
 			}
 		});
 		

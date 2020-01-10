@@ -135,6 +135,17 @@ angular.module('home').controller('NanoporeSizingCtrl',['$scope', '$parse', 'atm
 			        	 "extraHeaders":{0:Messages("experiments.inputs")}
 			         },
 			         {
+				        	"header":Messages("containers.table.tags"),
+				 			"property": "inputContainer.contents",
+				 			"filter": "getArray:'properties.tag.value'| unique",
+				 			"order":true,
+				 			"hide":true,
+				 			"type":"text",
+				 			"position":4.5,
+				 			"render":"<div list-resize='cellValue' list-resize-min-size='3'>",
+				        	 "extraHeaders":{0:Messages("experiments.inputs")}
+				         },
+			         {
 			        	 "header":Messages("containers.table.volume") + " (µL)",
 			        	 "property":"inputContainerUsed.volume.value",
 			        	 "order":true,
@@ -337,6 +348,10 @@ angular.module('home').controller('NanoporeSizingCtrl',['$scope', '$parse', 'atm
 						||  icu.fromTransformationTypeCodes.indexOf('ext-to-nanopore-process-dev-2') > -1
 						||  icu.fromTransformationTypeCodes.indexOf('ext-to-nanopore-frg-rep-lib-depot') > -1
 						||  icu.fromTransformationTypeCodes.indexOf('ext-to-nanopore-frg-lib-depot') > -1
+					
+						||  icu.fromTransformationTypeCodes.indexOf('ext-to-nanopore-frg-rependprep-lig-depot-process') > -1
+						||  icu.fromTransformationTypeCodes.indexOf('ext-to-nanopore-rependprep-lig-depot-process') > -1
+						
 						||  icu.fromTransformationTypeCodes.indexOf('ext-to-nanopore-process-library-no-frg') > -1
 				)
 				&& ocu.size && ocu.size.value){

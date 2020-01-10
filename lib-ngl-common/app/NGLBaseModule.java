@@ -5,10 +5,17 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.typesafe.config.ConfigList;
+import com.typesafe.config.ConfigValue;
+
+import fr.cea.ig.lfw.utils.Iterables;
+import fr.cea.ig.lfw.utils.ZenIterable;
 import play.api.Configuration;
 import play.api.Environment;
 import play.api.inject.Binding;
@@ -61,6 +68,8 @@ public class NGLBaseModule extends play.api.inject.Module {
 		bs.add(bind(ConfigChecker.class                              ).toSelf().eagerly());
 		// Initialize global variables
 		bs.add(bind(fr.cea.ig.play.IGGlobals.class                   ).toSelf().eagerly());
+		// Add application configuration defined bindings.
+		bs.addAll(configuredBindings(environment, configuration));
 		// Initialize assets server
 		bs.add(bind(controllers.resources.AssetPlugin.class          ).toSelf().eagerly());
 		// Bind authentication to configured
@@ -80,6 +89,11 @@ public class NGLBaseModule extends play.api.inject.Module {
 		// use a lazy binding. Spring plugin start should fixed.
 		bs.add(bind(fr.cea.ig.authorization.IAuthorizator.class)
 				.to(fr.cea.ig.authorization.authorizators.ConfiguredAuthorizator.class)); //.eagerly());
+		// NGL data boot binding. Default is to bind to an indirection to the ngl database
+		// that is the old behavior (no data population).
+		bs.add(bind(fr.cea.ig.ngl.tmp.INGLDataDB.class).to(fr.cea.ig.ngl.tmp.NGLDataDBDirect.class));
+		// Drools asynchronous execution binding
+		bs.add(bind(rules.services.IDrools6Actor.class).to(rules.services.LazyRules6Actor.class));
 		return bs;
 	}
 
@@ -103,11 +117,85 @@ public class NGLBaseModule extends play.api.inject.Module {
 	public Seq<Binding<?>> bindings(Environment environment, Configuration configuration) {
 		List<Binding<?>> bindings = nglBindings(environment,configuration);
 		for (Binding<?> b : bindings)
-			logger.debug("binding {}",b);
+			logger.debug("binding {}", b);
+		// Keep only the last defined binding for a given key.
+		Map<Class<?>,Binding<?>> lastBindings = new HashMap<>();
+		for (Binding<?> b : bindings) {
+			Class<?> key = b.key().clazz();
+			if (lastBindings.containsKey(key))
+				logger.warn("multiple bindings for {}, will keep the last one", key);
+			else
+				logger.debug("binding key {}", key);
+			lastBindings.put(key, b);
+		}
+		ZenIterable<Binding<?>> rBindings = Iterables.filter(bindings, b -> lastBindings.get(b.key().clazz()) == b);
 		// Possibly something better to do from a list...
-		return JavaConverters.asScalaIteratorConverter(bindings.iterator()).asScala().toSeq();
+//		return JavaConverters.asScalaIteratorConverter(bindings.iterator()).asScala().toSeq();
+		return JavaConverters.asScalaIteratorConverter(rBindings.iterator()).asScala().toSeq();
 	}
 
+	// ----------------------------------------------------------------------------
+	// Guice bindings from configuration
+	
+	/**
+	 * NGL bindings definition key in the the configuration.
+	 */
+	public static final String KEY_GUICE_BINDINGS = "ngl.bindings";
+	
+	/**
+	 * Guice binding.
+	 */
+	public static final String KEY_GUIBE_BIND     = "bind";
+	
+	/**
+	 * Guice binding to.
+	 */
+	public static final String KEY_GUICE_TO       = "to";
+	
+	/**
+	 * Guice eagerly binding.
+	 */
+	public static final String KEY_GUICE_EAGERLY = "eagerly";
+	
+	/**
+	 * Add bindings from the configuration file.
+	 * @param environment   environment
+	 * @param configuration configuration
+	 * @return              list of bindings found in the configuration
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public List<Binding<?>> configuredBindings(Environment environment, Configuration configuration) {
+		List<Binding<?>> l = new ArrayList<>();
+		if (configuration.underlying().hasPath(KEY_GUICE_BINDINGS)) {
+			ConfigList bindDefs = configuration.underlying().getList(KEY_GUICE_BINDINGS);
+			for (ConfigValue cv : bindDefs) {
+				Map<String,Object> def = (Map<String,Object>)cv.unwrapped();
+				if (!def.containsKey(KEY_GUIBE_BIND))
+					throw new RuntimeException("missing " + KEY_GUIBE_BIND);
+				if (!def.containsKey(KEY_GUICE_TO))
+					throw new RuntimeException("missing " + KEY_GUICE_TO);
+				boolean eagerly = def.containsKey(KEY_GUICE_EAGERLY) && "true".equalsIgnoreCase(def.get(KEY_GUICE_EAGERLY).toString()); 
+				String boundClassName   = (String)def.get(KEY_GUIBE_BIND);
+				String bindingClassName = (String)def.get(KEY_GUICE_TO);
+				logger.debug("building binding {} : {}", boundClassName, bindingClassName);
+				try {
+					Class boundClass   = Class.forName(boundClassName);
+					Class bindingClass = Class.forName(bindingClassName);
+					if (!boundClass.isAssignableFrom(bindingClass))
+						throw new RuntimeException("" + boundClass + " is not a super class of " + bindingClass);
+					Binding binding = bind(boundClass).to(bindingClass);
+					if (eagerly)
+						binding = binding.eagerly();
+					l.add(binding);
+					logger.debug("configured bindings {} : {}", boundClass, bindingClass);
+				} catch (Exception ex) {
+					throw new RuntimeException(ex);
+				}
+			}
+		}
+		return l;
+	}	
+	
 }
 
 // This only checks the config file, not resource.

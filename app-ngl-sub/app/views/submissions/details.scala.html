@@ -16,8 +16,48 @@
     Variable submission declarée dans scope de details.ctrl.js-->
    <button class="btn btn-default" ng-if="submission.state.code=='N'" ng-disabled="!(studyCheck &&sampleCheck && experimentCheck && runCheck && rawDataCheck)" ng-click="userValidate()" data-toggle="tooltip" title="@Messages("button.validate")" ><i class="fa fa-save"></i> @Messages("button.validate")</button>
    <button class="btn btn-default" ng-if="mainService.isEditMode() && submission.state.code=='N'" ng-click="cancel()" data-toggle="tooltip" title="@Messages("button.cancel")" ><i class="fa fa-undo"></i> @Messages("button.cancel")</button>
-   <button class="btn btn-default" ng-if="!mainService.isEditMode() && submission.state.code=='N'" ng-click="activeEditMode()" data-toggle="tooltip" title="@Messages("button.edit")" ><i class="fa fa-edit"></i> @Messages("button.edit")</button>		 					 
-}
+   <button class="btn btn-default" ng-if="!mainService.isEditMode() && submission.state.code=='N'" ng-click="activeEditMode()" data-toggle="tooltip" title="@Messages("button.edit")" ><i class="fa fa-edit"></i> @Messages("button.edit")</button>		 					  
+   <button class="btn btn-default" id="myTooltipStudy" data-toggle="tooltip" data-placement="bottom"> <i class="fa fa-info"> Visibilité du study à l'EBI</i>
+   <button class="btn btn-default" id="myTooltipSample" data-toggle="tooltip" data-placement="bottom" > <i class="fa fa-info"> Visibilité du sample à l'EBI</i>
+	</button>
+	}
+
+
+
+@* commentaire
+<div id="overlay" style="position: absolute;top: 50%;left: 50%;font-size: 50px;color: white;transform: translate(-50%,-50%);-ms-transform: translate(-50%,-50%);z-index: 500000000;">
+	<img src="/assets/images/visibiliteEbi_sample.png" />
+</div>
+
+<div id="overlay" style="position: absolute;top: 50%;left: 50%;z-index: 500000000;">
+	<img src="/assets/images/visibiliteEbi_sample.png" />
+</div>
+
+<a href="/assets/images/visibiliteEbi_sample.png">help</a>
+<button class="btn btn-default" data-toggle="tooltip" title="@Messages("button.edit")" ><i class="fa fa-edit"></i> @Messages("button.edit")</button>		 					 
+
+*@
+
+<script type="text/javascript" ">
+$(document).ready(function(){
+    $("#myTooltipStudy").tooltip({
+        title: "<img src='/assets/images/visibiliteEbi_study.png' style='width:800px' />",
+        html: true,
+    });
+});
+
+</script> 
+
+<script type="text/javascript" ">
+$(document).ready(function(){
+    $("#myTooltipSample").tooltip({
+        title: "<img src='/assets/images/visibiliteEbi_sample.png' style='width:800px' />",
+        html: true,
+    });
+});
+
+</script> 
+
 
 
 <!-- stopPropagation on checkbox prevent parents default behavior (stop <a> call) -->

@@ -15,7 +15,6 @@ angular.module('home').controller('WgChromiumLibraryPrepCtrl',['$scope', '$parse
 
 			"columns":[
 			         //--------------------- INPUT containers section -----------------------
-			         		        
 			          { // barcode support entree
 			        	 "header":Messages("containers.table.support.name"),
 			        	 "property":"inputContainer.support.code",
@@ -25,7 +24,6 @@ angular.module('home').controller('WgChromiumLibraryPrepCtrl',['$scope', '$parse
 			        	 "extraHeaders":{0: inputExtraHeaders}
 			         },    
 			         // Ligne:  seulement pour plaques voir + loin
-			         
 			         { // colonne:  strip-8 ou plaque
 			        	 "header":Messages("containers.table.support.column"),
 			        	 // astuce GA: pour pouvoir trier les colonnesCode Container dans l'ordre naturel forcer a numerique.=> type:number,   property:  *1
@@ -36,7 +34,6 @@ angular.module('home').controller('WgChromiumLibraryPrepCtrl',['$scope', '$parse
 			        	 "position":3,
 			        	 "extraHeaders":{0: inputExtraHeaders}
 			         },	
-			         
 			         //--->  colonnes specifiques experience s'inserent ici  (inputUsed ??)     
 			         
 			         //------------------------- OUTPUT containers section --------------------------
@@ -166,7 +163,7 @@ angular.module('home').controller('WgChromiumLibraryPrepCtrl',['$scope', '$parse
 				"header" : Messages("containers.table.support.name"),
 				"property" : "outputContainerUsed.locationOnContainerSupport.code",
 				"order" : true,
-				"edit" : true,
+				"edit" : true,  // Est-ce normal de pouvoir editer le code du strip ???????????
 				"hide" : true,
 				"type" : "text",
 				"position" : 400,
@@ -179,7 +176,7 @@ angular.module('home').controller('WgChromiumLibraryPrepCtrl',['$scope', '$parse
 				// Ligne
 				"header" : Messages("containers.table.support.column"),
 				"property" : "outputContainerUsed.locationOnContainerSupport.column",
-				"edit" : true,
+				"edit" : false, // la position sur un strip n'est pas editable !!!
 				"order" : true,
 				"hide" : true,
 				"type" : "text",
@@ -238,13 +235,19 @@ angular.module('home').controller('WgChromiumLibraryPrepCtrl',['$scope', '$parse
 	} 
 	
 	// en mode plaque ou strip uniquement !!!!!!
+	// 14/03/2019 TODO ?? remplacer par 
+	//"callback":function(datatable){
+	//          if ($scope.experiment.instrument.outContainerSupportCategoryCode !== "tube") 
+	//                   { atmService.copyContainerSupportCodeAndStorageCodeToDT( datatable,'auto')} 
+	// }
 	var copyContainerSupportCodeAndStorageCodeToDT = function(datatable){		
 		if($scope.experiment.instrument.outContainerSupportCategoryCode !== "tube") {
 			var dataMain = datatable.getData();
-		
 			var outputContainerSupportCode = $scope.outputContainerSupport.code;
-		
-			if ( null != outputContainerSupportCode && undefined != outputContainerSupportCode){
+			var outputContainerSupportStorageCode = $scope.outputContainerSupport.storageCode;
+			
+			// 14/03/2019 correction locale pour NGl-2371: ajout && "" != outputContainerSupportCode
+			if ( null != outputContainerSupportCode && undefined != outputContainerSupportCode && "" != outputContainerSupportCode){
 				for(var i = 0; i < dataMain.length; i++){
 				
 					var atm = dataMain[i].atomicTransfertMethod;
@@ -253,12 +256,11 @@ angular.module('home').controller('WgChromiumLibraryPrepCtrl',['$scope', '$parse
 					$parse('outputContainerUsed.code').assign(dataMain[i],newContainerCode);
 					$parse('outputContainerUsed.locationOnContainerSupport.code').assign(dataMain[i],outputContainerSupportCode);
 				
-					// Historique mais continuer a renseigner car effets de bord possible ????
+					// Historique mais continuer a renseigner car effets de bord possible ???? Note 08/03/2019 n'existe pas dans dautres experiences et ca marche qud meme !!!!!
 					$parse('line').assign(atm, atm.line);
 					$parse('column').assign(atm,atm.column );
 					//console.log("atm.line="+ atm.line + " atm.column="+atm.column);	
 				
-					var outputContainerSupportStorageCode = $scope.outputContainerSupport.storageCode;
 					if( null != outputContainerSupportStorageCode && undefined != outputContainerSupportStorageCode){
 						$parse('outputContainerUsed.locationOnContainerSupport.storageCode').assign(dataMain[i],outputContainerSupportStorageCode);
 					}
@@ -268,7 +270,7 @@ angular.module('home').controller('WgChromiumLibraryPrepCtrl',['$scope', '$parse
 		// Ne plus faire ... datatable.setData(dataMain);
 	}
 	
-	
+	// correction NGL-2371: attente correction traitement correct strip ? NGL-2491
 	$scope.$on('save', function(e, callbackFunction) {	
 		console.log("call event save");
 		$scope.atmService.data.save();
@@ -276,6 +278,7 @@ angular.module('home').controller('WgChromiumLibraryPrepCtrl',['$scope', '$parse
 		$scope.$emit('childSaved', callbackFunction);
 	});
 	
+	// correction NGL-2371: attente correction traitement correct strip ? NGL-2491
 	$scope.$on('refresh', function(e) {
 		console.log("call event refresh");		
 		var dtConfig = $scope.atmService.data.getConfig();

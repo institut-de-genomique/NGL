@@ -38,7 +38,7 @@ angular.module('home').controller('ConsultationCtrl',[ '$http', '$scope', '$rout
 				showButton:true
 			},
 			exportCSV:{
-				active:false
+				active:true
 			},
 			show:{                   // bouton pour epingler si on passe par details-ctrl.js 
 				active:true,

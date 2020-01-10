@@ -84,6 +84,24 @@ H:\birdsSpec.xsd">
 	</Treatment>
 	
 	
+	<Treatment name="LinkFile" useJobScheduler="false" checkIfNewTreatmentAlreadyPerformed="true">
+	
+		<ExecutableSpecification commandSyntaxStrategyName="default">
+			<Executable path="ln"/>
+		</ExecutableSpecification>
+		
+		<ParametersSpecification>
+			<KeyValueElement key="-s" value="%fileToLink%" parameterName="fileToLink"/>
+			<LineElement line=">%linkFike%" parameterName="endArg" />
+		</ParametersSpecification>
+		
+		<InputsSpecification>
+			<InputElement name="inputLinkFile" count="1" resourceType="rawDataZip">
+				<Referential name="internalRefMd5"/>
+			</InputElement>
+		</InputsSpecification>		
+	</Treatment>
+	
 	<!-- Treatment for file transfert  -->
 	<Treatment name="transfertRawData" useJobScheduler="true" checkIfNewTreatmentAlreadyPerformed="true">
 	

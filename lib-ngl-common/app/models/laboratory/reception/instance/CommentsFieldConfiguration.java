@@ -9,10 +9,9 @@ import java.util.Map;
 import models.laboratory.common.instance.Comment;
 import models.laboratory.reception.instance.ReceptionConfiguration.Action;
 import models.utils.CodeHelper;
+import validation.ContextValidation;
 
 import org.apache.commons.lang3.StringUtils;
-
-import validation.ContextValidation;
 
 public class CommentsFieldConfiguration extends ObjectFieldConfiguration<Comment> {
 	

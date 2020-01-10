@@ -100,6 +100,7 @@ angular.module('home').controller('ActivateCtrl',[ '$http', '$scope', '$routePar
 			})
 			
 			.error(function(data){
+				//$scope.messages.addDetails(data);
 				$scope.messages.addDetails(data);
 				error = true;
 				decompte = processInSubmission(decompte, error);

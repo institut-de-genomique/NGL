@@ -53,10 +53,11 @@ public class PropertyDefinitionMappingQuery extends NGLMappingSqlQuery<PropertyD
 	@Override
 	protected PropertyDefinition mapRow(ResultSet rs, int rowNumber) throws SQLException {
 		PropertyDefinition propertyDefinition = new PropertyDefinition();
+		MeasureUnitDAO     mufind = MeasureUnit.find.get();
 //		if (!this.lightVersion) {
 		if (!lightVersion) {
 			propertyDefinition.id            = rs.getLong("id");
-			propertyDefinition.name          = rs.getString("name");
+			propertyDefinition.setName(        rs.getString("name"));
 			propertyDefinition.code          = rs.getString("code");
 			propertyDefinition.description   = rs.getString("description");
 			propertyDefinition.required      = rs.getBoolean("required");
@@ -76,16 +77,16 @@ public class PropertyDefinitionMappingQuery extends NGLMappingSqlQuery<PropertyD
 				List<Level> levels=levelDAO.findByPropertyDefinitionID(propertyDefinition.id);
 				propertyDefinition.levels = levels;
 				
-				if(rs.getLong("fk_measure_category") !=0 ){
-					propertyDefinition.measureCategory = MeasureCategory.find.findById(rs.getLong("fk_measure_category"));
+				if (rs.getLong("fk_measure_category") != 0) {
+					propertyDefinition.measureCategory = MeasureCategory.find.get().findById(rs.getLong("fk_measure_category"));
 				}
 				//Add measure value
-				if(rs.getLong("fk_save_measure_unit")!=0){		
-					propertyDefinition.saveMeasureValue = MeasureUnit.find.findById(rs.getLong("fk_save_measure_unit"));
+				if (rs.getLong("fk_save_measure_unit") != 0) {		
+					propertyDefinition.saveMeasureValue = mufind.findById(rs.getLong("fk_save_measure_unit"));
 				}
 				
-				if(rs.getLong("fk_display_measure_unit")!=0){		
-					propertyDefinition.displayMeasureValue = MeasureUnit.find.findById(rs.getLong("fk_display_measure_unit"));
+				if (rs.getLong("fk_display_measure_unit")!= 0) {		
+					propertyDefinition.displayMeasureValue = mufind.findById(rs.getLong("fk_display_measure_unit"));
 				}
 	
 			} catch (DAOException e) {
@@ -94,7 +95,7 @@ public class PropertyDefinitionMappingQuery extends NGLMappingSqlQuery<PropertyD
 			//Add possible values
 			ValueDAO valueDAO = Spring.getBeanOfType(ValueDAO.class);
 			List<Value> values = valueDAO.findByPropertyDefinition(propertyDefinition.id);
-			//TODO GA convert value to the good type number or string ???
+			// GA: convert value to the good type number or string ???
 			propertyDefinition.possibleValues = values;
 		} else { //pd.code, pd.type, pd.property_value_type, pd.choice_in_list
 			propertyDefinition.code = rs.getString("code");

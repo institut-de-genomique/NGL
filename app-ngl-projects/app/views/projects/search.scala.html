@@ -26,12 +26,13 @@
 				<div class="form-control" bt-select ng-model="searchService.form.fgGroups"  multiple="true" filter="true" placeholder='@Messages("search.placeholder.codeFgGroup")' bt-options="bioinfoParam.fgGroup as bioinfoParam.fgGroup for bioinfoParam in searchService.lists.getBioinformaticParameters() | unique:'fgGroup' | orderBy:'fgGroup'"></div>				
 			}
 	}	
-	
+	<!--TODO EJACOBY AD-->
 	@columnSearchForm{	
 		@formGroup{
 				<div class="form-control" bt-select ng-model="searchService.form.unixGroups"  multiple="true" filter="true" placeholder='@Messages("search.placeholder.unixGroup")' bt-options='v.code as v.code for v in searchService.lists.getValues({},"values")'></div>				
 			}
 	}
+	
 }
 
 @if(isForm) {

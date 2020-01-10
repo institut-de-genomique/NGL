@@ -6,8 +6,7 @@ public class ListObjectNumber {
 	public Number code;
 	
 	public ListObjectNumber() {
-		this.name = "";
-		this.code = 0;
+		this(0, "");
 	}
 	
 	public ListObjectNumber(Number code, String label) {

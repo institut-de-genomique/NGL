@@ -11,13 +11,20 @@ import fr.cea.ig.ngl.dao.api.APIValidationException;
 import fr.cea.ig.ngl.dao.api.GenericAPI;
 import fr.cea.ig.ngl.dao.sra.AbstractStudyDAO;
 import models.sra.submit.common.instance.AbstractStudy;
+import models.sra.submit.common.instance.ExternalStudy;
+import models.sra.submit.common.instance.Study;
 
 public class AbstractStudyAPI extends GenericAPI<AbstractStudyDAO, AbstractStudy> {
 	
+	private StudyAPI studyAPI;
+	private ExternalStudyAPI externalStudyAPI;
+
 	@Inject
-	public AbstractStudyAPI(AbstractStudyDAO dao) {
+	public AbstractStudyAPI(AbstractStudyDAO dao,
+							StudyAPI studyAPI,
+							ExternalStudyAPI externalStudyAPI) {
 		super(dao);
-		// TODO Auto-generated constructor stub
+		this.studyAPI = studyAPI;
 	}
 
 //	private final AbstractStudyDAO dao;
@@ -26,7 +33,11 @@ public class AbstractStudyAPI extends GenericAPI<AbstractStudyDAO, AbstractStudy
 //	public AbstractStudyAPI (AbstractStudyDAO abstractStudyDAO) {
 //		this.dao = abstractStudyDAO;
 //	}
-
+	
+	public Iterable<AbstractStudy> dao_all() {
+		return dao.all();
+	}
+	
 	public boolean dao_checkObjectExist(String key, String keyValue) {
 		return dao.checkObjectExist(key, keyValue);
 	}
@@ -38,43 +49,48 @@ public class AbstractStudyAPI extends GenericAPI<AbstractStudyDAO, AbstractStudy
 	public AbstractStudy dao_getObject(String studyCode) {
 		return dao.getObject(studyCode);
 	}
-
+	
+	public void dao_saveObject(AbstractStudy absStudyElt) {
+		dao.saveObject(absStudyElt);
+	}
+	
 	/*-------------------------------------------------------------------------------------------------*/
 		
 	@Override
 	protected List<String> authorizedUpdateFields() {
-		// TODO Auto-generated method stub
-		return null;
+		throw new RuntimeException();
 	}
 
 	@Override
 	protected List<String> defaultKeys() {
-		// TODO Auto-generated method stub
-		return null;
+		throw new RuntimeException();
+
 	}
 
 	@Override
 	public AbstractStudy create(AbstractStudy input, String currentUser)
 			throws APIValidationException, APIException {
-		// TODO Auto-generated method stub
-		return null;
+		if (input instanceof Study) {
+			studyAPI.create((Study) input, currentUser);	
+		} else {
+			externalStudyAPI.create((ExternalStudy) input, currentUser);
+		}
+		return input;
 	}
 
 	@Override
 	public AbstractStudy update(AbstractStudy input, String currentUser)
 			throws APIException, APIValidationException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new RuntimeException();
+
 	}
 
 	@Override
 	public AbstractStudy update(AbstractStudy input, String currentUser,
 			List<String> fields) throws APIException, APIValidationException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new RuntimeException();
+
 	}
 
-	public void dao_saveObject(AbstractStudy absStudyElt) {
-		dao.saveObject(absStudyElt);
-	}
+
 }

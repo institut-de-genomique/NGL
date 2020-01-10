@@ -6,6 +6,9 @@
 -> / apimigration.Routes
 -> / nglcommon.Routes   
 
+GET		/scripts/run/:clazz												fr.cea.ig.lfw.controllers.scripts.ScriptController.run(clazz : java.lang.String)
+POST	/scripts/run/:clazz												fr.cea.ig.lfw.controllers.scripts.ScriptController.run(clazz : java.lang.String)
+
 # Home page
 GET     /                           				@controllers.main.tpl.Main.home()
 

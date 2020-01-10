@@ -16,12 +16,11 @@ import com.mongodb.MongoException;
 import com.typesafe.config.ConfigFactory;
 
 import fr.cea.ig.MongoDBDAO;
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import mail.MailServiceException;
 import mail.MailServices;
 import models.laboratory.run.instance.ReadSet;
 import models.utils.InstanceConstants;
-import scala.concurrent.duration.FiniteDuration;
 import services.reporting.txt.reportingCNS;
 
 public class ReportingCNS extends AbstractReporting {
@@ -30,28 +29,34 @@ public class ReportingCNS extends AbstractReporting {
 	@SuppressWarnings("hiding")
 	private static final play.Logger.ALogger logger = play.Logger.of(ReportingCNS.class);
 	
+//	@Inject
+//	public ReportingCNS(FiniteDuration durationFromStart, FiniteDuration durationFromNextIteration, NGLContext ctx) {
+//		super("ReportingCNS", durationFromStart, durationFromNextIteration, ctx);
+//	}
+	
+//	@Inject
+//	public ReportingCNS(NGLContext ctx) {
+//		super("ReportingCNS", ctx);
+//	}
+	
 	@Inject
-	public ReportingCNS(FiniteDuration durationFromStart,
-			FiniteDuration durationFromNextIteration, NGLContext ctx) {
-		super("ReportingCNS", durationFromStart, durationFromNextIteration, ctx);
+	public ReportingCNS(NGLApplication app) {
+		super("ReportingCNS", app);
 	}
-	
-	
+
 	@Override
 	public void runReporting() throws UnsupportedEncodingException, MessagingException {
-		
 		try {
-			
 			//Get global parameters for email
 			String expediteur = ConfigFactory.load().getString("reporting.email.from"); 
-			String dest = ConfigFactory.load().getString("reporting.email.to");   
-			String subject = ConfigFactory.load().getString("reporting.email.subject") + " " + ConfigFactory.load().getString("institute") + " " + ConfigFactory.load().getString("ngl.env");
+			String dest       = ConfigFactory.load().getString("reporting.email.to");   
+			String subject    = ConfigFactory.load().getString("reporting.email.subject") + " " + ConfigFactory.load().getString("institute") + " " + ConfigFactory.load().getString("ngl.env");
 		    Set<String> destinataires = new HashSet<>();
 		    destinataires.addAll(Arrays.asList(dest.split(",")));
 		    
 		    MailServices mailService = new MailServices();
 		    
-		    //Get data 
+		    // Get data 
 		    int nbQueries = 5;
 		    logger.debug("Call fives query");
 		    Integer[] nbResults = new Integer[nbQueries];  
@@ -77,7 +82,6 @@ public class ReportingCNS extends AbstractReporting {
 		} catch (MailServiceException e) {
 			logger.error("MailService error: "+e.getMessage(),e);
 		}
-		
 	}
 	
 	public static String getColumnHeaders(int queryId) {
@@ -111,20 +115,22 @@ public class ReportingCNS extends AbstractReporting {
 				readSets = MongoDBDAO.find(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, DBQuery.and(DBQuery.is("state.code", "IW-VQC"), DBQuery.is("typeCode", "rsillumina"), 
 						DBQuery.notExists("treatments.taxonomy"))).toList();
 				break;
+			default:
+				throw new RuntimeException("unhandled query id " + queryId);
 		}
 		ArrayList<String> lines = new ArrayList<>(); 
-		StringBuffer buffer;
+//		StringBuffer buffer;
 		for (ReadSet readSet : readSets) { 
-			buffer = new StringBuffer();
+//			buffer = new StringBuffer();
+			StringBuilder buffer = new StringBuilder(); 
 			buffer.append(readSet.code).append(",").append(readSet.runCode).append(",").append(readSet.state.code);
-			if (queryId==4) {
+			if (queryId == 4) {
 				buffer.append(",").append(readSet.sampleOnContainer.sampleTypeCode);
 			}
 			lines.add(buffer.toString());
-			
 		}
 		logger.debug("Result ");
-		for(String line : lines){
+		for (String line : lines) {
 			logger.debug("Line "+line);
 		}
 		return lines;

@@ -1,10 +1,9 @@
 package workflows.process;
 
-import static validation.common.instance.CommonValidationHelper.FIELD_STATE_CONTAINER_CONTEXT;
-import static validation.common.instance.CommonValidationHelper.FIELD_UPDATE_CONTAINER_SUPPORT_STATE;
 import static validation.common.instance.CommonValidationHelper.OBJECT_IN_DB;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -26,12 +25,14 @@ import models.laboratory.common.description.Level;
 import models.laboratory.common.instance.PropertyValue;
 import models.laboratory.common.instance.State;
 import models.laboratory.container.instance.Container;
+import models.laboratory.experiment.description.ExperimentCategory;
 import models.laboratory.processes.description.ProcessType;
 import models.laboratory.processes.instance.Process;
 import models.utils.InstanceConstants;
 import models.utils.InstanceHelpers;
 import models.utils.instance.SampleHelper;
 import validation.ContextValidation;
+import validation.container.instance.ContainerValidationHelper;
 import workflows.container.ContWorkflows;
 import workflows.container.ContentHelper;
 
@@ -51,7 +52,7 @@ public class ProcWorkflowHelper {
 	}
 	
 	public void updateInputContainerToStartProcess(ContextValidation contextValidation, Process process) {
-		ProcessType processType = ProcessType.find.findByCode(process.typeCode);
+		ProcessType processType = ProcessType.find.get().findByCode(process.typeCode);
 		String voidExpTypeCode = processType.voidExperimentType.code;
 		
 		DBQuery.Query query = getInputContainerQuery(process);
@@ -79,12 +80,13 @@ public class ProcWorkflowHelper {
 		
 		Container container = MongoDBDAO.findByCode(InstanceConstants.CONTAINER_COLL_NAME, Container.class,process.inputContainerCode);
 		State nextState = new State();
-		nextState.code  = contWorkflows.getContainerStateFromExperimentCategory(processType.firstExperimentType.category.code);
+//		nextState.code  = contWorkflows.getContainerStateFromExperimentCategory(processType.firstExperimentType.category.code);
+		nextState.code  = ExperimentCategory.getContainerStateFromExperimentCategory(processType.firstExperimentType.category.code);
 		nextState.user  = contextValidation.getUser();
 		
-		contextValidation.putObject(FIELD_STATE_CONTAINER_CONTEXT, "workflow");
-		contextValidation.putObject(FIELD_UPDATE_CONTAINER_SUPPORT_STATE, Boolean.TRUE);
-		contWorkflows.setState(contextValidation, container, nextState);
+		contextValidation.putObject(ContainerValidationHelper.FIELD_STATE_CONTAINER_CONTEXT, "workflow");
+		contextValidation.putObject(ContainerValidationHelper.FIELD_UPDATE_CONTAINER_SUPPORT_STATE, Boolean.TRUE);
+		contWorkflows.setState(contextValidation, container, nextState, "workflow", true);
 	}
 
 	
@@ -100,10 +102,10 @@ public class ProcWorkflowHelper {
 			MongoDBDAO.update(InstanceConstants.CONTAINER_COLL_NAME, Container.class,
 					query,DBUpdate.set("contents.$.processProperties", process.properties));
 			*/
-			//TODO Problem when property disappeared after pool fusion, we had a new property
+			// GA: Problem when property disappeared after pool fusion, we had a new property
 			List<String> containerCodes = new ArrayList<>();
 			containerCodes.add(process.inputContainerCode);
-			if(null != process.outputContainerCodes){
+			if (process.outputContainerCodes != null) {
 				containerCodes.addAll(process.outputContainerCodes);
 			}
 			
@@ -184,7 +186,7 @@ public class ProcWorkflowHelper {
 	}
 
 	private Set<String> getProcessesPropertyDefinitionCodes(Process process, Level.CODE level) {		
-		ProcessType processType = ProcessType.find.findByCode(process.typeCode);
+		ProcessType processType = ProcessType.find.get().findByCode(process.typeCode);
 		return processType.getPropertyDefinitionByLevel(level)
 				.stream()
 				.map(pd -> pd.code)
@@ -205,14 +207,13 @@ public class ProcWorkflowHelper {
 			
 		} else {
 			query.elemMatch("contents", DBQuery.is("sampleCode", process.sampleOnInputContainer.sampleCode).is("projectCode",  process.sampleOnInputContainer.projectCode));
-			
 		}
 		return query;
 	}
 
 	public void updateSampleOnContainer(ContextValidation validation, Process process) {
 		Container container = MongoDBDAO.findByCode(InstanceConstants.CONTAINER_COLL_NAME, Container.class,process.inputContainerCode);
-		if(container.contents.size() == 1 && process.sampleOnInputContainer == null){
+		if(container.contents.size() == 1 && (process.sampleOnInputContainer == null || "IW-C".equals(process.state.code))){
 			process.sampleCodes = SampleHelper.getSampleParent(container.contents.get(0).sampleCode);
 			process.projectCodes = SampleHelper.getProjectParent(process.sampleCodes);
 	
@@ -223,6 +224,30 @@ public class ProcWorkflowHelper {
 								.set("sampleCodes", process.sampleCodes));
 		} else if(container.contents.size() > 1 && process.sampleOnInputContainer == null){
 			logger.error("container is a pool, sampleOnInputContainer cannot be updated : "+process.code);
+		}
+	}
+
+	public void setIWCConfiguration(ContextValidation validation, Process process) {
+		String sampleCode = process.code.split("_"+process.typeCode.toUpperCase()+"_")[0];
+		if(sampleCode != null){
+			process.sampleOnInputContainer = InstanceHelpers.getSampleOnInputContainer(sampleCode);	
+			process.inputContainerCode = null;
+			process.inputContainerSupportCode = null;
+			process.sampleCodes.clear();
+			process.sampleCodes.add(process.sampleOnInputContainer.sampleCode);
+			process.projectCodes.clear();
+			process.projectCodes = SampleHelper.getProjectParent(process.sampleCodes);
+			//WARNING no set to null because in this case we don't want to keep the N state. if you set null the history contains previous state @see Workflow.updateHistoricalNextState
+			process.state.historical = new HashSet<>(0); 
+			MongoDBDAO.update(InstanceConstants.PROCESS_COLL_NAME, Process.class, DBQuery.is("code", process.code)
+					,DBUpdate.set("sampleOnInputContainer", process.sampleOnInputContainer)
+								.unset("inputContainerCode")
+								.unset("inputContainerSupportCode")
+								.unset("state.historical")
+								.set("sampleCodes", process.sampleCodes)
+								.set("projectCodes", process.projectCodes));
+		}else{
+			logger.error("cannot retrieve sample code for process "+process.code);
 		}
 	}
 

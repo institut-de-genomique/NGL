@@ -16,7 +16,6 @@ import org.springframework.stereotype.Repository;
 
 import models.laboratory.common.instance.PropertyValue;
 import models.laboratory.common.instance.property.PropertySingleValue;
-// import play.Logger;
 import validation.ContextValidation;
 
 @Repository
@@ -55,7 +54,7 @@ public class TaraDAO {
 	}
 
 	// @SuppressWarnings("rawtypes")
-	public Map<String,PropertyValue> findTaraSampleFromLimsCode(Integer limsCode,ContextValidation contextValidation) {
+	public Map<String,PropertyValue> findTaraSampleFromLimsCode(Integer limsCode, ContextValidation contextValidation) {
 		List<Map<String,PropertyValue>> results =  this.jdbcTemplate.query(SELECT_MATERIEL_TARA +
 				"  WHERE REF_ID=? ", 
 				new Object[]{limsCode},new RowMapper<Map<String,PropertyValue>>() {
@@ -67,7 +66,7 @@ public class TaraDAO {
 		if (results.size() == 1) {
 			return results.get(0);
 		} else {
-			contextValidation.addErrors("taraRefId","error.propertyNotExist","Tara Reference Id", limsCode);
+			contextValidation.addError("taraRefId","error.propertyNotExist","Tara Reference Id", limsCode);
 			return null;
 		}
 	}

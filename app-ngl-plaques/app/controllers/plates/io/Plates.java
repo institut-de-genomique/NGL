@@ -1,8 +1,5 @@
 package controllers.plates.io;
 
-//import static play.data.Form.form;
-//import static fr.cea.ig.play.IGGlobals.form;
-
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -18,11 +15,10 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 import controllers.TPLCommonController;
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import lims.cns.dao.LimsManipDAO;
 import lims.models.Well;
 import models.laboratory.common.instance.property.PropertyFileValue;
-//import play.Logger;
 import play.api.modules.spring.Spring;
 import play.data.Form;
 import play.libs.Json;
@@ -31,21 +27,25 @@ import play.mvc.Result;
 import validation.ContextValidation;
 import validation.utils.ValidationHelper;
 
-// TODO: extends DocumentController
 public class Plates extends TPLCommonController {
 	
 	private static final play.Logger.ALogger logger = play.Logger.of(Plates.class);
 	
-	final /*static*/ Form<PropertyFileValue> fileForm;// = form(PropertyFileValue.class);
+	private final NGLApplication          app;
+	private final Form<PropertyFileValue> fileForm;	
 	
-	private final NGLContext ctx;
+//	@Inject
+//	public Plates(NGLContext ctx) {
+//		this.ctx = ctx;	
+//		fileForm = ctx.form(PropertyFileValue.class);
+//	}
 	
 	@Inject
-	public Plates(NGLContext ctx) {
-		this.ctx = ctx;	
-		fileForm = ctx.form(PropertyFileValue.class);
+	public Plates(NGLApplication app) {
+		this.app = app;	
+		fileForm = app.form(PropertyFileValue.class);
 	}
-	
+
 	// @BodyParser.Of(value = BodyParser.Json.class, maxLength = 5000 * 1024)
 	@BodyParser.Of(value = fr.cea.ig.play.IGBodyParsers.Json5MB.class)
 	public Result importFile(Integer emnco){
@@ -53,7 +53,7 @@ public class Plates extends TPLCommonController {
 		PropertyFileValue pfv = filledForm.get();
 		if (pfv != null) {
 //			ContextValidation contextValidation = new ContextValidation(getCurrentUser(), filledForm.errors());
-			ContextValidation contextValidation = new ContextValidation(getCurrentUser(), filledForm);
+			ContextValidation contextValidation = ContextValidation.createUndefinedContext(getCurrentUser(), filledForm);
 			if (!contextValidation.hasErrors()) {
 				try {
 					List<Well> wells = importFile(emnco, pfv, contextValidation);
@@ -62,11 +62,11 @@ public class Plates extends TPLCommonController {
 					}
 				} catch(Throwable e) {
 					e.printStackTrace();
-					contextValidation.addErrors("Error :", e.getMessage()+"");
+					contextValidation.addError("Error :", e.getMessage()+"");
 				}
 			}
 			// return badRequest(filledForm.errors-AsJson());
-			return badRequest(ctx.errorsAsJson(contextValidation.getErrors()));
+			return badRequest(app.errorsAsJson(contextValidation.getErrors()));
 		} else {
 			return badRequest("missing file");
 		}		
@@ -76,7 +76,6 @@ public class Plates extends TPLCommonController {
 	private List<Well> importFile(Integer emnco, 
 			                      PropertyFileValue pfv,
 			                      ContextValidation contextValidation)  throws Exception {
-		// TODO Auto-generated method stub
 		logger.debug("Load plate files");
 //		InputStream is = new ByteArrayInputStream(pfv.value);
 //		InputStream is = new ByteArrayInputStream(pfv.getValue());
@@ -84,7 +83,7 @@ public class Plates extends TPLCommonController {
 		Workbook wb = WorkbookFactory.create(is);
 		Sheet sheet = wb.getSheetAt(0);//case sensitive??
 		if (sheet == null ) {
-			contextValidation.addErrors("Erreurs fichier", "Pas d'onglet 0");
+			contextValidation.addError("Erreurs fichier", "Pas d'onglet 0");
 			return null;
 		}
 		List<Well> wells = new ArrayList<>(0);
@@ -99,15 +98,15 @@ public class Plates extends TPLCommonController {
 				String column = getStringValue(sheet.getRow(i).getCell(2));
 				if(null == column) column = getNumericValue(sheet.getRow(i).getCell(2)).intValue()+"";
 				
-				if (ValidationHelper.required(contextValidation, nomManip, "nom manip : ligne = "+i)
-						&& ValidationHelper.required(contextValidation, line, "Ligne : ligne = "+i)
-						&& ValidationHelper.required(contextValidation, column, "Colonne : ligne = "+i)
+				if (ValidationHelper.validateNotEmpty(contextValidation, nomManip, "nom manip : ligne = "+i)
+						&& ValidationHelper.validateNotEmpty(contextValidation, line, "Ligne : ligne = "+i)
+						&& ValidationHelper.validateNotEmpty(contextValidation, column, "Colonne : ligne = "+i)
 						&& isPlatePosition(contextValidation, line+column, 96, i, wellPosition)
 						&& isNotAlreadyPresent(contextValidation,nomManip, nomManips,i)){
 					
 					LimsManipDAO  limsManipDAO = Spring.getBeanOfType(LimsManipDAO.class);
 					Well well = limsManipDAO.getWell(nomManip);
-					if (ValidationHelper.required(contextValidation, well, "manip non trouvé : ligne = "+i)
+					if (ValidationHelper.validateNotEmpty(contextValidation, well, "manip non trouvé : ligne = "+i)
 							&& isSameEmnco(contextValidation, well, emnco, i)
 							&& isNotInsideAPlate(contextValidation, well, i)) {
 						well.x = Integer.valueOf(column);
@@ -125,7 +124,7 @@ public class Plates extends TPLCommonController {
 
 	private boolean isNotAlreadyPresent(ContextValidation contextValidation, String nomManip, Set<String> nomManips, int lineNum) {
 		if (nomManips.contains(nomManip)) {
-			contextValidation.addErrors("Erreurs fichier", "Nom manip en double : "+nomManip+". Ligne"+lineNum);
+			contextValidation.addError("Erreurs fichier", "Nom manip en double : "+nomManip+". Ligne"+lineNum);
 			return false;
 		} else {
 			nomManips.add(nomManip);
@@ -135,7 +134,7 @@ public class Plates extends TPLCommonController {
 
 	private boolean isNotInsideAPlate(ContextValidation contextValidation, Well well, int i) {
 		if (well.x != null && well.y != null){
-			contextValidation.addErrors("Erreurs fichier", "Etape manip déjà sur une plaque : ligne = "+i);
+			contextValidation.addError("Erreurs fichier", "Etape manip déjà sur une plaque : ligne = "+i);
 			return false;
 		} else {
 			return true;
@@ -144,7 +143,7 @@ public class Plates extends TPLCommonController {
 
 	private boolean isSameEmnco(ContextValidation contextValidation, Well well, Integer emnco, int i) {
 		if (!well.typeCode.equals(emnco)) {
-			contextValidation.addErrors("Erreurs fichier", "Etape manip et étape choisie différente : ligne = "+i);
+			contextValidation.addError("Erreurs fichier", "Etape manip et étape choisie différente : ligne = "+i);
 			return false;
 		} else {
 			return true;
@@ -174,7 +173,7 @@ public class Plates extends TPLCommonController {
 	
 	public static boolean isPlatePosition(ContextValidation contextValidation, String position, int plFormat, int lineNum, Set<String> wellPosition){
 		if ((position.length() < 2) || (position.length() > 3 )) {
-			contextValidation.addErrors("Erreurs fichier", "Position puit inconnu : "+position+". Ligne"+lineNum);
+			contextValidation.addError("Erreurs fichier", "Position puit inconnu : "+position+". Ligne"+lineNum);
 			return false;
 		}
 		String row = position.substring(0,1);
@@ -183,7 +182,7 @@ public class Plates extends TPLCommonController {
 		
 		int col = Integer.parseInt(column); // et si la string ne correspond pas a un nombre ???
 		if (wellPosition.contains(position)) {
-			contextValidation.addErrors("Erreurs fichier", "Position puit en double : "+position+". Ligne"+lineNum);			
+			contextValidation.addError("Erreurs fichier", "Position puit en double : "+position+". Ligne"+lineNum);			
 		} else {
 			wellPosition.add(position);
 		}
@@ -191,14 +190,14 @@ public class Plates extends TPLCommonController {
 			if (row.matches("[A-H]") && (col>=1 && col<=12)){
 				return true;
 			} else { 
-				contextValidation.addErrors("Erreurs fichier", "Position puit en dehors de ce qui est possible : "+position+". Ligne"+lineNum);
+				contextValidation.addError("Erreurs fichier", "Position puit en dehors de ce qui est possible : "+position+". Ligne"+lineNum);
 				return false; 
 			}
 		} else if (plFormat == 384) {
 	    	if (row.matches("[A-P]") &&  (col>=1 && col <=24)){
 				return true;
 			} else { 
-				contextValidation.addErrors("Erreurs fichier", "Position puit en dehors de ce qui est possible : "+position+". Ligne"+lineNum);
+				contextValidation.addError("Erreurs fichier", "Position puit en dehors de ce qui est possible : "+position+". Ligne"+lineNum);
 				return false;
 			}
 		} else {

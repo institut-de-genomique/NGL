@@ -1,8 +1,5 @@
 package controllers.instruments.io.common.hiseq;
 
-
-
-
 import java.util.List;
 
 import models.laboratory.container.instance.Container;

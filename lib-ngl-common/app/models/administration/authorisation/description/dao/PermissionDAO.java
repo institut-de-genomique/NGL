@@ -17,7 +17,7 @@ import models.utils.dao.DAOException;
 @Repository
 public class PermissionDAO extends AbstractDAODefault<Permission>{
 
-	protected PermissionDAO(){
+	protected PermissionDAO() {
 		super("permission", Permission.class, true);
 	}
 
@@ -26,9 +26,10 @@ public class PermissionDAO extends AbstractDAODefault<Permission>{
 	 */
 	@SuppressWarnings("deprecation")
 	public List<Permission> findByUserLogin(String aLogin) throws DAOException{
-		if(null == aLogin){
-			throw new DAOException("login is mandatory");
-		}
+//		if(null == aLogin){
+//			throw new DAOException("login is mandatory");
+//		}
+		DAOException.daoAssertNotNull("login", aLogin);
 		String sql = getSqlCommon() + " "
 				+ "INNER JOIN role_permission AS rp ON t.id = rp.permission_id "
 				+ "INNER JOIN role AS r ON rp.role_id = r.id "
@@ -37,6 +38,7 @@ public class PermissionDAO extends AbstractDAODefault<Permission>{
 				+ "WHERE u.login=?";
 		//Logger.debug(sql);
 		BeanPropertyRowMapper<Permission> mapper = new BeanPropertyRowMapper<>(entityClass);
-		return this.jdbcTemplate.query(sql, mapper, aLogin);
+		return jdbcTemplate.query(sql, mapper, aLogin);
 	}
+	
 }

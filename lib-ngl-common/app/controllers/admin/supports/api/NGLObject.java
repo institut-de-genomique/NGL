@@ -5,11 +5,17 @@ import validation.ContextValidation;
 import validation.IValidation;
 import validation.utils.ValidationHelper;
 
-public class NGLObject extends DBObject implements IValidation{
+// Looks like a kind of command object. The representation looks like
+// the union of all the possible commands arguments. The validation method
+// is never called so it's just an illusion (removing 'implements IValidation'
+// still compiles). The action attribute would probably have been better
+// handled by command subclasses.
 
-	public enum Action { delete, replace, exchange }
+public class NGLObject extends DBObject implements IValidation {
+//public class NGLObject extends DBObject {
 
-//	public String code;
+	public enum Action { delete, replace, exchange, add }
+
 	public String typeCode;		
 	public String collectionName;
 
@@ -21,20 +27,19 @@ public class NGLObject extends DBObject implements IValidation{
 	public String readSetToSwitchCode;
 
 	public String action;
-	public Long nbOccurrences;
+	public Long   nbOccurrences;
 
 	@Override
 	public void validate(ContextValidation contextValidation) {
-		ValidationHelper.required(contextValidation, code, "code");
-		ValidationHelper.required(contextValidation, collectionName, "collectionName");
-		ValidationHelper.required(contextValidation, contentPropertyNameUpdated, "contentPropertyNameUpdated");
-		ValidationHelper.required(contextValidation, projectCode, "projectCode");
-		ValidationHelper.required(contextValidation, sampleCode, "sampleCode");
-		ValidationHelper.required(contextValidation, currentValue, "currentValue");
+		ValidationHelper.validateNotEmpty(contextValidation, code,                       "code");
+		ValidationHelper.validateNotEmpty(contextValidation, collectionName,             "collectionName");
+		ValidationHelper.validateNotEmpty(contextValidation, contentPropertyNameUpdated, "contentPropertyNameUpdated");
+		ValidationHelper.validateNotEmpty(contextValidation, projectCode,                "projectCode");
+		ValidationHelper.validateNotEmpty(contextValidation, sampleCode,                 "sampleCode");
+		ValidationHelper.validateNotEmpty(contextValidation, currentValue,               "currentValue");
 
-		if (ValidationHelper.required(contextValidation, action, "action") 
-				&& Action.replace.toString().equals(action)){
-			ValidationHelper.required(contextValidation, newValue, "newValue");
+		if (ValidationHelper.validateNotEmpty(contextValidation, action, "action") && Action.replace.toString().equals(action)) {
+			ValidationHelper.validateNotEmpty(contextValidation, newValue, "newValue");
 		}
 	}
 

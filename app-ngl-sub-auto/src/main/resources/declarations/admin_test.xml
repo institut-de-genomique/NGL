@@ -52,6 +52,7 @@
 		<RequiredProperty propertyName="directory" keyProperty="true"/>
 		<RequiredProperty propertyName="submissionDirectory" keyProperty="true"/>
 		<RequiredProperty propertyName="experimentCode"/>
+		<RequiredProperty propertyName="code"/>
 	</ResourceType>
 
 	<!-- Referential -->

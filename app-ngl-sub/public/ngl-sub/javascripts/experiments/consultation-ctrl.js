@@ -4,6 +4,7 @@ angular.module('home').controller('ConsultationCtrl',[ '$http', '$scope', '$rout
 	                                                  function($http, $scope, $routeParams, $q, mainService, lists, tabService, messages, experimentsConsultationService) { 
 
 
+
 	
 	var experimentsDTConfig = {
 			name:'experimentsDT',
@@ -38,7 +39,7 @@ angular.module('home').controller('ConsultationCtrl',[ '$http', '$scope', '$rout
 				showButton:true
 			},
 			exportCSV:{
-				active:false
+				active:true
 			},
 			show:{                   // bouton pour epingler si on passe par details-ctrl.js 
 				active:true,
@@ -54,9 +55,12 @@ angular.module('home').controller('ConsultationCtrl',[ '$http', '$scope', '$rout
 					return jsRoutes.controllers.sra.experiments.api.Experiments.update(line.code).url; // jamais utilisé si mode local
 				},
 				method:'put',
+				mode:'remote',
 				value:function(line){
 					return line;
 				},
+				callback : function(datatable, errors) {
+				}
 			}
 
 	};
@@ -69,8 +73,12 @@ angular.module('home').controller('ConsultationCtrl',[ '$http', '$scope', '$rout
 	}
 	// si on declare dans services => var sraVariables = {};
 	// si on declare dans le controlleur : $scope.sraVariables = {};
-
+	
+	
+	//$scope.sraVariables = experimentsConsultationService.sraVariables; // ligne importante sinon ne marche pas pour affecter sraVariables dans services
 	$scope.consultationService = experimentsConsultationService;
 	$scope.consultationService.init($routeParams, experimentsDTConfig);
+
+
 
 }]);

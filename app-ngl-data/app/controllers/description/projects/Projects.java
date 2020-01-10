@@ -4,22 +4,30 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-// import play.Logger;
+import javax.inject.Inject;
+
+import nglapps.DataService;
 import play.data.validation.ValidationError;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
-import services.description.project.ProjectService;
 
-// import controllers.CommonController;
-public class Projects extends Controller { // CommonController {
+public class Projects extends Controller {
 	
 	private static final play.Logger.ALogger logger = play.Logger.of(Projects.class);
+	
+	private final DataService dataService;
+	
+	@Inject
+	public Projects(DataService dataService) {
+		this.dataService = dataService;
+	}
 	
 	public Result save() {
 		try {
 			Map<String,List<ValidationError>> errors = new HashMap<>();
-			ProjectService.main(errors);
+//			ProjectService.main(errors);
+			dataService.saveProjectData(errors);
 			if (errors.size() > 0) {
 				return badRequest(Json.toJson(errors));
 			} else {

@@ -1,8 +1,5 @@
 package controllers.reagents.api;
 
-// import static play.data.Form.form;
-//import static fr.cea.ig.play.IGGlobals.form;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -19,7 +16,7 @@ import com.mongodb.BasicDBObject;
 import controllers.DocumentController;
 import fr.cea.ig.MongoDBDAO;
 import fr.cea.ig.MongoDBResult;
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import models.laboratory.reagent.description.AbstractCatalog;
 import models.laboratory.reagent.description.KitCatalog;
 import models.laboratory.reagent.utils.ReagentCodeHelper;
@@ -36,14 +33,20 @@ public class KitCatalogs extends DocumentController<KitCatalog> {
 	
 	private static final play.Logger.ALogger logger = play.Logger.of(KitCatalogs.class);
 	
-	private final /*static*/ Form<KitCatalogSearchForm> kitCatalogSearchForm;// = form(KitCatalogSearchForm.class);
+	private final Form<KitCatalogSearchForm> kitCatalogSearchForm;
+	
+//	@Inject
+//	public KitCatalogs(NGLContext ctx) {
+//		super(ctx,InstanceConstants.REAGENT_CATALOG_COLL_NAME, KitCatalog.class);
+//		kitCatalogSearchForm = ctx.form(KitCatalogSearchForm.class);
+//	}
 	
 	@Inject
-	public KitCatalogs(NGLContext ctx) {
-		super(ctx,InstanceConstants.REAGENT_CATALOG_COLL_NAME, KitCatalog.class);
-		kitCatalogSearchForm = ctx.form(KitCatalogSearchForm.class);
+	public KitCatalogs(NGLApplication app) {
+		super(app,InstanceConstants.REAGENT_CATALOG_COLL_NAME, KitCatalog.class);
+		kitCatalogSearchForm = app.form(KitCatalogSearchForm.class);
 	}
-	
+
 	@Override
 	public Result get(String code){
 		KitCatalog kitCatalog = getObject(code);
@@ -62,9 +65,10 @@ public class KitCatalogs extends DocumentController<KitCatalog> {
 		Form<KitCatalog> kitCatalogFilledForm = getMainFilledForm();
 		KitCatalog kitCatalog = kitCatalogFilledForm.get();
 //		ContextValidation contextValidation = new ContextValidation(getCurrentUser(), kitCatalogFilledForm.errors());
-		ContextValidation contextValidation = new ContextValidation(getCurrentUser(), kitCatalogFilledForm);
-		contextValidation.setCreationMode();
-		if (ValidationHelper.required(contextValidation, kitCatalog.name, "name")) {
+//		ContextValidation contextValidation = new ContextValidation(getCurrentUser(), kitCatalogFilledForm);
+//		contextValidation.setCreationMode();
+		ContextValidation contextValidation = ContextValidation.createCreationContext(getCurrentUser(), kitCatalogFilledForm);
+		if (ValidationHelper.validateNotEmpty(contextValidation, kitCatalog.name, "name")) {
 			kitCatalog.code = ReagentCodeHelper.getInstance().generateKitCatalogCode();
 //			kitCatalog = (KitCatalog)InstanceHelpers.save(InstanceConstants.REAGENT_CATALOG_COLL_NAME, kitCatalog, contextValidation);
 			kitCatalog = InstanceHelpers.save(InstanceConstants.REAGENT_CATALOG_COLL_NAME, kitCatalog, contextValidation);
@@ -80,9 +84,9 @@ public class KitCatalogs extends DocumentController<KitCatalog> {
 		KitCatalog kitCatalog = kitCatalogFilledForm.get();
 		
 //		ContextValidation contextValidation = new ContextValidation(getCurrentUser(), kitCatalogFilledForm.errors());
-		ContextValidation contextValidation = new ContextValidation(getCurrentUser(), kitCatalogFilledForm);
-		contextValidation.setUpdateMode();
-		
+//		ContextValidation contextValidation = new ContextValidation(getCurrentUser(), kitCatalogFilledForm);
+//		contextValidation.setUpdateMode();
+		ContextValidation contextValidation = ContextValidation.createUpdateContext(getCurrentUser(), kitCatalogFilledForm);
 //		kitCatalog = (KitCatalog)InstanceHelpers.save(InstanceConstants.REAGENT_CATALOG_COLL_NAME, kitCatalog, contextValidation);
 		kitCatalog = InstanceHelpers.save(InstanceConstants.REAGENT_CATALOG_COLL_NAME, kitCatalog, contextValidation);
 		if (contextValidation.hasErrors())

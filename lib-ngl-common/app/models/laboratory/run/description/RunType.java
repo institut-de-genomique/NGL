@@ -1,28 +1,24 @@
 package models.laboratory.run.description;
 
-import java.util.List;
+import java.util.function.Supplier;
 
+import fr.cea.ig.ngl.utils.SpringSupplier;
 import models.laboratory.common.description.CommonInfoType;
-import models.laboratory.common.description.Level;
-import models.laboratory.common.description.PropertyDefinition;
 import models.laboratory.run.description.dao.RunTypeDAO;
+import ngl.refactoring.MiniDAO;
 
 public class RunType extends CommonInfoType {
 	
 	@SuppressWarnings("hiding")
-	public static final CommonInfoType.AbstractCommonInfoTypeFinder<RunType,RunTypeDAO> find = 
-			new CommonInfoType.AbstractCommonInfoTypeFinder<>(RunTypeDAO.class); 
+	public static final Supplier<RunTypeDAO>       find     = new SpringSupplier<>(RunTypeDAO.class);
+	public static final Supplier<MiniDAO<RunType>> miniFind = MiniDAO.createSupplier(find); 
 
 	public RunCategory category;
 	public Integer     nbLanes;
 
-	public RunType() {
-		super(RunTypeDAO.class.getName());
-	}
-	
-	public List<PropertyDefinition> getPropertiesDefinitionDefaultLevel(){
-		return getPropertyDefinitionByLevel(Level.CODE.Run);
-	}
+//	public List<PropertyDefinition> getPropertiesDefinitionDefaultLevel() {
+//		return getPropertyDefinitionByLevel(Level.CODE.Run);
+//	}
 	
 }
 

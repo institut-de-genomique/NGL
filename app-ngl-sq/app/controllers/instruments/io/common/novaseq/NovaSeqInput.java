@@ -15,32 +15,22 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory; 
-// import javax.xml.xpath.XPathConstants;
 
 import org.mongojack.DBQuery;
-// import org.xml.sax.SAXParseException; //ajout pour essai catch
 import org.w3c.dom.Document;
-// import org.w3c.dom.NodeList;
-// import org.w3c.dom.Node;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-// import validation.utils.ValidationHelper;
 import controllers.instruments.io.utils.AbstractInput;
-// import controllers.instruments.io.utils.InputHelper;
 import fr.cea.ig.MongoDBDAO;
-// import models.laboratory.common.instance.PropertyValue;
 import models.laboratory.common.instance.property.PropertyFileValue;
-// import models.laboratory.common.instance.property.PropertySingleValue;
 import models.laboratory.experiment.instance.Experiment;
 import models.laboratory.reagent.description.BoxCatalog;
 import models.laboratory.reagent.description.KitCatalog;
 import models.laboratory.reagent.description.ReagentCatalog;
-// import models.laboratory.experiment.instance.InputContainerUsed;
 import models.laboratory.reagent.instance.ReagentUsed;
 import models.utils.InstanceConstants;
-// import play.Logger;
 import validation.ContextValidation;
 
 public class NovaSeqInput extends AbstractInput {
@@ -86,7 +76,6 @@ public class NovaSeqInput extends AbstractInput {
 	     try {
 	    	 DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 	    	 DocumentBuilder builder = factory.newDocumentBuilder();  /// c'est ici que des erreur de balises peuvent etre vues
-//	    	 InputStream inputStream = new ByteArrayInputStream(pfv.value);
 	    	 InputStream inputStream = new ByteArrayInputStream(pfv.byteValue());
 	    	 InputSource is = new InputSource(inputStream);
 	    	 is.setEncoding("UTF-8");
@@ -104,7 +93,6 @@ public class NovaSeqInput extends AbstractInput {
 	           
 		     // verifier le node RfidsInfo avant de faire le reste...
 		     String expression="RfidsInfo";
-//		     String info = (String)xpath.evaluate(expression, root);
 		     String info = xpath.evaluate(expression, root);
 		     checkMandatoryXMLTag (contextValidation, expression, info); 
 		     if (contextValidation.hasErrors())
@@ -113,17 +101,12 @@ public class NovaSeqInput extends AbstractInput {
 	         checkConsistancy(root, xpath, experiment, contextValidation);
 	         importReagents(root, xpath, experiment, contextValidation);
   
-	      //} catch (SAXParseException e) {
-	      //	 // sort en fatal error !!!
-	      // contextValidation.addErrors("Erreurs fichier", "fichier XML incorrect :" + e.getMessage());
-	      // e.printStackTrace();// on voit que l'erreur est SAXParseException ( sous classe de SAXException)
-	    	  
 	      } catch (SAXException | ParserConfigurationException e) {
-	    	  contextValidation.addErrors("Erreurs fichier", "fichier XML incorrect :" + e.getMessage());
+	    	  contextValidation.addError("Erreurs fichier", "fichier XML incorrect :" + e.getMessage());
 	      } catch (IOException e) {
-	    	  contextValidation.addErrors("Erreurs fichier", e.getMessage());
+	    	  contextValidation.addError("Erreurs fichier", e.getMessage());
 	      } catch (XPathExpressionException  e) {
-	    	  contextValidation.addErrors("Erreurs interne", e.getMessage());
+	    	  contextValidation.addError("Erreurs interne", e.getMessage());
 	      } 
 		  return experiment;
 	}
@@ -136,28 +119,25 @@ public class NovaSeqInput extends AbstractInput {
 		     
 		     //-1- position sur sequenceur: NIVEAU 1
 		     expression = "Side";
-//		     String side = (String)xpath.evaluate(expression, root);
 		     String side = xpath.evaluate(expression, root);
 		     checkMandatoryXMLTag (contextValidation, expression, side); 
 		     // si la balise OK comparer avec  position
 		     if ((side.length() > 0) && (! experiment.instrumentProperties.get("position").value.equals(side))) {
-		    		 contextValidation.addErrors("Erreurs fichier", "La position '"+side+"' du fichier ne correspond pas à celle de l'expérience.");
+		    		 contextValidation.addError("Erreurs fichier", "La position '"+side+"' du fichier ne correspond pas à celle de l'expérience.");
 			 } 
 		     
 		     //-2- barcode de Flowcell  NIVEAU 2=><RfidsInfo>
 		     expression = "RfidsInfo/FlowCellSerialBarcode";
-//		     String flowcellId = (String)xpath.evaluate(expression, root);  
 		     String flowcellId = xpath.evaluate(expression, root);  
 		     checkMandatoryXMLTag (contextValidation, expression, flowcellId );
 		     // si la balise OK comparer avec inputContainerSupportCodes: <BARCODE>_<POS>
 		     if ((flowcellId.length() > 0) && (! experiment.inputContainerSupportCodes.contains(flowcellId))) {
-		    		 contextValidation.addErrors("Erreurs fichier", "Le barcode flowcell du fichier '"+flowcellId+"' ne correspond pas à celui de l'expérience.");
+		    		 contextValidation.addError("Erreurs fichier", "Le barcode flowcell du fichier '"+flowcellId+"' ne correspond pas à celui de l'expérience.");
 			 }
 		 
 			 // -3- barcode du tube de chargement  NIVEAU 2=><RfidsInfo>
 		     // !!! pour l'instant il n'y a qu'un seul tube... mais ca va changer avec l'utilisation d'un support de chargement multi-lanes....
 		     expression="RfidsInfo/LibraryTubeSerialBarcode";
-//		     String tubeId = (String)xpath.evaluate(expression, root);
 		     String tubeId = xpath.evaluate(expression, root);
 		     checkMandatoryXMLTag (contextValidation, expression, tubeId );
 		     // si la balise OK comparer avec novaseqLoadingTube
@@ -168,12 +148,11 @@ public class NovaSeqInput extends AbstractInput {
 				 ///contextValidation.addErrors("Erreurs expérience", "Veuillez renseigner 'Tube chargement (RFID)' avant d'importer le fichier.");
 				 
 		     } else if ((tubeId.length() > 0 ) && ( ! experiment.instrumentProperties.get("novaseqLoadingTube").value.equals(tubeId)) ){
-				 contextValidation.addErrors("Erreurs fichier", "Le tube de chargement '"+tubeId+"' du fichier ne correspond pas à celui de l'expérience.");
+				 contextValidation.addError("Erreurs fichier", "Le tube de chargement '"+tubeId+"' du fichier ne correspond pas à celui de l'expérience.");
 		     }
 		     
 		     //-4- flowcell mode    NIVEAU 2=><RfidsInfo>
 		     expression="RfidsInfo/FlowCellMode";
-//		     String fcMode = (String)xpath.evaluate(expression, root);
 		     String fcMode = xpath.evaluate(expression, root);
 		     checkMandatoryXMLTag (contextValidation, expression, fcMode );
 		     // si la balise OK comparer avec novaseqFlowcellMode
@@ -184,7 +163,7 @@ public class NovaSeqInput extends AbstractInput {
 				 ///contextValidation.addErrors("Erreurs expérience", "Veuillez renseigner 'type de flowcell' avant d'importer le fichier.");
 				 
 		     } else if ((fcMode.length() > 0 ) && ( ! experiment.instrumentProperties.get("novaseqFlowcellMode").value.equals(fcMode)) ){
-				 contextValidation.addErrors("Erreurs fichier", "Le type de flowcell '"+ fcMode+"' du fichier ne correspond pas à celui de l'expérience.");
+				 contextValidation.addError("Erreurs fichier", "Le type de flowcell '"+ fcMode+"' du fichier ne correspond pas à celui de l'expérience.");
 		     }
 		     
 		     //-5- vérifier le nom de la machine ??? 
@@ -192,16 +171,15 @@ public class NovaSeqInput extends AbstractInput {
 		      * de run contient le nom du PC : <RunId>180115_MARIECURIX_0008_AH5TCYDMXX</RunId>
 		      */
 		     expression = "RunId";
-//		     String run = (String)xpath.evaluate(expression, root);
 		     String run = xpath.evaluate(expression, root);
 		     checkMandatoryXMLTag (contextValidation, expression, run);
 		     if ((run.length() > 0) && (! run.contains(experiment.instrument.code))) {
-	    		 contextValidation.addErrors("Erreurs fichier", "L'instrument dans le nom du run du fichier ne correspond pas à l'instrument de l'expérience.");
+	    		 contextValidation.addError("Erreurs fichier", "L'instrument dans le nom du run du fichier ne correspond pas à l'instrument de l'expérience.");
 		     }
 		     
 	     } catch (XPathExpressionException e) {
 	   	  	 // erreur de (String)xpath.evaluate("XX", root);=> erreur du programmeur
-	    	 contextValidation.addErrors("Erreurs interne", "Probleme XPathExpressionException :" + e.getMessage() );
+	    	 contextValidation.addError("Erreurs interne", "Probleme XPathExpressionException :" + e.getMessage() );
 	     }           
      }
 	      
@@ -230,32 +208,88 @@ public class NovaSeqInput extends AbstractInput {
     	 
     	 try {
 		     String expression = "RfidsInfo/FlowCellMode";
-//		     String fcMode = (String)xpath.evaluate(expression, root);
 		     String fcMode = xpath.evaluate(expression, root);
 
-		     if ("S2".equals(fcMode)) {
-		    	 kitName="NovaSeq 6000 S2 Rgt kit (300c)";
-		    	 //String boxName="BOX NOVASEQ 6000";
-		    			 
-		       	 //                 TAG name                   reagent name  box name
-		    	 reagentTagMap.put("FlowCell",   new String[]{"FlowCell",   "S2 Flow Cell"}); 
-		    	 reagentTagMap.put("LibraryTube",new String[]{"LibraryTube","NovaSeq 5000/6000 Library Tube"});
-		    	 reagentTagMap.put("Sbs",        new String[]{"Sbs",        "S1/S2 SBS Cartdridge 300 cycles"});
-		    	 reagentTagMap.put("Cluster",    new String[]{"Cluster",    "S2 Cluster Cartridge"});
-		    	 reagentTagMap.put("Buffer",     new String[]{"Buffer" ,    "S1/S2 Buffer Cartridge"});
+	        if  ("S1".equals(fcMode)) {  
+	    	  /* SUPSQCNG-607 / NGL-2199
+	    	     Pour info,pour le S1 :
+	    	     Nom kit : NovaSeq 6000 S1 Rgt kit (300c)
+	    		 contient ces boîtes :
+	    		 S1 Flow Cell
+	    		 S1/S2 Buffer Cartridge
+	    		 S1 Cluster Cartridge
+	    		 S1/S2 SBS Cartdridge 300 cycles
+	    		 NovaSeq 5000/6000 Library Tube
+	    	  */
+		       kitName="NovaSeq 6000 S1 Rgt kit (300c)";
+		       //String boxName="BOX NOVASEQ 6000";
+		       //                 TAG name                   reagent name  box name
+		       reagentTagMap.put("FlowCell",   new String[]{"FlowCell",   "S1 Flow Cell"}); 
+		       reagentTagMap.put("LibraryTube",new String[]{"LibraryTube","NovaSeq 5000/6000 Library Tube"});
+		       reagentTagMap.put("Sbs",        new String[]{"Sbs",        "S1/S2 SBS Cartdridge 300 cycles"});
+		       reagentTagMap.put("Cluster",    new String[]{"Cluster",    "S1 Cluster Cartridge"});
+		       reagentTagMap.put("Buffer",     new String[]{"Buffer" ,    "S1/S2 Buffer Cartridge"});
+		       
+	       } else if ("S2".equals(fcMode)) {
+		      kitName="NovaSeq 6000 S2 Rgt kit (300c)";
+		      //String boxName="BOX NOVASEQ 6000";
+		      //                 TAG name                   reagent name  box name
+		      reagentTagMap.put("FlowCell",   new String[]{"FlowCell",   "S2 Flow Cell"}); 
+		      reagentTagMap.put("LibraryTube",new String[]{"LibraryTube","NovaSeq 5000/6000 Library Tube"});
+		      reagentTagMap.put("Sbs",        new String[]{"Sbs",        "S1/S2 SBS Cartdridge 300 cycles"});
+		      reagentTagMap.put("Cluster",    new String[]{"Cluster",    "S2 Cluster Cartridge"});
+		      reagentTagMap.put("Buffer",     new String[]{"Buffer" ,    "S1/S2 Buffer Cartridge"});
 		    	 
-		     // TODO } else if  ("S4".equals(fcMode)) { }
-		     // TODO } else if  ("S1".equals(fcMode)) {	}
-		    	 
+		   } else if  ("S4".equals(fcMode)) { 
+		      /* SUPSQCNG-607 / NGL-2199
+		         Pour info,pour le S4 :
+		    	 Nom kit : NovaSeq 6000 S4 Rgt kit (300c)
+		    	 contient ces boîtes :
+		    	 S4 Flow Cell
+		    	 S4 Buffer Cartridge
+		    	 S4 Cluster Cartridge
+		    	 S4 SBS Cartdridge 300 cycles
+		    	 NovaSeq 5000/6000 Library Tube
+		      */
+			   kitName="NovaSeq 6000 S4 Rgt kit (300c)";
+			   //String boxName="BOX NOVASEQ 6000";
+			   //                 TAG name                   reagent name  box name
+			   reagentTagMap.put("FlowCell",   new String[]{"FlowCell",   "S4 Flow Cell"}); 
+			   reagentTagMap.put("LibraryTube",new String[]{"LibraryTube","NovaSeq 5000/6000 Library Tube"});
+			   reagentTagMap.put("Sbs",        new String[]{"Sbs",        "S4 SBS Cartdridge 300 cycles"});
+			   reagentTagMap.put("Cluster",    new String[]{"Cluster",    "S4 Cluster Cartridge"});
+			   reagentTagMap.put("Buffer",     new String[]{"Buffer" ,    "S4 Buffer Cartridge"});
+			   
+		   } else if  ("SP".equals(fcMode)) { 
+			   /* 26/08/2019: NGL-2628 
+				  noms EXACTS donnés par Céline Besse :                                                         remarques FDS
+				  Nom kit : NovaSeq 6000 SP Rgt kit (300c)
+				  Nom boîte : 'SP Flow Cell' / Nom du réactif : 'Flow Cell'                            !!! blanc qui n'existe pas pour autres kits !!!
+				  Nom boîte : 'SP/S1/S2 Buffer Cartridge' / Nom du réactif : 'Buffer'
+				  Nom boîte : 'SP Cluster Cartridge' / Nom du réactif : 'Cluster'
+				  Nom boîte : 'SP/S1/S2 SBS Cartridge 300 cycles' / Nom du réactif : 'SBS'             !!! SBS en majuscules !!!!
+				  Nom boîte : 'NovaSeq 5000/6000 Library Tube' / Nom du réactif : 'Library Tube'       !!! blanc qui n'existe pas pour autres kits !!!
+			    */
+			
+				kitName="NovaSeq 6000 SP Rgt kit (300c)";
+				//String boxName="BOX NOVASEQ 6000";
+				//                 TAG name                   reagent name,   box name
+				reagentTagMap.put("FlowCell",   new String[]{"Flow Cell",   "SP Flow Cell"}); 
+				reagentTagMap.put("LibraryTube",new String[]{"Library Tube","NovaSeq 5000/6000 Library Tube"});
+				reagentTagMap.put("Sbs",        new String[]{"SBS",        "SP/S1/S2 SBS Cartridge 300 cycles"});
+				reagentTagMap.put("Cluster",    new String[]{"Cluster",    "SP Cluster Cartridge"});
+				reagentTagMap.put("Buffer",     new String[]{"Buffer" ,    "SP/S1/S2 Buffer Cartridge"});
+				
 		     } else {
-		    	 contextValidation.addErrors("Erreurs fichier", "FlowCell mode '"+fcMode+"' non géré.");
+		    	 // il y aurait encore le S3 a gerer ???
+		    	 contextValidation.addError("Erreurs fichier", "FlowCell mode '"+fcMode+"' non géré.");
 		    	 return;
 		     }    	 
 	    	 
 	    	 //REM: l'association a l'expérience de dépot n'est pas vérifiée...elle est implicite
 	    	 KitCatalog kit= MongoDBDAO.findOne(InstanceConstants.REAGENT_CATALOG_COLL_NAME, KitCatalog.class, DBQuery.is("category","Kit").and(DBQuery.is("name",kitName ).and(DBQuery.is("active",true))));
 	    	 if ( null == kit ){
-	    		 contextValidation.addErrors("Erreurs catalogue", "Pas de kit actif nommé '"+kitName+"' dans le catalogue");
+	    		 contextValidation.addError("Erreurs catalogue", "Pas de kit actif nommé '"+kitName+"' dans le catalogue");
 	    		 return;
 	    	 }
     	
@@ -269,7 +303,7 @@ public class NovaSeqInput extends AbstractInput {
 	    		 
 		    	 BoxCatalog box= MongoDBDAO.findOne(InstanceConstants.REAGENT_CATALOG_COLL_NAME, BoxCatalog.class, DBQuery.is("category","Box").and(DBQuery.is("name",boxName ).and(DBQuery.is("active",true)).and(DBQuery.is("kitCatalogCode", kit.code ))));
 		    	 if ( null == box ){
-		    		 contextValidation.addErrors("Erreurs catalogue", "Pas de boîte active nommée '"+boxName+"' dans le kit '"+kitName +"'");
+		    		 contextValidation.addError("Erreurs catalogue", "Pas de boîte active nommée '"+boxName+"' dans le kit '"+kitName +"'");
 		    		 return;
 		    	 } 
 	    		 
@@ -277,13 +311,11 @@ public class NovaSeqInput extends AbstractInput {
 	    		 
 	    		 String XMLtag1 = "RfidsInfo/" + pair.getKey() + "SerialBarcode";
 	    		 //Logger.debug("XMLtag:"+XMLtag1); 
-//	    		 String serialBarcode = (String)xpath.evaluate(XMLtag1, root);
 	    		 String serialBarcode = xpath.evaluate(XMLtag1, root);
 	    		 checkMandatoryXMLTag (contextValidation, XMLtag1, serialBarcode );
 	    		 
 	    		 String XMLtag2 = "RfidsInfo/" + pair.getKey() + "LotNumber";
 	      		 //Logger.debug("XMLtag:"+XMLtag2);
-//	    		 String lotNumber = (String)xpath.evaluate(XMLtag2, root);
 	    		 String lotNumber = xpath.evaluate(XMLtag2, root);
 	    		 checkMandatoryXMLTag (contextValidation, XMLtag2, lotNumber );
 	    		 
@@ -294,29 +326,29 @@ public class NovaSeqInput extends AbstractInput {
 	    		 ReagentCatalog reag= MongoDBDAO.findOne(InstanceConstants.REAGENT_CATALOG_COLL_NAME, ReagentCatalog.class, DBQuery.is("category", "Reagent").
 	    				 and(DBQuery.is("name", reagName)).and(DBQuery.is("boxCatalogCode", box.code ))); 		 
 	    		 if (reag == null) {
-	        		 contextValidation.addErrors("Erreurs catalogue", "Pas de réactif nommé '"+reagName +"' dans le catalogue");
+	        		 contextValidation.addError("Erreurs catalogue", "Pas de réactif nommé '"+reagName +"' dans le catalogue");
 	        	 } else {
 		    		 logger.debug("code=" + reag.code);
 	        		 
 		    		 reagent.kitCatalogCode = kit.code;       // code NGL du kit parent
 		    		 reagent.boxCatalogCode = box.code;       // code NGL de la boîte parent
 		    		 reagent.reagentCatalogCode = reag.code;  // code NGL du reactif
-		    		 //reagent.boxCode="XXX";               // barcode de la boîte parent... info non disponible dans le fichier
+		    		 //reagent.boxCode="X XX";               // barcode de la boîte parent... info non disponible dans le fichier
 		    		 reagent.code = serialBarcode + "_" + lotNumber + "_"; // !!!! les codes doivent se terminer par "_" pour etre filtrables par la suite
 		    		 //reagent.description="TEST....";      // rien de pertinent a mettre ?????
 					 experiment.reagents.add(reagent); 
 	        	 }
 	    	 }
 	     } catch (XPathExpressionException e) {
-		    	 contextValidation.addErrors("Erreurs interne", e.getMessage());
+		    	 contextValidation.addError("Erreurs interne", e.getMessage());
 		 }      
      }	        
 
 	private void checkMandatoryXMLTag ( ContextValidation contextValidation, String tagName, String tagValue){
         if ( tagValue.equals("NULL") ) {
-        	 contextValidation.addErrors("Erreurs fichier","Balise <"+ tagName+"> incorrecte (NULL)");
+        	 contextValidation.addError("Erreurs fichier","Balise <"+ tagName+"> incorrecte (NULL)");
          } else if ( tagValue.equals("") ) {
-        	 contextValidation.addErrors("Erreurs fichier","Balise <"+ tagName+"> manquante ou non renseignée (vide)");
+        	 contextValidation.addError("Erreurs fichier","Balise <"+ tagName+"> manquante ou non renseignée (vide)");
          }
 	}
 	

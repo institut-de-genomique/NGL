@@ -2,7 +2,7 @@ package controllers.sra.samples.tpl;
 
 import javax.inject.Inject;
 import controllers.CommonController;
-import play.routing.JavaScriptReverseRouter;
+//import play.routing.JavaScriptReverseRouter;
 import play.mvc.Result;
 import views.html.samples.home;
 import views.html.samples.consultation;
@@ -37,22 +37,36 @@ public class Samples extends CommonController {
 		return ok(details.render());
 	}	
 */
-	public Result javascriptRoutes() {
-//		response().setContentType("text/javascript");
-	    return ok(  	    		
-	    		// Routes.javascriptRouter("jsRoutes",
-	    		// Routes
-	    		JavaScriptReverseRouter.create("jsRoutes",
-	    				controllers.sra.samples.tpl.routes.javascript.Samples.home(),
-	    				controllers.projects.api.routes.javascript.Projects.list(),
-	    				controllers.commons.api.routes.javascript.States.list(),
-	    				controllers.sra.api.routes.javascript.Variables.get(),
-	    				controllers.sra.api.routes.javascript.Variables.list(),
-	    				controllers.sra.samples.api.routes.javascript.Samples.get(),
-	    				controllers.sra.samples.tpl.routes.javascript.Samples.get(),
-	    				controllers.sra.samples.api.routes.javascript.Samples.list()
-	    				)
-	    ).as("text/javascript");
-	}
+//	public Result javascriptRoutes() {
+////		response().setContentType("text/javascript");
+//	    return ok(  	    		
+//	    		// Routes.javascriptRouter("jsRoutes",
+//	    		// Routes
+//	    		JavaScriptReverseRouter.create("jsRoutes",
+//	    				controllers.sra.samples.tpl.routes.javascript.Samples.home(),
+//	    				controllers.projects.api.routes.javascript.Projects.list(),
+//	    				controllers.commons.api.routes.javascript.States.list(),
+//	    				controllers.sra.api.routes.javascript.Variables.get(),
+//	    				controllers.sra.api.routes.javascript.Variables.list(),
+//	    				controllers.sra.samples.api.routes.javascript.Samples.get(),
+//	    				controllers.sra.samples.tpl.routes.javascript.Samples.get(),
+//	    				controllers.sra.samples.api.routes.javascript.Samples.list(),
+//	    				controllers.sra.samples.api.routes.javascript.Samples.update()
+//	    				)
+//	    ).as("text/javascript");
+//	}
 	
+	
+	// No annotation for tpl 
+	public Result javascriptRoutes() {	
+		return jsRoutes(controllers.sra.samples.tpl.routes.javascript.Samples.home(),
+				controllers.projects.api.routes.javascript.Projects.list(),
+				controllers.commons.api.routes.javascript.States.list(),
+				controllers.sra.api.routes.javascript.Variables.get(),
+				controllers.sra.api.routes.javascript.Variables.list(),
+				controllers.sra.samples.api.routes.javascript.Samples.get(),
+				controllers.sra.samples.tpl.routes.javascript.Samples.get(),
+				controllers.sra.samples.api.routes.javascript.Samples.list(),
+				controllers.sra.samples.api.routes.javascript.Samples.update());
+	}
 }

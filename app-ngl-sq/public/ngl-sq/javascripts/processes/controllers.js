@@ -32,6 +32,9 @@ angular.module('home').controller('SearchContainersCtrl', ['$scope','$filter','$
 	 		reverse : true,
 			mode:'local'
 		 },
+		 exportCSV:{
+				active:true
+		},
 	     otherButtons :{
 				active:true,
 				template:'<button class="btn" ng-disabled="!searchService.datatable.isSelect() && !searchService.datatable.isSelectGroup()" ng-click="addToBasket(searchService.datatable.getSelection(true))" data-toggle="tooltip" title="'+Messages("button.addbasket")+'">'
@@ -54,10 +57,6 @@ angular.module('home').controller('SearchContainersCtrl', ['$scope','$filter','$
 		$scope.basket.reset();
 		$scope.searchService.datatable.setData([]);
 		
-		$http.get(jsRoutes.controllers.processes.api.ProcessTypes.get($scope.searchService.form.nextProcessTypeCode).url)
-			.then(function(result){
-				console.log(result);
-			});
 		$scope.processGraphService.changeProcessType($scope.searchService.form.nextProcessTypeCode);
 	};
 	
@@ -224,19 +223,25 @@ angular.module('home').controller('SearchSamplesCtrl', ['$scope','$filter','bask
 		};
 		
 		$scope.changeProcessType = function(){
-			$scope.removeTab(1);
-			$scope.basket.reset();
-			$scope.searchService.datatable.setData([]);
 			$scope.processGraphService.changeProcessType($scope.processForm.nextProcessTypeCode);
+		};
+		
+		var random = function getRandomInt(max) {
+			  return Math.floor(Math.random() * Math.floor(max));
+		};
+		
+		$scope.addProcessType = function(){
+			if(($scope.processForm.nextProcessTypeCode)){			
+				tabService.addTabs({label:$filter('codes')($scope.processForm.nextProcessTypeCode,"type"),href:'/processes/new-from-samples/'+$scope.processForm.nextProcessTypeCode+'/'+random(1000),remove:true});				
+			}
 		};
 		
 		$scope.addToBasket  = function(samples){
 			samples.forEach(function(sample){
-				$scope.basket.add(sample);	
+				if($scope.basket.get().map(c=>c.code).indexOf(sample.code) === -1){
+					$scope.basket.add(sample);
+				}
 			});
-			if(($scope.processForm.nextProcessTypeCode) && this.basket.length() > 0 && tabService.getTabs().length === 1){
-				tabService.addTabs({label:$filter('codes')($scope.processForm.nextProcessTypeCode,"type"),href:$scope.processForm.nextProcessTypeCode,remove:false});
-			}
 		};
 		
 		if(angular.isUndefined($scope.getHomePage())){
@@ -276,21 +281,37 @@ angular.module('home').controller('SearchSamplesCtrl', ['$scope','$filter','bask
 			}
 		}
 }]);
-angular.module('home').controller('NewFromSamplesCtrl', ['$scope','$routeParams','processesNewFromSamplesService', 
-	function($scope,$routeParams,processesNewService) {
+angular.module('home').controller('NewFromSamplesCtrl', ['$scope','$routeParams','mainService','processesNewFromSamplesService', 
+	function($scope,$routeParams,mainService,processesNewService) {
 	
-	if($routeParams.processTypeCode){
-		$scope.newService = processesNewService;
-		$scope.newService.init($routeParams.processTypeCode);
+	if(mainService.getBasket().length() > 0 && $routeParams.processTypeCode !== undefined && $routeParams.tabid !== undefined){
+		var key = $routeParams.processTypeCode+"#"+$routeParams.tabid
+		if(mainService.get(key) === undefined){
+			var newService = processesNewService();
+			newService.init($routeParams.processTypeCode);
+			mainService.put(key, newService);
+			$scope.newService = newService;
+			
+		}else if(mainService.get(key) !== undefined){
+			$scope.newService = mainService.get(key);
+		}else{
+			throw 'bad parameters';
+		}
 	}
 	
 }]);
 angular.module('home').controller('NewFromContainersCtrl', ['$scope','$routeParams','processesNewFromContainersService', 
 	function($scope,$routeParams,processesNewService) {
 	
+	$scope.getSpinner = function(){
+		return $scope.spinner;
+	};
+	
 	if($routeParams.processTypeCode){
-		$scope.newService = processesNewService;
-		$scope.newService.init($routeParams.processTypeCode);
+		$scope.newService = processesNewService();
+		$scope.spinner=true;
+		$scope.newService.init($routeParams.processTypeCode,$scope);
+		//$scope.spinner=false;
 	}
 	
 }]);

@@ -8,7 +8,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import fr.cea.ig.MongoDBDAO;
-import fr.cea.ig.lfw.controllers.AbstractScript;
+import fr.cea.ig.lfw.controllers.scripts.buffered.ScriptNoArgs;
 import mail.MailServiceException;
 import models.sra.submit.common.instance.Sample;
 import models.sra.submit.common.instance.Submission;
@@ -20,7 +20,7 @@ import services.SubmissionServices;
 import validation.ContextValidation;
 
 
-public class Reload_AC_BHA extends AbstractScript {
+public class Reload_AC_BHA extends ScriptNoArgs {
 	
 	private FileAcServices fileAcServices;
 //	private SubmissionServices submissionServices;
@@ -79,7 +79,7 @@ public class Reload_AC_BHA extends AbstractScript {
 			
 			File fileEbi = new File("/env/cns/home/sgas/debug_BHA",  "listAC_" + submission.code + ".txt");
 			String user = "william";
-			ContextValidation ctxVal = new ContextValidation(user);
+			ContextValidation ctxVal = ContextValidation.createUndefinedContext(user);
 			submission = this.fileAcServices.traitementFileAC(ctxVal, submissionCode, fileEbi); 
 		}	
 	}

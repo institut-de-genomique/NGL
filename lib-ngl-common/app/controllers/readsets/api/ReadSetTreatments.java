@@ -2,145 +2,148 @@ package controllers.readsets.api;
 
 import javax.inject.Inject;
 
-import org.mongojack.DBQuery;
-import org.mongojack.DBUpdate;
-
-import controllers.authorisation.Permission;
-import fr.cea.ig.MongoDBDAO;
+import controllers.NGLController;
+import fr.cea.ig.authentication.Authenticated;
+import fr.cea.ig.authorization.Authorized;
+import fr.cea.ig.lfw.Historized;
+import fr.cea.ig.ngl.NGLApplication;
+import fr.cea.ig.ngl.dao.api.APIException;
+import fr.cea.ig.ngl.dao.api.APIValidationException;
+import fr.cea.ig.ngl.dao.readsets.ReadSetTreatmentsAPI;
+import fr.cea.ig.ngl.dao.readsets.ReadSetsAPI;
+import fr.cea.ig.ngl.support.NGLForms;
 import fr.cea.ig.play.IGBodyParsers;
-import fr.cea.ig.play.migration.NGLContext;
-import models.laboratory.common.description.Level;
 import models.laboratory.run.instance.ReadSet;
-import models.laboratory.run.instance.Run;
 import models.laboratory.run.instance.Treatment;
-import models.utils.InstanceConstants;
 import play.data.Form;
-import play.libs.Json;
 import play.mvc.BodyParser;
 import play.mvc.Result;
-import validation.ContextValidation;
 
-// TODO: cleanup
-public class ReadSetTreatments extends ReadSetsController {
+@Historized
+public class ReadSetTreatments  extends NGLController implements NGLForms {
 
-	private final Form<Treatment> treatmentForm; 
-	
-	@Inject
-	public ReadSetTreatments(NGLContext ctx) {
-		treatmentForm = ctx.form(Treatment.class);
-	}
-	
-	@Permission(value={"reading"})
-	public Result list(String readSetCode){
-		ReadSet readSet = getReadSet(readSetCode);
-		if (readSet != null) {
-			return ok(Json.toJson(readSet.treatments));
-		} else {
-			return notFound();
-		}		
-	}
-	
-	@Permission(value={"reading"})
-	public Result get(String readSetCode, String treatmentCode){
-		ReadSet readSet = MongoDBDAO.findOne(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, 
-				DBQuery.and(DBQuery.is("code", readSetCode), DBQuery.exists("treatments."+treatmentCode)));
-		if (readSet != null) {
-			return ok(Json.toJson(readSet.treatments.get(treatmentCode)));
-		} else{
-			return notFound();
-		}		
-	}
-	
-	@Permission(value={"reading"})
-	public Result head(String readSetCode, String treatmentCode){
-		if(MongoDBDAO.checkObjectExist(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, 
-				DBQuery.and(DBQuery.is("code", readSetCode), DBQuery.exists("treatments."+treatmentCode)))){
-			return ok();
-		} else {
-			return notFound();
-		}
-	}
-	
-	@Permission(value={"writing"})	
-	@BodyParser.Of(value = IGBodyParsers.Json5MB.class)
-	public Result save(String readSetCode){
-		ReadSet readSet = getReadSet(readSetCode);
-		if (readSet == null)
-			return badRequest();
-		// WARN: this is supposed to be standard parser behavior in play 2.5
-		/*else if(request().body().isMaxSizeExceeded()) {
-			return badRequest("Max size exceeded");
-		}*/
-		Form<Treatment> filledForm = getFilledForm(treatmentForm, Treatment.class);
-//		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm.errors()); 
-		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm); 
-		
-		Treatment treatment = filledForm.get();
-		ctxVal.setCreationMode();
-		ctxVal.putObject("level", Level.CODE.ReadSet);
-		ctxVal.putObject("readSet", readSet);
-		treatment.validate(ctxVal);
-		
-		if(!ctxVal.hasErrors()){
-			MongoDBDAO.update(InstanceConstants.READSET_ILLUMINA_COLL_NAME, Run.class, 
-					DBQuery.is("code", readSetCode),
-					DBUpdate.set("treatments." + treatment.code, treatment)
-					        .set("traceInformation", getUpdateTraceInformation(readSet)));	
-			return ok(Json.toJson(treatment));			
-		} else {
-			return badRequest(NGLContext._errorsAsJson(ctxVal.getErrors()));
-		}
-	}
+    private final ReadSetTreatmentsAPI api;
+    private final ReadSetsAPI readSetApi;
+    private final Form<Treatment> treatmentForm; 
 
-	@Permission(value={"writing"})
-	@BodyParser.Of(value = IGBodyParsers.Json5MB.class)
-	public Result update(String readSetCode, String treatmentCode){
-		ReadSet readSet = MongoDBDAO.findOne(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, 
-				DBQuery.and(DBQuery.is("code", readSetCode), DBQuery.exists("treatments."+treatmentCode)));
-		if (readSet == null)
-			return badRequest();
-		Form<Treatment> filledForm = getFilledForm(treatmentForm, Treatment.class);
-//		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm.errors()); 
-		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm); 
-		
-		Treatment treatment = filledForm.get();
-		if (treatmentCode.equals(treatment.code)) {
-			ctxVal.setUpdateMode();
-			ctxVal.putObject("level", Level.CODE.ReadSet);
-			ctxVal.putObject("readSet", readSet);
-			treatment.validate(ctxVal);
-			if (!ctxVal.hasErrors()) {
-				MongoDBDAO.update(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, 
-						DBQuery.is("code", readSetCode),
-						DBUpdate.set("treatments."+treatment.code, treatment).set("traceInformation", getUpdateTraceInformation(readSet)));				
-				return ok(Json.toJson(treatment));			
-			} else {
-				//return badRequest(filledForm.errors-AsJson());
-				return badRequest(NGLContext._errorsAsJson(ctxVal.getErrors()));
-			}
-		} else {
-			return badRequest("treatment code are not the same");
-		}
-	}
-	
-	@Permission(value={"writing"})
-	public Result delete(String readSetCode, String treatmentCode){
-		ReadSet readSet = MongoDBDAO.findOne(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, 
-				DBQuery.and(DBQuery.is("code", readSetCode), DBQuery.exists("treatments."+treatmentCode)));
-		if (readSet == null)
-			return badRequest();	
-		MongoDBDAO.update(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, 
-				DBQuery.is("code", readSetCode), DBUpdate.unset("treatments."+treatmentCode).set("traceInformation", getUpdateTraceInformation(readSet)));			
-		return ok();		
-	}
-	
-	@Permission(value={"writing"})
-	public Result deleteAll(String readSetCode){
-		ReadSet readSet = getReadSet(readSetCode);
-		if (readSet == null)
-			return badRequest();
-		MongoDBDAO.update(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, 
-				DBQuery.is("code", readSetCode), DBUpdate.unset("treatments").set("traceInformation", getUpdateTraceInformation(readSet)));			
-		return ok();		
-	}
+    @Inject
+    public ReadSetTreatments(NGLApplication app, ReadSetTreatmentsAPI api, ReadSetsAPI readSetApi) {
+        super(app);
+        this.api           = api;
+        this.readSetApi    = readSetApi;
+        this.treatmentForm = app.formFactory().form(Treatment.class);
+    }
+
+    @Authenticated
+    @Authorized.Read
+    public Result list(String readSetCode){
+        return globalExceptionHandler(() -> {
+            ReadSet readSet = readSetApi.get(readSetCode);
+            if (readSet != null) {
+                return okAsJson(api.getSubObjects(readSet));
+            } else {
+                return notFound();
+            }
+        });
+    }
+
+    @Authenticated
+    @Authorized.Read
+    public Result head(String readSetCode, String treatmentCode) {
+        return globalExceptionHandler(() -> {
+            if(api.checkObjectExist(readSetCode, treatmentCode)) {
+                return ok();
+            } else {
+                return notFound();
+            }
+        });
+    }
+
+    @Authenticated
+    @Authorized.Read
+    public Result get(String readSetCode, String treatmentCode){
+        return globalExceptionHandler(() -> {
+            if(api.checkObjectExist(readSetCode, treatmentCode)) {
+                return okAsJson(api.getSubObject(readSetApi.get(readSetCode), treatmentCode));
+            } else {
+                return notFound();
+            }     
+        });
+    }
+
+    @Authenticated
+    @Authorized.Write
+    @BodyParser.Of(value = IGBodyParsers.Json5MB.class)
+    public Result save(String readSetCode){
+        return globalExceptionHandler(() -> {
+            try {
+                ReadSet readSet = readSetApi.get(readSetCode);
+                if (readSet != null) {
+                    Treatment treatment = getFilledForm(treatmentForm, Treatment.class).get();
+                    return okAsJson(api.save(readSet, treatment, getCurrentUser()));
+                } else {
+                    return badRequestAsJson("ReadSet with code " + readSetCode + " not exist");
+                }
+            } catch (APIValidationException e) {
+                return badRequestLoggingForValidationException(e);
+            }
+        });
+    }
+    
+    @Authenticated
+    @Authorized.Write
+    @BodyParser.Of(value = IGBodyParsers.Json5MB.class)
+    public Result update(String readSetCode, String treatmentCode){
+        return globalExceptionHandler(() -> {
+            try {
+                if (api.checkObjectExist(readSetCode, treatmentCode)) {
+                    ReadSet readSet = readSetApi.get(readSetCode);
+                    Treatment treatment = getFilledForm(treatmentForm, Treatment.class).get();
+                    if (!treatmentCode.equals(treatment.code)) {
+                        return badRequestAsJson("treatment code are not the same");
+                    } else {
+                        return okAsJson(api.update(readSet, treatment, getCurrentUser()));
+                    }
+                } else {
+                    return badRequest();
+                }
+            } catch (APIValidationException e) {
+                return badRequestLoggingForValidationException(e);
+            }
+        });
+    }
+    
+    
+    
+    @Authenticated
+    @Authorized.Write
+    public Result delete(String readSetCode, String treatmentCode){
+        return globalExceptionHandler(() -> {
+            if (api.checkObjectExist(readSetCode, treatmentCode)) {
+                try {
+                    api.delete(readSetApi.get(readSetCode), treatmentCode, getCurrentUser());
+                    return ok();
+                } catch (APIException e) {
+                    // no management of exception here
+                    throw new RuntimeException(e);
+                }
+            } else {
+                return badRequest();
+            }
+        });  
+    }
+    
+    @Authenticated
+    @Authorized.Write
+    public Result deleteAll(String readSetCode){
+        return globalExceptionHandler(() -> {
+            ReadSet readSet = readSetApi.get(readSetCode);
+            if (readSet != null) {
+                api.deleteAll(readSet, getCurrentUser());
+                return ok();
+            } else {
+                return badRequest();
+            }
+        });  
+    }
 }

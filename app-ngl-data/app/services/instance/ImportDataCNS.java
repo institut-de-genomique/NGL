@@ -1,42 +1,51 @@
 package services.instance;
 
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import scala.concurrent.duration.Duration;
 import services.instance.container.BanqueAmpliImportCNS;
 import services.instance.container.SizingImportCNS;
-import services.instance.container.SolutionStockImportCNS;
 import services.instance.container.TubeImportCNS;
-import services.instance.container.UpdateAmpliCNS;
-import services.instance.container.UpdateSizingCNS;
-import services.instance.container.UpdateSolutionStockCNS;
 import services.instance.container.UpdateTaraPropertiesCNS;
 import services.instance.parameter.IndexImportCNS;
 import services.instance.project.ProjectImportCNS;
-import services.instance.run.RunExtImportCNS;
-import services.instance.run.UpdateReadSetCNS;
 import services.instance.sample.UpdateReportingData;
 import services.instance.sample.UpdateSampleCNS;
 import services.instance.sample.UpdateSampleNCBITaxonCNS;
 import services.instance.sample.UpdateSamplePropertiesCNS;
 import services.ncbi.TaxonomyServices;
 
-public class ImportDataCNS{
+public class ImportDataCNS {
 
+	private final NGLApplication app;
+	
 	@Inject
-	public ImportDataCNS(NGLContext ctx){
+	public ImportDataCNS(NGLApplication app) {
+		this.app = app;
+	}
+
+	public void run() {
+
 		// Import Projects tous les jours à 16h00
-		new ProjectImportCNS(ImportDataUtil.getDurationForNextHour(0),Duration.create(1,TimeUnit.HOURS), ctx);
-		new TubeImportCNS(ImportDataUtil.getDurationForNextHour(10),Duration.create(1,TimeUnit.HOURS), ctx);
-		new UpdateSampleCNS(ImportDataUtil.getDurationForNextHour(20),Duration.create(1,TimeUnit.HOURS), ctx);
+		new ProjectImportCNS(app)
+			.startScheduling(ImportDataUtil.getDurationForNextHour(0),Duration.create(1,TimeUnit.HOURS));
 		
-		new BanqueAmpliImportCNS(Duration.create(5,TimeUnit.SECONDS),Duration.create(5,TimeUnit.MINUTES), ctx);
-		new SizingImportCNS(Duration.create(10,TimeUnit.SECONDS),Duration.create(5,TimeUnit.MINUTES), ctx);
+		new TubeImportCNS(app)
+			.startScheduling(ImportDataUtil.getDurationForNextHour(10),Duration.create(1,TimeUnit.HOURS));
+		
+		//new UpdateSampleCNS(app)
+		//	.startScheduling(ImportDataUtil.getDurationForNextHour(20),Duration.create(1,TimeUnit.HOURS));
+		
+		//Desactive le 18/07/2019 NGL-2538
+		//new BanqueAmpliImportCNS(app)
+		//	.startScheduling(Duration.create(5,TimeUnit.SECONDS),Duration.create(5,TimeUnit.MINUTES));
+		
+		//Desactive le 18/07/2019 NGL-2538
+		//new SizingImportCNS(app)
+		//	.startScheduling(Duration.create(10,TimeUnit.SECONDS),Duration.create(5,TimeUnit.MINUTES));
 		
 		
 		//Update/Create Container
@@ -52,22 +61,27 @@ public class ImportDataCNS{
 		
 		//Update NCBI scientificName and lineage for Sample
 		
-			
-		
 		/*
 		new UpdateSizingCNS(Duration.create(1,TimeUnit.MINUTES),Duration.create(10,TimeUnit.MINUTES));
 		new UpdateAmpliCNS(Duration.create(1,TimeUnit.MINUTES),Duration.create(10,TimeUnit.MINUTES));
 		*/
-		new UpdateSampleNCBITaxonCNS(ImportDataUtil.getDurationForNextHour(15),Duration.create(6,TimeUnit.HOURS), ctx, new TaxonomyServices(ctx));
-		new UpdateSamplePropertiesCNS(ImportDataUtil.getDurationForNextHour(45),Duration.create(6,TimeUnit.HOURS), ctx);
+		new UpdateSampleNCBITaxonCNS(app, new TaxonomyServices(app))
+			.startScheduling(ImportDataUtil.getDurationForNextHour(15),Duration.create(6,TimeUnit.HOURS));
+		new UpdateSamplePropertiesCNS(app)
+			.startScheduling(ImportDataUtil.getDurationForNextHour(45),Duration.create(6,TimeUnit.HOURS));
 		
 		//new RunExtImportCNS(ImportDataUtil.getDurationInMillinsBefore(12, 30),Duration.create(12,TimeUnit.HOURS), ctx);
 		
-		new UpdateReportingData(ImportDataUtil.getDurationInMillinsBefore(20, 0),Duration.create(1,TimeUnit.DAYS), ctx);
-		new UpdateTaraPropertiesCNS(ImportDataUtil.getDurationInMillinsBefore(4, 0),Duration.create(1,TimeUnit.DAYS), ctx);
-	    new IndexImportCNS(ImportDataUtil.getDurationInMillinsBefore(5, 0),Duration.create(1,TimeUnit.DAYS), ctx);
+		new UpdateReportingData(app)
+			.startScheduling(ImportDataUtil.getDurationInMillinsBefore(20, 0),Duration.create(1,TimeUnit.DAYS));
 		
-	}
+		//new UpdateTaraPropertiesCNS(app)
+		//	.startScheduling(ImportDataUtil.getDurationInMillinsBefore(4, 0),Duration.create(1,TimeUnit.DAYS));
+		
+		//Desactive le 18/07/2019 NGL-2538
+	    //new IndexImportCNS(app)
+	    //	.startScheduling(ImportDataUtil.getDurationInMillinsBefore(5, 0),Duration.create(1,TimeUnit.DAYS));
 
+	}
 	
 }

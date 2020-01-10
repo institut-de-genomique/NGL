@@ -7,7 +7,6 @@
 <table class="table table-bordered table-condensed"
 				ng-mouseup="atmService.data.stopSelectInputContainer($event)"
 				ng-mousedown="atmService.data.startSelectInputContainer($event)">
-				
 	<thead>
 	     <tr>
 	         <th ng-mousedown="atmService.data.selectInputContainers($event, atmService.data.getCurrentSupportCode())"></th>
@@ -26,10 +25,10 @@
 	        	ng-mouseenter="atmService.data.selectInputContainer($event, container)"
 	        	ng-mousedown="atmService.data.startSelectInputContainer($event, container)"
 	        	ng-class="atmService.data.getInputContainerCellClass(container)">
-	        	   <div list-resize="container.contents | collect:'sampleCode+&quot; / &quot;+properties.libProcessTypeCode.value+&quot; / &quot;+properties.tag.value'">
-	        		</div>				        		        	    						    					
-	         </td>          
+	        	   <!-- NGL-2400 afficher processProperties.nPlex s'il y en a -->
+	        	   <div ng-if="(container.contents | countDistinct:'processProperties.nPlex.value') == 0" list-resize="container.contents | collect:'sampleCode+&quot; / &quot;+properties.libProcessTypeCode.value+&quot; / &quot;+properties.tag.value'"></div> 
+	        	   <div ng-if="(container.contents | countDistinct:'processProperties.nPlex.value') != 0" list-resize="container.contents | collect:'sampleCode+&quot; / &quot;+properties.libProcessTypeCode.value+&quot; / &quot;+properties.tag.value+&quot; / &quot;+processProperties.nPlex.value'"></div> 
+	         </td>
 	    </tr>
-	  
-	</tbody>				 
+	</tbody>
 </table>

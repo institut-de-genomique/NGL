@@ -246,6 +246,12 @@ angular.module('home').controller('NanoporeFrgCtrlCNG',['$scope', '$parse','atmT
 		$scope.atmService.data.setEdit();
 	});
 	
+	// insertion dynamique des propriétés d'instrument de niveau containerOut
+	$scope.$watch("instrumentType", function(newValue, OldValue){
+		if(newValue)
+			$scope.atmService.addInstrumentPropertiesToDatatable(newValue.propertiesDefinitions);
+	});
+	
 	var atmService = atmToSingleDatatable($scope, datatableConfig);
 	
 	

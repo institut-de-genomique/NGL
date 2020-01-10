@@ -11,29 +11,31 @@ angular.module('home').controller('OneToVoidBioanalyzerMigrationProfileCNGCtrl',
 	
 	$scope.atmService.data.setConfig(config );
 	
-	
-    //  version plus simple du labchipgx CNG....
+    // version plus simple du labchipgx CNG....
 	$scope.$parent.copyPropertiesToInputContainer = function(experiment){
-		
-		//FDS  30/08/2016 concentration et size de l'expérience doivent etres copiées dans le container
+		//FDS 30/08/2016 concentration et size de l'expérience doivent etres copiées dans le container
 		experiment.atomicTransfertMethods.forEach(function(atm){
+			console.log("copyPropertiesToInputContainer...")
 			var inputContainerUsed =$parse("inputContainerUseds[0]")(atm);
 			if(inputContainerUsed){
-					
 				var concentration1 = $parse("experimentProperties.concentration1")(inputContainerUsed);
-				if(concentration1){
+				// 04/01/2019: NGL-1226 la copie de la concentration ne doit etre faite que si l'utilisateur le demande explicitement !!!
+				if(concentration1 && $scope.experiment.experimentProperties.copyConcentration.value){
 					inputContainerUsed.newConcentration = concentration1;
+					//console.log("concentration1 copied!");
+				} else {
+					inputContainerUsed.newConcentration = null;
 				}
-				
+				// automatique pour la size 
 				var size1 = $parse("experimentProperties.size1")(inputContainerUsed);
 				if(size1){
 					inputContainerUsed.newSize = size1;
+					//console.log("size1 copied!");
 				}
-			}	
-		});	
+			}
+		});
 	};	
 	
-
 	// code venant de chip-migration-ctrl.js au CNS: prevus pour LabChipGX ET bionanalyzer => supprimer code pour labchipGX
 	var profilsMap = {};
 	angular.forEach($scope.experiment.atomicTransfertMethods, function(atm){
@@ -45,14 +47,14 @@ angular.module('home').controller('OneToVoidBioanalyzerMigrationProfileCNGCtrl',
 	var internalProfils = profilsMap;
 	/// pas besoin de line ?????
 	$scope.getProfil=function(column){
-		return internalProfils[column];					
+		return internalProfils[column];
 	};
 	
 	$scope.$watch("profils",function(newValues, oldValues){
 		if(newValues){			
 			var _profilsMap = {};
-			angular.forEach(newValues, function(img){						
-				var pos = img.fullname.match(/_Sample(\d+)\./)[1];					
+			angular.forEach(newValues, function(img){
+				var pos = img.fullname.match(/_Sample(\d+)\./)[1];
 				if(pos && img)this[pos] = img;
 							
 			}, _profilsMap);
@@ -74,7 +76,6 @@ angular.module('home').controller('OneToVoidBioanalyzerMigrationProfileCNGCtrl',
 			$scope.atmService.addInstrumentPropertiesToDatatable(newValue.propertiesDefinitions);
 	})
 	
-	
 	var columns = $scope.atmService.data.getColumnsConfig();
 	
 	columns.push({
@@ -90,17 +91,16 @@ angular.module('home').controller('OneToVoidBioanalyzerMigrationProfileCNGCtrl',
 	});
 	
 	columns.push({
-			"header" : Messages("containers.table.libProcessTypeCode"), // ajout Code
-			"property" : "inputContainer.contents",
-			"order" : false,
-			"hide" : true,
-			"type" : "text",
-			"position" : 7.2,
-			"render" : "<div list-resize='cellValue | getArray:\"properties.libProcessTypeCode.value\" | unique' list-resize-min-size='3'>",
-			"extraHeaders" : {
-				0 : Messages("experiments.inputs")
-			}
-		});
+		"header" : Messages("containers.table.libProcessTypeCode"),
+		"property" : "inputContainer.contents",
+		"order" : false,
+		"hide" : true,
+		"type" : "text",
+		"position" : 7.2,
+		"render" : "<div list-resize='cellValue | getArray:\"properties.libProcessTypeCode.value\" | unique' list-resize-min-size='3'>",
+		"extraHeaders" : {0 : Messages("experiments.inputs")
+		}
+	});
 	
 	// 08/08/2017 ajout Tag
 	columns.push({
@@ -115,9 +115,26 @@ angular.module('home').controller('OneToVoidBioanalyzerMigrationProfileCNGCtrl',
 		"extraHeaders" : {0 : Messages("experiments.inputs")}
 	});
 	
+	// NGL-1226 FDS 06/12/2018 ajouter une colonne "concentration.unit" car la colonne "concentration1" issue des 
+	// properties de l'experience est maintenant définie sans unité. C'est a l'utilisateur de la preciser
+	columns.push({
+		"header" :  Messages("containers.table.concentration.unit.shortLabel"),
+		"property" : "inputContainerUsed.experimentProperties.concentration1.unit",
+		"order" : true,
+		"edit" : true,
+		//"editDirectives":"udt-change='updatePropertyFromUDT(value,col)'",
+		"hide" : true,
+		"type" : "text",
+		"position" : 15,
+		"choiceInList":true,
+		"listStyle":"select",
+		"possibleValues":[{"name":"nM","code":"nM"},{"name":"ng/µl","code":"ng/µl"} ],
+		//"defaultValues":"ng/µl", // essai...
+		"extraHeaders" : {0 : Messages("experiments.inputs")}
+	});
 	
 	$scope.atmService.data.setColumnsConfig(columns);
-
+	
 	// bouton des profils
 	$scope.button = {
 		isShow:function(){
@@ -125,5 +142,29 @@ angular.module('home').controller('OneToVoidBioanalyzerMigrationProfileCNGCtrl',
 			}	
 	};
 	
-	
+	// NGL-1226 FDS 11/12/2018 : controler que les 2 colonnes concentration et unité sont remplies ou vides...
+	//==> ne bloque pas le save...=> essayer de bloquer sur $scope.$on('save'   ne marche pas non plus==> regle drools
+	/*$scope.updatePropertyFromUDT = function(value, col){
+		console.log("update from property : "+col.property);
+		$scope.messages.clear();
+
+		if (( col.property === 'inputContainerUsed.experimentProperties.concentration1.value')||
+			( col.property === 'inputContainerUsed.experimentProperties.concentration1.unit')){
+			
+			var concValue= $parse("inputContainerUsed.experimentProperties.concentration1.value")(value.data);
+			var concUnit=  $parse("inputContainerUsed.experimentProperties.concentration1.unit") (value.data);
+			
+			//console.log("concentration.value="+ concValue);
+			//console.log("concentration.unit="+ concUnit);
+
+			if      ((concValue === undefined || concValue === null ) && (concUnit === undefined ||concUnit === null  )) { console.log("2 MISSING=>OK"); }
+			else if ((concValue !== undefined && concValue !== null ) && (concUnit !== undefined && concUnit !== null )) { console.log("2 OK =>OK"); }
+			else {
+				$scope.messages.clazz = "alert alert-danger";
+				$scope.messages.text = "valeur ou concentration manquante";
+				$scope.messages.open();
+			}
+		}
+	}
+	*/
 }]);

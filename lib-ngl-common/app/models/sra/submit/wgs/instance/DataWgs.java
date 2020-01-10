@@ -13,18 +13,18 @@ public class DataWgs  implements IValidation {
 	@Override
 	public void validate(ContextValidation contextValidation) {
 		// Verifer que les champs sont bien renseignés :
-		if (ValidationHelper.required(contextValidation, this.relatifName,"relatifName")) {
+		if (ValidationHelper.validateNotEmpty(contextValidation, this.relatifName,"relatifName")) {
 			contextValidation.addKeyToRootKeyName("wgsData::relatifName::" + this.relatifName + "::");
 		} else {
 			contextValidation.addKeyToRootKeyName("relatifName::");
 		}
 		
-		ValidationHelper.required(contextValidation, this.relatifName , "relatifName");
-		ValidationHelper.required(contextValidation, this.directory , "directory");
-		ValidationHelper.required(contextValidation, this.extention , "extention");
-		ValidationHelper.required(contextValidation, this.relatifNameMd5 , "relatifNameMd5");
+		ValidationHelper.validateNotEmpty(contextValidation, this.relatifName , "relatifName");
+		ValidationHelper.validateNotEmpty(contextValidation, this.directory , "directory");
+		ValidationHelper.validateNotEmpty(contextValidation, this.extention , "extention");
+		ValidationHelper.validateNotEmpty(contextValidation, this.relatifNameMd5 , "relatifNameMd5");
 
-		if (ValidationHelper.required(contextValidation, this.relatifName,"relatifName")) {
+		if (ValidationHelper.validateNotEmpty(contextValidation, this.relatifName,"relatifName")) {
 			contextValidation.removeKeyFromRootKeyName("rawData::relatifName::" + this.relatifName + "::");
 		} else {
 			contextValidation.removeKeyFromRootKeyName("wgsData::");

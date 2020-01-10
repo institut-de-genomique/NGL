@@ -1,17 +1,17 @@
 package models.laboratory.storage.instance;
 
 import java.util.List;
+import java.util.function.Supplier;
+
+import org.mongojack.MongoCollection;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import fr.cea.ig.DBObject;
+import fr.cea.ig.ngl.dao.StoragesDAO;
+import fr.cea.ig.ngl.utils.GuiceSupplier;
 import validation.ContextValidation;
 import validation.IValidation;
-
-
-
-import org.mongojack.MongoCollection;
-import fr.cea.ig.DBObject;
-
 
 /**
  * 
@@ -24,19 +24,21 @@ import fr.cea.ig.DBObject;
  *
  */
 @MongoCollection(name="Stock")
-public class Storage extends DBObject implements IValidation{
-
-	//Place
+public class Storage extends DBObject implements IValidation {
+	
+	public static final Supplier<StoragesDAO> find = new GuiceSupplier<>(StoragesDAO.class);
+	
+	// Place
 	public String buildingCode;
 //	Not necessarry
-	//public String floorCode;
+	// public String floorCode;
 	public String roomCode;
 	
-	//Conteneur
+	// Conteneur
 	public String storageDeviceCode; 
 	public String shelf;
 	
-	//Box
+	// Box
 	public String boxCode;
 	public String x;
 	public String y;
@@ -47,9 +49,6 @@ public class Storage extends DBObject implements IValidation{
 	@JsonIgnore
 	@Override
 	public void validate(ContextValidation contextValidation) {
-		// TODO Auto-generated method stub
-		
 	}
 
-	
 }

@@ -1,5 +1,6 @@
 "use strict"
-angular.module('home').controller('SearchCtrl', ['$scope','$location','$routeParams','$filter', 'datatable','lists','mainService','tabService','experimentsSearchService', function($scope,$location,$routeParams,$filter, datatable, lists, mainService,tabService,experimentsSearchService) {
+angular.module('home').controller('SearchCtrl', ['$scope','$location','$routeParams','$filter', 'datatable','lists','mainService','tabService','experimentsSearchService', 
+	                                     function($scope,  $location,  $routeParams,  $filter,   datatable,  lists,  mainService,  tabService,  experimentsSearchService) {
 	$scope.datatableConfig = {	
 			show:{
 				active:true,
@@ -18,6 +19,11 @@ angular.module('home').controller('SearchCtrl', ['$scope','$location','$routePar
 				by:'traceInformation.creationDate',
 				reverse :true,
 				mode:'local'
+			},
+			group:{
+				active:true,
+				showOnlyGroups:true,
+				showButton:true
 			},
 			hide:{
 		 		 active:true
@@ -82,7 +88,7 @@ angular.module('home').controller('SearchCtrl', ['$scope','$location','$routePar
 
 "use strict"
 angular.module('home').controller('SearchReagentsCtrl', ['$scope', '$http', '$q', '$routeParams', 'datatable', 'experimentsSearchService', 'mainService', 'tabService', 
-                                                         function($scope,$http,$q,$routeParams,datatable,experimentsSearchService,mainService,tabService){
+                                                 function($scope,   $http,   $q,   $routeParams,   datatable,   experimentsSearchService,   mainService,   tabService){
 	$scope.datatableConfig = {
 			name:"experimentReagents",
 			search:{
@@ -145,7 +151,7 @@ angular.module('home').controller('SearchReagentsCtrl', ['$scope', '$http', '$q'
 }]);
 
 angular.module('home').controller('SearchGraphCtrl', ['$scope', '$http', '$q', 'mainService', 'tabService', 'lists',
-	function($scope,$http,$q, mainService, tabService,lists){
+	                                          function($scope,   $http,   $q,   mainService,   tabService,   lists){
 
 	
 	

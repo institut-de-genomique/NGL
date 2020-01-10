@@ -24,7 +24,8 @@ import models.utils.dao.NGLMappingSqlQuery;
 //public class UserMappingQuery extends MappingSqlQuery<User> {
 public class UserMappingQuery extends NGLMappingSqlQuery<User> {
 
-	public static final MappingSqlQueryFactory<User> factory = (d,s,ps) -> new UserMappingQuery(d,s,ps);
+//	public static final MappingSqlQueryFactory<User> factory = (d,s,ps) -> new UserMappingQuery(d,s,ps);
+	public static final MappingSqlQueryFactory<User> factory = UserMappingQuery::new;
 	
 //	public UserMappingQuery(){
 //		super();
@@ -55,7 +56,7 @@ public class UserMappingQuery extends NGLMappingSqlQuery<User> {
 		List<Long> someIds = new ArrayList<>();
 		// List<String> someLabels = new ArrayList<>();
 		try {
-			List<Role> roles = Role.find.findByUserLogin(user.login);
+			List<Role> roles = Role.find.get().findByUserLogin(user.login);
 			for(Role r:roles){
 				someIds.add(r.id);
 			}

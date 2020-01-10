@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import fr.cea.ig.ngl.utils.HashMapBuilder;
+import fr.cea.ig.lfw.utils.HashMapBuilder;
 
 public class DateTools {
 	

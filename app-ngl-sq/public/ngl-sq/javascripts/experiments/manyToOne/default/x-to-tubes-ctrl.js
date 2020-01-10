@@ -83,7 +83,7 @@ angular.module('home').controller('XToTubesCtrl',['$scope', '$parse', '$filter',
 			        	 "extraHeaders":{0:Messages("experiments.inputs")}
 			         },
 					 {
-			        	 "header":Messages("containers.table.concentration"),
+			        	 "header":Messages("containers.table.concentration.shortLabel"),
 			        	 "property":"inputContainerUsed.concentration.value",
 			        	 "order":true,
 						 "edit":false,
@@ -93,7 +93,7 @@ angular.module('home').controller('XToTubesCtrl',['$scope', '$parse', '$filter',
 			        	 "extraHeaders":{0:Messages("experiments.inputs")}
 			         },
 			         {
-			        	 "header":Messages("containers.table.concentration.unit"),
+			        	 "header":Messages("containers.table.concentration.unit.shortLabel"),
 			        	 "property":"inputContainerUsed.concentration.unit",
 			        	 "order":true,
 						 "edit":false,
@@ -124,7 +124,7 @@ angular.module('home').controller('XToTubesCtrl',['$scope', '$parse', '$filter',
 			        	 "extraHeaders":{0:Messages("experiments.inputs")}
 			         },
 			         {
-			        	 "header":Messages("containers.table.concentration"),
+			        	 "header":Messages("containers.table.concentration.shortLabel"),
 			        	 "property":"outputContainerUsed.concentration.value",
 			        	 "order":true,
 						 "edit":false,
@@ -134,7 +134,7 @@ angular.module('home').controller('XToTubesCtrl',['$scope', '$parse', '$filter',
 			        	 "extraHeaders":{0:Messages("experiments.outputs")}
 			         },
 			         {
-			        	 "header":Messages("containers.table.concentration.unit"),
+			        	 "header":Messages("containers.table.concentration.unit.shortLabel"),
 			        	 "property":"outputContainerUsed.concentration.unit",
 			        	 "order":true,
 						 "edit":false,
@@ -194,7 +194,10 @@ angular.module('home').controller('XToTubesCtrl',['$scope', '$parse', '$filter',
 				withoutEdit: true,
 				mode:'local',
 				changeClass:false,
-				showButton:false
+				showButton:false,
+	        	callback:function(datatable){
+	        		  copyContainerSupportCodeAndStorageCodeToDT(datatable);
+	        	}
 			},
 			hide:{
 				active:true
@@ -415,6 +418,7 @@ angular.module('home').controller('XToTubesCtrl',['$scope', '$parse', '$filter',
 			outputContainerUseds:new Array(0)
 		};
 	};
+	
 	
 	/* 03/05/2017 NGL-1197
 	   26/09/2017 suppression car ajouté par erreur ????

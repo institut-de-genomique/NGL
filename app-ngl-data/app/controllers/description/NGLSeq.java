@@ -4,33 +4,29 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.inject.Inject;
+
+import models.utils.ModelDAOs;
+import nglapps.DataService;
 import play.data.validation.ValidationError;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
-// import services.description.common.InstituteService;
-// import services.description.common.LevelService;
 import services.description.common.MeasureService;
-// import services.description.common.ObjectTypeService;
-// import services.description.common.StateService;
 import services.description.container.ContainerService;
-import services.description.experiment.ExperimentService;
-import services.description.instrument.InstrumentService;
-import services.description.process.ProcessService;
-// import services.description.project.ProjectService;
-// import services.description.run.RunService;
-// import services.description.run.TreatmentService;
-import services.description.sample.ImportService;
-import services.description.sample.SampleService;
 
-public class NGLSeq extends Controller { // NGLController { // NGLBaseController { //CommonController {
+public class NGLSeq extends Controller {
 
 	private static final play.Logger.ALogger logger = play.Logger.of(NGLSeq.class);
 	
-//	@Inject
-//	public NGLSeq(NGLApplication app) {
-//		super(app);
-//	}
+	private final ModelDAOs   mdao;
+	private final DataService dataService;
+	
+	@Inject
+	public NGLSeq(ModelDAOs mdao, DataService dataService) {
+		this.mdao        = mdao;
+		this.dataService = dataService;
+	}
 	
 	public Result save() {
 		try {
@@ -40,13 +36,13 @@ public class NGLSeq extends Controller { // NGLController { // NGLBaseController
 			//StateService.main(errors); 
 			//ResolutionService.main(errors); 
 			//LevelService.main(errors);
-			MeasureService.main(errors);
-			ContainerService.main(errors);
-			InstrumentService.main(errors);
-			SampleService.main(errors);
-			ImportService.main(errors);
-			ExperimentService.main(errors);
-			ProcessService.main(errors);
+			new MeasureService  (mdao).saveData(errors);
+			new ContainerService(mdao).saveData(errors);
+			dataService.saveInstrumentData(errors);
+			dataService.saveSampleData    (errors);
+			dataService.saveImportData    (errors);
+			dataService.saveExperimentData(errors);
+			dataService.saveProcessData   (errors);
 			//ProjectService.main(errors);
 			//RunService.main(errors);
 			//TreatmentService.main(errors);

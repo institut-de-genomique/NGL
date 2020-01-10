@@ -25,6 +25,8 @@ angular.module('ngl-sq.samplesServices')
 						return "label label-info";
 					}else if(process.state.code === 'IP'){
 						return "label label-warning"
+					}else if(process.state.code === 'IW-C'){
+						return "label label-perso"
 					}else if(process.state.code === 'F' && process.experiments && process.experiments.length > 0){
 						return "label label-primary"
 					}else if(process.state.code === 'F' && (!process.experiments || process.experiments.length === 0)){
@@ -138,6 +140,7 @@ angular.module('ngl-sq.samplesServices')
 							+'	<li class="list-group-item"><a class="label label-primary"  style="margin-right:2px">rs</a> : '+Messages('legendSampleProcesses.label.primary.rs')+'</li>'							
 							+'	<li class="list-group-item"><a class="label label-warning"  style="margin-right:2px"> </a> : '+Messages('legendSampleProcesses.label.warning')+'</li>'
 							+'	<li class="list-group-item"><a class="label label-info"  style="margin-right:2px"> </a> : '+Messages('legendSampleProcesses.label.info')+'</li>'
+							+'	<li class="list-group-item"><a class="label label-perso"  style="margin-right:2px"> </a> : '+Messages('legendSampleProcesses.label.perso')+'</li>'
 							+'	<li class="list-group-item"><a class="label label-default"  style="margin-right:2px"> </a> : '+Messages('legendSampleProcesses.label.default')+'</li>'							
 							+'</ul>',
 					trigger : "click"					
@@ -258,7 +261,9 @@ angular.module('ngl-sq.samplesServices')
 		
 		
 		var check = function(condition){
-			var results = $filter('filter')([this], condition.criteria, true);
+			//by default strict comparison
+			if(condition.comparator === undefined)condition.comparator = true;
+			var results = $filter('filter')([this], condition.criteria, condition.comparator);
 			if((results.length > 0 && condition.expected === true)
 					|| (results.length === 0 && condition.expected === false)){
 				return true;

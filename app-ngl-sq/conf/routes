@@ -7,6 +7,9 @@
 ->	/admin	        ngladmin.Routes
 ->  /               nglcommon.Routes  
 
+GET		/scripts/run/:clazz												fr.cea.ig.lfw.controllers.scripts.ScriptController.run(clazz : java.lang.String)
+POST	/scripts/run/:clazz												fr.cea.ig.lfw.controllers.scripts.ScriptController.run(clazz : java.lang.String)
+
 # Home page
 GET     /                           									controllers.main.tpl.Main.home()
 GET     /tpl/js-routes                         							controllers.main.tpl.Main.javascriptRoutes()
@@ -55,10 +58,23 @@ GET		/tpl/samples/search											controllers.samples.tpl.Samples.search()
 GET		/tpl/samples/details										controllers.samples.tpl.Samples.details()
 GET		/tpl/samples/js-routes										controllers.samples.tpl.Samples.javascriptRoutes()
 
+#details tpl
+GET		/descriptions/:homecode/home									controllers.descriptions.tpl.Descriptions.home(homecode:java.lang.String)
+GET		/tpl/descriptions/instruments									controllers.descriptions.tpl.Descriptions.instruments()
+GET		/tpl/descriptions/js-routes										controllers.descriptions.tpl.Descriptions.javascriptRoutes()
+
 #tags api
 GET 	/printing/:homecode/home										controllers.printing.tpl.Printing.home(homecode:java.lang.String)
 GET		/tpl/printing/js-routes											controllers.printing.tpl.Printing.javascriptRoutes()
 GET		/tpl/printing/tags/display										controllers.printing.tpl.Tags.display()
+
+#NGL-836: Indexes tpl
+GET 	/indexes/:homecode/home										controllers.indexes.tpl.Indexes.home(homecode:java.lang.String)
+GET		/indexes/:code												controllers.indexes.tpl.Indexes.get(code: java.lang.String)
+GET		/tpl/indexes/search											controllers.indexes.tpl.Indexes.search()
+GET		/tpl/indexes/details										controllers.indexes.tpl.Indexes.details()
+GET		/tpl/indexes/js-routes										controllers.indexes.tpl.Indexes.javascriptRoutes()
+
 
 # Map static resources from the /public folder to the /assets URL path
 # GET     /assets/*file               									controllers.Assets.at(path="/public", file)

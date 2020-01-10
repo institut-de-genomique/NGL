@@ -25,7 +25,6 @@ import models.laboratory.experiment.instance.OneToVoidContainer;
 import models.laboratory.instrument.description.InstrumentUsedType;
 import models.laboratory.instrument.instance.InstrumentUsed;
 import models.utils.InstanceConstants;
-import models.utils.InstanceHelpers;
 import models.utils.dao.DAOException;
 import validation.ContextValidation;
 
@@ -50,13 +49,13 @@ public class ExperimentImport {
 		//verification existence of this experimentTypeCode
 		ExperimentType experimentType=null;
 		try {
-			experimentType = ExperimentType.find.findByCode(experimentTypeCode);
+			experimentType = ExperimentType.find.get().findByCode(experimentTypeCode);
 		} catch (DAOException e) {
 			logger.error("",e);
 			return null;
 		}
 		if (experimentType == null) {
-			ctxErr.addErrors("code", "error.codeNotExist", experimentTypeCode, experiment.code);
+			ctxErr.addError("code", "error.codeNotExist", experimentTypeCode, experiment.code);
 			return null;
 		}
 		
@@ -91,13 +90,13 @@ public class ExperimentImport {
 		String instrumentUsedTypeCode = rs.getString("type_instr");
 		InstrumentUsedType instrumentUsedType=null;
 		try {
-			instrumentUsedType = InstrumentUsedType.find.findByCode(instrumentUsedTypeCode);
+			instrumentUsedType = InstrumentUsedType.find.get().findByCode(instrumentUsedTypeCode);
 		} catch (DAOException e) {
 			logger.error("",e);
 			return null;
 		}
 		if (instrumentUsedType==null) {
-			ctxErr.addErrors("code", "error.codeNotExist", instrumentUsedTypeCode, instrumentUsed.code);
+			ctxErr.addError("code", "error.codeNotExist", instrumentUsedTypeCode, instrumentUsed.code);
 			return null;
 		}
 		
@@ -115,7 +114,7 @@ public class ExperimentImport {
 		
 		//define experiment state
 		State state = new State();
-		state.code = "F";   //TODO : mapping
+		state.code = "F";   // GA: mapping
 		state.date = rs.getDate("min_date"); 
 		state.user = "ngl";
 		

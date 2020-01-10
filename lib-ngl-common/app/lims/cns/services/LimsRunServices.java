@@ -173,7 +173,7 @@ Conta mat ori + duplicat>30 + rep bases	46	TAXO-contaMatOri ; Qlte-duplicat ; Ql
 
 	private String getInstrumentCategoryCode(Experiment exp) {
 		try {
-			return models.laboratory.instrument.description.Instrument.find.findByCode(exp.instrument.code).typeCode;
+			return models.laboratory.instrument.description.Instrument.find.get().findByCode(exp.instrument.code).typeCode;
 		} catch (DAOException e) {
 			throw new RuntimeException(e);
 		}
@@ -292,7 +292,7 @@ Conta mat ori + duplicat>30 + rep bases	46	TAXO-contaMatOri ; Qlte-duplicat ; Ql
 					if (!TBoolean.UNSET.equals(readSet.bioinformaticValuation.valid)) {
 						dao.updateLotsequenceAbandonBI(readSet.code, getAbandon(readSet.bioinformaticValuation, readSet.code));
 					}
-				} catch(Throwable t) { // in case of deadlock situation or other error we retry, TODO: do not catch throwable
+				} catch (Exception t) { // in case of deadlock situation or other error we retry
 					logger.warn(readSet.code+" : second : "+t.getMessage());
 //					LotSeqValuation lsv = 
 							dao.getLotsequenceValuation(readSet.code);
@@ -303,7 +303,7 @@ Conta mat ori + duplicat>30 + rep bases	46	TAXO-contaMatOri ; Qlte-duplicat ; Ql
 				}
 				
 			}
-		} catch(Throwable t) { // TODO: do not catch throwable
+		} catch (Exception t) {
 			logger.error(readSet.code + " : " + t.getMessage(), t);
 		}
 	}
@@ -408,7 +408,7 @@ Conta mat ori + duplicat>30 + rep bases	46	TAXO-contaMatOri ; Qlte-duplicat ; Ql
 				try {
 					dao.deleteRun(run.code);
 					dao.deleteFlowcellNGL(run.containerSupportCode);					
-				} catch(Throwable t) { // TODO: do not catch throwable
+				} catch (Exception t) {
 					throw new RuntimeException("Delete RUN : " + run.code + " : " + t.getMessage(), t);
 				}
 			}
@@ -461,10 +461,10 @@ Conta mat ori + duplicat>30 + rep bases	46	TAXO-contaMatOri ; Qlte-duplicat ; Ql
 			} else {
 				throw new RuntimeException("DepotSolexa is null");
 			}
-	    	// TODO Etat
-	    	// TODO RunInNGL
+	    	// GA: Etat
+	    	// GA: RunInNGL
 		
-		} catch(Throwable t) { // TODO: do not catch throwable
+		} catch (Exception t) { 
 			logger.error("Synchro RUN : "+run.code+" : "+t.getMessage(),t);
 		}
 	}
@@ -477,26 +477,25 @@ Conta mat ori + duplicat>30 + rep bases	46	TAXO-contaMatOri ; Qlte-duplicat ; Ql
 				dao.updateReadSetBaseUtil(readset);
 				dao.insertFiles(readset, true);
 			}
-		} catch(Throwable t) { // TODO: do not catch throwable
+		} catch (Exception t) {
 			logger.error("Synchro READSET AfterQC: " + readset.code + " : " + t.getMessage(), t);
 		}
 	}
 
 	@Override
 	public void updateReadSetEtat(ReadSet readset, int etat){
-		if(dao.isLseqco(readset)){
+		if (dao.isLseqco(readset)) {
 			dao.updateReadSetEtat(readset, etat);
 		}
 	}
 	
 	@Override
 	public void updateReadSetArchive(ReadSet readset) {
-		try{
+		try {
 			if(dao.isLseqco(readset)){
 				dao.updateReadSetArchive(readset);
 			}
-			
-		}catch(Throwable t){
+		} catch (Exception t) {
 			logger.error("Synchro READSET Archive: "+readset.code+" : "+t.getMessage(),t);
 		}
 	}
@@ -505,8 +504,7 @@ Conta mat ori + duplicat>30 + rep bases	46	TAXO-contaMatOri ; Qlte-duplicat ; Ql
 	public void linkRunWithMaterielManip() {
 		try {
 			dao.linkRunWithMaterielManip();
-			
-		} catch(Throwable t) {
+		} catch (Exception t) {
 			logger.error("Synchro LINK RUN / MATERIEL_MANIP: "+t.getMessage(),t);
 		}
 	}

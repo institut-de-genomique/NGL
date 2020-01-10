@@ -47,7 +47,7 @@ public class ContentsFieldConfiguration extends ObjectFieldConfiguration<Content
 					Content content = contents.get(0);
 					populateSubFields(content, rowMap, contextValidation, action);
 				} else {
-					contextValidation.addErrors("Error", "no contents found");
+					contextValidation.addError("Error", "no contents found");
 				}
 			} else if(pool && configs.containsKey("sampleCode")) {
 //				List<Content> contents = (List<Content>) field.get(dbObject);
@@ -59,7 +59,7 @@ public class ContentsFieldConfiguration extends ObjectFieldConfiguration<Content
 				throw new RuntimeException("Pool not managed for update");
 				
 			} else {
-				contextValidation.addErrors("Error", "contents configuration must contain a sampleCode property to update the good content in case of pool");
+				contextValidation.addError("Error", "contents configuration must contain a sampleCode property to update the good content in case of pool");
 			}
 		}					
 	}

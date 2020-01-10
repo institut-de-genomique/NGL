@@ -25,8 +25,12 @@ dialect 'java'
         
         JSONDevice jsonDevice = new JSONDevice();
 		Set<ResourceProperties> rpsRawData = jsonDevice.httpGetJSON(ProjectProperties.getProperty("server")+"/api/sra/experiments/rawDatas?submissionCode="+groupJobResource.getProperty("code"),"bot");
+		//Create submission bigTmp directory if needed
+		SRAFilesUtil.createBigTmpDirectory(rpsRawData,groupJobResource.getProperty("code"));
+		
 		boolean gzipForSubmission = SRAFilesUtil.checkGzipForSubmission(rpsRawData);
-		if(!gzipForSubmission){
+		boolean checkDataCCRT = SRAFilesUtil.checkDataCCRT(rpsRawData,groupJobResource.getProperty("code"));
+		if(!gzipForSubmission && checkDataCCRT){
 			ResourceProperties newRp = new ResourceProperties();
 			newRp.setProperty("code",groupJobResource.getProperty("code"));
 			newRp.setProperty("gzipForSubmission","false");
@@ -34,7 +38,7 @@ dialect 'java'
 			newRp.setProperty("experimentCodes",groupJobResource.getProperty("experimentCodes").replaceAll("\"",""));
 			newRp.setProperty("idGroupJob",""+$groupJob.getId());
 			resourceProperties.add(newRp);
-		}else{
+		}else if(gzipForSubmission){
 			Set<ResourceProperties> rpZips = $referentialDevice.getResourcesWithType($rps.getResourceType().getName(), $resourcesReferential);
         	//Check submissionCode
         	for(ResourceProperties rpZip : rpZips){

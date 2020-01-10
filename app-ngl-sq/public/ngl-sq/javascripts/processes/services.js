@@ -178,10 +178,9 @@ angular.module('ngl-sq.processesServices', [])
 			"order" : false,
 			"hide" : false,
 			"position" : 10,
-			"filter" : "unique",
 			"groupMethod" : "collect:true",
 			"filter":"orderBy:searchService.extractDate",
-			"render" : "<div list-resize='cellValue|orderBy:searchService.extractDate' list-resize-min-size='2' vertical>",
+			"render" : "<div list-resize='cellValue' list-resize-min-size='2' vertical>",
 			"type" : "text"
 		});
 		columns.push({
@@ -205,9 +204,20 @@ angular.module('ngl-sq.processesServices', [])
 			"type" : "date"
 		});
 		columns.push({
+			"header" : Messages("processes.table.assignDate"),
+			"property" : "state.historical",
+			"position" : 13,
+			"order" : true,
+			"hide" : true,
+			"filter" : "filters:{code:'N'}:true|get:'date'",
+			"format" : Messages("datetime-hour.format"),
+			"groupMethod" : "unique",
+			"type" : "date"
+		});
+		columns.push({
 			"header" : Messages("processes.table.endDate"),
 			"property" : "state.historical",
-			"position" : 12,
+			"position" : 14,
 			"order" : true,
 			"hide" : true,
 			"filter" : "filters:{code:'F'}:true|get:'date'",
@@ -218,7 +228,7 @@ angular.module('ngl-sq.processesServices', [])
 		columns.push({
 			"header" : Messages("processes.table.createUser"),
 			"property" : "traceInformation.createUser",
-			"position" : 13,
+			"position" : 15,
 			"order" : true,
 			"hide" : true,
 			"groupMethod" : "unique",
@@ -648,10 +658,76 @@ angular.module('ngl-sq.processesServices', [])
 		         cancel:{
 		        	 active:false
 		         },
+		         select:{
+		        	    "active":false,//Active or not
+		        	    "showButton":false,//Show the select all button in the toolbar,
+		         },
+		         //Bouton pour switcher de containers à support ou de support a containers
 		         otherButtons :newService.udtOtherButtons()
 		};
 		return editDatatableConfig;
-	}
+	};
+	
+	var	getEditDatatableConfigWithScope = function(newService,$scope){
+		var editDatatableConfig = {
+				 columns: [],
+		         pagination:{
+		        	 active:false
+		         },		
+		         search:{
+		        	 active:false
+		         },
+		         order:{
+		        	 mode:'local',
+		        	 active:true
+		         },
+		         edit:{  		
+		        	 active:true,
+		        	 columnMode:true,
+		        	 byDefault : true,
+		        	 showButton:false
+		         },
+		         save:{
+		        	 active: true,
+		        	 withoutEdit:true,
+		        	 showButton : true,
+		        	 mode:"local",
+		        	 changeClass : false,
+		        	 callback : function(datatable){
+		        		 newService.udtSaveCallback(datatable,$scope);
+		        	 }
+		         },
+		         remove:{
+		        	 active:true,
+		        	 mode:'local',
+		        	 withEdit:true,
+		        	 callback : function(datatable){
+		        		 newService.udtRemoveCallback(datatable);
+		        	 }
+		         },
+		         lines:{
+		        	trClass:function(data,line){
+		        		return newService.udtTrClass(data,line);
+		        	}
+		         },
+		         messages:{
+		        	 active:false,
+		        	 transformKey: function(key, args) {
+			             return Messages(key, args);
+		        	 }
+		         },
+		         cancel:{
+		        	 active:false
+		         },
+		         select:{
+		        	    "active":false,//Active or not
+		        	    "showButton":false,//Show the select all button in the toolbar,
+		         },
+		         //Bouton pour switcher de containers à support ou de support a containers
+		         otherButtons :newService.udtOtherButtons()
+		};
+		return editDatatableConfig;
+	};
 
 	var getProcessColumnOk = function(){
 		var columns = [
@@ -769,47 +845,49 @@ angular.module('ngl-sq.processesServices', [])
 	};
 	
 	var newService = {
-			datatable : undefined,
-			messages:messages(),
-			processesDoneWithSuccess : [],
-			getEditDatatableConfig : getEditDatatableConfig,
-			getProcessColumnOk : getProcessColumnOk,
-			datatableConfigProcessOK:datatableConfigProcessOK,
-			processType : undefined,
-			processPropertyColumns :[],
-			computeProcessColumns : function(properties){
-				this.processPropertyColumns = [];
-				if(properties){										
-					this.processPropertyColumns = properties.map(function(propertyDefinition){
-						return propertyDefHelpers.getProcessUDTColumn(propertyDefinition);
-						});					
+				datatable : undefined,
+				messages:messages(),
+				processesDoneWithSuccess : [],
+				getEditDatatableConfig : getEditDatatableConfig,
+				getEditDatatableConfigWithScope : getEditDatatableConfigWithScope,
+				getProcessColumnOk : getProcessColumnOk,
+				datatableConfigProcessOK:datatableConfigProcessOK,
+				processType : undefined,
+				processPropertyColumns :[],
+				computeProcessColumns : function(properties){
+					this.processPropertyColumns = [];
+					if(properties){										
+						this.processPropertyColumns = properties.map(function(propertyDefinition){
+							return propertyDefHelpers.getProcessUDTColumn(propertyDefinition);
+							});					
+					}
+					
+				},
+				setDatatableProcessOk : function(){
+					var columns = this.getProcessColumnOk().concat(this.processPropertyColumns);
+					this.datatable = datatable(this.datatableConfigProcessOK);
+					this.datatable.setColumnsConfig(columns);
+					this.datatable.setData(this.processesDoneWithSuccess);				
+				},
+				initProcessType : function(processTypeCode) {
+					this.processesDoneWithSuccess = [];
+					var promise = $q.when(this);
+					if(processTypeCode){
+						promise = $http.get(jsRoutes.controllers.processes.api.ProcessTypes.get(processTypeCode).url,{newService:this})
+							.then(function(result){
+								var newService = result.config.newService;
+								newService.processType = result.data;
+								newService.computeProcessColumns(newService.processType.propertiesDefinitions);
+								return newService;
+						});				
+					}		
+					return promise;
 				}
-				
-			},
-			setDatatableProcessOk : function(){
-				var columns = this.getProcessColumnOk().concat(this.processPropertyColumns);
-				this.datatable = datatable(this.datatableConfigProcessOK);
-				this.datatable.setColumnsConfig(columns);
-				this.datatable.setData(this.processesDoneWithSuccess);				
-			},
-			initProcessType : function(processTypeCode) {
-				var promise = $q.when(this);
-				if(processTypeCode){
-					promise = $http.get(jsRoutes.controllers.processes.api.ProcessTypes.get(processTypeCode).url,{newService:this})
-						.then(function(result){
-							var newService = result.config.newService;
-							newService.processType = result.data;
-							newService.computeProcessColumns(newService.processType.propertiesDefinitions);
-							return newService;
-					});				
-				}		
-				return promise;
-			}
-		}
+			};		
 		return newService;
 	
-}]).factory('processesNewFromSamplesService', ['$q', '$http', '$parse', '$filter', 'mainService', 'lists', 'datatable', 'processesNewService',
-    function($q, $http, $parse, $filter, mainService, lists, datatable, processesNewService) {
+}]).factory('processesNewFromSamplesService', ['$q', '$http', '$parse', '$filter', 'mainService', 'lists', 'datatable', 'processesNewService','messages',
+    function($q, $http, $parse, $filter, mainService, lists, datatable, processesNewService,messages) {
 	
 	var getDefaultColumns = function() {
 		var columns = [];
@@ -890,7 +968,7 @@ angular.module('ngl-sq.processesServices', [])
 	};
 	
 	
-	var newService = {
+	var sampleNewService = {
 		getDefaultColumns : getDefaultColumns,
 		sampleViewData : undefined,
 		computeData : function(samples, isFirst){
@@ -900,7 +978,7 @@ angular.module('ngl-sq.processesServices', [])
 					sample.properties = null;
 					sample.comments = [];
 				}
-				this.sampleViewData[sample.code]=sample;
+				this.sampleViewData[sample.code]={sample:sample};
 			},this);
 			return samples;
 		},
@@ -909,26 +987,26 @@ angular.module('ngl-sq.processesServices', [])
 			this.messages.setError("save");
 			for(var key in this.sampleViewData){
 				if(this.sampleViewData[key].onError){
-					samples.push(this.sampleViewData[key]);
+					samples.push(this.sampleViewData[key].sample);
 					this.messages.addDetails(this.sampleViewData[key].errors);						
 				}
 			}
 			samples = $filter('orderBy')(samples, ['sampleCodes']);
 			
-			this.datatable = datatable(this.getEditDatatableConfig(newService));
-			this.datatable.setColumnsConfig(this.getDefaultColumns().concat(newService.processPropertyColumns))
+			this.datatable = datatable(this.getEditDatatableConfig(this));
+			this.datatable.setColumnsConfig(this.getDefaultColumns().concat(this.processPropertyColumns))
 			this.datatable.setData(samples);
 		},
 		swithToGlobalErrorView : function(){
 			var samples = [];
 			this.messages.setError("save");
 			for(var key in this.sampleViewData){
-				samples.push(this.sampleViewData[key]);				
+				samples.push(this.sampleViewData[key].sample);				
 			}
 			samples = $filter('orderBy')(samples, ['sampleCodes']);
 			
-			this.datatable = datatable(this.getEditDatatableConfig(newService));
-			this.datatable.setColumnsConfig(this.getDefaultColumns().concat(newService.processPropertyColumns))
+			this.datatable = datatable(this.getEditDatatableConfig(this));
+			this.datatable.setColumnsConfig(this.getDefaultColumns().concat(this.processPropertyColumns))
 			this.datatable.setData(samples);
 		},
 		udtSaveCallback : function(datatable){
@@ -975,7 +1053,7 @@ angular.module('ngl-sq.processesServices', [])
 		            	});	            	
 		            }
 				});
-				
+			
 				if(atLeastOneError){
 					$that.swithToSampleErrorView();
 	    		}else{
@@ -1014,13 +1092,17 @@ angular.module('ngl-sq.processesServices', [])
 				}
 			});
 		}
-	}
+	};
 	
-	newService = $.extend(true,{},newService,processesNewService);
 	
-	return newService;
 	
-}]).factory('processesNewFromContainersService', [ '$q', '$http', '$parse', '$filter', 'mainService', 'lists', 'datatable', 'processesNewService',
+	return function(){	
+		var newService = $.extend(true,{},sampleNewService,processesNewService);
+		newService.messages = messages(); //need new messages manager for each instance
+		return newService;
+	};
+	
+}]).factory('processesNewFromContainersService', [ '$q', '$http', '$parse', '$filter', 'mainService', 'lists', 'datatable', 'processesNewService', 
     function($q, $http, $parse, $filter, mainService, lists, datatable, processesNewService) {
 	
 	var getDefaultColumns = function(view) {
@@ -1127,7 +1209,7 @@ angular.module('ngl-sq.processesServices', [])
 	};
 
 	
-	var newService = {
+	var containerNewService = {
 			containerViewData : undefined,
 			supportViewData : undefined,
 			containerErroView : false,
@@ -1189,7 +1271,7 @@ angular.module('ngl-sq.processesServices', [])
 					}
 				}
 				containers = $filter('orderBy')(containers, ['support.code', 'support.column*1', 'support.line']);
-				this.datatable.setColumnsConfig(this.getDefaultColumns("container").concat(newService.processPropertyColumns));
+				this.datatable.setColumnsConfig(this.getDefaultColumns("container").concat(this.processPropertyColumns));
 				this.datatable.setData(containers);
 				this.containerErroView = true;
 			},
@@ -1200,7 +1282,7 @@ angular.module('ngl-sq.processesServices', [])
 					containers.push(this.containerViewData[key]);					
 				}
 				containers = $filter('orderBy')(containers, ['support.code', 'support.column*1', 'support.line']);
-				this.datatable.setColumnsConfig(this.getDefaultColumns("container").concat(newService.processPropertyColumns));
+				this.datatable.setColumnsConfig(this.getDefaultColumns("container").concat(this.processPropertyColumns));
 				this.datatable.setData(containers);
 				this.containerErroView = true;
 			},
@@ -1210,7 +1292,7 @@ angular.module('ngl-sq.processesServices', [])
 					containers.push(this.containerViewData[key]);
 				}
 				containers = $filter('orderBy')(containers, ['support.code', 'support.column*1', 'support.line']);
-				this.datatable.setColumnsConfig(this.getDefaultColumns("container").concat(newService.processPropertyColumns));
+				this.datatable.setColumnsConfig(this.getDefaultColumns("container").concat(this.processPropertyColumns));
 				this.datatable.setData(containers);	
 				this.supportView = false;
 
@@ -1221,11 +1303,12 @@ angular.module('ngl-sq.processesServices', [])
 					supports.push(this.supportViewData[key]);
 				}
 				supports = $filter('orderBy')(supports, 'support.code');
-				this.datatable.setColumnsConfig(this.getDefaultColumns("support").concat(newService.processPropertyColumns));
+				this.datatable.setColumnsConfig(this.getDefaultColumns("support").concat(this.processPropertyColumns));
 				this.datatable.setData(supports);			
 				this.supportView = true;
 			},
-			udtSaveCallback : function(datatable){
+			udtSaveCallback : function(datatable,$scope){
+				$scope.spinner=true;
 				this.messages.clear();
 				var data = datatable.getData();
 				var allProcesses = [];
@@ -1250,7 +1333,9 @@ angular.module('ngl-sq.processesServices', [])
 		        	queries.push($http.post(jsRoutes.controllers.processes.api.Processes.saveBatch("from-container").url, subsetOfProcesses,{subsetOfProcesses:subsetOfProcesses}));
 		        }
 				var $that = this;
+				datatable.setSpinner(true);
 				$q.all(queries).then(function(results) {
+					datatable.setSpinner(true);
 					$that.containerErroView = false;
 					var atLeastOneError = false;
 					
@@ -1278,13 +1363,12 @@ angular.module('ngl-sq.processesServices', [])
 			            	});	            	
 			            }
 					});
-					
 					if(atLeastOneError){
 						$that.swithToContainerErrorView();
 		    		}else{
 		    			$that.setDatatableProcessOk();		    					    		
 		    		}
-					
+					$scope.spinner=false;
 				},function(result){
 					$that.swithToGlobalErrorView();						
 				});
@@ -1319,26 +1403,30 @@ angular.module('ngl-sq.processesServices', [])
 			/**
 			 * initialise the service
 			 */
-			init : function(processTypeCode) {
+			init : function(processTypeCode,$scope) {
 				this.initProcessType(processTypeCode).then(function(newService){
 					if(newService.processType){
-						newService.supportView = false;
+						newService.supportView= false;
 						newService.computeData().then(function(){
-							newService.datatable = datatable(newService.getEditDatatableConfig(newService));
+							console.log($scope);
+							newService.datatable = datatable(newService.getEditDatatableConfigWithScope(newService,$scope));
 							if(!newService.supportView){
 								newService.swithToContainerView();
 							}else{
 								newService.swithToSupportView()
 							}
+							$scope.spinner=false;
 						});
+						
 					}
 				});
+				
 			}
 	}
-
-	newService = $.extend(true,{},newService,processesNewService);
-
-	return newService;
+	return function(){	
+		var newService = $.extend(true,{},containerNewService,processesNewService);
+		return newService;
+	};	
 
 }]).factory('assignToContainerService', [ '$q', '$http', '$parse', '$filter', 'mainService', 'messages', 'lists', 'datatable', 'propertyDefHelpers',
     function($q, $http, $parse, $filter, mainService, messages, lists, datatable, propertyDefHelpers) {
@@ -1412,6 +1500,17 @@ angular.module('ngl-sq.processesServices', [])
 			"position":5.002,
 			"type":"text"
 		});
+		columns.push({
+			"header" : Messages("processes.table.typeCode"),
+			"property" : "processTypeCode",
+			"filter" : "codes:'type'",
+			"order" : true,
+			"hide" : false,
+			"watch":true,
+			"groupMethod" : "unique",
+			"position" : 5.003,
+			"type" : "text"
+		});
 		/*
 		columns.push({
 			"header":Messages("containers.table.contents.length"),
@@ -1423,21 +1522,32 @@ angular.module('ngl-sq.processesServices', [])
 		});
 		*/
 		columns.push({
-			"header":Messages("containers.table.stateCode"),
+			"header" : Messages("processes.table.process.comments"),
+			"property" : "processComments[0].comment",
+			"position" : 9,
+			"order" : false,
+			"edit" : false,
+			"hide" : true,
+			"watch":true,
+			"type" : "text"
+		});
+		/*
+		columns.push({
+			"header":Messages("processes.table.container.state"),
 			"property":"state.code",
 			"order":true,
 			"hide":true,
-			"position":6,
+			"position":10,
 			"filter": "codes:'state'",
 			"type":"text"
 		});
+		*/
 		columns.push({
-			"header" : Messages("processes.table.comments"),
+			"header" : Messages("processes.table.container.comments"),
 			"property" : "comments[0].comment",
 			"position" : 500,
 			"order" : false,
 			"edit" : false,
-			"editTemplate":"<textarea class='form-control' #ng-model rows='3'></textarea>",
 			"hide" : true,
 			"type" : "text"
 		});
@@ -1485,13 +1595,7 @@ angular.module('ngl-sq.processesServices', [])
 		        	trClass:function(data,line){
 		        		return service.udtTrClass(data,line);
 		        	}
-		         },
-		         messages:{
-		        	 active:false,
-		        	 transformKey: function(key, args) {
-			             return Messages(key, args);
-		        	 }
-		         },
+		         },		        
 		         cancel:{
 		        	 active:false
 		         }
@@ -1520,47 +1624,73 @@ angular.module('ngl-sq.processesServices', [])
 				this.messages.clear();
 				var data = datatable.getData();
 				var allProcesses = [];
+				var nbContainerByProcess = {};
 				data.forEach(function(container, index){
 					var selectedProcess = $filter('filter')(this.containerData[container.code].processes, {code:container.processCode},true)[0];
 					selectedProcess.inputContainerCode = container.code;
 					selectedProcess.inputContainerSupportCode = container.support.code;
-					allProcesses.push({data:selectedProcess, index:index});				
+					allProcesses.push({data:selectedProcess, index:index});
+					
+					if(!nbContainerByProcess[selectedProcess.code]){
+						nbContainerByProcess[selectedProcess.code] = 0;
+					}
+					nbContainerByProcess[selectedProcess.code]++;
+					
 				},this);
+				var errors = false;
+				for(var key in nbContainerByProcess){
+					if(nbContainerByProcess[key] > 1){
+						var error = {};
+						error[key]=[Messages("processes.msg.assign.error.severalcontainer")];
+						this.messages.addDetails(error);
+						errors = true;
+					}
+				}
 				
-				var nbElementByBatch = Math.ceil(allProcesses.length / 6);
-				var queries = [];
-		        for (var i = 0; i < 6 && allProcesses.length > 0; i++) {
-		        	var subsetOfProcesses = allProcesses.splice(0, nbElementByBatch);
-		        	queries.push($http.put(jsRoutes.controllers.processes.api.Processes.updateBatch().url, subsetOfProcesses,{subsetOfProcesses:subsetOfProcesses}));
-		        }
-				var $that = this;
-				$q.all(queries).then(function(results) {
-					
-					results.forEach(function(result){
-						if (result.status !== 200) {
-							console.log("Batch in error");					
-			            } else {
-			            	result.data.forEach(function(data){
-			            		
-			            		if (data.status === 200) {
-			            			$that.containerData[data.data.inputContainerCode].trClass = "success";			            			
-			            		}else{
-			            			var process = $filter('filter')(result.config.subsetOfProcesses,{index:data.index}, true)[0];
-			            			$that.containerData[process.data.inputContainerCode].trClass = "danger";
-			            			$that.containerData[process.data.inputContainerCode].onError = true;
-			            			$that.containerData[process.data.inputContainerCode].errors = {};
-			            			$that.containerData[process.data.inputContainerCode].errors[process.data.inputContainerCode] = data.data;
-			            			atLeastOneError = true;
-			            		}	 
-			            		           		
-			            	});	            	
-			            }
+				if(!errors){
+				
+					var nbElementByBatch = Math.ceil(allProcesses.length / 6);
+					var queries = [];
+			        for (var i = 0; i < 6 && allProcesses.length > 0; i++) {
+			        	var subsetOfProcesses = allProcesses.splice(0, nbElementByBatch);
+			        	queries.push($http.put(jsRoutes.controllers.processes.api.Processes.updateBatch().url, subsetOfProcesses,{subsetOfProcesses:subsetOfProcesses}));
+			        }
+					var $that = this;
+					$q.all(queries).then(function(results) {
+						
+						results.forEach(function(result){
+							if (result.status !== 200) {
+								console.log("Batch in error");					
+				            } else {
+				            	result.data.forEach(function(data){
+				            		
+				            		if (data.status === 200) {
+				            			$that.containerData[data.data.inputContainerCode].trClass = "success";			            			
+				            		}else{
+				            			var process = $filter('filter')(result.config.subsetOfProcesses,{index:data.index}, true)[0];
+				            			$that.containerData[process.data.inputContainerCode].trClass = "danger";
+				            			$that.containerData[process.data.inputContainerCode].onError = true;
+				            			$that.containerData[process.data.inputContainerCode].errors = {};
+				            			$that.containerData[process.data.inputContainerCode].errors[process.data.inputContainerCode] = data.data;
+				            			atLeastOneError = true;
+				            		}	 
+				            		           		
+				            	});	            	
+				            }
+						});
+						
+					},function(result){
+						$that.messages.setError("save");
+						$that.messages.showDetails = true;
+						$that.datatable.setColumnsConfig($that.getDefaultColumns().concat($that.additionalProcessColumns));		
+						
 					});
+				}else{
+					this.messages.setError("save");
+					this.messages.showDetails = true;
+					this.datatable.setColumnsConfig(this.getDefaultColumns().concat(this.additionalProcessColumns));		
 					
-				},function(result){
-					$that.messages.setError("save");				
-				});
-				
+				}
 			},
 			udtRemoveCallback : function(datatable){
 				mainService.getBasket().reset();
@@ -1650,8 +1780,7 @@ angular.module('ngl-sq.processesServices', [])
 						});
 						
 						insideService.setSelectedSampleCodes(allData);
-						insideService.searchProcesses();
-						
+						insideService.udtData = allData;
 						return allData;
 					});		
 				}
@@ -1666,12 +1795,11 @@ angular.module('ngl-sq.processesServices', [])
 			searchProcesses : function(){
 				this.form.stateCode = 'IW-C';
 				this.form.sampleCodes = this.selectedSampleCodes;
-				
+				this.form.typeCode = this.processType.code;
 				//clean old process search
 				for(var key in this.containerData){
 					this.containerData[key].processes = [];
 				}
-				
 				$http.get(jsRoutes.controllers.processes.api.Processes.list().url,{params:this.form,service:this})
 					.then(function(result){
 						var service = result.config.service;
@@ -1679,49 +1807,74 @@ angular.module('ngl-sq.processesServices', [])
 							process.sampleCodes.forEach(function(sampleCode){
 								Object.keys(this.containerData)
 									.forEach(function(containerCode){
-										//if(!this.containerData[containerCode].processes)this.containerData[containerCode].processes = [];
-										if(this.containerData[containerCode].sampleCodes.indexOf(sampleCode) > -1)
-											this.containerData[containerCode].processes.push(process);
+										if(this.containerData[containerCode].sampleCodes.indexOf(sampleCode) > -1){
+											this.containerData[containerCode].processes = this.containerData[containerCode].processes.concat(process); 
+											//not used push because auto-select does not work. angular need new array ref to run watch.
+										}
 								}, this);								
-							},this);
+							},this);							
 						}, service);
-						
+						//reset all data
+						service.datatable.setData(service.udtData);
 					});
 			},
 			setSelectedSampleCodes : function(selectedContainers){
-				var allSampleCodes = [];
 				this.selectedSampleCodes = [];
-				 
+				var queries = [];
+				
 				selectedContainers.forEach(function(container){
-					var containerSampleCodes = container.sampleCodes;
-					if(container.treeOfLife)containerSampleCodes = containerSampleCodes.concat(container.treeOfLife.paths[0].split(','));		
-					allSampleCodes = allSampleCodes.concat(containerSampleCodes);
-					if(!this.containerData[container.code])this.containerData[container.code] = {};
-					this.containerData[container.code].sampleCodes = containerSampleCodes;					 
+					
+					queries.push($http.get(jsRoutes.controllers.samples.api.Samples.list().url,{params:{codes:container.sampleCodes},service:this, container:container})
+					.then(function(result){
+						var service = result.config.service;
+						var container = result.config.container;
+						var containerSampleCodes = container.sampleCodes;
+							
+						result.data.forEach(function(sample){
+							if(sample.life) containerSampleCodes = containerSampleCodes.concat(sample.life.path.split(','));							
+						});
+						
+						if(!service.containerData[container.code])service.containerData[container.code] = {};
+						service.containerData[container.code].sampleCodes = containerSampleCodes;
+						service.selectedSampleCodes = Array.from(new Set(service.selectedSampleCodes.concat(containerSampleCodes)));
+												 
+					}));
+					
 				},this);
-				allSampleCodes = Array.from(new Set(allSampleCodes));
-				this.selectedSampleCodes = allSampleCodes;
+				var that = this;
+				$q.all(queries)
+					.then(function(results){									
+						that.searchProcesses();						
+					})				
 			},
 			getProcesses : function(container){
-				if(container)return this.containerData[container.code].processes;
+				if(container && this.containerData[container.code] && this.containerData[container.code].processes)return this.containerData[container.code].processes;
 				return null;
 			},
 			selectProcess : function(container){
-				var selectedProcess = $filter('filter')(this.containerData[container.code].processes, {code:container.processCode},true)[0];
-				if(selectedProcess)
+				var selectedProcess = undefined;
+				if(container.processCode !== undefined && container.processCode !== null){
+					selectedProcess = $filter('filter')(this.containerData[container.code].processes, {code:container.processCode},true)[0];
+				}
+				if(selectedProcess){
 					container.properties = selectedProcess.properties;
-				else
+					container.processTypeCode = selectedProcess.typeCode;
+					container.processComments = selectedProcess.comments;
+				} else {
 					container.properties = null;
+					container.processTypeCode = null;
+					container.processComments = null;
+				}
 				
 			},
 			/**
 			 * initialise the service
 			 */
 			init : function(processTypeCode) {
+				this.reset();
 				this.initProcessType(processTypeCode).then(function(service){
 					if(service.processType){
 						service.computeData().then(function(selectedContainers){
-							
 							service.datatable = datatable(service.getDatatableConfig(service));
 							service.datatable.setColumnsConfig(service.getDefaultColumns().concat(service.additionalProcessColumns));		
 							service.datatable.setData(selectedContainers);

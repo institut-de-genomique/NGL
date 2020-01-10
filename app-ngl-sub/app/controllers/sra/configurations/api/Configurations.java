@@ -1,66 +1,58 @@
 package controllers.sra.configurations.api;
 
-// import static play.data.Form.form;
-// import static fr.cea.ig.play.IGGlobals.form;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.mongojack.DBQuery;
 import org.mongojack.DBQuery.Query;
 
-import models.sra.submit.sra.instance.*;
-import models.sra.submit.util.SraCodeHelper;
-import models.utils.InstanceConstants;
-//import play.Logger;
-// import play.api.modules.spring.Spring;
-import play.data.Form;
-import play.libs.Json;
-import play.mvc.Result;
 import controllers.DocumentController;
-// import controllers.sra.experiments.api.Experiments;
-// import controllers.sra.submissions.api.SubmissionsSearchForm;
 import fr.cea.ig.MongoDBDAO;
 import fr.cea.ig.MongoDBResult;
 import fr.cea.ig.mongo.DBQueryBuilder;
-import fr.cea.ig.play.migration.NGLContext;
-import validation.ContextValidation;
-import models.laboratory.common.instance.TraceInformation;
+import fr.cea.ig.ngl.NGLApplication;
 import models.laboratory.common.instance.State;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
-
-// import models.sra.submit.common.instance.Submission;
+import models.laboratory.common.instance.TraceInformation;
+import models.sra.submit.sra.instance.Configuration;
+import models.sra.submit.util.SraCodeHelper;
 import models.sra.submit.util.SraException;
+import models.utils.InstanceConstants;
+import play.data.Form;
+import play.libs.Json;
+import play.mvc.Result;
+import validation.ContextValidation;
 import views.components.datatable.DatatableResponse;
-//import workflows.sra.submission.ConfigurationWorkflows;
 
 public class Configurations extends DocumentController<Configuration> {
 	
 	private static final play.Logger.ALogger logger = play.Logger.of(Configurations.class);
 
-	// final static Form<Configuration> configurationForm = form(Configuration.class);
-	// declaration d'une instance configurationSearchForm qui permet de recuperer la liste des configurations => utilisee dans list()
-	// final static Form<ConfigurationsSearchForm> configurationsSearchForm = form(ConfigurationsSearchForm.class);
-	// final static Form<SubmissionsSearchForm> submissionsSearchForm = form(SubmissionsSearchForm.class);
-	// final ConfigurationWorkflows configWorkflows = Spring.get BeanOfType(ConfigurationWorkflows.class);
-
 	private final Form<Configuration>            configurationForm;
 	private final Form<ConfigurationsSearchForm> configurationsSearchForm;
-	// private final Form<SubmissionsSearchForm> submissionsSearchForm;
-	// private final ConfigurationWorkflows configWorkflows;
+	private final SraCodeHelper     sraCodeHelper;
 	
+//	@Inject
+//	public Configurations(NGLContext ctx,
+//            SraCodeHelper     sraCodeHelper) {
+//		super(ctx,InstanceConstants.SRA_CONFIGURATION_COLL_NAME, Configuration.class);
+//		configurationForm        = ctx.form(Configuration.class);
+//		configurationsSearchForm = ctx.form(ConfigurationsSearchForm.class);
+//		this.sraCodeHelper       = sraCodeHelper;
+//		// submissionsSearchForm    = ctx.form(SubmissionsSearchForm.class);
+//		// this.configWorkflows     = configWorkflows;
+//	}
+
 	@Inject
-	public Configurations(NGLContext ctx/*, ConfigurationWorkflows configWorkflows*/) {
-		super(ctx,InstanceConstants.SRA_CONFIGURATION_COLL_NAME, Configuration.class);
-		configurationForm        = ctx.form(Configuration.class);
-		configurationsSearchForm = ctx.form(ConfigurationsSearchForm.class);
-		// submissionsSearchForm    = ctx.form(SubmissionsSearchForm.class);
-		// this.configWorkflows     = configWorkflows;
+	public Configurations(NGLApplication app, SraCodeHelper     sraCodeHelper) {
+		super(app,InstanceConstants.SRA_CONFIGURATION_COLL_NAME, Configuration.class);
+		configurationForm        = app.form(Configuration.class);
+		configurationsSearchForm = app.form(ConfigurationsSearchForm.class);
+		this.sraCodeHelper       = sraCodeHelper;
 	}
 
 	public Result save() {
@@ -68,8 +60,9 @@ public class Configurations extends DocumentController<Configuration> {
 		Configuration userConfiguration = filledForm.get();
 		
 //		ContextValidation contextValidation = new ContextValidation(getCurrentUser(), filledForm.errors());
-		ContextValidation contextValidation = new ContextValidation(getCurrentUser(), filledForm);
-		contextValidation.setCreationMode();	
+//		ContextValidation contextValidation = new ContextValidation(getCurrentUser(), filledForm);
+//		contextValidation.setCreationMode();
+		ContextValidation contextValidation = ContextValidation.createCreationContext(getCurrentUser(), filledForm);
 		if (userConfiguration._id == null) {
 			userConfiguration.traceInformation = new TraceInformation(); 
 			userConfiguration.traceInformation.setTraceInformation(getCurrentUser());
@@ -78,7 +71,7 @@ public class Configurations extends DocumentController<Configuration> {
 			//configWorkflows.setState(contextValidation, userConfiguration, state);
 			userConfiguration.state = state;
 			try {
-				userConfiguration.code = SraCodeHelper.getInstance().generateConfigurationCode(userConfiguration.projectCodes);
+				userConfiguration.code = sraCodeHelper.generateConfigurationCode(userConfiguration.projectCodes);
 			} catch (SraException e) {
 				// return badRequest(filledForm.errors-AsJson());
 				return badRequest(errorsAsJson(contextValidation.getErrors()));
@@ -164,17 +157,19 @@ public class Configurations extends DocumentController<Configuration> {
 		Configuration configuration = getConfiguration(code);
 		Form<Configuration> filledForm = getFilledForm(configurationForm, Configuration.class);
 //		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm.errors()); 	
-		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm); 	
+//		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm); 	
+//			ctxVal.setUpdateMode();
+		ContextValidation ctxVal = ContextValidation.createUpdateContext(getCurrentUser(), filledForm); 
 		if (configuration == null) {
 			//return badRequest("Configuration with code "+code+" not exist");
-			ctxVal.addErrors("configuration ", " not exist");
+			ctxVal.addError("configuration ", " not exist");
 			// return badRequest(filledForm.errors-AsJson( ));
 			return badRequest(errorsAsJson(ctxVal.getErrors()));
 		}
 		Configuration configurationInput = filledForm.get();
 		if (code.equals(configurationInput.code)) {	
-			ctxVal.setUpdateMode();
-			ctxVal.getContextObjects().put("type","sra");
+//			ctxVal.getContextObjects().put("type","sra");
+			ctxVal.putObject("type","sra");
 			configurationInput.traceInformation.setTraceInformation(getCurrentUser());
 			configurationInput.validate(ctxVal);
 			if (!ctxVal.hasErrors()) {
@@ -187,7 +182,7 @@ public class Configurations extends DocumentController<Configuration> {
 			}
 		} else {
 			//return badRequest("configuration code are not the same");
-			ctxVal.addErrors("configuration " + code, "configuration code  " + code + " and configurationInput.code "+ configurationInput.code + "are not the same");
+			ctxVal.addError("configuration " + code, "configuration code  " + code + " and configurationInput.code "+ configurationInput.code + "are not the same");
 			// return badRequest(filledForm.errors-AsJson());
 			return badRequest(errorsAsJson(ctxVal.getErrors()));
 		}	

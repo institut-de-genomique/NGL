@@ -5,7 +5,11 @@
 		
 		var getColumns = function(){
 			var columns = [];
-			columns.push({	property:"code",
+			columns.push({	property:"traceInformation.creationDate",
+			            	header: Messages("traceInformation.creationDate"),
+			        		type :"date",		    	  	
+			        		order:true});
+				   			columns.push({	property:"code",
 				    	  	header: Messages("submissions.code"),
 				    	  	type :"text",		    	  	
 				    	  	order:true});
@@ -34,6 +38,7 @@
 				datatable : undefined,
 				internalStudies : true,
 				externalStudies : false,
+				readSets:undefined,
 				
 				setRouteParams:function($routeParams){
 					var count = 0;
@@ -56,6 +61,10 @@
 					if(this.form.projCodes && this.form.projCodes.length > 0){
 						//this.datatable.search(this.form);
 						this.datatable.search({projCodes:this.form.projCodes, stateCode:'N'});
+						//MAJ liste des readSets
+						$http.get(jsRoutes.controllers.readsets.api.ReadSets.list().url,{params:{projectCodes:this.form.projCodes, submissionStateCode:"NONE", stateCode:"A"}}).success(function(data) {
+							createService.readSets=data;
+						});
 					}
 				},
 				
@@ -145,6 +154,10 @@
 ]).factory('submissionsActivateService', ['$http', 'mainService', 'lists', 'datatable', function($http, mainService, lists, datatable){
 	var getColumns = function(){
 		var columns = [];
+		columns.push({  property:"traceInformation.creationDate",
+			            header: Messages("traceInformation.creationDate"),
+			        	type :"date",		    	  	
+			        	order:true});		
 		columns.push({	property:"code",
 			    	  	header: Messages("submissions.code"),
 			    	  	type :"text",		    	  	
@@ -230,6 +243,10 @@
 ]).factory('submissionsConsultationService', ['$http', 'mainService', 'lists', 'datatable', function($http, mainService, lists, datatable){
 	var getColumns = function(){
 		var columns = [];
+		columns.push({  property:"traceInformation.creationDate",
+			        	header: Messages("traceInformation.creationDate"),
+			        	type :"date",		    	  	
+			        	order:true});		
 		columns.push({	property:"code",
 			    	  	header: Messages("submissions.code"),
 			    	  	type :"text",		    	  	
@@ -243,10 +260,10 @@
 						header: Messages("submissions.state"),
 						type :"text",
 						order:true});	
-		columns.push({	property:"creationDate",
-						header: Messages("submissions.creationDate"),
-						type :"Date",
-						order:true});	
+//		columns.push({	property:"creationDate",
+//						header: Messages("submissions.creationDate"),
+//						type :"Date",
+//						order:true});	
 										
 		return columns;
 	};
@@ -355,6 +372,10 @@
 ])/*.factory('submissionsValidationService', ['$http', 'mainService', 'lists', 'datatable', function($http, mainService, lists, datatable){
 	var getColumns = function(){
 		var columns = [];
+		columns.push({property:"traceInformation.creationDate",
+			        	header: Messages("traceInformation.creationDate"),
+			        	type :"date",		    	  	
+			        	order:true});		
 		columns.push({	property:"code",
 			    	  	header: "submissions.code",
 			    	  	type :"text",		    	  	

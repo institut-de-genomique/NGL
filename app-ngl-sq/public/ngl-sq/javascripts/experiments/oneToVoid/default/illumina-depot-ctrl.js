@@ -168,9 +168,10 @@ angular.module('home').controller('IlluminaDepotCtrl',['$scope', '$parse','$http
 		
 		$scope.atmService = atmService;
 		
+		// NGL-2456: pas de feuille de route pour sesquenceur NEXTSEQ500
 		$scope.setAdditionnalButtons([{
 			isDisabled : function(){return $scope.isCreationMode();},
-			isShow:function(){return true},
+			isShow:function(){return ($scope.experiment.instrument.typeCode != 'NEXTSEQ500')},
 			click:$scope.fileUtils.generateSampleSheet,
 			label:Messages("experiments.sampleSheet")
 		}]);

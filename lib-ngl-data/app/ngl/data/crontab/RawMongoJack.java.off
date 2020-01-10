@@ -1,0 +1,72 @@
+//package ngl.data.crontab;
+//
+//import static fr.cea.ig.lfw.utils.Iterables.zen;
+//
+//import java.util.List;
+//
+//import org.bson.types.ObjectId;
+//import org.mongojack.DBCursor;
+//import org.mongojack.DBQuery;
+//import org.mongojack.JacksonDBCollection;
+//import org.mongojack.WriteResult;
+//import org.mongojack.DBQuery.Query;
+//import org.mongojack.DBUpdate.Builder;
+//
+//import fr.cea.ig.mongo.MongoConfig;
+//
+//// RawMongoObject mongojack support. Nothing beside some shorthands (upsert).
+//// The provided set of methods does not rely on T being a RawMongoObject.
+//public class RawMongoJack<T> {
+//	
+//	private final play.Logger.ALogger logger;
+//	
+//	private JacksonDBCollection<T,ObjectId> collection;
+//	
+//	public RawMongoJack(MongoConfig mc, String collectionName, Class<T> elementType) {
+//		collection = JacksonDBCollection.wrap(mc.getDB().getCollection(collectionName), elementType, ObjectId.class);
+//		logger = play.Logger.of(getClass().getName() + "<" + elementType.getName() + ">");
+//	}
+//	
+//	public WriteResult<T,ObjectId> upsert(DBQuery.Query q, T t) {
+//		logger.debug("upsert {} {}", q, t);
+//		return collection.update(q, t, true, false);
+//	}
+//	
+//	public WriteResult<T,ObjectId> upsertById(ObjectId id, T t) {
+//		return upsert(DBQuery.is("_id",  id), t);
+//	}
+//	
+//	public List<T> all() {
+//		return zen(collection.find()).toList();
+//	}
+//
+//	public T findOneById(ObjectId id) {
+//		return collection.findOneById(id);
+//	}
+//
+//	public void updateById(ObjectId id, Builder u) {
+//		logger.debug("updateById {} {}", id, u);
+//		collection.updateById(id,u);
+//	}
+//
+//	public void removeById(ObjectId id) {
+//		collection.removeById(id);
+//	}
+//
+//	public void insert(T t) {
+//		collection.insert(t);
+//	}
+//
+//	public DBCursor<T> find(Query query) {
+//		return collection.find(query);
+//	}
+//
+//	public T findOne(Query query) {
+//		return collection.findOne(query);
+//	}
+//
+//	public WriteResult<T,ObjectId> updateMulti(DBQuery.Query query, Builder update) {
+//		return collection.updateMulti(query, update);
+//	}
+//	
+//}

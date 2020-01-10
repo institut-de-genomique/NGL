@@ -135,7 +135,10 @@ angular.module('home').controller('ChromiumGemCtrl',['$scope', '$parse',  '$filt
 	        	"showButton":false,
 	        	"mode":"local" ,
 	        	"callback":function(datatable){
-	        		copyContainerSupportCodeAndStorageCodeToDT(datatable);
+	        		// 26/03/2019 dans les 2 cas il y a un bug si utilisateur ne fourni aucun outputSupportCode
+	        		//     => pas un bug liee a la factorisation dans atmService!!!
+	        		//copyContainerSupportCodeAndStorageCodeToDT(datatable);
+	        		atmService.copyContainerSupportCodeAndStorageCodeToDT(datatable,'chip');
 	        	}
 			},
 			"hide":{
@@ -165,21 +168,21 @@ angular.module('home').controller('ChromiumGemCtrl',['$scope', '$parse',  '$filt
 
 	$scope.$on('save', function(e, callbackFunction) {	
 		console.log("call event save");
-		$scope.atmService.data.save();		
-		$scope.atmService.viewToExperimentOneToOne($scope.experiment);
-		$scope.$emit('childSaved', callbackFunction);
+			$scope.atmService.data.save();
+			$scope.atmService.viewToExperimentOneToOne($scope.experiment);
+			$scope.$emit('childSaved', callbackFunction);
 	});
 	
 	
-	/* 07/02/2017 GA voudrait qu'on ne plus passe par ce systeme  utilisant callback ... pas reussi a faire sans...*/
+	// Remplacé par version dans atmService + pos='chip' 
 	var copyContainerSupportCodeAndStorageCodeToDT = function(datatable){
 		
 		var dataMain = datatable.getData();
-		
 		var outputContainerSupportCode = $scope.outputContainerSupport.code;
 		var outputContainerSupportStorageCode = $scope.outputContainerSupport.storageCode;
 
-		if ( null != outputContainerSupportCode && undefined != outputContainerSupportCode){
+		// 26/03/2019 correction locale pour NGl-2371: ajout && "" != outputContainerSupportCode
+		if ( null != outputContainerSupportCode && undefined != outputContainerSupportCode && "" != outputContainerSupportCode ){
 			for(var i = 0; i < dataMain.length; i++){
 				
 				var atm = dataMain[i].atomicTransfertMethod;
@@ -199,7 +202,7 @@ angular.module('home').controller('ChromiumGemCtrl',['$scope', '$parse',  '$filt
 					$parse('outputContainerUsed.locationOnContainerSupport.line').assign(dataMain[i],1);
 					$parse('outputContainerUsed.locationOnContainerSupport.column').assign(dataMain[i],newChipPos);
 					
-					// Historique mais continer a renseigner car effets de bord possible ????
+					// Historique mais continuer a renseigner car effets de bord possible ????
 					$parse('line').assign(atm,1);
 					$parse('column').assign(atm,newChipPos);
 					//console.log("atm.line="+ atm.line + " atm.column="+atm.column);	
@@ -224,6 +227,9 @@ angular.module('home').controller('ChromiumGemCtrl',['$scope', '$parse',  '$filt
 		dtConfig.remove.active = ($scope.isEditModeAvailable() && $scope.isNewState());
 		$scope.atmService.data.setConfig(dtConfig);
 		$scope.atmService.refreshViewFromExperiment($scope.experiment);
+		// NGL-2371 FDS 20/03/2019 récupérer outputContainerSupport s'il a été généré automatiquement (pas de barcode entré par l'utilisateur)
+		$scope.outputContainerSupport.code=$scope.experiment.atomicTransfertMethods[0].outputContainerUseds[0].locationOnContainerSupport.code;
+		
 		$scope.$emit('viewRefeshed');
 	});
 	
@@ -255,7 +261,7 @@ angular.module('home').controller('ChromiumGemCtrl',['$scope', '$parse',  '$filt
 		return {
 			class:"OneToOne",
 			line: "1", 
-			column: undefined, 				
+			column: undefined,
 			inputContainerUseds:new Array(0), 
 			outputContainerUseds:new Array(0)
 		};

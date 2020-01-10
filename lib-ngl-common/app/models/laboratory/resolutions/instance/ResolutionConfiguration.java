@@ -13,30 +13,27 @@ import validation.utils.ValidationHelper;
 
 public class ResolutionConfiguration extends DBObject implements IValidation {
 	
-    public String objectTypeCode;
-	public List<String> typeCodes;
+    public String           objectTypeCode;
+	public List<String>     typeCodes;
     public List<Resolution> resolutions;
     public TraceInformation traceInformation;
     
+    /**
+     * Validate this resolution configuration.
+     */
 	@Override
-	public void validate(ContextValidation contextValidation) {
-		
-    	contextValidation.putObject("resolutionConfigurations", this);
-    	CommonValidationHelper.validateCode(this, InstanceConstants.RESOLUTION_COLL_NAME, contextValidation);
-    	//TODO : validate objectTypeCode & typeCodes
-    	
-    	ValidationHelper.required(contextValidation, this.objectTypeCode, "type");
-    	
-    	contextValidation.removeObject("resolutionConfigurations");
-    	
-    	ResolutionValidationHelper.validationResolutions(this.resolutions, contextValidation);
-    	
-		//manage traceInformation
+	public void validate(ContextValidation contextValidation) {		
+    	CommonValidationHelper    .validateCodePrimary             (contextValidation, this, InstanceConstants.RESOLUTION_COLL_NAME);
+    	// GA: validate objectTypeCode & typeCodes
+    	ValidationHelper          .validateNotEmpty                (contextValidation, objectTypeCode, "type");    	
+    	ResolutionValidationHelper.validateResolutions             (contextValidation, resolutions);
+		// manage traceInformation
+    	// LOGIC: why does the validation always overwrite the trace information ?
+    	//        This means that the current method must be called in creation mode.
 		TraceInformation t = new TraceInformation();
 		t.setTraceInformation("ngsrg");
-		this.traceInformation = t;
-		
-		CommonValidationHelper.validateTraceInformation(this.traceInformation, contextValidation);
+		traceInformation = t;
+		CommonValidationHelper    .validateTraceInformationRequired(contextValidation, traceInformation);
 	}
 
 }

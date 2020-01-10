@@ -1,0 +1,31 @@
+//package ngl.data.crontab;
+//
+//import org.bson.types.ObjectId;
+//
+//import com.fasterxml.jackson.annotation.JsonProperty;
+//
+//// Jackson base object with an ObjectId as its identifier.
+//public class RawMongoObject {
+//
+//	private ObjectId id;
+//
+//	public RawMongoObject() {
+//	}
+//	
+//	public RawMongoObject(ObjectId id) { 
+//		this.id = id; 
+//	}
+//	
+//	@org.mongojack.ObjectId
+//	@JsonProperty("_id")
+//	public ObjectId getId() {
+//		return id;
+//	}
+//	
+//	@org.mongojack.ObjectId
+//	@JsonProperty("_id")
+//	public void setId(ObjectId id) {
+//		this.id = id;
+//	}
+//
+//}

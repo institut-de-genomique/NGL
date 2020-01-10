@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import javax.inject.Inject;
 
@@ -15,7 +16,7 @@ import org.mongojack.DBQuery;
 import org.mongojack.DBUpdate;
 
 import fr.cea.ig.MongoDBDAO;
-import fr.cea.ig.lfw.controllers.AbstractScript;
+import fr.cea.ig.lfw.controllers.scripts.buffered.ScriptNoArgs;
 import fr.cea.ig.lfw.utils.ZenIterable;
 import models.sra.submit.common.instance.Sample;
 import models.utils.InstanceConstants;
@@ -25,7 +26,7 @@ import sra.scripts.utils.Tools;
 import sra.scripts.utils.iteration.CSVIterable;
 import sra.scripts.utils.iteration.FileLineIterable;
 
-public class RepriseHistoSample_extId extends AbstractScript {
+public class RepriseHistoSample_extId extends ScriptNoArgs {
 	/* version 1 : on demande à play d'instancier la classe avec un objet WSClient et on instantiera 
 	un objet EbiAPI avec ws
 	private final WSClient ws;	
@@ -147,9 +148,20 @@ public class RepriseHistoSample_extId extends AbstractScript {
 		ZenIterable <List<String>> ebi_1 = new CSVIterable(ebiFile,';');
 		//Iterable <SampleInfos> sampleInfos = new MappingIterable<List<String>, SampleInfos>(lili_1, function_1);
 		//Function <List<String>, Boolean> taraFilter = new Function <List<String>, Boolean>(){
-		Function <SampleInfos, Boolean> taraFilter = new Function <SampleInfos, Boolean>() {
+//		Function <SampleInfos, Boolean> taraFilter = new Function <SampleInfos, Boolean>() {
+//			@Override
+//			public Boolean apply(SampleInfos sampleInfo) {
+//				// Ignorer les samples TARA de Pesant
+//				if (sampleInfo.optionalCode != null) {
+//					return !sampleInfo.optionalCode.matches("^TARA_[a-zA-Z0-9]{10,11}$");
+//				} else {
+//					return true;
+//				}
+//			}	
+//		};
+		Predicate <SampleInfos> taraFilter = new Predicate <SampleInfos>() {
 			@Override
-			public Boolean apply(SampleInfos sampleInfo) {
+			public boolean test(SampleInfos sampleInfo) {
 				// Ignorer les samples TARA de Pesant
 				if (sampleInfo.optionalCode != null) {
 					return !sampleInfo.optionalCode.matches("^TARA_[a-zA-Z0-9]{10,11}$");
@@ -238,7 +250,7 @@ public class RepriseHistoSample_extId extends AbstractScript {
 		
 	@Override
 	public LogLevel logLevel() {
-		return LogLevel.Info;
+		return LogLevel.INFO;
 	}
 	
 }

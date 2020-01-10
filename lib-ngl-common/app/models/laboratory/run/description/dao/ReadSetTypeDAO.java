@@ -1,5 +1,7 @@
 package models.laboratory.run.description.dao;
 
+import static models.utils.dao.DAOException.daoAssertNotNull;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,21 +16,17 @@ import play.api.modules.spring.Spring;
 @Repository
 public class ReadSetTypeDAO extends AbstractDAOCommonInfoType<ReadSetType>{
 
-//	protected ReadSetTypeDAO() {
-//		super("readset_type", ReadSetType.class, ReadSetTypeMappingQuery.class, 
-//				"SELECT distinct c.id, c.fk_common_info_type ", 
-//						"FROM readset_type as c "+sqlCommonInfoType, false);
-//	}
 	protected ReadSetTypeDAO() {
 		super("readset_type", ReadSetType.class, ReadSetTypeMappingQuery.factory, 
 				"SELECT distinct c.id, c.fk_common_info_type ", 
-						"FROM readset_type as c "+sqlCommonInfoType, false);
+						"FROM readset_type as c " + sqlCommonInfoType, false);
 	}
 
 	@Override
 	public long save(ReadSetType readSetType) throws DAOException {
-		if (readSetType == null)
-			throw new DAOException("ReadSetType is mandatory");
+//		if (readSetType == null)
+//			throw new DAOException("ReadSetType is mandatory");
+		daoAssertNotNull("readSetType", readSetType);
 		
 		//Add commonInfoType
 		CommonInfoTypeDAO commonInfoTypeDAO = Spring.getBeanOfType(CommonInfoTypeDAO.class);
@@ -58,5 +56,6 @@ public class ReadSetTypeDAO extends AbstractDAOCommonInfoType<ReadSetType>{
 		CommonInfoTypeDAO commonInfoTypeDAO = Spring.getBeanOfType(CommonInfoTypeDAO.class);
 		commonInfoTypeDAO.remove(readSetType);
 	}
+	
 }
 

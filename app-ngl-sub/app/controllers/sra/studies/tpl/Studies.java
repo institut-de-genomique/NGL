@@ -2,11 +2,11 @@ package controllers.sra.studies.tpl;
 
 import javax.inject.Inject;
 
+import controllers.NGLController;
 //import controllers.NGLBaseController;
 import fr.cea.ig.authentication.Authenticated;
 import fr.cea.ig.lfw.Historized;
 import fr.cea.ig.ngl.NGLApplication;
-import fr.cea.ig.ngl.NGLController;
 import fr.cea.ig.ngl.support.NGLJavascript;
 import play.mvc.Result;
 import views.html.studies.consultation;

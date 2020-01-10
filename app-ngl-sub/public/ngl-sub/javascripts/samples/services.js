@@ -8,6 +8,11 @@ angular.module('ngl-sub.SamplesServices', []).
     //methode utilisée pour definir les colonnes 
     var getColumns = function() {
 		var columns = [];
+		columns.push({property:"traceInformation.creationDate",
+		        	header: Messages("traceInformation.creationDate"),
+		        	type :"date",		    	  	
+		        	order:true
+			        });		
 		columns.push({property : "code",
   	  	      	  	  header   : Messages("sample.code"),
 			          type     : "text",		    	  	
@@ -88,6 +93,14 @@ angular.module('ngl-sub.SamplesServices', []).
 				      order    : true,
 				      choiceInList : false
 					});			
+		columns.push({property : "attributes",
+				      header   : Messages("sample.attributes"),
+				      type     : "String",
+			          hide     : true,
+			          edit     : true,
+				      order    : true,
+				      choiceInList : false
+					});									
 		return columns;
 	};
 	

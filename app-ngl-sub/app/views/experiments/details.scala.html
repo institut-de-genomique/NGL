@@ -21,7 +21,8 @@
 <div class="row">
 	@column(){
 	    @* Ecriture des differentes lignes code, state, title, abstract et description :*@
-		@line("experiment.code")
+	    @lineDate("experiment.traceInformation.creationDate")
+	  	@line("experiment.code")
 		@labelLine("experiment.state")
 		@line("experiment.projectCode")
 		@line("experiment.accession")

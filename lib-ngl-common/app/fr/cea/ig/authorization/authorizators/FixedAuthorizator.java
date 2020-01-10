@@ -56,7 +56,7 @@ public class FixedAuthorizator implements IAuthorizator {
 	 * Authorizes if all the requested permissions are in the permission set.
 	 */
 	@Override
-	public boolean authorize(String login, String[] perms) {
+	public boolean authorize(String login, String... perms) {
 		boolean authorized = true; 
 		for (String perm : perms)
 			authorized = authorized && authorizations.contains(perm);

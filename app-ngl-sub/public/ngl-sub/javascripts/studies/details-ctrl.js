@@ -34,7 +34,7 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 				showButton:true
 			},
 			exportCSV:{
-				active:false
+				active:true
 			},
 			show:{                   // bouton pour epingler si on passe par details-ctrl.js 
 				active:true,
@@ -86,18 +86,23 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 			hide:{
 				active:true,
 				showButton:true
-			},
+			},*/
 			exportCSV:{
-				active:false
+				active:true
 			},
-			*/
+		
 			columns : [
-			        {property:"code",
+			        {property:"traceInformation.creationDate",
+			        	header: Messages("experiment.traceInformation.creationDate"),
+			        	type :"date",		    	  	
+			        	order:false
+			        },
+ 					{property:"code",
 			        	header: Messages("experiment.code"),
 			        	type :"text",		    	  	
 			        	order:false
-			        },
-			         {property:"accession",
+			        },			        
+			        {property:"accession",
 			        	header: Messages("experiment.accession"),
 			        	type :"text",		    	  	
 			        	order:false
@@ -254,7 +259,15 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 				withoutSelect : true,
 				columnMode : true
 			},
-			columns : [
+			exportCSV:{
+				active:true
+			},
+			columns : [ 
+					  {property:"traceInformation.creationDate",
+			        	header: Messages("run.traceInformation.creationDate"),
+			        	type :"date",		    	  	
+			        	order:false
+			           },
 			           {property:"run.code",
 			        	header: Messages("run.code"),
 			        	type :"text",		    	  	
@@ -302,7 +315,7 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 				active:true
 			},
 			exportCSV:{
-				active:false
+				active:true
 			},
 			columns : [
 			           {property:"relatifName",
@@ -310,7 +323,7 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 			        	type :"text",		    	  	
 			        	order:true
 			           }
-		    ]	        
+		    		  ]	        
 		};	
 
 	

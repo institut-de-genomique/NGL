@@ -18,9 +18,7 @@ public class QualityControlResultConfiguration extends ObjectFieldConfiguration<
 	}
 
 	@Override
-	public void populateField(Field field, Object dbObject,
-			Map<Integer, String> rowMap, ContextValidation contextValidation,
-			Action action) throws Exception {
+	public void populateField(Field field, Object dbObject, Map<Integer, String> rowMap, ContextValidation contextValidation, Action action) throws Exception {
 		//we create or update all the comments
 		QualityControlResult qcrObject = new QualityControlResult();
 		qcrObject.index = 0;

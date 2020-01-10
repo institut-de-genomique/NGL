@@ -2,11 +2,11 @@ package controllers.containers.tpl;
 
 import javax.inject.Inject;
 
+import controllers.NGLController;
 import fr.cea.ig.authentication.Authenticated;
 import fr.cea.ig.authorization.Authorized;
 import fr.cea.ig.lfw.Historized;
 import fr.cea.ig.ngl.NGLApplication;
-import fr.cea.ig.ngl.NGLController;
 import fr.cea.ig.ngl.support.NGLJavascript;
 import play.mvc.Result;
 import views.html.containerSupports.details;
@@ -14,11 +14,7 @@ import views.html.containerSupports.home;
 import views.html.containerSupports.homeScanner;
 import views.html.containerSupports.search;
 
-// TODO: cleanup and comment
-
-//import controllers.CommonController;
-// public class ContainerSupports extends -CommonController{
-public class ContainerSupports extends NGLController implements NGLJavascript { // NGLBaseController {
+public class ContainerSupports extends NGLController implements NGLJavascript {
 	
 	private final home        home;
 	private final details     details;
@@ -87,40 +83,5 @@ public class ContainerSupports extends NGLController implements NGLJavascript { 
   	    				controllers.commons.api.routes.javascript.CommonInfoTypes.list(),
   	    				controllers.containers.tpl.routes.javascript.Containers.get());
   	}
-	
-	/*
-	public Result javascriptRoutes() {
-  	    response().setContentType("text/javascript");
-  	    return ok(  	    		
-  	      //Routes.javascriptRouter("jsRoutes",
-  	    		JavaScriptReverseRouter.create("jsRoutes",	  
-  	        // Routes
-  	    		controllers.containers.tpl.routes.javascript.ContainerSupports.search(),
-  	    		controllers.containers.tpl.routes.javascript.ContainerSupports.home(),
-  	    		controllers.printing.tpl.routes.javascript.Printing.home(),
-  	    		controllers.containers.tpl.routes.javascript.ContainerSupports.homeScanner(),
-  	    		controllers.containers.tpl.routes.javascript.ContainerSupports.details(),
-  	    		controllers.containers.api.routes.javascript.ContainerSupports.list(),
-  	    		controllers.containers.tpl.routes.javascript.ContainerSupports.get(),
-  	    		controllers.containers.api.routes.javascript.ContainerSupports.get(),
-  	    		controllers.containers.api.routes.javascript.ContainerSupports.update(),        // 26/05/2016 NLG-825
-  	    		controllers.containers.api.routes.javascript.ContainerSupportCategories.list(),
-  	    		controllers.containers.api.routes.javascript.ContainerSupports.updateStateBatch(),
-  	    		controllers.projects.api.routes.javascript.Projects.list(),
-  	    		controllers.samples.api.routes.javascript.Samples.list(),
-  	    		controllers.samples.api.routes.javascript.Samples.save(),
-  	    		controllers.containers.api.routes.javascript.Containers.list(),
-  	    		controllers.experiments.api.routes.javascript.ExperimentTypes.list(),  	    		
-  	    		controllers.commons.api.routes.javascript.States.list(),
-  	    		controllers.processes.api.routes.javascript.ProcessTypes.list(),
-  	    		controllers.processes.api.routes.javascript.ProcessCategories.list(),
-  	    		controllers.containers.api.routes.javascript.ContainerCategories.list(),
-  	    		controllers.commons.api.routes.javascript.Users.list(),
-  	    		controllers.commons.api.routes.javascript.CommonInfoTypes.list(),
-  	    		controllers.containers.tpl.routes.javascript.Containers.get()
-  	      )	  	      
-  	    );
-  	}
-  	*/
-	
+		
 }

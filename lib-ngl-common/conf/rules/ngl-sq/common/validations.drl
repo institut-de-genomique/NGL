@@ -46,7 +46,7 @@ rule "init inputsupport"
 	not InputContainerSupport($support==code)
     then
 		//Logger.debug("Support"+$support +" de category "+$categoryCode);
-		ContainerSupportCategory csc = ContainerSupportCategory.find.findByCode($categoryCode);
+		ContainerSupportCategory csc = ContainerSupportCategory.find.get().findByCode($categoryCode);
 		InputContainerSupport inputSupport=new InputContainerSupport($support,csc.nbLine);
 		insert(inputSupport);
 	end
@@ -144,6 +144,22 @@ rule "valid tag and tagCategory match"
     	Logger.debug("!!!"+$tagCategory.value +"!="+ $tagInfos.getIndex().categoryCode+"!!!");
     
     	$contextValidation.addErrors($typeCode,"error.validationexp.tagcategory.notvalid", $tagInfos.getTag().value, $tagInfos.getContainerCode());
+end
+
+rule "valid tag with tagCategory not null"
+    @nglSQ( validations )
+	dialect "java"
+	salience 1000
+	no-loop
+    when
+    	$experiment:Experiment($typeCode:typeCode)
+    	$atomicTransfert: AtomicTransfertMethod($outputContainerUseds: outputContainerUseds, $outputContainerUseds!=null )
+	   	$contextValidation:ContextValidation() 
+	   	$outputContainerUsed: OutputContainerUsed(experimentProperties!=null, experimentProperties.get("tag")!=null, experimentProperties.get("tagCategory")==null) from $outputContainerUseds
+    then
+    	Logger.debug("valid tag with tagCategory not null");
+    
+    	$contextValidation.addErrors($typeCode,"error.validationexp.tagcategory.null");
 end
 
 

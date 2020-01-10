@@ -1,5 +1,4 @@
 @this()
-
 @()
 
 <!-- work with atmDragAndDrop2 -->
@@ -7,11 +6,10 @@
 <table class="table" >
 <thead>
 		<tr ng-if="!atmService.data.isAllATMViewClose">
-			<th colspan="{{8 + inputContainerProperties.length}}">
+			<th colspan="{{9 + inputContainerProperties.length}}">
 				@Messages("experiments.inputs")
 			</th>
-			
-			<th colspan="{{6 + outputContainerProperties.length}}">
+			<th colspan="{{5 + outputContainerProperties.length}}">
 				@Messages("experiments.outputs")
 			</th>												
 		</tr>
@@ -28,7 +26,7 @@
 				                                                  ng-show="isNewState()">
 					<i class="fa fa-files-o"></i>
 				</button>		
-				.. valider et nettoyer le code TODO -->					
+				-->					
 			</th>
 			<th>
 				@Messages("containers.table.code")
@@ -40,6 +38,9 @@
 			-->					
 			<th>
 				@Messages("containers.table.tags")
+			</th>
+			<th><!-- NGL-2211 ajout size -->
+				@Messages("containers.table.size") (pb)
 			</th>
 			<th>
 				@Messages("containers.table.codeAliquot")
@@ -82,7 +83,7 @@
 				@Messages("containers.table.storageCode")
 			</th>		
 		</tr>
-		<tr ng-if="atmService.data.isAllATMViewClose" colspan="11">
+		<tr ng-if="atmService.data.isAllATMViewClose" colspan="12">
 			<th>
 			</th>
 			<th>
@@ -91,9 +92,9 @@
 			</th>		
 		</tr>
 		
-		<!--26/10/2016 FDS ajout TR; 14/11/2016 ne rien afficher du tout si pas edit mode... -->
+		<!--26/10/2016 FDS ajout TR; 14/11/2016 ne rien afficher du tout si pas edit mode -->
 		<tr ng-if="!atmService.data.isAllATMViewClose && mainService.isEditMode()">
-			<th colspan="8"></th>
+			<th colspan="9"></th>
 			<th ng-repeat="property in inputContainerProperties track by $index"></th>
 			<th>
                    <input class="form-control input-sm" type="text" id="plateCode"
@@ -142,7 +143,7 @@
 				<i ng-switch-when="false" class="fa fa-eye"></i>
 			</button>			
 		</td>
-		<td colspan="11"></td>
+		<td colspan="12"></td>
 	</tr>
 	
 	<tr ng-switch-when="compact" >	
@@ -155,10 +156,10 @@
 				<i class="fa fa-eye"></i>
 			</button>			
 		</td>	
-		<td colspan="11" >
+		<td colspan="12" >
 			<span ng-repeat="inputContainerUsed in atm.inputContainerUseds | orderBy:'code' track by $index"  class="compactText"
 				ng-model="inputContainerUsed" draggable drag="dragInProgress">
-				{{inputContainerUsed.code}} / {{inputContainerUsed.percentage}}%;<br/>
+				{{inputContainerUsed.code}} /{{inputContainerUsed.percentage}}%;<br/>
 			</span>
 		</td>
 	</tr>
@@ -183,31 +184,21 @@
 				                                                  ng-show="isNewState()">
 					<i class="fa fa-files-o"></i>
 				</button>	
-				.. valider et nettoyer le code TODO -->				
+				 -->				
 			</td>	
-			
 				<td>
 					{{inputContainerUsed.code}}
-				</td>
-				<!-- FDS allegement
-				<td>
-					{{inputContainerUsed.locationOnContainerSupport.categoryCode | codes:'container_support_cat'}}
-				</td>
-				<td>
-					<div list-resize='inputContainerUsed.fromTransformationTypeCodes | unique | codes:"type"' list-resize-min-size='5' below vertical>
-				</td>
-				    08/12/2016 re-allegement!!
-				<td>
-					<div list-resize="inputContainerUsed.contents | collect:'projectCode+&quot; / &quot;+sampleCode'" list-resize-min-size="5" vertical>																					
-				</td>
-				-->						
+				</td>						
 				<td>
 					<div list-resize='inputContainerUsed.contents | getArray:"properties.tag.value"| unique' list-resize-min-size='5' below vertical>															
 				</td>
-				<td><!-- FDS AJOUT OK-->
+				<td><!--  NGL-2211 ajout size -->	
+					{{inputContainerUsed.size.value}}
+				</td>
+				<td>
 					<div list-resize='inputContainerUsed.contents | getArray:"properties.sampleAliquoteCode.value"| unique' list-resize-min-size='5' below vertical>
 				</td>
-				<!-- FDS allègement demandé
+				<!-- FDS allègement
 				<td>
 					{{inputContainerUsed.state.code | codes:'state'}}
 				</td>
@@ -217,7 +208,7 @@
 				</td>
 				<td>
 					{{inputContainerUsed.concentration.value | number}} {{inputContainerUsed.concentration.unit}}
-				</td> 														
+				</td> 													
 				<td>
 					<div ng-switch on="mainService.isEditMode()">						
 						<p class="form-control-static" ng-switch-when="false" ng-bind="inputContainerUsed.percentage | number" />						 

@@ -8,6 +8,7 @@ import validation.ContextValidation;
 
 
 public class DefaultFieldConfiguration extends AbstractFieldConfiguration {
+	
 	public String value;
 
 	public DefaultFieldConfiguration() {
@@ -15,9 +16,13 @@ public class DefaultFieldConfiguration extends AbstractFieldConfiguration {
 	}
 
 	@Override
-	public void populateField(Field field, Object dbObject,
-			Map<Integer, String> rowMap, ContextValidation contextValidation, Action action) throws Exception {
+	public void populateField(Field field, Object dbObject, Map<Integer, String> rowMap, ContextValidation contextValidation, Action action) throws Exception {
 		populateField(field, dbObject, value);		
+	}
+
+	@Override
+	public void updateFromHeader(ContextValidation vc, Map<Integer, String> header) {
+		// Nothing to do
 	}
 	
 }

@@ -103,8 +103,12 @@ rule "Set state to In Waiting Transfert CCRT from Avalaible readSet"
 	no-loop
 	when
 		$nextState : State(code=="A")
-		$project : Project(bioinformaticParameters!=null, bioinformaticParameters.fgGroup!=null, !StringUtils.isBlank(bioinformaticParameters.fgGroup))
+		$project : Project(bioinformaticParameters!=null, bioinformaticParameters.fgGroup!=null, !StringUtils.isBlank(bioinformaticParameters.fgGroup),
+							bioinformaticParameters.ccrtAutomaticTransfer!=null, bioinformaticParameters.ccrtAutomaticTransfer==true)
 		$readSet : ReadSet(location==null || (location!=null && location!="CCRT"))
+		$mapValue : Map() from $readSet.sampleOnContainer.properties
+		$propValue : Entry(key=="devProdContext",$toEval:((PropertyValue)value).getValue()) from $mapValue.entrySet()
+		eval (((String)$toEval).equals("PROD"))
 	then
 		Logger.debug("Update state code "+$readSet.code+" to IW-TF");	
 		$nextState.code="IW-TF";
@@ -120,92 +124,13 @@ rule "Find Fungi for taxonomy treatment"
 		$readset : ReadSet($treatmentTaxo:treatments["taxonomy"], $treatmentTaxo != null) from $readsetKrona.readSet 						
 	then
 		Logger.debug("Find Fungi in taxonomy krona "+$readset.code);	
-			
-		String krona = null;
-//		List<Map<String, ?>> keywordBilan = new ArrayList<Map<String, ?>>();
-		List<Map<String, Object>> keywordBilan = new ArrayList<Map<String, Object>>();
-		boolean createPropKeywordBilan = true;
+		
 		if($treatmentTaxo.results.get("read1")!=null){
-			Logger.debug("Get from read1");
-//			krona = new String(((PropertyFileValue)$treatmentTaxo.results.get("read1").get("krona")).value);
-//			krona = new String(((PropertyFileValue)$treatmentTaxo.results.get("read1").get("krona")).getValue());
-			krona = new String(((PropertyFileValue)$treatmentTaxo.results.get("read1").get("krona")).byteValue());
-			if($treatmentTaxo.results.get("read1").get("keywordBilan")!=null){
-//				keywordBilan = ((PropertyObjectListValue)$treatmentTaxo.results.get("read1").get("keywordBilan")).value;
-				keywordBilan = ((PropertyObjectListValue)$treatmentTaxo.results.get("read1").get("keywordBilan")).getValue();
-				createPropKeywordBilan=false;
-			}
-		}else if($treatmentTaxo.results.get("pairs")!=null){
-			Logger.debug("Get from pairs");
-//			krona = new String(((PropertyFileValue)$treatmentTaxo.results.get("pairs").get("krona")).value);
-//			krona = new String(((PropertyFileValue)$treatmentTaxo.results.get("pairs").get("krona")).getValue());
-			krona = new String(((PropertyFileValue)$treatmentTaxo.results.get("pairs").get("krona")).byteValue());
-			if($treatmentTaxo.results.get("pairs").get("keywordBilan")!=null){
-//				keywordBilan = ((PropertyObjectListValue)$treatmentTaxo.results.get("pairs").get("keywordBilan")).value;
-				keywordBilan = ((PropertyObjectListValue)$treatmentTaxo.results.get("pairs").get("keywordBilan")).getValue();
-				createPropKeywordBilan=false;
-			}
-		}
-		if(createPropKeywordBilan){
-//				PropertyObjectListValue pol = new PropertyObjectListValue(new ArrayList<Map<String, ?>>());
-				PropertyObjectListValue pol = new PropertyObjectListValue(new ArrayList<Map<String, Object>>());
-				MongoDBDAO.update(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, 
-					DBQuery.is("code", $readset.code),
-					DBUpdate.set("treatments.taxonomy.pairs.keywordBilan", pol));
-				MongoDBDAO.update(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, 
-					DBQuery.is("code", $readset.code),
-					DBUpdate.set("treatments.taxonomy.read1.keywordBilan", pol));
+			fungiCalculate($readset.code, $treatmentTaxo, "read1");
 		}
 		
-		if(krona!=null){
-			Pattern p1 = Pattern.compile(".*<node name=\"Fungi\">\\s+<magnitude><val>(\\d+)</val></magnitude>.*", Pattern.DOTALL);
-			Matcher m1 = p1.matcher(krona);
-												
-			Pattern p2 = Pattern.compile(".*<node name=\"Fungi\"\\s+magnitude=\"(\\d+)\">.*", Pattern.DOTALL);
-			Matcher m2 = p2.matcher(krona);
-
-			Pattern p3 = Pattern.compile(".*<node name=\"Fungi\">\\s+(<members><val>\\S+</val>\\s+</members>\\s+)?<count><val>(\\d+)</val></count>.*", Pattern.DOTALL);
-			Matcher m3 = p3.matcher(krona);
-		
-			String value ="0";
-			Double fungiPercentValue = 0.0;
-		
-			if(m1.matches() || m2.matches() || m3.matches()){
-				value = (m1.matches())?m1.group(1):((m2.matches())?m2.group(1):m3.group(2));
-				Logger.debug("Value "+value);
-				fungiPercentValue = (Double.valueOf(value) / 20000) * 100;
-				Logger.debug("Match Group Fungi = "+fungiPercentValue);
-			}
-			
-//			List<Map<String, ?>> keywordBilan = ((PropertyObjectListValue)$treatmentTaxo.results.get("read1").get("keywordBilan")).value;
-
-//			List<Map<String, ?>> keywordBRemove = new ArrayList<Map<String, ?>>(); 
-//			for(Map<String, ?> keywordOne : keywordBilan){
-			List<Map<String, Object>> keywordBRemove = new ArrayList<Map<String, Object>>(); 
-			for(Map<String, Object> keywordOne : keywordBilan){
-				String keywordValue = (String)keywordOne.get("keyword");
-				if(keywordValue.equals("Fungi")){
-					Logger.debug("keywordValue = "+keywordValue);
-					keywordBRemove.add(keywordOne);
-				}	
-			}
-			keywordBilan.removeAll(keywordBRemove);
-			
-			Map<String, Object> fungiKeyword = new HashMap<String, Object>();
-			fungiKeyword.put("keyword","Fungi");
-			fungiKeyword.put("percent",fungiPercentValue);
-			fungiKeyword.put("nbSeq",Integer.valueOf(value));
-			keywordBilan.add(fungiKeyword);
-			if($treatmentTaxo.results.get("read1")!=null){
-				MongoDBDAO.update(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, 
-					DBQuery.is("code", $readset.code),
-					DBUpdate.set("treatments.taxonomy.read1.keywordBilan.value", keywordBilan));
-			}else if($treatmentTaxo.results.get("pairs")!=null){
-				MongoDBDAO.update(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, 
-					DBQuery.is("code", $readset.code),
-					DBUpdate.set("treatments.taxonomy.pairs.keywordBilan.value", keywordBilan));
-			}
-			
+		if($treatmentTaxo.results.get("pairs")!=null){
+			fungiCalculate($readset.code, $treatmentTaxo, "pairs");
 		}
 end
 
@@ -235,3 +160,4 @@ rule "Set state to Avalaible from Finished Transfert CCRT"
 		Logger.debug("State F-TF to A");
 		$nextState.code="A";
 end
+

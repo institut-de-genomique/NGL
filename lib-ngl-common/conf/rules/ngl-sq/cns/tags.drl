@@ -218,7 +218,7 @@ rule "Generate TagDetails from TagInfo"
 		}
 		*/
 		if(null !=  $tagInfo.getExperimentTypeCode()){
-			ExperimentType experimentType = ExperimentType.find.findByCode( $tagInfo.getExperimentTypeCode());
+			ExperimentType experimentType = ExperimentType.find.get().findByCode( $tagInfo.getExperimentTypeCode());
 			TagDetails tagDetails = new TagDetails(support.code, support.categoryCode, experimentType.shortCode, projectCode, sampleCode, libProcessTypeCode, tagCode);
 			insert(tagDetails);
 		}else{

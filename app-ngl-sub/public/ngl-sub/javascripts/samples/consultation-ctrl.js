@@ -38,7 +38,7 @@ angular.module('home').controller('ConsultationCtrl',[ '$http', '$scope', '$rout
 				showButton:true
 			},
 			exportCSV:{
-				active:false
+				active:true
 			},
 			/*show:{                   // bouton pour epingler si on passe par details-ctrl.js 
 				active:true,
@@ -46,6 +46,7 @@ angular.module('home').controller('ConsultationCtrl',[ '$http', '$scope', '$rout
 					tabService.addTabs({label:line.code,href:jsRoutes.controllers.sra.samples.tpl.Samples.get(line.code).url,remove:true});
 				}
 			},*/
+			
 			save : {
 				active:true,
 				showButton : true,
@@ -54,10 +55,14 @@ angular.module('home').controller('ConsultationCtrl',[ '$http', '$scope', '$rout
 					return jsRoutes.controllers.sra.samples.api.Samples.update(line.code).url; // jamais utilisé si mode local
 				},
 				method:'put',
+				mode:'remote',
 				value:function(line){
 					return line;
 				},
+				callback : function(datatable, errors) {
+				}
 			}
+			
 
 	};
 	
@@ -69,7 +74,8 @@ angular.module('home').controller('ConsultationCtrl',[ '$http', '$scope', '$rout
 	}
 	// si on declare dans services => var sraVariables = {};
 	// si on declare dans le controlleur : $scope.sraVariables = {};
-
+	
+	$scope.sraVariables = samplesConsultationService.sraVariables; // ligne importante sinon ne marche pas pour affecter sraVariables dans services
 	$scope.consultationService = samplesConsultationService;
 	$scope.consultationService.init($routeParams, samplesDTConfig);
 

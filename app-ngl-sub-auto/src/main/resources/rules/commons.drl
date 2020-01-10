@@ -21,7 +21,7 @@ rule "Syntax order command line for sendXML specification"
 		log.debug("Syntax sendXML : curl https://www.ebi.ac.uk/ena/submit/drop-box/submit/?auth=ERA%20era-drop-9%20N7mo%2B8F4aHH%2BrCjLTuMo59xwfFo%3D -k -F \"SAMPLE=@sampleXml\" -F \"RUN=@runXml\" -F \"SUBMISSION=@submissionXML\" -F \"STUDY=@studyXML\" -F \"EXPERIMENT=@experimentXML\" ");
 		String parameterLine = $strategy.getParameterValue().get("optK")+" ";
 		for (String key : $strategy.getParameterValue().keySet()) {
-			if(!key.equals("optK") && !key.equals("listAC") && !$strategy.getParameterValue().get(key).equals("-F null") && !key.equals("OptionCD"))
+			if(!key.equals("optK") && !key.equals("listAC") && !$strategy.getParameterValue().get(key).contains("null") && !key.equals("OptionCD"))
 	         parameterLine += $strategy.getParameterValue().get(key) + " ";
 	    }
 		//Add redirect to AC file
@@ -100,6 +100,21 @@ rule "Send error mail when job exited"
 		}
 
 end
+
+rule "Delete STDOUT/STDERR for job DONE"
+@BirdsRule( ExecutionService )
+	dialect 'java'
+	salience 80
+	no-loop
+	when
+		$executionService : ExecutionService( status == ExecutionService.POST_JOB_EXECUTION_STATUS)
+		$job : Job( treatmentSpecification!=null, executionState == Job.DONE_STATUS )
+	then
+		Logger log = Logger.getLogger("Birds.executionService");
+		log.debug("Delete stdout/sdterr for job "+$job.getId());
+		$job.removeOutputDir();
+end
+
 
 function void updateParameterXML(String valueParam, Job job, String resourceName)
 {

@@ -20,7 +20,6 @@ import models.laboratory.container.instance.StorageHistory;
 import models.laboratory.reception.instance.AbstractFieldConfiguration;
 import models.laboratory.reception.instance.ReceptionConfiguration.Action;
 import models.utils.InstanceConstants;
-import play.Logger;
 import services.io.reception.Mapping;
 import validation.ContextValidation;
 
@@ -28,13 +27,15 @@ import validation.ContextValidation;
 
 public class SupportMapping extends Mapping<ContainerSupport> {
 
+	private static final play.Logger.ALogger logger = play.Logger.of(SupportMapping.class);
+	
 	public SupportMapping(Map<String, Map<String, DBObject>> objects, Map<String, ? extends AbstractFieldConfiguration> configuration, Action action, ContextValidation contextValidation) {
 		super(objects, configuration, action, InstanceConstants.CONTAINER_SUPPORT_COLL_NAME, ContainerSupport.class, Mapping.Keys.support, contextValidation);
 	}
 
 	@Override
 	protected void update(ContainerSupport support) {
-		//TODO update categoryCode if not a code but a label.
+		// GA: update categoryCode if not a code but a label.
 		if(Action.update.equals(action)){
 			support.traceInformation.setTraceInformation(contextValidation.getUser());
 		}else{
@@ -116,7 +117,7 @@ public class SupportMapping extends Mapping<ContainerSupport> {
 		if(categoryCodes.size() == 1)
 			return containers.iterator().next().state;
 		else if(categoryCodes.size() > 1){
-			contextValidation.addErrors("state.code","different for several containers");
+			contextValidation.addError("state.code","different for several containers");
 			return null;
 		}else{
 			return null;
@@ -128,7 +129,7 @@ public class SupportMapping extends Mapping<ContainerSupport> {
 		if(categoryCodes.size() == 1)
 			return categoryCodes.iterator().next();
 		else if(categoryCodes.size() > 1){
-			contextValidation.addErrors("storageCode","different for several containers");
+			contextValidation.addError("storageCode","different for several containers");
 			return null;
 		}else{
 			return null;
@@ -140,7 +141,7 @@ public class SupportMapping extends Mapping<ContainerSupport> {
 		if(categoryCodes.size() == 1)
 			return categoryCodes.iterator().next();
 		else{
-			contextValidation.addErrors("categoryCode","different for several containers");
+			contextValidation.addError("categoryCode","different for several containers");
 			return null;
 		}
 	}
@@ -158,7 +159,7 @@ public class SupportMapping extends Mapping<ContainerSupport> {
 	@Override
 	public void synchronizeMongoDB(DBObject c){
 		if(Action.update.equals(action) && configuration.containsKey("storageCode") && !objects.containsKey(Keys.container.toString())){
-			Logger.info("update storageCode for all container for support "+c.code);
+			logger.info("update storageCode for all container for support "+c.code);
 			ContainerSupport support = (ContainerSupport)c;
 			MongoDBDAO.update(InstanceConstants.CONTAINER_COLL_NAME, ContainerSupport.class, 
 					DBQuery.and(DBQuery.is("support.code", support.code)), 

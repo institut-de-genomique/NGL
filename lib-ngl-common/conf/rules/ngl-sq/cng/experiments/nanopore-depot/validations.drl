@@ -53,20 +53,36 @@ rule "Validation nanopore-depot"
 end
 
 
-rule "Validation outputcode nanopore-depot"
+rule "Validation code flowcell on exp.instrumentProperties nanopore-depot"
 	@nglSQ( validations )
 	dialect "java"
 	salience 1000
 	no-loop
 	when 
-	$experiment:Experiment($instrumentProperties: instrumentProperties,$typeCode:typeCode,$typeCode=="nanopore-depot")
+	$experiment:Experiment($instrumentProperties: instrumentProperties, $instrumentProperties!=null,$typeCode:typeCode,$typeCode=="nanopore-depot")
 	$containerSupportCode : PropertyValue() from $instrumentProperties.get("containerSupportCode")
-	eval(!$containerSupportCode.value.toString().matches("^.+_[A-Z]{1}$"))
+	eval(!$containerSupportCode.value.toString().matches("^[A-Z0-9]+_[A-Z]{1}$"))
 	$contextValidation:ContextValidation($errors : errors)
 	then
 		 Logger.debug("Error code nanopore-depot "+$containerSupportCode.value);
-		 $contextValidation.addErrors("instrumentproperties[containerSupportCode]",	"error.validationexp.containerSupportCodeContainString", $containerSupportCode.value, "_[A-Z]"); 
+		 $contextValidation.addErrors("instrumentProperties[containerSupportCode]",	"error.validationexp.containerSupportCodeContainString", $containerSupportCode.value, "[A-Z0-9]+_[A-Z]"); 
 end
 
 
+rule "Validation code flowcell on atm.output.instrumentProperties nanopore-depot"
+	@nglSQ( validations )
+	dialect "java"
+	salience 1000
+	no-loop
+	when 
+	$experiment:Experiment($typeCode:typeCode,$typeCode=="nanopore-depot")
+	$atomicTransfert: OneToOneContainer($outputContainerUseds: outputContainerUseds, $outputContainerUseds!=null )
+	$outputContainerUsed: OutputContainerUsed($instrumentProperties: instrumentProperties, $instrumentProperties!=null) from $outputContainerUseds
+	$containerSupportCode : PropertyValue() from $instrumentProperties.get("containerSupportCode")
+	eval(!$containerSupportCode.value.toString().matches("^[A-Z0-9]+_[A-Z]{1}$"))
+	$contextValidation:ContextValidation($errors : errors)
+	then
+		 Logger.debug("Error code nanopore-depot "+$containerSupportCode.value);
+		 $contextValidation.addErrors("atm["+$atomicTransfert.viewIndex+"].instrumentProperties[containerSupportCode]",	"error.validationexp.containerSupportCodeContainString", $containerSupportCode.value, "[A-Z0-9]+_[A-Z]"); 
+end
 

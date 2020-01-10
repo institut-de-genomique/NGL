@@ -90,28 +90,51 @@ angular.module('home').controller('BalanceSheetsGeneralCtrl', ['$scope', '$http'
 		}
 		$scope.dataByYear = [];
 		 var queries = [];
+		
+			
 		 for (var i = $scope.startYear; i <= actualYear; i++){
 			 $scope.dataByYear[i-$scope.startYear] = {
 					 nbBases : 0,
 					 year : i
 			 };
-			 var formQuery = {};
-			 formQuery.includes = [];
-			 formQuery.includes.push("default");
-			 formQuery.includes.push("runSequencingStartDate");
-			 formQuery.includes.push("typeCode");
-			 formQuery.typeCode=$routeParams.typeCode;
-			//For rsillumina
-			 formQuery.includes.push("treatments.ngsrg.default.nbBases");
-			//for rsnanopore
-			 formQuery.includes.push("treatments.ngsrg.default.1DReverse");
-			 formQuery.includes.push("treatments.ngsrg.default.1DForward");
-			 formQuery.includes.push("treatments.readQuality.default.1DReverse");
-			 formQuery.includes.push("treatments.readQuality.default.1DForward");
-			 formQuery.limit = 100000;
-			 formQuery.fromDate = moment("01/01/"+i, Messages("date.format").toUpperCase()).valueOf();
-			 formQuery.toDate = moment("31/12/"+i, Messages("date.format").toUpperCase()).valueOf();
-			 queries.push( $http.get(jsRoutes.controllers.readsets.api.ReadSets.list().url, {params : formQuery}) );
+			 //Par trimestre
+			// var startDate1 = [moment("01/01/"+i, Messages("date.format").toUpperCase()).valueOf(),
+			//	 moment("01/04/"+i, Messages("date.format").toUpperCase()).valueOf(),
+			//	 moment("01/07/"+i, Messages("date.format").toUpperCase()).valueOf(),
+			//	 moment("01/10/"+i, Messages("date.format").toUpperCase()).valueOf()];
+			 //var endDate1 = [moment("31/03/"+i, Messages("date.format").toUpperCase()).valueOf(),
+			//	 moment("30/06/"+i, Messages("date.format").toUpperCase()).valueOf(),
+			//	 moment("30/09/"+i, Messages("date.format").toUpperCase()).valueOf(),
+			//	 moment("31/12/"+i, Messages("date.format").toUpperCase()).valueOf()];
+			//Par semestre
+			 var startDate1 = [moment("01/01/"+i, Messages("date.format").toUpperCase()).valueOf(),
+				 moment("01/07/"+i, Messages("date.format").toUpperCase()).valueOf()];
+			 var endDate1 = [moment("30/06/"+i, Messages("date.format").toUpperCase()).valueOf(),
+				 moment("31/12/"+i, Messages("date.format").toUpperCase()).valueOf()];
+			 for (var j = 0; j < endDate1.length; j++){
+					
+				 var startDateRS = startDate1[j];
+				 var endDateRS = endDate1[j];
+				 var formQuery = {};
+				 formQuery.includes = [];
+				 formQuery.includes.push("default");
+				 formQuery.includes.push("runSequencingStartDate");
+				 formQuery.includes.push("typeCode");
+				 formQuery.typeCode=$routeParams.typeCode;
+				 //For rsillumina
+				 formQuery.includes.push("treatments.ngsrg.default.nbBases");
+				 //for rsnanopore
+				 formQuery.includes.push("treatments.ngsrg.default.1DReverse");
+				 formQuery.includes.push("treatments.ngsrg.default.1DForward");
+				 formQuery.includes.push("treatments.readQuality.default.1DReverse");
+				 formQuery.includes.push("treatments.readQuality.default.1DForward");
+				 formQuery.limit = 100000;
+				// formQuery.fromDate = moment("01/01/"+i, Messages("date.format").toUpperCase()).valueOf();
+				// formQuery.toDate = moment("31/12/"+i, Messages("date.format").toUpperCase()).valueOf();
+				 formQuery.fromDate = startDateRS;
+				 formQuery.toDate = endDateRS;
+				 queries.push( $http.get(jsRoutes.controllers.readsets.api.ReadSets.list().url, {params : formQuery}) );
+			 }
 		 }
 		 
 		 $q.all(queries).then(function(results) {
@@ -166,8 +189,8 @@ var init = function(){
 init();	
 }]);
 
-angular.module('home').controller('BalanceSheetsYearCtrl', ['$scope', '$http','mainService', 'tabService', 'lists', 'datatable', 'balanceSheetsGeneralSrv', '$routeParams', 
-                                                            function($scope, $http, mainService, tabService, lists, datatable, balanceSheetsGeneralSrv, $routeParams){
+angular.module('home').controller('BalanceSheetsYearCtrl', ['$scope', '$http','mainService', 'tabService', 'lists', 'datatable', 'balanceSheetsGeneralSrv', '$routeParams','$q', 
+                                                            function($scope, $http, mainService, tabService, lists, datatable, balanceSheetsGeneralSrv, $routeParams,$q){
 
 	var configQuarterDT = {
 			name:'quarterDT',
@@ -438,6 +461,28 @@ angular.module('home').controller('BalanceSheetsYearCtrl', ['$scope', '$http','m
 			           ]
 	}; 
 
+	
+	var configRunDT = {
+			name:'runDT',
+			order : {
+				active : false
+			},
+			search : {
+				active:false
+			},
+			pagination:{
+				active : false
+			},
+			hide:{
+				active:false
+			},
+			select : {
+				active : false
+			},
+			callbackEndDisplayResult : function(){
+				colorBlue($scope.dtRun,$scope.dataForYear.dataRunDT.length-1);
+			}
+	}; 
 
 	var colorBlue = function(datatable, pos){
 		if(datatable.displayResult != undefined){
@@ -467,42 +512,121 @@ angular.module('home').controller('BalanceSheetsYearCtrl', ['$scope', '$http','m
 
 	var loadData = function(activeYear)
 	{
-		var form = {includes : [], typeCodes : []};
-		form.includes.push("default");
-		//For rsillumina
-		form.includes.push("treatments.ngsrg.default.nbBases");
-		//for rsnanopore
-		form.includes.push("treatments.ngsrg.default.1DReverse");
-		form.includes.push("treatments.ngsrg.default.1DForward");
-		form.includes.push("treatments.readQuality.default.1DReverse");
-		form.includes.push("treatments.readQuality.default.1DForward");
-		form.includes.push("projectCode");
-		form.includes.push("runTypeCode");
-		form.includes.push("runSequencingStartDate");
-		form.includes.push("sampleOnContainer.sampleTypeCode");
-		form.includes.push("sampleOnContainer.sampleCategoryCode");
-		form.fromDate = moment("01/01/"+activeYear, Messages("date.format").toUpperCase()).valueOf();
-		form.toDate = moment("31/12/"+activeYear, Messages("date.format").toUpperCase()).valueOf();
-		form.typeCode=$routeParams.typeCode;
-		form.limit = 20000;
-
+		var startDate = moment("01/01/"+activeYear, Messages("date.format").toUpperCase()).valueOf();
+		var endDate = moment("31/12/"+activeYear, Messages("date.format").toUpperCase()).valueOf();
+		
+		//var startDate1 = [moment("01/01/"+activeYear, Messages("date.format").toUpperCase()).valueOf(),moment("01/07/"+activeYear, Messages("date.format").toUpperCase()).valueOf()];
+		//var endDate1 = [moment("30/06/"+activeYear, Messages("date.format").toUpperCase()).valueOf(),moment("31/12/"+activeYear, Messages("date.format").toUpperCase()).valueOf()];
+		
+		//Par trimestre
+		//var startDate1 = [moment("01/01/"+activeYear, Messages("date.format").toUpperCase()).valueOf(),
+		//				  moment("01/04/"+activeYear, Messages("date.format").toUpperCase()).valueOf(),
+		//				  moment("01/07/"+activeYear, Messages("date.format").toUpperCase()).valueOf(),
+		//				  moment("01/10/"+activeYear, Messages("date.format").toUpperCase()).valueOf()];
+		//var endDate1 = [moment("31/03/"+activeYear, Messages("date.format").toUpperCase()).valueOf(),
+		//				moment("30/06/"+activeYear, Messages("date.format").toUpperCase()).valueOf(),
+		//				moment("30/09/"+activeYear, Messages("date.format").toUpperCase()).valueOf(),
+		//				moment("31/12/"+activeYear, Messages("date.format").toUpperCase()).valueOf()];
+		
+		var startDate1 = [moment("01/01/"+activeYear, Messages("date.format").toUpperCase()).valueOf(),
+						  moment("01/02/"+activeYear, Messages("date.format").toUpperCase()).valueOf(),
+						 // moment("01/03/"+activeYear, Messages("date.format").toUpperCase()).valueOf(),
+						  moment("01/04/"+activeYear, Messages("date.format").toUpperCase()).valueOf(),
+						  moment("01/05/"+activeYear, Messages("date.format").toUpperCase()).valueOf(),
+						  moment("01/06/"+activeYear, Messages("date.format").toUpperCase()).valueOf(),
+						  moment("01/07/"+activeYear, Messages("date.format").toUpperCase()).valueOf(),
+						  moment("01/08/"+activeYear, Messages("date.format").toUpperCase()).valueOf(),
+						  moment("01/09/"+activeYear, Messages("date.format").toUpperCase()).valueOf(),
+						  moment("01/10/"+activeYear, Messages("date.format").toUpperCase()).valueOf(),
+						  moment("01/11/"+activeYear, Messages("date.format").toUpperCase()).valueOf(),
+						  moment("01/12/"+activeYear, Messages("date.format").toUpperCase()).valueOf()];
+		var endDate1 = [moment("31/01/"+activeYear, Messages("date.format").toUpperCase()).valueOf(),
+						//moment("29/02/"+activeYear, Messages("date.format").toUpperCase()).valueOf(),
+						moment("31/03/"+activeYear, Messages("date.format").toUpperCase()).valueOf(),
+						moment("30/04/"+activeYear, Messages("date.format").toUpperCase()).valueOf(),
+						moment("31/05/"+activeYear, Messages("date.format").toUpperCase()).valueOf(),
+						moment("30/06/"+activeYear, Messages("date.format").toUpperCase()).valueOf(),
+						moment("31/07/"+activeYear, Messages("date.format").toUpperCase()).valueOf(),
+						moment("31/08/"+activeYear, Messages("date.format").toUpperCase()).valueOf(),
+						moment("30/09/"+activeYear, Messages("date.format").toUpperCase()).valueOf(),
+						moment("31/10/"+activeYear, Messages("date.format").toUpperCase()).valueOf(),
+						moment("30/11/"+activeYear, Messages("date.format").toUpperCase()).valueOf(),
+						moment("31/12/"+activeYear, Messages("date.format").toUpperCase()).valueOf()];
+		
+		var queriesRS = [];
+		
+		for (var i = 0; i < endDate1.length; i++){
+			
+			var startDateRS = startDate1[i];
+			var endDateRS = endDate1[i];
+			var form = {includes : [], typeCodes : []};
+			form.includes.push("default");
+			//For rsillumina
+			form.includes.push("treatments.ngsrg.default.nbBases");
+			//for rsnanopore
+			form.includes.push("treatments.ngsrg.default.1DReverse");
+			form.includes.push("treatments.ngsrg.default.1DForward");
+			form.includes.push("treatments.readQuality.default.1DReverse");
+			form.includes.push("treatments.readQuality.default.1DForward");
+			form.includes.push("projectCode");
+			form.includes.push("runTypeCode");
+			form.includes.push("runSequencingStartDate");
+			form.includes.push("sampleOnContainer.sampleTypeCode");
+			form.includes.push("sampleOnContainer.sampleCategoryCode");
+			form.fromDate = startDateRS;
+			form.toDate = endDateRS;
+			form.typeCode=$routeParams.typeCode;
+			form.limit = 20000;
+		
+			queriesRS.push( $http.get(jsRoutes.controllers.readsets.api.ReadSets.list().url, {params : form}) );
+		}
 		var projectForm = {includes : []};
 		projectForm.includes.push("code");
 		projectForm.includes.push("name");
 		projectForm.includes.push("traceInformation.creationDate");
-
-		$http.get(jsRoutes.controllers.readsets.api.ReadSets.list().url, {params : form})
+		
+		var runForm = {includes:[]};
+		runForm.includes.push("default");
+		runForm.categoryCode=$routeParams.typeCode.replace('rs','');
+		runForm.fromDate=startDate;
+		runForm.toDate=endDate;
+		runForm.limit = 20000;
+		
+		
+		$q.all(queriesRS).then(function(results) {
+			 var allData = [];
+				results.forEach(function(result){
+					allData = allData.concat(result.data);
+				});
+				$http.get(jsRoutes.controllers.commons.api.CommonInfoTypes.list().url,{params:{objectTypeCode:"Run"},key:"runTypes"})
+				.success(function(results, status, headers, config) {
+					$http.get(jsRoutes.controllers.projects.api.Projects.list().url, {params : projectForm})
+					.success(function(projectData, status, headers, config) {
+						$http.get(jsRoutes.controllers.runs.api.Runs.list().url, {params : runForm})
+						.success(function(runData, status, headers, config) {
+						$scope.dataForYear = $scope.balanceSheetsGeneralService.computeDataForYear(allData,results,projectData,runData,activeYear);
+						mainService.put($routeParams.typeCode+'-'+activeYear,$scope.dataForYear );
+						calculateData();
+						});
+					});
+				});
+		});
+		
+		/*$http.get(jsRoutes.controllers.readsets.api.ReadSets.list().url, {params : form})
 		.success(function(data, status, headers, config) {
 			$http.get(jsRoutes.controllers.commons.api.CommonInfoTypes.list().url,{params:{objectTypeCode:"Run"},key:"runTypes"})
 			.success(function(results, status, headers, config) {
 				$http.get(jsRoutes.controllers.projects.api.Projects.list().url, {params : projectForm})
 				.success(function(projectData, status, headers, config) {
-					$scope.dataForYear = $scope.balanceSheetsGeneralService.computeDataForYear(data,results,projectData,activeYear);
+					$http.get(jsRoutes.controllers.runs.api.Runs.list().url, {params : runForm})
+					.success(function(runData, status, headers, config) {
+					$scope.dataForYear = $scope.balanceSheetsGeneralService.computeDataForYear(data,results,projectData,runData,activeYear);
 					mainService.put($routeParams.typeCode+'-'+activeYear,$scope.dataForYear );
 					calculateData();
+					});
 				});
 			});
-		});
+		});*/
 
 	};
 	
@@ -549,6 +673,57 @@ angular.module('home').controller('BalanceSheetsYearCtrl', ['$scope', '$http','m
 
 		$scope.chartSample = $scope.balanceSheetsGeneralService.computeChartSample($scope.dataForYear.dataSampleDT,$scope.dataForYear.total);
 
+		
+		//run Datatable
+		configRunDT.columns=[];
+		configRunDT.columns.push({
+     	   "property" : "month",
+    	   "header" : Messages("balanceSheets.monthRun"),
+    	   //filter: "codes:'sample_cat'",
+    	   "render":function(value, line){
+	    		return "<strong>"+value.month+"</strong>";
+	    	},
+    	   "type" : "text",
+    	   "position" : 1
+		});
+		
+		var position=1;
+		for(var key of $scope.dataForYear.listSeq.keys()){
+			position++;
+			configRunDT.columns.push({
+		     	   "property" : "type_"+key,
+		    	   "header" : $scope.dataForYear.listSeq.get(key),
+		    	   "type" : "text",
+		    	   "position" : position
+				});
+		}
+		position++;
+		configRunDT.columns.push(
+					{	"property":"nbAborted",
+		        	   "header": Messages("balanceSheets.nbAborted"),
+		        	   "type" :"Number",
+		        	   "position":position
+		           });
+		position++;
+		configRunDT.columns.push(
+		           {
+		        	   "property":"total",
+		        	   "header": Messages("balanceSheets.sumNoAborting"),
+		        	   "type":"Number",
+		        	   "position":position
+		           }
+		);
+		
+		$scope.dtRun = datatable(configRunDT);
+		$scope.dtRun.setData($scope.dataForYear.dataRunDT, $scope.dataForYear.dataRunDT.length);
+		
+		var sumData = [{
+			"property" : Messages('balanceSheets.sum'),
+			"value" : $scope.dataForYear.totalRun
+		}];
+		$scope.dtRunSum = datatable(configSumDT);
+		$scope.dtRunSum.setData(sumData, 1);
+		
 		$scope.loading=false;
 	};
 	

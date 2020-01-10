@@ -11,6 +11,7 @@ import fr.cea.ig.ngl.dao.api.APIException;
 import fr.cea.ig.ngl.dao.api.APIValidationException;
 import fr.cea.ig.ngl.dao.api.GenericAPI;
 import fr.cea.ig.ngl.dao.sra.ExperimentDAO;
+import fr.cea.ig.play.IGGlobals;
 import models.sra.submit.sra.instance.Experiment;
 
 public class ExperimentAPI extends GenericAPI<ExperimentDAO, Experiment> {
@@ -27,6 +28,14 @@ public class ExperimentAPI extends GenericAPI<ExperimentDAO, Experiment> {
 //		this.dao = experimentDAO;
 //	}
 
+	public List<Experiment> dao_findAsList(Query q) {
+		return dao.findAsList(q);
+	}
+	
+	public Iterable<Experiment> dao_all() {
+		return dao.all();
+	}
+	
 	public Experiment dao_getObject(String experimentCode) {
 		return dao.getObject(experimentCode);
 	}
@@ -79,6 +88,16 @@ public class ExperimentAPI extends GenericAPI<ExperimentDAO, Experiment> {
 	public Experiment update(Experiment input, String currentUser,
 			List<String> fields) throws APIException, APIValidationException {
 		return null;
+	}
+
+	/**
+	 * Acces à une instance globale de ExperimentAPI, qui permet de remplacer les appels
+	 * à MongoDBDAO qui est une globale, dans un contexte ou on ne peut pas injecter. 
+	 * Exemple dans objets du domaine (sra.Experiment, ...)
+	 * @return ExperimentAPI
+	 */
+	public static ExperimentAPI get() {
+		return IGGlobals.instanceOf(ExperimentAPI.class);
 	}
 	
 }

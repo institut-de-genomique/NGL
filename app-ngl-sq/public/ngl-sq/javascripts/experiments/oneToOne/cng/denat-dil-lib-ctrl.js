@@ -1,7 +1,7 @@
 // FDS 04/10/2017 -- JIRA NGL-1584: denaturation en tubes et plaques
 // 16/10/2017 restriction main: forcer tube en sortie
 // 11/05/2018  le robot Epimotion n'est configuré que pour les container sortie=tube
-//             ==> mise en commentaire du code des gestion des plaques ( pour le jour ou ca sera demandé....
+//             ==> mise en commentaire du code des gestion des plaques ( pour le jour ou ca sera demandé...)
 
 angular.module('home').controller('DenatDilLibCtrl',['$scope', '$parse', 'atmToSingleDatatable',
                                                      function($scope, $parse, atmToSingleDatatable){
@@ -162,14 +162,14 @@ angular.module('home').controller('DenatDilLibCtrl',['$scope', '$parse', 'atmToS
 	        	withoutEdit: true,
 	        	changeClass:false,
 	        	showButton:false,
-	        	mode:'local'	        		
+	        	mode:'local'
 			},
 			hide:{
 				active:true
 			},
-			edit:{
-				active: ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('IP')),
-				showButton: ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('IP')),
+			edit:{ /// 08/01/2019 modif a F
+				active: ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F')),
+				showButton: ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F')),
 				byDefault:($scope.isCreationMode()),
 				columnMode:true
 			},
@@ -192,7 +192,7 @@ angular.module('home').controller('DenatDilLibCtrl',['$scope', '$parse', 'atmToS
                 complex:true,
                 template:  ''
                 	+$scope.plateUtils.templates.buttonLineMode()
-                	+$scope.plateUtils.templates.buttonColumnMode()     
+                	+$scope.plateUtils.templates.buttonColumnMode()
 			}
 	}; // fin struct datatableConfig
 	
@@ -333,8 +333,10 @@ angular.module('home').controller('DenatDilLibCtrl',['$scope', '$parse', 'atmToS
 		console.log("call event refresh");	
 		
 		var dtConfig = $scope.atmService.data.getConfig();
-		dtConfig.edit.active = ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('IP'));
+		dtConfig.edit.active = ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F'));// 08/01/2019 modifier IP=>F pour autoriser edition
+		//dtConfig.edit.showButton = ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F')); pas utile ??
 		dtConfig.edit.byDefault = false;
+		dtConfig.edit.start = false; 
 		dtConfig.remove.active = ($scope.isEditModeAvailable() && $scope.isNewState());
 		$scope.atmService.data.setConfig(dtConfig);
 		$scope.atmService.refreshViewFromExperiment($scope.experiment);
@@ -376,15 +378,19 @@ angular.module('home').controller('DenatDilLibCtrl',['$scope', '$parse', 'atmToS
 	}
 	*/
 	
+
 	// modifié a partir de copyContainerSupportCodeAndStorageCodeToDT
 	var copyContainerSupportCodeAndStorageCode = function(experiment){
 	
 		var outputContainerSupportCode = $scope.outputContainerSupport.code;
 		var outputContainerSupportStorageCode = $scope.outputContainerSupport.storageCode;
 
-		if ( null != outputContainerSupportCode && undefined != outputContainerSupportCode){
+		// 14/03/2019 correction locale de NGL-2371...: ajout && ""!= outputContainerSupportCode 
+		//( correction qui ne sert a rien en réalité puisque pour l'instant output forcé a tube !!! voir commentaires 11/05/2018)
+		if ( null != outputContainerSupportCode && undefined != outputContainerSupportCode && ""!= outputContainerSupportCode ){
 			for(var i = 0; i < experiment.atomicTransfertMethods.length; i++){
 				var atm = experiment.atomicTransfertMethods[i];
+				
 				// on est dans du oneToOne=> 1 seul containerUsed -->  [0]
 				$parse('outputContainerUseds[0].locationOnContainerSupport.code').assign(atm,outputContainerSupportCode);
 				if( null != outputContainerSupportStorageCode && undefined != outputContainerSupportStorageCode){
@@ -421,7 +427,7 @@ angular.module('home').controller('DenatDilLibCtrl',['$scope', '$parse', 'atmToS
 		return {
 			class:"OneToOne",
 			line:getLine(line), 
-			column:getColumn(column), 				
+			column:getColumn(column),
 			inputContainerUseds:new Array(0), 
 			outputContainerUseds:new Array(0)
 		};

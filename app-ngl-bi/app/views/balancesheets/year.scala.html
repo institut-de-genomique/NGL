@@ -8,6 +8,7 @@
 			<li ng-class="getTabClass('sequencingType')"><a href="#" data-target="#sequencingType" data-toggle="tab" ng-click="setActiveTab('sequencingType')">@Messages("balanceSheets.tab.sequencingType")</a></li>
 			<li ng-class="getTabClass('firstTen')"><a href="#" data-target="#firstTen" data-toggle="tab" ng-click="setActiveTab('firstTen')">@Messages("balanceSheets.tab.firstTen")</a></li>
 			<li ng-class="getTabClass('sampleType')"><a href="#" data-target="#sampleType" data-toggle="tab" ng-click="setActiveTab('sampleType')">@Messages("balanceSheets.tab.projectType")</a></li>    
+			<li ng-class="getTabClass('runType')"><a href="#" data-target="#runType" data-toggle="tab" ng-click="setActiveTab('runType')">@Messages("balanceSheets.tab.runType")</a></li>    
 		</ul>
 		<div class="tab-content">
 			<div class="tab-pane {{getTabClass('quarter')}}" id="quarter">		
@@ -106,6 +107,25 @@
 						<chart class="col-md-12 col-lg-12" value="chartSample"></chart>
 					</div>
 					</div>	
+				</div>
+			</div>
+			<div class="tab-pane {{getTabClass('runType')}}" id="runType">
+				<div ng-switch on="isLoading()">
+					<div ng-switch-when="true">
+						<div class="row">
+							<div class="col-md-12 col-lg-12 text-center">
+							<div class="inProgressSpinner"><button class="spinnerBtn btn btn-primary btn-lg"><i class="fa fa-spinner fa-spin fa-5x"></i></button></div>
+							</div>
+						</div>
+					</div>
+					<div ng-switch-when="false">
+					<div class="row">
+						<div class="col-md-12 col-lg-12" ultimate-datatable="dtRun"></div>
+					</div>		
+					<div class="row">
+						<div class="col-md-12 col-lg-12" ultimate-datatable="dtRunSum"></div>
+					</div>		
+					</div>
 				</div>
 			</div>
 		</div>

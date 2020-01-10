@@ -1,39 +1,39 @@
 package controllers.instance.resolution;
 
+import javax.inject.Inject;
+
 import models.Constants;
-import play.Logger;
+import nglapps.DataService;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
-
-import services.instance.resolution.ResolutionService;
 import validation.ContextValidation;
 
-//import javax.inject.Inject;
-
-//import controllers.CommonController;
-//import controllers.NGLBaseController;
-//import fr.cea.ig.play.migration.NGLContext;
-
-public class Resolutions extends Controller { // NGLBaseController { //CommonController {
+public class Resolutions extends Controller {
+		
+	private static final play.Logger.ALogger logger = play.Logger.of(Resolutions.class);
 	
-//	@Inject
-//	public Resolutions(NGLContext ctx) {
-//		super(ctx);
-//	}
+	private final DataService dataService;
 	
-	public Result save(){
-		ContextValidation ctx = new ContextValidation(Constants.NGL_DATA_USER);
-		ctx.setCreationMode();
+	@Inject
+	public Resolutions(DataService dataService) {
+		this.dataService = dataService;
+	}
+	
+	public Result save() {
+//		ContextValidation ctx = new ContextValidation(Constants.NGL_DATA_USER);
+//		ctx.setCreationMode();
+		ContextValidation ctx = ContextValidation.createCreationContext(Constants.NGL_DATA_USER);
 		try {
-			ResolutionService.main(ctx);
-			if (ctx.errors.size() > 0) {
-				return badRequest(Json.toJson(ctx.errors));
+			// ResolutionService.main(ctx);
+			dataService.saveResolutionData(ctx);
+			if (ctx.getErrors().size() > 0) {
+				return badRequest(Json.toJson(ctx.getErrors()));
 			} else {
 				return ok();
 			}
 		} catch (Exception e) {
-			Logger.error(e.getMessage(), e);
+			logger.error(e.getMessage(), e);
 			return internalServerError(e.getMessage());
 		}	
 	}

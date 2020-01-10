@@ -1,6 +1,6 @@
 "use strict";
 
-angular.module('home').controller('TabMainCtrl', ['$scope', '$location', function($scope, $location){
+angular.module('home').controller('TabMainCtrlXXX', ['$scope', '$location', function($scope, $location){
 	//contain each tab of on element of the datatable
 	var tabs = [];
 	var bcktabs = undefined;
@@ -88,7 +88,7 @@ angular.module('home').controller('TabMainCtrl', ['$scope', '$location', functio
 		    var valueIsInArray = false;
 
 		    for(var j = 0; j < doubledTab.length; j++) {
-		        if(doubledTab[j].label == tabs[i].label) {
+		        if(doubledTab[j].label === tabs[i].label && doubledTab[j].href === tabs[i].href) {
 		            valueIsInArray = true;
 		        }
 		    }

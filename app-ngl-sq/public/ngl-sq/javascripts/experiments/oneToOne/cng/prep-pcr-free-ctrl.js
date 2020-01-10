@@ -1,6 +1,6 @@
 // FDS 04/02/2016 -- JIRA NGL-894 : prep pcr free experiment
-angular.module('home').controller('PrepPcrFreeCtrl',['$scope', '$parse',  '$filter', 'atmToSingleDatatable','$http',
-                                                     function($scope, $parse, $filter, atmToSingleDatatable, $http){
+angular.module('home').controller('PrepPcrFreeCtrl',['$scope', '$parse',  '$filter', 'atmToSingleDatatable','$http','tagPlates',
+                                                     function($scope, $parse, $filter, atmToSingleDatatable, $http, tagPlates ){
 
 	var inputExtraHeaders=Messages("experiments.inputs");
 	var outputExtraHeaders=Messages("experiments.outputs");	
@@ -10,19 +10,7 @@ angular.module('home').controller('PrepPcrFreeCtrl',['$scope', '$parse',  '$filt
 			name: $scope.experiment.typeCode.toUpperCase(),
 			//Guillaume le 04/03 => utiliser containerUsed seulement pour proprietes dynamiques...
 			"columns":[
-			         //--------------------- INPUT containers section -----------------------
-			         
-			         /* plus parlant pour l'utilisateur d'avoir Plate barcode | line | column
-					  {
-			        	 "header":Messages("containers.table.code"),
-			        	 "property":"inputContainer.code",
-			        	 "order":true,
-						 "hide":true,
-			        	 "type":"text",
-			        	 "position":0,
-			        	 "extraHeaders":{0: inputExtraHeaders}
-			          },	
-			          */		        
+			         //--------------------- INPUT containers section -----------------------		        
 			          { // barcode plaque entree == input support Container code
 			        	 "header":Messages("containers.table.support.name"),
 			        	 "property":"inputContainer.support.code",
@@ -197,7 +185,10 @@ angular.module('home').controller('PrepPcrFreeCtrl',['$scope', '$parse',  '$filt
 	        	"showButton":false,
 	        	"mode":"local",
 	        	"callback":function(datatable){
-	        		copyContainerSupportCodeAndStorageCodeToDT(datatable);
+	        		// NGL-2371 FDS 08/03/2019 copyContainerSupportCodeAndStorageCodeToDT deplacée dans atmService + ajout 2eme param "pos"
+	        		// tous les instruments de cette exp n'ont que plaque en ouputContainer, inutile de le tester
+	        		// plaque inputContainer => pos='auto'
+	        		atmService.copyContainerSupportCodeAndStorageCodeToDT(datatable,'auto');
 	        	}
 			},
 			"hide":{
@@ -235,37 +226,12 @@ angular.module('home').controller('PrepPcrFreeCtrl',['$scope', '$parse',  '$filt
 	}; // fin struct datatableConfig
 	
 	
-	$scope.$on('save', function(e, callbackFunction) {	
+	$scope.$on('save', function(e, callbackFunction) {
 		console.log("call event save");
-		$scope.atmService.data.save();
-		$scope.atmService.viewToExperimentOneToOne($scope.experiment);
-		$scope.$emit('childSaved', callbackFunction);
+			$scope.atmService.data.save();
+			$scope.atmService.viewToExperimentOneToOne($scope.experiment);
+			$scope.$emit('childSaved', callbackFunction);
 	});
-	
-	var copyContainerSupportCodeAndStorageCodeToDT = function(datatable){
-
-		var dataMain = datatable.getData();
-		
-		var outputContainerSupportCode = $scope.outputContainerSupport.code;
-		var outputContainerSupportStorageCode = $scope.outputContainerSupport.storageCode;
-
-		if ( null != outputContainerSupportCode && undefined != outputContainerSupportCode){
-			for(var i = 0; i < dataMain.length; i++){
-				
-				var atm = dataMain[i].atomicTransfertMethod;
-				var newContainerCode = outputContainerSupportCode+"_"+atm.line + atm.column;
-
-				$parse('outputContainerUsed.code').assign(dataMain[i],newContainerCode);
-				$parse('outputContainerUsed.locationOnContainerSupport.code').assign(dataMain[i],outputContainerSupportCode);
-				
-				if( null != outputContainerSupportStorageCode && undefined != outputContainerSupportStorageCode){
-				    $parse('outputContainerUsed.locationOnContainerSupport.storageCode').assign(dataMain[i],outputContainerSupportStorageCode);
-				}
-			}
-		}
-		
-		//ne plus faire...datatable.setData(dataMain);
-	}
 	
 	// ajout showButton + suppression start = false;
 	$scope.$on('refresh', function(e) {
@@ -277,6 +243,9 @@ angular.module('home').controller('PrepPcrFreeCtrl',['$scope', '$parse',  '$filt
 		dtConfig.remove.active = ($scope.isEditModeAvailable() && $scope.isNewState());
 		$scope.atmService.data.setConfig(dtConfig);
 		$scope.atmService.refreshViewFromExperiment($scope.experiment);
+		// NGL-2371 FDS 20/03/2019 récupérer outputContainerSupport s'il été généré automatiquement (pas de barcode entré par l'utilisateur)
+		$scope.outputContainerSupport.code=$scope.experiment.atomicTransfertMethods[0].outputContainerUseds[0].locationOnContainerSupport.code;
+		
 		$scope.$emit('viewRefeshed');
 	});
 		
@@ -289,7 +258,6 @@ angular.module('home').controller('PrepPcrFreeCtrl',['$scope', '$parse',  '$filt
 			dtConfig.edit.byDefault = false;
 			$scope.atmService.data.setConfig(dtConfig);
 		}
-		
 	});
 	
 	$scope.$on('activeEditMode', function(e) {
@@ -327,8 +295,7 @@ angular.module('home').controller('PrepPcrFreeCtrl',['$scope', '$parse',  '$filt
 				$scope.messages.text = "Plusieurs noms de travail (robot) trouvés parmi les containers d'entrée (info processus)";    
 				$scope.messages.open();			
 			
-				console.log('>1  run workLabel trouvé !!');
-				
+				//console.log('>1  run workLabel trouvé !!');	
 			} else if ( workLabels.length === 1 ){
 				// verifier que TOUS les containers ont une valeur...
 				var contents= $scope.$eval("getBasket().get()|getArray:'contents[0]'");
@@ -339,9 +306,15 @@ angular.module('home').controller('PrepPcrFreeCtrl',['$scope', '$parse',  '$filt
 					$scope.messages.text = "Certains containers en entrée n'ont pas de nom de travail run (robot) (info processus)";
 					$scope.messages.open();			
 				
-					console.log("Certains containers n'ont pas de workLabel !!");
+					//console.log("Certains containers n'ont pas de workLabel !!");
 				} else {
-					$parse("instrumentProperties.robotRunCode.value").assign($scope.experiment, workLabels[0]);
+					// NGL-2160/NGL-2164 ne faire l'assignation que si l'instrument possede la propriété robotRunCode (sinon erreur de sauvegarde experience!)
+					if ( $scope.instrumentHasProperty('robotRunCode') ) {
+						$parse("instrumentProperties.robotRunCode.value").assign($scope.experiment, workLabels[0]);
+					} else {
+						console.log("la propriété n'est pas gérée par l'instrument!");
+						// faut-il une alerte utilisateur ??
+					}
 				}
 			} 
 			// si aucun workLabel ne rien faire
@@ -366,17 +339,30 @@ angular.module('home').controller('PrepPcrFreeCtrl',['$scope', '$parse',  '$filt
 	atmService.defaultOutputUnit = {
 			volume : "µL"
 	}
+	
+	// NGL-1350 aide a la saisie des index
+	// !! les surcharges doivent etre faites avant experimentToView
+	// filter tags.groupNames sur selectedTagGroup 
+	// Ne pas utiliser bt-select...pour l'instant 
+	atmService.convertOutputPropertiesToDatatableColumn = function(property, pName){
+		var column = atmService.$commonATM.convertTypePropertyToDatatableColumn(property,"outputContainerUsed."+pName+".",{"0":Messages("experiments.outputs")});
+		if(property.code=="tag"){
+			// afficher le nom aux utilisateurs et pas le code 
+			//column.editTemplate='<input class="form-control" type="text" #ng-model typeahead="v.code as v.code for v in getTags() | filter:{groupNames:selectedTagGroup.value} | filter:{code:$viewValue} | limitTo:20" typeahead-min-length="1" udt-change="updatePropertyFromUDT(value,col)"/>';  
+			column.editTemplate='<input class="form-control" type="text" #ng-model typeahead="tag.code as tag.name for tag in getTags() | filter:{groupNames:selectedTagGroup.value} | filter:{name:$viewValue} | limitTo:20" typeahead-min-length="1" udt-change="updatePropertyFromUDT(value,col)"/>'; 
+			}
+		return column;
+	};
+
 	atmService.experimentToView($scope.experiment, $scope.experimentType);
 	
 	$scope.atmService = atmService;
-	
 	
 	var importData = function(){
 		$scope.messages.clear();
 
 		$http.post(jsRoutes.controllers.instruments.io.IO.importFile($scope.experiment.code).url, $scope.file)
-		.success(function(data, status, headers, config) {
-			
+		.success(function(data, status, headers, config) {		
 			$scope.messages.clazz="alert alert-success";
 			$scope.messages.text=Messages('experiments.msg.import.success');
 			$scope.messages.showDetails = false;
@@ -386,11 +372,9 @@ angular.module('home').controller('PrepPcrFreeCtrl',['$scope', '$parse',  '$filt
 			$scope.file = undefined;
 			// reinit select File...
 			angular.element('#importFile')[0].value = null;
-			$scope.$emit('refresh');
-			
+			$scope.$emit('refresh');		
 		})
-		.error(function(data, status, headers, config) {
-			
+		.error(function(data, status, headers, config) {		
 			$scope.messages.clazz = "alert alert-danger";
 			$scope.messages.text = Messages('experiments.msg.import.error');
 			$scope.messages.setDetails(data);
@@ -417,7 +401,7 @@ angular.module('home').controller('PrepPcrFreeCtrl',['$scope', '$parse',  '$filt
 	$scope.button = {
 		isShow:function(){
 			return ( $scope.isInProgressState() || Permissions.check("admin") );
-			},
+		},
 		isFileSet:function(){
 			return ($scope.file === undefined)?"disabled":"";
 		},
@@ -430,223 +414,52 @@ angular.module('home').controller('PrepPcrFreeCtrl',['$scope', '$parse',  '$filt
 	                   {name:'1', position:0}, {name:'2', position:8}, {name:'3', position:16}, {name:'4',  position:24}, {name:'5',  position:32}, {name:'6',  position:40},
 	                   {name:'7', position:48},{name:'8', position:56},{name:'9', position:64}, {name:'10', position:72}, {name:'11', position:80}, {name:'12', position:88}
 	                 ];
+	
 	$scope.tagPlateColumn = $scope.columns[0]; // defaut du select
 	
-	// 17/11/2017 modifications pour possibilité d'utiliser plusieurs plaques
 	// 12/04/2018 NGL-2012 ne rien mettre par defaut !!!
-	$scope.plates = [ {name: "---",                                           tagCategory: undefined,   tags: undefined },
-	                  {name:"DAP TruSeq DNA HT",                              tagCategory:"DUAL-INDEX", tags:[] }, 
-	                  {name:"IDT-ILMN TruSeq DNA UD Indexes (96 Indexes)",    tagCategory:"DUAL-INDEX", tags:[] },
-	                  {name:"IDT-ILMN TruSeq DNA UD Indexes (24 Indexes x4)", tagCategory:"DUAL-INDEX", tags:[] }
-	                ];
+	// 22/06/2018 utilisation de la factory tagPlates dans le module tools (tag-plate-helpers.js)
+	$scope.plates=[];
+	$scope.plates.push( {name: "---",                                           tagCategory: undefined,   tags: undefined });
+	$scope.plates.push( {name:"DAP TruSeq DNA HT",                              tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_XapTruSeqHT() });
+	$scope.plates.push( {name:"IDT-ILMN TruSeq DNA UD Indexes (96 Indexes)",    tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_IdtTruSeq96() });
+	$scope.plates.push( {name:"IDT-ILMN TruSeq DNA UD Indexes (24 Indexes x4)", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_IdtTruSeq24x4() });
 	
-	// l'indice dans le tableau correspond a l'ordre "colonne d'abord" dans la plaque
-	// c'est le code des index qu'il faut mettre ici exemple:  AglSSXT-01(name)/aglSSXT-01(code) 
-	// NOTE: il existe au CNS ( voir dna-illumina-indexed-library-prep ) des methodes pour generer le plaques reguliere algorithmiquement...
-	
-	//-1- DAP TruSeq DNA HT
-	$scope.plates[1].tags.push("D701-D501", "D701-D502", "D701-D503", "D701-D504", "D701-D505", "D701-D506", "D701-D507", "D701-D508"); //colonne 1
-	$scope.plates[1].tags.push("D702-D501", "D702-D502", "D702-D503", "D702-D504", "D702-D505", "D702-D506", "D702-D507", "D702-D508"); //colonne 2
-	$scope.plates[1].tags.push("D703-D501", "D703-D502", "D703-D503", "D703-D504", "D703-D505", "D703-D506", "D703-D507", "D703-D508"); //colonne 3
-	$scope.plates[1].tags.push("D704-D501", "D704-D502", "D704-D503", "D704-D504", "D704-D505", "D704-D506", "D704-D507", "D704-D508"); //colonne 4
-	$scope.plates[1].tags.push("D705-D501", "D705-D502", "D705-D503", "D705-D504", "D705-D505", "D705-D506", "D705-D507", "D705-D508"); //colonne 5
-	$scope.plates[1].tags.push("D706-D501", "D706-D502", "D706-D503", "D706-D504", "D706-D505", "D706-D506", "D706-D507", "D706-D508"); //colonne 6
-	$scope.plates[1].tags.push("D707-D501", "D707-D502", "D707-D503", "D707-D504", "D707-D505", "D707-D506", "D707-D507", "D707-D508"); //colonne 7
-	$scope.plates[1].tags.push("D708-D501", "D708-D502", "D708-D503", "D708-D504", "D708-D505", "D708-D506", "D708-D507", "D708-D508"); //colonne 8
-	$scope.plates[1].tags.push("D709-D501", "D709-D502", "D709-D503", "D709-D504", "D709-D505", "D709-D506", "D709-D507", "D709-D508"); //colonne 9
-	$scope.plates[1].tags.push("D710-D501", "D710-D502", "D710-D503", "D710-D504", "D710-D505", "D710-D506", "D710-D507", "D710-D508"); //colonne 10
-	$scope.plates[1].tags.push("D711-D501", "D711-D502", "D711-D503", "D711-D504", "D711-D505", "D711-D506", "D711-D507", "D711-D508"); //colonne 11
-	$scope.plates[1].tags.push("D712-D501", "D712-D502", "D712-D503", "D712-D504", "D712-D505", "D712-D506", "D712-D507", "D712-D508"); //colonne 12
-	
-    //-2- IDT-ILMN TruSeq DNA UD Indexes (96 Indexes)
-    $scope.plates[2].tags.push("udi0001_i7-udi0001_i5","udi0002_i7-udi0002_i5","udi0003_i7-udi0003_i5","udi0004_i7-udi0004_i5","udi0005_i7-udi0005_i5","udi0006_i7-udi0006_i5","udi0007_i7-udi0007_i5","udi0008_i7-udi0008_i5"); //colonne 1
-    $scope.plates[2].tags.push("udi0009_i7-udi0009_i5","udi0010_i7-udi0010_i5","udi0011_i7-udi0011_i5","udi0012_i7-udi0012_i5","udi0013_i7-udi0013_i5","udi0014_i7-udi0014_i5","udi0015_i7-udi0015_i5","udi0016_i7-udi0016_i5"); //colonne 2
-    $scope.plates[2].tags.push("udi0017_i7-udi0017_i5","udi0018_i7-udi0018_i5","udi0019_i7-udi0019_i5","udi0020_i7-udi0020_i5","udi0021_i7-udi0021_i5","udi0022_i7-udi0022_i5","udi0023_i7-udi0023_i5","udi0024_i7-udi0024_i5"); //colonne 3
-    $scope.plates[2].tags.push("udi0025_i7-udi0025_i5","udi0026_i7-udi0026_i5","udi0027_i7-udi0027_i5","udi0028_i7-udi0028_i5","udi0029_i7-udi0029_i5","udi0030_i7-udi0030_i5","udi0031_i7-udi0031_i5","udi0032_i7-udi0032_i5"); //colonne 4
-    $scope.plates[2].tags.push("udi0033_i7-udi0033_i5","udi0034_i7-udi0034_i5","udi0035_i7-udi0035_i5","udi0036_i7-udi0036_i5","udi0037_i7-udi0037_i5","udi0038_i7-udi0038_i5","udi0039_i7-udi0039_i5","udi0040_i7-udi0040_i5"); //colonne 5
-    $scope.plates[2].tags.push("udi0041_i7-udi0041_i5","udi0042_i7-udi0042_i5","udi0043_i7-udi0043_i5","udi0044_i7-udi0044_i5","udi0045_i7-udi0045_i5","udi0046_i7-udi0046_i5","udi0047_i7-udi0047_i5","udi0048_i7-udi0048_i5"); //colonne 6
-    $scope.plates[2].tags.push("udi0049_i7-udi0049_i5","udi0050_i7-udi0050_i5","udi0051_i7-udi0051_i5","udi0052_i7-udi0052_i5","udi0053_i7-udi0053_i5","udi0054_i7-udi0054_i5","udi0055_i7-udi0055_i5","udi0056_i7-udi0056_i5"); //colonne 7
-    $scope.plates[2].tags.push("udi0057_i7-udi0057_i5","udi0058_i7-udi0058_i5","udi0059_i7-udi0059_i5","udi0060_i7-udi0060_i5","udi0061_i7-udi0061_i5","udi0062_i7-udi0062_i5","udi0063_i7-udi0063_i5","udi0064_i7-udi0064_i5"); //colonne 8
-    $scope.plates[2].tags.push("udi0065_i7-udi0065_i5","udi0066_i7-udi0066_i5","udi0067_i7-udi0067_i5","udi0068_i7-udi0068_i5","udi0069_i7-udi0069_i5","udi0070_i7-udi0070_i5","udi0071_i7-udi0071_i5","udi0072_i7-udi0072_i5"); //colonne 9
-    $scope.plates[2].tags.push("udi0073_i7-udi0073_i5","udi0074_i7-udi0074_i5","udi0075_i7-udi0075_i5","udi0076_i7-udi0076_i5","udi0077_i7-udi0077_i5","udi0078_i7-udi0078_i5","udi0079_i7-udi0079_i5","udi0080_i7-udi0080_i5"); //colonne 10
-    $scope.plates[2].tags.push("udi0081_i7-udi0081_i5","udi0082_i7-udi0082_i5","udi0083_i7-udi0083_i5","udi0084_i7-udi0084_i5","udi0085_i7-udi0085_i5","udi0086_i7-udi0086_i5","udi0087_i7-udi0087_i5","udi0088_i7-udi0088_i5"); //colonne 11
-    $scope.plates[2].tags.push("udi0089_i7-udi0089_i5","udi0090_i7-udi0090_i5","udi0091_i7-udi0091_i5","udi0092_i7-udi0092_i5","udi0093_i7-udi0093_i5","udi0094_i7-udi0094_i5","udi0095_i7-udi0095_i5","udi0096_i7-udi0096_i5"); //colonne 12
-
-    //-3- IDT-ILMN TruSeq DNA UD Indexes (24 Indexes repetes 4 fois)
-    $scope.plates[3].tags.push("udi0001_i7-udi0001_i5","udi0002_i7-udi0002_i5","udi0003_i7-udi0003_i5","udi0004_i7-udi0004_i5","udi0005_i7-udi0005_i5","udi0006_i7-udi0006_i5","udi0007_i7-udi0007_i5","udi0008_i7-udi0008_i5"); //colonne 1
-    $scope.plates[3].tags.push("udi0009_i7-udi0009_i5","udi0010_i7-udi0010_i5","udi0011_i7-udi0011_i5","udi0012_i7-udi0012_i5","udi0013_i7-udi0013_i5","udi0014_i7-udi0014_i5","udi0015_i7-udi0015_i5","udi0016_i7-udi0016_i5"); //colonne 2
-    $scope.plates[3].tags.push("udi0017_i7-udi0017_i5","udi0018_i7-udi0018_i5","udi0019_i7-udi0019_i5","udi0020_i7-udi0020_i5","udi0021_i7-udi0021_i5","udi0022_i7-udi0022_i5","udi0023_i7-udi0023_i5","udi0024_i7-udi0024_i5"); //colonne 3
-    $scope.plates[3].tags.push("udi0001_i7-udi0001_i5","udi0002_i7-udi0002_i5","udi0003_i7-udi0003_i5","udi0004_i7-udi0004_i5","udi0005_i7-udi0005_i5","udi0006_i7-udi0006_i5","udi0007_i7-udi0007_i5","udi0008_i7-udi0008_i5"); //colonne 4
-    $scope.plates[3].tags.push("udi0009_i7-udi0009_i5","udi0010_i7-udi0010_i5","udi0011_i7-udi0011_i5","udi0012_i7-udi0012_i5","udi0013_i7-udi0013_i5","udi0014_i7-udi0014_i5","udi0015_i7-udi0015_i5","udi0016_i7-udi0016_i5"); //colonne 5
-    $scope.plates[3].tags.push("udi0017_i7-udi0017_i5","udi0018_i7-udi0018_i5","udi0019_i7-udi0019_i5","udi0020_i7-udi0020_i5","udi0021_i7-udi0021_i5","udi0022_i7-udi0022_i5","udi0023_i7-udi0023_i5","udi0024_i7-udi0024_i5"); //colonne 6
-    $scope.plates[3].tags.push("udi0001_i7-udi0001_i5","udi0002_i7-udi0002_i5","udi0003_i7-udi0003_i5","udi0004_i7-udi0004_i5","udi0005_i7-udi0005_i5","udi0006_i7-udi0006_i5","udi0007_i7-udi0007_i5","udi0008_i7-udi0008_i5"); //colonne 7
-    $scope.plates[3].tags.push("udi0009_i7-udi0009_i5","udi0010_i7-udi0010_i5","udi0011_i7-udi0011_i5","udi0012_i7-udi0012_i5","udi0013_i7-udi0013_i5","udi0014_i7-udi0014_i5","udi0015_i7-udi0015_i5","udi0016_i7-udi0016_i5"); //colonne 8
-    $scope.plates[3].tags.push("udi0017_i7-udi0017_i5","udi0018_i7-udi0018_i5","udi0019_i7-udi0019_i5","udi0020_i7-udi0020_i5","udi0021_i7-udi0021_i5","udi0022_i7-udi0022_i5","udi0023_i7-udi0023_i5","udi0024_i7-udi0024_i5"); //colonne 9
-    $scope.plates[3].tags.push("udi0001_i7-udi0001_i5","udi0002_i7-udi0002_i5","udi0003_i7-udi0003_i5","udi0004_i7-udi0004_i5","udi0005_i7-udi0005_i5","udi0006_i7-udi0006_i5","udi0007_i7-udi0007_i5","udi0008_i7-udi0008_i5"); //colonne 10
-    $scope.plates[3].tags.push("udi0009_i7-udi0009_i5","udi0010_i7-udi0010_i5","udi0011_i7-udi0011_i5","udi0012_i7-udi0012_i5","udi0013_i7-udi0013_i5","udi0014_i7-udi0014_i5","udi0015_i7-udi0015_i5","udi0016_i7-udi0016_i5"); //colonne 11
-    $scope.plates[3].tags.push("udi0017_i7-udi0017_i5","udi0018_i7-udi0018_i5","udi0019_i7-udi0019_i5","udi0020_i7-udi0020_i5","udi0021_i7-udi0021_i5","udi0022_i7-udi0022_i5","udi0023_i7-udi0023_i5","udi0024_i7-udi0024_i5"); //colonne 12
-
 	$scope.tagPlate = $scope.plates[0]; // defaut du select
 	
-	//NGL-2012 - 04/05/2018: Nvel algorithme plus générique, capable de gérer des plaques d'index incomplètes...(repris de small-rnaseq-lib-prep-ctrl.js)
-	var setTags = function(){
-		$scope.messages.clear();
-			
-		console.log("selected plate is "+ $scope.tagPlate.name);
-		console.log("selected start column is " + $scope.tagPlateColumn.name);
-		console.log("selected start position is " + $scope.tagPlateColumn.position);
-		
-		var dataMain = atmService.data.getData();
-		// trier dans l'ordre "colonne d'abord"
-		var dataMain = $filter('orderBy')(dataMain, ['atomicTransfertMethod.column*1','atomicTransfertMethod.line']); 
-
-		if (($scope.tagPlateColumn.name === '---' ) && ($scope.tagPlate.name === '---')){
-			// remise a 0 des selects par l'utilisateur ????=> nettoyage de ce qui a ete positionné precedemment
-			console.log("suppression des index ...");
-				
-			for(var i = 0; i < dataMain.length; i++){
-				var udtData = dataMain[i];
-				var ocu=udtData.outputContainerUsed;
-				ocu.experimentProperties["tag"]= undefined;
-				ocu.experimentProperties["tagCategory"]=undefined;
-			}	
-			atmService.data.setData(dataMain);	
-			
-		} else if (($scope.tagPlateColumn.name !== '---' ) && ($scope.tagPlate.name !== '---')){	
-			
-			//attention certains choix de colonne sont incorrrects !!! 
-			//le controle doit porter sur la valeur maximale de colonne trouvee sur la plaque a indexer
-			//=>dernier puit si on a trié  dans l'ordre "colonne d'abord"
-			var last=dataMain.slice(-1)[0];
-			var lastInputCol=last.atomicTransfertMethod.column*1;
-			console.log("last col in input plate="+ lastInputCol);
-			
-			var lastTagCol=$scope.tagPlate.tags.length / 8;    // ce sont des colonnes de 8
-			console.log("last col in tag plate="+ lastTagCol);
-			
-			// meme en prennant tous les index possibles, il n'y en a pas assez dans la plaque !!
-			if ( lastTagCol < lastInputCol ){
-	        	$scope.messages.clazz="alert alert-danger";
-	        	$scope.messages.text=Messages('select.msg.error.notEnoughTags.tagPlate',$scope.tagPlate.name);
-	        	$scope.messages.showDetails = false;
-	        	$scope.messages.open();
-	        	return;
-			}
-			
-			// la colonne de debut choisie est vide
-			if ( $scope.tagPlateColumn.name*1 > lastTagCol){
-	        	$scope.messages.clazz="alert alert-danger";
-	        	$scope.messages.text=Messages('select.msg.error.emptyStartColumn.tagPlate', $scope.tagPlateColumn.name, $scope.tagPlate.name );
-	        	$scope.messages.showDetails = false;
-	        	$scope.messages.open();	
-	        	return;
-	        }
-				
-			// la colonne choisie est incorrecte (toutes les puits input ne recevront pas d'index) !!INTERDIT
-		    if ( (lastTagCol - $scope.tagPlateColumn.name*1  +1) < lastInputCol ) {   	
-	        	$scope.messages.clazz="alert alert-danger";
-	        	$scope.messages.text=Messages('select.msg.error.wrongStartColumn.tagPlate', $scope.tagPlateColumn.name);
-	        	$scope.messages.showDetails = false;
-	        	$scope.messages.open();	
-	        	return;
-	        }
-	
-			for(var i = 0; i < dataMain.length; i++){
-				var udtData = dataMain[i];
-				var ocu=udtData.outputContainerUsed;
-				//console.log("outputContainerUsed.code"+udtData.outputContainerUsed.code);
-
-				//calculer la position sur la plaque:   pos= (col -1)*8 + line      (line est le code ascii - 65)
-				var libPos= (udtData.atomicTransfertMethod.column  -1 )*8 + ( udtData.atomicTransfertMethod.line.charCodeAt(0) -65);
-				//console.log("lib pos=" +libPos);
-				var indexPos= libPos + $scope.tagPlateColumn.position; 
-				//console.log("index pos="+indexPos);
-				console.log("=> setting index "+indexPos+ ": "+ $scope.tagPlate.tags[indexPos] );
-				
-				//ajouter dans experimentProperties les PSV tagCategory et tag
-				var ocu=udtData.outputContainerUsed;
-				if(ocu.experimentProperties===undefined || ocu.experimentProperties===null){
-					ocu.experimentProperties={};
-				}
-				
-				// attention aux positions non definies des plaques d'index ( plaques de 48..) /// ne doit plus arriver avec les tests initiaux...
-				// reste le cas possible de plan d'index avec des trous ???
-				if ( $scope.tagPlate.tags[indexPos] !== undefined) {
-					ocu.experimentProperties["tag"]={"_type":"single","value":$scope.tagPlate.tags[indexPos]};
-					ocu.experimentProperties["tagCategory"]={"_type":"single","value":$scope.tagPlate.tagCategory};
-				}
-			}	
-			
-			atmService.data.setData(dataMain);
-		}
-		// dans le dernier cas rien a faire...
-	};
-	
-	/*garder pour l'instant au cas ou....
-	var setTagsOLD = function(){
-		$scope.messages.clear();
-		
-        var dataMain = atmService.data.getData();
-        // trier dans l'ordre "colonne d'abord"
-        var dataMain = $filter('orderBy')(dataMain, ['atomicTransfertMethod.column*1','atomicTransfertMethod.line']);
-        
-        //attention certains choix de colonne sont incorrrects !!!
-        // 26/10/2017 NGL-1671: le controle doit porter sur la valeur maximale de colonne trouvee sur la plaque a indexer
-        //=>dernier puit si on a trié  dans l'ordre "colonne d'abord"
-        
-        var last=dataMain.slice(-1)[0];
-        var maxcol=last.atomicTransfertMethod.column*1;
-        console.log("last col in input plate="+maxcol);
-        console.log("selected index plate="+$scope.tagPlate.name);
-        console.log("selected index column=" +$scope.tagPlateColumn.name);
-        
-        if  ($scope.tagPlateColumn.name*1 + maxcol > 13 ){			
-			$scope.messages.clazz="alert alert-danger";
-			$scope.messages.text=Messages('select.msg.error.wrongStartColumn.tagPlate', $scope.tagPlateColumn.name); // en attendant modif de l'algo
-			$scope.messages.showDetails = false;
-			$scope.messages.open();	
-			return;
-		}
-       
-	    for(var i = 0; i < dataMain.length; i++){
-			var udtData = dataMain[i];
-			var ocu=udtData.outputContainerUsed;
-			//console.log("outputContainerUsed.code"+udtData.outputContainerUsed.code);
-			
-			if ($scope.tagPlateColumn.position != undefined ){
-				//calculer la position sur la plaque:   pos= (col -1)*8 + line      (line est le code ascii - 65)
-				var libPos= (udtData.atomicTransfertMethod.column  -1 )*8 + ( udtData.atomicTransfertMethod.line.charCodeAt(0) -65);
-				var indexPos= libPos + $scope.tagPlateColumn.position;
-				//console.log("=> setting index "+indexPos+ ": "+ tagPlateCode[indexPos] );
-				
-				//ajouter dans experimentProperties les PSV tagCategory et tag
-				var ocu=udtData.outputContainerUsed;
-				if(ocu.experimentProperties===undefined || ocu.experimentProperties===null){
-					ocu.experimentProperties={};
-				}				
-				// 17/11/2017 modification pour possibilité d'utilisation plusieurs plaques
-				ocu.experimentProperties["tag"]={"_type":"single","value":$scope.tagPlate.tags[indexPos]};
-				ocu.experimentProperties["tagCategory"]={"_type":"single","value":$scope.tagPlate.tagCategory};
-				
-
-			} else {
-				//l'utilisateur n'a rien selectionné => suprimer les PSV tagCategory et tagCode 
-				ocu.experimentProperties["tag"]= undefined;
-				ocu.experimentProperties["tagCategory"]=undefined;
-			}
-		}	
-	    atmService.data.setData(dataMain);
-	};
-	*/
-	
-	// NGL-2012 :Ajouter les permissions pour admin; supprimer condition sur EditMode
+	// 22/06/2018 NGL-2014 setTags mis en commun dans tag-plate-helpers.js
+	// NGL-2012 Ajouter les permissions pour admin; supprimer condition sur EditMode
 	$scope.selectColOrPlate = {
 		isShow:function(){
 			return ( $scope.isInProgressState() || Permissions.check("admin") );
-			},	
-		// !!!!   select:setTags()  => comportement incomprehensible et sans erreurs !!!
-		select:setTags
+		},	
+		select:function(){
+			// 22/06/2018 NGL-2014 utiliser la factory tagPlates
+			return tagPlates.setTags($scope.tagPlate, $scope.tagPlateColumn, atmService, $scope.messages) 
+		}
 	};
+	
+	// 31/08/2018 NGL-1350 aide a la saisie des tags
+	// meme si la fonctionnalité n'a pas été mise en place dans cette experience, 
+	// l'appel a tagPlates.initTags() est maintenant obligatoire pour l'assignation automatique de tagCategory
+	if ( $scope.isNewState() || $scope.isInProgressState() || Permissions.check("admin") ){ 
+		
+	   tagPlates.initTags();
+	   $scope.getTags= function(){return tagPlates.getAllTags()};
+	   
+	   /* masquer fonctionnalité de choix d'index par groupes...pour l'instant 
+	   $scope.getTagGroups= function(){return tagPlates.getAllTagGroups()};
+	   $scope.selectedTagGroup= $scope.getTagGroups()[0]; // valeur defaut du select (qui maintenant existe car definie sans attendre le retour de la promise)
+	   */
+	}
+
+	/* masquer fonctionnalité de choix d'index par groupes...pour l'instant 
+	$scope.selectGroup = {
+			isShow:function(){
+				return (  $scope.isInProgressState()  || Permissions.check("admin") );
+			}
+	};
+	*/
 	
 	// 24/11/2016  ajouté comme dans prep-wg-nano pour remplacer les valeurs par defaut dans la definition de l'experience
 	// calculer les qtés inputQuantityFrag et inputQuantityLib a partir de inputVolumeFrag et inputVolumeLib
@@ -658,12 +471,14 @@ angular.module('home').controller('PrepPcrFreeCtrl',['$scope', '$parse',  '$filt
 			// verifier si le volume saisi est > au volume IN:  si oui ecraser le volume saisi par volume IN
 			// TODO...?? plus tard
 			computeQuantityFrag(value.data);
-		}
-		
-		if(col.property === 'inputContainerUsed.experimentProperties.inputVolumeLib.value'){
+		} else if(col.property === 'inputContainerUsed.experimentProperties.inputVolumeLib.value'){
 			// verifier si le volume saisi est > au volume IN:  si oui ecraser le volume saisi par volume IN
 			// TODO...?? plus tard
 			computeQuantityLib(value.data);
+		} else if(col.property === 'outputContainerUsed.experimentProperties.tag.value'){
+			// 26/06/2018 utilisation de tagPlates.computeTagCategory
+			//V1 tagPlates.computeTagCategory(value);
+			tagPlates.computeTagCategory(value.data);
 		}
 	}
 
@@ -683,12 +498,11 @@ angular.module('home').controller('PrepPcrFreeCtrl',['$scope', '$parse',  '$filt
 		
 		if(compute.isReady()){
 			var result = $parse("inputConc * inputVolume")(compute);
-			//console.log("result = "+result);
+			console.log("frag result = "+result);
 			
 			if(angular.isNumber(result) && !isNaN(result)){
 				inputQuantity = Math.round(result*10)/10;				
 			}else{
-				//inputQuantity = undefined;
 				inputQuantity = 0;
 			}	
 			getter.assign(udtData, inputQuantity);
@@ -716,12 +530,11 @@ angular.module('home').controller('PrepPcrFreeCtrl',['$scope', '$parse',  '$filt
 		
 		if(compute.isReady()){
 			var result = $parse("inputConc * inputVolume")(compute);
-			console.log("result = "+result);
+			console.log("quant result = "+result);
 			
 			if(angular.isNumber(result) && !isNaN(result)){
 				inputQuantity = Math.round(result*10)/10;				
 			}else{
-				///inputQuantity = undefined;\\
 				inputQuantity = 0;
 			}	
 			getter.assign(udtData, inputQuantity);
@@ -730,6 +543,5 @@ angular.module('home').controller('PrepPcrFreeCtrl',['$scope', '$parse',  '$filt
 			console.log("Missing values to exec computeQuantityLib");
 		}
 	}	
-
     
 }]);

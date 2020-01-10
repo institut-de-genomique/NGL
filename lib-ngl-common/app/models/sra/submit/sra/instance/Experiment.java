@@ -7,17 +7,16 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 import fr.cea.ig.DBObject;
-import models.laboratory.common.description.ObjectType;
+import fr.cea.ig.ngl.dao.api.sra.ExperimentAPI;
 import models.laboratory.common.instance.State;
 import models.laboratory.common.instance.TraceInformation;
 import models.sra.submit.util.VariableSRA;
 import models.utils.InstanceConstants;
 import validation.ContextValidation;
 import validation.IValidation;
+import validation.common.instance.CommonValidationHelper;
 import validation.sra.SraValidationHelper;
 import validation.utils.ValidationHelper;
-
-// todo : ajouter  libraryName dans la validation
 
 // Declaration d'une collection Experiment (herite de DBObject)
 public class Experiment extends DBObject implements IValidation {
@@ -42,9 +41,11 @@ public class Experiment extends DBObject implements IValidation {
  	//SPOTDECODESPEC.READSPEC a remplir en fonction de typePlatform, libraryLayout, libraryLayoutOrientation
  	// voir dans create_ExperimentType
 	//Projects ref
-	public String sampleCode = null;
-	public String studyCode = null;
-	public String sampleAccession = null;
+	public String sampleCode = null;   // champs qui peut etre null, si rappatriement à partir de l'EBI
+									   // ou si utilisation d'un sampleAC soumis par les collaborateurs.
+	public String studyCode = null;    // champs qui peut etre null, si rappatriement à partir de l'EBI
+	                                   // ou si utilisation d'un sampleAC soumis par les collaborateurs.
+	public String sampleAccession = null;  // champs qui doit etre renseigné si state > SUB-F
 	public String studyAccession = null;
 	public String readSetCode = null;
 	public List<ReadSpec> readSpecs = new ArrayList<>();
@@ -57,86 +58,161 @@ public class Experiment extends DBObject implements IValidation {
 		// pour loguer les dernieres modifications utilisateurs
 	public Date releaseDate; 
 	public Date firstSubmissionDate; 
-
-	// ajouter instrumentModel et libraryName.
-
+	
 	// Verifie validite de l'experiment sans verifier validite du run associé :
-	public void validateLight(ContextValidation contextValidation) {
-		contextValidation.addKeyToRootKeyName("experiment");
+	public void validateInvariantsNoRun(ContextValidation contextValidation) {
+		// nouvelle notation de Jean. Ne marche pas si put objets dans contextValidation :
+		contextValidation = contextValidation.appendPath("experiment");
+		if (ValidationHelper.validateNotEmpty(contextValidation, code, "code")) 
+			contextValidation = contextValidation.appendPath(code);		
+//      ancienne notation :		
+//		contextValidation.addKeyToRootKeyName("experiment");
+//		//verifier que code est bien renseigné
+//		String codeRootKey = null;
+//		if (ValidationHelper.validateNotEmpty(contextValidation, code, "code")) {
+//			codeRootKey = code;
+//			contextValidation.addKeyToRootKeyName(codeRootKey);
+//		}
 		// Verifier que status est bien rensigne, et si != new alors libraryName renseigné :
 		//System.out.println("Dans exp.validate, stateCode =" +state.code);
 		SraValidationHelper.validateFreeText(contextValidation,"title", this.title);
-		SraValidationHelper.validateState(ObjectType.CODE.SRASubmission, this.state, contextValidation);
-		ValidationHelper.required(contextValidation, this.libraryName , "libraryName");
+		//CommonValidationHelper.validateStateRequired(contextValidation, ObjectType.CODE.SRASubmission, this.state);
+		ValidationHelper.validateNotEmpty(contextValidation, this.libraryName , "libraryName");
 		// Verifer que projectCode est bien renseigné et qu'il existe bien dans lims :
-		SraValidationHelper.validateProjectCode(this.projectCode, contextValidation);
-		ValidationHelper.required(contextValidation, this.title , "title");
+		CommonValidationHelper.validateProjectCodeRequired(contextValidation, this.projectCode);
+		ValidationHelper.validateNotEmpty(contextValidation, this.title , "title");
         // Verifer que librarySelection libraryStrategy librarySource et libraryLayout sont bien renseignés avec bonne valeur :		
 		SraValidationHelper.requiredAndConstraint(contextValidation, this.librarySelection, VariableSRA.mapLibrarySelection(), "librarySelection");
 		SraValidationHelper.requiredAndConstraint(contextValidation, this.libraryStrategy, VariableSRA.mapLibraryStrategy(), "libraryStrategy");
 		SraValidationHelper.requiredAndConstraint(contextValidation, this.librarySource, VariableSRA.mapLibrarySource(), "librarySource");
 		SraValidationHelper.requiredAndConstraint(contextValidation, this.libraryLayout, VariableSRA.mapLibraryLayout(), "libraryLayout"); // single ou paired
-
 		//ValidationHelper.required(contextValidation, this.libraryName , "libraryName");
 		//ValidationHelper.required(contextValidation, this.libraryConstructionProtocol , "libraryConstructionProtocol");
 		SraValidationHelper.requiredAndConstraint(contextValidation, this.typePlatform, VariableSRA.mapTypePlatform(), "typePlatform");
 		SraValidationHelper.requiredAndConstraint(contextValidation, this.instrumentModel, VariableSRA.mapInstrumentModel(), "instrumentModel");
-		if (this.sampleAccession == null) {
-			ValidationHelper.required(contextValidation, this.sampleCode , "sampleCode");
+		// L'un des champs sampleAccession ou sampleCode doit etre defini :
+		if (StringUtils.isBlank(this.sampleAccession)) {
+			ValidationHelper.validateNotEmpty(contextValidation, this.sampleCode , "sampleCode");
+		} 
+		if (StringUtils.isBlank(this.sampleCode)) {
+			ValidationHelper.validateNotEmpty(contextValidation, this.sampleAccession , "sampleAccession");
 		}
-		if (this.studyAccession == null) {
-			ValidationHelper.required(contextValidation, this.studyCode , "studyCode");
+		// L'un des champs studyAccession ou studyCode doit etre defini :
+		if (StringUtils.isBlank(this.studyAccession)) {
+			ValidationHelper.validateNotEmpty(contextValidation, this.studyCode , "studyCode");
 		}
-		ValidationHelper.required(contextValidation, this.readSetCode , "readSetCode");
-
-		System.out.println("platform = " + this.typePlatform);
+		if (StringUtils.isBlank(this.studyCode)) {
+			ValidationHelper.validateNotEmpty(contextValidation, this.studyAccession , "studyAccession");
+		}	
+		ValidationHelper.validateNotEmpty(contextValidation, this.readSetCode , "readSetCode");
 		// Dans le cas des illumina ou LS454
 		if (! "OXFORD_NANOPORE".equalsIgnoreCase(this.typePlatform)) {
 			if ("illumina".equalsIgnoreCase(this.typePlatform)) {
-			ValidationHelper.required(contextValidation, this.spotLength , "spotLength");
+			ValidationHelper.validateNotEmpty(contextValidation, this.spotLength , "spotLength");
 			}
 			if (StringUtils.isNotBlank(this.libraryLayout) && libraryLayout.equalsIgnoreCase("paired")){
 				// Verifer que lastBaseCoord est bien renseigné ssi Illumina et paired:
-				ValidationHelper.required(contextValidation, this.lastBaseCoord , "lastBaseCoord");	
-				ValidationHelper.required(contextValidation, this.libraryLayoutNominalLength , "libraryLayoutNominalLength");
+				ValidationHelper.validateNotEmpty(contextValidation, this.lastBaseCoord , "lastBaseCoord");	
+				ValidationHelper.validateNotEmpty(contextValidation, this.libraryLayoutNominalLength , "libraryLayoutNominalLength");
 				SraValidationHelper.requiredAndConstraint(contextValidation, this.libraryLayoutOrientation, VariableSRA.mapLibraryLayoutOrientation(), "libraryLayoutOrientation");
 			}
 		}
 		// Si nanopore pas de readspec et pas spotLength, lastBasecoord, et libraryLayoutNominalLength
 		// Verifier les readSpec :
-		SraValidationHelper.validateReadSpecs(contextValidation, this);
-		
-		// verifier que code est bien renseigné
-		SraValidationHelper.validateCode(this, InstanceConstants.SRA_EXPERIMENT_COLL_NAME, contextValidation);
-		SraValidationHelper.validateId(this, contextValidation);
-		SraValidationHelper.validateTraceInformation(traceInformation, contextValidation);
-		contextValidation.removeKeyFromRootKeyName("experiment");
-
-		// todo :
-		//if (MongoDBDAO.checkObjectExist(InstanceConstants.SRA_EXPERIMENT_COLL_NAME, Experiment.class, "readSetCode", this.readSetCode)) {
-			//throw new SraException("le readSetcode "+ experiment.run.code + " existe deja dans la collection Experiment de la base");
-			//mess += "le readSetcode "+ this.run.code + " existe deja dans la collection Experiment de la base";
-		//}
-
-		
+		SraValidationHelper   .validateReadSpecs(contextValidation, this);
+		CommonValidationHelper.validateCodePrimary(contextValidation, this, InstanceConstants.SRA_EXPERIMENT_COLL_NAME);
+		CommonValidationHelper.validateIdPrimary(contextValidation, this);
+		CommonValidationHelper.validateTraceInformationRequired(contextValidation, traceInformation);
 	}
 	
+	
+	public void validateInvariants(ContextValidation contextValidation) {
+		validateInvariantsNoRun(contextValidation);
+		contextValidation = contextValidation.appendPath("experiment");
+		if (ValidationHelper.validateNotEmpty(contextValidation, code, "code")) 
+			contextValidation = contextValidation.appendPath(code);
+		if (! "OXFORD_NANOPORE".equalsIgnoreCase(typePlatform)) { 
+			//pas mis dans validateLight car il existe dans reprise historique des illumina et LS454 sans lastBaseCoord 
+			ValidationHelper.validateNotEmpty(contextValidation, lastBaseCoord , "lastBaseCoord");	
+		}
+		if (ValidationHelper.validateNotEmpty(contextValidation, run, "run")
+				&& ValidationHelper.validateNotEmpty(contextValidation, run.code, "run"))
+			run.validate(contextValidation);
+	}
+	
+	private void validateCreation(ContextValidation contextValidation) {
+		contextValidation = contextValidation.appendPath("experiment");
+		if (ValidationHelper.validateNotEmpty(contextValidation, code, "code")) 
+			contextValidation = contextValidation.appendPath(code);
+//		if(! MongoDBDAO.checkObjectExist(InstanceConstants.SRA_EXPERIMENT_COLL_NAME, Experiment.class, "code", code)) {
+//			contextValidation.addError("code", code + " n'existe pas dans la base de données et MODE DELETE");
+//		}	
+		ExperimentAPI experimentAPI = ExperimentAPI.get();
+		if(experimentAPI.dao_checkObjectExist("code", code)) {
+			contextValidation.addError("code", code + " existe deja dans la base de données et MODE CREATION");
+		}	
+	}
+
+	private void validateDelete(ContextValidation contextValidation) {
+		contextValidation = contextValidation.appendPath("experiment");
+		if (ValidationHelper.validateNotEmpty(contextValidation, code, "code")) 
+			contextValidation = contextValidation.appendPath(code);
+		ExperimentAPI experimentAPI = ExperimentAPI.get();
+		if(! experimentAPI.dao_checkObjectExist("code", code)) {
+			contextValidation.addError("code", code + " n'existe pas dans la base de données et MODE DELETE");
+		}	
+	}
+	
+
+	private void validateUpdate(ContextValidation contextValidation) {
+		contextValidation = contextValidation.appendPath("experiment");
+		if (ValidationHelper.validateNotEmpty(contextValidation, code, "code")) 
+			contextValidation = contextValidation.appendPath(code);
+		ExperimentAPI experimentAPI = ExperimentAPI.get();
+		if(! experimentAPI.dao_checkObjectExist("code", code)) {
+			contextValidation.addError("code", code + " n'existe pas dans la base de données et MODE UPDATE");
+		}	
+	}
+
 	@Override
 	public void validate(ContextValidation contextValidation) {
-		this.validateLight(contextValidation);
-		if (! "OXFORD_NANOPORE".equalsIgnoreCase(this.typePlatform)) { 
-			//pas mis dans validateLight car il existe dans reprise historique des illumina et LS454 sans lastBaseCoord 
-			ValidationHelper.required(contextValidation, this.lastBaseCoord , "lastBaseCoord");	
-		}
-		contextValidation.addKeyToRootKeyName("experiment");
-		// Verifier le run :
-		if (this.run == null) {
-			contextValidation.addErrors("run", " aucune valeur");
-		} else {
-			this.run.validate(contextValidation);
-		}
-		contextValidation.removeKeyFromRootKeyName("experiment");
+//		contextValidation = contextValidation.appendPath("experiment");
+//		if (ValidationHelper.validateNotEmpty(contextValidation, code, "code")) 
+//			contextValidation = contextValidation.appendPath(code);
+		
+		switch (contextValidation.getMode()) {
+		case CREATION:
+			validateCreation(contextValidation);
+			break;
+		case UPDATE:
+			validateUpdate(contextValidation);
+			break;
+		case DELETE:
+			validateDelete(contextValidation);
+			break;
+		default: // autre cas undefined notamment
+			contextValidation.addError("ERROR", "contextValidation.getMode() != de CREATION, UPDATE ou DELETE (undefined ?)");
+			break;	
+		} 
+		validateInvariants(contextValidation);
+	}
+	
+	public void validateNoRun(ContextValidation contextValidation) {
+		switch (contextValidation.getMode()) {
+		case CREATION:
+			validateCreation(contextValidation);
+			break;
+		case UPDATE:
+			validateUpdate(contextValidation);
+			break;
+		case DELETE:
+			validateDelete(contextValidation);
+			break;
+		default: // autre cas undefined notamment
+			contextValidation.addError("ERROR", "contextValidation.getMode() != de CREATION, UPDATE ou DELETE (undefined ?)");
+			break;	
+		} 
+		validateInvariantsNoRun(contextValidation);
 	}
 
-	
 }

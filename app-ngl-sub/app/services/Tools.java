@@ -23,7 +23,7 @@ public class Tools {
 	
 	public List<String> loadReadSet(InputStream inputStream) throws SraException {	
 		List<String> listReadSet = new ArrayList<>();
-		if (inputStream==null) {
+		if (inputStream == null) {
 			return listReadSet;
 		}
 		try {
@@ -61,7 +61,7 @@ public class Tools {
 				String readSetCode = m.group(1); //readSetCode
 				readSetCode = clean(readSetCode);
 				//System.out.println("readSetCode = '"+ readSetCode +"'");
-				if (! listReadSet.contains(readSetCode)){
+				if (! listReadSet.contains(readSetCode)) {
 					listReadSet.add(readSetCode);
 				}
 			} 

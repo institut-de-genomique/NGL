@@ -40,19 +40,77 @@ public class Valuation implements IValidation {
      */
     public String comment;
     
+    public Valuation() {
+    }
+    
+    // -------------------------------------------------------------------
+    // Bunch of overloaded constructor to lighten caller syntax.
+    
+    /**
+     * Construct a valuation with the given user, validity and the current date.
+     * @param user  user
+     * @param valid validity
+     */
+    public Valuation(String user, TBoolean valid) {
+    	this(user, valid, new Date());
+    }
+    
+    /**
+     * Construct a valuation with the given user, validity and date.
+     * @param user  user
+     * @param valid validity
+     * @param date  date
+     */
+    public Valuation(String user, TBoolean valid, Date date) {
+    	this.user  = user;
+    	this.valid = valid;
+    	this.date  = date;
+    }
+    
+    /**
+     * Construct a valuation with the given user, validity ({@link TBoolean#valueOf(boolean)}) and the current date.
+     * @param user  user
+     * @param valid validity
+     */
+    public Valuation(String user, boolean valid) {
+    	this(user, TBoolean.valueOf(valid));
+    }
+    
+    /**
+     * Construct a valuation with the given user, validity ({@link TBoolean#valueOf(boolean)}) and date.
+     * @param user  user
+     * @param valid validity
+     * @param date  date
+     */
+    public Valuation(String user, boolean valid, Date date) {
+    	this(user, TBoolean.valueOf(valid), date);
+    }
+    
+    /**
+     * Validate this valuation (context parameter {@link CommonValidationHelper#FIELD_TYPE_CODE}).
+     */
 	@Override
+	@Deprecated
 	public void validate(ContextValidation contextValidation) {
-		ValidationHelper.required(contextValidation, valid, "valid");
-		if(!TBoolean.UNSET.equals(valid)){
-			ValidationHelper.required(contextValidation, date, "date");
-			ValidationHelper.required(contextValidation, user, "user");
-			
+		ValidationHelper.validateNotEmpty             (contextValidation, valid, "valid");
+		if (!TBoolean.UNSET.equals(valid)) {
+			ValidationHelper.validateNotEmpty         (contextValidation, date, "date");
+			ValidationHelper.validateNotEmpty         (contextValidation, user, "user");
 		}
-		CommonValidationHelper.validateResolutionCodes(resolutionCodes, contextValidation);
-		//TODO : resolution si different de zero
-		
-		CommonValidationHelper.validateCriteriaCode(criteriaCode, contextValidation); 
-		
+		CommonValidationHelper.validateResolutionCodes(contextValidation, resolutionCodes);
+		// GA: resolution si different de zero
+		CommonValidationHelper.validateCriteriaCode   (contextValidation, criteriaCode); 
+	}
+	
+	public void validate(ContextValidation contextValidation, String typeCode) {
+		ValidationHelper.validateNotEmpty             (contextValidation, valid, "valid");
+		if (!TBoolean.UNSET.equals(valid)) {
+			ValidationHelper.validateNotEmpty         (contextValidation, date, "date");
+			ValidationHelper.validateNotEmpty         (contextValidation, user, "user");
+		}
+		CommonValidationHelper.validateResolutionCodes(contextValidation, typeCode, resolutionCodes);
+		// GA: resolution si different de zero
+		CommonValidationHelper.validateCriteriaCode   (contextValidation, typeCode, criteriaCode); 
 	}
 
 }

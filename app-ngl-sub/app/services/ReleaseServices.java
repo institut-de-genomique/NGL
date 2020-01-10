@@ -2,14 +2,10 @@ package services;
 
 import java.io.File;
 import java.io.IOException;
-// import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-// import java.util.HashMap;
 import java.util.HashSet;
-// import java.util.Map;
-// import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -18,49 +14,28 @@ import javax.inject.Inject;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-// import javax.xml.xpath.XPath;
-// import javax.xml.xpath.XPathExpressionException;
-// import javax.xml.xpath.XPathFactory;
-// import com.typesafe.config.ConfigFactory;
 
 import org.apache.commons.lang3.StringUtils;
 import org.mongojack.DBQuery;
 import org.mongojack.DBUpdate;
-
-// import java.util.Date;
-
-// import javax.xml.parsers.DocumentBuilder;
-// import javax.xml.parsers.DocumentBuilderFactory;
-// import javax.xml.parsers.ParserConfigurationException;
-// import javax.xml.xpath.XPath;
-// import javax.xml.xpath.XPathExpressionException;
-// import javax.xml.xpath.XPathFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-// import org.apache.commons.lang3.StringUtils;
-// import java.util.regex.Pattern;
-// import java.util.regex.Matcher;
 
-//import play.Logger;
-import fr.cea.ig.MongoDBDAO;
+
+
+//import fr.cea.ig.MongoDBDAO;
 import fr.cea.ig.ngl.NGLConfig;
+import fr.cea.ig.ngl.dao.api.sra.StudyAPI;
+import fr.cea.ig.ngl.dao.api.sra.SubmissionAPI;
 import mail.MailServiceException;
 import mail.MailServices;
 import models.laboratory.common.instance.State;
-// import models.laboratory.run.instance.ReadSet;
-// import models.sra.submit.common.instance.Sample;
 import models.sra.submit.common.instance.Study;
 import models.sra.submit.common.instance.Submission;
-// import models.sra.submit.sra.instance.Experiment;
 import models.sra.submit.util.SraException;
-// import models.sra.submit.util.VariableSRA;
-import models.utils.InstanceConstants;
-//import play.Logger;
-// import play.Play;
-// import play.api.modules.spring.Spring;
 import validation.ContextValidation;
 import workflows.sra.submission.SubmissionWorkflows;
 
@@ -68,15 +43,22 @@ public class ReleaseServices  {
 
 	private static final play.Logger.ALogger logger = play.Logger.of(ReleaseServices.class);
 
+
 	// final static SubmissionWorkflows submissionWorkflows = Spring.get BeanOfType(SubmissionWorkflows.class);
-	
 	private final SubmissionWorkflows submissionWorkflows;
 	private final NGLConfig           config;
+	private final SubmissionAPI       submissionAPI;
+	private final StudyAPI            studyAPI;
 	
 	@Inject
-	public ReleaseServices(NGLConfig config, SubmissionWorkflows submissionWorkflows) {
+	public ReleaseServices(NGLConfig config, 
+						   SubmissionWorkflows submissionWorkflows,
+						   SubmissionAPI submissionAPI,
+						   StudyAPI studyAPI) {
 		this.submissionWorkflows = submissionWorkflows;
 		this.config              = config;
+		this.submissionAPI       = submissionAPI;
+		this.studyAPI            = studyAPI;
 	}
 
 	public Submission traitementRetourRelease(ContextValidation ctxVal, String submissionCode, File retourEbiRelease) throws IOException, SraException, MailServiceException {
@@ -85,11 +67,13 @@ public class ReleaseServices  {
 		}
 //		System.out.println("submissionCode=" + submissionCode);
 		logger.debug("submissionCode = {}", submissionCode);
-		Submission submission = MongoDBDAO.findByCode(InstanceConstants.SRA_SUBMISSION_COLL_NAME, Submission.class, submissionCode);
+//		Submission submission = MongoDBDAO.findByCode(InstanceConstants.SRA_SUBMISSION_COLL_NAME, Submission.class, submissionCode);
+		Submission submission = submissionAPI.dao_getObject(submissionCode);
 
 		if (submission == null) 
 			throw new SraException("soumission " + submissionCode + " impossible à recuperer dans base");
-		Study study = MongoDBDAO.findByCode(InstanceConstants.SRA_STUDY_COLL_NAME, Study.class, submission.studyCode);
+//		Study study = MongoDBDAO.findByCode(InstanceConstants.SRA_STUDY_COLL_NAME, Study.class, submission.studyCode);
+		Study study = studyAPI.dao_getObject(submission.studyCode);
 		if (! retourEbiRelease.exists())
 			throw new SraException("Fichier resultat de l'ebi pour la release absent des disques : " + retourEbiRelease.getAbsolutePath());
 		if (!submission.release)
@@ -186,7 +170,7 @@ public class ReleaseServices  {
 				message = "Absence de la ligne RECEIPT ... pour  " + submissionCode + " dans fichier "+ retourEbiRelease.getPath();
 			}
 			for (int i = 0; i<nbRacineNoeuds; i++) {
-				if(racineNoeuds.item(i).getNodeType() == Node.ELEMENT_NODE) {
+				if (racineNoeuds.item(i).getNodeType() == Node.ELEMENT_NODE) {
 					final Element elt = (Element) racineNoeuds.item(i);
 					//Affichage d'un elt :
 					/*System.out.println("\n*************Elt************");
@@ -212,18 +196,21 @@ public class ReleaseServices  {
 					}
 				}			
 			}  // end for  
-		} catch (final ParserConfigurationException e) {
-			e.printStackTrace();
-		} catch (final SAXException e) {
-			e.printStackTrace();
-		} catch (final IOException e) {
+//		} catch (final ParserConfigurationException e) {
+//			e.printStackTrace();
+//		} catch (final SAXException e) {
+//			e.printStackTrace();
+//		} catch (final IOException e) {
+//			e.printStackTrace();
+//		} 
+		} catch (final ParserConfigurationException| SAXException | IOException e) {
 			e.printStackTrace();
 		} 
 		if (submissionCode.equals(submission.code)) {
 //			System.out.println("ok submissionCode = submission.code");
 			logger.debug("ok submissionCode = submission.code");
 		}
-		if (StringUtils.isNotBlank(studyAccession)) {
+		if (studyAccession != null && StringUtils.isNotBlank(studyAccession)) { // Duplicate test to avoid warning
 			if (studyAccession.equals(study.accession)) {
 //				System.out.println("studyAccession :'"+ studyAccession + "' ==  study.accession :'" +  study.accession +"'");
 				logger.debug("studyAccession :'"+ studyAccession + "' ==  study.accession :'" +  study.accession +"'");
@@ -270,16 +257,22 @@ public class ReleaseServices  {
 			submissionWorkflows.setState(ctxVal, submission, okState);
 			message = "Objets lies au studyAccession = " + studyAccession + " mis dans le domaine public via la soumission "+ submissionCode + "</br>"; 
 			mailService.sendMail(expediteur, destinataires, subjectSuccess, new String(message.getBytes(), "iso-8859-1"));
-			MongoDBDAO.update(InstanceConstants.SRA_SUBMISSION_COLL_NAME, Submission.class, 
-				DBQuery.is("code", submissionCode),
-				DBUpdate.set("submissionDate", date).set("traceInformation.modifyUser", user).set("traceInformation.modifyDate", date));	
+//			MongoDBDAO.update(InstanceConstants.SRA_SUBMISSION_COLL_NAME, Submission.class, 
+//				DBQuery.is("code", submissionCode),
+//				DBUpdate.set("submissionDate", date).set("traceInformation.modifyUser", user).set("traceInformation.modifyDate", date));	
+			submissionAPI.dao_update(DBQuery.is("code", submissionCode), 
+									 DBUpdate.set("submissionDate", date).
+									 set("traceInformation.modifyUser", user).
+									 set("traceInformation.modifyDate", date));
 
-			MongoDBDAO.update(InstanceConstants.SRA_STUDY_COLL_NAME, Study.class, 
-				DBQuery.is("accession", studyAccession),
-				DBUpdate.set("releaseDate", release_date).set("traceInformation.modifyUser", user).set("traceInformation.modifyDate", date));
+//			MongoDBDAO.update(InstanceConstants.SRA_STUDY_COLL_NAME, Study.class, 
+//				DBQuery.is("accession", studyAccession),
+//				DBUpdate.set("releaseDate", release_date).set("traceInformation.modifyUser", user).set("traceInformation.modifyDate", date));
+			studyAPI.dao_update(DBQuery.is("accession", studyAccession), DBUpdate.set("releaseDate", release_date).set("traceInformation.modifyUser", user).set("traceInformation.modifyDate", date));
 		}
 		// Recuperer l'objet soumission mis à jour pour le status :
-		submission = MongoDBDAO.findByCode(InstanceConstants.SRA_SUBMISSION_COLL_NAME, Submission.class, submissionCode);
+//		submission = MongoDBDAO.findByCode(InstanceConstants.SRA_SUBMISSION_COLL_NAME, Submission.class, submissionCode);
+		submission = submissionAPI.dao_getObject(submissionCode);
 		return submission;
 	}
 	
