@@ -1,8 +1,0 @@
-@(experiment:models.laboratory.experiment.instance.Experiment, FDStestparam:java.lang.String)
-
-@import controllers.instruments.io.utils._;
-
-@*** 
-FDS 25/10/2016 : TODO...pas encore de specs 
-***@
-TODO @(FDStestparam)

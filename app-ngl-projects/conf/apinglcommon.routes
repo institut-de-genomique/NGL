@@ -1,9 +1,0 @@
-GET		/api/commons/types								controllers.commons.api.CommonInfoTypes.list()
-GET		/api/commons/states								controllers.commons.api.States.list()
-
-GET		/api/values										controllers.commons.api.Values.list()
-
-
-GET		/api/commons/users								controllers.commons.api.Users.list()
-
-GET		/api/authorisation/user							controllers.authorisation.User.get()

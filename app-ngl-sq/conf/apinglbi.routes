@@ -1,3 +1,0 @@
-#projects
-GET    	/api/readsets	                 			controllers.readsets.api.ReadSets.list()
-GET    	/api/runs		                 			controllers.runs.api.Runs.list()
