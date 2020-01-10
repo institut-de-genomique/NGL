@@ -1,0 +1,68 @@
+@this(ctx : fr.cea.ig.ngl.NGLApplication)
+@* @this(ctx : fr.cea.ig.play.migration.NGLContext) *@
+
+@()
+
+@import play.mvc.Http.Context
+@import controllers.authorisation.PermissionHelper
+
+@partials.imageModal()
+
+@* @user = @{ fr.cea.ig.authentication.Helper.username(Context.current().session()) } *@
+
+@user            = @{ ctx.currentUser(); }
+@writePermission = @{ PermissionHelper.checkPermission(user,"writing") }
+
+<div class="row">
+	<div class="col-md-12 col-lg-12">
+		<div class="page-header">
+			<div class="btn-toolbar pull-right">
+			@if(writePermission){
+				<button class="btn btn-default" ng-if="mainService.isEditMode()" ng-click="save()" data-toggle="tooltip" title="@Messages("button.validate")" ><i class="fa fa-save"></i> @Messages("button.validate")</button>
+				<button class="btn btn-default" ng-if="mainService.isEditMode()" ng-click="cancel()" data-toggle="tooltip" title="@Messages("button.cancel")" ><i class="fa fa-undo"></i> @Messages("button.cancel")</button>
+			 	<button class="btn btn-default" ng-if="!mainService.isEditMode()" ng-click="activeEditMode()" data-toggle="tooltip" title="@Messages("button.edit")" ><i class="fa fa-edit"></i> @Messages("button.edit")</button>		 					
+			}
+		</div>
+			@partials.details_header()
+		</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-12 col-lg-12"  messages="messages"></div>
+</div>
+<div class="inProgressSpinner" ng-if="isSaveInProgress()">
+	<button class="btn btn-primary btn-lg">
+		<i class="fa fa-spinner fa-spin fa-5x"></i>
+	</button>
+</div>
+
+
+<div class="row margin-bottom-7">
+	<div class="col-md-12 col-lg-12">
+		<ul class="nav nav-tabs margin-bottom-5">
+			<li ng-class="getTabClass('general')"><a href="#" data-target="#general" data-toggle="tab" ng-click="setActiveTab('general')">@Messages("containers.tabs.general")</a></li>
+			<li ng-class="getTabClass('treeoflife')"><a href="#" data-target="#treeoflife" data-toggle="tab" ng-click="initGraph()">@Messages("containers.tabs.treeoflife")</a></li>
+			<li ng-class="getTabClass('workflow')"><a href="#" data-target="#workflow" data-toggle="tab" ng-click="setActiveTab('workflow')">@Messages("containers.tabs.workflow")</a></li>
+			
+			<li ng-if="container.qualityControlResults !== null && container.qualityControlResults !== undefined" 
+				ng-class="getTabClass('resultsqc')"><a href="#" data-target="#resultsqc" data-toggle="tab" 
+					ng-click="setActiveTab('resultsqc')">@Messages("containers.tabs.resultsqc")</a></li>
+		</ul>
+		<div class="tab-content">
+			<div class="tab-pane {{getTabClass('general')}}" id="general">
+				@partials.details_general()
+			</div>
+			<div class="tab-pane {{getTabClass('treeoflife')}}" id="treeoflife">
+				@partials.details_treeoflife()
+			</div>
+			<div class="tab-pane {{getTabClass('workflow')}}" id="workflow">
+				@partials.details_workflow()
+			</div>
+			<div class="tab-pane {{getTabClass('resultsqc')}}" id="results" 
+				ng-if="container.qualityControlResults !== null && container.qualityControlResults !== undefined && container.qualityControlResults.length > 0">
+				@partials.details_qc()
+			</div>
+		</div>
+	</div>
+</div>
+

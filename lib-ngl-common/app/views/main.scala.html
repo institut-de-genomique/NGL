@@ -1,0 +1,19 @@
+@(title: String, menu: Html = Html(""), scripts: Html = Html(""), otherCss: Html = Html(""))(content: Html)
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@Messages(title)</title>
+    @css(otherCss)  	
+  </head>
+  <body>
+    <div class="hidden-print">
+	  @menu
+	</div>
+	<div class="container-fluid">
+	  @content
+	</div>
+	@javascripts(scripts)	  
+  </body>
+</html>

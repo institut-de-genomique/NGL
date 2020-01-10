@@ -1,0 +1,12 @@
+@(read: String)
+
+
+<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+ng-click="setImage(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].@(read).phylogeneticTree.value,'phylogeneticTree','',treament.code!=undefined?treament.code:treatments.getTreatment().code, 
+readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].@(read).phylogeneticTree.width,
+readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].@(read).phylogeneticTree.height)">
+	<a href="#">
+    	<img id="phylogeneticTree" ng-src="data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].@(read).phylogeneticTree.value}}" />	 
+	</a>
+</div>  
+

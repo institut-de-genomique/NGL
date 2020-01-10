@@ -1,0 +1,31 @@
+@(experiment:models.laboratory.experiment.instance.Experiment)
+
+@import controllers.instruments.io.utils._;
+
+@*** FDS: déclarations de variables avec le mot clé 'var' et toutes sur une seule ligne 
+  pas réussi avec BigDecimal....
+  @import java.math.BigDecimal; var buffer_vol=0.0;
+  @{buffer_vol=a.outputContainerUseds.get(0).experimentProperties.get("bufferVolume").value.parseFloat()}
+    ni
+  @{buffer_vol=a.outputContainerUseds.get(0).experimentProperties.get("bufferVolume").value.Float.parseFloat()}
+***@
+@import java.lang.String; var buffer_vol="";
+@import java.math.BigInteger; var dest_pos=0;
+
+@*** FDS corrections 26/10/2016
+CRLF pour le header
+Destination rack: HARDCODED="1" [ 1 seule plaque en sortie possible ? ]
+correction séparateur "," 
+FDS correction 14/11/2016 le destination rack doit s'appeller "poolplate"
+***@
+
+Destination rack,Destination position,volume\u000D\u000A
+@for((a,index) <- experiment.atomicTransfertMethods.sortWith(_.line<_.line).sortWith(_.column.toInt<_.column.toInt).zipWithIndex){
+		@for(c <- a.outputContainerUseds){
+			
+			 @{dest_pos=OutputHelper.getNumberPositionInPlateByColumn(c.locationOnContainerSupport.line, c.locationOnContainerSupport.column)}
+			 @{buffer_vol=a.outputContainerUseds.get(0).experimentProperties.get("bufferVolume").value.toString() }
+			 
+			 poolplate,@(dest_pos),@(buffer_vol)\u000D\u000A
+		}	
+} 

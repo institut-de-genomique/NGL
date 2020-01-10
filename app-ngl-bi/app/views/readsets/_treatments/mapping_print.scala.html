@@ -1,0 +1,46 @@
+@()
+
+<div ng-controller="MappingCtrl">
+
+	<div class="row" ng-show="isDataExistsForRead('read1') || isDataExistsForRead('read2')">
+		<div class="col-xs-12">
+			<div class="page-header">
+				{{titleForRead()}}
+			</div>
+		</div>	
+		<div class="col-xs-6" ng-show="isDataExistsForRead('read1')">
+			@partials.mapping_print("read1")
+		</div>
+		<div class="col-xs-6" ng-show="isDataExistsForRead('read2')">
+			@partials.mapping_print("read2")
+		</div>
+	</div>
+
+	<div class="row page-break" ng-if="isDataExistsForRead('read1') || isDataExistsForRead('read2')">
+		<div class="col-xs-12">
+			<div class="page-header">
+				@Messages("readsets.treatments.mapping.tabs.pairs")
+			</div>
+		</div>
+	</div>
+	
+	<div class="row" ng-if="!isDataExistsForRead('read1') && !isDataExistsForRead('read2')">
+		<div class="col-xs-12">
+			<div class="page-header">
+				@Messages("readsets.treatments.mapping.tabs.pairs")
+			</div>
+		</div>
+	</div>
+	
+	@partials.mapping_pairs()
+	
+	<div class="row page-break">
+		<div class="col-xs-12">	
+			<div class="page-header">
+				@Messages("readsets.treatments.mapping.tabs.ref")
+			</div>	
+		</div>
+	</div>
+	
+	@partials.mapping_ref()
+</div>

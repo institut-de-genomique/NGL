@@ -1,0 +1,18 @@
+@(entity:String, condition:String = "TRUE")
+
+<!-- Debut details_header -->
+<h1 ng-switch on=@condition>
+	<span ng-switch-when="FALSE" class="text-danger" ng-bind="@{entity}.code" ></span>
+	<span ng-switch-when="TRUE" class="text-success" ng-bind="@{entity}.code" ></span>
+	<span ng-switch-default class="mute" ng-bind="@{entity}.code" ></span>
+	@views.html.tools.translate_code(entity,"small")
+</h1>
+
+@* <h5>
+<span list-resize="container.fromTransformationTypeCodes|unique|codes:'type'" list-resize-min-size='3' horizontal></span>
+<span ng-if="(container.fromPurificationTypeCode||container.fromTransfertTypeCode)">@Messages("container.from") </span>
+<span ng-if="container.fromPurificationTypeCode" ng-bind="container.fromPurificationTypeCode|codes:'type'"></span>
+<span ng-if="container.fromTransfertTypeCode" ng-bind="container.fromTransfertTypeCode|codes:'type'"></span>
+
+</h5> *@
+<!-- Fin details_header -->

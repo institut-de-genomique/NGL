@@ -1,0 +1,184 @@
+@()
+
+<div class="row">		
+	<div class="col-md-2 col-lg-2">				  	
+			<table class="table table-condensed table-hover table-bordered">
+				<tbody>
+				<tr>
+					<th>@Messages("readsets.treatments.mapping_nanopore.inputNbBases")</th>
+					<td>
+						{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.inputNbBases.value | number}}
+					</td>
+							
+				</tr>
+				</tbody>
+			</table>
+		</div>					
+	</div>	
+
+<div class="row"> 
+	<div class="col-md-5 col-lg-5">
+	 <table class="table table-condensed table-hover table-bordered">
+		<thead>
+			<tr>
+				<th></th>
+				<th>@Messages("readsets.treatments.mapping.sampleInput")</th>
+				<th>@Messages("readsets.treatments.mapping.chimericAlignedReads")</th>
+				<th>@Messages("readsets.treatments.mapping.nonChimericAlignedReads")</th>		
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<th>@Messages("readsets.treatments.mapping.number")</th>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.inputNbReads.value | number}}</td>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.chimericAlignedReads.value | number}}</td>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.nonChimericAlignedReads.value | number}}</td>
+			</tr>
+			<tr>
+				<th>@Messages("readsets.treatments.mapping.totalReadsPercent")</th>
+				<td>@Messages("readsets.treatments.mapping.100percent")</td>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.chimericAlignedReadsPercent.value | number:2}} @Messages("unit.percent")</td>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.nonChimericAlignedReadsPercent.value | number:2}} @Messages("unit.percent")</td>
+			</tr>					
+		</tbody>
+	</table>
+	</div>	
+</div>
+
+<div class="row" ng-if="readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.forwardAlignedReads!=null || readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.reverseAlignedReads!=null"> 
+	<div class="col-md-5 col-lg-5">
+	 <table class="table table-condensed table-hover table-bordered">
+		<thead>
+			<tr>
+				<th></th>
+				<th>@Messages("readsets.treatments.mapping.forwardAlignedReads")</th>
+				<th>@Messages("readsets.treatments.mapping.reverseAlignedReads")</th>			
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<th>@Messages("readsets.treatments.mapping.number")</th>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.forwardAlignedReads.value | number}}</td>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.reverseAlignedReads.value | number}}</td>
+			</tr>
+			<tr>
+				<th>@Messages("readsets.treatments.mapping.alignedReadsPercent")</th>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.forwardAlignedReadsPercent.value | number:2}} @Messages("unit.percent")</td>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.reverseAlignedReadsPercent.value | number:2}} @Messages("unit.percent")</td>
+			</tr>					
+		</tbody>
+	</table>
+	</div>	
+</div>
+
+<!-- Tableau a 2 dimensions -->
+ <div class="row">
+	<div class="col-md-6 col-lg-6">	
+		 <table class="table table-condensed table-hover table-bordered">
+			<thead>
+				<tr>
+					<th></th>
+					<th>@Messages("treatments.nanopore.1DForward")</th>
+					<th>@Messages("treatments.nanopore.1DReverse")</th>
+					<th>@Messages("treatments.nanopore.2DAll")</th>
+					<th>@Messages("treatments.nanopore.2DPass")</th>
+					<th>@Messages("treatments.nanopore.useful")</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<th>@Messages("readsets.treatments.mapping_nanopore.percentAlignedBasePairs")</th>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DForward'].value.percentAlignedBasePairs | number:2}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DReverse'].value.percentAlignedBasePairs | number:2}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DAll'].value.percentAlignedBasePairs | number:2}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DPass'].value.percentAlignedBasePairs | number:2}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['useful'].value.percentAlignedBasePairs | number:2}}</td>
+				</tr>	
+				
+				<tr>
+					<th>@Messages("readsets.treatments.mapping_nanopore.percentAlignedReads")</th>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DForward'].value.percentAlignedReads | number:2}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DReverse'].value.percentAlignedReads | number:2}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DAll'].value.percentAlignedReads | number:2}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DPass'].value.percentAlignedReads | number:2}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['useful'].value.percentAlignedReads | number:2}}</td>
+				</tr>						
+				<tr>
+					<th>@Messages("readsets.treatments.mapping_nanopore.percentAlignedReadsL100")</th>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DForward'].value.percentAlignedReadsL100 | number:2}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DReverse'].value.percentAlignedReadsL100 | number:2}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DAll'].value.percentAlignedReadsL100 | number:2}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DPass'].value.percentAlignedReadsL100 | number:2}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['useful'].value.percentAlignedReadsL100 | number:2}}</td>
+				</tr>	
+				
+				<tr>
+					<th>@Messages("readsets.treatments.mapping_nanopore.identityPercentageAvg")</th>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DForward'].value.identityPercentageAvg | number:2}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DReverse'].value.identityPercentageAvg | number:2}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DAll'].value.identityPercentageAvg | number:2}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DPass'].value.identityPercentageAvg | number:2}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['useful'].value.identityPercentageAvg | number:2}}</td>
+				</tr>			
+				<tr>
+					<th>@Messages("readsets.treatments.mapping_nanopore.readAlignementSizeMax")</th>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DForward'].value.readAlignementSizeMax | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DReverse'].value.readAlignementSizeMax | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DAll'].value.readAlignementSizeMax | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DPass'].value.readAlignementSizeMax | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['useful'].value.readAlignementSizeMax | number}}</td>
+				</tr>	
+				
+				<tr>
+					<th>@Messages("readsets.treatments.mapping_nanopore.verticalCoverage")</th>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DForward'].value.verticalCoverage | number:2}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DReverse'].value.verticalCoverage | number:2}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DAll'].value.verticalCoverage | number:2}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DPass'].value.verticalCoverage | number:2}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['useful'].value.verticalCoverage | number:2}}</td>
+				</tr>	
+				<tr>
+					<th>@Messages("readsets.treatments.mapping_nanopore.horizontalCoverage")</th>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DForward'].value.horizontalCoverage | number:2}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DReverse'].value.horizontalCoverage | number:2}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DAll'].value.horizontalCoverage | number:2}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DPass'].value.horizontalCoverage | number:2}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['useful'].value.horizontalCoverage | number:2}}</td>
+				</tr>					
+			</tbody>
+		 </table>
+	</div>
+</div>
+
+
+
+<!-- Image -->
+
+
+
+<div class="row">
+	<div class="col-md-8 col-lg-8">
+	<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+		ng-click="setImage(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.identityPercentVsReadQuality.value,'identityPercentVsReadQuality','',treament.code!=undefined?treament.code:treatments.getTreatment().code,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.identityPercentVsReadQuality.width,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.identityPercentVsReadQuality.height)">
+		 <a href="#">
+		    <img id="default_identityPercentVsReadQuality" ng-src="data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.identityPercentVsReadQuality.value}}" />
+		 </a> 
+	    </div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-8 col-lg-8">
+	<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+		ng-click="setImage(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.identityPercentVsReadAlignedLength.value,'identityPercentVsReadAlignedLength','',treament.code!=undefined?treament.code:treatments.getTreatment().code,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.identityPercentVsReadAlignedLength.width,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.identityPercentVsReadAlignedLength.height)">
+		 <a href="#">
+		    <img id="default_identityPercentVsReadAlignedLength" ng-src="data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.identityPercentVsReadAlignedLength.value}}" />
+		 </a> 
+	    </div>
+	 </div>
+	
+</div>
+

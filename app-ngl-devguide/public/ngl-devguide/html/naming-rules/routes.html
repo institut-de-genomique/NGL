@@ -1,0 +1,188 @@
+<section id="views">
+<div class="page-header">
+<h1>Routes</h1>
+</div>
+<p>
+Une route est le lien entre une URL et une méthode d'un controlleur. Les routes sont définies dans le fichier <code>routes</code> du framework Play. 
+Une route est constitué de 3 éléments : Un verbe HTTP (GET, POST, DELETE), une URL et une méthode de controlleur. 
+Pour chacun de ses 3 éléments, il exite des conventions à respecter.
+</p>
+
+<ul>
+<li>Les verbes HTTP doivent s'utiliser selon les principes REST.</li>
+<li>l'URL doit appliquer les règles décrites sur le site de SEOMoz : <a href="http://www.seomoz.org/blog/11-best-practices-for-urls">11-best-practices-for-urls</a> 
+<li>La méthode du controlleur doit appliquer les règles de nommage Java.</li>
+</ul>
+
+<p>
+il y a 3 sortes de route et pour chacune il y a une nomenclature. 
+</p>
+<ol>
+<li>Les routes correspondants à des menus ou des URL saisies par les utilisateurs.</li>
+<li>Les routes correspondants aux templates pour afficher les données.</li>
+<li>Les routes correspondants aux api pour manipuler les données.</li>
+</ol>
+
+<div class="alert alert-info">
+<strong>Remarque : </strong>
+Seul le troisième type de route va respecter intégralement l'architecture REST.
+</div>
+
+<div class="alert alert-info">
+<strong>Remarque : </strong>
+Les deux derniers types sont utilisés via AngularJS.
+</div>
+
+<hr>
+<h3>1. Les routes correspondants à des menus ou des URL saisies par les utilisateurs.</h3>
+<p>
+Ces routes sont celles utilisées par les menus ou par des saisies utilisateurs dans la barre des navigateurs. 
+Pour que l'application fonctionne, elles doivent faire en sorte de charger la configuration d'AngularJS. 
+Elles vont donc toutes appeler au final la template <code>home.scala.html</code> et utiliser le verbe HTTP <code>GET</code>. 
+</p>
+<p>
+Elles correspondent au point d'entrée d'une fonctionnalité pour une ressource primaire (recherche, creation, chargement, etc.). 
+Mais ces fonctionnalités peuvent faire appel à différentes routes pour afficher des vues et modifier les données.
+</p>
+<p>
+Actuellement, il y a réellement deux cas gérés :
+</p>
+<ul>
+<li>L'accès à la page d'accueil d'une fonctionnalité pour une <b>ressource primaire</b></li>
+<li>Le chargement d'une <b>ressource primaire</b></li>
+</ul>
+
+<pre class="prettyprint scala">
+GET      /&lt;resource-names&gt;/:homecode/home  controllers.&lt;resourcenames&gt;.tpl.&lt;ResourceNames&gt;.home(homecode:String)
+GET      /&lt;resource-names&gt;/:code           controllers.&lt;resourcenames&gt;.tpl.&lt;ResourceNames&gt;.home(code:String)
+</pre>
+
+<p>
+Pour la première, le paramètre <code>homecode</code> fait référence à la fonctionnalité globale désirée (recherche, création) :
+</p>
+<ul>
+<li>Pour une recherche le homecode est <code>search</code>.</li>
+<li>Pour une création  le homecode est <code>new</code>.</li>
+</ul>
+
+<p>
+Pour la seconde, le paramètre <code>code</code> fait référence à l'identifiant de la ressource.
+</p>
+
+<hr>
+<h3>2. Les routes correspondants aux templates pour afficher les données</h3>
+<p>Ses routes vont être appelé par AngularJS pour afficher les données et sont utilisées par le routing de celui-çi (fichier app.js).</p>
+<p>Elles commencent toutes par <code>/tpl/</code> et  doivent toutes suivre la nomenclature suivante :</p>
+<pre class="prettyprint scala">
+GET		/tpl/&lt;resource-names&gt;/&lt;method-name&gt;		controllers.&lt;resourcenames&gt;.tpl.&lt;ResourceNames&gt;.&lt;methodName&gt;()
+</pre>
+<div class="alert">
+<strong>Attention : </strong>
+Si le nom de la ressource ou de la méthode du controlleur est composé de 2 mots, pour la partie URL, il faut les séparer par un "-".
+</div>
+<div class="alert alert-info">
+<strong>Remarque : </strong>
+L'url doit toujours être en minuscule.
+</div>
+<hr>
+<h3>3. Les routes correspondants aux api pour manipuler les données</h3>
+<p>Ses routes vont être appelé depuis les controlleurs AngularJS pour charger, sauver ou supprimer des données.</p>
+<p>Elles commencent toutes par <code>/api/</code> et doivent toutes suivre la nomenclature suivante :</p>
+<pre class="prettyprint scala">
+GET      /api/&lt;resource-names&gt;        controllers.&lt;resourcenames&gt;.api.&lt;ResourceNames&gt;.list()               #chargement d'une liste
+GET      /api/&lt;resource-names&gt;/:code  controllers.&lt;resourcenames&gt;.api.&lt;ResourceNames&gt;.get(code: String)    #chargement d'un élément
+POST     /api/&lt;resource-names&gt;        controllers.&lt;resourcenames&gt;.api.&lt;ResourceNames&gt;.save()               #modification d'un élément
+DELETE   /api/&lt;resource-names&gt;/:code  controllers.&lt;resourcenames&gt;.api.&lt;ResourceNames&gt;.delete(code: String) #suppression d'un élément
+</pre>
+
+<div class="alert alert-info">
+<strong>Remarque : </strong>
+Si il y a une ressource secondaire la logique est la même. Il faut juste ajouter <code>/&lt;subresource-names&gt; à la fin de chaque route.</code>
+</div>
+
+<div class="example">
+   <div id="accordion" class="accordion">
+                <div class="accordion-group">
+                  <div class="accordion-heading">
+                    <a data-target="#collapse1" data-parent="#accordion" data-toggle="collapse" class="accordion-toggle collapsed">
+                     Rechercher des hôtels et afficher les détails d'un hôtel.
+                    </a>
+                  </div>
+                  <div class="accordion-body collapse" id="collapse1" >
+                    <div class="accordion-inner">
+<pre class="prettyprint scala">
+#hotels home
+GET      /hotels/:homecode/home            controllers.hotels.tpl.Hotels.home(homecode:String)
+GET      /hotels/:code                     controllers.hotels.tpl.Hotels.home(code:String)
+
+#hotels tpl
+GET      /tpl/hotels/search                controllers.hotels.tpl.Hotels.search()
+GET      /tpl/hotels/details               controllers.hotels.tpl.Hotels.details()
+GET      /tpl/hotels/js-routes             controllers.hotels.tpl.Hotels.javascriptRoutes()
+
+#hotels api
+GET      /api/hotels                       controllers.hotels.api.Hotels.list()
+GET      /api/hotels/:code                 controllers.hotels.api.Hotels.get(code: String)
+</pre>
+
+<div class="alert alert-info">
+<strong>Remarque : </strong>
+Pour les routes javascript on a utilisé la contraction <code>js-routes</code>.
+</div>                  
+                    </div>
+                  </div>
+                </div>
+                <div class="accordion-group">
+                  <div class="accordion-heading">
+                    <a data-target="#collapse2" data-parent="#accordion" data-toggle="collapse" class="accordion-toggle collapsed">
+                      Afficher l'ensemble des chambres d'un hotel et les administrer.
+                    </a>
+                  </div>
+                  <div class="accordion-body collapse" id="collapse2" >
+                    <div class="accordion-inner">
+<pre class="prettyprint scala">
+#bedrooms tpl
+GET      /tpl/hotels/bedrooms/list              controllers.hotels.tpl.Bedrooms.list()
+GET      /tpl/hotels/bedrooms/details           controllers.hotels.tpl.Bedrooms.details()
+
+#bedrooms api
+GET      /api/hotels/:hcode/bedrooms             controllers.hotels.api.Bedrooms.list(hcode: String)
+GET      /api/hotels/:hcode/bedrooms/:code       controllers.hotels.api.Bedrooms.get(hcode: String, code: String)
+POST     /api/hotels/:hcode/bedrooms             controllers.hotels.api.Bedrooms.save(hcode: String)
+DELETE   /api/hotels/:hcode/bedrooms/:code       controllers.hotels.api.Bedrooms.delete(hcode: String, code: String)
+</pre>                  
+                         
+                    </div>
+                  </div>
+                </div>
+                <div class="accordion-group">
+                  <div class="accordion-heading">
+                    <a data-target="#collapse3" data-parent="#accordion" data-toggle="collapse" class="accordion-toggle collapsed">
+                      Faire une réservation d'hotel, rechercher des réservations et afficher les détails d'une réservation.
+                      </a>
+                  </div>
+                  <div class="accordion-body collapse" id="collapse3" >
+                    <div class="accordion-inner">
+<pre class="prettyprint scala">
+#bookings home
+GET      /bookings/:homecode/home    controllers.bookings.tpl.Bookings.home(homecode:String)
+GET      /bookings/:code             controllers.bookings.tpl.Bookings.home(code:String)
+
+#bookings tpl
+GET      /tpl/bookings/search        controllers.bookings.tpl.Bookings.search()
+GET      /tpl/bookings/details       controllers.bookings.tpl.Bookings.details()
+GET      /tpl/bookings/js-routes     controllers.bookings.tpl.Bookings.javascriptRoutes()
+
+#bookings api
+GET      /api/bookings               controllers.bookings.api.Bookings.list()
+GET      /api/bookings/:code         controllers.bookings.api.Bookings.get(code: String)
+POST     /api/bookings               controllers.bookings.api.Bookings.save()
+DELETE   /api/bookings/:code         controllers.bookings.api.Bookings.delete(code: String)
+</pre>                  
+                 </div>
+                  </div>
+                </div>
+              </div>
+</div>
+
+</section>

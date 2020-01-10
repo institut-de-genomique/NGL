@@ -1,0 +1,36 @@
+//created on: May 5, 2015
+package rules
+
+
+rule "Set good project code for DNA extraction"
+    @nglSQ( calculations )
+	dialect "java"
+	salience 900
+	no-loop
+    when
+		$experiment:Experiment($typeCode:typeCode,$typeCode=="dna-extraction", state.code == "N")
+		$atomicTransfert: OneToOneContainer($inputContainerUseds : inputContainerUseds, $inputContainerUseds!=null , $outputContainerUseds: outputContainerUseds, $outputContainerUseds!=null )
+		$inputContainerUsed: InputContainerUsed($inputProjectCode:contents.get(0).projectCode, $inputProjectCode != null) from $inputContainerUseds
+		$outputContainerUsed: OutputContainerUsed($outputSampleTypeCode:experimentProperties.get("sampleTypeCode"), $outputSampleTypeCode != null) from $outputContainerUseds		
+    	eval("DNA".equals($outputSampleTypeCode.value))
+    then
+        Logger.debug("Set good project code for DNA extraction calculation");
+		
+		PropertySingleValue outputProjectCode = (PropertySingleValue)$outputContainerUsed.experimentProperties.get("projectCode");
+		if(null == outputProjectCode){
+			outputProjectCode=new PropertySingleValue();
+			$outputContainerUsed.experimentProperties.put("projectCode",outputProjectCode);
+		}
+		
+		MapParameter mapping = (MapParameter)MongoDBDAO.findByCode(InstanceConstants.PARAMETER_COLL_NAME, Parameter.class,  "dna-extraction-mapping-rules");
+		
+		if(mapping.map.containsKey($inputProjectCode)){
+			outputProjectCode.value = mapping.map.get($inputProjectCode);
+		}else{
+			Logger.error("DNA extraction mapping not defined for project "+$inputProjectCode);
+			outputProjectCode.value = null;
+		}
+		
+		Logger.debug("Input project code = "+$inputProjectCode+" / "+$outputSampleTypeCode.value+" => Output project code ="+outputProjectCode.value);
+		
+end

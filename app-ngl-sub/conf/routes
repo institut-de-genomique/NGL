@@ -1,0 +1,158 @@
+
+->  / nglcommon.Routes  
+
+# Home page
+GET		/											    controllers.main.tpl.Main.home()
+
+
+# GET		/sra/scripts/noRest/:clazz/:method				fr.cea.ig.lfw.controllers.scripts.ScriptController.noRest(clazz : java.lang.String, method : java.lang.String)
+GET		/sra/scripts/run/:clazz							fr.cea.ig.lfw.controllers.scripts.ScriptController.run(clazz : java.lang.String)
+
+#------------
+# Submission
+#------------
+GET		/sra/submissions/:homeCode/home					controllers.sra.submissions.tpl.Submissions.home(homeCode : java.lang.String)
+GET		/sra/submissions/:code							controllers.sra.submissions.tpl.Submissions.get(code : java.lang.String)
+GET		/tpl/sra/submissions/activate					controllers.sra.submissions.tpl.Submissions.activate()
+GET		/tpl/sra/submissions/consultation				controllers.sra.submissions.tpl.Submissions.consultation()
+GET		/tpl/sra/submissions/create						controllers.sra.submissions.tpl.Submissions.create()
+GET		/tpl/sra/submissions/details					controllers.sra.submissions.tpl.Submissions.details()
+GET		/tpl/sra/submissions/validation				    controllers.sra.submissions.tpl.Submissions.validation()
+GET		/tpl/sra/submissions/js-routes					controllers.sra.submissions.tpl.Submissions.javascriptRoutes()
+PUT		/api/sra/submissions/:submissionCode/activate	controllers.sra.submissions.api.Submissions.activate(submissionCode : java.lang.String)
+PUT		/api/sra/submissions/createFromStudy/:studyCode controllers.sra.submissions.api.Submissions.createFromStudy(studyCode : java.lang.String)
+#GET		/api/sra/submissions/create          		controllers.sra.submissions.api.Submissions.create()
+
+# Mise à jour d'un objet submission et de ses composants :
+PUT		/sra/submissions/:code 							controllers.sra.submissions.api.Submissions.update(code: java.lang.String) 
+# todo verifier s'il faut prefixer de api pour updateState
+PUT		/sra/submissions/:code/state				    controllers.sra.submissions.api.Submissions.updateState(code:java.lang.String)
+POST	/api/sra/submissions                            controllers.sra.submissions.api.Submissions.save()
+GET		/api/sra/submissions							controllers.sra.submissions.api.Submissions.list()
+GET		/api/sra/submissions/:code						controllers.sra.submissions.api.Submissions.get(code: java.lang.String)
+
+# Creation des fichiers xml pour l'objet submission :
+PUT		/sra/submissions/:code/xml						controllers.sra.submissions.api.Submissions.createXml(code: java.lang.String)
+# Traitement des AC et mise a jour du status de l'objet submission :
+PUT		/sra/submissions/:code/ebiAc					controllers.sra.submissions.api.Submissions.treatmentAc(code: java.lang.String) 
+PUT		/sra/submissions/:code/release					controllers.sra.submissions.api.Submissions.treatmentRelease(code: java.lang.String) 
+
+
+#-----------------
+# Configurations
+#-----------------
+
+GET		/sra/configurations/:homeCode/home			controllers.sra.configurations.tpl.Configurations.home(homeCode: java.lang.String)
+GET		/sra/configurations/:code			     	controllers.sra.configurations.tpl.Configurations.get(code: java.lang.String)
+GET		/tpl/sra/configurations/create				controllers.sra.configurations.tpl.Configurations.create()
+GET		/tpl/sra/configurations/js-routes			controllers.sra.configurations.tpl.Configurations.javascriptRoutes()
+# version avec details inutilisee
+#GET	/tpl/sra/configurations/details				controllers.sra.configurations.tpl.Configurations.details()
+
+GET 	/api/sra/configurations					    controllers.sra.configurations.api.Configurations.list()
+GET		/tpl/sra/configurations/consultation		controllers.sra.configurations.tpl.Configurations.consultation()
+GET		/api/sra/variables			           		controllers.sra.api.Variables.list()
+GET		/api/sra/variables/:type/:code         		controllers.sra.api.Variables.get(type: java.lang.String, code: java.lang.String)
+
+###http://localhost:9000/api/sra/configurations/CONF_BCZ_098K3YVFH
+# methode get du controlleur api qui est heritée d'un parent de DocumentController
+GET		/api/sra/configurations/:code				controllers.sra.configurations.api.Configurations.get(code: java.lang.String)
+
+# Mise à jour d'un objet configuration et de ses composants :
+PUT		/sra/configurations/:code 					controllers.sra.configurations.api.Configurations.update(code: java.lang.String) 
+POST	/api/sra/configurations					    controllers.sra.configurations.api.Configurations.save()
+
+
+#----------
+# Studies
+#----------
+GET		/sra/studies/:homeCode/home					controllers.sra.studies.tpl.Studies.home(homeCode: java.lang.String)
+#http://localhost:9000/api/sra/studies?
+#http://localhost:9000/api/sra/studies?datatable=true&paginationMode=local&projCode=BCZ
+GET		/api/sra/studies							controllers.sra.studies.api.Studies.list()
+POST	/api/sra/studies							controllers.sra.studies.api.Studies.save()
+GET		/tpl/sra/studies/create					    controllers.sra.studies.tpl.Studies.create()
+###release fait dans menu details mais si on fait un menu release dedié alors prevoir url:
+#GET	/tpl/sra/studies/release				    controllers.sra.studies.tpl.Studies.release()
+GET		/tpl/sra/studies/js-routes				   	controllers.sra.studies.tpl.Studies.javascriptRoutes()
+GET		/tpl/sra/studies/details				    controllers.sra.studies.tpl.Studies.details()
+
+GET		/api/sra/studies/:code			        	controllers.sra.studies.api.Studies.get(code: java.lang.String)
+GET		/sra/studies/:code			            	controllers.sra.studies.tpl.Studies.get(code: java.lang.String)
+
+GET		/tpl/sra/studies/consultation	        	controllers.sra.studies.tpl.Studies.consultation()
+# Mise à jour d'un objet study et de ses composants :
+PUT		/sra/studies/:code 							controllers.sra.studies.api.Studies.update(code: java.lang.String) 
+PUT		/sra/studies/internal/:code					controllers.sra.studies.api.StudiesInternal.update(code: java.lang.String)
+POST	/api/sra/studies					    	controllers.sra.studies.api.Studies.save()
+PUT		/api/sra/studies/:studyCode/release	        controllers.sra.studies.api.Studies.release(studyCode : java.lang.String)
+
+#PUT		/sra/studies/:code/state				    controllers.sra.studies.api.Studies.updateState(code:java.lang.String)
+
+#--------
+# Samples
+#--------
+GET		/sra/samples/:homeCode/home					controllers.sra.samples.tpl.Samples.home(homeCode: java.lang.String)
+GET		/sra/samples/:code							controllers.sra.samples.tpl.Samples.get(code: java.lang.String)
+GET		/api/sra/samples							controllers.sra.samples.api.Samples.list()
+GET		/api/sra/samples/:code						controllers.sra.samples.api.Samples.get(code: java.lang.String)
+PUT		/api/sra/samples/:code						controllers.sra.samples.api.Samples.update(code: java.lang.String)
+PUT		/api/sra/samples/internal/:code				controllers.sra.samples.api.SamplesInternal.update(code: java.lang.String)
+GET		/tpl/sra/samples/js-routes				   	controllers.sra.samples.tpl.Samples.javascriptRoutes()
+GET		/tpl/sra/samples/consultation	        	controllers.sra.samples.tpl.Samples.consultation()
+#http://localhost:9000/api/sra/samples?codeRegex=sample_BCM_4932_OS_564&datatable=true&paginationMode=local ok
+#http://localhost:9000/api/sra/samples?accessionRegex=ERS1082367&datatable=true&paginationMode=local ok 
+#http://localhost:9000/api/sra/studies?projCodes=ARC&datatable=true&paginationMode=local ok
+#http://localhost:9000/api/sra/samples?projCodes=AXY&datatable=true&paginationMode=local  ok
+
+#-------------
+# Experiments
+#-------------
+GET		/sra/experiments/:homeCode/home				controllers.sra.experiments.tpl.Experiments.home(homeCode: java.lang.String)
+GET		/sra/experiments/:code						controllers.sra.experiments.tpl.Experiments.get(code: java.lang.String)
+GET		/api/sra/experiments						controllers.sra.experiments.api.Experiments.list()
+GET		/api/sra/experiments/rawDatas				controllers.sra.experiments.api.ExperimentsRawDatas.list()
+GET		/api/sra/experiments/readSpecs				controllers.sra.experiments.api.ExperimentsReadSpecs.list()
+GET		/api/sra/experiments/:code					controllers.sra.experiments.api.Experiments.get(code: java.lang.String)
+PUT		/api/sra/experiments/:code					controllers.sra.experiments.api.Experiments.update(code: java.lang.String)
+GET 	/api/sra/experiments/run/:code				controllers.sra.experiments.api.ExperimentsRuns.get(code: java.lang.String)
+PUT		/api/sra/experiments/run/:code				controllers.sra.experiments.api.ExperimentsRuns.update(code: java.lang.String)
+GET		/tpl/sra/experiments/js-routes				controllers.sra.experiments.tpl.Experiments.javascriptRoutes()
+GET		/tpl/sra/experiments/consultation	        controllers.sra.experiments.tpl.Experiments.consultation()
+GET		/tpl/sra/experiments/details			    controllers.sra.experiments.tpl.Experiments.details()
+
+#-------------------
+# ExperimentsRawData
+#-------------------
+
+PUT		/api/sra/experiments/:code/rawDatas/:relatifName	controllers.sra.experiments.api.ExperimentsRawDatas.update(code: java.lang.String, relatifName: java.lang.String)
+GET		/api/sra/experiments/:code/rawDatas/:relatifName	controllers.sra.experiments.api.ExperimentsRawDatas.get(code: java.lang.String, relatifName: java.lang.String)
+DELETE	/api/sra/experiments/:code/rawDatas/:relatifName	controllers.sra.experiments.api.ExperimentsRawDatas.delete(code: java.lang.String, relatifName: java.lang.String)
+
+#-----------------
+# ExperimentsRuns
+#-----------------
+
+
+#--------
+GET    	/api/readsets	                 			controllers.readsets.api.ReadSets.list()
+
+#---------
+# projects from ngl-common
+#---------
+GET		/api/projects								controllers.projects.api.Projects.list()
+
+# states from ngl-Common
+GET		/api/commons/states							controllers.commons.api.States.list()
+
+#----------------
+# documentation
+#----------------
+GET		/sra/documentation/home						controllers.sra.documentation.tpl.Documentation.home()
+
+
+
+# Map static resources from the /public folder to the /assets URL path
+# GET     /assets/*file               									controllers.Assets.at(path="/public", file)
+GET     /messages.js                									controllers.main.tpl.Main.jsMessages()
+GET     /codes.js        	        									controllers.main.tpl.Main.jsCodes()

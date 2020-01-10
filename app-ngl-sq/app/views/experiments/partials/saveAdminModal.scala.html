@@ -1,0 +1,36 @@
+@()
+
+@import play.mvc.Http.Context
+@import controllers.authorisation.PermissionHelper
+
+@user            = @{ fr.cea.ig.authentication.Authentication.getUser(Context.current().session()) }
+@writePermission = @{ PermissionHelper.checkPermission(user, "writing") }
+
+<div class="row">
+	<!-- Modal -->
+	<div class="modal fade" id="saveAdminModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	  <div class="modal-dialog">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+	        <h2 class="modal-title">@Messages("experiment.title.saveAdmin")</h2>
+	      </div>
+	      <div class="modal-body">
+	      		<div class="row">
+	      			 <div class="col-md-12 col-lg-12">
+						 <h4>@Messages("experiment.question.saveAdmin")</h4>
+					 </div>
+	      		</div>	
+	      </div>
+	      @if(writePermission){
+		      <div class="modal-footer">
+		          <button class="btn btn-danger" ng-click="saveAdmin()" >@Messages("experiment.question.delete.yes")</i></button>
+		          <button type="button" class="btn btn-default" data-dismiss="modal">@Messages("experiment.question.delete.no")</button>							      
+		      </div>
+		  }
+	    </div><!-- /.modal-content -->
+	  </div><!-- /.modal-dialog -->
+	</div><!-- /.modal -->
+</div>
+
+	

@@ -1,0 +1,71 @@
+/*Custom galbini compo flowcell*/
+
+.flowcellTable .table{
+	margin-bottom:0px;		
+} 
+
+
+.flowcellTable >table>tbody {
+	border-bottom: 2px solid #000000;		
+}
+
+.flowcellTable >table>tbody>tr>td {
+	font-size: 11px;
+	padding-right: 4px;
+	padding-left: 4px;	 	
+}
+
+
+.flowcellTable .compactColumn{
+	max-width: 5px; 	
+}
+
+.flowcellTable >table>thead>tr>th {
+	font-size: 11px;
+	padding-right: 4px;
+	padding-left: 4px;		 	
+}
+
+.flowcellTable >table>tbody+tbody {
+	border-bottom: 2px solid #000000;		
+}
+
+.flowcellTable >table>tbody+tbody>tr>td {
+	font-size: 11px;
+	padding-right: 4px;
+	padding-left: 4px;		 	
+}
+
+.flowcellTable .label {
+	font-size: 12px;	 	
+}
+
+.flowcellTable .compactText{
+	font-size: 12px;	
+} 
+
+
+.label-black {
+	background-color: #FFFFFF;
+	color: #000000;
+}
+
+.flowcellTable .over .label{
+	background-color: #5bc0de;
+	color: #FFFFFF;	
+}
+
+.flowcellTable .dropZoneHover{
+	background-color: #f1f1f1;		
+}
+
+.flowcellTable .sampleCodeAndTags{
+	width:20%
+}
+.roadmap .datatable .form-group input.form-control:not([type="checkbox"]){
+	padding: 3px 3px 3px;	
+}
+
+.roadmap .datatable .table>tbody>tr>td{
+	overflow-wrap: break-word;
+}

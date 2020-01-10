@@ -1,0 +1,24 @@
+.tab-content > .tab-pane:not(.active) {
+    display: block;
+    height: 0;
+    overflow-y: hidden;
+    opacity: 0;
+}
+
+.inProgressSpinner{
+	background-color: #428BCA;
+  	height: 80%;
+ 	opacity: 0.5;
+  	position: fixed;
+ 	top: 15%;
+  	width: 80%;
+  	right: 3%;
+  	z-index: 1040;
+  	text-align: center;
+}
+
+.spinnerBtn {
+  position: relative;
+  top: 40%;
+}
+

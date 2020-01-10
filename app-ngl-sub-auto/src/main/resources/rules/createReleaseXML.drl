@@ -1,0 +1,72 @@
+#created on: Jul 7, 2014
+package birds
+
+rule "Define variable lineParmeter for createReleaseXML specification"
+	@BirdsRule(ExecutionService)
+	dialect 'java'
+	salience 300
+	no-loop
+    when
+       $executionService : ExecutionService( status == ExecutionService.PRE_JOB_EXECUTION_STATUS)
+       $job : Job( treatmentSpecification!=null, treatmentSpecification.name == "createReleaseXML", treatmentSpecification.project.name == "SRA" )
+    then
+       Logger log = Logger.getLogger("ngl.sub.rules");
+       log.debug("Set code in url for spec createReleaseXML");
+       $job.setUnixCommand($job.getUnixCommand().replace("%code%", $job.getUniqueJobResource("releaseToXML").getProperty("code")));
+       log.debug("Unix command "+$job.getUnixCommand());
+       log.debug("Code "+$job.getUniqueJobResource("releaseToXML").getProperty("code"));
+end
+
+rule "Action : create xml file for release"
+    @BirdsRule( ExecutionService )
+    salience 200
+	dialect 'java'
+	no-loop 
+	when
+	    $executionService : ExecutionService( status == ExecutionService.JOB_PROCESSING_STATUS , caught==false)
+	    $job : Job( treatmentSpecification!=null, treatmentSpecification.name == "createReleaseXML" )
+	then
+	    Logger log = Logger.getLogger("ngl.sub.rules");
+	   
+	    JobResource jobResource = $job.getUniqueJobResource("releaseToXML");
+	    String codeSubmission = jobResource.getProperty("code");
+	    String submissionDirectory = jobResource.getProperty("submissionDirectory");
+	    String studyCode = jobResource.getProperty("studyAccession");
+	     log.debug("Call createXML release with "+codeSubmission+"/"+submissionDirectory+"/"+studyCode);
+	     try{
+	   	 	SubmissionServicesFactory.getInstance().createXMLRelease(codeSubmission, submissionDirectory,studyCode);
+	    }catch(Exception e){
+	    	$job.setExecutionState(Job.ERROR_STATUS);
+	    	$job.setProperty("Exception",e.getMessage());
+	    	throw e;
+	    }
+end
+
+rule "add releaseXML resources in internalRefReleaseXML to fire sendReleaseXML"
+	@BirdsRule( addResources ) 
+	dialect 'java'
+	salience 200
+	when
+		$flag : Flag ( done == false ) 
+		$output : OutputSpecificationElement(treatmentSpecification.name == "createReleaseXML")
+	  	$referential : ResourcesReferential ( name == "internalRefReleaseXML" )
+		$resourceSet : ResourceSet( ioSpecificationElement == $output )
+		$job : Job(treatmentSpecification!=null, treatmentSpecification.name == "createReleaseXML")
+	then
+		Logger log = Logger.getLogger("ngl.sub.rules");
+		JobResource jobResource = $job.getUniqueJobResource("releaseToXML");
+		log.debug("Add resources rules for sendReleaseXML");
+		log.debug("Job resource "+jobResource);
+		JobResource outputResource = $resourceSet.createJobResource($output.getResourceType(),$referential.getName());
+		ResourceProperties resourceProperties = outputResource.getResourceProperties();
+		resourceProperties.setProperty("code",jobResource.getProperty("code"));
+	  	resourceProperties.setProperty("studyAccession",jobResource.getProperty("studyAccession"));
+	  	resourceProperties.setProperty("studyCode",jobResource.getProperty("studyCode"));
+	  	resourceProperties.setProperty("submissionDirectory",jobResource.getProperty("submissionDirectory"));
+	  	resourceProperties.setProperty("submissionDate",jobResource.getProperty("submissionDate"));
+	  	resourceProperties.setProperty("xmlSubmission",jobResource.getProperty("xmlSubmission"));
+		
+		$flag.setDone(true);
+		modify($flag){};
+		modify($resourceSet){};
+end

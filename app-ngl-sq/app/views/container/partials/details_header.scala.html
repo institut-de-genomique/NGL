@@ -1,0 +1,15 @@
+@()
+<h1 ng-switch on="container.valuation.valid">
+	<span ng-switch-when="FALSE" class="text-danger" ng-bind="container.code" ></span>
+	<span ng-switch-when="TRUE" class="text-success" ng-bind="container.code" ></span>
+	<span ng-switch-default class="mute" ng-bind="container.code" ></span>
+	<small ng-bind="container.state.code|codes:'state'" ></small>
+	
+</h1>
+<h5>
+<span list-resize="container.fromTransformationTypeCodes|unique|codes:'type'" list-resize-min-size='3' horizontal></span>
+<span ng-if="(container.fromPurificationTypeCode||container.fromTransfertTypeCode)">@Messages("container.from") </span>
+<span ng-if="container.fromPurificationTypeCode" ng-bind="container.fromPurificationTypeCode|codes:'type'"></span>
+<span ng-if="container.fromTransfertTypeCode" ng-bind="container.fromTransfertTypeCode|codes:'type'"></span>
+
+</h5>

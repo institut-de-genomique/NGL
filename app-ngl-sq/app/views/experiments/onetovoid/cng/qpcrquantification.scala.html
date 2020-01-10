@@ -1,0 +1,54 @@
+@()
+<div ng-controller="OneToVoidQCCtrl">	
+<div class="col-md-12 col-lg-12" ng-controller="OneToVoidQPCRQuantificationCNGCtrl">
+	<!-- NGL-2237 ajout d'un 2eme bouton pour import fichier "Dev"; renommer bouton initial en "Prod"  -->
+	<div class="row margin-bottom-7" ng-show="buttons.isShowBravo()">
+	<div class="col-md-10 col-lg-10">
+		<form class="form-inline margin-bottom-7" role="form">
+	  	<div class="form-group col-lg-6">
+	   		<label for="importFileProd" class="col-md-5 col-lg-5 control-label">Fichier résultats qPCR<br/>PROD - dilutions 5&nbsp;000 et 50&nbsp000&nbsp;:</label>
+			<div class="input-group col-md-7 col-lg-7" >
+			<input id="importFileProd" type="file" class="form-control" base64-file="fileProd">
+			<span class="input-group-btn">
+				<button class="btn btn-primary" ng-click="buttons.clickProd()" ng-disabled="buttons.isFileSetProd()" title="@Messages("button.import.file")"><i class="fa fa-upload"></i></button>
+			</span>
+			</div>
+		</div>	
+		<div class="form-group col-lg-6">
+			<label for="importFileDev" class="col-md-5 col-lg-5 control-label">Fichier résultats qPCR<br/>DEV - dilutions 10&nbsp;000 et 100&nbsp;000&nbsp;:</label>
+			<div class="input-group col-md-7 col-lg-7" >
+			<input id="importFileDev" type="file" class="form-control" base64-file="fileDev">
+			<span class="input-group-btn">
+				<button class="btn btn-primary" ng-click="buttons.clickDev()" ng-disabled="buttons.isFileSetDev()" title="@Messages("button.import.file")"><i class="fa fa-upload"></i></button>
+			</span>
+			</div>
+		</div>
+		</form>
+	</div>
+	</div>
+	
+	<!-- 28/01/2019 NGL-2368/NGL-2389 ajout des tecan+lihtcycler -->
+	<div class="row margin-bottom-7" ng-show="buttons.isShowTecan()">
+	<div class="col-md-10 col-lg-10">
+		<form class="form-inline margin-bottom-7" role="form">
+	  	<div class="form-group col-lg-6">
+	   		<label for="importFileProdTecan" class="col-md-5 col-lg-5 control-label">Fichier résultats qPCR:</label>
+			<div class="input-group col-md-7 col-lg-7" >
+			<input id="importFileProdTecan" type="file" class="form-control" base64-file="fileProdTecan">
+			<span class="input-group-btn">
+				<button class="btn btn-primary" ng-click="buttons.clickProdTecan()" ng-disabled="buttons.isFileSetProdTecan()" title="@Messages("button.import.file")"><i class="fa fa-upload"></i></button>
+			</span>
+			</div>
+		</div>	
+		</form>
+	</div>
+	</div>
+	
+	
+	<div class="row margin-bottom-7">
+		<div class="col-md-12 col-lg-12" >
+			@views.html.experiments.onetoone.defaults.partials.udtAndPlateDesign()
+		</div>
+	</div> 	 
+</div>
+</div>

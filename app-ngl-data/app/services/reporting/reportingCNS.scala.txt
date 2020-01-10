@@ -1,0 +1,40 @@
+@(subHeaders2 : Array[java.lang.String], nbResults : Array[java.lang.Integer], listResults : java.util.ArrayList[java.util.ArrayList[java.lang.String]])
+
+<html>
+	<head>
+		<meta charset="iso-8859-1">
+	</head>
+<body>
+
+@import java.lang.Integer; val nbQueries=5
+@import java.lang.String; val subHeader1 = "Nombre de résultats : "; val subHeader2 = "Détails : "; val lineReturn = "<br>"; val separatorLine = "------------------------------------------";
+@import java.util.Arrays; val headers = Array("1. QC en cours bloqué", "2. Readsets à évaluer : Read Quality (RAW) manquant", "3. Readsets à évaluer : Read Quality (CLEAN) manquant", "4. Readsets à évaluer : SortingRibo manquant", "5. Readsets à évaluer : Taxonomy manquant"); 
+@import java.util.Arrays; val comments = Array("Liste des readsets à l\'état IP-QC, pour lesquels le traitement readQualityRaw n\'existe pas.","Liste des readsets à l\'état IW-VQC, pour lesquels le traitement readQualityRaw n\'existe pas.","Liste des readsets à l\'état IW-VQC, pour lesquels le traitement readQualityClean n\'existe pas.","Liste des readsets à l\'état IW-VQC, pour lesquels le traitement sortingRibo n\'existe pas et dont le sampleType est dans la liste : depletedRNA ;  mRNA ; total-RNA ; sRNA ; cDNA","Liste des readsets à l\'état IW-VQC, pour lesquels le traitement taxonomy n\'existe pas.");
+
+
+@for(i<-0 until nbQueries){
+
+	@(headers(i)) @(lineReturn)
+	
+	@(comments(i)) @(lineReturn)
+	
+	@(subHeader1) @(nbResults(i)) @(lineReturn)
+	
+	@(subHeader2) @(subHeaders2(i)) @(lineReturn)
+	
+	@for(result <- listResults(i)) {
+		@(result) @(lineReturn)
+	}
+	
+	@if(listResults(i).size > 0) {
+		@(lineReturn)
+	} 
+
+	@(separatorLine)
+	
+	@(lineReturn)
+
+}
+
+</body>
+</html>

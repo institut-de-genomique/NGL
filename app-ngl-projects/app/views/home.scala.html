@@ -1,0 +1,24 @@
+@this(ctx : fr.cea.ig.ngl.NGLApplication, menu_ : menu)
+@* @this(ctx : fr.cea.ig.play.migration.NGLContext, menu_ : menu) *@
+@()
+
+@import play.mvc.Http.Context
+@import views.html._
+@import views.html.imports._
+
+@user            = @{ ctx.currentUser() }
+
+@scripts() = {
+}
+
+@views.html.main("home.title.name", menu_("home"), scripts) {
+ <div  class="row">
+  <div class="col-md-12 col-lg-12">
+  	<div class="jumbotron">
+   		<h1>@Messages("home.h10.header", user)</h1>
+    	<p>@Messages("home.p.comment")</p> 
+   	</div>
+  </div>
+ </div>
+}
+ 

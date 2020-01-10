@@ -1,0 +1,76 @@
+@this()
+@()
+@import views.html.helper._
+
+@formConsultation() = {
+
+	@columnSearchForm{
+		@formGroup{
+			<div class="form-control" bt-select  ng-model="consultationService.form.projCodes" filter="true" multiple="true" placeholder='@Messages("consultation.placeholder.projectCodes")' bt-options="project.code as project|formatProjectListLabel for project in consultationService.lists.getProjects()"></div>	
+		}													
+	}
+	@columnSearchForm{
+		@formGroup{
+			<div class="form-control" bt-select  ng-model="consultationService.form.stateCodes" filter="true" multiple="true" placeholder='@Messages("consultation.placeholder.stateCodes")' bt-options="state.code as state.name for state in consultationService.lists.getStates()"></div>	
+		}													
+	}	
+	@columnSearchForm{
+		@formGroup{			
+			<bt-input type="text" class="form-control" input-ng-model="consultationService.form.codeRegex" textarea-ng-model="consultationService.form.codes" placeholder='@Messages("consultation.placeholder.experimentCodes")'></bt-input>
+		}
+	}
+	@columnSearchForm{
+		@formGroup{
+			<bt-input type="text" class="form-control" input-ng-model="consultationService.form.accessionRegex" textarea-ng-model="consultationService.form.accessions" placeholder='@Messages("consultation.placeholder.experimentAccessions")'></bt-input>
+		}
+	}
+	@columnSearchForm{
+	
+	}
+	@columnSearchForm{
+	
+	}
+	
+	
+	@columnSearchForm{
+		@formGroup{
+		<div class="tab-pane active" id="filters">
+			<form class="well well-small">
+			<div class="row">
+			
+				<div class="btn-toolbar">
+					<button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="consultationService.search()" class="btn btn-primary" >
+						<i class="fa fa-search"></i>
+					</button>
+					<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="consultationService.resetForm()"  class="btn btn-default">
+						<i class="fa fa-undo"></i>
+					</button>						 	
+				</div>
+				
+			</div>		
+		</form>	
+	</div>
+	
+		}													
+	}
+}
+
+
+
+	
+<div class="row"> 
+	<div class="col-md-12 col-lg-12" ultimate-datatable="consultationService.datatable">
+		<div dt-form>	
+			<div class="tab-content">
+				<div class="tab-pane active" id="filters">
+					<form name="experimentForm" class="well well-small">
+						<div class="row">
+						@formConsultation
+						</div>		
+					</form>	
+				</div>
+			</div>
+		</div>
+	</div>
+</div> 
+

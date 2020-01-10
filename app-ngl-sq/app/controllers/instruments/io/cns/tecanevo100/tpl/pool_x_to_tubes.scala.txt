@@ -1,0 +1,9 @@
+@(lines: List[controllers.instruments.io.cns.tecanevo100.SampleSheetPoolLine])
+
+@import controllers.instruments.io.utils._;
+@import java.lang._
+
+Ligne;Colonne;Source;Code Plaque;Position;Volume a prelever;Portoir destination;Code tube;Position;Puits source\u000D\u000A
+@for((line) <- lines.sorted){
+	@line.inputSupportContainerLine;@line.inputSupportContainerColumn;@line.inputSupportSource;@line.inputSupportCode;@line.inputSupportContainerPosition;@line.inputSupportContainerVolume;@line.outputSupportDestination;@line.outputSupportCode;@line.outputSupportPosition;@line.inputSupportContainerCode\u000D\u000A	
+}

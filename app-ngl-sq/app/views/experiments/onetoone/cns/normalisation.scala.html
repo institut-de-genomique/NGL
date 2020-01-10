@@ -1,0 +1,14 @@
+@()
+<div ng-controller="XToPlateCtrl">
+<div class="col-md-12 col-lg-12"  ng-controller="NormalisationCtrl">
+	<div class="row">
+	<div class="col-md-12 col-lg-12">
+	<ul class="list-unstyled">
+	<li>Si <u>mode calcul = volume final fixe</u>,  <strong>renseigner concentration et volume final</strong>, <span class="label label-danger">ne pas renseigner</span> vol engagé et tampon</li>
+	<li>Si <u>mode calcul = volume à engager fixe</u>, <strong>renseigner volume engagé et concentration</strong>, <span class="label label-danger">ne pas renseigner</span> vol final et tampon</li>
+	</ul>	
+	</div>
+	</div>
+	@views.html.experiments.onetoone.defaults.partials.udtAndPlateDesign()
+</div>
+</div>

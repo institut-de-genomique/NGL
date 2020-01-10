@@ -1,0 +1,60 @@
+package rules
+
+
+
+// 14/03/2016 verification du volume de sortie des containers prep-pcr-free
+// NOTE: il faut passer par drools pour les verification sur les attributs
+rule "Volume not null in prep-pcr-free outputContainer"
+    @nglSQ( validations )
+	dialect "java"
+	salience 1000
+	no-loop
+    when
+    	$experiment:Experiment($typeCode:typeCode,$typeCode=="prep-pcr-free")
+    	State($stateCode:code=="IP")
+		$atomicTransfert: OneToOneContainer($inputContainerUsed:inputContainerUseds.get(0), $outputContainerUsed: outputContainerUseds.get(0))
+	   	OutputContainerUsed($volume: volume) from $outputContainerUsed
+    	$contextValidation:ContextValidation()
+    	eval($volume == null || $volume.value == null || $volume.value == "")
+    then
+    	Logger.debug("Volume not null in prep-pcr-free outputContainer");   
+    	// voir fichier messages pour le libellé de l'erreur
+   		$contextValidation.addErrors("prep-pcr-free","error.validationexp.outputvolumenotnull", $outputContainerUsed.code);
+end
+
+/*
+rule "init tag and tagCategory match"
+    @nglSQ( validations )
+	dialect "java"
+	salience 1000
+	no-loop
+    when
+    	$experiment:Experiment($typeCode:typeCode,$typeCode=="prep-pcr-free")
+    	State($stateCode:code=="F")
+		$atomicTransfert: OneToOneContainer($outputContainerUsed: outputContainerUseds.get(0))
+	   	OutputContainerUsed($experimentProperties: experimentProperties) from $outputContainerUsed 
+	   	eval($experimentProperties.get("tag") != null && $experimentProperties.get("tagCategory") != null )   	
+    then
+    	PropertySingleValue tag = (PropertySingleValue)$experimentProperties.get("tag");
+    	PropertySingleValue tagCategory = (PropertySingleValue)$experimentProperties.get("tagCategory");
+    	IlluminaIndex index = MongoDBDAO.findOne(InstanceConstants.PARAMETER_COLL_NAME, IlluminaIndex.class, DBQuery.is("typeCode", "index-illumina-sequencing").is("code",tag.value));
+    	//Logger.debug("!!!"+tag.value+" "+tagCategory.value+" "+index.categoryCode+" !!!");
+    	TagInfos tagInfos=new TagInfos(tag,tagCategory, index, $outputContainerUsed.code);
+		insert(tagInfos);
+end
+
+rule "tag and tagCategory match"
+    @nglSQ( validations )
+	dialect "java"
+	salience 900
+	no-loop
+    when
+    	$experiment:Experiment($typeCode:typeCode,$typeCode=="prep-pcr-free")
+    	$tagInfos:TagInfos()
+    	$contextValidation:ContextValidation() 
+    	eval(!$tagInfos.getTagCategory().value.equals($tagInfos.getIndex().categoryCode))   	
+    then
+    	Logger.debug("!!!"+$tagInfos.getTagCategory().value +"!="+ $tagInfos.getIndex().categoryCode+"!!!");
+    	$contextValidation.addErrors("prep-pcr-free","error.validationexp.tagcategory.notvalid", $tagInfos.getTagCategory().value, $tagInfos.getContainerCode());
+end
+*/

@@ -1,0 +1,12 @@
+@(label: String, field: String=null)
+
+@realField = @{ if (field==null) label else field }
+@*
+@views.html.helper.columnLabelValue(Messages(label)){
+  <p class="form-control-static">{{@realField}}</p>
+}
+*@
+
+@simpleLine(Messages(label),"{{"+realField+"}}")
+
+

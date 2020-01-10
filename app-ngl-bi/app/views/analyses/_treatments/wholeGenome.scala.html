@@ -1,0 +1,162 @@
+@()
+<div class="row">
+ <div class="col-md-10 col-lg-10">
+ 	<div class="panel panel-default">
+	<div class="panel-heading text-center"><strong>@Messages("analyses.treatments.wholeGenome.statAnalysis")</strong></div>
+	 <table class="table table-condensed table-hover table-bordered">
+		<thead>
+		<tr>
+			<th>@Messages("analyses.treatments.wholeGenome.gender")</th>
+			<th>@Messages("analyses.treatments.wholeGenome.coveredGenomeSize")</th>
+			<th>@Messages("analyses.treatments.wholeGenome.coveragePercent")</th>
+			<th>@Messages("analyses.treatments.wholeGenome.n50")</th>
+			<th>@Messages("analyses.treatments.wholeGenome.largestContigSize")</th>
+			<th>@Messages("analyses.treatments.wholeGenome.coverageMean")</th>
+			<th>@Messages("analyses.treatments.wholeGenome.coverageMedian")</th>
+			<th>@Messages("analyses.treatments.wholeGenome.Q1Coverage")</th>
+			<th>@Messages("analyses.treatments.wholeGenome.iqr")</th>
+			<th>@Messages("analyses.treatments.wholeGenome.outlierPercent")</th>
+			<th>@Messages("analyses.treatments.wholeGenome.duplicatedReadsPercent")</th>
+			<th>@Messages("analyses.treatments.wholeGenome.humanReferenceGenome")</th>
+			<th>@Messages("analyses.treatments.wholeGenome.pipelineVersion")</th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.gender.value}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.coveredGenomeSize.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.coveragePercent.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.n50.value | number}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.largestContigSize.value | number}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.coverageMean.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.coverageMedian.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.q1Coverage.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.iqr.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.outlierPercent.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.duplicatedReadsPercent.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.humanReferenceGenome.value}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.pipelineVersion.value}}</td>
+		
+		</tr>						
+	</tbody>
+	 </table>
+	 </div>
+ </div>	 
+</div>
+
+<div class="row">
+ <div class="col-md-10 col-lg-10">
+ 	<div class="panel panel-default">
+	<div class="panel-heading text-center"><strong>@Messages("analyses.treatments.wholeGenome.regionPercent")</strong></div>
+	 <table class="table table-condensed table-hover table-bordered">
+		<thead>
+		<tr>
+			<th>@Messages("analyses.treatments.wholeGenome.cov5xRegionPercent")</th>
+			<th>@Messages("analyses.treatments.wholeGenome.cov10xRegionPercent")</th>
+			<th>@Messages("analyses.treatments.wholeGenome.cov20xRegionPercent")</th>
+			<th>@Messages("analyses.treatments.wholeGenome.cov30xRegionPercent")</th>
+			<th>@Messages("analyses.treatments.wholeGenome.cov40xRegionPercent")</th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.cov5xRegionPercent.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.cov10xRegionPercent.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.cov20xRegionPercent.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.cov30xRegionPercent.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.cov40xRegionPercent.value | number:2}}</td>
+		</tr>						
+	</tbody>
+	 </table>
+	 </div>
+ </div>	 
+</div>
+
+<div class="row">
+ <div class="col-md-10 col-lg-10">
+ 	<div class="panel panel-default">
+	<div class="panel-heading text-center"><strong>@Messages("analyses.treatments.wholeGenome.noCoveredPercent")</strong></div>
+	 <table class="table table-condensed table-hover table-bordered">
+		<thead>
+		<tr>
+			<th>@Messages("analyses.treatments.wholeGenome.chr01NoCovered")</th>
+			<th>@Messages("analyses.treatments.wholeGenome.chr02NoCovered")</th>
+			<th>@Messages("analyses.treatments.wholeGenome.chr03NoCovered")</th>
+			<th>@Messages("analyses.treatments.wholeGenome.chr04NoCovered")</th>
+			<th>@Messages("analyses.treatments.wholeGenome.chr05NoCovered")</th>
+			<th>@Messages("analyses.treatments.wholeGenome.chr06NoCovered")</th>
+			<th>@Messages("analyses.treatments.wholeGenome.chr07NoCovered")</th>
+			<th>@Messages("analyses.treatments.wholeGenome.chr08NoCovered")</th>
+			<th>@Messages("analyses.treatments.wholeGenome.chr09NoCovered")</th>
+			<th>@Messages("analyses.treatments.wholeGenome.chr10NoCovered")</th>
+			<th>@Messages("analyses.treatments.wholeGenome.chr11NoCovered")</th>
+			<th>@Messages("analyses.treatments.wholeGenome.chr12NoCovered")</th>
+			<th>@Messages("analyses.treatments.wholeGenome.chr13NoCovered")</th>
+			<th>@Messages("analyses.treatments.wholeGenome.chr14NoCovered")</th>
+			<th>@Messages("analyses.treatments.wholeGenome.chr15NoCovered")</th>
+			<th>@Messages("analyses.treatments.wholeGenome.chr16NoCovered")</th>
+			<th>@Messages("analyses.treatments.wholeGenome.chr17NoCovered")</th>
+			<th>@Messages("analyses.treatments.wholeGenome.chr18NoCovered")</th>
+			<th>@Messages("analyses.treatments.wholeGenome.chr19NoCovered")</th>
+			<th>@Messages("analyses.treatments.wholeGenome.chr20NoCovered")</th>
+			<th>@Messages("analyses.treatments.wholeGenome.chr21NoCovered")</th>
+			<th>@Messages("analyses.treatments.wholeGenome.chr22NoCovered")</th>
+			<th>@Messages("analyses.treatments.wholeGenome.chrXNoCovered")</th>
+			<th>@Messages("analyses.treatments.wholeGenome.chrYNoCovered")</th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.chr01NoCovered.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.chr02NoCovered.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.chr03NoCovered.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.chr04NoCovered.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.chr05NoCovered.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.chr06NoCovered.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.chr07NoCovered.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.chr08NoCovered.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.chr09NoCovered.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.chr10NoCovered.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.chr11NoCovered.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.chr12NoCovered.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.chr13NoCovered.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.chr14NoCovered.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.chr15NoCovered.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.chr16NoCovered.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.chr17NoCovered.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.chr18NoCovered.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.chr19NoCovered.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.chr20NoCovered.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.chr21NoCovered.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.chr22NoCovered.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.chrXNoCovered.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.chrYNoCovered.value | number:2}}</td>
+			
+		</tr>						
+	</tbody>
+	 </table>
+	 </div>
+ </div>	 
+</div>
+
+<div class="row">
+ <div class="col-md-13 col-lg-13">
+ 	<div class="panel panel-default">
+	<div class="panel-heading text-center"><strong>@Messages("analyses.treatments.wholeGenome.info")</strong></div>
+	 <table class="table table-condensed table-hover table-bordered">
+		<thead>
+		<tr>
+			<th>@Messages("analyses.treatments.wholeGenome.fastqFiles")</th>
+			<th>@Messages("analyses.treatments.wholeGenome.filePath")</th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.fastqFiles.value}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.filePath.value}}</td>
+		</tr>						
+	</tbody>
+	 </table>
+	 </div>
+ </div>	 
+</div>

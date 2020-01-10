@@ -1,0 +1,56 @@
+//package controllers.crontab;
+//
+//import static fr.cea.ig.lfw.utils.Iterables.*;
+//
+//import java.util.List;
+//
+//import javax.inject.Inject;
+//
+////import org.bson.types.ObjectId;
+//
+//import ngl.data.crontab.CronService;
+//import ngl.data.crontab.CronTabAPI;
+//import ngl.data.crontab.CronTabEntry;
+//import ngl.data.crontab.JobRunner;
+//import play.mvc.Controller;
+//import play.mvc.Result;
+//
+//// Not implemented, not working prototype.
+//public class CronController extends Controller {
+//
+//	private final CronTabAPI  ctAPI;
+//	private final JobRunner   jr;
+//	// private final CronService cronService;
+//	
+//	@Inject
+//	public CronController(CronTabAPI ctAPI, JobRunner jr, CronService cronService) {
+//		this.ctAPI       = ctAPI;
+//		this.jr          = jr;
+//		// this.cronService = cronService;
+//	}
+//	
+//	// Return some table with the processes.
+//	public Result getEntries() {
+//		List<CronTabEntry> entries = ctAPI.getJobs();
+//		String tx = map(entries, e -> zenThem(e.getId(),e.getJob().getName(),e.getJob().getImplementation(),e.getLastExecutionDate(),e.getCheckDate())
+//				          .map(Object::toString)
+//				          .map(x -> "<td>" + x + "</td>")
+//				          .surround("<tr>", "", "</tr>")
+//						  .asString()).asString();
+//		return ok(tx);
+//	}
+//	
+//	public Result run(String sid) {
+//		// ObjectId id = new ObjectId(sid);
+//		CronTabEntry e = null; //ctAPI.getCronEntry(id);
+//		try {
+//			jr.runJob(e);
+//			return ok();
+//		} catch (Exception ex) {
+//			return internalServerError(ex.getMessage());
+//		}
+//	}
+//	
+//	
+//	
+//}

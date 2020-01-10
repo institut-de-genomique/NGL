@@ -1,0 +1,8 @@
+@(lines: List[controllers.instruments.io.cns.biomekfx.PlateSampleSheetLine])
+
+@import controllers.instruments.io.utils._;
+
+Container code entree,Container code sortie,Source-ADN,Swell-ADN,Source-Tp,Swell-Tp,Destination,Dwell,Volume ADN,Volume tampon\u000D\u000A
+@for((line) <- lines.sorted){
+@line.inputContainerCode,@line.outputContainerCode,@line.sourceADN,@line.swellADN,reservoir tampon,1,plaque a covariser,@line.dwell,@line.inputVolume,@line.bufferVolume\u000D\u000A	
+}

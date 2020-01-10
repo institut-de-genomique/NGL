@@ -1,0 +1,289 @@
+@this(menu_ : menu)
+@()
+<!-- utilise le main de common -->
+@views.html.main("documentation.page.title",menu_("documentation")) {
+<div class="jumbotron">
+	<h1>@Messages("documentation.page.title")</h1>
+</div>
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<h3>@Messages("documentation.ebi.title")</h3>
+	</div>
+	<div class="panel-body">
+		<ul>
+			<li><a href="http://www.ebi.ac.uk/ena/submit/read-submission">@Messages("documentation.sra.url")</a></li>																				
+			<li><a href="http://www.ebi.ac.uk/ena/submit/metadata-model">@Messages("documentation.metatdata.url")</a></li>																				
+		</ul>
+	
+	</div>
+	
+	<div class="panel-heading">
+		<h3>@Messages("documentation.intern.title")</h3>
+	</div>
+	<div class="panel-body">
+		<ul>
+			<li><h4>Strategy sample : @Messages("documentation.mandatory").  @Messages("documentation.possible.values") :</h4> 
+				<ul>
+					<li><strong>STRATEGY_SAMPLE_TAXON</strong> : building sample object per project (LIMS project code) and taxon (LIMS taxon).</li>
+					<li><strong>STRATEGY_SAMPLE_CLONE</strong> : building sample object per project and per clone.</li>
+					<li><strong>STRATEGY_SAMPLE_BANK</strong>  : building sample object per project and per bank (type of bank).</li>				
+					<li><strong>STRATEGY_NO_SAMPLE</strong> : tag FILE_USER_CLONE_TO_ACSAMPLE_ACSTUDY used.</li>
+                </ul>
+           	</li>
+			<li><h4>Library strategy : @Messages("documentation.mandatory"). @Messages("documentation.possible.values") :</h4> 
+				<ul>
+					<li><strong>WGS</strong> : Random sequencing of the whole genome</li>
+					<li><strong>WXS</strong> : Random sequencing of exonic regions selected from the genome</li>
+					<li><strong>RNA-Seq</strong> : Random sequencing of whole transcriptome</li>
+					<li><strong>WCS</strong> : Random sequencing of a whole chromosome or other replicon isolated from a genome</li>
+					<li><strong>CLONE</strong> : Genomic clone based (hierarchical) sequencing</li>
+					<li><strong>POOLCLONE</strong> : Shotgun of pooled clones (usually BACs and Fosmids)</li>
+					<li><strong>AMPLICON</strong> : Sequencing of overlapping or distinct PCR or RT-PCR products</li>
+					<li><strong>CLONEEND</strong> : Clone end (5', 3', or both) sequencing</li>
+					<li><strong>FINISHING</strong> : Sequencing intended to finish (close) gaps in existing coverage</li>
+					<li><strong>ChIP-Seq</strong> : Direct sequencing of chromatin immunoprecipitates</li>
+					<li><strong>MNase-Seq</strong> : Direct sequencing following MNase digestion</li>
+					<li><strong>DNase-Hypersensitivity</strong> : Sequencing of hypersensitive sites, or segments of open chromatin that are more readily cleaved by DNaseI</li>
+					<li><strong>Bisulfite-Seq</strong> : Sequencing following treatment of DNA with bisulfite to convert cytosine residues to uracil depending on methylation status</li>
+					<li><strong>EST</strong> : Single pass sequencing of cDNA templates</li>
+					<li><strong>FL-cDNA</strong> : Full-length sequencing of cDNA templates</li>
+					<li><strong>CTS</strong> : Concatenated Tag Sequencing</li>
+					<li><strong>MRE-Seq</strong> : Methylation-Sensitive Restriction Enzyme Sequencing strategy</li>
+					<li><strong>MeDIP-Seq</strong> : Methylated DNA Immunoprecipitation Sequencing strategy</li>
+					<li><strong>MBD-Seq</strong> : Direct sequencing of methylated fractions sequencing strategy</li>
+					<li><strong>OTHER</strong> : Library strategy not listed</li>
+				</ul>
+			</li>
+			<li><h4>Library source : @Messages("documentation.mandatory"). @Messages("documentation.possible.values") :</h4> 
+				<ul>
+					<li><strong>GENOMIC</strong> : Genomic DNA (includes PCR products from genomic DNA)</li>
+					<li><strong>TRANSCRIPTOMIC</strong> : Transcription products or non genomic DNA (EST, cDNA, RT-PCR,screened libraries)</li>
+					<li><strong>METAGENOMIC</strong> : Mixed material from metagenome</li>
+					<li><strong>METATRANSCRIPTOMIC</strong> : Transcription products from community targets</li>
+					<li><strong>SYNTHETIC</strong> : Synthetic DNA</li>
+					<li><strong>VIRAL RNA</strong> : Viral RNA</li>
+					<li><strong>OTHER</strong> : Other, unspecified, or unknown library source material</li>
+				</ul>
+			</li>
+			<li><h4>Library selection : @Messages("documentation.mandatory"). @Messages("documentation.possible.values") :</h4> 
+				<ul>
+					<li><strong>RANDOM</strong>: No selection or random</li> 
+					<li><strong>PCR</strong> : Target selection and enrichment via PCR</li>
+					<li><strong>RANDOM PCR</strong> : Source material was selected by randomly generated primers.</li>
+					<li><strong>RT-PCR</strong> : Selection by reverse transcription PCR.</li>
+					<li><strong>HMPR</strong> : Hypo-methylated partial restriction digest</li>
+					<li><strong>MF</strong> : Methyl Filtrated</li>
+					<li><strong>repeat fractionation</strong> : Selection for less repetitive (and more gene rich) sequence through Cot filtration (CF) or other fractionation techniques based on DNA kinetics.</li> 
+					<li><strong>size fractionation</strong> : Physical selection of size appropriate targets.</li>
+					<li><strong>MSLL</strong> : Methylation Spanning Linking Library</li>
+					<li><strong>cDNA</strong>: PolyA selection or enrichment for messenger RNA(mRNA). complementary DNA.</li> 
+					<li><strong>ChIP</strong> : Chromatin immunoprecipitation</li>
+					<li><strong>Mnase</strong> : Micrococcal Nuclease (Mnase) digestion</li>
+					<li><strong>Dnase</strong> : Deoxyribonuclease (MNase) digestion</li> 
+					<li><strong>Hybrid Selection</strong> : Selection by hybridization in array or solution.</li>
+					<li><strong>Reduced Representation</strong> : Reproducible genomic subsets, often generated by restriction fragment size selection, containing a manageable number of loci to facilitate re-sampling.</li>
+					<li><strong>Restriction Digest</strong> : DNA fractionation using restriction enzymes.</li>
+					<li><strong>5-methylcytidine antibody</strong> : Selection of methylated DNA fragments using an antibody raised against 5-methylcytosine or 5-methylcytidine (m5C).</li>
+					<li><strong>MBD2 protein methyl-CpG binding domain</strong> :  Enrichment by methyl-CpG binding domain.</li>
+					<li><strong>CAGE</strong> : Cap-analysis gene expression.</li> 
+					<li><strong>RACE</strong> : Rapid Amplification of cDNA Ends.</li>  
+					<li><strong>MDA</strong> : Multiple Displacement Amplification, a non-PCR based DNA amplification technique that amplifies a minute quantifies of DNA to levels suitable for genomic analysis.</li> 
+					<li><strong>padlock probes capture method</strong> : Targeted sequence capture protocol covering an arbitrary set of nonrepetitive genomics targets. An example is capture bisulfite sequencing using padlock probes (BSPP).</li> 
+					<li><strong>other</strong> : Other library enrichment, screening, or selection process.</li>
+					<li><strong>unspecified</strong> : Library enrichment, screening, or selection is not specified.</li>
+				</ul>
+			</li>
+			<li><h4>Library protocol : @Messages("documentation.optionnal").</h4></li>
+			<li><h4>Study type : @Messages("documentation.mandatory"). @Messages("documentation.possible.values") :</h4>
+				<ul>
+					<li><strong>Whole Genome Sequencing</strong> : Sequencing of a single organism.</li>
+					<li><strong>Metagenomics</strong> : Sequencing of a community.</li> 
+					<li><strong>Transcriptome Analysis</strong> : Sequencing and characterization of transcription elements.</li>
+					<li><strong>Resequencing</strong> : Sequencing of a sample with respect to a reference.</li>                 
+					<li><strong>Epigenetics</strong> : Cellular differentiation study.</li>  
+					<li><strong>Synthetic Genomics</strong> : Sequencing of modified, synthetic, or transplanted genomes.</li>
+					<li><strong>Forensic or Paleo-genomics</strong> :  Sequencing of recovered genomic material.</li>
+					<li><strong>Gene Regulation Study</strong> : Study of gene expression regulation.</li> 
+					<li><strong>Cancer Genomics</strong> : Study of cancer genomics.</li> 
+					<li><strong>Population Genomics</strong> : Study of populations and evolution through genomics.</li>
+					<li><strong>RNASeq : RNA sequencing study.</strong></li>
+					<li><strong>Exome Sequencing</strong> : The study investigates the exons of the genome.</li>
+					<li><strong>Pooled Clone Sequencing</strong> : The study is sequencing clone pools (BACs, fosmids, other constructs).</li>
+					<li><strong>Other</strong> : Study type not listed.</li>
+				</ul> 
+			</li>
+		</ul>
+	</div>
+	
+	<div class="panel-heading">
+		<h3>@Messages("documentation.userFileReadSet")</h3>
+	</div>
+	<div class="panel-body">
+		<ul>
+		<li><h4>utilité du fichier :</h4>
+		Il permet d'indiquer une liste predefinie de ReadSetCode à soumettre.
+		<li><h4>Format du fichier :</h4>
+		En colonnes délimitées par le caractère '|'. La premiere ligne du fichier permet de definir la legende (type-information de chaque colonne) tandis que les lignes suivantes du fichier correspondent aux valeurs. <br>
+		Les lignes commencant par le caractère '#' sont ignorées (commentaires).<br> 
+		La legende doit obligatoirement comporter le champs "readSetCode".<br>
+		<li><h4>Type d'informations pouvant apparaitre dans le fichier :</h4>
+		<ul>
+			<li><strong>readSetCode</strong> :        Code du readSet.
+		</ul>		
+		<li><h4>Exemple de fichier :</h4>
+		#-------------------------------<br>
+		readSetCode<br>
+		#-------------------------------<br>
+		BAT_AAQOSW_1_C37T3ACXX.IND25<br>
+		BAT_ABAOSW_2_C39B2ACXX.IND30<br>
+		
+		
+	</div>	
+	
+	<div class="panel-heading">
+		<h3>@Messages("documentation.userFileExperiments")</h3>
+	</div>
+	<div class="panel-body">
+		<ul>
+		<li><h4>utilité du fichier :</h4>
+		Il permet de surcharger certaines informations de NGL ou de la configuration de soumission pour construire les objets 'experiment'.
+		<li><h4>Format du fichier :</h4>
+		En colonnes délimitées par le caractère '|'. La premiere ligne du fichier permet de definir la legende (type-information de chaque colonne) tandis que les lignes suivantes du fichier correspondent aux valeurs. <br>
+		Les lignes commencant par le caractère '#' sont ignorées (commentaires).<br> 
+		La legende doit obligatoirement comporter le champs "experiment_alias".<br>
+		<li><h4>Type d'informations pouvant apparaitre dans le fichier :</h4>
+		<ul>
+			<li><strong>experiment_alias</strong> :   Valeur de la forme exp_readsetCode.
+			<li><strong>nominal_length</strong> :     Valeur correspondant à un entier.
+			<li><strong>library_strategy</strong> :   Voir valeurs autorisées ci-dessus. 
+			<li><strong>library_source</strong> :     Voir valeurs autorisées ci-dessus. 
+			<li><strong>library_selection</strong> :  Voir valeurs autorisées ci-dessus. 
+			<li><strong>library_name</strong> :       Valeur correspondant à une chaine de caractères sans éspaces. 
+			<li><strong>title </strong> :             Courte chaine de caractères.	
+		</ul>		
+		<li><h4>Exemple de fichier :</h4>
+        #--------------------------------------------- <br>
+        experiment_alias	|	nominal_length         <br>  
+        #--------------------------------------------- <br>
+        exp_AWP_AOSF_1_D0HW7ACXX.IND12	|	297 <br>
+        exp_AWP_AOSF_4_D0HW7ACXX.IND12	|	297 <br>
+        exp_AWP_AOSA_7_D0HW7ACXX	|	2852 <br>
+        exp_AWP_AOSA_8_D0HW7ACXX	|	3292 <br>
+		
+		
+	</div>	
+	<div class="panel-heading">
+		<h3>@Messages("documentation.userFileSamples")</h3>
+	</div>
+	<div class="panel-body">
+		<ul>
+		<li><h4>utilité du fichier :</h4>
+		Il permet de surcharger certaines informations de NGL ou de la configuration de soumission pour construire les objets 'experiment'.
+		<li><h4>Format du fichier :</h4>
+		En colonnes délimitées par le caractère '|'. La premiere ligne du fichier permet de definir la legende (type-information de chaque colonne) tandis que les lignes suivantes du fichier correspondent aux valeurs. <br>
+		Les lignes commencant par le caractère '#' sont ignorées (commentaires).<br> 
+		La legende doit obligatoirement comporter le champs "sample_alias".<br>
+		<li><h4>Type d'informations pouvant apparaitre dans le fichier :</h4>
+		<ul>
+			<li><strong>sample_alias</strong> :       Valeur obligatoire de la forme 
+					'sample_codeProjet_taxonId' si STRATEGY_SAMPLE= strategy_sample_taxon 
+   					'sample_codeProjet_clone' si STRATEGY_SAMPLE= strategy_sample_clone    
+			<li><strong>scientific_name</strong> : Valeur de type chaine de caracteres sans accents ni caracteres speciaux (ex de caracteres à proscrire '&'). 
+			<li><strong>common_name</strong> :  Valeur de type chaine de caracteres sans accents ni caracteres speciaux (ex de caracteres à proscrire '&').  
+			<li><strong>title</strong> :  Valeur de type chaine de caracteres sans accents ni caracteres speciaux (ex de caracteres à proscrire '&').  
+			<li><strong>description</strong> : Valeur de type chaine de caracteres sans accents ni caracteres speciaux (ex de caracteres à proscrire '&'). 
+		</ul>		
+		<li><h4>Exemple de fichier :</h4>
+		#---------------------------------------------------------<br>
+        sample_alias|title|scientific_name|description<br>
+        #---------------------------------------------------------<br>
+        sample_ARI_408172_23DCM1CCII43|16S rDNA Gene Sequencing of Tara Oceans DNA samples corresponding to size fractions for prokaryotes|Marine metagenome|Station23 - Deep Chlorophyl Maximum - 0.2-1.6 µm - DNA <br>
+		sample_ARI_408172_23SUR1CCII43|16S rDNA Gene Sequencing of Tara Oceans DNA samples corresponding to size fractions for prokaryotes|Marine metagenome|Station23 - Surface - 0.2-1.6 µm - DNA <br>
+        sample_ARI_408172_30SUR2CCII43|16S rDNA Gene Sequencing of Tara Oceans DNA samples corresponding to size fractions for prokaryotes|Marine metagenome|Station30 - Surface - 0.2-1.6 µm - DNA <br>
+		
+	</div>		
+	<div class="panel-heading">
+		<h3>@Messages("documentation.userFileCloneToAc")</h3>
+	</div>
+	<div class="panel-body">		
+		<ul>
+		<li><h4>utilité du fichier :</h4>	
+		Il permet de donner les correspondance entre les noms de clones et les numéros d'accession des objets 'sample' et/ou 'study' soumis par des collaborateurs. 
+		<li><h4>Format du fichier :</h4>
+		En colonnes délimitées par le caractère '|'. La premiere ligne du fichier permet de definir la legende (type-information de chaque colonne) tandis que les lignes suivantes du fichier correspondent aux valeurs.<br> 
+		Les lignes commencant par le caractère '#' sont ignorées (commentaires).<br> 
+		La legende doit obligatoirement comporter le champs "clone_alias"
+		<li><h4>Type d'informations pouvant apparaitre dans le fichier :</h4>
+		<ul>
+			<li><strong>clone_alias</strong> : Nom du clone dans NGL.
+			<li><strong>sample_ac</strong> :   Numéros d'accession du sample à l'EBI.
+			<li><strong>study_ac</strong> :    Numéros d'accession du study à l'EBI.
+		</ul>	
+
+		
+		<li><h4>Exemple de fichier :</h4>
+
+		#-------------------------------------------<br>
+		clone_alias|sample_ac|study_ac <br>
+		#--------------------------------------------<br>
+		"IROO-C3-0001"|"ERS154526"|"ERP001583"<br>
+		"IROO-D6-0002"|"ERS154527"|"ERP001583"<br>
+		"IROO-D6-0003"|"ERS154528"|"ERP001583"<br>
+		"IROO-D6-0004"|"ERS154529"|"ERP001583"<br>
+		"IROO-D6-0005"|"ERS154530"|"ERP001583"<br>
+		"IROO-E5-5146"|"ERS154531"|"ERP001583"<br>
+		"IROO-F5-5079"|"ERS154532"|"ERP001583"<br>		
+	<br/>
+	
+	</div>		
+	<div class="panel-heading">
+		<h3>@Messages("documentation.sampleAttributes")</h3>
+	</div>
+		<div class="panel-body">
+		<ul>		
+		<li><h4>utilité du champs :</h4>	
+		
+		L'EBI reconnait un ensemble fini de caracteristiques pour le sample (ex: title, description, code, taxonId, ...).<br>
+		Si le sample doit etre decrit plus precisement (a l'aide de propriétés qui n'apparaissent pas dans les differents champs du sample),<br>
+		il est possible de definir ses propres attributs (ex Strain, Clone, Note, altitude...) dans 
+		le champs attributes, en utilisant les balises autorisées.<br>
+		On peut definir plusieurs "attributes" dans ce champs.<br>
+		
+		<li><h4>Balises autorisées dans le champs attributes :</h4>
+		- SAMPLE_ATTRIBUTE <br>
+		- TAG              <br>
+		- VALUE            <br>
+		- UNITS            <br>
+		
+	
+		<li><h4>Exemple d'un champs attributes :</h4>
+		</ul>
+		<xmp>
+	   "<SAMPLE_ATTRIBUTE><TAG>Strain</TAG><VALUE>ABBA</VALUE></SAMPLE_ATTRIBUTE>
+	    <SAMPLE_ATTRIBUTE><TAG></TAG>Depth<VALUE>200</VALUE><UNITS>m</UNITS></SAMPLE_ATTRIBUTE>
+	    <SAMPLE_ATTRIBUTE><TAG>Sample Collection Device</TAG><VALUE>high volume peristaltic pump [HVP-PUMP]</VALUE></SAMPLE_ATTRIBUTE>"
+  		</xmp>
+		
+    </div>	
+			
+	<div class="panel-heading">
+		<h3>@Messages("documentation.visibiliteEBI_study")</h3>
+	</div>
+	<br/>
+	<div class="panel-body">		
+		<img src="/assets/images/visibiliteEbi_study.png" />
+		<br/>
+		<br/>	
+	</div>
+	
+	
+	<div class="panel-heading">
+		<h3>@Messages("documentation.visibiliteEBI_sample")</h3>
+	</div>
+	<br/>
+	<div class="panel-body">
+		<img src="/assets/images/visibiliteEbi_sample.png" />
+		<br/>
+		<br/>		
+	</div>
+}

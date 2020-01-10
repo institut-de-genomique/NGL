@@ -1,0 +1,32 @@
+@this()
+@()
+
+<div class="row">
+	<div class="col-xs-12">
+		<div class="page-header">	
+			<div class="btn-toolbar pull-right hidden-print">
+			
+				<div ng-controller="DetailsPrintCtrl">
+					<button class="btn btn-default" ng-click="print()" data-toggle="tooltip" title="@Messages("button.print")" ><i class="fa fa-print"></i> @Messages("button.print")</button>
+					<button class="btn btn-default" ng-click="back()" data-toggle="tooltip" title="@Messages("button.return")" ><i class="fa fa-arrow-left"></i> @Messages("button.return")</button>
+				</div>
+				
+			</div>
+ 			<center>@partials.details_header()</center>
+ 		</div>
+ 	</div>
+</div>
+@partials.details_print()
+@partials.details_file()
+
+
+<div ng-repeat="treament in treatments.getTreatments()">
+	<div class="row page-break">
+		<div class="col-xs-12">
+			<h3>{{treament.name}}</h3>
+		</div>
+	</div>
+	<div ng-include="treament.url+'?media=print'"></div>			
+</div>
+
+

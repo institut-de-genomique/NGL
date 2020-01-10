@@ -1,0 +1,25 @@
+#datatable
+datatable.button.selectall=Select all
+datatable.button.unselectall =Deselect all
+datatable.button.cancel=Cancel
+datatable.button.hide=Hide
+datatable.button.show=Show Details
+datatable.button.edit=Edit
+datatable.button.sort=Order
+datatable.button.save=Save
+datatable.button.remove=Remove
+datatable.button.group = Group / Ungroup
+datatable.button.length=Size ({0})
+datatable.totalNumberRecords = {0} Result(s)
+datatable.button.exportCSV = CSV Export
+datatable.button.top = Go to the top
+datatable.msg.success.save = All backups are successful.
+datatable.msg.error.save = There are {0} backup(s) in error.
+datatable.msg.success.remove = All the deletions are successful.
+datatable.msg.error.remove =  There are {0} deletion(s) in error.
+
+datatable.remove.confirm = can you confirm the delete ?
+
+#format date
+datetime.format=MM/dd/yyyy HH:mm:ss
+date.format=MM/dd/yyyy

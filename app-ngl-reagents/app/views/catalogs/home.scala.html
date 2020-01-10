@@ -1,0 +1,23 @@
+@this(menu_ : menu)
+@(code : String)
+
+@import models.laboratory.common.description.ObjectType
+
+@scripts() = {
+   <script src="@controllers.main.tpl.routes.Main.jsCodes" type="text/javascript" charset="utf-8"></script> 
+	<script src="@routes.Assets.at("lib/datatable/datatable/javascripts/services/ultimate-datatable.js")" type="text/javascript" charset="utf-8"></script> 
+	<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/basket.js")" type="text/javascript" charset="utf-8"></script>     
+	<script src="@routes.Assets.at("ngl-reagents/javascripts/catalogs/app.js")" type="text/javascript" charset="utf-8"></script>  
+	<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/commons.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("lib/lib-frameworkweb/ngl-common/javascripts/controllers/mainctrl.js")" type="text/javascript" charset="utf-8"></script> 
+	<script src="@routes.Assets.at("ngl-reagents/javascripts/catalogs/services.js")" type="text/javascript" charset="utf-8"></script>  	
+	<script src="@routes.Assets.at("ngl-reagents/javascripts/catalogs/creation-kits-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-reagents/javascripts/catalogs/search-kits-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@controllers.reagents.tpl.routes.KitCatalogs.javascriptRoutes" type="text/javascript" charset="utf-8"></script>   
+}
+
+@css() = {
+<link rel="stylesheet" href="@routes.Assets.at("ngl-reagents/css/reagents/creation.css")">
+}
+
+@views.html.main("catalogs.title", menu_("catalogs."+code), scripts, css)(views.html.contents.lefttabs())

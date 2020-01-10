@@ -1,0 +1,91 @@
+@(typeForm: String)
+
+@column()(value: Html) = {
+	<div class="col-md-4 col-lg-4">
+		@value
+	</div>
+}
+
+@if(typeForm == "update") {
+	<div class="row">
+		<div class="col-md-12 col-lg-12 ">
+		<div class="page-header" ng-init="init()">
+			<div class="btn-toolbar pull-right">
+				 <button class="btn btn-default" ng-if="mainService.isEditMode()" ng-click="update()" data-toggle="tooltip" title="@Messages("button.validate")" ><i class="fa fa-save"></i> @Messages("button.validate")</button>
+				 <button class="btn btn-default" ng-if="mainService.isEditMode()" ng-click="cancel()" data-toggle="tooltip" title="@Messages("button.cancel")" ><i class="fa fa-undo"></i> @Messages("button.cancel")</button>
+				 <button class="btn btn-default" ng-if="!mainService.isEditMode()" ng-click="startEditMode()" data-toggle="tooltip" title="@Messages("button.edit")" ><i class="fa fa-edit"></i> @Messages("button.edit")</button>
+			</div>
+		 	<h1>	
+			 	<span>{{umbrellaProject.code}}</span> 
+			 </h1>
+		</div>
+	</div>
+	
+	<div class="row">
+		<div class="col-md-12 col-lg-12"  messages="messages"></div>
+	</div>
+	
+	<div class="row margin-bottom-7">
+		<div class="col-md-12 col-lg-12">
+			<form class="form-horizontal">
+				<div class="row">
+					@column(){
+						@views.html.helper.columnLabelValue(Messages("umbrellaProjects.code")){
+							<p class="form-control-static">{{umbrellaProject.code}}</p>
+						}
+						
+						@views.html.helper.columnLabelValue(Messages("umbrellaProjects.name")){
+							<div ng-switch on="mainService.isEditMode()">
+								<p class="form-control-static" ng-switch-when="false">{{umbrellaProject.name}}</p>
+								<input type="text" class="form-control" ng-switch-when="true" ng-model="umbrellaProject.name">
+							</div>
+						}
+					}
+				</div>
+			</form>
+		</div>
+	</div>
+}
+
+
+@if(typeForm == "add") {
+	<div class="row">
+		<div class="col-md-12 col-lg-12 ">
+		<div class="page-header" ng-init="init()">
+			<div class="btn-toolbar pull-right">
+				 <button class="btn btn-default" ng-click="save()" data-toggle="tooltip" title="@Messages("button.validate")" ><i class="fa fa-save"></i> @Messages("button.validate")</button>
+			</div>
+			<h1>
+				@Messages("add.title.name")
+			</h1>
+		</div>
+	</div>
+	
+	<div class="row">
+		<div class="col-md-12 col-lg-12"  messages="messages"></div>
+	</div>
+	
+	<div class="row margin-bottom-7">
+		<div class="col-md-12 col-lg-12">
+			<form class="form-horizontal">
+				<div class="row">
+					@column(){
+						@views.html.helper.columnLabelValue(Messages("projects.code")){
+							<div>
+								<input type="text" class="form-control" ng-model="form.code">
+							</div>
+						}
+										
+						@views.html.helper.columnLabelValue(Messages("projects.name")){
+							<div>
+								<input type="text" class="form-control" ng-model="form.name">
+							</div>
+						}
+					}
+				</div>
+				
+			</form>
+		</div>
+	</div>
+}
+       

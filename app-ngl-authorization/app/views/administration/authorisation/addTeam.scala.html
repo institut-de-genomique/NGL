@@ -1,0 +1,20 @@
+@(permForm:Form[models.administration.authorisation.Team],isEdit: Boolean)
+@implicitField = @{views.html.helper.FieldConstructor(helper.tbformhorizontal.f) }
+
+@helper.form(action = controllers.administration.authorisation.routes.Teams.createOrUpdate() , args = 'class -> "form-horizontal", Symbol("data-toggle") -> "ajax") {
+<legend>New team</legend>   
+@defining(if(!isEdit) ('states->"disabled") else (Symbol("") -> "")){ disabled =>
+	@helper.tbInputUneditable(permForm("id"),'hidden->"yes",'_label->"#ID")
+	@helper.tbInputText(permForm("nom"),'_label->"Nom",disabled)
+	 <div class="form-actions">
+            @if(isEdit){
+            	<button class="btn btn-primary" type="submit">Save</button>
+            	@if(permForm("id").value){
+            		<a class="btn btn-default" href="#" data-toggle="pilldyn" data-target="#onelement" data-href="@controllers.administration.authorisation.routes.Teams.show(Integer.valueOf(permForm("id").value))">Cancel</a>
+            	}
+            } else {
+            	<a class="btn btn-primary" href="#" data-toggle="pilldyn" data-target="#onelement" data-href="@controllers.administration.authorisation.routes.Teams.edit(permForm.get.id)" >Edit</a>
+            }            			
+          </div>
+}
+}

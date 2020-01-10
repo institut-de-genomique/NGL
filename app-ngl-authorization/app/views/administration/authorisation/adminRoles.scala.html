@@ -1,0 +1,154 @@
+@(dataForm: Form[controllers.utils.DataTableForm], userForm:Form[models.administration.authorisation.Role])
+@import helper._
+@import models.administration.authorisation.Role
+@implicitField = @{ FieldConstructor(helper.tbformvertical.f) }
+
+@searchForm(handler: FieldConstructor) = {
+	
+	@helper.form(action = controllers.administration.authorisation.routes.Roles.list(), args = 'class -> "well form-search") {		
+		
+				@helper.tbInputText(
+				field = dataForm("search_1"), 
+                args = 'placeholder -> "Label",
+                'class -> "search-query",
+                '_label -> "Label"  
+            )(handler = handler)
+                          				
+	}
+} 
+
+@scripts(handler: FieldConstructor, lang : Lang = implicitly[Lang]) = {
+  <script type="text/javascript">
+$(document).ready( function () {
+    var myDatatable = $('#table_id').dataTable({
+         "sDom":"Trti",
+         "sPaginationType": "bootstrap",
+    	 "bFilter": true,
+    	 "bDeferRender": true,
+    	 "bLengthChange": false,    	 
+         "bProcessing": true,
+         "bServerSide": true,
+         "sAjaxSource": "@controllers.administration.authorisation.routes.Roles.list()",
+         "sServerMethod": "GET",
+         "aoColumnDefs": [
+                  { "sTitle": "#ID", "mData": "id","aTargets": [ 0 ] },
+                  { "sTitle": "Label", "mData": "label","aTargets": [ 1 ], 
+                	  "mRender": function ( data, type, full ) {if(type==='edit'){return getEdit("edit1",data);}else{return data;}}},
+         ],
+         "oTableTools": {	
+        	"sRowSelect": "multi",
+        	"sSelectedClass": "row_selected",
+        	"aButtons": [
+							{
+								 "sExtends":    "btngroup",
+								 "aButtons":    [
+									{
+									    "sExtends":    "text",
+									    "sButtonText": "New",
+									    "sButtonClass" : "btn-primary",			                    
+									    "fnClick": function ( nButton, oConfig, oFlash ) {
+									    	if($('#newelt').length == 0){
+									        	//see ngl.js to see the custom tab event
+									            $('#searchTab').append('<li><a id="newelt" href="#" data-toggle="pilldyn" data-target="#newelement" data-href="@controllers.administration.authorisation.routes.Roles.add()">New<button class="close" data-dismiss="pilldyn">&times;</button></a></li>');					                    		
+									        }	
+									    	$('#newelt').click();
+									    }
+									},
+									{
+									    "sExtends":    "text",
+									    "sButtonText": "Show",
+									    "sButtonClass" : "btn-primary",			                    
+									    "fnClick": function ( nButton, oConfig, oFlash ) {
+									    	var oTT = TableTools.fnGetInstance( 'table_id' );
+									    	var aDatas = oTT.fnGetSelectedData();
+									    	if(aDatas){
+									        	for(var i = 0; i < aDatas.length; i++){	
+									        	    var aData = aDatas[i];
+									        	    var id = 'dyn_'+aData.id + '_id';
+									        		if($('#'+id).length == 0){
+									        			//see ngl.js to see the custom tab event
+									        			var url = jsRoutes.controllers.administration.authorisation.Roles.show(aData.id).url;
+									            	    $('#searchTab').append('<li><a id="'+id+'" href="#" data-toggle="pilldyn" data-target="#onelement" data-href="'+url+'">'+aData.label+'<button class="close" data-dismiss="pilldyn">&times;</button></a></li>');					                    		
+									        		}
+									        	}
+									        	if(aDatas.length == 1){
+									        		var id = 'dyn_'+aDatas[0].id + '_id';
+									        		$('#'+id).click();
+									        	}
+									    	}			                    				                    			                    
+									    }
+									}
+								]
+							}			                
+			                ,
+			                {
+			                    "sExtends":    "btngroup",
+			                    "sButtonText": "Edit",
+			                    "sDropdown":	true,
+			                    "mainButton":	"edit",
+			                    "aButtons":	[{
+			                    	"sExtends":    "edit",
+			                    	"aTargets": 1, 
+			                    	"sButtonText":  "Label",
+			                    	"mRender": function ( data, type ) {if(type==='edit'){return getEdit("edit1",data);}else{return data;}}
+			                   	 	}	                    
+			                    ]
+			                    
+			                }, {
+                			    "sExtends":    "refresh",
+                			},
+			                {
+			                	 "sExtends":    "btngroup",
+			                	 "aButtons":    [ {
+			                		 "sExtends":    "save",
+			                		 "playJSRoute":jsRoutes.controllers.administration.authorisation.Roles.createOrUpdate("json")
+			                		 },
+			                		 "cancel","select_all" ]
+			                },
+			                {
+		                		 "sExtends":    "remove",
+		                		 "playJSRoute":jsRoutes.controllers.administration.authorisation.Roles.remove()
+		                }
+			            ]
+		            	 
+        }
+    });
+
+    $("#search_1").keyup( function () {
+        myDatatable.fnFilter( $(this).val(), 1 );
+        
+    } );
+   
+    $("#searchTab").click(function() {
+    	myDatatable.fnClearTable(0);
+    	myDatatable.fnDraw();
+	});
+    
+    function getEdit(id, value){
+    	var html = $($('#'+id).html()).clone();
+    	if(html.children("input, select").size() > 0){
+    		html.children("input, select").val(value);
+    	}else{
+    		html.val(value);
+    	}
+    	return html;
+    }
+    
+    //myDatatable.dataTablEditable();
+    
+} );
+
+
+</script>
+<script type="text/html" id="edit1">
+<div class="control-group control-group-datatable">
+@helper.inputText(field = dataForm("label"), 'class -> "input-medium")(handler = handler, lang)
+</div>
+</script>
+}
+
+@search("Search a type", "roles", scripts(implicitField))(searchForm(implicitField)){
+	<form class="form-inline">
+		<table id="table_id" class="table table-bordered table-condensed table-hover"></table>   
+	</form> 
+}

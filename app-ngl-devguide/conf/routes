@@ -1,0 +1,61 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+#################
+# DevGuide pages
+#################
+GET     /                           				@controllers.Application.index()
+GET     /naming-rules                				@controllers.Application.namingRules(submenu:String = "")
+GET     /naming-rules/:submenu       				@controllers.Application.namingRules(submenu:String)
+GET     /technologies               				@controllers.Application.technologies()
+GET     /modules/:name              				@controllers.Application.modules(name:String)
+
+GET     /services/:name                				@controllers.Application.services(name:String)
+
+GET     /datatable                 					@controllers.Application.datatable()
+GET     /datatable/demo            					@controllers.Application.datatableDemo()
+GET     /datatable/get-examples           			@controllers.Datatable.getExamples()
+GET     /datatable/get-examples-pagination          @controllers.Datatable.getExamplesPagination()
+
+###############
+#Example Pages
+###############
+#hotels home
+GET		/hotels/:homecode/home						@controllers.hotels.tpl.Hotels.home(homecode:String)
+GET		/hotels/:code								@controllers.hotels.tpl.Hotels.home(code:String)
+
+#hotels tpl
+GET		/tpl/hotels/search							@controllers.hotels.tpl.Hotels.search()
+GET		/tpl/hotels/details							@controllers.hotels.tpl.Hotels.details()
+GET		/tpl/hotels/js-routes						@controllers.hotels.tpl.Hotels.javascriptRoutes()
+#hotels api
+GET		/api/hotels									@controllers.hotels.api.Hotels.list()
+GET    	/api/hotels/:code               			@controllers.hotels.api.Hotels.get(code: String)
+
+#bedrooms tpl
+GET		/tpl/hotels/bedrooms/list					@controllers.hotels.tpl.Bedrooms.list()
+GET		/tpl/hotels/bedrooms/details				@controllers.hotels.tpl.Bedrooms.details()
+#bedrooms api
+GET		/api/hotels/:hcode/bedrooms					@controllers.hotels.api.Bedrooms.list(hcode: String)
+GET    	/api/hotels/:hcode/bedrooms/:code     		@controllers.hotels.api.Bedrooms.get(hcode: String, code: String)
+POST   	/api/hotels/:hcode/bedrooms 	     		@controllers.hotels.api.Bedrooms.save(hcode: String)
+DELETE 	/api/hotels/:hcode/bedrooms/:code     		@controllers.hotels.api.Bedrooms.delete(hcode: String, code: String)
+
+#bookings home
+GET		/bookings/:homecode/home					@controllers.bookings.tpl.Bookings.home(homecode:String)
+GET		/bookings/:code								@controllers.bookings.tpl.Bookings.home(code:String)
+
+#bookings tpl
+GET		/tpl/bookings/search						@controllers.bookings.tpl.Bookings.search()
+GET		/tpl/bookings/details						@controllers.bookings.tpl.Bookings.details()
+GET		/tpl/bookings/js-routes						@controllers.bookings.tpl.Bookings.javascriptRoutes()
+#bookings api
+GET		/api/bookings								@controllers.bookings.api.Bookings.list()
+GET    	/api/bookings/:code               			@controllers.bookings.api.Bookings.get(code: String)
+POST   	/api/bookings 	     						@controllers.bookings.api.Bookings.save()
+DELETE 	/api/bookings/:code     					@controllers.bookings.api.Bookings.delete(code: String)
+
+# Map static resources from the /public folder to the /assets URL path
+GET     /assets/*file               @controllers.Assets.at(path="/public", file)
+GET     /messages.js                @controllers.main.tpl.Main.jsMessages()

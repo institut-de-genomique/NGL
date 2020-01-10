@@ -1,0 +1,37 @@
+@this()
+@()
+@import play.mvc.Http.Context
+
+
+<div class="row">
+	<div class="col-xs-12 col-md-12 col-lg-12">
+		<div class="page-header">@partials.details_header()</div>
+	</div>
+</div>
+
+
+<div class="row margin-bottom-7">
+	<div class="col-md-12 col-lg-12">
+		<ul class="nav nav-tabs margin-bottom-5">
+			<li ng-class="getTabClass('general')"><a href="#" data-target="#general" data-toggle="tab" ng-click="setActiveTab('general')">@Messages("containerSupports.tabs.general")</a></li>
+			<li class="{{getTabClass('storages')}} hidden-print"><a href="#" data-target="#storages" data-toggle="tab" ng-click="setActiveTab('storages')">@Messages("containerSupports.tabs.storages")</a></li>
+			<li class="{{getTabClass('workflow')}} hidden-print"><a href="#" data-target="#workflow" data-toggle="tab" ng-click="setActiveTab('workflow')">@Messages("containerSupports.tabs.workflow")</a></li>			
+		</ul>
+	
+		<div class="tab-content">
+			<div class="tab-pane {{getTabClass('general')}}" id="general">
+				@partials.details_general()
+			</div>
+			<div class="tab-pane {{getTabClass('storages')}}" id="storages">
+				@partials.details_storages()
+			</div>
+			<div class="tab-pane {{getTabClass('workflow')}}" id="workflow">
+				@partials.details_workflow()
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+

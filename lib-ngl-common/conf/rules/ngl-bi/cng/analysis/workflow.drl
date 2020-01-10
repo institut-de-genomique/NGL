@@ -1,0 +1,30 @@
+//created on: Nov 21, 2013
+package rules
+
+rule "Whole Genome Analysis expectedCoverage propagation"
+	@nglBI( F_BA_1 )
+	dialect "java"
+	salience 600
+	no-loop
+	when
+		$analysis : Analysis ( typeCode == "WG-analysis", $masterReadSetCode : masterReadSetCodes.get(0) )		
+	then
+		Logger.debug("Set ReadSet properties to Analysis "+$analysis.code);
+		BasicDBObject keys = new BasicDBObject();
+		keys.put("sampleOnContainer.properties.expectedCoverage", 1);
+		ReadSet readSet = MongoDBDAO.findOne(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, DBQuery.is("code", $masterReadSetCode), keys);
+		if(null != readSet){
+			Map<String, PropertyValue> properties = $analysis.properties;
+			//Get expectedCoverage value
+			if(readSet.sampleOnContainer.properties.get("expectedCoverage")!=null){
+				Double valueExpectedCoverage = Double.parseDouble(((String)readSet.sampleOnContainer.properties.get("expectedCoverage").getValue()).substring(0,((String)readSet.sampleOnContainer.properties.get("expectedCoverage").getValue()).length()-1));
+				PropertySingleValue propertyExpectedCoverage = new PropertySingleValue(valueExpectedCoverage);
+				properties.put("expectedCoverage",propertyExpectedCoverage);
+				MongoDBDAO.update(InstanceConstants.ANALYSIS_COLL_NAME, Analysis.class, DBQuery.is("code", $analysis.code),  DBUpdate.set("properties", properties));
+			}else{
+				Logger.error("ReadSet : "+$masterReadSetCode+" no property expectedCoverage");
+			}
+		}else{
+			Logger.error("ReadSet Does not exist: "+$masterReadSetCode);
+		}		
+end

@@ -1,0 +1,181 @@
+@this(menu_ : menu)
+@(code : String)
+
+@import models.laboratory.common.description.ObjectType
+
+@scripts() = {
+
+ 	<script src="@controllers.main.tpl.routes.Main.jsCodes" type="text/javascript" charset="utf-8"></script> 
+	<script src="@controllers.main.tpl.routes.Main.jsPermissions" type="text/javascript" charset="utf-8"></script>
+	<script src="@controllers.main.tpl.routes.Main.jsAppURL" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("lib/datatable/datatable/javascripts/services/ultimate-datatable.js")" type="text/javascript" charset="utf-8"></script>
+
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/app.js")" type="text/javascript" charset="utf-8"></script>  	
+	
+	<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/basket.js")" type="text/javascript" charset="utf-8"></script>  
+	<script src="@routes.Assets.at("lib/lib-frameworkweb/ngl-common/javascripts/controllers/mainctrl.js")" type="text/javascript" charset="utf-8"></script> 
+	<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/commons.js")" type="text/javascript" charset="utf-8"></script> 
+	<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/valuation.js")" type="text/javascript" charset="utf-8"></script> 
+	<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/list-resize.js")" type="text/javascript" charset="utf-8"></script> 	
+	<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/bt-input.js")" type="text/javascript" charset="utf-8"></script> 	
+	
+	<script src="@routes.Assets.at("ngl-sq/javascripts/services/dragndrop.js")" type="text/javascript" charset="utf-8"></script> 
+	
+	<script src="@routes.Assets.at("ngl-sq/javascripts/services/atomicTransfereServices.js")" type="text/javascript" charset="utf-8"></script>
+	
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/search-containers-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/services.js")" type="text/javascript" charset="utf-8"></script>  	
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/details-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/search-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<!-- FDS test remonter ici pour mise en commun...PB!!!
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/tag-plate-helpers.js")" type="text/javascript" charset="utf-8"></script>
+	-->
+	
+	<!-- oneToVoid -->
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToVoid/default/one-to-void-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToVoid/default/one-to-void-qc-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToVoid/default/illumina-depot-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToVoid/cns/bionano-depot-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToVoid/cns/qpcr-quantification-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToVoid/cns/reception-fluo-quantification-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToVoid/cns/chip-migration-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToVoid/cns/gel-migration-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToVoid/cns/pcr-gel-migration-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToVoid/cns/uv-spectrophotometry-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToVoid/cns/qcard-ctrl.js")" type="text/javascript" charset="utf-8"></script>			
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToVoid/cns/pulsedfieldelectrophoresis-ctrl.js")" type="text/javascript" charset="utf-8"></script>			
+	
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToVoid/cng/qpcr-quantification-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToVoid/cng/qpcr-nb-cycle-setting-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToVoid/cng/labchip-migration-profile-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToVoid/cng/bioanalyzer-migration-profile-ctrl.js")" type="text/javascript" charset="utf-8"></script>	
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToVoid/cng/qc-miseq-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToVoid/cng/fluo-quantification-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToVoid/cng/illumina-depot-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	
+	<!--oneToMany  -->
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToMany/default/tube-to-tubes-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToMany/cns/small-and-large-rna-extraction-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToMany/cns/dna-rna-extraction-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToMany/cns/grinding-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToMany/cns/aliquoting-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToMany/cns/sizing-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToMany/cns/nanopore-sizing-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToMany/cng/aliquoting-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToMany/cng/tube-to-tubes-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToMany/cng/nanopore-sizing-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToMany/cng/sample-prep-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToMany/cng/oxbisseq-and-bisseq-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+		
+	<!-- manyToOne -->	
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/manyToOne/default/tubes-to-tube-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/manyToOne/default/tubes-to-flowcell-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/manyToOne/default/tubes-to-mapcard-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/manyToOne/default/x-to-tubes-ctrl.js")" type="text/javascript" charset="utf-8"></script>	
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/manyToOne/default/tube-to-iryschip-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/manyToOne/default/tube-to-saphyrchip-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/manyToOne/cns/tubes-to-flowcell-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/manyToOne/cns/prepa-fc-ordered-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/manyToOne/cns/x-to-tubes-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/manyToOne/cns/x-to-plates-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/manyToOne/cng/x-to-plates-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/manyToOne/cng/tubes-to-flowcell-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/manyToOne/cng/prepa-fc-ordered-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+		
+	<!-- oneToOne -->
+    <script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/default/tube-to-tube-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+    <script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/default/x-to-plate-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+    <script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/default/helpers.js")" type="text/javascript" charset="utf-8"></script>
+  
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/nanopore-library-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/nanopore-fragmentation-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/nanopore-frg-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/nanopore-dna-reparation-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/nanopore-reparation-and-end-prep-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/precipitation-purification-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/nanopore-end-prep-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/nanopore-pre-pcr-ligation-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/nanopore-pcr-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/nanopore-barcode-ligation-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/nanopore-final-ligation-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/dna-extraction-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/cdna-synthesis-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/nanopore-frg-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/nanopore-dna-reparation-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/nanopore-library-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/nanopore-depot-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	
+	
+	
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/solution-stock-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/nanopore-depot-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/irys-nlrs-prep-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/bionano-dls-prep-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/rna-illumina-indexed-library-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/normalisation-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/dilution-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/tag-pcr-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/dna-illumina-indexed-library-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/pcr-amplification-and-purification-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/tubes-to-plate-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/plate-to-tubes-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/plates-to-plate-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/x-to-plate-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/post-pcr-ampure-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/spri-select-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/total-rna-extraction-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/cdna-synthesis-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/fragmentation-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/dnase-treatment-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/spin-column-purification-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/rrna-depletion-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/wga-amplification-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cns/wga-debranching-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/denat-dil-lib-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/prep-pcr-free-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/prep-wg-nano-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/library-prep-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/lib-normalization-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/pcr-and-purification-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/tubes-to-plate-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/plate-to-tubes-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/plates-to-plate-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/x-to-plate-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/chromium-gem-generation-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/wg-chromium-lib-prep-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/additional-normalization-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/fragmentation-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/capture-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/pcr-and-indexing-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/small-rnaseq-lib-prep-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/bisseq-lib-prep-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/frg-cdna-indexing-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/dev-pcr-amplification-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/lib-and-pcr-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/permeabilization-transposition-purification-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/pcr-amplif-and-purif-atac-chip-seq-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	
+	<!-- FDS remise a l'endroit initial...-->
+	<script src="@routes.Assets.at("ngl-sq/javascripts/experiments/oneToOne/cng/tag-plate-helpers.js")" type="text/javascript" charset="utf-8"></script> 
+	
+	<script src="@controllers.experiments.tpl.routes.Experiments.javascriptRoutes" type="text/javascript" charset="utf-8"></script> 
+	<script src="@helper.getAsset("javascripts","cytoscape","2.6.12","cytoscape_2.6.12.js")" type="text/javascript" charset="utf-8"></script>   
+}
+
+@css() = {
+<link rel="stylesheet" href="@routes.Assets.at("ngl-sq/css/commons/commons.css")">
+<link rel="stylesheet" href="@routes.Assets.at("ngl-sq/css/experiments/manyToOne/manyToOne.css")">
+<link rel="stylesheet" href="@routes.Assets.at("ngl-sq/css/experiments/new-experiments.css")">
+<link rel="stylesheet" href="@routes.Assets.at("ngl-sq/css/experiments/create-experiments.css")">
+}
+
+@views.html.main("experiments.title", menu_("experiments."+code), scripts,css)(views.html.contents.lefttabs())

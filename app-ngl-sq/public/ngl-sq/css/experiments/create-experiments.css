@@ -1,0 +1,43 @@
+/*custom bootrap for creating experiments*/
+
+/* MAIN */
+
+.selectSupportsTable .datatable .table>tbody>tr>td{	
+	max-width: 300px;
+	overflow-wrap: break-word;	
+}
+
+/* ACTION BUTTON */
+
+#experiment_action{
+	margin-right: 3px;
+}
+
+/* EXPERIMENTS COMMENTS  */
+
+.commentsButtons{
+	background-color: #DDD;
+	color: #333;
+	height: 27px;
+	width: 27px;
+	padding: 1px 1px 1px 1px;
+	margin: 0px 5px 0px 0px;}
+
+.columnWidth100px{
+	width: 100px
+}
+.columnWidth90px{
+	width: 90px
+}
+.columnWidth80px{
+	width: 80px
+}
+.columnWidth70px{
+	width: 70px
+}
+.columnWidth60px{
+	width: 60px
+}
+.columnWidth50px{
+	width: 50px
+}

@@ -1,0 +1,124 @@
+#created on: Jul 7, 2014
+package birds
+
+import fr.cea.ig.auto.submission.SRAFilesUtil;
+
+rule "get input submissionZip resources from NGL and internal referential for transfertRawData"
+@BirdsRule ( selectionRule )
+dialect 'java'
+ salience 200
+ //no-loop
+	when
+		$input : InputSpecificationElement(name=="inputTransfertSubZip", treatmentSpecification.name=="transfertRawData", project.name == "SRA")
+		$resourcesReferential : InternalReferential(name=="internalRefSubmission")
+		$referentialDevice : InternalReferentialDevice ()
+		$rps : ResourcePropertiesSet(initialized==false, inputSpecificationElement==$input, resourcesReferential==$resourcesReferential)
+		$groupJob : Job( treatmentSpecification.specificationGroup == true)
+	then
+        Logger log = Logger.getLogger("ngl.sub.rules");
+        log.debug("group internal referential device resources query from referential " + $resourcesReferential.getName());
+        $rps.initialize();
+        log.debug("Get data first from NGLSUB");
+        Set<ResourceProperties> resourceProperties = new HashSet<ResourceProperties>();
+        
+        JobResource groupJobResource = $groupJob.getUniqueJobResource("subData");
+        
+        JSONDevice jsonDevice = new JSONDevice();
+		Set<ResourceProperties> rpsRawData = jsonDevice.httpGetJSON(ProjectProperties.getProperty("server")+"/api/sra/experiments/rawDatas?submissionCode="+groupJobResource.getProperty("code"),"bot");
+		//Create submission bigTmp directory if needed
+		SRAFilesUtil.createBigTmpDirectory(rpsRawData,groupJobResource.getProperty("code"));
+		
+		boolean gzipForSubmission = SRAFilesUtil.checkGzipForSubmission(rpsRawData);
+		boolean checkDataCCRT = SRAFilesUtil.checkDataCCRT(rpsRawData,groupJobResource.getProperty("code"));
+		if(!gzipForSubmission && checkDataCCRT){
+			ResourceProperties newRp = new ResourceProperties();
+			newRp.setProperty("code",groupJobResource.getProperty("code"));
+			newRp.setProperty("gzipForSubmission","false");
+			newRp.setProperty("submissionDirectory",groupJobResource.getProperty("submissionDirectory"));
+			newRp.setProperty("experimentCodes",groupJobResource.getProperty("experimentCodes").replaceAll("\"",""));
+			newRp.setProperty("idGroupJob",""+$groupJob.getId());
+			resourceProperties.add(newRp);
+		}else if(gzipForSubmission){
+			Set<ResourceProperties> rpZips = $referentialDevice.getResourcesWithType($rps.getResourceType().getName(), $resourcesReferential);
+        	//Check submissionCode
+        	for(ResourceProperties rpZip : rpZips){
+        		if(rpZip.getProperty("code").equals(groupJobResource.getProperty("code")))
+        			resourceProperties.add(rpZip);
+        	}
+		}
+		$rps.setResourcePropertiesSet(resourceProperties);
+		modify($rps) {};
+end
+
+
+#règle mise à jour la valeur du parametre fileList selon resource en entrée et creation fichier WGS
+rule "update localDirectoryPath parameter"
+	@BirdsRule(fsRule)
+	dialect 'java'
+	salience 300
+	no-loop
+		when
+			$treatSpec : TreatmentSpecification(name=="transfertRawData", project.name=="SRA")
+			$job : Job()
+		then
+			Logger log = Logger.getLogger("ngl.sub.rules");
+			log.debug("Get rawData");
+			//Get rawData
+			JSONDevice jsonDevice = new JSONDevice();
+			Set<ResourceProperties> rps = jsonDevice.httpGetJSON(ProjectProperties.getProperty("server")+"/api/sra/experiments/rawDatas?submissionCode="+$job.getUniqueJobResource("rawDataDir").getProperty("code"),"bot");
+			log.debug("Size of rawData : "+rps.size());
+			String directoryPath = $job.getUniqueJobResource("rawDataDir").getProperty("submissionDirectory");
+			String filePath = $job.getParameterValue("fileList").getValue().replace("%directoryPath%",directoryPath);
+			SRAFilesUtil.createWGSFile(directoryPath, filePath, rps);
+			log.debug("set parameter value");
+			//Get input resource
+			$job.setParameterValue("fileList", filePath);
+end
+
+#Règle organisation syntaxe Aspera selon ticket NGL-334
+#//usr/local/aspera/connect/bin/ascp -i ~/.ssh/ebi.rsa -T -l300M --file-list=list_data_for_aspera.txt 
+#										--mode=send --host=webin.ebi.ac.uk --user=Webin-9 .
+rule "unix syntax ncftpput for EBI"
+	@BirdsRule(unixSyntaxRule)
+	dialect 'java'
+	salience 300
+	no-loop
+		when
+			$strategy : UnixCommandSyntaxStrategy ( name == "ncftpputSyntax" , commandLine == null)
+		then
+			Logger log = Logger.getLogger("ngl.sub.rules");	    
+			//Organize order parameterLine
+			String parameterLine = $strategy.getParameterValue().get("cert") + " " + 
+									$strategy.getParameterValue().get("encryption") + " " +
+									$strategy.getParameterValue().get("optionk").replace(" ","") + " " +
+									$strategy.getParameterValue().get("optionl").replace(" ","") + " " +
+									$strategy.getParameterValue().get("fileList").replace("--file-list ","--file-list=") + " " +
+									$strategy.getParameterValue().get("mode").replace("--mode ","--mode=") + " " +
+									$strategy.getParameterValue().get("hostName").replace("--host ","--host=") + " " +	
+									$strategy.getParameterValue().get("userEBI").replace("--user ","--user=") + " "+
+									$strategy.getParameterValue().get("localDirectory");
+			$strategy.setCommandLine("module load aspera-connect; "+$strategy.getExecutableName() + " " + parameterLine);
+			log.debug("command line : " + $strategy.getCommandLine());
+			modify($strategy) {}
+end
+
+rule "add rawData resources in internalRefSubmission_xml to fire sendXML"
+	@BirdsRule( addResources ) 
+	dialect 'java'
+	salience 200
+	when
+		$flag : Flag ( done == false ) 
+		$output : OutputSpecificationElement(treatmentSpecification.name == "transfertRawData")
+	  	$referential : ResourcesReferential ( name == "internalRefSubmissionXML" )
+		$resourceSet : ResourceSet( ioSpecificationElement == $output )
+		$job : Job(treatmentSpecification!=null, treatmentSpecification.name == "transfertRawData")
+	then
+		Logger log = Logger.getLogger("ngl.sub.rules");
+		log.debug("Add rawData resources rules for sendXML");
+		JobResource outputResource = $resourceSet.createJobResource($output.getResourceType(),$referential.getName());
+		ResourceProperties resourceProperties = outputResource.getResourceProperties();
+		resourceProperties.setProperty("fileList", $job.getParameterValue("fileList").getValue());
+		$flag.setDone(true);
+		modify($flag){};
+		modify($resourceSet){};
+end

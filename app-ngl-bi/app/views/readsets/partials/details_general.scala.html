@@ -1,0 +1,113 @@
+@()
+
+@column()(value: Html) = {
+	<div class="col-md-4 col-lg-4 col-xs-4">
+		@value
+	</div>
+}
+
+			<form class="form-horizontal">
+				<div class="row">
+				@column(){
+					@views.html.helper.columnLabelValue(Messages("readsets.code")){
+						<p class="form-control-static">{{readset.code}}</p>
+					}
+					@views.html.helper.columnLabelValue(Messages("readsets.state.code")){
+						<workflow-chart ng-attr-modal-bg-color="white" ng-attr-modal-width="700" ng-attr-modal-height="810" ng-attr-modal-header-text='@Messages("readsets.modal.header.text")' ng-attr-modal-body-text="" 
+		        			ng-attr-modal-data="statesHierarchy" ng-attr-modal-historical-data="readset.state.historical" ng-attr-modal-current-code="readset.state.code">
+		        		</workflow-chart>
+					}
+					
+
+		        
+					@views.html.helper.columnLabelValue(Messages("readsets.productionValuation.valid")){
+						<div ng-switch on="isEditMode()">
+							<p class="form-control-static" ng-switch-when="false" ng-bind="readset.productionValuation.valid|codes:'valuation'"/>
+							<div ng-switch-when="true"><div bt-select class="form-control" ng-model="readset.productionValuation.valid" bt-options="valid.code as valid.name for valid in lists.getValuations()"></div></div>
+						</div>
+					}				
+					@views.html.helper.columnLabelValue(Messages("readsets.productionValuation.resolutions")){
+							<div bt-select class="form-control" ng-model="readset.productionValuation.resolutionCodes" multiple="true" bt-options="valid.code as valid.name group by valid.category.name for valid in lists.getResolutions()" ng-edit="isEditMode()"></div>							
+					}
+					@views.html.helper.columnLabelValue(Messages("readsets.productionValuation.criteria")){
+						<div ng-switch on="isEditMode()">
+							<p class="form-control-static" ng-switch-when="false" ng-bind="readset.productionValuation.criteriaCode|codes:'valuation_criteria'" />
+							<div ng-switch-when="true"><div bt-select class="form-control" ng-model="readset.productionValuation.criteriaCode" bt-options="valid.code as valid.name for valid in lists.getValuationCriterias()|filter:{active:true}"></div></div>
+						</div>
+					}
+					@views.html.helper.columnLabelValue(Messages("readsets.valuation.user")){
+						<p class="form-control-static" >{{readset.productionValuation.user}} ({{readset.productionValuation.date | date:'@Messages("date.format")'}})</p>
+					}
+				}
+				@column(){
+					@views.html.helper.columnLabelValue(Messages("readsets.treatments.global.usefulSequences")){
+						<p class="form-control-static" ng-class="highLight('treatments.global.default.usefulSequences.value')">
+							{{readset.treatments.global["default"].usefulSequences.value |	number}}
+						</p>
+					}
+					@views.html.helper.columnLabelValue(Messages("readsets.treatments.global.usefulBases")){
+						<p class="form-control-static" >{{readset.treatments.global["default"].usefulBases.value | number}}</p>
+					}
+					@views.html.helper.columnLabelValue(Messages("readsets.bioinformaticValuation.valid")){
+						<div ng-switch on="isEditMode()">
+							<p class="form-control-static" ng-switch-when="false" ng-bind="readset.bioinformaticValuation.valid|codes:'valuation'"/>
+							<div ng-switch-when="true"><div bt-select  class="form-control" ng-model="readset.bioinformaticValuation.valid" bt-options="valid.code as valid.name for valid in lists.getValuations()"></div></div>
+						</div>
+					}
+					@views.html.helper.columnLabelValue(Messages("readsets.bioinformaticValuation.resolutions")){
+						<div bt-select  class="form-control" ng-model="readset.bioinformaticValuation.resolutionCodes" multiple="true" bt-options="valid.code as valid.name group by valid.category.name for valid in lists.getResolutions()" ng-edit="isEditMode()"></div>
+					}
+					@views.html.helper.columnLabelValue(Messages("readsets.bioinformaticValuation.criteria")){
+						<div ng-switch on="isEditMode()">
+							<p class="form-control-static" ng-switch-when="false" ng-bind="readset.bioinformaticValuation.criteriaCode|codes:'valuation_criteria'"/>
+							<div ng-switch-when="true"><div bt-select  class="form-control" ng-model="readset.bioinformaticValuation.criteriaCode" bt-options="valid.code as valid.name for valid in lists.getValuationCriterias()|filter:{active:true}"></div></div>
+						</div>
+					}
+					@views.html.helper.columnLabelValue(Messages("readsets.valuation.user")){
+						<p class="form-control-static" >{{readset.bioinformaticValuation.user}} ({{readset.bioinformaticValuation.date | date:'@Messages("date.format")'}})</p>
+					}
+				}
+				@column(){
+					@views.html.helper.columnLabelValue(Messages("readsets.runCode")+" / "+Messages("readsets.laneNumber")){
+						<p class="form-control-static"><a href="#" ng-click="goToRun()">{{readset.runCode}}</a> / {{readset.laneNumber}}</p>
+					}
+					@views.html.helper.columnLabelValue(Messages("readsets.runType")){
+						<p class="form-control-static" >{{readset.runTypeCode}}</p>
+					}
+					@views.html.helper.columnLabelValue(Messages("readsets.nbCycles")){
+						<p class="form-control-static" ng-bind="getNbCycles()"></p>
+					}
+					@views.html.helper.columnLabelValue(Messages("runs.sequencingStartDate")){
+						<p class="form-control-static">{{readset.runSequencingStartDate|date:'@Messages("date.format")'}}</p>
+					}
+					@views.html.helper.columnLabelValue(Messages("readsets.endOfRG")){
+						<p class="form-control-static">{{readset.state.historical|filter:'F-RG'|get:'date'|date:'@Messages("datetime.format")'}}</p>
+					}
+					@views.html.helper.columnLabelValue(Messages("readsets.endOfQC")){
+						<p class="form-control-static">{{readset.state.historical|filter:'F-QC'|get:'date'|date:'@Messages("datetime.format")'}}</p>
+					}
+				}
+				</div>
+				
+				<div class="row">
+					<div ng-switch on="isEditMode()">
+						<div class="col-md-8 col-lg-8" ng-switch-when="false">
+							<div class="form-group">
+								<label class="col-md-3 col-lg-3 control-label">@Messages("readsets.productionValuation.comment")</label>
+								<div class="col-md-9 col-lg-9">
+									<p class="form-control-static" ng-bind-html="deliberatelyTrustHTMLComment()"></p>
+				   				</div>
+				   			</div>
+			   			</div>
+			   			<div class="col-md-8 col-lg-8" ng-switch-when="true">
+			   				<div class="form-group">
+								<label class="col-md-3 col-lg-3 control-label">@Messages("readsets.productionValuation.comment")</label>
+								<div class="col-md-9 col-lg-9">
+									<textarea class="form-control" ng-model="readset.productionValuation.comment" rows="3"></textarea>
+								</div>
+							</div>
+						</div>
+			  		</div>		  		
+		  		</div>
+		  		
+			</form>		

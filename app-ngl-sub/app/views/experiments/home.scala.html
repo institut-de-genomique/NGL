@@ -1,0 +1,23 @@
+@this(menu_ : menu)
+@(code: String)
+
+@scripts() = {
+ 	<script src="@controllers.main.tpl.routes.Main.jsCodes" type="text/javascript" charset="utf-8"></script> 
+	<script src="@controllers.sra.experiments.tpl.routes.Experiments.javascriptRoutes" type="text/javascript" charset="utf-8"></script>
+    <script src="@routes.Assets.at("lib/datatable/datatable/javascripts/services/ultimate-datatable.js")" type="text/javascript" charset="utf-8"></script>
+    <script src="@routes.Assets.at("ngl-sub/javascripts/experiments/app.js")" type="text/javascript" charset="utf-8"></script>
+    
+    <script src="@routes.Assets.at("lib/lib-frameworkweb/ngl-common/javascripts/controllers/mainctrl.js")" type="text/javascript" charset="utf-8"></script>	
+    <script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/commons.js")" type="text/javascript" charset="utf-8"></script> 
+	<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/bt-input.js")" type="text/javascript" charset="utf-8"></script> 
+	
+	<script src="@routes.Assets.at("ngl-sub/javascripts/experiments/services.js")" type="text/javascript" charset="utf-8"></script>
+    <script src="@routes.Assets.at("ngl-sub/javascripts/experiments/consultation-ctrl.js")" type="text/javascript" charset="utf-8"></script>                             	
+	<script src="@routes.Assets.at("ngl-sub/javascripts/experiments/details-ctrl.js")" type="text/javascript" charset="utf-8"></script>                             	
+
+}
+<!-- home code au niveau du controller : donc create 
+appel de main.scala.html de views de ngl-common avec en parametre les javascripts dont studies/app.js-->
+@views.html.main("experiments.page.title", menu_("experiments."+code), scripts)(views.html.contents.lefttabs())
+
+

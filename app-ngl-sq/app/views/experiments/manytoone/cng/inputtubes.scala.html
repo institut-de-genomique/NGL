@@ -1,0 +1,94 @@
+@this()
+
+@()
+
+		<div ng-model="atmService.data.inputContainers">
+			<div class="panel panel-primary"  style="border-style:dashed">				
+			<div class="panel-body" ng-if="atmService.data.inputContainers.length==0">		
+				<p><i class="fa fa-download"></i> @Messages("experiments.inputs")</p>
+			</div>
+			
+			<table class="table" ng-if="atmService.data.inputContainers.length > 0"
+				ng-mouseup="atmService.data.stopSelectInputContainer($event)"
+				ng-mousedown="atmService.data.startSelectInputContainer($event)">
+			<thead>
+				<tr>
+					<th>
+					</th>
+					<th>
+						@Messages("containers.table.code")
+					</th>
+					<th>
+						@Messages("containers.table.supportCategoryCode")
+					</th>
+					<th>
+						@Messages("containers.table.fromTransformationTypeCodes")
+					</th>
+					<th>
+						@Messages("containers.table.projectCodes")
+					</th>
+					<th>
+						@Messages("containers.table.sampleCodes")
+					</th>
+					<th>
+						@Messages("containers.table.libProcessTypeCodes")
+					</th>
+					<th><!--24/08/2018 NGL-2211: ajout size -->
+					     @Messages("containers.table.size") (pb)
+					</th>
+					<th>
+						@Messages("containers.table.tags")
+					</th>
+					<th>
+						@Messages("containers.table.volume") (µL)
+					</th>
+					<th>
+						@Messages("containers.table.concentration") 
+					</th>									
+				</tr>
+				</thead>				
+				<tr ng-model="container" ng-repeat="container in atmService.data.inputContainers | orderBy:'code' track by $index" 
+					ng-mouseenter="atmService.data.selectInputContainer($event, container)"
+		        	ng-mousedown="atmService.data.startSelectInputContainer($event, container)"
+		        	ng-class="atmService.data.getInputContainerCellClass(container)">
+					<td>
+						<button class="btn btn-default btn-xs"  ng-click="atmService.data.deleteInputContainer(container)" ng-disabled="!isEditModeAvailable() && !isNewState()"><i class="fa fa-trash-o"></i></button>
+					</td>
+					<td>
+						{{container.code}}
+					</td>
+					<td>
+						{{container.locationOnContainerSupport.categoryCode | codes:'container_support_cat'}}
+					</td>
+					<td>
+						<div list-resize='container.fromTransformationTypeCodes | unique | codes:"type"' list-resize-min-size='3'>
+						
+					</td>
+					<td>
+						<div list-resize='container.projectCodes' list-resize-min-size='3'>
+						
+					</td>
+					<td>
+						<div list-resize='container.sampleCodes' list-resize-min-size='3'>
+						
+					</td>
+					<td>
+						<div list-resize='container.contents | getArray:"properties.libProcessTypeCode.value"| unique' list-resize-min-size='5' below vertical>					
+					</td>
+					<td><!-- 24/08/2018 NGL-2211 ajout size -->		
+					    {{container.size.value}}
+					</td>										
+					<td>
+						<div list-resize='container.contents | getArray:"properties.tag.value"| unique' list-resize-min-size='5' below vertical>																
+					</td>	
+	
+					<td>
+						{{container.volume.value}}
+					</td>
+					<td>
+						{{container.concentration.value | number}} {{container.concentration.unit}}
+					</td>						
+				</tr>				
+			</table>
+			</div>	
+		</div>

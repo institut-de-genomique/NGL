@@ -1,0 +1,32 @@
+Package: <span class="text-info">controllers.authorisation</span>
+<h2>Description: </h2>
+<ul>
+	<li>
+		Cette annotation/helper permet de gérer les authorisations et l'accès aux différentes ressources.
+	</li>
+</ul>
+<br/>
+<h2 id="helpers">Exemple d’utilisation: </h2>
+<ul>
+<li>
+<b>En annotation devant une méthode:</b> @Permission(value={"54ki2","test"},teams={"THETEAM","team2"})
+</li>
+<li>
+<b>Dans un template:</b> 
+<ul>
+<li>
+@if(PermissionHelper.checkPermission(session,"code permission")) { @* instructions *@} <i>(session est un mot-clé scala)</i>
+</li>
+<li>
+<b>Avec une liste de permission à verifier, allPermission permet de demander à ce que l'utilisateur ai toute les permissions(true) ou juste une des permissions(false)</b><br>
+@if(PermissionHelper.checkPermission(session,Array(String)permissions,String allPermission)) { @* instructions *@} <i>(session est un mot-clé scala)</i>
+</li>
+<li>
+@PermissionHelper.checkTeam(Session ses, String varteam){ @* instructions *@} <i>(ses est un mot-clé scala)</i>
+</li>
+<li>
+@PermissionHelper.checkTeam(Session ses, Array(string) varteam){ @* instructions *@} <i>(ses est un mot-clé scala)</i>
+</li>
+</ul>
+</li>
+</ul>

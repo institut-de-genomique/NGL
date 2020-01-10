@@ -1,0 +1,17 @@
+@this()
+@()
+@import views.html.helper._
+
+<div class="row">
+	<div class="col-md-12 col-lg-12"  messages="messages"></div>
+</div>
+<div class="row"> 
+<div class="col-md-12 col-lg-12" ultimate-datatable="searchService.datatable">
+	<div udt-form>
+		<ul class="nav nav-tabs margin-bottom-5">
+	   	<li class="active"><a href="#" data-target="#categories" data-toggle="tab" ng-click="changeTab('categories')">@Messages("descriptions.instruments.tab.categories")</a></li>
+	   	<li><a href="#" data-toggle="tab" ng-click="changeTab('instruments')">@Messages("descriptions.instruments.tab.instruments")</a></li>
+		<li><a href="#" data-toggle="tab" ng-click="changeTab('properties')">@Messages("descriptions.instruments.tab.properties")</a></li>      
+		<li><a href="#" data-toggle="tab" ng-click="changeTab('table')">@Messages("descriptions.instruments.tab.table")</a></li> 
+	   	</ul>
+</div>

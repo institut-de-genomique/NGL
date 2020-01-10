@@ -1,0 +1,32 @@
+@(experiment: models.laboratory.experiment.instance.Experiment, containers: List[models.laboratory.container.instance.Container])
+
+@import controllers.instruments.io.utils._;
+@import java.text.SimpleDateFormat
+@import java.util.Locale
+
+[Header]\u000D\u000A
+IEMFileVersion,4\u000D\u000A
+Investigator Name,\u000D\u000A
+Project Name,\u000D\u000A
+Experiment Name,@experiment.code\u000D\u000A
+Date,@(new SimpleDateFormat("MM/dd/yyyy").format(experiment.traceInformation.creationDate))\u000D\u000A
+Workflow,GenerateFASTQ\u000D\u000A
+Application,FASTQ Only\u000D\u000A
+Assay,\u000D\u000A
+Description,\u000D\u000A
+Chemistry,Default\u000D\u000A
+[Reads]\u000D\u000A
+@experiment.instrumentProperties.get("nbCyclesRead1").value\u000D\u000A
+@experiment.instrumentProperties.get("nbCyclesRead2").value\u000D\u000A
+[Settings]\u000D\u000A
+CustomRead1PrimerMix,C1\u000D\u000A
+CustomIndexPrimerMix,C2\u000D\u000A
+CustomRead2PrimerMix,C3\u000D\u000A
+[Data]\u000D\u000A
+Sample_ID,Sample_Name,Sample_Plate,Sample_Well,I7_Index_ID,index,Sample_Project,Description\u000D\u000A
+@for(c <- containers){
+	@for(co <- c.contents){
+		@(c.support.line)_@(co.sampleCode)_@(OutputHelper.getContentProperty(co,"libProcessTypeCode"))_@(OutputHelper.getContentProperty(co,"tag")),@(c.code),,,@OutputHelper.getSupplierName(OutputHelper.getIndex("index-illumina-sequencing",OutputHelper.getContentProperty(co,"tag")),"illumina"),@OutputHelper.getSequence(OutputHelper.getIndex("index-illumina-sequencing",OutputHelper.getContentProperty(co,"tag"))),,@(OutputHelper.getContentProperty(co,"tag"))_@(co.percentage)\u000D\u000A
+	}
+} 
+

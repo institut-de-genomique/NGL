@@ -1,0 +1,274 @@
+@this()
+@(code: String)
+@if(code == "minknow-metrichor") {
+<div class="panel panel-default">
+  <div class="panel-body">
+<form class="form-horizontal" ng-controller="RunMinknowMetrichorCtrl">
+		<div class="row">
+			<div class="col-md-3 col-lg-3">
+				<div ng-switch on="isEditMode()">
+				@views.html.helper.columnLabelValue(Messages("runs.treatments.minknow-metrichor.minKnowVersion")){					
+					<p ng-switch-when="false" class="form-control-static" ng-bind="run.treatments.minknowMetrichor.default.minKnowVersion.value"></p>
+					<input  ng-switch-when="true" class="form-control" type="text" ng-model="run.treatments.minknowMetrichor.default.minKnowVersion.value" default-value="propDefinitions['minKnowVersion'].defaultValue"/>					
+				}
+				@views.html.helper.columnLabelValue(Messages("runs.treatments.minknow-metrichor.metrichorVersion")){
+					<p ng-switch-when="false" class="form-control-static" ng-bind="run.treatments.minknowMetrichor.default.metrichorVersion.value"></p>
+					<input  ng-switch-when="true" class="form-control" type="text" ng-model="run.treatments.minknowMetrichor.default.metrichorVersion.value" default-value="propDefinitions['metrichorVersion'].defaultValue"/>					
+				}
+				@views.html.helper.columnLabelValue(Messages("runs.treatments.minknow-metrichor.metrichorWorkflowName")){
+					<p ng-switch-when="false" class="form-control-static" ng-bind="run.treatments.minknowMetrichor.default.metrichorWorkflowName.value"></p>
+					<input  ng-switch-when="true" class="form-control" type="text" ng-model="run.treatments.minknowMetrichor.default.metrichorWorkflowName.value" default-value="propDefinitions['metrichorWorkflowName'].defaultValue"/>					
+				}
+				@views.html.helper.columnLabelValue(Messages("runs.treatments.minknow-metrichor.metrichorWorkflowVersion")){
+					<p ng-switch-when="false" class="form-control-static" ng-bind="run.treatments.minknowMetrichor.default.metrichorWorkflowVersion.value"></p>
+					<input  ng-switch-when="true" class="form-control" type="text" ng-model="run.treatments.minknowMetrichor.default.metrichorWorkflowVersion.value" default-value="propDefinitions['metrichorWorkflowVersion'].defaultValue"/>					
+				}
+				@views.html.helper.columnLabelValue(Messages("runs.treatments.minknow-metrichor.metrichorRunID")){
+					<p ng-switch-when="false" class="form-control-static" ng-bind="run.treatments.minknowMetrichor.default.metrichorRunID.value | number"></p>
+					<input  ng-switch-when="true" class="form-control" type="text" ng-model="run.treatments.minknowMetrichor.default.metrichorRunID.value" />
+				}
+				</div>
+				<div ng-switch on="mainService.isEditMode()">
+				@views.html.helper.columnLabelValue(Messages("runs.treatments.minknow-metrichor.minknowChannelsWithReads")){
+					<p ng-switch-when="false" class="form-control-static" ng-bind="run.treatments.minknowMetrichor.default.minknowChannelsWithReads.value | number"></p>
+					<input  ng-switch-when="true" class="form-control" type="text" ng-model="run.treatments.minknowMetrichor.default.minknowChannelsWithReads.value"/>
+				}
+				@views.html.helper.columnLabelValue(Messages("runs.treatments.minknow-metrichor.minknowEvents")){
+					<p ng-switch-when="false" class="form-control-static" ng-bind="run.treatments.minknowMetrichor.default.minknowEvents.value | number"></p>
+					<input  ng-switch-when="true" class="form-control" type="text" ng-model="run.treatments.minknowMetrichor.default.minknowEvents.value" />					
+				}
+				</div>
+			</div>
+			<div class="col-md-3 col-lg-3" ng-switch on="mainService.isEditMode()">
+				@views.html.helper.columnLabelValue(Messages("runs.treatments.minknow-metrichor.minknowCompleteReads")){
+			  		<p ng-switch-when="false" class="form-control-static" ng-bind="run.treatments.minknowMetrichor.default.minknowCompleteReads.value | number"></p>
+					<input  ng-switch-when="true" class="form-control" type="text" ng-model="run.treatments.minknowMetrichor.default.minknowCompleteReads.value" />
+					
+				}
+				@views.html.helper.columnLabelValue(Messages("runs.treatments.minknow-metrichor.metrichorReadCount")){
+					<p ng-switch-when="false" class="form-control-static" ng-bind="run.treatments.minknowMetrichor.default.metrichorReadCount.value | number"></p>
+					<input  ng-switch-when="true" class="form-control" type="text" ng-model="run.treatments.minknowMetrichor.default.metrichorReadCount.value" />
+					
+				}
+				@views.html.helper.columnLabelValue(Messages("runs.treatments.minknow-metrichor.metrichor2DReadsYield")){
+					<p ng-switch-when="false" class="form-control-static" ng-bind="run.treatments.minknowMetrichor.default.metrichor2DReadsYield.value | number"></p>
+					<input  ng-switch-when="true" class="form-control" type="text" ng-model="run.treatments.minknowMetrichor.default.metrichor2DReadsYield.value"/>
+					
+				}
+				@views.html.helper.columnLabelValue(Messages("runs.treatments.minknow-metrichor.metrichorMax2DRead")){
+					<p ng-switch-when="false" class="form-control-static" ng-bind="run.treatments.minknowMetrichor.default.metrichorMax2DRead.value | number"></p>
+					<input  ng-switch-when="true" class="form-control" type="text" ng-model="run.treatments.minknowMetrichor.default.metrichorMax2DRead.value" />
+					
+				}
+				@views.html.helper.columnLabelValue(Messages("runs.treatments.minknow-metrichor.metrichorMax2DQualityScore")){
+					<p ng-switch-when="false" class="form-control-static" ng-bind="run.treatments.minknowMetrichor.default.metrichorMax2DQualityScore.value | number:2"></p>
+					<input  ng-switch-when="true" class="form-control" type="text" ng-model="run.treatments.minknowMetrichor.default.metrichorMax2DQualityScore.value" />
+					
+				}
+			</div>
+		
+		</div>	
+</form>	
+</div>
+</div>
+}
+
+@if(code == "minknow-basecalling") {
+<div class="panel panel-default">
+  <div class="panel-body">
+<form class="form-horizontal" ng-controller="RunMinknowBasecallingCtrl">
+		<div class="row">
+			<div class="col-md-5 col-lg-5">
+				@views.html.helper.columnLabelValue(Messages("runs.treatments.minknow-basecalling.minKnowVersion")){					
+					<p class="form-control-static" ng-bind="run.treatments.minknowBasecalling.default.minKnowVersion.value"></p>
+				}
+				@views.html.helper.columnLabelValue(Messages("runs.treatments.minknow-basecalling.minknowEvents")){
+					<p class="form-control-static" ng-bind="run.treatments.minknowBasecalling.default.minknowEvents.value | number"></p>
+				}
+				@views.html.helper.columnLabelValue(Messages("runs.treatments.minknow-basecalling.minknowCompleteReads")){
+					<p class="form-control-static" ng-bind="run.treatments.minknowBasecalling.default.minknowCompleteReads.value | number"></p>
+				}
+				@views.html.helper.columnLabelValue(Messages("runs.treatments.minknow-basecalling.basecallerName")){
+					<p class="form-control-static" ng-bind="run.treatments.minknowBasecalling.default.basecallerName.value"></p>
+				}
+				@views.html.helper.columnLabelValue(Messages("runs.treatments.minknow-basecalling.basecallerVersion")){
+					<p class="form-control-static" ng-bind="run.treatments.minknowBasecalling.default.basecallerVersion.value"></p>
+				}
+				
+				
+			</div>
+			
+		
+		</div>	
+</form>	
+</div>
+</div>
+}
+
+@if(code == "ngsrg-nanopore") {
+
+	<div class="row">
+	<div class="col-md-10 col-lg-10">
+		<table class="table table-condensed table-hover table-bordered">
+			<thead>
+				<tr>
+					<th>@Messages("runs.ngsrg_nanopore.activePorePercentage")</th>
+					<th>@Messages("runs.ngsrg_nanopore.poreActivityTimePercentAvg")</th>
+					<th>@Messages("runs.ngsrg_nanopore.poreNbReadsAvg")</th>
+					<th>@Messages("runs.ngsrg_nanopore.poreNbBasesAvg")</th>
+					<th>@Messages("runs.ngsrg_nanopore.poreSpeedDistribAvg")</th>
+					<th>@Messages("runs.ngsrg_nanopore.sequencingTime")</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>{{run.treatments.ngsrg.default.activePorePercentage.value | number:2}}</td>
+					<td>{{run.treatments.ngsrg.default.poreActivityTimePercentAvg.value | number:2}}</td>
+					<td>{{run.treatments.ngsrg.default.poreNbReadsAvg.value | number:2}}</td>
+					<td>{{run.treatments.ngsrg.default.poreNbBasesAvg.value | number:2}}</td>
+					<td>{{run.treatments.ngsrg.default.poreSpeedDistribAvg.value | number:2}}</td>
+					<td>{{run.treatments.ngsrg.default.sequencingTime.value | number:2}}</td>
+				</tr>		
+			</tbody>
+		</table>			
+	</div>
+	</div>
+	
+	<div class="row">
+	<div class="col-md-6 col-lg-6">	
+		 <table class="table table-condensed table-hover table-bordered">
+			<thead>
+				<tr>
+					<th></th>
+					<th>@Messages("treatments.ngsrg_nanopore.nbBases")</th>
+					<th>@Messages("treatments.ngsrg_nanopore.basesPercent")</th>
+					<th>@Messages("treatments.ngsrg_nanopore.nbReads")</th>
+					<th>@Messages("treatments.ngsrg_nanopore.readsPercent")</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<th>@Messages("treatments.nanopore.1DForward")</th>
+					<td>{{run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DForward'].value.nbBases | number}}</td>
+					<td>{{run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DForward'].value.basesPercent | number:2}}</td>
+					<td>{{run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DForward'].value.nbReads | number}}</td>
+					<td>{{run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DForward'].value.readsPercent | number:2}}</td>
+				</tr>	
+				
+				<tr>
+					<th>@Messages("treatments.nanopore.1DReverse")</th>
+					<td>{{run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DReverse'].value.nbBases | number}}</td>
+					<td>{{run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DReverse'].value.basesPercent | number:2}}</td>
+					<td>{{run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DReverse'].value.nbReads | number}}</td>
+					<td>{{run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DReverse'].value.readsPercent | number:2}}</td>
+				</tr>						
+				<tr>
+					<th>@Messages("treatments.nanopore.2DAll")</th>
+					<td>{{run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DAll'].value.nbBases | number}}</td>
+					<td>{{run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DAll'].value.basesPercent | number:2}}</td>
+					<td>{{run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DAll'].value.nbReads | number}}</td>
+					<td>{{run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DAll'].value.readsPercent | number:2}}</td>
+				</tr>	
+				<tr>
+					<th>@Messages("treatments.nanopore.2DPass")</th>
+					<td>{{run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DPass'].value.nbBases | number}}</td>
+					<td>{{run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DPass'].value.basesPercent | number:2}}</td>
+					<td>{{run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DPass'].value.nbReads | number}}</td>
+					<td>{{run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DPass'].value.readsPercent | number:2}}</td>
+				</tr>
+				<tr>
+					<th>@Messages("treatments.ngsrg_nanopore.useful")</th>
+					<td>{{run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['useful'].value.nbBases | number}}</td>
+					<td>{{run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['useful'].value.basesPercent | number:2}}</td>
+					<td>{{run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['useful'].value.nbReads | number}}</td>
+					<td>{{run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['useful'].value.readsPercent | number:2}}</td>
+				</tr>					
+			</tbody>
+		 </table>
+	</div>
+</div>
+
+  	<!-- Add images -->
+  	<div class="row">
+	<div class="col-md-10 col-lg-10">
+	<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+		ng-click="setImage(run.treatments.ngsrg.default.poreMetrics.value,'poreMetrics','','ngsrg',
+		run.treatments.ngsrg.default.poreMetrics.width,
+		run.treatments.ngsrg.default.poreMetrics.height)">
+		 <a href="#">
+		    <img id="default_poreMetrics" ng-src="data:image/png;base64,{{run.treatments.ngsrg.default.poreMetrics.value}}" />
+		 </a> 
+	    </div>
+	    </div>
+	</div>
+  	<div class="row">
+  	<div class="col-md-5 col-lg-5">
+	<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+		ng-click="setImage(run.treatments.ngsrg.default.poreOccupancy.value,'poreOccupancy','','ngsrg',
+		run.treatments.ngsrg.default.poreOccupancy.width,
+		run.treatments.ngsrg.default.poreOccupancy.height)">
+		 <a href="#">
+		    <img id="default_poreOccupancy" ng-src="data:image/png;base64,{{run.treatments.ngsrg.default.poreOccupancy.value}}" />
+		 </a> 
+	    </div>
+	 </div>
+	 <div class="col-md-5 col-lg-5">
+	<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+		ng-click="setImage(run.treatments.ngsrg.default.poreOccupancyTime.value,'poreOccupancyTime','','ngsrg',
+		run.treatments.ngsrg.default.poreOccupancyTime.width,
+		run.treatments.ngsrg.default.poreOccupancyTime.height)">
+		 <a href="#">
+		    <img id="default_poreOccupancyTime" ng-src="data:image/png;base64,{{run.treatments.ngsrg.default.poreOccupancyTime.value}}" />
+		 </a> 
+	    </div>
+	</div>
+	</div>
+	<div class="row">
+	<div class="col-md-5 col-lg-5">
+	<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+		ng-click="setImage(run.treatments.ngsrg.default.yieldBasePairs.value,'yieldBasePairs','','ngsrg',
+		run.treatments.ngsrg.default.yieldBasePairs.width,
+		run.treatments.ngsrg.default.yieldBasePairs.height)">
+		 <a href="#">
+		    <img id="default_yieldBasePairs" ng-src="data:image/png;base64,{{run.treatments.ngsrg.default.yieldBasePairs.value}}" />
+		 </a> 
+	    </div>
+	</div>
+	</div>
+	<div class="row">
+	<div class="col-md-5 col-lg-5">
+	<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+		ng-click="setImage(run.treatments.ngsrg.default.timeAvgQuality.value,'timeAvgQuality','','ngsrg',
+		run.treatments.ngsrg.default.timeAvgQuality.width,
+		run.treatments.ngsrg.default.timeAvgQuality.height)">
+		 <a href="#">
+		    <img id="default_timeAvgQuality" ng-src="data:image/png;base64,{{run.treatments.ngsrg.default.timeAvgQuality.value}}" />
+		 </a> 
+	    </div>
+	   </div>
+	 <div class="col-md-5 col-lg-5">
+	<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+		ng-click="setImage(run.treatments.ngsrg.default.timeAvgSpeed.value,'timeAvgSpeed','','ngsrg',
+		run.treatments.ngsrg.default.timeAvgSpeed.width,
+		run.treatments.ngsrg.default.timeAvgSpeed.height)">
+		 <a href="#">
+		    <img id="default_timeAvgSpeed" ng-src="data:image/png;base64,{{run.treatments.ngsrg.default.timeAvgSpeed.value}}" />
+		 </a> 
+	    </div>
+	   </div>
+	</div>
+	
+}
+
+
+
+
+ 
+
+
+
+
+
+
+
+

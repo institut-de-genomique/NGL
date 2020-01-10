@@ -1,0 +1,39 @@
+
+->  / apinglcommon.Routes
+->  / apinglsq.Routes
+->  / apinglreagents.Routes
+->  / nglcommon.Routes  
+
+# Home page
+GET     /                           									controllers.main.tpl.Main.home()
+
+#Kit catalogs TPL
+GET 	/kit-catalogs/:code										controllers.reagents.tpl.KitCatalogs.get(code: java.lang.String)
+GET	   	/kit-catalogs/:homecode/home							controllers.reagents.tpl.KitCatalogs.home(homecode: java.lang.String)
+GET		/tpl/reagent-catalogs/js-routes							controllers.reagents.tpl.KitCatalogs.javascriptRoutes()
+GET		/tpl/kit-catalogs/creation								controllers.reagents.tpl.KitCatalogs.createOrEdit()
+GET		/tpl/kit-catalogs/search								controllers.reagents.tpl.KitCatalogs.search()
+
+
+#Kits TPL
+GET 	/kits/:code											controllers.reagents.tpl.Kits.get(code: java.lang.String)
+GET	   	/kits/:homecode/home								controllers.reagents.tpl.Kits.home(homecode: java.lang.String)
+GET		/tpl/reagent-declarations/js-routes					controllers.reagents.tpl.Kits.javascriptRoutes()
+GET		/tpl/kits/creation									controllers.reagents.tpl.Kits.createOrEdit()
+GET		/tpl/kits/search									controllers.reagents.tpl.Kits.search()
+
+#Orders TPL
+GET	   	/orders/:homecode/home								controllers.reagents.tpl.Orders.home(homecode: java.lang.String)
+GET 	/orders/:code										controllers.reagents.tpl.Orders.get(code: java.lang.String)
+GET		/tpl/orders/creation								controllers.reagents.tpl.Orders.createOrEdit()
+
+
+#Boxes TPL
+GET	   	/boxes/:homecode/home								controllers.reagents.tpl.Boxes.home(homecode: java.lang.String)
+GET		/tpl/boxes/search									controllers.reagents.tpl.Boxes.search()
+
+
+# Map static resources from the /public folder to the /assets URL path
+# GET     /assets/*file               									controllers.Assets.at(path="/public", file)
+GET     /messages.js                									controllers.main.tpl.Main.jsMessages()
+GET     /codes.js        	        									controllers.main.tpl.Main.jsCodes()

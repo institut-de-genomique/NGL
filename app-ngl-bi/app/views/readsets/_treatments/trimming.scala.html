@@ -1,0 +1,67 @@
+@()
+
+<div class="row">
+	<div class="col-md-11 col-lg-11">	
+		 <table class="table table-condensed table-hover table-bordered">
+			<thead>
+				<tr>
+					<th></th>
+					<th>@Messages("readsets.treatments.trimming.sizeRange")</th>
+					<th>@Messages("readsets.treatments.trimming.readsInput")</th>
+					<th>@Messages("readsets.treatments.trimming.readsOutput")</th>
+					<th>@Messages("readsets.treatments.trimming.readsTrim")</th>
+					<th>@Messages("readsets.treatments.trimming.readsTrimPercent")</th>
+					<th>@Messages("readsets.treatments.trimming.nucleotidesTrim")</th>
+					<th>@Messages("readsets.treatments.trimming.trimRejectedShort")</th>
+					<th>@Messages("readsets.treatments.trimming.trimRejectedLength0")</th>			
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<th>@Messages("readsets.treatments.trimming.read1")</th>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].read1.sizeRange.value}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].read1.readsInput.value | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].read1.readsOutput.value | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].read1.readsTrim.value | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].read1.readsTrimPercent.value | number:2}} @Messages("unit.percent")</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].read1.nucleotidesTrim.value | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].read1.trimRejectedShort.value | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].read1.trimRejectedLength0.value | number}}</td>
+				</tr>						
+				<tr>
+					<th>@Messages("readsets.treatments.trimming.read2")</th>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].read2.sizeRange.value}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].read2.readsInput.value | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].read2.readsOutput.value | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].read2.readsTrim.value | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].read2.readsTrimPercent.value | number:2}} @Messages("unit.percent")</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].read2.nucleotidesTrim.value | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].read2.trimRejectedShort.value | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].read2.trimRejectedLength0.value | number}}</td>
+				</tr>						
+			</tbody>
+		 </table>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-4 col-lg-4">
+		<table class="table table-condensed table-hover table-bordered">
+			<thead>
+				<tr>
+					<th>@Messages("readsets.treatments.trimming.storedPairs")</th>
+					<th>@Messages("readsets.treatments.trimming.storedSingleton")</th>
+					<th>@Messages("readsets.treatments.trimming.rejectedPairs")</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.storedPairs.value | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].single.storedSingleton.value | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.rejectedPairs.value | number}}</td>
+				</tr>		
+			</tbody>
+		</table>			
+	</div>
+</div>		
+

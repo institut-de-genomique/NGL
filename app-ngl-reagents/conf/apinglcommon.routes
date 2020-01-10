@@ -1,0 +1,1 @@
+GET		/api/commons/states												controllers.commons.api.States.list()

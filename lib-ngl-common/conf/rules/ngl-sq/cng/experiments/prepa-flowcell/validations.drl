@@ -1,0 +1,58 @@
+//created on: Aug 6, 2014
+//Rules for calculations
+package rules
+
+// 14/02/2017 1) correction: le code "prepa-flowcell-cng" est devenu "prepa-flowcell" depuis ????
+//            2) modif: "prepa-flowcell" ET "prepa-fc-ordered"
+rule "Code Flowcell with bad chars"
+    @nglSQ( validations )
+	dialect "java"
+	salience 900
+	no-loop
+    when
+   		$experiment:Experiment($typeCode:typeCode, ($typeCode=="prepa-flowcell") || ($typeCode=="prepa-fc-ordered"), $instrumentProperties:instrumentProperties)
+    	$containerSupportCode: PropertyValue($code:value, $code matches ".*[^a-zA-Z0-9].*") from $instrumentProperties.get("containerSupportCode")
+   		$contextValidation:ContextValidation()
+    then
+   		Logger.debug("Code Flowcell with bad chars");
+    	$contextValidation.addErrors("instrument",	"error.validationexp.codewithbadchar", "Code Flowcell");
+end
+
+// 18/03/2019 NGL-2474  blocage demandé pour certains cas
+rule "Prepaflowcell validate contenant sortie avec instrument"
+	@nglSQ (validations )
+	dialect "java"
+	salience 400
+	no-loop
+    when
+    	// !! 1) il n'y a pas "interne' pour les codes; 2) NextSeq1 avec "S"
+    	Experiment($typeCode:typeCode,$typeCode=="prepa-flowcell",$instrumentCode:instrument.code
+    			,$outputContainerSupport:instrument.outContainerSupportCategoryCode, 
+    		 ($instrumentCode in("cBot-Miseq1") && $outputContainerSupport!="flowcell-1")
+    		 || 
+    		 ($instrumentCode in("cBot-NextSeq1") && $outputContainerSupport!="flowcell-4") )
+    	$contextValidation:ContextValidation($errors : errors)
+    then
+    	Logger.debug("outputcontainersupport "+$outputContainerSupport + ", instrument code "+$instrumentCode);
+    	$contextValidation.addErrors("instrument",	"error.validationexp.badoutputprepaflowcell", $outputContainerSupport,$instrumentCode);
+end
+
+// 14/02/2017 correction: le code "prepa-flowcell-cng" est devenu "prepa-flowcell"  depuis ???
+rule "Prepaflowcell validate piste controle"
+	@nglSQ (validations )
+	dialect "java"
+	salience 400
+	no-loop
+    when
+    	Experiment($typeCode:typeCode,$typeCode=="prepa-flowcell",$instrumentProperties:instrumentProperties,$outputContainerSupport:instrument.outContainerSupportCategoryCode)
+    	$control :PropertyValue($value:value, 
+    		($value in ("3","4","5","6","7","8")  && $outputContainerSupport=="flowcell-2" )
+			||
+			( $value in ("2","3","4","5","6","7","8") && $outputContainerSupport=="flowcell-1")    	
+    	) from $instrumentProperties.get("control")
+    	$contextValidation:ContextValidation($errors : errors)
+    then
+    	Logger.debug("outputcontainersupport "+$outputContainerSupport + ", piste controle ");
+    	$contextValidation.addErrors("instrument",	"error.validationexp.badcontrolprepaflowcell", $value,$outputContainerSupport);
+end    
+

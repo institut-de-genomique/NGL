@@ -1,0 +1,74 @@
+package rules
+
+function Double roundValue(Double value)
+{
+	BigDecimal bg = new BigDecimal(value.toString()).setScale(2, RoundingMode.HALF_UP); 
+	return bg.doubleValue();
+}
+
+function Double convertPVToDouble(PropertyValue pv){
+	return Double.valueOf(pv.value.toString());
+}
+
+// E. Jacobi ????
+function String convertPVToString(PropertyValue pv){
+	return String.valueOf(pv.value.toString());
+}
+
+function String fungiCalculate(String readSetCode, Treatment treatment, String level){
+		List<Map<String, Object>> keywordBilan = new ArrayList<Map<String, Object>>();
+		Logger.debug("Get from "+level);
+		String krona = new String(((PropertyFileValue)treatment.results.get(level).get("krona")).byteValue());
+		
+		if(treatment.results.get(level).get("keywordBilan")!=null){
+			keywordBilan = ((PropertyObjectListValue)treatment.results.get(level).get("keywordBilan")).getValue();
+		}else{
+			PropertyObjectListValue pol = new PropertyObjectListValue(new ArrayList<Map<String, Object>>());
+			MongoDBDAO.update(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, 
+					DBQuery.is("code", readSetCode),
+					DBUpdate.set("treatments.taxonomy."+level+".keywordBilan", pol));
+		}
+		
+		if(krona!=null){
+			Pattern p1 = Pattern.compile(".*<node name=\"Fungi\">\\s+<magnitude><val>(\\d+)</val></magnitude>.*", Pattern.DOTALL);
+			Matcher m1 = p1.matcher(krona);
+												
+			Pattern p2 = Pattern.compile(".*<node name=\"Fungi\"\\s+magnitude=\"(\\d+)\">.*", Pattern.DOTALL);
+			Matcher m2 = p2.matcher(krona);
+
+			Pattern p3 = Pattern.compile(".*<node name=\"Fungi\">\\s+(<members><val>\\S+</val>\\s+</members>\\s+)?<count><val>(\\d+)</val></count>.*", Pattern.DOTALL);
+			Matcher m3 = p3.matcher(krona);
+		
+			String value ="0";
+			Double fungiPercentValue = 0.0;
+		
+			if(m1.matches() || m2.matches() || m3.matches()){
+				value = (m1.matches())?m1.group(1):((m2.matches())?m2.group(1):m3.group(2));
+				Logger.debug("Value "+value);
+				fungiPercentValue = (Double.valueOf(value) / 20000) * 100;
+				Logger.debug("Match Group Fungi = "+fungiPercentValue);
+			}
+			
+
+			//Remove Fungi from keywordList in order to recalculate
+			List<Map<String, Object>> keywordBRemove = new ArrayList<Map<String, Object>>(); 
+			for(Map<String, Object> keywordOne : keywordBilan){
+				String keywordValue = (String)keywordOne.get("keyword");
+				if(keywordValue.equals("Fungi")){
+					Logger.debug("keywordValue = "+keywordValue);
+					keywordBRemove.add(keywordOne);
+				}	
+			}
+			keywordBilan.removeAll(keywordBRemove);
+			
+			Map<String, Object> fungiKeyword = new HashMap<String, Object>();
+			fungiKeyword.put("keyword","Fungi");
+			fungiKeyword.put("percent",fungiPercentValue);
+			fungiKeyword.put("nbSeq",Integer.valueOf(value));
+			keywordBilan.add(fungiKeyword);
+			MongoDBDAO.update(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, 
+					DBQuery.is("code",readSetCode),
+					DBUpdate.set("treatments.taxonomy."+level+".keywordBilan.value", keywordBilan));
+		}
+		return readSetCode;
+}

@@ -1,0 +1,138 @@
+//package ngl.data.crontab;
+//
+//import static fr.cea.ig.lfw.utils.Iterables.map;
+//
+//import java.util.Calendar;
+//import java.util.HashSet;
+//import java.util.List;
+//import java.util.Set;
+//import java.util.concurrent.CompletableFuture;
+//import java.util.concurrent.TimeUnit;
+//
+//import javax.inject.Inject;
+//import javax.inject.Singleton;
+//
+//import akka.actor.ActorSystem;
+//import akka.actor.Cancellable;
+//import fr.cea.ig.ngl.NGLConfig;
+//import play.inject.ApplicationLifecycle;
+//import scala.concurrent.duration.FiniteDuration;
+//
+//// Application setup of cron service. This reads some configuration so the jobs
+//// are ran depending on some tags.
+//@Singleton
+//public class CronService {
+//
+//	private static final play.Logger.ALogger logger = play.Logger.of(CronService.class); 
+//	
+//	/**
+//	 * Key of job tags list in configuration. 
+//	 */
+//	private static final String KEY_CRON_TAGS = "cron.service.tags";
+//	
+//	/**
+//	 * Set of job tags that are processed by this service.
+//	 */
+//	private Set<Job.Tag> tags;
+//	
+//	// Using constructors as starters is not the proper approach. We should use an injected instance
+//	// and call a proper start() method but this requires an application start hook and the
+//	// play approach is to use the constructor to do the work.  
+//	@Inject
+//	public CronService(NGLConfig conf, ApplicationLifecycle lifeCycle, ActorSystem akka, CronTabAPI ctAPI, JobRunner jr) {
+//		tags = new HashSet<>();
+//		if (conf.getBoolean("import.data",false))
+//			tags.add(Job.Tag.IMPORT);
+//		if (conf.getBoolean("reporting.active",false))
+//			tags.add(Job.Tag.REPORT);
+//		List<String> tagNames = conf.getStringList(KEY_CRON_TAGS);
+//		if (tagNames != null)
+//			for (String s : conf.getStringList(KEY_CRON_TAGS))
+//				tags.add(Job.Tag.valueOf(s.toUpperCase()));
+//		logger.debug("using tags ({})", map(tags,Job.Tag::toString).intercalate(",").asString());
+//		
+//		// Always start a lock GC to clean things up
+//		final Cancellable lockCollector = akka.scheduler().schedule(
+//				FiniteDuration.create( 0, TimeUnit.SECONDS),
+//				FiniteDuration.create(60, TimeUnit.SECONDS),
+//				new LockCleaner(ctAPI), 
+//				akka.dispatcher());
+//		lifeCycle.addStopHook(() -> {
+//			logger.debug("stopping lock collector");
+//			lockCollector.cancel();
+//			return CompletableFuture.completedFuture(null); 
+//		});
+//		
+//		// Setup a process that checks the cron jobs
+//		final Cancellable cron = akka.scheduler().schedule(
+//				FiniteDuration.create( 0, TimeUnit.SECONDS),
+//				FiniteDuration.create(60, TimeUnit.SECONDS),
+//				new Cron(tags,ctAPI,jr), 
+//				akka.dispatcher());
+//		lifeCycle.addStopHook(() -> {
+//			logger.debug("stopping cron engine");
+//			cron.cancel();
+//			return CompletableFuture.completedFuture(null); 
+//		});
+//		
+//		// TO-DO
+//		// Start declaring ourselves as a ngl server (lock like stuff).
+//		// We cannot suppose that the application knows about the server that
+//		// uses the application to serve requests.
+//		// At best we can provide our identity as a process but we cannot know about the
+//		// HTTP server that runs ourself. 
+//		//String vmName = java.lang.management.ManagementFactory.getRuntimeMXBean().getName();
+//		// ObjectId id = ctAPI.getId(vmName);
+//		// 
+////		Application app;
+////		int realPort = ((Number)server.runningHttpPort().get()).intValue();
+//	}
+//	
+//	public static class Cron implements Runnable {
+//
+//		private final CronTabAPI ctAPI;
+//		private final JobRunner jr;
+//		private final Set<Job.Tag> tags;
+//		
+//		public Cron(Set<Job.Tag> tags, CronTabAPI ctAPI, JobRunner jr) {
+//			this.tags = tags;
+//			this.ctAPI = ctAPI;
+//			this.jr = jr;
+//		}
+//		
+//		@Override
+//		public void run() {
+//			// add : ctAPI update jobs check dates
+//			ctAPI.updateJobCheckDates();
+//			List<CronTabEntry> ces = ctAPI.getJobs();
+//			logger.debug("checking {} crontab entries", ces.size());
+//			for (CronTabEntry e : ces) {
+//				// At least one tag is common to the job declaration and the
+//				// service tags.
+//				Set<Job.Tag> eTags = new HashSet<>(tags);
+//				eTags.retainAll(e.getJob().getTags());
+//				if (eTags.size() > 0) {
+//					logger.debug("check job {} {}", e.getId(), e.getJob().getName());
+//					if (jr.shouldRunJob(e)) {
+//						logger.debug("will run job {} '{}'", e.getId(), e.getJob().getName());
+//						try {
+//							jr.runJob(e);
+//						} catch (Exception ex) {
+//							logger.error("cron failed", ex);
+//						}
+//					} else {
+//						logger.debug("will not run job (runner check was false) {} '{}'", e.getId(), e.getJob().getName());
+//					}
+//				} else {
+//					logger.debug("not running job (us:[{}]/job:[{}]) (should run : {}) {} : '{}'", 
+//							map(tags,Job.Tag::toString).intercalate(",").asString(),
+//							map(e.getJob().getTags(),Job.Tag::toString).intercalate(",").asString(),
+//							jr.shouldRunJob(e, Calendar.getInstance()), 
+//							e.getId(), e.getJob().getName());
+//				}
+//			}
+//		}
+//		
+//	}
+//	
+//}
