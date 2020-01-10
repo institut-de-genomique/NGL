@@ -1,9 +1,0 @@
-// FDS 26/02/2019  inactivé en .off car pas d'import de fichier pour un lightcycler seul...
-package controllers.instruments.io.cng.qpcrlightcycler480ii;
-
-/* FDS 24/01/2019 réutiliser Qpcrlightcycler480iiAloneInput.java de qpcrlightcycler480iiAlone  */
-import controllers.instruments.io.cng.qpcrlightcycler480iiAlone.Qpcrlightcycler480iiAloneInput;
-
-// si jamais il faut réactiver cette classe elle doit étendre MappingLightcyclerQPCR et plus Qpcrlightcycler480iiAloneInput...
-public class Input extends Qpcrlightcycler480iiAloneInput{
-}

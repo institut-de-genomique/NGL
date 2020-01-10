@@ -1,2 +1,0 @@
-#projects
-GET		/api/projects												controllers.projects.api.Projects.list()

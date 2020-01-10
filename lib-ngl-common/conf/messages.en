@@ -1,9 +1,0 @@
-boolean.true = Yes
-boolean.false = No
-boolean.unset = ---
-boolean.TRUE = Yes
-boolean.FALSE = No
-
-valuation.TRUE = Yes
-valuation.FALSE = No
-valuation.UNSET = ---
