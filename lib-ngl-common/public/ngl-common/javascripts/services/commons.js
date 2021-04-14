@@ -1,114 +1,116 @@
 "use strict";
 
 angular.module('commonsServices', []).
-    	factory('messages', function(){
-    		var constructor = function($scope, iConfig){
-				var messages = {
-						
-						configDefault : {
-							errorClass:'alert alert-danger',
-							successClass: 'alert alert-success',							
-							errorKey:{save:'msg.error.save',remove:'msg.error.remove', get:'msg.error.get'},
-							successKey:{save:'msg.success.save',remove:'msg.success.remove', get:'msg.success.get'}
-						},
-						config:undefined,
-    					configMaster:undefined,
-						
-						clazz : undefined, 
-						text : undefined, 
-						showDetails : false, 
-						isDetails : false, 
-						details : [],
-						opening : false,
-						getConfig: function(){
-		    				return this.config;		    				
-		    			},
-		    			setConfig: function(config){
-		    				var settings = $.extend(true, {}, this.configDefault, config);
-		    	    		this.config = angular.copy(settings);
-		    	    		this.configMaster = angular.copy(settings);		    	    		
-		    			},
-						clear : function() {
-							this.clazz = undefined;
-							this.text = undefined; 
-							this.showDetails = false; 
-							this.isDetails = false;
-							this.details = {};
-							this.opening = false;
-						},
-						setDetails : function(details){
-							this.isDetails = true;
-							this.details = details;
-						},
-						addDetails : function(details){
-							for(var pName in details){
-								if(this.details[pName] === undefined || this.details[pName] === null){
-									this.details[pName] = details[pName];
-								}else{
-									if(angular.isArray(details[pName])){
-										this.details[pName] = this.details[pName].concat(details[pName]);
-									}else{
-										this.details[pName].push(details[pName]);
-									}									
-								}
+factory('messages', function(){
+	var constructor = function($scope, iConfig){
+		var messages = {
+				
+				configDefault : {
+					errorClass:'alert alert-danger',
+					successClass: 'alert alert-success',
+					errorKey:{save:'msg.error.save',remove:'msg.error.remove', get:'msg.error.get'},
+					successKey:{save:'msg.success.save',remove:'msg.success.remove', get:'msg.success.get'}
+				},
+				config:undefined,
+				configMaster:undefined,
+				
+				clazz : undefined, 
+				text : undefined, 
+				showDetails : false, 
+				isDetails : false, 
+				details : [],
+				opening : false,
+				getConfig: function(){
+					return this.config;
+				},
+				setConfig: function(config){
+					var settings = $.extend(true, {}, this.configDefault, config);
+					this.config = angular.copy(settings);
+					this.configMaster = angular.copy(settings);
+				},
+				clear : function() {
+					this.clazz = undefined;
+					this.text = undefined; 
+					this.showDetails = false; 
+					this.isDetails = false;
+					this.details = {};
+					this.opening = false;
+				},
+				setDetails : function(details){
+					this.isDetails = true;
+					this.details = details;
+				},
+				addDetails : function(details){
+					for(var pName in details){
+						if(this.details[pName] === undefined || this.details[pName] === null){
+							this.details[pName] = details[pName];
+						}else{
+							if(angular.isArray(details[pName])){
+								this.details[pName] = this.details[pName].concat(details[pName]);
+							}else{
+								this.details[pName].push(details[pName]);
 							}
-							this.isDetails = true;
-							
-							
-						},
-						setSuccess : function(type){
-							this.clazz=this.config.successClass;
-							if(this.config.errorKey[type]){
-								this.text=this.transformKey(this.config.successKey[type]);
-							}else{
-								this.text=type;
-							}	
-							this.open();
-						},
-						setError : function(type){
-							this.clazz=this.config.errorClass;
-							if(this.config.errorKey[type]){
-								this.text=this.transformKey(this.config.errorKey[type]);
-							}else{
-								this.text=type;
-							}							
-							this.open();
-						},
-						open : function(){
-							this.opening = true;
-						},
-						close : function(){
-							this.opening = false;
-						},
-						isOpen : function(){
-							return this.opening;
-						},
-						transformKey : function(key, args){
-							return Messages(key, args);
 						}
-				};
-    			messages.setConfig(iConfig)
-				return messages;
-    		}
-    		return constructor;
-    	}).factory('lists', ['$http', function($http){
+					}
+					this.isDetails = true;
+					
+					
+				},
+				setSuccess : function(type){
+					this.clazz=this.config.successClass;
+					if(this.config.errorKey[type]){
+						this.text=this.transformKey(this.config.successKey[type]);
+					}else{
+						this.text=type;
+					}	
+					this.open();
+				},
+				setError : function(type){
+					this.clazz=this.config.errorClass;
+					if(this.config.errorKey[type]){
+						this.text=this.transformKey(this.config.errorKey[type]);
+					}else{
+						this.text=type;
+					}
+					this.open();
+				},
+				open : function(){
+					this.opening = true;
+				},
+				close : function(){
+					this.opening = false;
+				},
+				isOpen : function(){
+					return this.opening;
+				},
+				transformKey : function(key, args){
+					return Messages(key, args);
+				}
+		};
+		messages.setConfig(iConfig)
+		return messages;
+	}
+	return constructor;
+	}).factory('lists', ['$http','$filter', function($http,$filter){   // FDS 29/11/2018 ajout $filter pour getTagGroupNames et getTacCategories
     		var inProgress = {};
     		var results = {
-    				valuations : [{code:"TRUE", name:Messages("valuation.TRUE")},
-    				                 {code:"FALSE", name:Messages("valuation.FALSE")},
-    				                 {code:"UNSET", name:Messages("valuation.UNSET")}],    				
-    				status : [{code:"TRUE", name:Messages("status.TRUE")},
-    				                 {code:"FALSE", name:Messages("status.FALSE")},
-    				                 {code:"UNSET", name:Messages("status.UNSET")}],    				
-	    				                 
-    				booleans : [{code:"true", name:Messages("boolean.TRUE")}, 
-    				            {code:"false", name:Messages("boolean.FALSE")}]
-    		
-    			};    		
+    				valuations : [{code:"TRUE",  name:Messages("valuation.TRUE")},
+    				              {code:"FALSE", name:Messages("valuation.FALSE")},
+    				              {code:"UNSET", name:Messages("valuation.UNSET")}],
+    				status :     [{code:"TRUE",  name:Messages("status.TRUE")},
+    				              {code:"FALSE", name:Messages("status.FALSE")},
+    				              {code:"UNSET", name:Messages("status.UNSET")}],
+    				booleans :   [{code:"true",  name:Messages("boolean.TRUE")}, 
+    				              {code:"false", name:Messages("boolean.FALSE")}],
+    				// FDS ne marche que ici !!!! valeurs en dur
+    				tagTypes :   [{code:'index-illumina-sequencing', name:Messages("techno.index-illumina-sequencing")},
+    				      		  {code:'index-nanopore-sequencing', name:Messages("techno.index-nanopore-sequencing")}],
+    				reagentCategories : [{code:'Box', name:Messages("reagent.category-box")}, {code:'Reagent', name:Messages("reagent.category-reagent")}]
+    			};
     		
     		var refresh = {
     				resolutions : function(params, key){
-    					load(jsRoutes.controllers.resolutions.api.Resolutions.list().url,params,(key)?key:'resolutions');
+    					load(jsRoutes.controllers.resolutions.api.Resolutions.list().url,params,(key)?key:'resolutions', true);
     				},
     				instruments : function(params, key){
     					load(jsRoutes.controllers.instruments.api.Instruments.list().url,params,(key)?key:'instruments');
@@ -120,16 +122,16 @@ angular.module('commonsServices', []).
     					load(jsRoutes.controllers.instruments.api.InstrumentUsedTypes.list().url,params,(key)?key:'instrumentUsedTypes');
     				},
     				containerSupportCategories : function(params, key){
-    					load(jsRoutes.controllers.containers.api.ContainerSupportCategories.list().url,params,(key)?key:'containerSupportCategories');
+    					load(jsRoutes.controllers.containers.api.ContainerSupportCategories.list().url,params,(key)?key:'containerSupportCategories', true);
     				},
     				processes : function(params, key){
     					load(jsRoutes.controllers.processes.api.Processes.list().url,params,(key)?key:'processes');
     				},
     				processCategories : function(params, key){
-    					load(jsRoutes.controllers.processes.api.ProcessCategories.list().url,params,(key)?key:'processCategories');
+    					load(jsRoutes.controllers.processes.api.ProcessCategories.list().url,params,(key)?key:'processCategories', true);
     				},
     				processTypes : function(params, key){
-    					load(jsRoutes.controllers.processes.api.ProcessTypes.list().url,params,(key)?key:'processTypes');
+    					load(jsRoutes.controllers.processes.api.ProcessTypes.list().url,params,(key)?key:'processTypes', true);
     				},
     				kitCatalogs : function(params, key){
     					load(jsRoutes.controllers.reagents.api.KitCatalogs.list().url,params,(key)?key:'kitCatalogs');
@@ -139,6 +141,9 @@ angular.module('commonsServices', []).
     				},
     				reagentCatalogs : function(params, key) {
     					load(jsRoutes.controllers.reagents.api.ReagentCatalogs.list().url,params,(key)?key:'reagentCatalogs');
+    				},
+    				reagentReceptions : function(params, key) {
+    					load(jsRoutes.controllers.reagents.api.Receptions.list().url,params,(key)?key:'reagentReceptions');
     				},
        				projectCategories : function(params, key){
     					load(jsRoutes.controllers.projects.api.ProjectCategories.list().url,params,(key)?key:'projectCategories');
@@ -153,40 +158,43 @@ angular.module('commonsServices', []).
     					load(jsRoutes.controllers.projects.api.ProjectBioinformaticParameters.list().url,params,(key)?key:'bioinformaticParameters');
     				},
     				valuationCriterias: function(params, key){
-    					load(jsRoutes.controllers.valuation.api.ValuationCriterias.list().url,params,(key)?key:'valuationCriterias');    					
+    					load(jsRoutes.controllers.valuation.api.ValuationCriterias.list().url,params,(key)?key:'valuationCriterias');
     				},
     				containerSupports : function(params, key){
-    					load(jsRoutes.controllers.containers.api.ContainerSupports.list().url,params,(key)?key:'containerSupports'); 
+    					load(jsRoutes.controllers.containers.api.ContainerSupports.list().url,params,(key)?key:'containerSupports');
     				},
     				projects : function(params, key){
-    					load(jsRoutes.controllers.projects.api.Projects.list().url,params,(key)?key:'projects');    					
+    					load(jsRoutes.controllers.projects.api.Projects.list().url,params,(key)?key:'projects');
     				},
     				samples : function(params, key){
     					if(params)params.limit=-1
     					else params = {limit:-1};
-    					load(jsRoutes.controllers.samples.api.Samples.list().url,params,(key)?key:'samples');    					
-    				},
+    					load(jsRoutes.controllers.samples.api.Samples.list().url,params,(key)?key:'samples');
+					},
+					importTypes : function(params, key){
+						load(jsRoutes.controllers.samples.api.ImportTypes.list().url,params,(key)?key:'importTypes')
+					},
     				users : function(params, key){
-    					load(jsRoutes.controllers.commons.api.Users.list().url,params,(key)?key:'users');    					
+    					load(jsRoutes.controllers.commons.api.Users.list().url,params,(key)?key:'users');
     				},
     				roles : function(params, key){
     					load(jsRoutes.controllers.commons.api.Roles.list().url, params, (key)?key:'roles');
     				},
     				experiments : function(params, key){
-    					load(jsRoutes.controllers.experiments.api.Experiments.list().url,params,(key)?key:'experiments');    					
+    					load(jsRoutes.controllers.experiments.api.Experiments.list().url,params,(key)?key:'experiments');
     				},
     				states : function(params, key){
-    					load(jsRoutes.controllers.commons.api.States.list().url,params,(key)?key:'states');    				
+    					load(jsRoutes.controllers.commons.api.States.list().url,params,(key)?key:'states', true);
     				},
     				protocols : function(params, key){
-    					load(jsRoutes.controllers.protocols.api.Protocols.list().url,params,(key)?key:'protocols');    				
+    					load(jsRoutes.controllers.protocols.api.Protocols.list().url,params,(key)?key:'protocols');
     				},
     				types : function(params, multi, key){
     					var name = "types";
     					if(multi!=undefined){
     						name = params.objectTypeCode+'Types';
     					}
-    					load(jsRoutes.controllers.commons.api.CommonInfoTypes.list().url,params,(key)?key:name);    				
+    					load(jsRoutes.controllers.commons.api.CommonInfoTypes.list().url,params,(key)?key:name);
     				},
     				containerCategories : function(params, key){
     					load(jsRoutes.controllers.containers.api.ContainerCategories.list().url,params,(key)?key:'containerCategories');
@@ -195,71 +203,130 @@ angular.module('commonsServices', []).
     					load(jsRoutes.controllers.experiments.api.ExperimentCategories.list().url,params,(key)?key:'experimentCategories');
     				},
     				experimentTypes : function(params, key){
-    					load(jsRoutes.controllers.experiments.api.ExperimentTypes.list().url,params,(key)?key:'experimentTypes');
+    					load(jsRoutes.controllers.experiments.api.ExperimentTypes.list().url,params,(key)?key:'experimentTypes', true);
     				},    				
     				runs : function(params, key){
-    					load(jsRoutes.controllers.runs.api.Runs.list().url,params,(key)?key:'runs');    				
+    					load(jsRoutes.controllers.runs.api.Runs.list().url,params,(key)?key:'runs');
     				},
     				runCategories : function(params, key){
     					load(jsRoutes.controllers.runs.api.RunCategories.list().url,params,(key)?key:'runCategories');
     				},
     				reportConfigs : function(params, key){
-    					load(jsRoutes.controllers.reporting.api.ReportingConfigurations.list().url,params,(key)?key:'reportConfigs');    				
+    					load(jsRoutes.controllers.reporting.api.ReportingConfigurations.list().url,params,(key)?key:'reportConfigs', true);
     				},
     				receptionConfigs : function(params, key){
-    					load(jsRoutes.controllers.receptions.api.ReceptionConfigurations.list().url,params,(key)?key:'receptionConfigs');    				
+    					load(jsRoutes.controllers.receptions.api.ReceptionConfigurations.list().url,params,(key)?key:'receptionConfigs', true);
     				},
     				filterConfigs : function(params, key){
-    					load(jsRoutes.controllers.reporting.api.FilteringConfigurations.list().url,params,(key)?key:'filterConfigs');    				
+    					load(jsRoutes.controllers.reporting.api.FilteringConfigurations.list().url,params,(key)?key:'filterConfigs');
     				},
     				statsConfigs : function(params, key){
-    					load(jsRoutes.controllers.stats.api.StatsConfigurations.list().url, params, (key)?key:'statsConfigs');
+    					load(jsRoutes.controllers.stats.api.StatsConfigurations.list().url, params, (key)?key:'statsConfigs', true);
     				},
     				propertyDefinitions : function(params, key){
-    					load(jsRoutes.controllers.commons.api.PropertyDefinitions.list().url,params,(key)?key:'propertyDefinitions');    				
+    					load(jsRoutes.controllers.commons.api.PropertyDefinitions.list().url,params,(key)?key:'propertyDefinitions');
     				},
     				treatmentTypes : function(params, key){
-    					load(jsRoutes.controllers.treatmenttypes.api.TreatmentTypes.list().url,params,(key)?key:'treatmentTypes');    				
+    					load(jsRoutes.controllers.treatmenttypes.api.TreatmentTypes.list().url,params,(key)?key:'treatmentTypes');
     				},
     				values : function(params, key){
-    					load(jsRoutes.controllers.commons.api.Values.list().url,params,(key)?key:'values');    				
+    					load(jsRoutes.controllers.commons.api.Values.list().url,params,(key)?key:'values');
     				},
     				tags : function(params, key){
     					if(angular.isUndefined(params)){
     	    				params = {typeCodes:['index-illumina-sequencing','index-nanopore-sequencing']};
     	    			}
-    				//GA 24/07/2015 un peu spécial pour tags car fait partie de la collection parameters...
+    					//GA 24/07/2015 un peu spécial pour tags car fait partie de la collection parameters...
     					load(jsRoutes.controllers.commons.api.Parameters.list().url,params,(key)?key:'tags');
+    				},
+    				// FDS 29/11/2018  ==> voir aussi tag-plate-helper.js
+    				tagGroupNames: function(key){
+    					var types = {typeCodes:['index-illumina-sequencing','index-nanopore-sequencing']};
+    					if(inProgress[key] === undefined){
+    						inProgress[key] = true; //avoid multiple load in parallele
+    						$http.get(jsRoutes.controllers.commons.api.Parameters.list().url,{params:types})
+    							.success(function(data, status, headers, config) {
+    							//console.log('index récupérés depuis Mongo...');
+    							//  certains tags appartiennent a plusieurs groupes, faire une Map pour obtenir une liste sans doublons
+    								var groupsMap = new Map();
+    								data.forEach (function(tag){
+    									if ( tag.groupNames != null) {
+    										tag.groupNames.forEach (function(group){
+    											groupsMap.set(group,"group");
+    										});
+    									}
+    								});
+    								
+    								// convertir la map en tableau
+    								var grps=Array.from(groupsMap.keys());
+    								results[key]=[];
+    								grps.forEach( function (grp){
+    									results[key].push( {'name':grp} );
+    								});
+    								// trier le tableau
+    								results[key] = $filter('orderBy')(results[key],'name');
+    								inProgress[key] = undefined; // reset boolean
+    							});
+    					} 
+    				},
+    				// FDS 29/11/2018 sur le meme principe que tagGroupNames creation de tagCategories 
+    				tagCategories: function(key){
+    					var types = {typeCodes:['index-illumina-sequencing','index-nanopore-sequencing']};
+    					if(inProgress[key] === undefined){
+    						inProgress[key] = true; //avoid multiple load in parallele
+    						$http.get(jsRoutes.controllers.commons.api.Parameters.list().url,{params:types})
+								.success(function(data, status, headers, config) {
+									//console.log('index récupérés depuis Mongo...');
+									var categoryMap = new Map();
+									data.forEach (function(tag){
+										categoryMap.set(tag.categoryCode,"code");
+									});
+									
+									// convertir la map en tableau
+									var cats=Array.from(categoryMap.keys());
+									results[key]=[];
+									cats.forEach( function (cat){
+										results[key].push( {'code':cat} );
+									});
+									// trier le tableau
+									results[key] = $filter('orderBy')(results[key],'code');
+									inProgress[key] = undefined; // reset boolean
+								});
+    					}
     				},
     				sampleTypes : function(params, key){
     					if(angular.isUndefined(params)){
     	    				params = {};
     	    			}
     					params.objectTypeCode='Sample';
-    					load(jsRoutes.controllers.commons.api.CommonInfoTypes.list().url,params,(key)?key:'sampleTypes');
+    					load(jsRoutes.controllers.commons.api.CommonInfoTypes.list().url,params,(key)?key:'sampleTypes', true);
     				},
     				sraStudies : function(params, key){
-    					load(jsRoutes.controllers.sra.studies.api.Studies.list().url,params,(key)?key:'sraStudies');    				
+    					load(jsRoutes.controllers.sra.studies.api.Studies.list().url,params,(key)?key:'sraStudies');
+    				},
+    				sraProjects : function(params, key){
+    					load(jsRoutes.controllers.sra.projects.api.Projects.list().url,params,(key)?key:'sraProjects');
     				},
     				sraSamples : function(params, key){
-    					load(jsRoutes.controllers.sra.samples.api.Samples.list().url,params,(key)?key:'sraSamples');    				
+    					load(jsRoutes.controllers.sra.samples.api.Samples.list().url,params,(key)?key:'sraSamples');
     				},
     				sraExperiments : function(params, key){
-    					load(jsRoutes.controllers.sra.experiments.api.Experiments.list().url,params,(key)?key:'sraExperiments');    				
+    					load(jsRoutes.controllers.sra.experiments.api.Experiments.list().url,params,(key)?key:'sraExperiments');
     				},
     				sraConfigurations : function(params, key){
-    					load(jsRoutes.controllers.sra.configurations.api.Configurations.list().url,params,(key)?key:'sraConfigurations');    				
+    					load(jsRoutes.controllers.sra.configurations.api.Configurations.list().url,params,(key)?key:'sraConfigurations');
     				},
     				readSets : function(params, key){
-    					load(jsRoutes.controllers.readsets.api.ReadSets.list().url,params,(key)?key:'readSets');    				
+    					load(jsRoutes.controllers.readsets.api.ReadSets.list().url,params,(key)?key:'readSets');
     				},
     				//Solution temporaire en attendant le passage de la description SQL dans Mongo
     				context : function(params,key){
     					if(angular.isUndefined(params)){
     	    				params = {typeCode:'context-description'};
     	    			}
-    					load(jsRoutes.controllers.commons.api.Parameters.list().url,params,(key)?key:'context');
+    					load(jsRoutes.controllers.commons.api.Parameters.list().url,params,(key)?key:'context', true);
     				},
+    				// FDS 22/11/2018  il en manque plein dans cette liste !!!!!!!! c'est appelé ou ?
     				all : function(params){
     					this.resolutions(params);
     					this.containerCategories(params);
@@ -279,22 +346,29 @@ angular.module('commonsServices', []).
     					this.protocols(params);
     					this.instruments(params);
     					this.sraStudies(params);
+    					this.sraProjects(params);
     					this.sraConfigurations(params);
     					this.readSets(params);
    				}
     		};
     		
-    		
-    		
-    		function load(url, params, key){
+    		function load(url, params, key, preventSorting){
+				if (preventSorting == undefined || preventSorting == null) {
+					preventSorting = false;
+				}
+
     			if(inProgress[key] === undefined){
 	    			inProgress[key] = true; //avoid multiple load in parallele
 	    			if(angular.isUndefined(params)){
 	    				params = {};
 	    			}
-	    			params.list = true;
+					params.list = true;
 	    			$http.get(url,{params:params,key:key}).success(function(data, status, headers, config) {
-	    				results[config.key]=data;
+	    				results[config.key]= preventSorting ? data : data.sort(function(a, b){
+							if(a.code < b.code) { return -1; }
+							if(a.code > b.code) { return 1; }
+							return 0;
+						});    // pourquoi config ??
 	    				inProgress[key] = undefined;
 	    			});
     			}
@@ -315,7 +389,6 @@ angular.module('commonsServices', []).
     				}else{
     					return results[key];
     				}
-    				
     			},
     			clear : function(key){results[key] = null;},
     			getResolutions : function(){return results['resolutions'];},
@@ -341,18 +414,16 @@ angular.module('commonsServices', []).
     			getProjectTypes : function(){return results['projectTypes'];},
     			getUmbrellaProjects : function(){return results['umbrellaProjects'];},
     			getBioinformaticParameters : function(){return results['bioinformaticParameters'];},
-    			getSamples : function(){return results['samples'];},
+				getSamples : function(){return results['samples'];},
+				getImportTypes : function(){return results['importTypes'];},
     			getUsers : function(){return results['users'];},
     			getRoles : function(){return results['roles'];},
     			getExperiments : function(){return results['experiments'];},
     			getContainerSupports : function(){return results['containerSupports'];},
     			getContainerCategories : function(){return results['containerCategories'];},
     			getExperimentCategories : function(){return results['experimentCategories'];},
-    			
     			getExperimentTypes : function(){return results['experimentTypes'];},
-    			getStates : function(){
-    				return results['states'];
-    				},
+    			getStates : function(){return results['states'];},
     			getRuns : function(){return results['runs'];},
     			getRunCategories : function(){return results['runCategories'];},
     			getInstrumentCategories : function(){return results['instrumentCategories'];},
@@ -378,16 +449,21 @@ angular.module('commonsServices', []).
     				return results[key];
     			},
     			getReagentCatalogs : function(params,key){
-    				key = (key)?key:'reagentCatalogs';					
+    				key = (key)?key:'reagentCatalogs';
     				if (results[key] === undefined) {
     					refresh.reagentCatalogs(params,key);
     				}
     				return results[key];
     			},
-    			getInstruments : function(){return results['instruments'];},		   
-    			getValuations : function(params,key){
-    				return results['valuations'];
+    			getReagentReceptions : function(params,key){
+    				key = (key)?key:'reagentReceptions';
+    				if (results[key] === undefined) {
+    					refresh.reagentReceptions(params,key);
+    				}
+    				return results[key];
     			},
+    			getInstruments : function(){return results['instruments'];},
+    			getValuations : function(params,key){return results['valuations'];},
     			getValues : function(params, key){
     				if(results[key] === undefined){
     					refresh.values(params, key);
@@ -416,6 +492,7 @@ angular.module('commonsServices', []).
     				return results[key];
     			},
     			getSraStudies : function(){return results['sraStudies'];},
+    			getSraProjects : function(){return results['sraProjects'];},
     			getSraConfigurations : function(){return results['sraConfigurations'];},
     			getReadSets : function(params,key){
     				key = (key)?key:'readSets';
@@ -427,17 +504,34 @@ angular.module('commonsServices', []).
     			getTags : function(params,key){
     				key = (key)?key:'tags';
     				if(results[key] === undefined){
-    					refresh.tags(params, key);
+    					refresh.tags(params,key);
+    				}
+    				return results[key];
+    			},
+    			getValuations : function(){return results['valuations'];},
+    			getTagTypes : function(){return results['tagTypes'];},  // FDS 22/11/2018 ajout; liste en dur 
+    			getTagCategories : function(key){    // FDS 29/11/2018 ajout; version dynamique
+    				key = (key)?key:'tagCategories';
+    				if(results[key] === undefined){
+    					refresh.tagCategories(key);
+    				}
+    				return results[key];
+    			},
+    			getTagGroupNames : function(key){// FDS 29/11/2018 ajout; voir aussi tag-plate-helper.js
+      				key = (key)?key:'tagGroupNames';
+    				if(results[key] === undefined){
+    					refresh.tagGroupNames(key);
     				}
     				return results[key];
     			},
     			getContext : function(params,key){
     				key = (key)?key:'context';
     				if(results[key] === undefined){
-    					refresh.tags(params, key);
+    					refresh.tags(params, key); // pourquoi refresh tags ??????????   mise en comm change rien pour recherge tags (effets ailleurs ??)
     				}
     				return results[key];
-    			}
+    			},
+    			getReagentCategories : function(){return results['reagentCategories'];},
     		};
     		
     	}]).factory('convertValueServices', [function() {
@@ -465,11 +559,24 @@ angular.module('commonsServices', []).
 					},
 					//Get the multiplier to convert the value
 					getConversion : function(inputUnit, outputUnit){
-						if((inputUnit === 'µg' && outputUnit === 'ng') || (inputUnit === 'ml' && (outputUnit === 'µl' || outputUnit === 'µL')) || (inputUnit === 'pM' && outputUnit === 'nM')){
+						if((inputUnit === 'pb' && outputUnit === 'Kb') || (inputUnit === 'µg' && outputUnit === 'ng') || (inputUnit === 'ml' && (outputUnit === 'µl' || outputUnit === 'µL')) || (inputUnit === 'pM' && outputUnit === 'nM')){
 							return (1/1000);
-						}else if((inputUnit === 'ng' && outputUnit === 'µg') || ((inputUnit === 'µl' || inputUnit === 'µL') && outputUnit === 'ml') || (inputUnit === 'nM' && outputUnit === 'pM')){
+						}else if((inputUnit === 'Kb' && outputUnit === 'pb') || (inputUnit === 'ng' && outputUnit === 'µg') || ((inputUnit === 'µl' || inputUnit === 'µL') && outputUnit === 'ml') || (inputUnit === 'nM' && outputUnit === 'pM')){
 							return 1000;
+						} else if(inputUnit === 'Gb' && outputUnit === 'pb') {
+							return 1000000000;
+						} else if(inputUnit === 'pb' && outputUnit === 'Gb') {
+							return (1/1000000000);
+						} else if(inputUnit === 'Mb' && outputUnit === 'pb') {
+							return 1000000;
+						} else if(inputUnit === 'pb' && outputUnit === 'Mb') {
+							return (1/1000000);
+						}else if((inputUnit === 'pmol' && outputUnit === 'fmol')){
+							return 1000;
+						}else if((inputUnit === 'fmol' && outputUnit === 'pmol')){
+							return 1/1000;
 						}
+						
 						return undefined;
 					},
 					parse : function(value){
@@ -487,6 +594,37 @@ angular.module('commonsServices', []).
 				return convertValueServices;
 			};
     		return constructor;
+    	}]).factory('dateServices', ['$filter', function($filter) {
+    		// FDS added 12/10/2020 NGL-3000
+    		var constructor = function($scope){
+				var dateServices = {
+					// msdate is a milliseconds date timestamp
+					// dateformat is a date format string  like DD/MM/YYYY
+					isValidDateFormat : function(msdate, dateformat){
+						console.log ("check :"+ msdate); // en ms !!!!
+						// string donnée par la directive date, elle fait deja des corrections !!!!! exemple 08/10/20 ===> 08/10/0020
+						var stringdate =$filter('date')(msdate, dateformat); // ici il faut SANS uppercase
+						//verifier avec moment si cette string correspond au format attendu. ajouter strict=true
+						var momentDate = moment(stringdate, dateformat.toUpperCase(), true);// ici il FAUT uppercase
+						if ( ! momentDate.isValid() ){
+							console.log ("INVALID DATE");
+							return false;
+						} else { 
+							console.log ("VALID DATE");
+							return true;
+						}
+					},
+					
+					isFuturDate : function(msdate){
+						// msdate is a milliseconds date timestamp
+						// use moment.js to check : https://momentjscom.readthedocs.io/en/latest/moment/05-query/03-is-after/
+						var isAfter = moment(msdate).isAfter(moment(),'day');
+						return isAfter;
+					}
+				};
+				return dateServices;
+    		};
+			return constructor;
     	}]).directive('messages', function() {
     		return {
     			restrict: 'A',
@@ -623,8 +761,8 @@ angular.module('commonsServices', []).
                     });
                 }
             };
-        //Convert the date in format(view) to a timestamp date(model)
         }]).directive('dateTimestamp', ['$filter', function($filter) {
+            //Convert the date in format(view) to a timestamp date(model)
             return {
                 require: 'ngModel',
                 link: function(scope, element, attrs, ngModelController) {
@@ -632,21 +770,148 @@ angular.module('commonsServices', []).
     				ngModelController.$formatters.push(function(data) {
 						var convertedData = data;
 						convertedData = $filter('date')(convertedData, Messages("date.format"));
+						
+						console.log ("OLD $formatters: convertedData="+ convertedData);
 					    return convertedData;
 					}); 
 			    
 				    ngModelController.$parsers.push(function(data) {
 				    	var convertedData = data;
 			    	    if(moment && convertedData !== ""){
-			    			   convertedData = moment(data, Messages("date.format").toUpperCase()).valueOf();
+			    			var momentDate = moment(data, Messages("date.format").toUpperCase());
+			    	    	if(attrs.endOfDay !== undefined ){
+			    	    		console.log ("OLD $parsers: ???????");
+			    	    		momentDate.endOf('day');
+			    			}
+			    	    	console.log ("OLD $parsers: valid date");
+			    	    	convertedData = momentDate.valueOf();
 			    		   }else{
+			    			   console.log ("OLD $parsers: INVALID date");
 			    			   convertedData = null;
-			    			   console.log("mission moment library to convert string to date");
+			    			   //console.log("mission moment library to convert string to date");
 			    		   }
-				    	   
+			    	    
+			    	      console.log ("OLD $parsers: convertedData="+ convertedData);
 				    	  return convertedData;
 				    }); 
     				
+                }
+            }
+        }]).directive('dateTimestamp2', ['$filter', function($filter) {
+            // FDS: Nouvelle version NGL-3000, 08/10/2020... peut elle remplacer la directive originale dans tous les cas ????
+        	// regarder aussi datatable2.js pour ameliorations/simplifications...
+
+            return {
+                require: 'ngModel',
+                link: function(scope, element, attrs, ngModelController) {
+					
+                	// transforme la valeur ( ms ) issue du modèle en date (string) à destination de la vue
+                	// ms -> string
+    				ngModelController.$formatters.push(function(modelValue) {
+						var dateformat = Messages("date.format"); 
+						var convertedData = $filter('date')(modelValue, dateformat);  // PAS toUpperCase() !!!!
+						
+						console.log ("NEW $formatters: convertedData="+ convertedData);
+					    return convertedData;
+					}); 
+    				
+    				// transformer la date saisie (si input type="text") par l'utilisateur dans la vue en ms a destination du modèle
+    				// string --> ms
+				    ngModelController.$parsers.push(function(viewValue) {
+				    	var convertedData=viewValue;// ??
+			    	    if(moment && viewValue !== ""){
+			    	    	console.log ("NEW $parsers   viewvalue= "+viewValue)
+			    	    	// si cette valeur ne correspond pas au format attendu ne pas transformer en ms !!!!
+			    	    	// ajout strict=true
+			    	    	// !!!!!!!!!    SUPSQCNG-902 le timestamp doit etre arrondi ==> TODO !!!!
+			    			var momentDate = moment(viewValue, Messages("date.format").toUpperCase(),true);// FAUT toUpperCase() !!!
+			    	    	if ( momentDate.isValid() ){ 
+			    	    		console.log ("NEW $parsers: valid date");
+			    	    		convertedData = momentDate.valueOf();
+			    	    	}else{
+			    	    		console.log ("NEW $parsers: INVALID date");
+			    				//convertedData = null;
+			    				convertedData = undefined;
+			    	    	}
+			    	    }
+			    	   
+			    	    console.log ("NEW $parsers: convertedData="+ convertedData);
+				    	return convertedData;
+				    });
+                }
+            }
+        }]).directive('calendarTimestamp', ['$filter', function($filter) {
+        	// NGL-3138 : version adaptee depuis datatable2.js ( pas de ngModelControler !!!!!) pour les calendriers ( input type="date" )
+            return {
+                require: 'ngModel',
+                link: function(scope, elem, attrs, ngModel) {
+					var typedDate = "01/01/1970";//Initialisation of the date
+					
+					/// convertit au format attentu par le calendrier.....
+                	var convertToDate = function(timestamp){
+                		if(timestamp !== null && timestamp !== undefined && timestamp !== ""){
+	                		//var date = moment(timestamp).format('yyyy-MM-dd'); // PAS BON
+	                		var date = moment(timestamp).format('YYYY-MM-DD');   // OUI
+	                		console.log('converted date :'+ date)
+	                		return date;
+                		}
+                		return "";
+                	};
+                	
+                	var convertToTimestamp = function(date){
+                		//// impossible avec un calendrier ....if(date !== null && date !== undefined && date !== ""){
+        	    	    	// la view value retournée par un calendrier est au format ISO 8601
+        	    			var momentDate = moment(date, moment.ISO_8601);
+        	    			var timestamp=momentDate.valueOf();
+        	    			console.log('converted timestamp :'+timestamp )
+	    					return timestamp;
+                		////}
+                		////return "";
+    				};
+					
+                	//model to view
+                	scope.$watch(
+						function(){
+							return ngModel.$modelValue;
+						}, function(newValue, oldValue){
+							//We check if the date is complete.... oui mais ici on ne tape plus la date!!!
+							if(newValue !== null && newValue !== undefined && newValue !== "" && typedDate.length === 10){
+								var date = convertToDate(newValue);
+    							ngModel.$setViewValue(date);
+								ngModel.$render();
+							}
+                    });
+					
+                	//view to model
+                    ngModel.$parsers.push(function(value) {
+                    	//if(value.length === 10){//When the date is complete.... oui mais ici on ne tape plus la date!!!
+                    		var timestamp = convertToTimestamp(value);
+                    	//}
+						return timestamp;
+                    });
+                    
+				    // 2 valeurs possibles pour l'attribut de la directive:  max-today ou min-today
+				    // déterminent la valeur de l'attribut max ou min de l'input de type date
+                    // on peut creer les valeurs comme 'max-tomorow'
+                    var curDate=new Date();
+                    var tomDate=new Date();
+                    tomDate.setDate(tomDate.getDate() + 1)
+				    //OK var today = $filter('date')(Date.now() ,'yyyy-MM-dd'); // Il faut ce format pour l'affichage avec un navigateur en langue FR
+				    var today    = $filter('date')(curDate ,'yyyy-MM-dd'); // Il faut ce format pour l'affichage avec un navigateur en langue FR
+				    var tomorrow = $filter('date')(tomDate ,'yyyy-MM-dd'); 
+				    switch(attrs.calendarTimestamp) {
+				    	  case 'max-today':
+				    		  attrs.$set('max', today);
+				    	    break;
+				    	  case  'max-tomorrow':
+				    		  attrs.$set('max', tomorrow);
+				    		break;
+				    	  case 'min-today':
+				    		  attrs.$set('min', today);
+				    	    break;
+				    	  default:
+				    		  // ni max, ni min
+				    }
                 }
             }
         }]).directive('base64File', [function () {
@@ -858,13 +1123,13 @@ angular.module('commonsServices', []).
 		    	  		+'</div>'
   		    			
 		    	  		//select mode
-  		    			+'<input type="text" style="background:white" ng-class="inputClass" ng-model="selectedLabels" placeholder="{{placeholder}}" title="{{placeholder}}" readonly/>'  		    			
+  		    			+'<input type="text" style="background:white" ng-class="inputClass" ng-model="selectedLabels" placeholder="{{placeholder}}" readonly/>'  		    			
   		    			+'<div class="input-group-btn">'
   		    			+'<button tabindex="-1" data-toggle="dropdown" class="btn btn-default btn-sm dropdown-toggle" type="button" ng-disabled="isDisabled()" ng-click="open()">'
   		    			+'<span class="caret"></span>'
   		    			+'</button>'
   		    			+'<ul class="dropdown-menu dropdown-menu-right"  role="menu">'
-  				        +'<li ng-show="filter"><input ng-class="inputClass" type="text" ng-click="inputClick($event)" ng-model="filterValue" ng-change="setFilterValue(filterValue)" placeholder="{{getMessage(\'bt-select.here\')}}"/></li>'
+  				        +'<li ng-show="filter"><input ng-class="inputClass" type="text" ng-click="inputClick($event)" ng-model="filterValue" ng-change="setFilterValue(filterValue)" title="{{getMessage(\'bt-select.here.long\')}}" placeholder="{{getMessage(\'bt-select.here\')}}"/></li>'
   				        // Liste des items déja cochés
 		    	  		+'<li ng-repeat-start="item in getSelectedItems()" ng-if="groupBy(item, $index) && acceptsMultiple()"></li>'
   				        +'<li class="dropdown-header" ng-if="groupBy(item, $index)" ng-bind="itemGroupByLabel(item)"></li>'
@@ -894,7 +1159,7 @@ angular.module('commonsServices', []).
 	       		  // if ngModel is not defined, we don't need to do anything
 	      		      if (!ctrls[0]) return;
 	      		      scope.inputClass = element.attr("class");
-	      		      scope.placeholder = attr.placeholder;
+					  scope.placeholder = attr.placeholder;
     		          
 	      		      element.attr("class",''); //remove custom class
 	      		     
@@ -1110,7 +1375,16 @@ angular.module('commonsServices', []).
       		    	  			ngModelCtrl.$setViewValue(scope.itemValue(item));
       		    	  		}else{
       		    	  			ngModelCtrl.$setViewValue(null);
-      		    	  		}
+							}
+								
+							/**
+							 * Si on a ce paramètre, on ne veut pas que l'utilisateur sélectionne une ligne vide. 
+							 * Donc on remet la valeur d'avant.
+							 */
+							if (attr.noBlank) {
+								ngModelCtrl.$setViewValue(scope.itemValue(item));
+							}
+
       		    	  		ngModelCtrl.$render();
       		    	  		
       		    	  	}
@@ -1254,7 +1528,7 @@ angular.module('commonsServices', []).
     			if(filtered.length > 0)return filtered;
     			return undefined;
     		}
-    	}]).filter('unique', function($parse) {
+    	}]).filter('unique', ['$parse', function($parse) {
     		return function (collection, property) {
 				var isDefined = angular.isDefined,
 				isUndefined = angular.isUndefined,
@@ -1278,8 +1552,8 @@ angular.module('commonsServices', []).
 				*/
 				function toArray(object) {
 				    var i = -1,
-				        props = Object.keys(object),
-				        result = new Array(props.length);
+				    props = Object.keys(object),
+				    result = new Array(props.length);
 				
 				    while(++i < props.length) {
 				        result[i] = object[props[i]];
@@ -1323,7 +1597,7 @@ angular.module('commonsServices', []).
 				    });
 				  }
 				}
-    	}).filter('sum', ['$parse',function($parse) {
+    	}]).filter('sum', ['$parse',function($parse) {
     	    return function(array, key) {
     	    	if(!array)return undefined;
     	    	if(!angular.isArray(array) && (angular.isObject(array) || angular.isNumber(array))) array = [array];
@@ -1340,6 +1614,18 @@ angular.module('commonsServices', []).
     	    	}, params);
     	    	return params.sum;
     	    };
+//    	    // ajout sgas pour ex, mais mieux d'utiliser un filtre plus generique : "filter": "collect:'readSetCodes' | length",
+//    	}]).filter('countReadsetInRun',function() {
+//    	    return function(input) {
+//    	    	if(!input)return 0;
+//    	    	if(!angular.isArray(input)) throw "lanes is not an array, object or a number !";
+//    	    	if(angular.isArray(input) && input.length === 0) return 0; 	    		
+//    	    	var total = 0;
+//    	    	for (var i = 0; i < input.length; i++) {
+//    	    		total += input[i].readSetCodes.length;
+//    	    	}
+//    	    	return total;
+//    	    };
     	}]).filter('get', ['$parse',function($parse) {
     	    return function(object, key) {
     	    	if(!object)return undefined;
@@ -1373,7 +1659,38 @@ angular.module('commonsServices', []).
     	    				data.push(get);    	    			
     	    			}
     	    		});    	    		
-    	    	}     	    	
+    	    	}   
+    	    	
+    	    	return data;
+    	    };
+		}])
+		/**
+		 * Filtre qui permet, à partir d'un objet et d'une clé, de retourner un tableau de valeurs de cette clé.
+		 * Ce filtre prend les mêmes arguments que le filtre getArray.
+		 * La seule différence avec le getArray c'est que si la clé n'existe pas dans le sous objet,
+		 * un objet vide est retourné, là où le getArray ne renvoie rien.
+		 * 
+		 * @param objects L'objet où sera cherché la clé.
+		 * @param key La clé à chercher dans l'objet.
+		 * 
+		 * @return Un tableau de valeurs avec la clé donnée en entrée de la fonction.
+		 */
+		.filter('getArrayNotStrict', ['$parse', function ($parse) {
+    	    return function (objects, key) {
+    	    	if (key && !angular.isString(key)) throw "key is not valid, only string is authorized"; 	
+    	    	if (!objects) return undefined;    	    	
+				if (!angular.isObject(objects)) return objects; 
+				   	    
+    	    	var data = [];
+				var get = "";
+				
+    	    	if (angular.isObject(objects) && objects.length > 0) {   	    		
+    	    		angular.forEach(objects, function(value, index) {
+						get = $parse(key)(value);   			
+    	    			data.push(get);    	    			
+    	    		});    	    		
+    	    	}   
+    	    	
     	    	return data;
     	    };
     	}]).filter('codes', function(){
@@ -1403,9 +1720,7 @@ angular.module('commonsServices', []).
     				return tmp;    				
     			}
     			return undefined;
-    		}
-
-    		
+    		}	
     	}).filter('convert', ['convertValueServices', function(convertValueServices){
     		return function(input, property){
 				var convertValues = convertValueServices();
@@ -1414,11 +1729,15 @@ angular.module('commonsServices', []).
 				}
     			return input;
     		}
-    	}]).filter('messages', function(){
+    	}]).filter('messages', function(){   //FDS 27/11/2018 never used in NGL !!!???
     		return function(input){
-    			return Messages(input);    			
+    			return Messages(input);
     		}
-    	}).filter('inttostring', function(){
+    	}).filter('messagesPrefix', function(){   //FDS 27/11/2018: add a prefix before calling Messages
+    		return function(input, prefix){
+    			return Messages(prefix+'.'+input);
+    		}
+    	}).filter('inttostring', function(){   //FDS 27/11/2018  never used in NGL  !!!???
     		return function(input){
     			return String(input);    			
     		}
@@ -1434,7 +1753,7 @@ angular.module('commonsServices', []).
     			else if(angular.isArray(array) && ifOnlyOne === true && array.length === 1)return array[0]
     			else return array;   			    			
     		}
-    	}).filter('countDistinct', ['$parse',function($parse) {
+    	}).filter('countDistinct', ['$parse',function($parse) {    //FDS 27/11/2018  never used in NGL  !!!???
     	    return function(array, key) {
     	    	if (!array || array.length === 0)return undefined;
     	    	if (!angular.isArray(array) && (angular.isObject(array) || angular.isNumber(array) || angular.isString(array) || angular.isDate(array))) array = [array];
@@ -1555,5 +1874,44 @@ angular.module('commonsServices', []).
 				  }
 				 
 	  		  };
-		}])
-    	
+		}]).filter('length', function(){  // FDS 27/11/2018 :get length of input string
+    		return function(input){
+    			if(input) {
+    				return input.length; 
+    			}     		
+    		}
+		}).filter('tagLength', function(){  // FDS 03/01/2019 :get length of TAG ( a tag is a string but could contain several "-" which must not be counted !!)
+    		return function(input){
+				return input.replace(/-/g,'').length;
+    		}
+		}).filter('toStringKeysObject', function() { 
+    		return function (object) {
+    			var result="";
+    			if(angular.isObject(object)){
+					var i = -1,
+					props = Object.keys(object);
+
+					while(++i < props.length) {
+					  result+= props[i];
+					  if (props.length > 1) {
+						if (i < props.length) {
+							result + ", ";
+						}
+					  }
+					}
+    				return result;
+				}
+			}
+    	}).filter('toArrayProps', function() { // FDS 28/11/2018 : return array of properties values from an object
+    		return function (object) {
+				if(angular.isObject(object)){
+					var keys = Object.keys(object); // this is already an array !!!
+					return keys;
+				}
+    		}
+    	}).filter('percentage', function () {
+			return function (input) {
+				input = input.replace(",", "."); // Si on mulitplie un nombre avec une , et pas un point ça fait planter le calcul.
+				return Math.floor(input * 100) + ' %';
+			};
+		  });

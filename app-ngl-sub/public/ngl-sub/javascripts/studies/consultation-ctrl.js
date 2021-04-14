@@ -1,8 +1,120 @@
 "use strict";
 
-angular.module('home').controller('ConsultationCtrl',[ '$http', '$scope', '$routeParams' , '$q', 'mainService', 'lists', 'tabService','messages','studiesConsultationService',
-	                                                  function($http, $scope, $routeParams, $q, mainService, lists, tabService, messages, studiesConsultationService) { 
+angular.module('home').controller('ConsultationCtrl',[ '$http', '$scope', '$routeParams' , '$q', 'mainService', 'lists', 'tabService', 'messages', 'toolsServices', 'datatable', '$window',
+	                                                  function($http, $scope, $routeParams, $q, mainService, lists, tabService, messages, toolsServices, datatable, $window) { 
 
+	var getStudyColumns = function() {
+		var columns = [];
+			columns.push({
+						property     : "traceInformation.creationDate",
+						header       : Messages("traceInformation.creationDate"),
+						type         : "date",		    	  	
+						order        : true,
+						edit         : false,
+						choiceInList : false  
+						});
+			columns.push({
+						property     : "traceInformation.createUser",
+						header       : Messages("traceInformation.creationUser"),
+						type         : "date",		    	  	
+						order        : true,
+						edit         : false,
+						choiceInList : false  
+						});
+			columns.push({
+						property : "state.code",
+						header   : Messages("study.state.code"),
+						"filter" : "codes:'state'",
+						type     : "text",		    	  	
+						order    : true
+						});	
+			columns.push({
+						property   : "code",
+		  	        	header     : Messages("study.code"),
+				       	type       : "text",		    	  	
+				       	order      : true
+				        });	
+			columns.push({
+						property     : "projectCodes",
+				       	header       : Messages("study.projectCodes"),
+				       	type         : "text",		    	  	
+				       	order        : false,
+				       	edit         : false,
+				       	choiceInList : false  
+				       	}); 			
+			columns.push({
+						property     : "accession",
+					    header       : Messages("study.accession"),
+				        type         : "text",		    	  	
+				        order        : true,
+				        edit         : false,
+				        choiceInList : false  
+				       	});	
+			columns.push({
+						property     : "externalId",
+					    header       : Messages("study.externalId"),
+				       	type         : "text",		    	  	
+				       	order        : true,
+				       	edit         : false,
+				       	choiceInList : false  
+				       	});				        	    	
+			columns.push({
+						property     : "releaseDate",
+					   	header       : Messages("study.releaseDate"),
+					    type         : "date",		    	  	
+					    order        : false,
+					    edit         : false,
+					    choiceInList : false  
+						});	
+			columns.push({
+						property     : "centerProjectName",
+						header       : Messages("study.centerProjectName"),
+						type         : "text",		    	  	
+						order        : false,
+						edit         : true,
+						choiceInList : false  
+						});			        			        			        
+			columns.push({
+						property     : "title",
+						header       : Messages("study.title"),
+						type         : "String",
+						hide         : true,
+						edit         : true,
+						order        : false,
+						choiceInList : false
+						});	    
+			columns.push({
+						property     : "studyAbstract",
+						header       : Messages("study.abstract"),
+						type         : "String",
+						hide         : true,
+						edit         : true,
+						order        : false,
+						choiceInList : false
+						});	
+			columns.push({
+						property     : "description",
+						header       : Messages("study.description"),
+						type         : "String",
+						hide         : true,
+						edit         : true,
+						order        : false,
+						choiceInList : false
+						});	
+					      
+			columns.push({
+						property     : "existingStudyType",
+						header       : Messages("study.existingStudyType"),
+						type         : "String",
+						hide         : true,
+						edit         : true,
+						order        : false,
+						choiceInList : true,
+						listStyle    : 'bt-select',
+						possibleValues : 'sraVariables.existingStudyType',
+						});
+			return columns;
+		};
 
 	
 	var studiesDTConfig = {
@@ -13,7 +125,8 @@ angular.module('home').controller('ConsultationCtrl',[ '$http', '$scope', '$rout
 			},
 			pagination:{
 				active:true,
-				mode:'local'
+				mode:'local',
+                numberRecordsPerPage: 100
 			},
 			select:{active:true},
 			showTotalNumberRecords:true,
@@ -22,12 +135,15 @@ angular.module('home').controller('ConsultationCtrl',[ '$http', '$scope', '$rout
 				showButton : true,// bouton d'edition visible
 				withoutSelect : true,
 				columnMode : true,
-				lineMode : function(line){
-					if(line.state.code === "N")
-						return true;
+				lineMode: function (line) {
+					if((line.state.code === "SUB-N" || line.state.code === "NONE") // modification autorisee seulement pour les samples nouvellement crees.
+						&&line._type === "Study"  // On n'edite pas les ExternalStudy
+						&& line.traceInformation.createUser === $scope.user) // limiter autorisation de modification au proprietaire.
+					   return true;
 					else 
-						return false;
+					   return false;
 				}
+
 			},
 			
 			cancel : {
@@ -38,12 +154,19 @@ angular.module('home').controller('ConsultationCtrl',[ '$http', '$scope', '$rout
 				showButton:true
 			},
 			exportCSV:{
-				active:false
+				active:true
 			},
 			show:{                   // bouton pour epingler si on passe par details-ctrl.js 
 				active:true,
 				add :function(line){
-					tabService.addTabs({label:line.code,href:jsRoutes.controllers.sra.studies.tpl.Studies.get(line.code).url,remove:true});
+					// ajout onglet avec nom du study permettant d'acceder à la vue details
+					tabService.addTabs({label:line.code,
+										href:jsRoutes.controllers.sra.studies.tpl.Studies.get(line.code).url,
+										remove:true // permet fermer onglet
+										});
+					// inutile d'installer le datatable renseigné dans mainService car fait a l'initialisation et passage par adresse. 
+					// modifications de $scope.studiesDT prises en compte dans mainService
+					// mainService.setDatatable($scope.studiesDT);
 				}
 			},
 			save : {
@@ -61,35 +184,153 @@ angular.module('home').controller('ConsultationCtrl',[ '$http', '$scope', '$rout
 
 	};
 	
+	
 
 	
+
+//---------------------------------------------------------------------------------------------------
+	
+	// Definitions des methodes :
+	//---------------------------
+	
+	$scope.reset = function() {
+		$scope.form = {};
+		$scope.studiesDT = datatable(studiesDTConfig);
+		$scope.studiesDT.setColumnsConfig(getStudyColumns());
+		$scope.messages = messages();
+		//console.log("99999999999999999999999999999999999999999999999999999999999999  passage dans reset");
+	};
+	
+	
+	$scope.search = function(user){
+		//$scope.messages.clear();
+		$scope.messages = messages();
+		//console.log("$scope.messages = ", $scope.messages);
+		//console.log("Dans consultation-ctr.search, avec user", user);
+		if (! $scope.form.externalIdRegex      && 
+				! $scope.form.externalIds      &&
+				! $scope.form.accessionRegex   && 
+				! $scope.form.accessions       && 
+				! $scope.form.codeRegex        &&
+				! $scope.form.codes            &&
+				! $scope.form.pseudoStateCodes &&
+				! $scope.form.projCodes ) {
+				console.log("Aucun parametre => envoyer message erreur");
+				$scope.messages.setError(Messages("AbsenceSearchParameter"));
+				console.log("$scope.messages = ", $scope.messages);
+				throw("Aucun parametre pour la recherche des study");   
+			} 
+		$scope.user = user;
+		// Remplacement des pesudoStateCodes par codes stateCodes dans le formulaire et destruction
+		// de form.pseudoStateCodes pour pouvoir envoyer directement form a la methode search du datatable:
+		$scope.saveUserForm = angular.copy($scope.form);// sauver formulaire utilisateur initial avant modif dans replacePseudoStateCodesToStateCodesInFormulaire
+		toolsServices.replacePseudoStateCodesToStateCodesInFormulaire($scope.sraVariables.pseudoStateCodeToStateCodes, $scope.form);
+		$scope.studiesDT.search($scope.form);
+		$scope.form = angular.copy($scope.saveUserForm);// remettre formulaire utilisateur initial
+		
+		// stoquer form dans main pour pouvoir l'utiliser de n'importe ou : (quand on clique sur l'onglet recherche de la vue details) :
+		// attention copie avec passage par valeur, si on modifie $scope.form dans le code, mainService ne contiendra pas les modifications.
+		// d'ou importance de le copier dans la methode search et non à l'initialisation.
+		mainService.setForm($scope.form);
+
+		// inutile de sauver le datatable renseigné dans mainService car fait a l'initialisation et passage par adresse. 
+		// modifications de $scope.studiesDT prises en compte dans mainService
+		// mainService.setDatatable($scope.studiesDT);
+		// mainService.setDatatable($scope.studiesDT);  
+	};
+	
+	
+	
+//------------------------------------------------------------------------------------------------------------------
+	
+	
+	// Initialisations :
+	//-------------------
+	//console.log("Dans studies.consultation-ctrl.js");
 	$scope.messages = messages();	
-
+	$scope.form = {};  // important. 
+	$scope.lists = lists;		
+	$scope.sraVariables = {}; // si on declare dans services => var sraVariables = {};
 	
-	if(angular.isUndefined(mainService.getHomePage())){
+	// Pour avoir les onglets a gauche de la page :
+	if (angular.isUndefined(mainService.getHomePage())) {
 		mainService.setHomePage('consultation');
-		tabService.addTabs({label:Messages('studies.menu.consultation'),href:jsRoutes.controllers.sra.studies.tpl.Studies.home("consultation").url,remove:true});
-		tabService.activeTab(0); // desactive le lien !
-	}
-	// si on declare dans services => var sraVariables = {};
-	// si on declare dans le controlleur : $scope.sraVariables = {};
+		tabService.addTabs({
+			label: Messages('studies.menu.consultation'),
+			href: jsRoutes.controllers.sra.studies.tpl.Studies.home("consultation").url,
+			remove:true});
+		tabService.activeTab(0); // active l'onglet, le met en bleu
+	}		
+	
 
-	$scope.consultationService = studiesConsultationService;
-	$scope.consultationService.init($routeParams, studiesDTConfig);
+
+
+//	Initialisation ProjectCodes:
+	$scope.lists.refresh.projects();
 	
-	//$scope.search = function(){
-		//if(($scope.consultationService.form.projCodes && $scope.consultationService.form.projCodes.length > 0)||
-		//($scope.consultationService.form.accessions && $scope.consultationService.form.accessions.length > 0)||
-		//($scope.consultationService.form.codes && $scope.consultationService.form.codes.length > 0)){
-		//	console.log($scope.consultationService.form.accessions)
-		//	$scope.consultationService.search();
-		//} else {
-		//	console.log("Cancel datatable");
-		//	$scope.consultationService.cancel();
-		//}	
-	//};
+//	Initialisation datatable : le stoquer dans main pour pouvoir le recuperer depuis une autre vue
+//	$scope.studiesDT = datatable(studiesDTConfig);
+//	$scope.studiesDT.setColumnsConfig(getStudyColumns());
 	
+//	if ($scope.studiesDT == null) {
+//		console.log("studiesDT null                  nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn");
+//	}
+//	if ($scope.studiesDT == undefined) {
+//		console.log("studiesDT undefined                 nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn");
+//	}
 	
+	// datatable dans mainService qui est partagee par plusieurs ctr ou services du coup peut etre recuperé dans details.ctr
+	if (studiesDTConfig && angular.isUndefined(mainService.getDatatable())) {
+		$scope.studiesDT = datatable(studiesDTConfig);
+        $scope.studiesDT.setColumnsConfig(getStudyColumns());
+        // installation de l'adresse du datatable dans mainService  => toutes 
+        // les modifications uterieures de $scope.studiesDT seront visibles dans mainService mais
+        // on pourra acceder à scope.studiesDT meme quand on revient sur la page recherche
+        // car on ne relance pas la recherche ?????
+        mainService.setDatatable($scope.studiesDT); 
+    	//console.log("AAAAAAAAAAAA         installation du datatable dans le mainService");
+    } else if (angular.isDefined(mainService.getDatatable())) {
+    	$scope.studiesDT = mainService.getDatatable();  
+    	//console.log("AAAAAAAAAAAA         recuperation du datatable depuis le mainService", $scope.studiesDT);
+    }
+	
+
+	
+	// Recuperer form depuis mainService si existe  :
+	// mais ne pas installer $scope.form dans mainService s'il n'existe pas dans mainService, 
+	// car methode mainService.setForm($scope.form) qui fait une copie par valeur 
+	// => si modifications ulterieures du $scope.form, le form de mainService ne sera pas modifié
+	// => installer la copie de $scope.form dans mainService dans methode $scope.search()
+	if(angular.isDefined(mainService.getForm())) {
+        $scope.form = mainService.getForm();
+    } // else
+	
+//	$window.onbeforeunload = function(){
+//		 console.log("BBBBBBBBBBBBBBBB          Etes vous sure de vouloir changer de page?");
+//	};
+		
+	// Initialisation des etats :
+	lists.refresh.states({objectTypeCode: "SRASubmission"});
+	$http.get(jsRoutes.controllers.sra.api.Variables.list().url, {params:{type:'simplifiedStates'}})
+	.success(function(data) {
+		$scope.sraVariables.simplifiedStates = data;	
+	});	
+//	$http.get(jsRoutes.controllers.sra.api.Variables.list().url, {params:{type:'pseudoStateCodeToStateCodes'}})
+//	.success(function(data) {
+//		$scope.sraVariables.pseudoStateCodeToStateCodes = data;
+//	console.log("CCCCCCCCCCCCCCCCC Dans initListService, consultationService.sraVariables.pseudoStateCodeToStateCodes pour pseudo-03-EnCours :" , consultationService.sraVariables.pseudoStateCodeToStateCodes);
+//	});
+	$http.get(jsRoutes.controllers.sra.api.Variables.get('pseudoStateCodeToStateCodes').url)
+	.success(function(data) {
+		$scope.sraVariables.pseudoStateCodeToStateCodes = data;
+	});
+	
+//	Initialistation ExistingStudyType:
+	$http.get(jsRoutes.controllers.sra.api.Variables.list().url, {params:{type:'existingStudyType'}})
+	.success(function(data) {
+	// initialisation de la variable createService.sraVariables.exitingStudyType utilisée dans create.scala.html
+	$scope.sraVariables.existingStudyType = data;																					
+	});
 	
 
 }]);

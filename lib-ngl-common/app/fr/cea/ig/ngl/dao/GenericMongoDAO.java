@@ -1,26 +1,38 @@
 package fr.cea.ig.ngl.dao;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.jongo.Aggregate;
 import org.jongo.MongoCollection;
 import org.jongo.MongoCursor;
+import org.mongojack.Aggregation.Expression;
+import org.mongojack.Aggregation.Pipeline;
 import org.mongojack.DBQuery.Query;
 import org.mongojack.DBUpdate.Builder;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
 
+import com.mongodb.AggregationOptions;
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
+import com.mongodb.util.JSON;
 
 import fr.cea.ig.DBObject;
 import fr.cea.ig.MongoDBDAO;
 import fr.cea.ig.MongoDBResult;
 import fr.cea.ig.MongoDBResult.Sort;
 import models.utils.dao.DAOException;
+import ngl.refactoring.MiniDAO;
 import play.modules.jongo.MongoDBPlugin;
 
-// TODO transformer cette classe en classe abstraite si on décide d'utiliser l'héritage au lieu d'une association d'objet pour les DAO "concrêtes"
-public /*abstract*/ class GenericMongoDAO<T extends DBObject> {
+// AJ: transformer cette classe en classe abstraite si on décide d'utiliser l'héritage au lieu d'une association d'objet pour les DAO "concrêtes"
+public /*abstract*/ class GenericMongoDAO<T extends DBObject> implements MiniDAO<T> {
 	
+	public static final Pattern FIELD_PATTERN = Pattern.compile("^(\\w+)\\.{1}(\\w+)$");
+    private static final play.Logger.ALogger logger = play.Logger.of(GenericMongoDAO.class);
+    
 	private final String   collectionName;
 	private final Class<T> elementClass;
 	
@@ -37,8 +49,10 @@ public /*abstract*/ class GenericMongoDAO<T extends DBObject> {
 	 */
 	public T findOne(Query q) throws DAOException {
 		T t = MongoDBDAO.findOne(collectionName, elementClass, q);
-		if (t == null)
-			throw new DAOException("no instance found");
+		if (t == null) {
+		    logger.debug("query: " + q.toString());
+			throw new DAOException("no instance found ("+ collectionName + ")");
+		}
 		return t;
 	}
 	
@@ -54,12 +68,21 @@ public /*abstract*/ class GenericMongoDAO<T extends DBObject> {
 		return MongoDBDAO.find(collectionName, elementClass).cursor;
 	}
 	
+	public Iterable<T> all_batch(int cp) throws DAOException {
+		return MongoDBDAO.find(collectionName, elementClass).cursor.batchSize(cp);
+	}	
+	@Override
 	public T findByCode(String code) throws DAOException {
 		return MongoDBDAO.findByCode(collectionName, elementClass, code);
 	}
 	
-	public T getObject(String code, BasicDBObject keys) throws DAOException {
+	public T findByCode(String code, BasicDBObject keys) throws DAOException {
     	return MongoDBDAO.findByCode(collectionName, elementClass, code, keys);
+    }
+	
+	public T getObject(String code, BasicDBObject keys) throws DAOException {
+    	//return MongoDBDAO.findByCode(collectionName, elementClass, code, keys);
+		return findByCode(code, keys);
     }
 	
 	public T getObject(String code) throws DAOException {
@@ -70,14 +93,31 @@ public /*abstract*/ class GenericMongoDAO<T extends DBObject> {
     	return this.findOne(query);
     }
 	
+	public boolean checkObjectExistByCode(String code) throws DAOException {
+		return MongoDBDAO.checkObjectExistByCode(collectionName, elementClass, code);
+	}
+	
 	public boolean isObjectExist(String code) throws DAOException {
 		return MongoDBDAO.checkObjectExistByCode(collectionName, elementClass, code);
+	}
+	
+	@Override
+	public boolean isCodeExist(String code) {
+		return isObjectExist(code);
+	}
+	
+	public boolean checkObjectExist(Query query) throws DAOException {
+		return MongoDBDAO.checkObjectExist(collectionName, elementClass, query);
 	}
 	
 	public boolean isObjectExist(Query query) throws DAOException {
 		return MongoDBDAO.checkObjectExist(collectionName, elementClass, query);
 	}
 	
+	public T save(T o) throws DAOException {
+		return MongoDBDAO.save(collectionName, o);
+	}
+
 	public T saveObject(T o) throws DAOException {
 		return MongoDBDAO.save(collectionName, o);
 	}
@@ -105,7 +145,7 @@ public /*abstract*/ class GenericMongoDAO<T extends DBObject> {
 	 */
 	public MongoDBResult<T> mongoDBFinder(Query query, String orderBy, Sort orderSense, Integer limit) throws DAOException {
 		MongoDBResult<T> results = MongoDBDAO.find(collectionName, elementClass, query).sort(orderBy, orderSense);
-		if(limit != -1){
+		if (limit != -1) {
 			results.limit(limit);
 		}
 		return results;
@@ -196,6 +236,36 @@ public /*abstract*/ class GenericMongoDAO<T extends DBObject> {
 	}
 	
 	/**
+     * use to replace controllers.MongoCommonController.nativeMongoDBQuery(ListForm form).
+     * @param query String
+     * @param keys  keys in json format used to project the result
+     * @return      mongo cursor
+     */
+    public MongoCursor<T> findByQueryWithProjection(String query, String keys) {
+        MongoCollection collection = MongoDBPlugin.getCollection(collectionName);
+        return collection.find(query).projection(keys).as(elementClass);
+    }
+	
+	/**
+	 * use to replace controllers.CommonController.nativeMongoDBAggregate(ListForm form).
+	 * @param query String
+	 * @return      mongo cursor
+	 */
+	public Aggregate.ResultsIterator<T> findByAggregate(String query) {
+		MongoCollection collection = MongoDBPlugin.getCollection(collectionName);
+		BasicDBList mongoList = (BasicDBList)JSON.parse(query);
+		final Aggregate aggregateQuery = collection.aggregate(((com.mongodb.BasicDBObject)mongoList.get(0)).toJson());
+		for(int i = 1; i < mongoList.size(); i++){
+			aggregateQuery.and(((com.mongodb.BasicDBObject)mongoList.get(i)).toJson());
+		}
+		
+		Aggregate.ResultsIterator<T> all = aggregateQuery.options(AggregationOptions.builder().outputMode(AggregationOptions.OutputMode.CURSOR).build())
+				.as(elementClass);
+		return all;
+		
+	}
+	
+	/**
 	 * Construct a builder from some fields.
 	 * Use to update a mongodb document.
 	 * @param value  DBObject
@@ -218,12 +288,19 @@ public /*abstract*/ class GenericMongoDAO<T extends DBObject> {
 		Builder builder = new Builder();
 		try {
 			for (String field: fields) {
+				Matcher matcher = FIELD_PATTERN.matcher(field);
 				if(prefix != null) {
 					String fieldName = prefix + "." + field ;
 					BeanWrapper wrapper = PropertyAccessorFactory.forBeanPropertyAccess(value);
-//					Class<?> c = wrapper.getPropertyType(prefix);
 					Object o = wrapper.getPropertyValue(prefix);
 					builder.set(fieldName, wrapper.getPropertyType(prefix).getField(field).get(o));
+				} else if(matcher.matches()){
+					String fieldName = field ;
+					String nPrefix = matcher.group(1);
+					String nField = matcher.group(2);
+					BeanWrapper wrapper = PropertyAccessorFactory.forBeanPropertyAccess(value);
+					Object o = wrapper.getPropertyValue(nPrefix);
+					builder.set(fieldName, wrapper.getPropertyType(nPrefix).getField(nField).get(o));
 				} else {
 					builder.set(field, elementClass.getField(field).get(value));
 				}
@@ -233,11 +310,18 @@ public /*abstract*/ class GenericMongoDAO<T extends DBObject> {
 		}
 		return builder;
 	}
-	
+
+//	public Iterable<T> aggregate(Pipeline<Expression<?>> pipeline) {
+//		return MongoDBDAO.getCollection(collectionName, elementClass).aggregate(pipeline, elementClass).results();
+//	}
+	public Iterable<T> aggregate(Pipeline<Expression<?>> pipeline) {
+		return MongoDBDAO.aggregate(collectionName, elementClass, pipeline);
+	}
 	
 	/// ---- Recablage iso 
 	
 	public boolean checkObjectExist(String key, String keyValue) {
+		logger.debug("collectionName=" + collectionName + " key="+ key + " keyValue=" + keyValue);
 		return MongoDBDAO.checkObjectExist(collectionName, elementClass, key, keyValue);
 	}
 	
@@ -256,6 +340,14 @@ public /*abstract*/ class GenericMongoDAO<T extends DBObject> {
 	public MongoDBResult<T> dao_find(Query q) {
 		return MongoDBDAO.find(collectionName, elementClass, q);
 	}
+
+    public String getCollectionName() {
+        return collectionName;
+    }
+
+    public Class<T> getElementClass() {
+        return elementClass;
+    }
 	
 }
 

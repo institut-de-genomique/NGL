@@ -3,6 +3,11 @@
 @import controllers.instruments.io.utils._;
 @import java.text.SimpleDateFormat
 @import java.util.Locale
+@import java.lang.String; var perc="";
+
+@*** 08/04/2020
+30/03/2020 NGL-2201 remplacer "." par "_" dans co.percentage (pour le logiciel Illumina LRM)
+***@
 
 [Header]\u000D\u000A
 IEMFileVersion,4\u000D\u000A
@@ -23,7 +28,8 @@ Chemistry,Default\u000D\u000A
 Sample_ID,Sample_Name,Sample_Plate,Sample_Well,I7_Index_ID,index,Sample_Project,Description\u000D\u000A
 @for(c <- containers){
 	@for(co <- c.contents){
-		@(c.support.line)_@(co.sampleCode)_@(OutputHelper.getContentProperty(co,"libProcessTypeCode"))_@(OutputHelper.getContentProperty(co,"tag")),@(c.code),,,@OutputHelper.getSupplierName(OutputHelper.getIndex("index-illumina-sequencing",OutputHelper.getContentProperty(co,"tag")),"illumina"),@OutputHelper.getSequence(OutputHelper.getIndex("index-illumina-sequencing",OutputHelper.getContentProperty(co,"tag"))),,@(OutputHelper.getContentProperty(co,"tag"))_@(co.percentage)\u000D\u000A
+		@{perc=Double.toString(co.percentage).replace(".","_")}
+		@(c.support.line)_@(co.sampleCode)_@(OutputHelper.getContentProperty(co,"libProcessTypeCode"))_@(OutputHelper.getContentProperty(co,"tag")),@(c.code),,,,@OutputHelper.getSequence(OutputHelper.getIndex("index-illumina-sequencing",OutputHelper.getContentProperty(co,"tag"))),,@(OutputHelper.getContentProperty(co,"tag"))_@(perc)\u000D\u000A
 	}
 } 
 

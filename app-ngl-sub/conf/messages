@@ -1,10 +1,13 @@
 application.name = NGL-SUB
 index.title = Bienvenue dans l'application NGL-SUB
-
+#generic
+AbsenceSearchParameter = Indiquez au moins un parametre pour votre recherche
+AbsenceDonneePourUpdate = Absence de donnée à mettre à jour
 #Study
 studies.menu = Study
-studies.menu.create = Création
+studies.menu.create  =  Création
 studies.menu.release = Release
+studies.menu.update  =  Modifier à l'EBI
 studies.page.title=Study
 study.create.success= Sauvegarde du study reussie
 studies.msg.save.success=Study crée
@@ -12,10 +15,11 @@ create.placeholder.studiesTitle= * Titre du study
 create.placeholder.projectCodes= * Choisir au moins un code projet
 release.placeholder.projectCodes= * Choisir au moins un code projet
 consultation.placeholder.projectCodes= Choisir un code projet
-consultation.placeholder.studyCodes= Pattern code study ou liste codes 
-consultation.placeholder.studyAccessions= Pattern numéros d'accession study (ERP...) ou liste numéros d'accession
-consultation.placeholder.studyExternalIds=Pattern identifiants PRJEB ou liste identifiants PRJEB
-
+consultation.placeholder.studyCodes= Regex code study ou liste codes 
+consultation.placeholder.studyAccessions= Regex numéros d'accession study (ERP...) ou liste numéros d'accession
+consultation.placeholder.studyExternalIds=Regex identifiants PRJEB ou liste identifiants PRJEB
+update.placeholder.studyAccession= ERP...
+update.placeholder.studyExternalId=PRJEB...
 
 create.placeholder.abstract= * Donner un Abstract
 create.placeholder.description= * Donner une description
@@ -23,34 +27,55 @@ create.placeholder.existingStudyType= * Choisir un type de study
 studies.menu.consultation = Recherche
 study.code=Code
 study.projectCode=ProjectCode
-study.state.code=State
+study.state.code=Etat
 study.accession=Numéros d accession
-study.releaseDate=ReleaseDate
+study.releaseDate=Date de release à l'EBI
+study.createUser=Crée par
 study.centerName=CenterName
-study.centerProjectName=CenterProjectName
-study.title=Titre
-study.studyAbstract=StudyAbstract
-study.description=Description
+study.centerProjectName=*CenterProjectName
+study.title=*Titre
+study.studyAbstract=*StudyAbstract
+study.description=*Description
 study.bioProjectId=BioProjectId
 study.externalId=BioProjectId
-study.existingStudyType=ExistingStudyType
+study.existingStudyType=*ExistingStudyType
 studies.tabs.sample=Sample
 studies.tabs.experiment=Experiment
 studies.tabs.run=Run
 studies.tabs.rawData=RawData
 studies.msg.details-release=Objets liés au study 
 studies.msg.details-release-1=Study 
-studies.msg.details.states=state 
-studies.msg.release.success=Demande de release du study enregistrée
-study.state=Etat 
-study.abstract=Résumé 
-study.description=Déscription 
+studies.msg.details.states=Etat 
+studies.msg.release.success=Demande de release du study à l'EBI enregistrée
+study.state=Etat
+study.abstract=*Résumé 
+study.description=*Déscription 
 study.projectCodes=Codes projets
-study.public=Publique
+study.public=Public
 study.private=Privé
-study.status=Statut 
+study.undefined=Non defini
+study.visibility=Visibilité à l'EBI 
+#Project
+projects.menu=Project
+projects.page.title=Project
+projects.menu.update=Ajouter ou modifier un locus_tag à l'EBI
+projects.menu.consultation=Recherche
+update.placeholder.projectAccession=PRJEB
+update.placeholder.projectExternalId=ERP
+consultation.placeholder.projectAccessions=PRJEB
+
+project.code=Code
+project.projectCode=ProjectCode
+project.state.code=Etat
+project.accession=Numéros d accession
+project.externalId=Identifiant 
+project.createUser=Crée par
+project.title=Titre
+project.description=Description
+project.locusTagPrefixs=locus_tag_prefixs
+
 #Configuration
-configurations.menu = Configurations
+configurations.menu = Configuration
 configurations.menu.create = Création
 configurations.page.title=Configurations
 configurations.menu.consultation=Recherche
@@ -68,7 +93,7 @@ configurations.msg.consultation=Recherche des configurations
 configuration.code=Code
 configuration.projectCode=ProjectCode
 configuration.projectCodes=ProjectCodes
-configuration.state.code=State
+configuration.state.code=Etat
 configuration.librarySource=LibrarySource
 configuration.libraryConstructionProtocol=LibraryConstructionProtocol
 configuration.ebiStudiesSamplesFileName=EbiSampleOrStudyACFileName
@@ -84,20 +109,23 @@ submissions.menu.consultation=Recherche
 submissions.menu.validation=Validation
 submissions.menu.activate=Démarrer la soumission.
 submissions.page.title=Soumission
-consultation.placeholder.submissionAccessions= Pattern AC submission ou liste ACs
+consultation.placeholder.submissionAccessions= Regex AC submission ou liste ACs
 consultation.placeholder.stateCodes= Choisir un etat
-consultation.placeholder.submissionCodes= Pattern code submission ou liste codes
+consultation.placeholder.pseudoStateCodes= Choisir un etat
+consultation.placeholder.submissionCodes= Regex code submission ou liste codes
 create.placeholder.submissions.study= * Choisir un study
 create.placeholder.submissions.configuration= * Choisir une configuration
 create.placeholder.submissions.readSet= * Choisir les readSets
 activate.placeholder.projectCodes= * Choisir un code projet
 validation.placeholder.projectCode= * Choisir un code projet
 submissions.tabs.study=Study
+submissions.tabs.project=Project
+
 submissions.tabs.sample=Sample
 submissions.tabs.experiment=Experiment
 submissions.tabs.run=Run
 submissions.tabs.rawData=RawData
-createService.placeholder.submissions.file=Charger le fichier cloneToAc
+createService.placeholder.submissions.file=Charger le fichier refCollabToAc
 create.placeholder.acStudy=AC study
 create.placeholder.acSample=AC sample
 
@@ -106,14 +134,20 @@ submissions.msg.validate.success=Soumission validée
 submissions.msg.details=Détail de la soumission
 submissions.msg.consultation=Recherche des soumission
 submissions.code=Code
+submissions.type=Type de soumission
 submissions.state=Etat
 submissions.accession=Numeros d'accession
 submissions.creationDate=Date de création
-userFileReadSet=Fichier des readsets :
-userFileExperiments=Fichier des experiments :
-userFileCloneToAc=Fichier Clones - AC :
-consultation.placeholder.state= Choisir l'état de la soumission
+submissions.creationUser=Crée par
+submissions.projectCodes=ProjectCodes
 
+ReadSet=Fichier des readsets :
+userFileExperiments=Fichier des experiments :
+#userFileClonesToAC=Fichier userRefCollabToAc :
+userFileRefCollabToAc=userFileRefCollabToAc
+
+consultation.placeholder.state= Choisir l'état 
+consultation.placeholder.simplifiedStateCodes= Choisir l'état
 #RUN
 
 run.experiment.code=Code experiment
@@ -125,56 +159,66 @@ run.date=Date
 rawData.relatifName=Nom du fichier
 
 #SAMPLE 
+samples.menu.update  =  Modifier à l'EBI
 sample.code=Code
 sample.accession=Numéros d'accession
 sample.externalId=identifiant de type SAME
 sample.projectCode=Code projet
 sample.anonymizedName=Nom anonyme
 sample.state=Etat
-sample.state.code=Etat
+#sample.state.code=Etat
 sample.title=Titre
 sample.description=Déscription
-sample.clone=Clone
-
-sample.taxonId= * identifiant du taxon
+sample.anonymizedName=anonymized_name
+#sample.clone=RefCollab
+sample.refCollab=refCollab
+sample.attributes=Attributes
+sample.taxonId= *identifiant du taxon
+#consultation.sample.taxonId= identifiant du taxon
 sample.commonName=Nom commun
-sample.scientificName=* Nom scientifique
+sample.scientificName=*Nom scientifique
+#consultation.sample.scientificName=Nom scientifique
 sample.classification=Classification
 samples.menu=Sample
 samples.menu.consultation=Recherche
 samples.page.title=Sample
-consultation.placeholder.sampleCodes= Pattern code sample ou liste codes 
-consultation.placeholder.sampleAccessions= Pattern numéros d'accession sample (ERS...) ou liste numéros d'accession
-consultation.placeholder.sampleExternalIds=Pattern identifiants SAME ou liste identifiants SAME
+consultation.placeholder.sampleCodes= Regex code sample ou liste codes 
+consultation.placeholder.sampleAccessions= Regex numéros d'accession sample (ERS...) ou liste numéros d'accession
+consultation.placeholder.sampleExternalIds=Regex identifiants SAME ou liste identifiants SAME
+update.placeholder.sampleAccession= ERS...
+update.placeholder.sampleExternalId=SAME...
 
 
 #EXPERIMENT
+experiments.menu.update  =  Modifier à l'EBI
 experiment.code=Code
 experiment.accession=Numéros d'accession
 experiment.projectCode=Code projet
 experiment.state=Etat
 experiment.sampleCode=Code Sample
 experiment.studyCode=Code Study
+experiment.studyAccession=Study accession(ERP...)
+experiment.sampleAccession=Sample accession (ERS...)
 experiment.title=Titre
 #EBI label
-experiment.librarySelection= * Library_Selection
-experiment.libraryStrategy= * Library_Strategy
-experiment.librarySource= * Library_Source
-experiment.libraryLayout= * Library_Layout
-experiment.libraryLayoutNominalLength=Library Layout Nominal Length
+experiment.librarySelection= *Library_Selection
+experiment.libraryStrategy= *Library_Strategy
+experiment.librarySource= *Library_Source
+experiment.libraryLayout= *Library_Layout
+experiment.libraryLayoutNominalLength=Library_Layout_Nominal_Length
 experiment.libraryLayoutOrientation=Library_Layout_Orientation
-experiment.libraryName= * Library_Name
+experiment.libraryName= *Library_Name
 experiment.libraryConstructionProtocol=Library_Construction_Protocol
-experiment.typePlatform= * Type Platform
-experiment.instrumentModel= * Instrument_Model
+experiment.typePlatform= *Type Platform
+experiment.instrumentModel= *Instrument_Model
 experiment.lastBaseCoord=Last Base Coordonée
 experiment.spotLength=SpotLength
 experiments.menu=Experiment
 experiments.menu.consultation=Recherche
 experiments.page.title=Experiments
-consultation.placeholder.experimentCodes= Pattern code experiment ou liste codes 
-consultation.placeholder.experimentAccessions= Pattern numéros d'accession experiment (ERS...) ou liste numéros d'accession
-
+consultation.placeholder.experimentCodes= Regex code experiment ou liste codes 
+consultation.placeholder.experimentAccessions= Regex numéros d'accession experiment (ERS...) ou liste numéros d'accession
+experiment.msg.details=Objets liés à :
 documentation.menu=Aide
 documentation.page.title=Documentation
 documentation.ebi.title=Documentation EBI
@@ -187,14 +231,47 @@ documentation.possible.values=Valeurs possibles
 documentation.userFileReadSet=Fichier userFileReadSet
 documentation.userFileExperiments=Fichier userFileExperiments
 documentation.userFileSamples=Fichier userFileSamples
-documentation.userFileCloneToAc=Fichier userFileCloneToAc
+documentation.userFileExperiment=Fichier UserFileExperiment
+documentation.userFileSample=Fichier userFileSample
+documentation.userFileRefCollabToAc=Fichier userFileRefCollabToAc
+documentation.sampleAttributes=Champs attributes du sample
+documentation.visibiliteEBI_study=Visibilité des informations du study à l EBI
+documentation.visibiliteEBI_sample=Visibilité des informations du sample à l EBI
+documentation.modeleSRA=SRA(Sequence Read Archive): Le modele des données de soumission
+bilans.menu=Bilan
+bilans.menu.consultation=consultation
+bilans.page.title=Bilan
+
+bilans.submissionDate=date creation
+bilans.rawData=Nom du fichier au CNS
+bilans.collabFileName=Nom du fichier à l'EBI
+bilans.readSetCode=readSetCode
+bilans.typePlatform=plateforme
+bilans.instrumentModel=instrumentModel
+bilans.refCollab=refCollab
+bilans.echantillon=echantillon
+bilans.experimentAC=exp_AC
+bilans.runAC=run_AC
+bilans.studyAC=study_AC
+bilans.studyExternalId=bioprojectId
+
+bilans.sampleAC=sample_AC
+bilans.sampleExternalId=SAME
+
+consultation.placeholder.studyAccession=studyAccession(ERP...)
+consultation.placeholder.studyExternalId=bioProject(PRJEB...)
+consultation.placeholder.sampleAccession=sampleAccession(ERS...)
+consultation.placeholder.sampleExternalId=sampleExternalId(SAME...)
+
+
 
 button.save=Save
 button.reset=Reset
 button.cancel=Cancel
 button.edit=Edit
-button.validate=Validate
-button.activate=Activate
+button.shortValidate=Valider
+button.validate=Validation de toutes les données du tableau
+button.activate=Demarrer les soumissions selectionnées
 button.release=Release du study et des objets liés
 #Containers
 #containers.title = Containers
@@ -208,7 +285,14 @@ authentification.dropdown_list.profile=Profil
 authentification.dropdown_list.signout=Deconnexion
 
 date.format=dd/MM/yyyy
+firstSubmissionDate=Date de première soumission
+traceInformation.creationDate=Date création (NGL-SUB)
+traceInformation.creationUser=Crée par
+study.traceInformation.creationDate=Date création (NGL-SUB)
+experiment.traceInformation.creationDate=Date création (NGL-SUB)
+run.traceInformation.creationDate=Date création (NGL-SUB)
+sample.traceInformation.creationDate=Date création (NGL-SUB)
+submission.traceInformation.creationDate=Date création (NGL-SUB)
+state.NONE=Non associé à une soumission.
 
-
-
-
+button.submitUpdate=Mise a jour à l'EBI de toutes les données du tableau

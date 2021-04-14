@@ -1,9 +1,5 @@
 package controllers.projects.api;
 
-// import static play.data.Form.form;
-//import static fr.cea.ig.play.IGGlobals.form;
-
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -20,12 +16,11 @@ import com.mongodb.BasicDBObject;
 import controllers.DocumentController;
 import controllers.QueryFieldsForm;
 import fr.cea.ig.MongoDBResult;
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import models.laboratory.common.instance.TraceInformation;
 import models.laboratory.project.instance.UmbrellaProject;
 import models.utils.InstanceConstants;
 import models.utils.ListObject;
-//import play.Logger;
 import play.data.Form;
 import play.libs.Json;
 import play.mvc.Result;
@@ -36,22 +31,28 @@ import views.components.datatable.DatatableResponse;
  * Controller around Project object
  *
  */
-// @Controller
 public class UmbrellaProjects extends DocumentController<UmbrellaProject> {
 
 	private static final play.Logger.ALogger logger = play.Logger.of(UmbrellaProjects.class);
 	
-	private final /*static*/ Form<UmbrellaProjectsSearchForm> searchForm; // = form(UmbrellaProjectsSearchForm.class); 
-//	private final /*static*/ Form<UmbrellaProject> projectForm; // = form(UmbrellaProject.class);
-	private final /*static*/ Form<QueryFieldsForm> updateForm; // = form(QueryFieldsForm.class);
 	final static List<String> authorizedUpdateFields = Arrays.asList("keep");
+
+	private final Form<UmbrellaProjectsSearchForm> searchForm; 
+	private final Form<QueryFieldsForm>            updateForm;
 	
+//	@Inject
+//	public UmbrellaProjects(NGLContext ctx) {
+//		super(ctx,InstanceConstants.UMBRELLA_PROJECT_COLL_NAME, UmbrellaProject.class);		
+//		searchForm = ctx.form(UmbrellaProjectsSearchForm.class); 
+////		projectForm = ctx.form(UmbrellaProject.class);
+//		updateForm = ctx.form(QueryFieldsForm.class);
+//	}
+
 	@Inject
-	public UmbrellaProjects(NGLContext ctx) {
-		super(ctx,InstanceConstants.UMBRELLA_PROJECT_COLL_NAME, UmbrellaProject.class);		
-		searchForm = ctx.form(UmbrellaProjectsSearchForm.class); 
-//		projectForm = ctx.form(UmbrellaProject.class);
-		updateForm = ctx.form(QueryFieldsForm.class);
+	public UmbrellaProjects(NGLApplication app) {
+		super(app,InstanceConstants.UMBRELLA_PROJECT_COLL_NAME, UmbrellaProject.class);		
+		searchForm = app.form(UmbrellaProjectsSearchForm.class); 
+		updateForm = app.form(QueryFieldsForm.class);
 	}
 
 	public Result list() {
@@ -119,8 +120,9 @@ public class UmbrellaProjects extends DocumentController<UmbrellaProject> {
 		}
 
 //		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm.errors()); 
-		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm); 
-		ctxVal.setCreationMode();
+//		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm); 
+//		ctxVal.setCreationMode();
+		ContextValidation ctxVal = ContextValidation.createCreationContext(getCurrentUser(), filledForm); 
 		projectInput.validate(ctxVal);
 		if (!ctxVal.hasErrors()) {
 			projectInput = saveObject(projectInput);
@@ -148,8 +150,9 @@ public class UmbrellaProjects extends DocumentController<UmbrellaProject> {
 					logger.error("traceInformation is null !!");
 				}
 //				ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm.errors()); 	
-				ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm); 	
-				ctxVal.setUpdateMode();
+//				ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm); 	
+//				ctxVal.setUpdateMode();
+				ContextValidation ctxVal = ContextValidation.createUpdateContext(getCurrentUser(), filledForm);
 				projectInput.validate(ctxVal);
 				if (!ctxVal.hasErrors()) {
 					updateObject(projectInput);
@@ -164,8 +167,9 @@ public class UmbrellaProjects extends DocumentController<UmbrellaProject> {
 		} else {
 			// warning no validation !!!
 //			ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm.errors()); 	
-			ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm); 	
-			ctxVal.setUpdateMode();
+//			ValidationContext ctxVal = new ContextValidation(getCurrentUser(), filledForm); 	
+//			ctxVal.setUpdateMode();
+			ContextValidation ctxVal = ContextValidation.createUpdateContext(getCurrentUser(), filledForm);
 			validateAuthorizedUpdateFields(ctxVal, queryFieldsForm.fields, authorizedUpdateFields);
 			validateIfFieldsArePresentInForm(ctxVal, queryFieldsForm.fields, filledForm);
 			// if(!filledForm.hasErrors()){

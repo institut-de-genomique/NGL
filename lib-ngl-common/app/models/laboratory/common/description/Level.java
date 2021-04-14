@@ -1,23 +1,48 @@
 package models.laboratory.common.description;
 
-import static fr.cea.ig.lfw.utils.Hashing.hash;
 import static fr.cea.ig.lfw.utils.Equality.objectEquals;
 import static fr.cea.ig.lfw.utils.Equality.typedEquals;
+import static fr.cea.ig.lfw.utils.Hashing.hash;
 
+import java.util.function.Supplier;
+
+import fr.cea.ig.ngl.utils.SpringSupplier;
 import models.laboratory.common.description.dao.LevelDAO;
 import models.utils.Model;
-import models.utils.dao.AbstractDAO;
 
-public class Level extends Model<Level> {
+/**
+ * Defines the object type for which a property definition is valid.
+ * This is possibly a duplicate of {@link models.laboratory.common.description.ObjectType} depending on the
+ * object types that define the properties attribute.
+ *  
+ * @author vrd
+ *
+ */
+public class Level extends Model {
 	
-//	public static Model.Finder<Level> find = new Model.Finder<Level>(LevelDAO.class.getName()); 
-	public static final Finder<Level,LevelDAO> find = new Finder<>(LevelDAO.class); 
+	/**
+	 * Standard access point to DAO.
+	 */
+	public static final Supplier<LevelDAO> find = new SpringSupplier<>(LevelDAO.class); 
 	
-	//not used ContentIn, ContentOut, ContainerSupportIn, ContainerSupportOut
+	// not used ContentIn, ContentOut, ContainerSupportIn, ContainerSupportOut
 	public enum CODE {
-		Container, 
-		ContainerIn, 
-		ContainerOut, 
+		
+		/**
+		 * Container.
+		 */
+		Container,
+		
+		/**
+		 * Container input used.
+		 */
+		ContainerIn,
+		
+		/**
+		 * Container output used.
+		 */
+		ContainerOut,
+		
 		Content, 
 		ContainerSupport, 
 		Experiment, 
@@ -39,46 +64,21 @@ public class Level extends Model<Level> {
 			
 	public String name;
 	
-	public Level() {
-		super(LevelDAO.class.getName());
-	}
+	// Serialization constructor
+	public Level() {}
 	
-	// TODO: fix doc generation error (CODE -> Level.CODE) 
 	public Level(Level.CODE code) {
-		super(LevelDAO.class.getName());
 		this.code = code.name();
 		this.name = code.name();	
 	}
-
-	@Override
-	protected Class<? extends AbstractDAO<Level>> daoClass() {
-		return LevelDAO.class;
-	}	
-
+	
 	@Override
 	public int hashCode() {
-//		final int prime = 31;
-//		int result = super.hashCode();
-//		result = prime * result + ((name == null) ? 0 : name.hashCode());
-//		return result;
 		return hash(super.hashCode(),name);
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-//		if (this == obj)
-//			return true;
-//		if (!super.equals(obj))
-//			return false;
-//		if (getClass() != obj.getClass())
-//			return false;
-//		Level other = (Level) obj;
-//		if (name == null) {
-//			if (other.name != null)
-//				return false;
-//		} else if (!name.equals(other.name))
-//			return false;
-//		return true;
 		return typedEquals(Level.class, this, obj,
 				           (a,b) -> super.equals(obj) && objectEquals(a.name,b.name));
 	}

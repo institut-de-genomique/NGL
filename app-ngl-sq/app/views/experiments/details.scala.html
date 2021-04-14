@@ -1,10 +1,11 @@
-@this(headerSection: views.html.experiments.partials.headerSection)
+@this(headerSection: views.html.experiments.partials.headerSection, ctx : fr.cea.ig.ngl.NGLApplication)
 
 @(currentUser:java.lang.String)
 
 @import views.html.helper._
 @import views.html.experiments.partials._
 
+@isCNSInstitute  = @{ "CNS" == ctx.nglConfig().getInstitute() }
 
 <div ng-form name="allForm" class="row">
 <div class="col-md-12 col-lg-12">
@@ -21,7 +22,7 @@
 <div class="row break">
 	<div ng-include="experimentTypeTemplate"></div>
 </div>
-@reagentsSection()
+@reagentsSection(isCNSInstitute)
 @commentSection(currentUser)
 @finalValuationModal()
 @finalResolutionModal()

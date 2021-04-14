@@ -1,92 +1,118 @@
 @this()
 @()
-
 @import views.html.helper._
+
+@** FDS 23/11/2020 remise en forme de l'ordre des attributs...
+                   NGL-3152 ajout des titles manquants sur bt-input => va sur 'icone d'ouverture des textarea => messages spécifiques ajoutés 
+                   ajout des autres titles manquants  title=placehoder  **@
+
 @form() = {
 	@columnSearchForm{			
 		@formGroup{
-			<div class="form-control" bt-select ng-model="searchService.form.projectCodes" multiple="true" textarea="true" filter="true" placeholder='@Messages("search.placeholder.projects")' bt-options="project.code as project|formatProjectListLabel  for project in searchService.lists.getProjects()" ng-change="searchService.resetSampleCodes()"></div>
+			<div class="form-control" bt-select placeholder='@Messages("search.placeholder.projects")' title='@Messages("search.placeholder.projects")'
+			     multiple="true" textarea="true" filter="true"
+			     ng-model="searchService.form.projectCodes" 
+			     bt-options="project.code as project|formatProjectListLabel  for project in searchService.lists.getProjects()"
+			     ng-change="searchService.resetSampleCodes()">
+			</div>
 		}
 		
 		@formGroup{
-			<input class="form-control" type="text" ng-model="searchService.form.referenceCollabRegex" placeholder='@Messages("samples.placeholder.referenceCollabRegex")'>
-		}	
-		
+			<bt-input class="form-control" placeholder='@Messages("samples.placeholder.referenceCollabRegex")' title='@Messages("samples.title.containerRegexArea")'
+				input-ng-model="searchService.form.referenceCollabRegex"
+				textarea-ng-model="searchService.form.referenceCollabs">
+			</bt-input>
+		}
 		@formGroup{
-			<div class="form-control" bt-select ng-model="searchService.form.existingProcessTypeCode" placeholder="@Messages("samples.placeholder.existingProcessTypeCode")" 
-				bt-options="p.code as p.name for p in searchService.lists.getProcessTypes()" ng-change="searchService.changeExistingProcessType()">
+			<div class="form-control" bt-select placeholder="@Messages("samples.placeholder.existingProcessTypeCode")" title='@Messages("samples.placeholder.existingProcessTypeCode")'
+			     ng-model="searchService.form.existingProcessTypeCode"
+				 bt-options="p.code as p.name for p in searchService.lists.getProcessTypes()" 
+				 ng-change="searchService.changeExistingProcessType()">
 			</div>
 		}	
-		
-		
 	}
 	@columnSearchForm{
 		@formGroup{
-			<div class="form-control" bt-select ng-model="searchService.form.codes" multiple="true" textarea="true" filter="true" placeholder='@Messages("search.placeholder.samples")' bt-options="sample.code as sample.code for sample in searchService.lists.getSamples()" ng-focus="searchService.refreshSamples()"></div>			
-		}
-		
-		@formGroup{
-			<input class="form-control" type="text" ng-model="searchService.form.taxonCode" placeholder='@Messages("samples.placeholder.taxonCode")' title='@Messages("samples.placeholder.taxonCode")'>
-					
-		}	
-		
-		@formGroup{
-			<div class="form-control" bt-select ng-model="searchService.form.notExistingProcessTypeCode" placeholder="@Messages("samples.placeholder.notExistingProcessTypeCode")" 
-				bt-options="p.code as p.name for p in searchService.lists.getProcessTypes()">
+			<div class="form-control" bt-select placeholder='@Messages("search.placeholder.samples")' title='@Messages("search.placeholder.samples")'
+			     multiple="true" textarea="true" filter="true"
+			     ng-model="searchService.form.codes" 
+			     bt-options="sample.code as sample.code for sample in searchService.lists.getSamples()" 
+			     ng-focus="searchService.refreshSamples()">
 			</div>
 		}
 		
+		@formGroup{
+			<input class="form-control" type="text" placeholder='@Messages("samples.placeholder.taxonCode")' title='@Messages("samples.placeholder.taxonCode")'
+			       ng-model="searchService.form.taxonCode" >
+		}	
 		
+		@formGroup{
+			<div class="form-control" bt-select placeholder='@Messages("samples.placeholder.notExistingProcessTypeCode")' title='@Messages("samples.placeholder.notExistingProcessTypeCode")'
+			     ng-model="searchService.form.notExistingProcessTypeCode" 
+				 bt-options="p.code as p.name for p in searchService.lists.getProcessTypes()">
+			</div>
+		}
 	}
 	
 	@columnSearchForm{		
 		
 		@formGroup{
-			<input class="form-control" type="text" ng-model="searchService.form.fromDate" placeholder='@Messages("samples.placeholder.fromDate")' title='@Messages("samples.placeholder.fromDate")'>							
+			<input class="form-control" type="text" placeholder='@Messages("samples.placeholder.fromDate")' title='@Messages("samples.placeholder.fromDate")'
+			       ng-model="searchService.form.fromDate" >	
 		}
-		
+	
 		@formGroup{
-			<input class="form-control" type="text" ng-model="searchService.form.ncbiScientificNameRegex" placeholder='@Messages("samples.placeholder.ncbiScientificNameRegex")' title='@Messages("samples.placeholder.ncbiScientificNameRegex")'>
-					
+			<input class="form-control" type="text" placeholder='@Messages("samples.placeholder.ncbiScientificNameRegex")' title='@Messages("samples.placeholder.ncbiScientificNameRegex")'
+			       ng-model="searchService.form.ncbiScientificNameRegex" >		
 		}	
 		
 		@formGroup{
-			<div class="form-control" bt-select ng-model="searchService.form.existingTransformationTypeCode" placeholder="@Messages("samples.placeholder.existingTransformationTypeCode")" 
-				bt-options="expType.code as expType.name for expType in searchService.lists.get('transformation')">
+			<div class="form-control" bt-select placeholder='@Messages("samples.placeholder.existingTransformationTypeCode")' title='@Messages("samples.placeholder.existingTransformationTypeCode")' 
+			     ng-model="searchService.form.existingTransformationTypeCode"
+				 bt-options="expType.code as expType.name for expType in searchService.lists.get('transformation')">
 			</div>
 		}	
-	
-		
 	}
 	@columnSearchForm{	
 		@formGroup{
-			<input class="form-control" type="text" ng-model="searchService.form.toDate" placeholder='@Messages("samples.placeholder.toDate")' title='@Messages("samples.placeholder.toDate")'>
-					
+			<input class="form-control" type="text" placeholder='@Messages("samples.placeholder.toDate")' title='@Messages("samples.placeholder.toDate")'
+			       ng-model="searchService.form.toDate" >
 		}	
 		
 		@formGroup{
-			<div class='form-control' bt-select ng-model='searchService.form.typeCodes' multiple='true' placeholder='@Messages("samples.placeholder.typeCodes")' bt-options='v.code as v.name for v in searchService.lists.getSampleTypes()'></div>
+			<div class='form-control' bt-select placeholder='@Messages("samples.placeholder.typeCodes")' title='@Messages("samples.placeholder.typeCodes")'
+			     multiple='true'  
+			     ng-model='searchService.form.typeCodes' 
+			     bt-options='v.code as v.name for v in searchService.lists.getSampleTypes()'>
+			</div>
 		}
 		
 		@formGroup{
-			<div class="form-control" bt-select ng-model="searchService.form.notExistingTransformationTypeCode" placeholder="@Messages("samples.placeholder.notExistingTransformationTypeCode")" 
-				bt-options="expType.code as expType.name for expType in searchService.lists.get('transformation')">
+			<div class="form-control" bt-select placeholder='@Messages("samples.placeholder.notExistingTransformationTypeCode")' title='@Messages("samples.placeholder.notExistingTransformationTypeCode")' 
+			     ng-model="searchService.form.notExistingTransformationTypeCode" 
+				 bt-options="expType.code as expType.name for expType in searchService.lists.get('transformation')">
 			</div>
 		}	
 		
 	}
 	@columnSearchForm{
 		@formGroup{
-			<input class="form-control" type="text" ng-model="searchService.form.createUser" typeahead="user.name as user.name for user in searchService.lists.getUsers() | filter:$viewValue | limitTo:20" placeholder='@Messages("samples.placeholder.createUser")' title='@Messages("samples.placeholder.createUser")'>	
+			<input class="form-control" type="text" placeholder='@Messages("samples.placeholder.createUser")' title='@Messages("samples.placeholder.createUser")'
+			       ng-model="searchService.form.createUser" 
+			       typeahead="user.name as user.name for user in searchService.lists.getUsers() | filter:$viewValue | limitTo:20" >
 		}	
-		
 	}
-			
+
 }
 
 @buttons() = {
 	@formGroup{
-		<div class="form-control" auto-select bt-select ng-model="searchService.reportingConfigurationCode" ng-change="searchService.updateColumn()" placeholder="@Messages("search.placeholder.reporting.configuration")" bt-options="valid.code as valid.name for valid in searchService.lists.get('reportConfigs')" ng-if="searchService.lists.get('reportConfigs').length > 0"></div>
+		<div class="form-control" bt-select auto-select placeholder='@Messages("search.placeholder.reporting.configuration")' title='@Messages("search.placeholder.reporting.configuration")'
+		     ng-model="searchService.reportingConfigurationCode" 
+		     ng-change="searchService.updateColumn()" 
+		     bt-options="valid.code as valid.name for valid in searchService.lists.get('reportConfigs')" 
+		     ng-if="searchService.lists.get('reportConfigs').length > 0">
+		</div>
 	}	
 }
 <!-- @searchForm(form)()("searchService.datatable") -->
@@ -98,7 +124,7 @@
 	   	<li class="active"><a href="#" data-target="#filters" data-toggle="tab">@Messages("search.tab.filters")</a></li>
 	   	<li ng-if="searchService.getAddFiltersToForm().length > 0"><a href="#" data-target="#addfilters" data-toggle="tab">@Messages("search.tab.addfilters")</a></li>
 	   	<li ng-if="searchService.getAddColumnsToForm().length > 0"><a href="#" data-target="#addcolumns" data-toggle="tab">@Messages("search.tab.addcolumns")</a></li>       
-	   	<li><a href="#" data-target="#nativeQuery" data-toggle="tab">Experimental search mode</a></li>       
+	   	<li><a href="#" data-target="#nativeQuery" data-toggle="tab">@Messages("search.tab.experimental")</a></li>       
 	   	
 	   	</ul>
 			
@@ -159,14 +185,14 @@
 			<div class="col-md-2 col-lg-2" ng-repeat="columns in searchService.getAddColumnsToForm()">
 			  		<div class="checkbox" ng-repeat="column in columns | filter:{header:regexColumn}">
 				    <label>
-				      <input type="checkbox" ng-model="column.select"> {{column.header}}
+				      <input type="checkbox" ng-model="column.select"> {{column.groupHeader!=null?column.groupHeader:column.header}}
 				    </label>
 				  </div>			
 			 </div>
 			 @columnSearchForm{
 				@formGroup{
 				<div class="btn-toolbar">
-					<button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="searchService.addColumnsToDatatable()" class="btn btn-primary" >
+					<button type="submit" title='@Messages("button.add.columns")' data-toggle="tooltip" ng-click="searchService.addColumnsToDatatable()" class="btn btn-primary" >
 						<i class="fa fa-plus"></i>
 					</button>
 					<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="searchService.resetDatatableColumns()"  class="btn btn-default">

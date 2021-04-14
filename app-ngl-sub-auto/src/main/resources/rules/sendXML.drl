@@ -3,8 +3,38 @@ package birds
 
 import java.util.Date;
 import java.text.SimpleDateFormat;
+import fr.genoscope.lis.devsi.birds.api.exception.JSONDeviceException;
 
-rule "Define variable lineParmeter for sendXML specification"
+rule "select resources from nglsub for sendXML"
+	@BirdsRule ( selectionRule )
+	salience 200
+	dialect 'java'
+	no-loop
+	when
+		$input : InputSpecificationElement(name=="subToSend", treatmentSpecification.name=="sendXML", project.name == "SRA")
+		$resourcesReferential : ResourcesReferential(name=="nglSubRef") 
+		$device : JSONDevice() from $resourcesReferential.referentialDevice
+		$rps : ResourcePropertiesSet(initialized==false, inputSpecificationElement==$input, resourcesReferential==$resourcesReferential)
+		$groupJob : Job( treatmentSpecification.specificationGroup == true)
+	then
+		Logger log = Logger.getLogger("ngl.sub.rules");
+		$rps.initialize();
+		JobResource groupJobResource = $groupJob.getUniqueJobResource("subData");
+		String submissionCode = groupJobResource.getProperty("code");
+		Set<ResourceProperties> resourceProperties = new HashSet<ResourceProperties>();
+		
+		Set<ResourceProperties> resourcePropertiesSet = $device.httpGetJSON(ProjectProperties.getProperty("server")+"/api/sra/submissions?stateCode=SUB-SMD-IW", "bot");
+		for(ResourceProperties rp : resourcePropertiesSet){
+			if(rp.getProperty("code").equals(submissionCode)){
+				resourceProperties.add(rp);
+			}
+		}
+		log.debug("size resources "+resourcePropertiesSet.size());
+		$rps.addResourcePropertiesSet(resourceProperties);
+		modify($rps){};
+end
+
+rule "Define variable lineParameter for sendXML specification"
 	@BirdsRule(fsRule)
 	dialect 'java'
 	salience 300
@@ -20,12 +50,31 @@ rule "Define variable lineParmeter for sendXML specification"
        updateParameterXML("xmlSamples",$job, "subToSend");
        updateParameterXML("xmlExperiments",$job, "subToSend");
        updateParameterXML("xmlRuns",$job, "subToSend");
-       $job.setParameterValue("listAC",$job.getParameterValue("listAC").getValue().replace("%submissionCode%",$job.getUniqueJobResource("subToSend").getProperty("code")));
-       SimpleDateFormat dt = new SimpleDateFormat("yyyyMMddhhmm");
-       String dateSubmission = dt.format(new Date());
-       $job.setParameterValue("listAC",$job.getParameterValue("listAC").getValue().replace("%submissionDate%",dateSubmission));
+       $job.setParameterValue("listAC",$job.getParameterValue("listAC").getValue().replace("%ebiResult%",$job.getUniqueJobResource("subToSend").getProperty("ebiResult")));
+       
+       //$job.setParameterValue("listAC",$job.getParameterValue("listAC").getValue().replace("%submissionCode%",$job.getUniqueJobResource("subToSend").getProperty("code")));
+       //SimpleDateFormat dt = new SimpleDateFormat("yyyyMMddhhmm");
+       //String dateSubmission = dt.format(new Date());
+       //$job.setParameterValue("listAC",$job.getParameterValue("listAC").getValue().replace("%submissionDate%",dateSubmission));
+       log.debug("Get parameter optionCD "+$job.getParameterValue("OptionCD"));
+       log.debug("Get submissionDirectory "+$job.getUniqueJobResource("subToSend").getProperty("submissionDirectory"));
        $job.setParameterValue("OptionCD",$job.getParameterValue("OptionCD").getValue().replace("%submissionDirectory%",$job.getUniqueJobResource("subToSend").getProperty("submissionDirectory")));
 	
+end
+
+rule "Set submission to SUB-SMD-IP "
+@BirdsRule( ExecutionService )
+	dialect 'java'
+	salience 500
+	no-loop
+	when
+		$executionService : ExecutionService( status == ExecutionService.PRE_JOB_EXECUTION_STATUS)
+		$job : Job( treatmentSpecification.specificationGroup == false,  treatmentSpecification.name != null , treatmentSpecification.name == "sendXML")
+	then
+		JobResource jobResource = $job.getUniqueJobResource("subToSend");
+		String codeSubmission = jobResource.getProperty("code");
+		JSONDevice jsonDevice = new JSONDevice();
+		jsonDevice.httpPut(ProjectProperties.getProperty("server")+"/sra/submissions/"+codeSubmission+"/state", "{\"code\":\"SUB-SMD-IP\"}", "bot");
 end
 
 rule "POST DONE EXECUTION of sendXML : File AC results operation"
@@ -37,32 +86,52 @@ rule "POST DONE EXECUTION of sendXML : File AC results operation"
 		$job : Job( treatmentSpecification!=null, treatmentSpecification.name == "sendXML", treatmentSpecification.project.name == "SRA", executionState == Job.DONE_STATUS )
 	then
 		Logger log = Logger.getLogger("ngl.sub.rules");
-		//Call service treatment AC files results 
 		JobResource jobResource = $job.getUniqueJobResource("subToSend");
 		String codeSubmission = jobResource.getProperty("code");
-		String studyCode = jobResource.getProperty("studyCode");
-		String sampleCodes = jobResource.getProperty("sampleCodes");
-		String experimentCodes = jobResource.getProperty("experimentCodes");
-		String runCodes = jobResource.getProperty("runCodes");
-		String creationUser = jobResource.getProperty("creationUser");
-		String pathAC = jobResource.getProperty("submissionDirectory")+File.separator+$job.getParameterValue("listAC").getValue();
+		//String pathAC = jobResource.getProperty("submissionDirectory")+File.separator+$job.getParameterValue("listAC").getValue();
 		//File fileAC = new File(pathAC);
-		log.debug("path AC="+pathAC);
-		log.debug("Call treatmentFileSubmission with "+codeSubmission+" studyCode="+studyCode+" sampleCodes="+sampleCodes+" experimentCodes="+experimentCodes+" runCodes="+runCodes+" creationUser="+creationUser);
-		boolean ebiSuccess = false;
-		try{
-			ebiSuccess = SubmissionServicesFactory.getInstance().treatmentFileSubmission(pathAC, codeSubmission, studyCode, sampleCodes, experimentCodes, runCodes, creationUser);
-		}catch(Exception e){
-	    	$job.setExecutionState(Job.ERROR_STATUS);
-	    	log.debug("Exception "+e.getMessage());
-	    	$job.setProperty("Exception",e.getMessage());
-	    }
+		//log.debug("path AC="+pathAC);
+		//Update submission ebiResult
 		JSONDevice jsonDevice = new JSONDevice();
-		if(ebiSuccess){
-			jsonDevice.httpPut(ProjectProperties.getProperty("server")+"/sra/submissions/"+codeSubmission+"/state", "{\"code\":\"F-SUB\"}", "bot");
-		}else{
-			jsonDevice.httpPut(ProjectProperties.getProperty("server")+"/sra/submissions/"+codeSubmission+"/state", "{\"code\":\"FE-SUB\"}", "bot");
-			$job.setExecutionState(Job.ERROR_STATUS);
+		String JSONRawData = jsonDevice.httpGet(ProjectProperties.getProperty("server")+"/api/sra/submissions/"+codeSubmission,"bot");
+		log.debug("Result JSON RawData"+JSONRawData);
+		String JSONRawDataModify = jsonDevice.modifyJSON(JSONRawData, "ebiResult", $job.getParameterValue("listAC").getValue());
+		log.debug("Result JSON JSONRawDataModify"+JSONRawDataModify);
+		String jsonResult = jsonDevice.httpPut(ProjectProperties.getProperty("server")+"/sra/submissions/"+codeSubmission,JSONRawDataModify, "bot");
+		log.debug("Result "+jsonResult);\
+		try{
+			jsonDevice.httpPut(ProjectProperties.getProperty("server")+"/sra/submissions/"+codeSubmission+"/state", "{\"code\":\"SUB-SMD-F\"}", "bot");
+		}catch(JSONDeviceException e){
+			log.debug("Bad request "+e.getMessage());
 		}
+end
+
+rule "POST ERROR EXECUTION of sendXML"
+	@BirdsRule( ExecutionService )
+	dialect 'java'
+	salience 200
+	when
+		$executionService : ExecutionService( status == ExecutionService.POST_JOB_EXECUTION_STATUS)
+		$job : Job( treatmentSpecification!=null, treatmentSpecification.name == "sendXML", treatmentSpecification.project.name == "SRA", executionState == Job.ERROR_STATUS )
+	then
+		Logger log = Logger.getLogger("ngl.sub.rules");
+		JobResource jobResource = $job.getUniqueJobResource("subToSend");
+		String codeSubmission = jobResource.getProperty("code");
+		
+		JSONDevice jsonDevice = new JSONDevice();
+		jsonDevice.httpPut(ProjectProperties.getProperty("server")+"/sra/submissions/"+codeSubmission+"/state", "{\"code\":\"SUB-SMD-FE\"}", "bot");
+		
+		//Send mail error
+		String errorMessage = "Error during executing job for sending meta data : "+codeSubmission+".\n"+
+			"Command line "+$job.getUnixCommand()+"\n"+
+			"Check outputFile and log \n"+
+			"STDOUT "+$job.getProperty(Job.STDOUT)+"\n"+
+			"STDERR "+$job.getProperty(Job.STDERR)+"\n"+
+			"SCHEDULER STDOUT "+$job.getProperty(JobScheduler.JOB_SCHEDULER_STD_OUTPUT_PATH+JobScheduler.JOB_SCHEDULER_STD_OUTPUT_FILE)+"\n"+
+			"SCHEDULER STDERR "+$job.getProperty(JobScheduler.JOB_SCHEDULER_STD_ERROR_PATH+JobScheduler.JOB_SCHEDULER_STD_ERROR_FILE)+"\n"+
+			"Exception "+$job.getProperty("Exception");
+		
+			SubmissionServicesFactory.getInstance().sendMail("william","ERROR Sending Meta Data Submission="+codeSubmission+" JobID="+$job.getId(),errorMessage);
+		
 end
 

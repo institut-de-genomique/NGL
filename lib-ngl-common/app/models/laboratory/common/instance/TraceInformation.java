@@ -2,8 +2,11 @@ package models.laboratory.common.instance;
 
 import java.util.Date;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import play.Logger;
 import validation.ContextValidation;
 import validation.IValidation;
 import validation.utils.ValidationHelper;
@@ -15,6 +18,9 @@ import validation.utils.ValidationHelper;
  * @author mhaquell
  * @author vrd
  */
+// The simpler strategy would be to set the creation and modification at creation time
+// so the code can always rely on creation and modification info. An unmodified object
+// would have the same creation and modification dates.
 public class TraceInformation implements IValidation {
 	
 	/**
@@ -115,7 +121,16 @@ public class TraceInformation implements IValidation {
 		Date date = new Date();
 		forceModificationStamp(user,date);
 	}
-	
+
+	/**
+	 * Set the update information using the the provided user and the current date.
+	 * @param user user name for the update
+	 */
+	public void modificationStamp(String user) {
+		Date date = new Date();
+		forceModificationStamp(user,date);
+	}
+		
 	/**
 	 * Force this trace modification information. 
 	 * @param user modification user
@@ -123,7 +138,7 @@ public class TraceInformation implements IValidation {
 	 */
 	public void forceModificationStamp(String user, Date date) {
 		modifyUser = user;
-		modifyDate = date;			
+		modifyDate = date;	
 	}
 	
 	/**
@@ -134,18 +149,39 @@ public class TraceInformation implements IValidation {
 		forceModificationStamp(user, new Date());
 	}
 	
-	@Override
+	/**
+	 * Validation depends on the context mode ((update or undefined) or other) that will
+	 * require the creation and update info in update or undefined mode and only the
+	 * creation info in other modes.
+	 */
 	public void validate(ContextValidation contextValidation) {
-		//backward compatibility
-		if (contextValidation.isUpdateMode() || (contextValidation.isNotDefined() && contextValidation.getObject("_id") != null)) {
-			ValidationHelper.required(contextValidation, createUser,   "createUser");
-			ValidationHelper.required(contextValidation, creationDate, "creationDate");
-			ValidationHelper.required(contextValidation, modifyUser,   "modifyUser");
-			ValidationHelper.required(contextValidation, modifyDate,   "modifyDate");
-		} else {
-			ValidationHelper.required(contextValidation, createUser,   "createUser");
-			ValidationHelper.required(contextValidation, creationDate, "createDate");
+		ValidationHelper.validateNotEmpty(contextValidation, createUser,   "createUser");
+		ValidationHelper.validateNotEmpty(contextValidation, creationDate, "createDate");
+		boolean copy = false;
+		if (contextValidation.getObject("copy")!= null && (boolean) contextValidation.getObject("copy")) {
+			copy = true;
+		}
+		if ( (contextValidation.isUpdateMode() && ! copy )  || (contextValidation.isNotDefined() && contextValidation.getObject("_id") != null)) {
+			ValidationHelper.validateNotEmpty(contextValidation, modifyUser,   "modifyUser");
+			ValidationHelper.validateNotEmpty(contextValidation, modifyDate,   "modifyDate");
 		}
 	}
-	
+
+	/**
+	 * Update or create a trace information.
+	 * @param traceInformation optional trace information to update
+	 * @param user             user
+	 * @return                 updated object if one was provided otherwise a created object
+	 */
+	public static TraceInformation updateOrCreateTraceInformation(TraceInformation traceInformation, String user) {
+		TraceInformation ti = null;
+		if (traceInformation == null) {
+			ti = new TraceInformation();
+		} else {
+			ti = traceInformation;
+		}
+		ti.setTraceInformation(user);
+		return ti;
+	}
+		
 }

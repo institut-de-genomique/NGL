@@ -15,8 +15,8 @@
 			@if(writePermission){
 			<div class="btn-toolbar pull-right">
 			
-					<div class="btn-group " id="experiment_action" ng-if="getNbAvailableAdditionnalButtons() > 1">
-						<a class="btn btn-default dropdown-toggle" data-toggle="dropdown"> @Messages("experiments.additionnalButtons") 
+					<div class="btn-group " id="experiment_action" ng-if="getNbAvailableAdditionnalButtons() > 1 ">
+						<a class="btn btn-default dropdown-toggle" data-toggle="dropdown"><span ng-bind="getAdditionnalButtonsLabel()"></span>
 							<span class="caret"></span>
 						</a>
 						<ul class="dropdown-menu dropdown-menu-right">
@@ -45,7 +45,7 @@
 				 	
 				 	<div class="btn-group" ng-switch on="isFinishEditMode()" ng-if="isFinishState()">
 				 		<button class="btn btn-default" ng-switch-when="true"  ng-click="cancel()" data-toggle="tooltip" title="@Messages("button.cancel")" ><i class="fa fa-undo"></i></button>
-				 		<button class="btn btn-default" ng-switch-when="false"  ng-click="activeFinishEditMode()" data-toggle="tooltip" title="@Messages("button.edit")" ><i class="fa fa-edit"></i></button>
+				 		<button class="btn btn-default" ng-switch-when="false"  ng-click="activeFinishEditMode()" data-toggle="tooltip" title="@Messages("button.editFinish")" ><i class="fa fa-edit"></i></button>
 				 	</div>		
 				 	
 				 	

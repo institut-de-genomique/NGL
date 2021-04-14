@@ -1,0 +1,147 @@
+@()
+
+<div class="panel panel-default">
+   <div class="panel-body">
+		<div class="row">
+			<div class="col-md-10 col-lg-10">
+				<div class="col-md-6 col-lg-6">
+				<div id="panel_softwareVersion" class="panel panel-default text-center">
+					<div class="panel-heading">
+						<strong>@Messages("runs.treatments.molQualReport.reference") : </strong>
+					</div>
+					<div class="panel-body">
+						{{readset.treatments[treatments.getTreatment().code].default.reference.value}}
+					</div>
+				</div>
+				</div>
+
+				<br />
+				<br />
+
+				<table class="table table-condensed table-hover table-bordered">
+					<thead>
+						<tr>
+							<th>@Messages("runs.treatments.molQualReport.mapRateGe150kbp")</th>
+							<th>@Messages("runs.treatments.molQualReport.effectiveCoverage")</th>
+							<th>@Messages("runs.treatments.molQualReport.moleculeIntegrityNumber")</th>
+							<th>@Messages("runs.treatments.molQualReport.positiveLabelVariance")</th>
+							<th>@Messages("runs.treatments.molQualReport.negativeLabelVariance")</th>
+							<th>@Messages("runs.treatments.molQualReport.siteSd")</th>
+							<th>@Messages("runs.treatments.molQualReport.scalingSd")</th>
+							<th>@Messages("runs.treatments.molQualReport.relativeSd")</th>
+							<th>@Messages("runs.treatments.molQualReport.sMin")</th>
+							<th>@Messages("runs.treatments.molQualReport.basePairsPerPixel")</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>							
+							<td ng-if="treatments.getTreatment().code == 'moleculeQualityReport'">
+								<span ng-if="readset.treatments[treatments.getTreatment().code].default.mapRateGe150kbp">{{readset.treatments[treatments.getTreatment().code].default.mapRateGe150kbp.value | number : 2 | percentage}}</span>
+							</td>
+								
+							<td ng-if="treatments.getTreatment().code == 'moleculeQualityReport'">
+								<span ng-if="readset.treatments[treatments.getTreatment().code].default.effectiveCoverage">{{readset.treatments[treatments.getTreatment().code].default.effectiveCoverage.value | number : 2}}</span>
+							</td>
+			
+							<td ng-if="treatments.getTreatment().code == 'moleculeQualityReport'">
+								<span ng-if="readset.treatments[treatments.getTreatment().code].default.moleculeIntegrityNumber">{{readset.treatments[treatments.getTreatment().code].default.moleculeIntegrityNumber.value | number : 2}}</span>
+							</td>
+			
+							<td ng-if="treatments.getTreatment().code == 'moleculeQualityReport'">
+								<span ng-if="readset.treatments[treatments.getTreatment().code].default.positiveLabelVariance">{{readset.treatments[treatments.getTreatment().code].default.positiveLabelVariance.value | number : 2 | percentage}}</span>
+							</td>
+			
+							<td ng-if="treatments.getTreatment().code == 'moleculeQualityReport'">
+								<span ng-if="readset.treatments[treatments.getTreatment().code].default.negativeLabelVariance">{{readset.treatments[treatments.getTreatment().code].default.negativeLabelVariance.value | number : 2 | percentage}}</span>
+							</td>
+			
+							<td ng-if="treatments.getTreatment().code == 'moleculeQualityReport'">
+								<span ng-if="readset.treatments[treatments.getTreatment().code].default.siteSd">{{readset.treatments[treatments.getTreatment().code].default.siteSd.value | number : 2}}</span>
+							</td>
+			
+							<td ng-if="treatments.getTreatment().code == 'moleculeQualityReport'">
+								<span ng-if="readset.treatments[treatments.getTreatment().code].default.scalingSd">{{readset.treatments[treatments.getTreatment().code].default.scalingSd.value | number : 2}}</span>
+							</td>
+			
+							<td ng-if="treatments.getTreatment().code == 'moleculeQualityReport'">
+								<span ng-if="readset.treatments[treatments.getTreatment().code].default.relativeSd">{{readset.treatments[treatments.getTreatment().code].default.relativeSd.value | number : 2}}</span>
+							</td>
+			
+							<td ng-if="treatments.getTreatment().code == 'moleculeQualityReport'">
+								<span ng-if="readset.treatments[treatments.getTreatment().code].default.sMin">{{ convertValueServices.convertValue(readset.treatments[treatments.getTreatment().code].default.sMin.value, "pb", "Kb") | number : 2 }}</span>
+							</td>
+			
+							<td ng-if="treatments.getTreatment().code == 'moleculeQualityReport'">
+								<span ng-if="readset.treatments[treatments.getTreatment().code].default.basePairsPerPixel">{{readset.treatments[treatments.getTreatment().code].default.basePairsPerPixel.value | number : 2}}</span>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+
+				<br />
+
+				<p><b>MQR de la flowcell :</b></p>
+
+				<table class="table table-condensed table-hover table-bordered">
+					<thead>
+						<tr>							
+							<th>@Messages("runs.treatments.moleculeQualityReport.totalDnaGe20kbp")</th>
+							<th>@Messages("runs.treatments.moleculeQualityReport.n50Ge20kbp")</th>
+							<th>@Messages("runs.treatments.moleculeQualityReport.totalDnaGe150kbp")</th>
+							<th>@Messages("runs.treatments.moleculeQualityReport.n50Ge150kbp")</th>
+							<th>@Messages("runs.treatments.moleculeQualityReport.totalDnaGe150kbpMinSitesGe9")</th>
+							<th>@Messages("runs.treatments.moleculeQualityReport.n50Ge150kbpMinSitesGe9")</th>
+							<th>@Messages("runs.treatments.moleculeQualityReport.enzyme")</th>
+							<th>@Messages("runs.treatments.moleculeQualityReport.enzymeRecognitionSequence")</th>
+							<th>@Messages("runs.treatments.moleculeQualityReport.labelColor")</th>
+							<th>@Messages("runs.treatments.moleculeQualityReport.avgLabelDensityGe150kbp")</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>							
+							<td ng-if="treatments.getTreatment().code == 'moleculeQualityReport'">
+								<span ng-if="readset.treatments[treatments.getTreatment().code].default.totalDnaGe20kbp">{{convertValueServices.convertValue(readset.treatments[treatments.getTreatment().code].default.totalDnaGe20kbp.value, "pb", "Gb") | number : 2}}</span>
+							</td>
+								
+							<td ng-if="treatments.getTreatment().code == 'moleculeQualityReport'">
+								<span ng-if="readset.treatments[treatments.getTreatment().code].default.n50Ge20kbp">{{convertValueServices.convertValue(readset.treatments[treatments.getTreatment().code].default.n50Ge20kbp.value, "pb", "Mb") | number : 2}}</span>
+							</td>
+			
+							<td ng-if="treatments.getTreatment().code == 'moleculeQualityReport'">
+								<span ng-if="readset.treatments[treatments.getTreatment().code].default.totalDnaGe150kbp">{{convertValueServices.convertValue(readset.treatments[treatments.getTreatment().code].default.totalDnaGe150kbp.value, "pb", "Gb") | number : 2}}</span>
+							</td>
+			
+							<td ng-if="treatments.getTreatment().code == 'moleculeQualityReport'">
+								<span ng-if="readset.treatments[treatments.getTreatment().code].default.n50Ge150kbp">{{convertValueServices.convertValue(readset.treatments[treatments.getTreatment().code].default.n50Ge150kbp.value, "pb", "Mb") | number : 2}}</span>
+							</td>
+			
+							<td ng-if="treatments.getTreatment().code == 'moleculeQualityReport'">
+								<span ng-if="readset.treatments[treatments.getTreatment().code].default.totalDnaGe150kbpMinSitesGe9">{{convertValueServices.convertValue(readset.treatments[treatments.getTreatment().code].default.totalDnaGe150kbpMinSitesGe9.value, "pb", "Gb") | number : 2}}</span>
+							</td>
+			
+							<td ng-if="treatments.getTreatment().code == 'moleculeQualityReport'">
+								<span ng-if="readset.treatments[treatments.getTreatment().code].default.n50Ge150kbpMinSitesGe9">{{convertValueServices.convertValue(readset.treatments[treatments.getTreatment().code].default.n50Ge150kbpMinSitesGe9.value, "pb", "Mb") | number : 2}}</span>
+							</td>
+			
+							<td ng-if="treatments.getTreatment().code == 'moleculeQualityReport'">
+								<span ng-if="readset.treatments[treatments.getTreatment().code].default.enzyme">{{readset.treatments[treatments.getTreatment().code].default.enzyme.value}}</span>
+							</td>
+			
+							<td ng-if="treatments.getTreatment().code == 'moleculeQualityReport'">
+								<span ng-if="readset.treatments[treatments.getTreatment().code].default.enzymeRecognitionSequence">{{readset.treatments[treatments.getTreatment().code].default.enzymeRecognitionSequence.value}}</span>
+							</td>
+			
+							<td ng-if="treatments.getTreatment().code == 'moleculeQualityReport'">
+								<span ng-if="readset.treatments[treatments.getTreatment().code].default.labelColor">{{ readset.treatments[treatments.getTreatment().code].default.labelColor.value }}</span>
+							</td>
+			
+							<td ng-if="treatments.getTreatment().code == 'moleculeQualityReport'">
+								<span ng-if="readset.treatments[treatments.getTreatment().code].default.avgLabelDensityGe150kbp">{{readset.treatments[treatments.getTreatment().code].default.avgLabelDensityGe150kbp.value | number: 2}}</span>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>	
+	</div>
+</div>

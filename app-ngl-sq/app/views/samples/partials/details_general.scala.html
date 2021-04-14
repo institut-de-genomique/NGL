@@ -44,7 +44,13 @@
 			}
 			@columnLabelValue(Messages("samples.table.createUser")){	
 				<div class="form-control-static" ng-bind='sample.traceInformation.createUser' />
+				}
+			@columnLabelValue(Messages("samples.table.modifyDate")){	
+				<p  class="form-control-static" ng-bind="sample.traceInformation.modifyDate|date:'@Messages("date.format")'" />
 			}
+			@columnLabelValue(Messages("samples.table.modifyUser")){	
+				<div class="form-control-static" ng-bind='sample.traceInformation.modifyUser' />
+				}
 			@columnLabelValue(Messages("samples.table.importTypeCode")){	
 				<div class="form-control-static" ng-bind="sample.importTypeCode|codes:'type'" />
 			}

@@ -2,11 +2,11 @@ package controllers.balancesheets.tpl;
 
 import javax.inject.Inject;
 
+import controllers.NGLController;
 import fr.cea.ig.authentication.Authenticated;
 import fr.cea.ig.authorization.Authorized;
 import fr.cea.ig.lfw.Historized;
 import fr.cea.ig.ngl.NGLApplication;
-import fr.cea.ig.ngl.NGLController;
 import fr.cea.ig.ngl.support.NGLJavascript;
 import play.mvc.Result;
 import views.html.balancesheets.general;
@@ -47,9 +47,12 @@ public class BalanceSheets extends NGLController
 		return jsRoutes(controllers.balancesheets.tpl.routes.javascript.BalanceSheets.home(),
 						controllers.balancesheets.tpl.routes.javascript.BalanceSheets.year(),
 						controllers.balancesheets.tpl.routes.javascript.BalanceSheets.general(),
+						controllers.balancesheets.api.routes.javascript.BalanceSheets.list(),
+						controllers.balancesheets.api.routes.javascript.BalanceSheets.excelReport(),
 						controllers.readsets.api.routes.javascript.ReadSets.list(),
 						controllers.runs.api.routes.javascript.Runs.list(),
 						controllers.projects.api.routes.javascript.Projects.list(),
+						controllers.sampletypes.api.routes.javascript.SampleTypes.list(),
 						controllers.commons.api.routes.javascript.CommonInfoTypes.list());
 	}
 	

@@ -1,20 +1,19 @@
 package models.laboratory.common.description;
 
+import java.util.function.Supplier;
+
+import fr.cea.ig.ngl.utils.SpringSupplier;
 import models.laboratory.common.description.dao.MeasureCategoryDAO;
-import models.utils.dao.AbstractDAO;
 
-public class MeasureCategory extends AbstractCategory<MeasureCategory> {
+public class MeasureCategory extends AbstractCategory {
 		
-//	public static Finder<MeasureCategory> find = new Finder<MeasureCategory>(MeasureCategoryDAO.class.getName()); 
-	public static final Finder<MeasureCategory,MeasureCategoryDAO> find = new Finder<>(MeasureCategoryDAO.class); 
+	public static final Supplier<MeasureCategoryDAO> find = new SpringSupplier<>(MeasureCategoryDAO.class); 
 	
-	public MeasureCategory() {
-		super(MeasureCategoryDAO.class.getName());
+	// Serialization constructor
+	public MeasureCategory() {}
+	
+	public MeasureCategory(String code, String name) {
+		super(code,name);
 	}
-
-	@Override
-	protected Class<? extends AbstractDAO<MeasureCategory>> daoClass() {
-		return MeasureCategoryDAO.class;
-	}
-
+	
 }

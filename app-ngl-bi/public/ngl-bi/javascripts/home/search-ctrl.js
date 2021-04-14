@@ -95,14 +95,16 @@ angular.module('home').controller('SearchCtrl', ['$scope', '$http','$httpParamSe
 					//$scope.runCodes.concat(result.data.map(function(readSet){return readSet.runCode;}));
 					allData = allData.concat(result.data);
 				});
-				$scope.runCodes = allData.map(function(readSet){return readSet.runCode;}).filter((value, index, self) => self.indexOf(value) === index);
+				$scope.runCodes = allData.map(function(readSet){return readSet.runCode;}).filter(function(value, index, self) { return self.indexOf(value) === index; });
+				if($scope.runCodes.length>0){
+					$scope.runsNoValid.search({codes:$scope.runCodes});
+					$scope.runCodesUrl = $httpParamSerializer({codes:$scope.runCodes});
+				}
 				$scope.runsNoValid.config.spinner.start=false;
-				$scope.runsNoValid.search({codes:$scope.runCodes});
-				$scope.runCodesUrl = $httpParamSerializer({codes:$scope.runCodes});
 		 });
 		
 		/*$http.get(jsRoutes.controllers.readsets.api.ReadSets.list().url,{params:form}).then(function(result){
-			$scope.runCodes =result.data.map(function(readSet){return readSet.runCode;}).filter((value, index, self) => self.indexOf(value) === index);
+			$scope.runCodes =result.data.map(function(readSet){return readSet.runCode;}).filter(function(value, index, self) { return self.indexOf(value) === index; });
 			//var datatableConfigRunsNoValid = datatableConfig;
 			//datatableConfigRunsNoValid.order={by:'sequencingStartDate', reverse:false, mode:'remote'},
 			//$scope.runsNoValid = datatable(datatableConfig);		

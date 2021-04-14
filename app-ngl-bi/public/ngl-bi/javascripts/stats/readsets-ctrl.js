@@ -32,11 +32,11 @@ angular.module('home').controller('StatsChoiceCtrl',['$scope', '$location','$mod
 	//we used jquery to open the modal
 }]);
 
-angular.module('home').controller('ModalChoiceCtrl', function ($scope, $modalInstance) {
+angular.module('home').controller('ModalChoiceCtrl', ['$scope', '$modalInstance', function ($scope, $modalInstance) {
 	$scope.choice = function(value){
 		$modalInstance.close(value);
 	};	 
-});
+}]);
 	
 angular.module('home').controller('StatsSearchReadSetsCtrl',['$scope', '$routeParams', 'mainService', 'tabService','readSetsSearchService', 'valuationService','queriesConfigReadSetsService',
                                                               function($scope, $routeParams, mainService, tabService, readSetsSearchService, valuationService, queriesConfigReadSetsService) { 
@@ -65,7 +65,7 @@ angular.module('home').controller('StatsSearchReadSetsCtrl',['$scope', '$routePa
 		tabService.addTabs({label:Messages('stats.page.tab.readsets.config'),href:jsRoutes.controllers.stats.tpl.Stats.home("readsets-config").url});		
 		tabService.addTabs({label:Messages('stats.page.tab.show'),href:jsRoutes.controllers.stats.tpl.Stats.home("readsets-show").url});		
 		
-		tabService.activeTab(0); // desactive le lien !
+		tabService.activeTab(0); // active l'onglet, le met en bleu
 	}
 	
 	$scope.search = function(){
@@ -104,7 +104,7 @@ angular.module('home').controller('StatsConfigReadSetsCtrl',['$scope', 'mainServ
 		tabService.addTabs({label:Messages('stats.page.tab.readsets.select'),href:jsRoutes.controllers.stats.tpl.Stats.home("readsets-search").url});
 		tabService.addTabs({label:Messages('stats.page.tab.readsets.config'),href:jsRoutes.controllers.stats.tpl.Stats.home("readsets-config").url});		
 		tabService.addTabs({label:Messages('stats.page.tab.show'),href:jsRoutes.controllers.stats.tpl.Stats.home("readsets-show").url});		
-		tabService.activeTab(1); // desactive le lien !
+		tabService.activeTab(1); // active l'onglet, le met en bleu
 	}
 	$scope.statsConfigService = statsConfigReadSetsService;
 	$scope.queriesConfigService = queriesConfigReadSetsService;
@@ -125,7 +125,7 @@ angular.module('home').controller('StatsShowReadSetsCtrl',['$scope', '$routePara
 			tabService.addTabs({label:Messages('stats.page.tab.readsets.select'),href:jsRoutes.controllers.stats.tpl.Stats.home("readsets-search").url});
 			tabService.addTabs({label:Messages('stats.page.tab.readsets.config'),href:jsRoutes.controllers.stats.tpl.Stats.home("readsets-config").url});		
 			tabService.addTabs({label:Messages('stats.page.tab.show'),href:jsRoutes.controllers.stats.tpl.Stats.home("readsets-show").url});		
-			tabService.activeTab(2); // desactive le lien !
+			tabService.activeTab(2); // active l'onglet, le met en bleu
 		}else{
 			tabService.addTabs({label:Messages('stats.page.tab.show'),href:jsRoutes.controllers.stats.tpl.Stats.home("readsets-show").url});		
 			tabService.activeTab(0);

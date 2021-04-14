@@ -28,7 +28,7 @@
 			            <tr ng-repeat="y in ['A','B','C','D','E','F','G','H']" class="total">
 			                <td><strong>{{y}}</strong></td>
 			                <td class="plates" ng-repeat="x in [1,2,3,4,5,6,7,8,9,10,11,12]" class="browser">
-			                	    <div ng-bind="plateUtils.getCellPlateData(y, x)"/>    						    					
+			                	    <div list-resize="plateUtils.getCellPlateData(y, x)"  list-resize-min-size='3' vertical/>    						    					
 			                 </td>          
 			            </tr>			          
 			        <tbody>			    
@@ -48,18 +48,18 @@
 						</th>
 						<th>
 							@Messages("experiments.src_dest.source")
-						</th>											
+						</th>
 					</tr>
 					</thead>	
-					<!--  containerSupport et pas container -->			
+					<!--  containerSupport et pas container -->
 					<tr ng-model="containerSupport" ng-repeat="containerSupport in getInputContainerSupports() | orderBy track by $index" >
 						<td>
 							{{containerSupport}}
 						</td>
 						<td>
 							{{$index+1}}
-						</td>									
-					</tr>				
+						</td>
+					</tr>
 				</table>
 			</div>
 		<div class="col-md-4 col-lg-4">
@@ -72,11 +72,9 @@
 						<th>
 							@Messages("experiments.src_dest.dest")
 						</th>
-						<!-- pas necessaire pour 1 seule paque de sortie..
 						<th>
 							@Messages("experiments.src_dest.label")
-						</th>	
-						 -->										
+						</th>
 					</tr>
 					</thead>	
 					<!--  <tr ng-model="container" ng-repeat="container    in getOutputContainerSupports() | orderBy:'locationOnContainerSupport.code' track by $index" >	-->			
@@ -87,12 +85,10 @@
 						<td>
 							{{$index+1}}
 						</td>
-						<!-- pas necessaire pour 1 seule paque de sortie..
 						<td>
 							{{container.experimentProperties.workName.value}}
-						</td>		
-						-->							
-					</tr>				
+						</td>
+					</tr>
 				</table>
 			</div>	
 		</div>

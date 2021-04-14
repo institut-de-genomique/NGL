@@ -134,6 +134,7 @@ angular.module('home').controller('SizingCtrl',['$scope', '$parse', 'atmToGenera
 			        	 "position":4,
 			        	 "extraHeaders":{0:Messages("experiments.inputs")}
 			         },
+			        
 			         {
 			        	 "header":Messages("containers.table.volume") + " (µL)",
 			        	 "property":"inputContainerUsed.volume.value",

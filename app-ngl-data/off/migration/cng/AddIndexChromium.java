@@ -105,8 +105,8 @@ public class AddIndexChromium extends  CommonController {
 		index.shortName = code;
 		index.sequence = seq ;  //Voir plus tard: il y a 4 sequences pour les POOL-INDEX...Chromium
 		index.categoryCode = "POOL-INDEX";
-		index.supplierName = new HashMap<String,String>();
-		index.supplierName.put("10x Genomics", code);
+		index.supplierName = "10x Genomics";
+		index.supplierIndexName = code;
 		index.traceInformation=new TraceInformation("ngl-data");
 		
 		return index;

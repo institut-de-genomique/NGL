@@ -30,12 +30,13 @@ angular.module('home').controller('SearchCtrl',['$scope', '$routeParams', 'datat
 	
 	$scope.reset = function(){
 		$scope.searchService.resetForm();
+		$scope.searchService.resetTextareas();
 	};
 	
 	if(angular.isUndefined(mainService.getHomePage())){
 		mainService.setHomePage('search');
 		tabService.addTabs({label:Messages('analyses.page.tab.search'),href:jsRoutes.controllers.analyses.tpl.Analyses.home("search").url,remove:true});
-		tabService.activeTab(0); // desactive le lien !
+		tabService.activeTab(0); // active l'onglet, le met en bleu
 	}
 	
 	$scope.searchService = analysisSearchService;	
@@ -88,13 +89,14 @@ angular.module('home').controller('SearchValuationCtrl', ['$scope', '$routeParam
 	};
 	
 	$scope.reset = function(){
-		$scope.searchService.reset();
+		$scope.searchService.resetForm();
+		$scope.searchService.resetTextareas();
 	};
 	
 	if(angular.isUndefined(mainService.getHomePage())){
 		mainService.setHomePage('valuation');
 		tabService.addTabs({label:Messages('analyses.page.tab.validate'),href:jsRoutes.controllers.analyses.tpl.Analyses.home("valuation").url,remove:true});
-		tabService.activeTab(0); // desactive le lien !
+		tabService.activeTab(0); // active l'onglet, le met en bleu
 	}
 	
 	$scope.searchService = analysisSearchService;	
@@ -122,7 +124,7 @@ angular.module('home').controller('SearchStateCtrl', ['$scope', '$routeParams', 
 			},			
 			save : {
 				active:Permissions.check("writing")?true:false,
-				url: jsRoutes.controllers.analyses.api.Analyses.stateBatch().url,				
+				url: jsRoutes.controllers.analyses.api.Analyses.updateStateBatch().url,				
 				batch:true,
 				method:'put',
 				value:function(line){return {code:line.code,state:line.state};}				
@@ -144,13 +146,14 @@ angular.module('home').controller('SearchStateCtrl', ['$scope', '$routeParams', 
 	};
 	
 	$scope.reset = function(){
-		$scope.searchService.reset();
+		$scope.searchService.resetForm();
+		$scope.searchService.resetTextareas();
 	};
 	
 	if(angular.isUndefined(mainService.getHomePage())){
 		mainService.setHomePage('state');
 		tabService.addTabs({label:Messages('analyses.page.tab.state'),href:jsRoutes.controllers.analyses.tpl.Analyses.home("state").url,remove:true});
-		tabService.activeTab(0); // desactive le lien !
+		tabService.activeTab(0); // active l'onglet, le met en bleu
 	}
 
 	$scope.searchService = analysisSearchService;	

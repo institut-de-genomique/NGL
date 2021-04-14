@@ -1,0 +1,25 @@
+//created 13/12/2018
+//Rules for validation
+package rules
+
+rule "conc value must have unit in bioanalyzer-migration-profile inputContainer"
+    @nglSQ( validations )
+	dialect "java"
+	salience 940
+	no-loop
+    when
+    	$experiment:Experiment($typeCode:typeCode,$typeCode == "bioanalyzer-migration-profile")
+    	//State($stateCode:code == "IP") /// a faire qq soit etat
+		$atomicTransfert: OneToVoidContainer($inputContainerUseds : inputContainerUseds, $inputContainerUseds.size()!=0)
+		$inputContainerUsed: InputContainerUsed($experimentProperties: experimentProperties, $experimentProperties != null) from $inputContainerUseds 
+		// les propriétés sont des maps, il faut un get() pour les récuperer !!!,    tester not null ci-dessus avant de faire un get !!!
+		$concentration1 : PropertySingleValue() from $experimentProperties.get("concentration1")  ///  PropertyValue() ne marche pas dans ce cas
+		//note: inutile de tester le cas inverse (unit =! null et value == null) car ce cas n'est pas sauvegardé
+    	eval($concentration1.value != null && $concentration1.unit == null)
+    	
+    	$contextValidation:ContextValidation()
+    then
+    	Logger.debug("conc value and unit in bioanalyzer-migration-profile inputContainer");
+    	// voir fichier ngl-common/conf/messages pour le libellé des erreurs 
+   		$contextValidation.addErrors("bioanalyzer-migration-profile","error.validationexp.mandatoryconcentrationunit",$inputContainerUsed.code);
+	end

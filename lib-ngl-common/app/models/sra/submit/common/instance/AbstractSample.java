@@ -13,12 +13,12 @@ import fr.cea.ig.DBObject;
 
 @JsonTypeInfo(use=Id.NAME, include=As.EXTERNAL_PROPERTY, property="_type", defaultImpl=models.sra.submit.common.instance.Sample.class)
 @JsonSubTypes({
-	@JsonSubTypes.Type(value =  models.sra.submit.common.instance.Sample.class, name = AbstractSample.sampleType),
+	@JsonSubTypes.Type(value =  models.sra.submit.common.instance.Sample        .class, name = AbstractSample.sampleType),
 	@JsonSubTypes.Type(value =  models.sra.submit.common.instance.ExternalSample.class, name = AbstractSample.externalSampleType),
 })
-public abstract class AbstractSample extends DBObject implements IValidation {
+public abstract class AbstractSample extends DBObject implements IValidation, IStateReference {
 
-	public static final String sampleType = "Sample";
+	public static final String sampleType         = "Sample";
 	public static final String externalSampleType = "ExternalSample";
 	
 	public String _type;
@@ -30,11 +30,25 @@ public abstract class AbstractSample extends DBObject implements IValidation {
 	public TraceInformation traceInformation = new TraceInformation();
 	
 	public AbstractSample(String _type) {
-//		super();
 		this._type=_type;
 	} 
-	
-	
 
+
+	@Override
+	public State getState() {
+		return state;
+	}
+
+	@Override
+	public void setState(State state) {
+		this.state = state;
+	}
+
+	
+	@Override
+	public TraceInformation getTraceInformation() {
+		return traceInformation;
+	}
+	
 	
 }

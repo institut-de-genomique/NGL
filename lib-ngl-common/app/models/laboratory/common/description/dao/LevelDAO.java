@@ -9,7 +9,7 @@ import models.laboratory.common.description.Level;
 import models.utils.dao.AbstractDAODefault;
 
 @Repository
-public class LevelDAO extends AbstractDAODefault<Level>{
+public class LevelDAO extends AbstractDAODefault<Level> {
 
 	protected LevelDAO() {
 		super("level", Level.class, true);
@@ -25,6 +25,11 @@ public class LevelDAO extends AbstractDAODefault<Level>{
 		
 		BeanPropertyRowMapper<Level> mapper = new BeanPropertyRowMapper<>(Level.class);
 		return jdbcTemplate.query(sql, mapper, id);		
+	}
+	
+	@Override
+	protected List<String> getColumns() {
+		return enumColumns;
 	}
 
 }

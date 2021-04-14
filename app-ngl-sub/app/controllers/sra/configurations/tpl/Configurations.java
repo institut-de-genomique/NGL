@@ -2,18 +2,15 @@ package controllers.sra.configurations.tpl;
 
 import javax.inject.Inject;
 
+import controllers.NGLController;
 import fr.cea.ig.authentication.Authenticated;
 import fr.cea.ig.lfw.Historized;
 import fr.cea.ig.ngl.NGLApplication;
-import fr.cea.ig.ngl.NGLController;
 import fr.cea.ig.ngl.support.NGLJavascript;
 import play.mvc.Result;
 import views.html.configurations.consultation;
 import views.html.configurations.create;
 import views.html.configurations.home;
-
-//import controllers.CommonController;                     // done
-// public class Configurations extends -CommonController { // done
 
 public class Configurations extends NGLController implements NGLJavascript  { // extends NGLBaseController {
 	
@@ -51,10 +48,6 @@ public class Configurations extends NGLController implements NGLJavascript  { //
 		return ok(consultation.render());
 	}	
 	
-/*	public static Result details() {
-		return ok(details.render());
-	}	
-*/	
 
 	// No annotation for tpl 
 	public Result javascriptRoutes() {
@@ -70,27 +63,5 @@ public class Configurations extends NGLController implements NGLJavascript  { //
 						controllers.sra.configurations.api.routes.javascript.Configurations.update());
 	}
 	
-	/*
-	public Result javascriptRoutes() {
-		response().setContentType("text/javascript");
-		return ok(  	    		
-				//Routes.javascriptRouter("jsRoutes",
-				JavaScriptReverseRouter.create("jsRoutes",
-						// Routes
-						controllers.sra.configurations.tpl.routes.javascript.Configurations.home(),
-						controllers.projects.api.routes.javascript.Projects.list(),
-						controllers.commons.api.routes.javascript.States.list(),
-						controllers.sra.configurations.api.routes.javascript.Configurations.save(),
-						controllers.sra.api.routes.javascript.Variables.get(),
-						controllers.sra.api.routes.javascript.Variables.list(),
-						controllers.sra.configurations.api.routes.javascript.Configurations.get(),
-						controllers.sra.configurations.tpl.routes.javascript.Configurations.get(),
-						controllers.sra.configurations.api.routes.javascript.Configurations.list(),
-						controllers.sra.configurations.api.routes.javascript.Configurations.update()	
-						)
-				);
-	}
-	*/
-
   	 
 }

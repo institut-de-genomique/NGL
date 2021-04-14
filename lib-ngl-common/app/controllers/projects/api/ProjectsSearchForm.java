@@ -1,11 +1,15 @@
 package controllers.projects.api;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.mongojack.DBQuery;
 import org.mongojack.DBQuery.Query;
@@ -14,7 +18,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import controllers.DBObjectListForm;
 import controllers.ListObject;
+import controllers.NGLControllerHelper;
+import models.laboratory.common.description.Level;
 import models.laboratory.project.instance.Project;
+import play.Logger;
 
 
 public class ProjectsSearchForm extends DBObjectListForm<Project> {
@@ -31,11 +38,17 @@ public class ProjectsSearchForm extends DBObjectListForm<Project> {
 	
 	public Boolean isFgGroup;
 	
+	public Date fromDate;
+	
+	public Date toDate;
+
 	public List<String> unixGroups;
 	
+	public Map<String, List<String>> properties = new HashMap<>();
 	
 	public Set<String> existingFields, notExistingFields;
 
+	public Map<String, Boolean> mapExistingFields;
 
 	@Override
 	@JsonIgnore
@@ -50,14 +63,14 @@ public class ProjectsSearchForm extends DBObjectListForm<Project> {
 		}
 		
 		if(CollectionUtils.isNotEmpty(this.fgGroups)){
-			queries.add(DBQuery.in("biointhisaticParameters.fgGroup", this.fgGroups));
+			queries.add(DBQuery.in("bioinformaticParameters.fgGroup", this.fgGroups));
 		}
 		
 		if (this.isFgGroup != null) {
 			if(this.isFgGroup){
-				queries.add(DBQuery.exists("biointhisaticParameters.fgGroup"));
+				queries.add(DBQuery.exists("bioinformaticParameters.fgGroup"));
 			} else{
-				queries.add(DBQuery.notExists("biointhisaticParameters.fgGroup"));
+				queries.add(DBQuery.notExists("bioinformaticParameters.fgGroup"));
 			}
 		}
 		
@@ -67,6 +80,7 @@ public class ProjectsSearchForm extends DBObjectListForm<Project> {
 			queries.add(DBQuery.in("state.code", this.stateCodes));
 		}
 		
+		// EJACOBY AD
 		if (CollectionUtils.isNotEmpty(this.unixGroups)) {
 			queries.add(DBQuery.in("properties.unixGroup.value", this.unixGroups));
 		}
@@ -80,7 +94,19 @@ public class ProjectsSearchForm extends DBObjectListForm<Project> {
 			for(String field : this.existingFields){
 				queries.add(DBQuery.exists(field));
 			}		
+		} 
+		
+		if(null != this.fromDate){
+			queries.add(DBQuery.greaterThanEquals("traceInformation.creationDate", this.fromDate));
 		}
+
+		if(null != this.toDate){
+			queries.add(DBQuery.lessThan("traceInformation.creationDate", (DateUtils.addDays(this.toDate, 1))));
+		}
+
+		queries.addAll(NGLControllerHelper.generateExistsQueriesForFields(this.mapExistingFields));
+		
+		queries.addAll(NGLControllerHelper.generateQueriesForProperties(this.properties, Level.CODE.Project, "properties"));
 		
 		if(queries.size() > 0){
 			query = DBQuery.and(queries.toArray(new Query[queries.size()]));
@@ -88,7 +114,6 @@ public class ProjectsSearchForm extends DBObjectListForm<Project> {
 
 		return query;
 	}
-
 
 	@Override
 	@JsonIgnore

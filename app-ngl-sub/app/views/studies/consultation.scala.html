@@ -1,69 +1,83 @@
 @this()
 @()
 @import views.html.helper._
+@**Definition d'une variable user :**@
+@user            = @{ fr.cea.ig.authentication.Authentication.getUser() }
 
 @formConsultation() = {
 
 	@columnSearchForm{
 		@formGroup{
-			<div class="form-control" bt-select  ng-model="consultationService.form.projCodes" filter="true" multiple="true" placeholder='@Messages("consultation.placeholder.projectCodes")' bt-options="project.code as project|formatProjectListLabel for project in consultationService.lists.getProjects()"></div>	
+			<div class="form-control" bt-select  ng-model="form.projCodes" filter="true" multiple="true" placeholder='@Messages("consultation.placeholder.projectCodes")' bt-options="project.code as project|formatProjectListLabel for project in lists.getProjects()"></div>	
 		}													
 	}
-	@columnSearchForm{
+	@columnSearchForm{	
 		@formGroup{
-			<div class="form-control" bt-select  ng-model="consultationService.form.stateCodes" filter="true" multiple="true" placeholder='@Messages("consultation.placeholder.stateCodes")' bt-options="state.code as state.name for state in consultationService.lists.getStates()"></div>	
-		}													
-	}	
+			<div class="form-control" bt-select ng-model="form.pseudoStateCodes"  filter="true" multiple="true" placeholder='@Messages("consultation.placeholder.pseudoStateCodes")' 
+			                          bt-options="pseudoStates.code as pseudoStates.name for pseudoStates in sraVariables.simplifiedStates|orderBy:'code'"></div>			
+		}	
+	}
 	@columnSearchForm{
 		@formGroup{			
-			<bt-input  class="form-control"  input-ng-model="consultationService.form.codeRegex" textarea-ng-model="consultationService.form.codes" placeholder='@Messages("consultation.placeholder.studyCodes")' ></bt-input>									
+			<bt-input  class="form-control"  input-ng-model="form.codeRegex" textarea-ng-model="form.codes" placeholder='@Messages("consultation.placeholder.studyCodes")' ></bt-input>									
 		}
-	}
-	@columnSearchForm{
-		@formGroup{
-			<bt-input  class="form-control"  input-ng-model="consultationService.form.accessionRegex" textarea-ng-model="consultationService.form.accessions" placeholder='@Messages("consultation.placeholder.studyAccessions")' ></bt-input>									
-		}
-	}
-	@columnSearchForm{
-		@formGroup{
-			<bt-input  class="form-control"  input-ng-model="consultationService.form.externalIdRegex" textarea-ng-model="consultationService.form.accessions" placeholder='@Messages("consultation.placeholder.studyExternalIds")' ></bt-input>									
-		}
-	}
-
-	@columnSearchForm{
 	}
 	
 	@columnSearchForm{
+		@formGroup{
+			<bt-input  class="form-control"  input-ng-model="form.accessionRegex" textarea-ng-model="form.accessions" placeholder='@Messages("consultation.placeholder.studyAccessions")' ></bt-input>									
+		}
 	}
-	
-	
+	@columnSearchForm{
+		@formGroup{			
+			<bt-input  class="form-control"  input-ng-model="form.externalIdRegex" textarea-ng-model="form.externalIds" placeholder='@Messages("consultation.placeholder.studyExternalIds")' ></bt-input>									
+		}
+	}
+@*	@columnSearchForm{
+	}
+	@columnSearchForm{
+	}	
+*@
+		
 	@columnSearchForm{
 		@formGroup{
-		<div class="tab-pane active" id="filters">
-			<form class="well well-small">
-			<div class="row">
-			
-				<div class="btn-toolbar">
-					<button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="consultationService.search()" class="btn btn-primary" >
-						<i class="fa fa-search"></i>
-					</button>
-					<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="consultationService.resetForm()"  class="btn btn-default">
-						<i class="fa fa-undo"></i>
-					</button>						 	
-				</div>
-				
-			</div>		
-		</form>	
-	</div>
+			<div class="tab-pane active" id="filters">
+				<form class="well well-small">
+				<div class="row">
+					<div class="btn-toolbar">
+						<button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="search('@user')" class="btn btn-primary" >
+							<i class="fa fa-search"></i>
+						</button>	
+						<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="reset()"  class="btn btn-default">
+							<i class="fa fa-undo"></i>
+						</button>				 	
+					</div>		
+				</div>		
+			</form>	
+		</div>
 	
 		}													
 	}
+	
+
+	@columnSearchForm{
+	}	
+	@columnSearchForm{
+	}
+	@columnSearchForm{
+	}
+		
 }
 
 
+<div class="row">
+<div class="col-md-12 col-lg-12"  messages="messages"></div>
+</div>
+
+@* XXXXXXXX CONSULTATION STUDY XXXXXXXXXXXXXX *@
 	
 <div class="row"> 
-	<div class="col-md-12 col-lg-12" ultimate-datatable="consultationService.datatable">
+	<div class="col-md-12 col-lg-12" ultimate-datatable="studiesDT">
 		<div dt-form>	
 			<div class="tab-content">
 				<div class="tab-pane active" id="filters">

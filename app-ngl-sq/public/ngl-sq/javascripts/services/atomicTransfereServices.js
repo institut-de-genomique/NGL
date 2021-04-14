@@ -125,6 +125,8 @@ angular.module('atomicTransfereServices', [])
 						projectCodes:container.projectCodes,
 						fromTransformationTypeCodes:container.fromTransformationTypeCodes,
 						fromTransformationCodes:container.fromTransformationCodes,
+						fromPurificationTypeCode:container.fromPurificationTypeCode,
+						fromTransfertTypeCode:container.fromTransfertTypeCode,
 					    processTypeCodes:container.processTypeCodes,
 					    processCodes:container.processCodes,
 						state : container.state,
@@ -155,6 +157,9 @@ angular.module('atomicTransfereServices', [])
 						containerUsed.fromTransformationCodes=container.fromTransformationCodes;
 						containerUsed.processTypeCodes=container.processTypeCodes;
 						containerUsed.processCodes=container.processCodes;
+						
+						containerUsed.fromPurificationTypeCode=container.fromPurificationTypeCode;
+						containerUsed.fromTransfertTypeCode=container.fromTransfertTypeCode;
 					}
 					containerUsed.sampleCodes=container.sampleCodes;
 					containerUsed.projectCodes=container.projectCodes;
@@ -500,6 +505,7 @@ angular.module('atomicTransfereServices', [])
 							atomicIndex++;
 						}
 						
+						// FDS: line*1 a un sens pour les strips et les flowcell car la ligne est numérique 
 						if(allData[0] && allData[0].inputContainer.categoryCode === 'well'){
 							// GA 16/03/2017 added inputContainer.support.code
 							allData = $filter('orderBy')(allData, ['inputContainer.support.code','inputContainer.support.column*1', 'inputContainer.support.line']);
@@ -507,6 +513,8 @@ angular.module('atomicTransfereServices', [])
 							// FDS 10/03/2017 added inputContainer.suport.line and inputContainer.support.column; 
 							allData = $filter('orderBy')(allData,['inputContainer.support.code','inputContainer.support.column*1','inputContainer.support.line*1']);
 						}
+						
+						
 						//GA : used directly _setData for not cancel the configuration !!! but may be some problems
 						$that.data._setData(allData, allData.length);
 						//add new atomic in datatable
@@ -561,6 +569,7 @@ angular.module('atomicTransfereServices', [])
 									allData.push(line);
 								});
 								
+								// FDS: line*1 a un sens pour les strips et les flowcell car la ligne est numérique 
 								if(allData[0].inputContainer.categoryCode === 'well'){
 									// GA 16/03/2017 added inputContainer.support.code
 									allData = $filter('orderBy')(allData, ['inputContainer.support.code','inputContainer.support.column*1', 'inputContainer.support.line']);
@@ -712,6 +721,93 @@ angular.module('atomicTransfereServices', [])
 						}
 						experiment.atomicTransfertMethods = cleanAtomicTransfertMethods;
 					}								
+				},
+				/* NGL-2371 FDS 07/03/2019 mise en commun (existait dans plusieurs experiences CNG avec des variantes...)
+				                  n'a de sens que si outputContainer ne sont PAS des tubes (96-well-plate, strip-8)
+				                  ajout parametre, "pos" si 'auto '=> positions sur outputContainer= positions sur inputContainer  (n'as de sens que si plaque en entree et 1 seule plaque !!!)
+				                                         si 'userdef' => c'est l'utilisateur qui détermine par ses choix les positions sur outputContainer de type plaque
+				                                         si 'chip'    => c'est l'utilisateur qui détermine par ses choix les positions sur outputContainer de type "chip"(=strip)
+				*/
+				copyContainerSupportCodeAndStorageCodeToDT : function(datatable, pos){
+					if (pos !=='auto' && pos !=='userdef'&& pos !=='chip' ){
+						throw 'pos param must be "auto","userdef" or "chip"';
+					}
+					if($scope.experiment.instrument.outContainerSupportCategoryCode == "tube"){ 
+						throw 'output support category code must not be "tube"';
+					}
+					var dataMain = datatable.getData();
+					var outputContainerSupportCode = $scope.outputContainerSupport.code;
+					var outputContainerSupportStorageCode = $scope.outputContainerSupport.storageCode;
+				
+					//07/03/2019 outputContainerSupportCode mis DANS le for, sinon on n'effectue pas l'assignation outputContainerSupportStorageCode
+					// si ce dernier est renseigné
+					for(var i = 0; i < dataMain.length; i++){
+						//NGL-2371 si le champ scope.outputContainerSupport.code est vidé par l'utilisateur (il supprime ce qu'il a tapé)
+						//il contient alors une chaine vide et pas null ce qui genere des erreurs:
+						//     ->  atomictransfertmethods[1].outputContainerUseds[1].locationOnContainerSupport.code : Propriété obligatoire
+						// => ajouter   && "" != outputContainerSupportCode
+						var atm = dataMain[i].atomicTransfertMethod;
+						
+						if ( null != outputContainerSupportCode && undefined != outputContainerSupportCode && "" != outputContainerSupportCode ){
+							if (pos == 'auto'){
+								//calcul automatique du code container
+								var newContainerCode = outputContainerSupportCode+"_"+atm.line + atm.column;
+								$parse('outputContainerUsed.code').assign(dataMain[i],newContainerCode);
+								
+							} else if (pos == 'chip' ){
+								var newChipPos =$parse("inputContainerUsed.instrumentProperties.chipPosition.value")(dataMain[i]);
+								console.log("data :"+ i + "=> new chip position =" + newChipPos);
+								
+								if ( null != newChipPos){
+									// creation du code du container
+									var newContainerCode = outputContainerSupportCode+"_"+newChipPos ;
+									$parse('outputContainerUsed.code').assign(dataMain[i],newContainerCode);
+									
+									// NGL-2551...manquait ces lignes
+									//POUR CHIP faire qd meme l'assignation column !!!!!!!
+									$parse('outputContainerUsed.locationOnContainerSupport.column').assign(dataMain[i],newChipPos);
+									
+									// Historique mais continuer a renseigner car effets de bord possible ????
+									//inutile car forcé a 1 a l'init... $parse('line').assign(atm,1);
+									$parse('column').assign(atm,newChipPos);
+									
+								}
+							} 
+							// else if userdef => ne rien faire  .......A TESTER !!!
+							
+							$parse('outputContainerUsed.locationOnContainerSupport.code').assign(dataMain[i],outputContainerSupportCode);
+						} /*else {
+							// si l'utilisateur a effacé le SupportCode=> annuler dans outputContainerUsed
+							$parse('outputContainerUsed.locationOnContainerSupport.code').assign(dataMain[i],null);
+							// et aussi le code pour rester coherent !!
+							$parse('outputContainerUsed.code').assign(dataMain[i],null);
+						
+							/// POUR CHIP faire qd meme l'assignation column !!!!!!!
+							if (pos == 'chip' ){
+								var newChipPos =$parse("inputContainerUsed.instrumentProperties.chipPosition.value")(dataMain[i]);
+								//inutile car forcé a 1 a l'init... $parse('outputContainerUsed.locationOnContainerSupport.line').assign(dataMain[i],1);
+								$parse('outputContainerUsed.locationOnContainerSupport.column').assign(dataMain[i],newChipPos);
+							
+								// Historique mais continuer a renseigner car effets de bord possible ????
+								//inutile car forcé a 1 a l'init... $parse('line').assign(atm,1);
+								$parse('column').assign(atm,newChipPos);
+							}
+						}*/
+							
+						if( null != outputContainerSupportStorageCode && undefined != outputContainerSupportStorageCode && ""!=outputContainerSupportStorageCode ){
+							$parse('outputContainerUsed.locationOnContainerSupport.storageCode').assign(dataMain[i],outputContainerSupportStorageCode);
+						}/* else {
+							//si l'utilisateur a effacé le storageCode=> annuler dans outputContainerUsed
+							$parse('outputContainerUsed.locationOnContainerSupport.storageCode').assign(dataMain[i],null);
+						}*/
+					}
+				}
+				,
+				//FDS 26/03/2019 NGL-2487 
+				// marche ici mais est-ce le bon endroit pour ca ???
+				emptyToNull: function(data, property ){
+					//console.log("(NGL-2487: "+property);
+					if ($parse(property)(data) === ""){ $parse(property).assign(data,null);}
 				}
 		};
 		return view;		

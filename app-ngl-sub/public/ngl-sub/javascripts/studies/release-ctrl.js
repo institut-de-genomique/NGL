@@ -53,7 +53,7 @@ angular.module('home').controller('ReleaseCtrl',[ '$http', '$scope', '$routePara
 	if(angular.isUndefined(mainService.getHomePage())){
 		mainService.setHomePage('release');
 		tabService.addTabs({label:Messages('studies.menu.release'),href:jsRoutes.controllers.sra.studies.tpl.Studies.home("release").url,remove:true});
-		tabService.activeTab(0); // desactive le lien !
+		tabService.activeTab(0); //  active l'onglet en le mettant en bleu
 	}
 	// si on declare dans services => var sraVariables = {};
 	// si on declare dans le controlleur : $scope.sraVariables = {};
@@ -61,6 +61,7 @@ angular.module('home').controller('ReleaseCtrl',[ '$http', '$scope', '$routePara
 	$scope.releaseService = studiesReleaseService;
 	$scope.releaseService.init($routeParams, studiesDTConfig);
 	$scope.search = function(){
+		$scope.messages = messages();
 		if($scope.releaseService.form.projCodes && $scope.releaseService.form.projCodes.length > 0){
 			$scope.releaseService.search();
 		} else {

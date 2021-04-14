@@ -1,8 +1,5 @@
 package controllers.experiments.api;
 
-//import static play.data.Form.form;
-//import static fr.cea.ig.play.IGGlobals.form;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,38 +9,42 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import controllers.APICommonController;
-//import controllers.CommonController;
 import controllers.authorisation.Permission;
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import models.laboratory.processes.description.ExperimentTypeNode;
 import models.utils.ListObject;
 import models.utils.dao.DAOException;
-//import play.Logger;
 import play.data.Form;
 import play.libs.Json;
 import play.mvc.Result;
 import play.mvc.Results;
 import views.components.datatable.DatatableResponse;
 
-public class ExperimentTypeNodes extends APICommonController<ExperimentTypeNodesSearchForm> { //CommonController{
+public class ExperimentTypeNodes extends APICommonController<ExperimentTypeNodesSearchForm> {
 
 	private static final play.Logger.ALogger logger = play.Logger.of(ExperimentTypeNodes.class);
 	
-	private final /*static*/ Form<ExperimentTypeNodesSearchForm> experimentTypeNodeForm; // = form(ExperimentTypeNodesSearchForm.class);
+	private final Form<ExperimentTypeNodesSearchForm> experimentTypeNodeForm;
+	
+//	@Inject
+//	public ExperimentTypeNodes(NGLContext ctx) {
+//		super(ctx, ExperimentTypeNodesSearchForm.class);
+//		experimentTypeNodeForm = ctx.form(ExperimentTypeNodesSearchForm.class);
+//	}
 	
 	@Inject
-	public ExperimentTypeNodes(NGLContext ctx) {
+	public ExperimentTypeNodes(NGLApplication ctx) {
 		super(ctx, ExperimentTypeNodesSearchForm.class);
 		experimentTypeNodeForm = ctx.form(ExperimentTypeNodesSearchForm.class);
 	}
-	
+
 	@Permission(value={"reading"})
-	public Result get(String code){
+	public Result get(String code) {
 		try {
-			ExperimentTypeNode experimentTypeNode = ExperimentTypeNode.find.findByCode(code);
-			if(experimentTypeNode == null){
+			ExperimentTypeNode experimentTypeNode = ExperimentTypeNode.find.get().findByCode(code);
+			if (experimentTypeNode == null) {
 				return notFound();
-			}else{
+			} else {
 				return ok(Json.toJson(experimentTypeNode));
 			}
 			
@@ -60,11 +61,11 @@ public class ExperimentTypeNodes extends APICommonController<ExperimentTypeNodes
 			List<ExperimentTypeNode> experimentTypeNodes = new ArrayList<>();
 			
 			if(StringUtils.isNotBlank(experimentTypeNodesSearch.code)){
-				experimentTypeNodes.add(ExperimentTypeNode.find.findByCode(experimentTypeNodesSearch.code));
+				experimentTypeNodes.add(ExperimentTypeNode.find.get().findByCode(experimentTypeNodesSearch.code));
 			}else if(CollectionUtils.isNotEmpty(experimentTypeNodesSearch.codes)){
-				experimentTypeNodes.addAll(ExperimentTypeNode.find.findByCodes(experimentTypeNodesSearch.codes));
+				experimentTypeNodes.addAll(ExperimentTypeNode.find.get().findByCodes(experimentTypeNodesSearch.codes));
 			}else{
-				experimentTypeNodes = ExperimentTypeNode.find.findAll();
+				experimentTypeNodes = ExperimentTypeNode.find.get().findAll();
 			}
 			
 			if(experimentTypeNodesSearch.datatable){

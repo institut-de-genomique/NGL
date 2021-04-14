@@ -16,13 +16,10 @@ public class StatsConfiguration extends DBObject implements IValidation, ITracin
 	public QueryForm queryForm;
 	public List<StatsForm> statsForm;
 	
-	
 	@Override
 	public void validate(ContextValidation contextValidation) {
-		// TODO Auto-generated method stub
-		
 	}
-
+	
 	@Override
 	public TraceInformation getTraceInformation() {
 		if (traceInformation == null)

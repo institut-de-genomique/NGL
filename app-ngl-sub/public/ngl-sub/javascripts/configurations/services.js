@@ -21,7 +21,7 @@
 				});
 				$http.get(jsRoutes.controllers.sra.api.Variables.list().url, {params:{type:'librarySelection'}})
 				.success(function(data) {
-					createService.sraVariables.librarySelection = data;																					
+					createService.sraVariables.librarySelection = data;																				
 				});
 				$http.get(jsRoutes.controllers.sra.api.Variables.list().url, {params:{type:'libraryStrategy'}})
 				.success(function(data) {
@@ -92,6 +92,16 @@
 
 var getColumns = function(){
 		var columns = [];
+		columns.push({property:"traceInformation.creationDate",
+			        	header: Messages("traceInformation.creationDate"),
+			        	type :"date",		    	  	
+			        	order:true
+			        });	
+		columns.push({property:"traceInformation.createUser",
+        				header: Messages("traceInformation.creationUser"),
+        				type :"date",		    	  	
+        				order:true
+					});
 		columns.push({property:"code",
 			        	header: Messages("configuration.code"),
 			        	type :"text",		    	  	
@@ -111,7 +121,7 @@ var getColumns = function(){
 						edit:true,
 						order:false,
 						choiceInList:true,
-						//listStyle:'bt-select-multiple',
+						//listStyle:'bt-select',
 						possibleValues:'consultationService.sraVariables.strategySample',
 					});	
 		columns.push({property:"strategyStudy",
@@ -121,7 +131,7 @@ var getColumns = function(){
 						edit:true,
 						order:false,
 						choiceInList:true,
-						//listStyle:'bt-select-multiple',
+						//listStyle:'bt-select',
 						possibleValues:'consultationService.sraVariables.strategyStudy',
 					});	
 		columns.push({property:"librarySelection",
@@ -131,7 +141,7 @@ var getColumns = function(){
 			        	edit:true,
 						order:false,
 				    	choiceInList:true,
-				    	//listStyle:'bt-select-multiple',
+				    	listStyle:'bt-select',
 				    	possibleValues:'consultationService.sraVariables.librarySelection',
 				    });	
 		columns.push({property:"libraryStrategy",
@@ -141,7 +151,7 @@ var getColumns = function(){
 						edit:true,
 						order:false,
 						choiceInList:true,
-						//listStyle:'bt-select-multiple',
+						//listStyle:'bt-select',
 						possibleValues:'consultationService.sraVariables.libraryStrategy',
 				    });	
 		columns.push({property:"librarySource",
@@ -151,7 +161,7 @@ var getColumns = function(){
 						edit:true,
 						order:false,
 						choiceInList:true,
-						//listStyle:'bt-select-multiple',
+						//listStyle:'bt-select',
 						possibleValues:'consultationService.sraVariables.librarySource',
 					});	
 		columns.push({property:"libraryConstructionProtocol",
@@ -179,8 +189,8 @@ var getColumns = function(){
 		if(!isInit){
 			consultationService.lists.refresh.projects();
 			//lists.refresh.states({objectTypeCode:"SRASubmission"});
-			/*
-			$http.get(jsRoutes.controllers.sra.api.Variables.get('strategySample').url)
+			
+/*			$http.get(jsRoutes.controllers.sra.api.Variables.get('strategySample').url)
 				.success(function(data) {
 					// initialisation de la variable sraVariables.strategySample utilisée dans consultation.scala.html
 					consultationService.sraVariables.strategySample = data;																					
@@ -202,7 +212,7 @@ var getColumns = function(){
 			.success(function(data) {
 				consultationService.sraVariables.librarySource = data;																					
 			});
-			*/
+*/			
 			isInit=true;
 		}
 	};
@@ -219,6 +229,7 @@ var getColumns = function(){
 			// methode appelee pour remplir le tableau des configurations 
 			// Recherche toutes les configurations pour projCode indiqué :
 			search : function(){
+				// produit erreur => $scope.messages = messages();	
 				//this.datatable.search({projCodes:this.form.projCodes, codes:this.form.codes, codeRegex:this.form.codeRegex});				
 				this.datatable.search(this.form);
 				console.log("consultationService: " + this.form);

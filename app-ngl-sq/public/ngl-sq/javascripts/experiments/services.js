@@ -1,7 +1,8 @@
  "use strict";
  
  angular.module('ngl-sq.experimentsServices', []).
-	factory('experimentsSearchService', ['$http', 'mainService', 'lists', 'datatable', function($http, mainService, lists, datatable){
+	factory('experimentsSearchService', ['$http', 'mainService', 'lists', 'datatable', 
+		                         function($http,   mainService,   lists,   datatable){
 		var getColumns = function(){
 			var columns = [];
 			
@@ -13,6 +14,7 @@
 			            	 "hide":true,
 			            	 "position":1,
 			            	 "type":"text"
+			            	 
 			});
 			columns.push({
 							"header":Messages("experiments.table.code"),
@@ -20,34 +22,39 @@
 							"order":true,
 							"hide":false,
 							"position":2,
-							"type":"text"
+							"type":"text",
+							"groupMethod":"count:true"
 			});
 			columns.push({
-							"header":Messages("experiments.intrument"),
+							"header":Messages("experiments.instrument"),
 							"property":"instrument.code",
 							"order":true,
 							"hide":true,
 							"position":3,
 							"type":"text",
-							"filter":"codes:'instrument'"
+							"filter":"codes:'instrument'",
+							"groupMethod":"collect:true"
 			});
 			columns.push({
 							"header":Messages("experiments.table.projectCodes"),
 							"property":"projectCodes",
 							"order":false,
-							"render":"<div list-resize='value.data.projectCodes | unique' list-resize-min-size='3'>",
+							"render":"<div list-resize='cellValue' list-resize-min-size='3'>",
 							"hide":true,
 							"position":7,
-							"type":"text"
+							"type":"text",
+							"filter":"unique",
+							"groupMethod":"collect:true"
 			});
 			columns.push({
 							"header":Messages("containers.table.sampleCodes"),
 							"property":"sampleCodes",
 							"order":false,
 							"hide":true,
+							"groupMethod":"collect:true",
 							"position":9,
 							"type":"text",
-				"render":"<div list-resize='value.data.sampleCodes | unique' list-resize-min-size='3'>"					
+							"render":"<div list-resize='cellValue | unique' list-resize-min-size='3'>"					
 			});
 			columns.push({
 							"header":Messages("experiments.table.creationDate"),
@@ -125,7 +132,8 @@
 					"hide":true,
 					"position":4,
 					"type":"text",
-					"filter":"codes:'experiment_cat'"				
+					"filter":"codes:'experiment_cat'",
+					"groupMethod":"unique"
 				});
 				columns.push({
 					"header":Messages("experiments.table.state.code"),
@@ -134,25 +142,56 @@
 					"type":"text",
 					"position":5,
 					"hide":true,
-					"filter":"codes:'state'"					
+					"filter":"codes:'state'",
+					"groupMethod":"collect:true"
 				});
-				columns.push({
+				/*columns.push({
 					"header":Messages("experiments.table.status"),
 					"property":"status.valid",
 					"render":"<div bt-select ng-model='value.data.status.valid' bt-options='valid.code as valid.name for valid in searchService.lists.get(\"status\")'  ng-edit='false'></div>",
 					"order":false,
 					"hide":true,
 					"position":5.5,
-					"type":"text"					
-				});
+					"type":"text",
+					"groupMethod":"collect"
+				});*/
 				columns.push({
+					"header":Messages("experiments.table.status"),
+					"property":"status.valid",
+					"filter":"codes:'status'",
+					"order":false,
+					"hide":true,
+					"edit":true,
+					"position":5.5,
+					"type":"text",
+					"choiceInList":true,
+				    "listStyle":"bt-select-multiple",
+					 "possibleValues":"searchService.lists.get(\"status\")",
+					"groupMethod":"collect:true"
+				});
+				/*columns.push({
 					"header":Messages("experiments.table.resolutionCodes"),
 					"property":"state.resolutionCodes",
 					"render":"<div bt-select ng-model='value.data.state.resolutionCodes' bt-options='valid.code as valid.name for valid in searchService.lists.getResolutions()'  ng-edit=\"false\"></div>",
 					"order":false,
 					"hide":true,
 					"position":6,
-					"type":"text"					
+					"type":"text",
+					"groupMethod":"collect:true"
+				});*/
+				columns.push({
+					"header":Messages("experiments.table.resolutionCodes"),
+					"property":"state.resolutionCodes",
+					"filter":"codes:'resolution'",
+					"order":false,
+					"hide":true,
+					"edit" : true,
+					"position":6,
+					"type":"text",
+					"choiceInList":true,
+				    "listStyle":"bt-select-multiple",
+					 "possibleValues":"searchService.lists.getResolutions()",
+					"groupMethod":"collect:true"
 				});
 				columns.push({
 					"header":Messages("containers.table.sampleCodes.length"),
@@ -261,6 +300,15 @@
 				
 				resetForm : function(){					
 					this.form = {};					
+				},
+
+				resetTextareas : function(){
+					Array.from(document.getElementsByTagName('textarea')).forEach(function(element) {
+						var elementScope = angular.element(element).scope();
+						if(elementScope.textareaValue){
+							elementScope.textareaValue = null;
+						}
+					});
 				},
 				
 				resetSampleCodes : function(){

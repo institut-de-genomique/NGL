@@ -1,0 +1,240 @@
+<!-- FDS NGL-2603 : remplace defaults/irychip2.scala.html ET default/saphyrchip.scala.html -->
+@()
+
+<div ng-controller="TubesToIrysChipCtrl">
+
+<!-- Add Runs -->
+<div class="row col-md-3 col-lg-3">
+	<div id="panel_runs" class="panel panel-default text-center" ng-if="runs.length > 0">
+		<div class="panel-heading">
+			<strong>@Messages("experiments.select.run") </strong>
+		</div>
+		<div class="panel-body">
+			<div class="row" ng-repeat="run in runs"><a href="#" ng-click="goToBi(run.code)">{{run.code}}</a></div>
+		</div>
+	</div>
+</div>
+
+<div class="col-md-12 col-lg-12">
+
+<ul class="nav nav-tabs margin-bottom-5" role="tablist">
+  <li class="active"><a href="" role="tab" data-target="#tube" data-toggle="tab" ng-click="atmService.data.updateFromDatatable()">@Messages("experiments.iryschip.design")</a></li>
+  <li ng-if="isRoadMapAvailable"><a href="" role="tab"  data-target="#roadmap" data-toggle="tab" ng-click="atmService.data.updateDatatable()">@Messages("experiments.calculation.sheet")</a></li>  
+</ul>
+
+<div class="tab-content"  >
+	<div class="tab-pane active" id="tube">	
+		<div class="row">
+		<div class="col-md-12 col-lg-12">
+		<div class="row">
+		
+		<!-- InputContainers table -->
+		
+		<div class="col-md-12 col-lg-5" droppable drop-fn="atmService.data.drop" ng-model="atmService.data.inputContainers"  ng-if="mainService.isEditMode() && isNewState()">
+			<div class="panel panel-primary"  style="border-style:dashed">				
+			<div class="panel-body" ng-if="atmService.data.inputContainers.length==0">		
+				<p><i class="fa fa-download"></i> @Messages("experiments.inputs")</p>
+			</div>
+			<table class="table" ng-if="atmService.data.inputContainers.length > 0" >
+			<thead>
+				<tr>
+					<th>
+					</th>
+					<th>
+						@Messages("containers.table.code")
+					</th>
+					<th>
+						@Messages("containers.table.percentage")
+					</th>
+					<th>
+						@Messages("containers.table.nlrsConcentration")
+					</th>
+					<th>
+						@Messages("containers.table.sampleTypes")
+					</th>
+					<th>
+					</th>								
+				</tr>
+				</thead>				
+				<tr ng-model="container" ng-repeat="container in atmService.data.inputContainers | orderBy:'code' track by $index" draggable drag="dragInProgress">
+					<td>
+						<button class="btn btn-default btn-xs" ng-disabled="!mainService.isEditModeAvailable() && !isNewState()" ng-click="atmService.data.deleteInputContainer(container)" ><i class="fa fa-trash-o"></i></button>
+					</td>
+					<td>
+						{{container.code}}
+					</td>
+					<td class="col-sm-1">
+						<input class="form-control input-small valueInput" 
+									type="text"
+									ng-readonly="true" 
+									ng-model="container.percentage" 
+									title='@Messages("containers.table.percentage")'
+									udt-html-filter="number"
+									/>
+						
+					</td>	
+					<td>
+						<p class="form-control-static">{{container.contents[0].properties.nlrsConcentration.value}}</p>
+					</td>				
+					<td>
+						<div list-resize='container.contents | getArray:"sampleTypeCode"| unique | codes:"type"' list-resize-min-size='5' below vertical>
+					</td>
+					<td>
+						<button class="btn btn-default btn-xs" ng-click="atmService.data.duplicateInputContainer(container,$index)"><i class="fa fa-plus"></i></button>
+					</td>			
+				</tr>				
+			</table>			
+			</div>
+		</div>
+		
+		<div class="col-md-12 col-lg-7 flowcellTable table-responsive">
+			<table class="table" >
+			<thead>
+			<tr>
+			<th>
+			</th>
+			<th>
+				<button ng-click="hideRowAll()"  ng-if="isAllOpen" class="btn btn-default btn-xs"><i class="fa fa-eye-slash"></i></button>
+				<button ng-click="showRowAll()"  ng-if="!isAllOpen" class="btn btn-default btn-xs"><i class="fa fa-eye"></i></button>							
+			</th>
+			
+			<th ng-if="isAllOpen">
+				@Messages("containers.table.code")
+			</th>
+			<th ng-if="isAllOpen">
+				@Messages("containers.table.percentage")
+			</th>
+			<th ng-if="isAllOpen">
+				@Messages("containers.table.nlrsConcentration")
+			</th>
+			<th ng-if="isAllOpen">
+				@Messages("containers.table.iryschip.sampleCodes")
+			</th>
+						
+			<th ng-if="isAllOpen">
+				@Messages("containers.table.sampleTypes")
+			</th>
+			<th  ng-if="isAllOpen"
+				ng-repeat="property in outputContainerProperties track by $index">
+				{{property.name}}<span ng-if="property.displayMeasureValue"> ({{property.displayMeasureValue.value}})</span>
+			</th>
+			<th ng-if="!isAllOpen" colspan="{{4 + outputContainerProperties.length}}"></th>
+			</tr>
+			
+			</thead>
+			<tbody ng-if="isAllOpen && mainService.isEditMode()">
+			<tr>
+			<th colspan="6"></th>
+		
+			<th ng-repeat="property in outputContainerProperties track by $index">
+						<input class="form-control input-sm" type="text"
+						ng-model="outputContainerValues[property.code]"
+						ng-change="updateAllOutputContainerProperty(property)"
+						udt-html-filter="number"
+						/>
+			</th>
+			</tr>
+			</tbody>
+			
+			<tbody ng-repeat="atm in atmService.data.atm | orderBy:'line' track by $index" ng-model="atm.inputContainerUseds" 
+				droppable drop-fn="atmService.data.drop" 
+				ng-switch="getDisplayMode(atm, $index)">
+				
+				<tr ng-switch-when="empty">
+					<td>
+						<span class="label label-black" ng-bind="atm.line"></span>
+					</td>
+					<td>
+						<button class="btn btn-default btn-xs"  ng-click="toggleRow(atm.line - 1)" ng-switch="rows[$index]">
+							<i ng-switch-when="true" class="fa fa-eye-slash"></i>
+							<i ng-switch-when="false" class="fa fa-eye"></i>
+						</button>			
+					</td>
+					<td colspan="{{5 + outputContainerProperties.length}}"></td>
+				</tr>
+				
+				<tr ng-switch-when="compact" >	
+					<td class="compactColumn">
+						<span class="label label-black" ng-bind="atm.line"></span>
+					</td >
+					<td class="compactColumn"> 					
+						<button class="btn btn-default btn-xs"  ng-click="toggleRow(atm.line - 1)">
+							<!--  i class="fa fa-eye-slash"></i-->
+							<i class="fa fa-eye"></i>
+						</button>			
+					</td>	
+					<td colspan="{{5 + outputContainerProperties.length}}" >
+						<span ng-repeat="inputContainer in atm.inputContainerUseds | orderBy:'code' track by $index"  class="compactText"
+							    ng-model="inputContainer" draggable drag="dragInProgress">
+							{{inputContainer.code}} / {{inputContainer.percentage}}% / <br/>
+						</span>
+					</td>
+				</tr>
+				
+				<tr ng-switch-when="open" ng-repeat="inputContainer in atm.inputContainerUseds | orderBy:'code' track by $index"
+							              ng-model="inputContainer" draggable drag="dragInProgress">	
+						<td rowspan="{{atm.inputContainerUseds.length}}" ng-if="$index === 0">
+							<span class="form-control-static label label-black" ng-bind="atm.line"></span>
+						</td>
+						<td rowspan="{{atm.inputContainerUseds.length}}" ng-if="$index === 0">
+							<button class="btn btn-default btn-xs"  ng-click="toggleRow(atm.line - 1)">
+								<i class="fa fa-eye-slash"></i>
+								<!-- i class="fa fa-eye"></i-->
+							</button>
+						</td>
+						<td>
+							{{inputContainer.code}}
+						</td>
+						<td class="col-sm-1">
+								<div>
+									<input class="form-control input-sm" type="text" 
+										title='@Messages("containers.table.percentage")' 
+										ng-model="inputContainer.percentage"
+										ng-readonly=true
+										ng-change="changeValueOnFlowcellDesign()" 
+										udt-html-filter="number"/>
+								</div>
+						</td>
+						<td class="col-sm-2">
+							<p class="form-control-static">{{inputContainer.contents[0].properties.nlrsConcentration.value}}</p>
+						</td>
+						<td>
+							<div list-resize='inputContainer.contents | getArray:"sampleCode" ' list-resize-min-size='5' below vertical>
+						</td>
+						
+						<td>
+							<div list-resize='inputContainer.contents | getArray:"sampleTypeCode"| unique | codes:"type"' list-resize-min-size='5' below vertical>
+						</td> 
+						<td ng-repeat="property in outputContainerProperties track by $index" 
+							ng-if="$parent.$index === 0"
+							rowspan="{{atm.inputContainerUseds.length}}">
+								 
+							<div ng-switch on="mainService.isEditMode()">
+								<span ng-switch-when="false" ng-bind="atm.outputContainerUseds[0].experimentProperties[property.code].value"></span>						 
+								<div ng-switch-when="true">
+									<input class="form-control input-sm" type="text"
+										 title="{{property.name}}"
+										 ng-model="atm.outputContainerUseds[0].experimentProperties[property.code].value"
+										 ng-change="changeValueOnFlowcellDesign(property)"
+										 udt-html-filter="number" />
+							
+								</div>
+							</div>
+							
+						</td>
+					</tr>
+			</tbody>
+			</table>
+		</div>
+		</div>
+		</div>
+		</div>
+	</div>
+	<div class="tab-pane" id="roadmap" ng-if="isRoadMapAvailable">
+	<div class="row roadmap">
+		<div class="col-md-12 col-lg-12 table-responsive" ultimate-datatable="atmService.data.datatable"></div>
+	</div>
+	</div>
+</div>
+	
+</div>

@@ -1,10 +1,9 @@
 #reagents
 GET 	/api/reagent-catalogs/kits					controllers.reagents.api.KitCatalogs.list()
-GET 	/api/reagent-declarations/kits				controllers.reagents.api.Kits.list()
-GET 	/api/reagent-declarations/boxes				controllers.reagents.api.Boxes.list()
-GET 	/api/reagent-declarations/reagents			controllers.reagents.api.Reagents.list()
 POST 	/api/reagent-catalogs/kits					controllers.reagents.api.KitCatalogs.save()
 
 
 GET 	/api/box-catalogs							controllers.reagents.api.BoxCatalogs.list()
 GET 	/api/reagent-catalogs						controllers.reagents.api.ReagentCatalogs.list()
+
+GET 	/api/reagent-receptions						controllers.reagents.api.Receptions.list()

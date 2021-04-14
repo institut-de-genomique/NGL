@@ -13,26 +13,27 @@ import models.utils.dao.DAOException;
 import models.utils.dao.DAOHelpers;
 
 @Repository
-public class ValueDAO extends AbstractDAODefault<Value>{
+public class ValueDAO extends AbstractDAODefault<Value> {
 
+	private static final play.Logger.ALogger logger = play.Logger.of(ValueDAO.class);
+	
 	protected ValueDAO() {
 		super("value", Value.class,true);
 	}
 
 	@SuppressWarnings("deprecation")
-	public List<Value> findByPropertyDefinition(long idPropertyDefinition)
-	{
+	public List<Value> findByPropertyDefinition(long idPropertyDefinition) {
 		String sql = "SELECT id, value, code, name, default_value FROM value WHERE fk_property_definition=?";
 		BeanPropertyRowMapper<Value> mapper = new BeanPropertyRowMapper<>(Value.class);
 		return this.jdbcTemplate.query(sql, mapper, idPropertyDefinition);
 	}
 
-	public Value save(Value value, long idPropertyDefinition)
-	{
+	public Value save(Value value, long idPropertyDefinition) {
+		logger.debug("save - value:{}, code:{}, name:{}, default:{}", value.value, value.code, value.name, value.defaultValue);
 		Map<String, Object> parameters = new HashMap<>();
-		parameters.put("value", value.value); //TODO mus be remove
-		parameters.put("code", value.code);
-		parameters.put("name", value.name);
+		parameters.put("value", value.value); // GA: must be removed
+		parameters.put("code",  value.code);
+		parameters.put("name",  value.name);
         parameters.put("default_value", value.defaultValue);
         parameters.put("fk_property_definition", idPropertyDefinition);
         Long newId = (Long) jdbcInsert.executeAndReturnKey(parameters);
@@ -41,8 +42,7 @@ public class ValueDAO extends AbstractDAODefault<Value>{
 	}
 
 	@SuppressWarnings("deprecation")
-	public void update(Value value, long idPropertyDefinition)
-	{
+	public void update(Value value, long idPropertyDefinition) {
 		String sql = "UPDATE value SET value=?, code=?, name=?, default_value=? WHERE id=? AND fk_property_definition=?";
 		jdbcTemplate.update(sql,value.code, value.value, value.code, value.name, value.defaultValue, value.id, idPropertyDefinition);
 	}
@@ -59,7 +59,7 @@ public class ValueDAO extends AbstractDAODefault<Value>{
 	}
 
 	@SuppressWarnings("deprecation")
-	public List<Value> findUnique(String propertyDefinitionCode){
+	public List<Value> findUnique(String propertyDefinitionCode) {
 		String sql =  
 				"select distinct v.value, v.code, v.name "
 				+"from  value v "
@@ -68,7 +68,6 @@ public class ValueDAO extends AbstractDAODefault<Value>{
 				+DAOHelpers.getCommonInfoTypeSQLForInstitute("cit")
 			    +"where pd.code = ? "
 			    +"order by v.name";
-		//Logger.debug("SQL value " + sql);
 		BeanPropertyRowMapper<Value> mapper = new BeanPropertyRowMapper<>(Value.class);
 		return this.jdbcTemplate.query(sql, mapper, propertyDefinitionCode);		
 	}

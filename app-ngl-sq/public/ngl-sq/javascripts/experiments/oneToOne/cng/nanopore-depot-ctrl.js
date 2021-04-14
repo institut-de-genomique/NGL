@@ -1,5 +1,6 @@
-angular.module('home').controller('NanoporeDepotCtrlCNG',['$scope', '$parse', '$http','$window', 'atmToSingleDatatable', 'datatable',
-                                                               function($scope, $parse, $http,$window, atmToSingleDatatable, datatable) {
+// FDS 07/10/2020 NGL-3000 ajout dateServices
+angular.module('home').controller('NanoporeDepotCtrlCNG',['$scope', '$parse', '$http','$window', 'atmToSingleDatatable', 'datatable', 'dateServices',
+                                                               function($scope, $parse, $http,$window, atmToSingleDatatable, datatable, dateServices) {
 	
 	// NGL-1055: name explicite pour fichier CSV exporté: typeCode experience
 	// NGL-1055: mettre getArray et codes:'' dans filter et pas dans render
@@ -60,10 +61,20 @@ angular.module('home').controller('NanoporeDepotCtrlCNG',['$scope', '$parse', '$
 			 			"render":"<div list-resize='cellValue' 'list-resize-min-size='3'>",
 			 			"extraHeaders":{0:Messages("experiments.inputs")}			 			
 			 		},
-			         					 
-					 {
+					{
 			        	 "header":Messages("containers.table.concentration") + " (ng/µL)",
 			        	 "property":"inputContainerUsed.concentration.value",
+			        	 "order":true,
+						 "edit":false,
+						 "hide":true,
+			        	 "type":"number",
+			        	 "position":5,
+			        	 "extraHeaders":{0:Messages("experiments.inputs")}
+			         },
+			         //DEBUG NGL-3261
+						{
+			        	 "header": "TEST inputContainer concentration (ng/µL)",
+			        	 "property":"inputContainer.concentration.value",
 			        	 "order":true,
 						 "edit":false,
 						 "hide":true,
@@ -79,6 +90,16 @@ angular.module('home').controller('NanoporeDepotCtrlCNG',['$scope', '$parse', '$
 						 "hide":true,
 			        	 "type":"number",
 			        	 "position":6,
+			        	 "extraHeaders":{0:Messages("experiments.inputs")}
+			         },
+			         {
+			        	 "header":Messages("containers.table.quantity") + " (ng)",
+			        	 "property":"inputContainerUsed.quantity.value",
+			        	 "order":true,
+						 "edit":false,
+						 "hide":true,
+			        	 "type":"number",
+			        	 "position":6.5,
 			        	 "extraHeaders":{0:Messages("experiments.inputs")}
 			         },
 			         {
@@ -100,7 +121,7 @@ angular.module('home').controller('NanoporeDepotCtrlCNG',['$scope', '$parse', '$
 						 "edit":false,
 						 "hide":true,
 			        	 "type":"text",
-			        	 "position":10,
+			        	 "position":500,
 			        	 "extraHeaders":{0:Messages("experiments.outputs")}
 			         },
 			         {
@@ -110,7 +131,7 @@ angular.module('home').controller('NanoporeDepotCtrlCNG',['$scope', '$parse', '$
 						 "edit":false,
 						 "hide":true,
 			        	 "type":"text",
-			        	 "position":20,
+			        	 "position":600,
 			        	 "extraHeaders":{0:Messages("experiments.outputs")}
 			         }
 			         ],
@@ -144,9 +165,9 @@ angular.module('home').controller('NanoporeDepotCtrlCNG',['$scope', '$parse', '$
 				active:true
 			},
 			edit:{
-				active: false,
-				showButton: false,
-				byDefault:false,
+				active: ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F')),
+				showButton: ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F')),
+				byDefault:($scope.isCreationMode()),
 				columnMode:true
 			},
 			messages:{
@@ -218,7 +239,6 @@ angular.module('home').controller('NanoporeDepotCtrlCNG',['$scope', '$parse', '$
 			showTotalNumberRecords:false
 	};
 	
-
 	var datatableConfigQcFlowcell = {
 			// ici laiser ce nom ??
 			name:"NanoportQcFlowcell",
@@ -270,58 +290,73 @@ angular.module('home').controller('NanoporeDepotCtrlCNG',['$scope', '$parse', '$
 		var dataQCFlowcell = $scope.datatableQcFlowcell.getData();
 		var dataLoadingReport = $scope.datatableLoadingReport.getData();
 	
-		$parse('outputContainerUsed.experimentProperties.qcFlowcell._type').assign(dataMain[0], "object_list");
-		$parse('outputContainerUsed.experimentProperties.qcFlowcell.value').assign(dataMain[0], dataQCFlowcell);
-		
-		$parse('inputContainerUsed.experimentProperties.loadingReport._type').assign(dataMain[0], "object_list");		
-		$parse('inputContainerUsed.experimentProperties.loadingReport.value').assign(dataMain[0], dataLoadingReport);
-		
-		//copy flowcell code to output code
-		var codeFlowcell = $parse("instrumentProperties.containerSupportCode.value")($scope.experiment);
-		if(null != codeFlowcell && undefined != codeFlowcell){
-			$parse('outputContainerUsed.code').assign(dataMain[0],codeFlowcell);
-			$parse('outputContainerUsed.locationOnContainerSupport.code').assign(dataMain[0],codeFlowcell);
-		}
-		
-	//	var loadingQtty= $parse('outputContainerUsed.loadingQuantity.value');
-		if(dataMain[0].inputContainerUsed.concentration){
-			var concIN = dataMain[0].inputContainerUsed.concentration.value;
-			var reportingList = dataLoadingReport ;
-			var reportingVolSum=0;	
-			if (null != reportingList){
-				for(var j=0; j < reportingList.length; j++){
-					reportingVolSum +=reportingList[j].volume;
-				}
+		dataMain.forEach(function(dataMain){
+			$parse('outputContainerUsed.experimentProperties.qcFlowcell._type').assign(dataMain, "object_list");
+			$parse('outputContainerUsed.experimentProperties.qcFlowcell.value').assign(dataMain, dataQCFlowcell);
+			
+			$parse('inputContainerUsed.experimentProperties.loadingReport._type').assign(dataMain, "object_list");		
+			$parse('inputContainerUsed.experimentProperties.loadingReport.value').assign(dataMain, dataLoadingReport);
+			
+			//copy flowcell code to output code
+			var codeFlowcell = $parse("instrumentProperties.containerSupportCode.value")($scope.experiment);
+			if(null != codeFlowcell && undefined != codeFlowcell){
+				$parse('outputContainerUsed.code').assign(dataMain,codeFlowcell);
+				$parse('outputContainerUsed.locationOnContainerSupport.code').assign(dataMain,codeFlowcell);
+			}else{
+				codeFlowcell = $parse("outputContainerUsed.instrumentProperties.containerSupportCode.value")(dataMain);
+				$parse('outputContainerUsed.code').assign(dataMain,codeFlowcell);
+				$parse('outputContainerUsed.locationOnContainerSupport.code').assign(dataMain,codeFlowcell);
 			}
 			
-			if(reportingVolSum){
-				$parse('inputContainerUsed.experimentProperties.loadingQuantity.value').assign(dataMain[0],concIN * reportingVolSum);
+		//	var loadingQtty= $parse('outputContainerUsed.loadingQuantity.value');
+			if(dataMain.inputContainerUsed.concentration){
+				var concIN = dataMain.inputContainerUsed.concentration.value;
+				var reportingList = dataLoadingReport ;
+				var reportingVolSum=0;	
+				if (null != reportingList){
+					for(var j=0; j < reportingList.length; j++){
+						reportingVolSum +=reportingList[j].volume;
+					}
+				}
+				
+				if(reportingVolSum){
+					$parse('inputContainerUsed.experimentProperties.loadingQuantity.value').assign(dataMain,concIN * reportingVolSum);
+				}
 			}
-		}
+		});
+		
 		//datatable.setData(dataMain);
 	}
 	
-	$scope.$on('save', function(e, callbackFunction) {	
-		$scope.datatableQcFlowcell.save();
-		$scope.datatableLoadingReport.save();
-		
-		//save entraine appel copyOtherDTToMainDatatable
-		$scope.atmService.data.save();	
-				
-		$scope.atmService.viewToExperimentOneToOne($scope.experiment);
-		$scope.$emit('childSaved', callbackFunction);
-		
-		
+	// NGL-3000 ajouter une vérification de la date saisie
+	// 21/10/2020 isValidDateFormat ne controle pas une date entrée sur 2 digits...la retirer pour l'instant
+	$scope.$on('save', function(e, callbackFunction) {
+		console.log("call event save");
+			// une valeur existe toujours => la controler
+			// avec l'utilisation d'un calendrier cette verification est superflue...
+			/*if ( ! dateService.isValidDateFormat($scope.experiment.experimentProperties.runStartDate.value, Messages("date.format"))){
+				$scope.messages.setError(Messages("experiment.msg.badformat", "Date réelle de dépôt", Messages("date.format")));
+				$scope.$emit('childSavedError', callbackFunction);
+			} else { */
+				//tout OK sauvegarder !!!
+				$scope.datatableQcFlowcell.save();
+				$scope.datatableLoadingReport.save();
+
+				//save entraine appel copyOtherDTToMainDatatable
+				$scope.atmService.data.save();	
+					
+				$scope.atmService.viewToExperimentOneToOne($scope.experiment);
+				$scope.$emit('childSaved', callbackFunction);
+			//}
 	});
 	
-	
-	
+
 	$scope.$on('refresh', function(e) {
 		console.log("call event refresh");		
 		var dtConfig = $scope.atmService.data.getConfig();
-		//dtConfig.edit.active = ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F'));
-		//dtConfig.edit.showButton = ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F'));
-		//dtConfig.edit.byDefault = false;
+		dtConfig.edit.active = ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F'));
+		dtConfig.edit.showButton = ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F'));
+		dtConfig.edit.byDefault = false;
 		dtConfig.remove.active = ($scope.isEditModeAvailable() && $scope.isNewState());
 		$scope.atmService.data.setConfig(dtConfig);
 		
@@ -334,7 +369,6 @@ angular.module('home').controller('NanoporeDepotCtrlCNG',['$scope', '$parse', '$
 		dtConfig.edit.byDefault = false;
 		dtConfig.edit.start = false; //BUG in UDT but not found //09/02/2017
 		$scope.datatableLoadingReport.setConfig(dtConfig);
-		
 		
 		$scope.atmService.refreshViewFromExperiment($scope.experiment);
 		$scope.$emit('viewRefeshed');
@@ -355,18 +389,16 @@ angular.module('home').controller('NanoporeDepotCtrlCNG',['$scope', '$parse', '$
 			dtConfig.edit.byDefault = false;
 			$scope.datatableLoadingReport.setConfig(dtConfig);
 			
-			
 			dtConfig = $scope.datatableQcFlowcell.getConfig();
 			dtConfig.edit.byDefault = false;
 			$scope.datatableQcFlowcell.setConfig(dtConfig);
 		}
-		
 	});
 	
 	$scope.$on('activeEditMode', function(e) {
 		console.log("call event activeEditMode");
-		//$scope.atmService.data.selectAll(true);
-		//$scope.atmService.data.setEdit();
+		$scope.atmService.data.selectAll(true);
+		$scope.atmService.data.setEdit();
 		
 		$scope.datatableQcFlowcell.selectAll(true);
 		$scope.datatableQcFlowcell.setEdit();
@@ -374,18 +406,27 @@ angular.module('home').controller('NanoporeDepotCtrlCNG',['$scope', '$parse', '$
 		$scope.datatableLoadingReport.selectAll(true);
 		$scope.datatableLoadingReport.setEdit();
 	});
+
+	$scope.$watch("instrumentType", function(newValue, oldValue){
+		if(newValue)
+			$scope.atmService.addInstrumentPropertiesToDatatable(newValue.propertiesDefinitions);
+	});
 	
 	//Init
-	
+	// FDS NGL-3261 ajout flag outputvoid... change rien !!!
+	//var atmService = atmToSingleDatatable($scope, datatableConfig, true);
 	var atmService = atmToSingleDatatable($scope, datatableConfig);
+	
 	//defined new atomictransfertMethod
 	atmService.newAtomicTransfertMethod = function(){
 		return {
+			// FDS NGL-3261 ...OneToVoid change rien !!
+			//class:"OneToVoid",
 			class:"OneToOne",
 			line:"1", 
 			column:"1", 				
 			inputContainerUseds:new Array(0), 
-			outputContainerUseds:new Array(0)
+			outputContainerUseds:new Array(0) // mettre en commentaire si class:"OneToVoid
 		};
 	};
 	
@@ -396,10 +437,13 @@ angular.module('home').controller('NanoporeDepotCtrlCNG',['$scope', '$parse', '$
 			quantity : "ng"
 	}
 	
+	// ajouté pour NGL-3000
+	var dateService=dateServices($scope);
+	
 	//overide defaut method
-	atmService.convertOutputPropertiesToDatatableColumn = function(property){
+	atmService.convertOutputPropertiesToDatatableColumn = function(property, pName){
 		if(property.propertyValueType === "single"){
-			return  this.$commonATM.convertSinglePropertyToDatatableColumn(property,"outputContainerUsed.experimentProperties.",{"0":Messages("experiments.outputs")});
+			return  this.$commonATM.convertSinglePropertyToDatatableColumn(property,"outputContainerUsed."+pName+".",{"0":Messages("experiments.outputs")});
 		}else if(property.propertyValueType === "object_list"){
 			var newColum = this.$commonATM.convertObjectListPropertyToDatatableColumn(property,"",{"0":"QC Flowcell"});
 			var columns = $scope.datatableQcFlowcell.getColumnsConfig();
@@ -408,9 +452,9 @@ angular.module('home').controller('NanoporeDepotCtrlCNG',['$scope', '$parse', '$
 			return undefined;						
 		}		
 	};
-	atmService.convertInputPropertiesToDatatableColumn = function(property){
+	atmService.convertInputPropertiesToDatatableColumn = function(property, pName){
 		if(property.propertyValueType === "single"){
-			return this.$commonATM.convertSinglePropertyToDatatableColumn(property,"inputContainerUsed.experimentProperties.",{"0":Messages("experiments.inputs")});
+			return this.$commonATM.convertSinglePropertyToDatatableColumn(property,"inputContainerUsed."+pName+".",{"0":Messages("experiments.inputs")});
 		}else if(property.propertyValueType === "object_list"){
 			var newColum = this.$commonATM.convertObjectListPropertyToDatatableColumn(property,"",{"0":"Bilan chargement"});
 			var columns = $scope.datatableLoadingReport.getColumnsConfig();
@@ -447,25 +491,35 @@ angular.module('home').controller('NanoporeDepotCtrlCNG',['$scope', '$parse', '$
 	atmService.experimentToView($scope.experiment, $scope.experimentType);
 	
 	//init list runs
-	
 	if(angular.isArray($scope.experiment.outputContainerSupportCodes) && $scope.experiment.outputContainerSupportCodes.length > 0){
 		$http.get(jsRoutes.controllers.runs.api.Runs.list().url,{params:{containerSupportCodes:$scope.experiment.outputContainerSupportCodes}}).success(function(data) {
 			$scope.runs = data;
 		});
 	}
-	
 	$scope.goToBi = function(code){
 		var value = AppURL("bi");
 		$window.open(value+"/runs/"+code, 'bi');
 	};
-
+	
+	// en mode creation positionner la date courante par defaut
 	if($scope.isCreationMode()){
 		if(!$parse("experimentProperties.runStartDate.value")($scope.experiment)){
+			console.log('setting current date as default');
+			// dans le javascript positionner une valeur en millisecondes en utilisant la librairie moment.js
+			// le rendu au format date est executé par la directive date-timestamp (dateTimestamp) ou date-timestamp2 (dateTimestamp2) 
+			/* !!!!!!!!!    SUPSQCNG-902 le timestamp doit etre arrondi pour que NGSRG retrouve le fichier du run
+			   garder le code ci-dessous qui effectue l'arrondi !!!!!!! */
 			var format = Messages("date.format").toUpperCase();
-			var date = moment().format(format);
-			date = moment(date, format).valueOf();
-			$parse("experimentProperties.runStartDate.value").assign($scope.experiment, date); 
+			var curdateMS_round = moment().format(format);
+			curdateMS_round = moment(curdateMS_round, format).valueOf();
+			console.log('timestamp arrondi='+curdateMS_round);
+			//var curdateMS_exact= moment().valueOf();
+			//console.log('timestamp exact  ='+curdateMS_exact);
+			
+			$parse("experimentProperties.runStartDate.value").assign($scope.experiment, curdateMS_round); 
 		}
 	}
-		
+	
+	//NGL-3203 ajout information masquable; commencer affiché
+	$scope.setIsShowInformation (true);
 }]);

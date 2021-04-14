@@ -7,10 +7,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import validation.ContextValidation;
 import validation.IValidation;
 
-
-
-
-public class StorageHistory implements IValidation{
+public class StorageHistory implements IValidation {
+	
 	//ContainerSupport ref
 	public String barCode;
 	public String createUser;
@@ -19,8 +17,6 @@ public class StorageHistory implements IValidation{
 	@JsonIgnore
 	@Override
 	public void validate(ContextValidation contextValidation) {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

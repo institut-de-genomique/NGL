@@ -22,48 +22,42 @@ import play.mvc.Result;
  * The T extends DBObject is not needed, the real constraint is that T
  * produces some valid JSON representation.
  * 
- * Conversion from sources to bytestring akka sources that represent 
+ * Conversion from sources to Akka byte string sources that represent 
  * JSON data is probably not much related to Mongo anymore. 
  * 
  * @author vrd
  *
  */
-
-// Direct transform apply does not compile. 
-// return stream(source.map(transform));
-// Despite what eclipse says, explicit source type compiles
-// Source<R,?> rsource = source.map(transform);
-// I blame the weak type inference of javac at the moment.
-
 public class MongoStreamer {
 	
+	/*
+	 * Logger.
+	 */
+	// private static final play.Logger.ALogger logger = play.Logger.of(MongoStreamer.class);
+	
 	// -------------- more generic streamer ------------------
+	
 	public static final <A,B> ImmutablePair<A,B> pair(A a, B b) { return new ImmutablePair<>(a,b); }
 
 	/**
-	 * @param i an iterable
-	 * @param f a function witch converts object to String
-	 * @return  the stream of ByteString
+	 * @param <A> iterable element type
+	 * @param i   an iterable
+	 * @param f   a function witch converts object to String
+	 * @return    the stream of ByteString
 	 */
 	public static final <A> Source<ByteString,?> streamUDT_(Iterable<A> i, Function<A,String> f) {
 		Iterable<ByteString> it =
-				Iterables.map(i, x -> pair(1,f.apply(x))) // count as 1
-				.intercalate(pair(0,","))                 // count as 0
-				.prepend(pair(0,"{\"data\":["))           // count as 0
-				.foldlIn(0, (c,p) -> c + p.left, c -> pair(0,"],\"recordsNumber\":" + c + "}"))
-				.map(r -> { return ByteString.fromString(r.right); });
+				Iterables.map(i, x -> pair(1,f.apply(x)))  // count as 1
+				.intercalate (pair(0,","))                 // count as 0
+				.prepend     (pair(0,"{\"data\":["))       // count as 0
+				.foldlIn     (0, (c,p) -> c + p.left, c -> pair(0,"],\"recordsNumber\":" + c + "}"))
+				.map         (r -> ByteString.fromString(r.right));
 		return Source.from(it);
 	}
 	
 	public static final <A,B> Source<ByteString,?> stream(Iterable<A> iterable, Function<A,B> transform) {
 		return stream(Source.from(iterable),transform);
 	}
-	
-	
-	/*
-	 * Logger.
-	 */
-	// private static final play.Logger.ALogger logger = play.Logger.of(MongoStreamer.class);
 	
 	// 
 	// --------------------- MongoCursor<T> overloads ---------------
@@ -89,7 +83,7 @@ public class MongoStreamer {
 	 * @return          JSON array formatted source 
 	 */
 	public static <T extends DBObject,R> Source<ByteString, ?> stream(MongoCursor<T> cursor, Function<T,R> transform) {
-		return stream(Source.from(cursor),transform);
+		return stream(Source.from(cursor), transform);
 	}
 	
 	
@@ -100,7 +94,7 @@ public class MongoStreamer {
 	 * @return       JSON array formatted source
 	 */
 	public static <T extends DBObject> Source<ByteString, ?> streamUDT(MongoCursor<T> cursor) {
-		return streamUDT(cursor.count(),Source.from(cursor));
+		return streamUDT(cursor.count(), Source.from(cursor));
 	}
 	
 	// 
@@ -225,9 +219,9 @@ public class MongoStreamer {
 	
 	// ---------------------- HTTP Result overloads ------------------------
 	// Yay ! More overloads
-	// Those overloads are shortcuts to http ok results with a chunked content.
+	// Those overloads are shorthands to HTTP OK results with a chunked content.
 	
-	// TODO: possibly fix names as this is okChunked and not okStream
+	// RENAME: possibly fix names as this is okChunked and not okStream
 	
 	public static <T extends DBObject> Result okStream(MongoDBResult<T> all) {
 		return Streamer.okStream(stream(all)); 

@@ -1,191 +1,143 @@
 package controllers.runs.api;
 
 
+import java.util.Map;
+
 import javax.inject.Inject;
 
-import org.mongojack.DBQuery;
-import org.mongojack.DBUpdate;
-
-import fr.cea.ig.MongoDBDAO;
+import controllers.NGLController;
 import fr.cea.ig.authentication.Authenticated;
 import fr.cea.ig.authorization.Authorized;
 import fr.cea.ig.lfw.Historized;
+import fr.cea.ig.ngl.NGLApplication;
+import fr.cea.ig.ngl.dao.api.APIException;
+import fr.cea.ig.ngl.dao.api.APIValidationException;
+import fr.cea.ig.ngl.dao.runs.LaneTreatmentsAPI;
+import fr.cea.ig.ngl.support.NGLForms;
 import fr.cea.ig.play.IGBodyParsers;
-import fr.cea.ig.play.migration.NGLContext;
-import models.laboratory.common.description.Level;
-import models.laboratory.run.instance.Lane;
 import models.laboratory.run.instance.Run;
 import models.laboratory.run.instance.Treatment;
-import models.utils.InstanceConstants;
 import play.data.Form;
-import play.libs.Json;
 import play.mvc.BodyParser;
 import play.mvc.Result;
-import validation.ContextValidation;
 
-// TODO: cleanup
-public class LaneTreatments extends RunsController {
+@Historized
+public class LaneTreatments extends NGLController implements NGLForms {
 
-	private final Form<Treatment> treatmentForm;
+    private final Form<Treatment>   treatmentForm;
+    private final LaneTreatmentsAPI api;
 
-	@Inject
-	public LaneTreatments(NGLContext ctx) {
-		treatmentForm = ctx.form(Treatment.class);
-	}
-	
-//	@Permission(value={"reading"})
-	@Authenticated
-	@Historized
-	@Authorized.Read
-	public /*static*/ Result list(String runCode, Integer laneNumber){
-		Run run  = MongoDBDAO.findOne(InstanceConstants.RUN_ILLUMINA_COLL_NAME, Run.class, 
-				DBQuery.and(DBQuery.is("code", runCode), 
-						DBQuery.elemMatch("lanes",DBQuery.is("number", laneNumber))));
-		if (run != null) {
-			return ok(Json.toJson(getLane(run, laneNumber).treatments));
-		} else {
-			return notFound();
-		}		
-	}
-	
-//	@Permission(value={"reading"})
-	@Authenticated
-	@Historized
-	@Authorized.Read
-	public /*static*/ Result get(String runCode, Integer laneNumber, String treatmentCode){
-		Run run  = MongoDBDAO.findOne(InstanceConstants.RUN_ILLUMINA_COLL_NAME, Run.class, 
-				DBQuery.and(DBQuery.is("code", runCode), 
-						DBQuery.elemMatch("lanes", 
-								DBQuery.and(
-										DBQuery.is("number", laneNumber),
-										DBQuery.exists("treatments."+treatmentCode)))));
-		if (run != null) {
-			return ok(Json.toJson(getLane(run, laneNumber).treatments.get(treatmentCode)));
-		} else {
-			return notFound();
-		}		
-	}
-	
-//	@Permission(value={"reading"})
-	@Authenticated
-	@Historized
-	@Authorized.Read
-	public /*static*/ Result head(String runCode, Integer laneNumber, String treatmentCode) {
-		if (MongoDBDAO.checkObjectExist(InstanceConstants.RUN_ILLUMINA_COLL_NAME, Run.class, 
-				DBQuery.and(DBQuery.is("code", runCode), 
-						DBQuery.elemMatch("lanes", 
-								DBQuery.and(
-										DBQuery.is("number", laneNumber),
-										DBQuery.exists("treatments."+treatmentCode)))))){
-			return ok();
-		} else {
-			return notFound();
-		}
-	}
+    @Inject
+    public LaneTreatments(NGLApplication app, LaneTreatmentsAPI api) {
+        super(app);
+        treatmentForm = app.formFactory().form(Treatment.class);
+        this.api      = api;
+    }
 
-//	@Permission(value={"writing"})	
-	@Authenticated
-	@Historized
-	@Authorized.Write
-	//@Permission(value={"creation_update_treatments"})
-	// @BodyParser.Of(value = BodyParser.Json.class, maxLength = 5000 * 1024)
-	@BodyParser.Of(value = IGBodyParsers.Json5MB.class)
-	public Result save(String runCode, Integer laneNumber){
-		Run run = MongoDBDAO.findOne(InstanceConstants.RUN_ILLUMINA_COLL_NAME, Run.class, 
-				DBQuery.and(DBQuery.is("code", runCode), DBQuery.is("lanes.number", laneNumber)));
-		if (run == null)
-			return badRequest(); // Probably a not found
-		
-		Form<Treatment> filledForm = getFilledForm(treatmentForm, Treatment.class);
-		Treatment treatment = filledForm.get();
-		
-//		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm.errors()); 
-		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm); 
-		ctxVal.setCreationMode();
-		ctxVal.putObject("level", Level.CODE.Lane);
-		ctxVal.putObject("run", run);
-		ctxVal.putObject("lane", getLane(run, laneNumber));
-		treatment.validate(ctxVal);
-		if (!ctxVal.hasErrors()) {
-			MongoDBDAO.update(InstanceConstants.RUN_ILLUMINA_COLL_NAME, Run.class, 
-					DBQuery.and(DBQuery.is("code", runCode), DBQuery.is("lanes.number", laneNumber)),
-					DBUpdate.set("lanes.$.treatments."+treatment.code, treatment).set("traceInformation", getUpdateTraceInformation(run)));	
-			return ok(Json.toJson(treatment));
-		} else {
-			return badRequest(NGLContext._errorsAsJson(ctxVal.getErrors()));
-		}
-	}
-	
-//	@Permission(value={"writing"})
-	@Authenticated
-	@Historized
-	@Authorized.Write
-	//@Permission(value={"creation_update_treatments"})
-	// @BodyParser.Of(value = BodyParser.Json.class, maxLength = 5000 * 1024)
-	@BodyParser.Of(value = IGBodyParsers.Json5MB.class)
-	public Result update(String runCode, Integer laneNumber, String treatmentCode){
-		Run run  = MongoDBDAO.findOne(InstanceConstants.RUN_ILLUMINA_COLL_NAME, Run.class, 
-				DBQuery.and(DBQuery.is("code", runCode), 
-						DBQuery.elemMatch("lanes", 
-								DBQuery.and(
-										DBQuery.is("number", laneNumber),
-										DBQuery.exists("treatments."+treatmentCode)))));
-		if (run == null)
-			return badRequest(); // TODO: probably a not found
-		
-		Form<Treatment> filledForm = getFilledForm(treatmentForm, Treatment.class);
-		Treatment treatment = filledForm.get();
-		if (treatmentCode.equals(treatment.code)) {
-//			ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm.errors()); 
-			ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm); 
-			ctxVal.setUpdateMode();
-			ctxVal.putObject("level", Level.CODE.Lane);
-			ctxVal.putObject("run", run);
-			ctxVal.putObject("lane", getLane(run, laneNumber));
-			treatment.validate(ctxVal);
-			if (!ctxVal.hasErrors()) {
-				MongoDBDAO.update(InstanceConstants.RUN_ILLUMINA_COLL_NAME, Run.class, 
-						DBQuery.and(DBQuery.is("code", runCode), DBQuery.is("lanes.number", laneNumber)),
-						DBUpdate.set("lanes.$.treatments."+treatment.code, treatment).set("traceInformation", getUpdateTraceInformation(run)));
-				return ok(Json.toJson(treatment));
-			} else {
-				// return badRequest(filledForm.errors-AsJson());
-				return badRequest(NGLContext._errorsAsJson(ctxVal.getErrors()));
-			}
-		} else {
-			return badRequest("treatment code are not the same");
-		}		
-	}
-	
-//	@Permission(value={"writing"})
-	@Authenticated
-	@Historized
-	@Authorized.Write
-	//@Permission(value={"delete_treatments"})
-	public /*static*/ Result delete(String runCode,  Integer laneNumber, String treatmentCode){
-		Run run  = MongoDBDAO.findOne(InstanceConstants.RUN_ILLUMINA_COLL_NAME, Run.class, 
-				DBQuery.and(DBQuery.is("code", runCode), 
-						DBQuery.elemMatch("lanes", 
-								DBQuery.and(
-										DBQuery.is("number", laneNumber),
-										DBQuery.exists("treatments."+treatmentCode)))));
-		if (run == null)
-			return badRequest(); // TODO: probably a not found
-		MongoDBDAO.update(InstanceConstants.RUN_ILLUMINA_COLL_NAME, Run.class, 
-				DBQuery.and(DBQuery.is("code", runCode), DBQuery.is("lanes.number", laneNumber)),
-				DBUpdate.unset("lanes.$.treatments."+treatmentCode).set("traceInformation", getUpdateTraceInformation(run)));					
-		return ok();		
-	}	
-	
-	private Lane getLane(Run run, Integer laneNumber) {
-		if (run.lanes != null) {
-			for (Lane lane : run.lanes) {
-				if (lane.number.equals(laneNumber)) {
-					return lane;
-				}		
-			}
-		}
-		throw new RuntimeException("Lane number does not exist "+run.code+" / "+laneNumber);
-	}
-	
+    @Authenticated
+    @Authorized.Read
+    public Result list(String runCode, Integer laneNumber){
+        return globalExceptionHandler(() -> {
+            try {
+                Map<String, Treatment> treatments = api.list(runCode, laneNumber);
+                if (treatments == null) {
+                    return notFoundAsJson("Run with code " + runCode + " not exist"); 
+                } else {
+                    return okAsJson(treatments);
+                }
+            } catch (APIException e) {
+                return notFoundAsJson(e.getMessage());
+            }	
+        });
+    }
+
+    @Authenticated
+    @Authorized.Read
+    public Result get(String runCode, Integer laneNumber, String treatmentCode){
+        return globalExceptionHandler(() -> {
+            try {
+                return okAsJson(api.get(api.getRun(runCode, laneNumber), laneNumber, treatmentCode));
+            } catch (APIException e) {
+                return notFoundAsJson(e.getMessage());
+            }
+        });
+    }
+
+    @Authenticated
+    @Authorized.Read
+    public Result head(String runCode, Integer laneNumber, String treatmentCode) {
+        return globalExceptionHandler(() -> {
+            if (api.checkObjectExist(runCode, laneNumber, treatmentCode)){
+                return ok();
+            } else {
+                return notFound();
+            }
+        });
+    }
+
+    @Authenticated
+    @Authorized.Write
+    @BodyParser.Of(value = IGBodyParsers.Json5MB.class)
+    public Result save(String runCode, Integer laneNumber) {
+        return globalExceptionHandler(() -> {
+            try {
+                Run run = api.getRun(runCode, laneNumber);
+                if (run == null) {
+                    return badRequestAsJson("Run with code " + runCode + " not exist"); 
+                } else {
+                    Treatment input = getFilledForm(treatmentForm, Treatment.class).get();
+                    Treatment t = api.save(run, input, laneNumber, getCurrentUser());
+                    return okAsJson(t);
+                }
+            } catch (APIValidationException e) {
+                return badRequestLoggingForValidationException(e);
+            } catch (APIException e) {
+                return badRequestAsJson(e.getMessage());
+            }
+        });
+    }
+
+    @Authenticated
+    @Authorized.Write
+    @BodyParser.Of(value = IGBodyParsers.Json5MB.class)
+    public Result update(String runCode, Integer laneNumber, String treatmentCode){
+        return globalExceptionHandler(() -> {
+            Run run = api.getRun(runCode, laneNumber, treatmentCode);
+            if (run == null) {
+                return badRequestAsJson("Run with code " + runCode + " not exist"); 
+            } else {
+                Treatment input = getFilledForm(treatmentForm, Treatment.class).get();
+                if (treatmentCode.equals(input.code)) {
+                    try {
+                        return okAsJson(api.update(run, laneNumber, input, getCurrentUser()));
+                    } catch (APIValidationException e) {
+                        return badRequestLoggingForValidationException(e);
+                    } catch (APIException e) {
+                        return badRequestAsJson(e.getMessage());
+                    }
+                } else {
+                    return badRequestAsJson("treatment code are not the same");
+                }
+            }
+        });
+    }
+
+    @Authenticated
+    @Authorized.Write
+    public Result delete(String runCode,  Integer laneNumber, String treatmentCode){
+        return globalExceptionHandler(() -> {
+            Run run = api.getRun(runCode, laneNumber, treatmentCode);
+            if (run == null) {
+                return notFoundAsJson("Run with code " + runCode + " not exist");
+            } else {
+                try {
+                    api.delete(run, laneNumber, treatmentCode, getCurrentUser());
+                    return ok();
+                } catch (APIException e) {
+                    return badRequestAsJson(e.getMessage());
+                }
+            }
+        });	
+    }	
+
 }

@@ -2,11 +2,11 @@ package controllers.containers.tpl;
 
 import javax.inject.Inject;
 
+import controllers.NGLController;
 import fr.cea.ig.authentication.Authenticated;
 import fr.cea.ig.authorization.Authorized;
 import fr.cea.ig.lfw.Historized;
 import fr.cea.ig.ngl.NGLApplication;
-import fr.cea.ig.ngl.NGLController;
 import fr.cea.ig.ngl.support.NGLJavascript;
 import play.mvc.Result;
 import views.html.container.details;
@@ -14,11 +14,8 @@ import views.html.container.home;
 import views.html.container.newFromFile;
 import views.html.container.search;
 
-// TODO: clean, comment
 
-//import controllers.CommonController;
-// public class Containers extends -CommonController {
-public class Containers extends NGLController implements NGLJavascript { // NGLBaseController {
+public class Containers extends NGLController implements NGLJavascript { 
 
 	private final home        home;
 	private final search      search;
@@ -75,7 +72,9 @@ public class Containers extends NGLController implements NGLJavascript { // NGLB
                 		controllers.containers.api.routes.javascript.Containers.update(),
                 		controllers.samples.api.routes.javascript.Samples.list(),
                 		controllers.containers.api.routes.javascript.Containers.list(),
-                		controllers.experiments.api.routes.javascript.ExperimentTypes.list(),
+                        controllers.experiments.api.routes.javascript.ExperimentTypes.list(),
+                        controllers.experiments.api.routes.javascript.Experiments.get(),
+                        controllers.experiments.api.routes.javascript.Experiments.update(),
                 		controllers.containers.api.routes.javascript.ContainerSupportCategories.list(),
                 		controllers.commons.api.routes.javascript.States.list(),
                 		controllers.commons.api.routes.javascript.PropertyDefinitions.list(),
@@ -87,6 +86,7 @@ public class Containers extends NGLController implements NGLJavascript { // NGLB
                 		controllers.containers.api.routes.javascript.ContainerSupports.list(),
                 		controllers.containers.api.routes.javascript.ContainerSupports.saveCode(),
                 		controllers.containers.api.routes.javascript.Containers.updateStateBatch(),
+                		controllers.containers.api.routes.javascript.Containers.updateState(),
                 		controllers.reporting.api.routes.javascript.ReportingConfigurations.list(),
                 		controllers.reporting.api.routes.javascript.ReportingConfigurations.get(),
                 		controllers.reporting.api.routes.javascript.ReportingConfigurations.save(),

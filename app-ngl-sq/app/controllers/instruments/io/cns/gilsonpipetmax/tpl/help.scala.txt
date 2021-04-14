@@ -1,0 +1,23 @@
+@(lines: List[controllers.instruments.io.cns.gilsonpipetmax.HelpSampleSheetLine],protocolName: String)
+
+
+@import controllers.instruments.io.utils._;
+@import java.text.SimpleDateFormat;
+@import java.lang.String; var printLine="";
+# ---------------------------------------------------------------------------------------------------------,\u000D\u000A
+# Aide au positionnement des tubes sur le robot Gilson
+# ---------------------------------------------------------------------------------------------------------,\u000D\u000A
+Protocole choisi : @(protocolName)
+
+@for((line) <- lines.sorted){
+		@{printLine+= line.inputContainerCode +";"+line.sampleNameList+";"+line.sourcePos+"\n"}
+		
+}
+@(printLine)
+
+
+
+
+
+
+

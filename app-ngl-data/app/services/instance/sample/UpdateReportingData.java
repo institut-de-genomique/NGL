@@ -26,7 +26,7 @@ import controllers.migration.OneToVoidContainer;
 import fr.cea.ig.MongoDBDAO;
 import fr.cea.ig.MongoDBResult;
 import fr.cea.ig.MongoDBResult.Sort;
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import models.laboratory.common.instance.PropertyValue;
 import models.laboratory.experiment.description.ExperimentType;
 import models.laboratory.experiment.instance.Experiment;
@@ -41,84 +41,82 @@ import models.laboratory.sample.instance.reporting.SampleProcessesStatistics;
 import models.laboratory.sample.instance.reporting.SampleReadSet;
 import models.utils.InstanceConstants;
 import models.utils.dao.DAOException;
-// import play.Logger;
-// import play.api.modules.spring.Spring;
+import play.Logger;
 import rules.services.RulesException;
-import scala.concurrent.duration.FiniteDuration;
 import services.instance.AbstractImportData;
+import validation.ContextValidation;
 import workflows.process.ProcWorkflowHelper;
 
 public class UpdateReportingData extends AbstractImportData {
 	
-//	private static final play.Logger.ALogger logger = play.Logger.of(UpdateReportingData.class);
-	
+	private final ProcWorkflowHelper procWorkflowHelper;	
 	private Map<String, List<String>> transformationCodesByProcessTypeCode = new HashMap<>();
 	private Map<String, Integer> nbExpPositionInProcessType = new HashMap<>(); 
 
-	private final ProcWorkflowHelper procWorkflowHelper;
-	
 	@Inject
-	public UpdateReportingData(FiniteDuration durationFromStart, FiniteDuration durationFromNextIteration, NGLContext ctx) {
-		super("UpdateReportingData", durationFromStart, durationFromNextIteration, ctx);
-		procWorkflowHelper = ctx.injector().instanceOf(ProcWorkflowHelper.class); // Spring.get BeanOfType(ProcWorkflowHelper.class);
+	public UpdateReportingData(NGLApplication app) {
+		super("UpdateReportingData", app);
+		procWorkflowHelper = app.injector().instanceOf(ProcWorkflowHelper.class);
 	}
 
 	@Override
-	public void runImport() throws SQLException, DAOException, MongoException, RulesException {
+	public void runImport(ContextValidation contextError) throws SQLException, DAOException, MongoException, RulesException {
 		logger.debug("Start reporting synchro");
 		Integer skip = 0;
 		Date date = new Date();
 		MongoDBResult<Sample> result = MongoDBDAO.find(InstanceConstants.SAMPLE_COLL_NAME, Sample.class);
 		Integer nbResult = result.count(); 
-		while(skip < nbResult) {
+		while (skip < nbResult) {
 			try {
 				long t1 = System.currentTimeMillis();
-					List<Sample> cursor = MongoDBDAO.find(InstanceConstants.SAMPLE_COLL_NAME, Sample.class)
+				List<Sample> cursor = MongoDBDAO.find(InstanceConstants.SAMPLE_COLL_NAME, Sample.class)
 						.sort("traceInformation.creationDate", Sort.DESC).skip(skip).limit(1000)
 						.toList();
 
-					cursor.forEach(sample -> {
-					try{
-						updateProcesses(sample);
-						logger.debug("update sample "+sample.code);
-						if(sample.processes != null && sample.processes.size() > 0){
-							MongoDBDAO.update(InstanceConstants.SAMPLE_COLL_NAME, Sample.class, DBQuery.is("code", sample.code), 
-									DBUpdate.set("processes", sample.processes).set("processesStatistics", sample.processesStatistics).set("processesUpdatedDate", date));
-						}else{
-							MongoDBDAO.update(InstanceConstants.SAMPLE_COLL_NAME, Sample.class, DBQuery.is("code", sample.code), 
-									DBUpdate.unset("processes").unset("processesStatistics").set("processesUpdatedDate", date));
+				cursor.forEach(sample -> {
+					try {
+						if(!sample.projectCodes.contains("CEA")){ //skip very big sample on CNS
+							updateProcesses(sample);						
+							logger.debug("update sample "+sample.code);
+							if (sample.processes != null && sample.processes.size() > 0) {
+								MongoDBDAO.update(InstanceConstants.SAMPLE_COLL_NAME, Sample.class, DBQuery.is("code", sample.code), 
+										DBUpdate.set("processes", sample.processes).set("processesStatistics", sample.processesStatistics).set("processesUpdatedDate", date));
+							} else {
+								MongoDBDAO.update(InstanceConstants.SAMPLE_COLL_NAME, Sample.class, DBQuery.is("code", sample.code), 
+										DBUpdate.unset("processes").unset("processesStatistics").set("processesUpdatedDate", date));
+							}
 						}
-					}catch(Throwable e){
+					} catch(Throwable e) {
 						logger.error("Sample : "+sample.code+" - "+e,e);
-						if(null != e.getMessage())
-							contextError.addErrors(sample.code, e.getMessage());
+						if (e.getMessage() != null)
+							contextError.addError(sample.code, e.getMessage());
 						else
-							contextError.addErrors(sample.code, "null");
+							contextError.addError(sample.code, "null");
 					}
 				});
-					skip = skip+1000;
-					long t2 = System.currentTimeMillis();
-					logger.debug("time "+skip+" - "+((t2-t1)/1000));
-				}catch(Throwable e){
-					logger.error("Error : "+e,e);
-					if(null != e.getMessage())
-						contextError.addErrors("Error", e.getMessage());
-					else
-						contextError.addErrors("Error", "null");
-				}
+				skip = skip + 1000;
+				long t2 = System.currentTimeMillis();
+				logger.debug("time " + skip + " - " + ((t2-t1)/1000));
+			} catch(Throwable e) {
+				logger.error("Error : "+e,e);
+				if (e.getMessage() != null)
+					contextError.addError("Error", e.getMessage());
+				else
+					contextError.addError("Error", "null");
+			}
 		}
 	}
 
-	private void updateProcesses(Sample sample) {
+	
+	public void updateProcesses(Sample sample) {
 		List<Process> processes = MongoDBDAO.find(InstanceConstants.PROCESS_COLL_NAME, Process.class, DBQuery.in("sampleCodes", sample.code))
 				.toList();
 		
 		sample.processes = processes.parallelStream()
 					.map(process -> convertToSampleProcess(sample, process))
-					.collect(Collectors.toList());	
-		
+					.collect(Collectors.toList());
 		SampleProcess spWithoutProcess = getReadSetBeforeNGLSQ(sample);
-		if(null != spWithoutProcess){
+		if (spWithoutProcess != null) {
 			sample.processes.add(spWithoutProcess);
 		}
 		
@@ -126,12 +124,10 @@ public class UpdateReportingData extends AbstractImportData {
 	}
 
 	private void computeStatistics(Sample sample) {
-		if(null != sample.processes){
-			
+		if (sample.processes != null) {
 			sample.processesStatistics = new SampleProcessesStatistics();	
 			sample.processesStatistics.processTypeCodes = sample.processes.stream().filter(p -> p.typeCode != null).collect(Collectors.groupingBy(p -> p.typeCode, Collectors.counting()));
 			sample.processesStatistics.processCategoryCodes = sample.processes.stream().filter(p -> p.categoryCode != null).collect(Collectors.groupingBy(p -> p.categoryCode, Collectors.counting()));
-		
 			sample.processesStatistics.readSetTypeCodes = sample.processes.stream().filter(p -> p.readsets != null).map(p -> p.readsets).flatMap(List::stream).collect(Collectors.groupingBy(r -> r.typeCode, Collectors.counting()));
 		}
 	}
@@ -150,16 +146,15 @@ public class UpdateReportingData extends AbstractImportData {
 			sampleProcess.properties = process.properties;			
 		}
 		sampleProcess.currentExperimentTypeCode = process.currentExperimentTypeCode;
-		if(process.experimentCodes != null && process.experimentCodes.size() > 0){
+		if (process.experimentCodes != null && process.experimentCodes.size() > 0) {
 			List<SampleExperiment> experiments  = updateExperiments(process);
-			if(experiments != null && experiments.size() > 0){
+			if (experiments != null && experiments.size() > 0) {
 				sampleProcess.experiments = experiments;
 			}
 		}
-		
-		if(process.outputContainerCodes != null && process.outputContainerCodes.size() > 0){
+		if (process.outputContainerCodes != null && process.outputContainerCodes.size() > 0) {
 			List<SampleReadSet> readsets = getSampleReadSets(sample, process);
-			if(readsets != null && readsets.size() > 0){
+			if (readsets != null && readsets.size() > 0) {
 				sampleProcess.readsets = readsets;
 			}
 		}
@@ -167,29 +162,31 @@ public class UpdateReportingData extends AbstractImportData {
 		//extract only transformation
 		
 		Integer nbExp = 0;
-		if(process.experimentCodes != null && process.experimentCodes.size() > 0 && transformationCodes != null && transformationCodes.size() > 0){
+		if (process.experimentCodes != null && process.experimentCodes.size() > 0 && transformationCodes != null && transformationCodes.size() > 0) {
 			nbExp = MongoDBDAO.find(InstanceConstants.EXPERIMENT_COLL_NAME, Experiment.class, DBQuery.in("code", process.experimentCodes)
 					.in("typeCode", transformationCodes)
 					.in("state.code", Arrays.asList("IP","F"))).count();
+			/*nbExp = MongoDBDAO.getCount(InstanceConstants.EXPERIMENT_COLL_NAME, Experiment.class, DBQuery.in("code", process.experimentCodes)
+					.in("typeCode", transformationCodes)
+					.in("state.code", Arrays.asList("IP","F")));*/
 			
 			sampleProcess.progressInPercent = (new BigDecimal((nbExp.floatValue() / Integer.valueOf(nbExpPositionInProcessType.get(process.typeCode)).floatValue())*100.00)).setScale(0, BigDecimal.ROUND_HALF_UP).intValue();
 			//Logger.debug("progressInPercent : "+(nbExp.floatValue() / Integer.valueOf(transformationCodes.size()).floatValue()));
-		}else{
+		} else {
 			sampleProcess.progressInPercent = null;			
 		}
-		
 		return sampleProcess;
 	}
 			
 	private List<String> getTransformationCodesForProcessTypeCode(Process process) {
 		List<String> transformationCodes;
-		if(transformationCodesByProcessTypeCode.containsKey(process.typeCode)){
+		if (transformationCodesByProcessTypeCode.containsKey(process.typeCode)) {
 			transformationCodes = transformationCodesByProcessTypeCode.get(process.typeCode);
-		}else{
-			transformationCodes =ExperimentType.find.findByProcessTypeCode(process.typeCode,true).stream().map(e -> e.code).collect(Collectors.toList());
+		} else {
+			transformationCodes =ExperimentType.find.get().findByProcessTypeCode(process.typeCode,true).stream().map(e -> e.code).collect(Collectors.toList());
 			transformationCodesByProcessTypeCode.put(process.typeCode, transformationCodes);
 			
-			Integer nbPos = ExperimentType.find.countDistinctExperimentPositionInProcessType(process.typeCode);
+			Integer nbPos = ExperimentType.find.get().countDistinctExperimentPositionInProcessType(process.typeCode);
 			nbExpPositionInProcessType.put(process.typeCode, nbPos);
 		}
 		
@@ -213,13 +210,13 @@ public class UpdateReportingData extends AbstractImportData {
 		Set<String> containerCodes = new TreeSet<>();
 		containerCodes.add(process.inputContainerCode);
 		
-		if(null != process.outputContainerCodes){
+		if (process.outputContainerCodes != null) {
 			containerCodes.addAll(process.outputContainerCodes);
 		}
 		experiment.atomicTransfertMethods.parallelStream().forEach(atm -> {
-			if(OneToVoidContainer.class.isInstance(atm)){
+			if (OneToVoidContainer.class.isInstance(atm)) {
 				atm.inputContainerUseds.forEach(icu -> {
-					if(containerCodes.contains(icu.code)){
+					if (containerCodes.contains(icu.code)) {
 						SampleExperiment sampleExperiment = new SampleExperiment();
 						sampleExperiment.code = experiment.code;
 						sampleExperiment.typeCode= experiment.typeCode;
@@ -234,11 +231,11 @@ public class UpdateReportingData extends AbstractImportData {
 						sampleExperiments.add(sampleExperiment);
 					}					
 				});
-			}else{
+			} else {
 				atm.inputContainerUseds.forEach(icu -> {
-					if(null != atm.outputContainerUseds){
-						atm.outputContainerUseds.forEach(ocu ->{
-							if(ocu.code != null && containerCodes.containsAll(Arrays.asList(icu.code, ocu.code))){
+					if (atm.outputContainerUseds != null) {
+						atm.outputContainerUseds.forEach(ocu -> {
+							if (ocu.code != null && containerCodes.containsAll(Arrays.asList(icu.code, ocu.code))) {
 								SampleExperiment sampleExperiment = new SampleExperiment();
 								sampleExperiment.code = experiment.code;
 								sampleExperiment.typeCode= experiment.typeCode;
@@ -251,7 +248,7 @@ public class UpdateReportingData extends AbstractImportData {
 								sampleExperiment.protocolCode = experiment.protocolCode;
 								sampleExperiment.properties = computeExperimentProperties(experiment, icu, ocu);
 								sampleExperiments.add(sampleExperiment);
-							}else if(containerCodes.contains(icu.code)){
+							} else if(containerCodes.contains(icu.code)) {
 								SampleExperiment sampleExperiment = new SampleExperiment();
 								sampleExperiment.code = experiment.code;
 								sampleExperiment.typeCode= experiment.typeCode;
@@ -265,7 +262,7 @@ public class UpdateReportingData extends AbstractImportData {
 								sampleExperiments.add(sampleExperiment);
 							}
 						});
-					}else if(containerCodes.contains(icu.code)){
+					} else if(containerCodes.contains(icu.code)) {
 						SampleExperiment sampleExperiment = new SampleExperiment();
 						sampleExperiment.code = experiment.code;
 						sampleExperiment.typeCode= experiment.typeCode;
@@ -294,15 +291,14 @@ public class UpdateReportingData extends AbstractImportData {
 			                                                          InputContainerUsed icu,
 			                                                          OutputContainerUsed ocu) {
 		Map<String, PropertyValue> finalProperties = new HashMap<>(); // <String, PropertyValue>();
-		if (null != experiment.experimentProperties) finalProperties.putAll(filterProperties(experiment.experimentProperties));
-		if (null != experiment.instrumentProperties) finalProperties.putAll(filterProperties(experiment.instrumentProperties));
-		if (null != icu.experimentProperties)        finalProperties.putAll(filterProperties(icu.experimentProperties));
-		if (null != icu.instrumentProperties)        finalProperties.putAll(filterProperties(icu.instrumentProperties));
-		if (null != ocu){
-			if(null != ocu.experimentProperties) finalProperties.putAll(filterProperties(ocu.experimentProperties));
-			if(null != ocu.instrumentProperties) finalProperties.putAll(filterProperties(ocu.instrumentProperties));
+		if (experiment.experimentProperties != null) finalProperties.putAll(filterProperties(experiment.experimentProperties));
+		if (experiment.instrumentProperties != null) finalProperties.putAll(filterProperties(experiment.instrumentProperties));
+		if (icu.experimentProperties        != null) finalProperties.putAll(filterProperties(icu.experimentProperties));
+		if (icu.instrumentProperties        != null) finalProperties.putAll(filterProperties(icu.instrumentProperties));
+		if (ocu != null) {
+			if (ocu.experimentProperties != null) finalProperties.putAll(filterProperties(ocu.experimentProperties));
+			if (ocu.instrumentProperties != null) finalProperties.putAll(filterProperties(ocu.instrumentProperties));
 		}
-		
 		return finalProperties;
 	}
 
@@ -315,7 +311,7 @@ public class UpdateReportingData extends AbstractImportData {
 	
 	private List<SampleReadSet> getSampleReadSets(Sample sample, Process process) {
 		List<SampleReadSet> sampleReadSets = new ArrayList<>();
-		Set<String> tags = procWorkflowHelper.getTagAssignFromProcessContainers(process);
+		Set<String> tags = procWorkflowHelper.getTagAssignFromProcessContainersUpdateReporting(process);
 		
 		BasicDBObject keys = new BasicDBObject();
 		keys.put("treatments", 0);
@@ -325,11 +321,23 @@ public class UpdateReportingData extends AbstractImportData {
 				keys)
 		.cursor
 		.forEach(readset -> {
-			if(!readset.sampleOnContainer.properties.containsKey(InstanceConstants.TAG_PROPERTY_NAME)
-					|| (null != tags && readset.sampleOnContainer.properties.containsKey(InstanceConstants.TAG_PROPERTY_NAME) 
-					&&  tags.contains(readset.sampleOnContainer.properties.get(InstanceConstants.TAG_PROPERTY_NAME).value))){
-				sampleReadSets.add(convertToSampleReadSet(readset));				
+			
+			//Construction tag value
+			if(readset.sampleOnContainer.properties.containsKey(InstanceConstants.TAG_PROPERTY_NAME) 
+					&& readset.sampleOnContainer.properties.containsKey(InstanceConstants.SECONDARY_TAG_PROPERTY_NAME) 
+					&& null!=tags 
+					&& tags.contains(readset.sampleOnContainer.properties.get(InstanceConstants.SECONDARY_TAG_PROPERTY_NAME).value.toString()+"_"+readset.sampleOnContainer.properties.get(InstanceConstants.TAG_PROPERTY_NAME).value.toString())){
+				sampleReadSets.add(convertToSampleReadSet(readset));
+			}else if(readset.sampleOnContainer.properties.containsKey(InstanceConstants.TAG_PROPERTY_NAME) 
+					&& !readset.sampleOnContainer.properties.containsKey(InstanceConstants.SECONDARY_TAG_PROPERTY_NAME) 
+					&& null != tags
+					&& tags.contains("_"+readset.sampleOnContainer.properties.get(InstanceConstants.TAG_PROPERTY_NAME).value.toString())){
+				sampleReadSets.add(convertToSampleReadSet(readset));
+			}else if(!readset.sampleOnContainer.properties.containsKey(InstanceConstants.TAG_PROPERTY_NAME) 
+					&& !readset.sampleOnContainer.properties.containsKey(InstanceConstants.SECONDARY_TAG_PROPERTY_NAME)){
+				sampleReadSets.add(convertToSampleReadSet(readset));
 			}
+			
 		});
 		return sampleReadSets;
 	}
@@ -347,7 +355,7 @@ public class UpdateReportingData extends AbstractImportData {
 		sampleReadSet.productionValuation = readset.productionValuation;   
 		sampleReadSet.bioinformaticValuation = readset.bioinformaticValuation; 
 		sampleReadSet.sampleOnContainer = readset.sampleOnContainer; 
-		if(!readset.typeCode.equals("rsnanopore")){
+		if (!readset.typeCode.equals("rsnanopore")) {
 			BasicDBObject keys = new BasicDBObject();
 			keys.put("code", 1);
 			keys.put("treatments.ngsrg", 1);
@@ -355,8 +363,6 @@ public class UpdateReportingData extends AbstractImportData {
 			ReadSet rs = MongoDBDAO.findByCode(InstanceConstants.READSET_ILLUMINA_COLL_NAME,ReadSet.class, readset.code, keys);
 			sampleReadSet.treatments = rs.treatments;
 		}
-		
-		
 		//sampleReadSet.treatments = filterTreaments(readset.treatments);
 		return sampleReadSet;
 	}
@@ -372,7 +378,7 @@ public class UpdateReportingData extends AbstractImportData {
 //		return treatments;
 //	}
 	
-	/**
+	/*
 	 * Extract ReadSet before the beginning of ngl-sq used.
 	 * @param sample
 	 * @return
@@ -395,7 +401,7 @@ public class UpdateReportingData extends AbstractImportData {
 			});
 			
 			SampleProcess sampleProcess = null;
-			if(sampleReadSets.size() > 0){
+			if (sampleReadSets.size() > 0) {
 				sampleProcess = new SampleProcess();
 				sampleProcess.typeCode = "Old LIMS";
 				sampleProcess.readsets = sampleReadSets;

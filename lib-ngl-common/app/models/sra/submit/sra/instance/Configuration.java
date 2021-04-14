@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 import fr.cea.ig.DBObject;
+import fr.cea.ig.ngl.dao.api.sra.ConfigurationAPI;
 import models.laboratory.common.description.ObjectType;
 import models.laboratory.common.instance.State;
 import models.laboratory.common.instance.TraceInformation;
@@ -13,20 +14,44 @@ import models.sra.submit.util.VariableSRA;
 import models.utils.InstanceConstants;
 import validation.ContextValidation;
 import validation.IValidation;
+import validation.common.instance.CommonValidationHelper;
 import validation.sra.SraValidationHelper;
+import validation.utils.ValidationHelper;
 //import play.Logger;
 
 //Declaration d'une collection Configuration (herite de DBObject)
 public class Configuration extends DBObject implements IValidation {
 
 	public static final String initialStateCode = "NONE";
+	
+	public  enum StrategyStudy {
+		strategy_internal_study, //obsolete
+		strategy_external_study, //obsolete
 
+		STRATEGY_CODE_STUDY,  // internal_study
+		STRATEGY_AC_STUDY     // external_study
+	}
+	
+	public enum StrategySample {
+		strategy_sample_clone,    //obsolete
+		strategy_sample_bank,     //obsolete
+		strategy_sample_taxon,    //obsolete
+		strategy_external_sample, //obsolete
+
+		STRATEGY_CODE_SAMPLE_TAXON,
+		STRATEGY_CODE_SAMPLE_REFCOLLAB,
+		STRATEGY_CODE_SAMPLE_BANK,
+		STRATEGY_AC_SAMPLE         // external_sample
+	}
+	
 	//public String alias;            // required mais remplacé par code herité de DBObject, et valeur = conf_projectCode_num
 	public List<String> projectCodes = new ArrayList<>(); // de type BAT, required pour nos stats
 	//public String studyCode = null;
-	public String strategySample = null;  // required et constraint :
+//	public String strategySample = null;  // required et constraint :
+	public StrategySample strategySample = null;  // required et constraint :
 	//("STRATEGY_SAMPLE_TAXON", "STRATEGY_SAMPLE_CLONE", "STRATEGY_NO_SAMPLE");
-	public String strategyStudy = "strategy_internal_study"; // required et contraint 
+//	public String strategyStudy = "strategy_internal_study"; // required et contraint 
+	public StrategyStudy strategyStudy = Configuration.StrategyStudy.STRATEGY_CODE_STUDY; // required et contraint 
 	// Whole Genome Sequencing, Metagenomics, transcriptome analysis
 
 	//public String studyCode = null;       // study à soumettre à l'ebi si strategyStudy==strategy_internal_study
@@ -50,56 +75,87 @@ public class Configuration extends DBObject implements IValidation {
 	// pour loguer les dernieres modifications utilisateurs
 
 
-
-	@Override
-	public void validate(ContextValidation contextValidation) {
+	public void validateInvariants(ContextValidation contextValidation) {
 		// Ajouter l'objet au contexte de validation seulement si objet ext
 		// pour ex pour validation de submission qui va avoir besoin d'ajouter des objets 
 
 		//contextValidation.putObject("configuration", this);	   
-		contextValidation.addKeyToRootKeyName("configuration");
+		contextValidation = contextValidation.appendPath("configuration");
+		if (ValidationHelper.validateNotEmpty(contextValidation, code, "code")) 
+			contextValidation = contextValidation.appendPath(code);
 		// verifier que projectCode est bien renseigné et existe dans lims :
-		SraValidationHelper.validateProjectCodes(this.projectCodes, contextValidation);
-
+		CommonValidationHelper.validateProjectCodes(contextValidation, this.projectCodes);
 		// Verifier que les projects ne sont pas archivés :
 		for (String projectCode: this.projectCodes) {
 			if (StringUtils.isNotBlank(projectCode)) {
 				// verifier si archivage ou non:
 			}
 		}
-
 		// verifier que champs contraints presents avec valeurs autorisees:
-		SraValidationHelper.requiredAndConstraint(contextValidation, this.librarySelection, VariableSRA.mapLibrarySelection(), "librarySelection");
-		SraValidationHelper.requiredAndConstraint(contextValidation, this.libraryStrategy, VariableSRA.mapLibraryStrategy(), "libraryStrategy");
-		SraValidationHelper.requiredAndConstraint(contextValidation, this.librarySource, VariableSRA.mapLibrarySource(), "librarySource");
-		if ( this.state != null && StringUtils.isNotBlank(this.state.code) && !initialStateCode.equals(this.state.code)) {
-			SraValidationHelper.validateState(ObjectType.CODE.SRASubmission, this.state, contextValidation);
+		SraValidationHelper.requiredAndConstraint(contextValidation, librarySelection, VariableSRA.mapLibrarySelection(), "librarySelection");
+		SraValidationHelper.requiredAndConstraint(contextValidation, libraryStrategy,  VariableSRA.mapLibraryStrategy(),  "libraryStrategy");
+		SraValidationHelper.requiredAndConstraint(contextValidation, librarySource,    VariableSRA.mapLibrarySource(),    "librarySource");
+		if (state != null && StringUtils.isNotBlank(state.code) && !initialStateCode.equals(state.code)) {
+			CommonValidationHelper.validateStateRequired(contextValidation, ObjectType.CODE.SRASubmission, this.state);
 		}
-		SraValidationHelper.requiredAndConstraint(contextValidation, this.strategySample, VariableSRA.mapStrategySample, "strategySample");
-		SraValidationHelper.requiredAndConstraint(contextValidation, this.strategyStudy, VariableSRA.mapStrategyStudy, "strategyStudy");
+		
 
-		/*if (StringUtils.isBlank(this.studyCode)) {
-				if (StringUtils.isBlank(this.strategyStudy) || ! this.strategyStudy.equalsIgnoreCase("strategy_external_study")){
-					contextValidation.addErrors("Pb study dans objet configuration", "Aucun studyCode et strategyStudy != 'strategy_external_study'");
-				}
-			}*/
-
-
-		// Verifier que si User_Experiments est renseigné, la valeur correspond bien à un fichier present sur disque
-		/*if (StringUtils.isNotBlank(userFileExperiments)){
-				if (! new File(userFileExperiments).isFile()){
-					contextValidation.addErrors("userFileExperiments", this.userFileExperiments + " n'est pas un fichier");
-				}
-				if (! new File(userFileExperiments).canRead()){
-					contextValidation.addErrors("userFileExperiments", this.userFileExperiments + " n'est pas un fichier lisible");
-				}
-			}*/		
+//		SraValidationHelper.requiredAndConstraint(contextValidation, this.strategySample, VariableSRA.mapStrategySample, "strategySample");
+//		SraValidationHelper.requiredAndConstraint(contextValidation, this.strategyStudy, VariableSRA.mapStrategyStudy, "strategyStudy");
 		// verifier que code est bien renseigné
 		//SraValidationHelper.validateCode(this, InstanceConstants.SRA_CONFIGURATION_COLL_NAME, contextValidation);
-		SraValidationHelper.validateId(this, contextValidation);
-		SraValidationHelper.validateCode(this, InstanceConstants.SRA_CONFIGURATION_COLL_NAME, contextValidation);
-		SraValidationHelper.validateTraceInformation(traceInformation, contextValidation);
-		contextValidation.removeKeyFromRootKeyName("configuration");
+		CommonValidationHelper.validateIdPrimary(contextValidation, this);
+		CommonValidationHelper.validateCodePrimary(contextValidation, this, InstanceConstants.SRA_CONFIGURATION_COLL_NAME);
+		CommonValidationHelper.validateTraceInformationRequired(contextValidation, traceInformation);
+	}
+	
+	private void validateCreation(ContextValidation contextValidation) {
+		contextValidation = contextValidation.appendPath("configuration");
+		if (ValidationHelper.validateNotEmpty(contextValidation, code, "code")) 
+			contextValidation = contextValidation.appendPath(code);
+		ConfigurationAPI configurationAPI = ConfigurationAPI.get();
+		if(configurationAPI.dao_checkObjectExist("code", code)) {
+			contextValidation.addError("code", code + " existe deja dans la base de données et MODE CREATION");
+		}	
+	}
+	
+	private void validateDelete(ContextValidation contextValidation) {
+		contextValidation = contextValidation.appendPath("configuration");
+		if (ValidationHelper.validateNotEmpty(contextValidation, code, "code")) 
+			contextValidation = contextValidation.appendPath(code);
+		ConfigurationAPI configurationAPI = ConfigurationAPI.get();
+		if(! configurationAPI.dao_checkObjectExist("code", code)) {
+			contextValidation.addError("code", code + " n'existe pas dans la base de données et MODE DELETE");
+		}	
+	}
+	
+	private void validateUpdate(ContextValidation contextValidation) {
+		contextValidation = contextValidation.appendPath("configuration");
+		if (ValidationHelper.validateNotEmpty(contextValidation, code, "code")) 
+			contextValidation = contextValidation.appendPath(code);
+		ConfigurationAPI configurationAPI = ConfigurationAPI.get();
+		if(! configurationAPI.dao_checkObjectExist("code", code)) {
+			contextValidation.addError("code", code + " n'existe pas dans la base de données et MODE UPDATE");
+		}	
+	}
+
+	@Override
+	public void validate(ContextValidation contextValidation) {
+		switch (contextValidation.getMode()) {
+		case CREATION:
+			validateCreation(contextValidation);
+			break;
+		case UPDATE:
+			validateUpdate(contextValidation);
+			break;
+		case DELETE:
+			validateDelete(contextValidation);
+			break;
+		default: // autre cas undefined notamment
+			contextValidation.addError("ERROR", "contextValidation.getMode() != de CREATION, UPDATE ou DELETE (undefined ?)");
+			break;	
+		} 
+		validateInvariants(contextValidation);
 	}
 
 }

@@ -9,15 +9,24 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 			pagination:{
 				active:true,
 				mode:'local'
-			},			
+			},	
+			cancel:{active: false, showButton: false},
+			select:{active: false, showButton: false},
 			showTotalNumberRecords:true,
 			edit : {
-				active:true,
+				active:false,
 				showButton : false,
 				withoutSelect : true,
 				columnMode : true
 			},
-			columns : [
+			exportCSV:{
+				active:true
+			},
+			columns : [{property:"traceInformation.creationDate",
+			        	header: Messages("experiment.traceInformation.creationDate"),
+			        	type :"date",		    	  	
+			        	order:true
+			           },
 			           {property:"code",
 			        	header: Messages("run.code"),
 			        	type :"text",		    	  	
@@ -37,32 +46,32 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 		    ]	        
  	};
 		
-	var rawDatasDTConfig = {
+	var rawDatasDTConfig = {	
 			name:'rawDataDT',
 			order :{by:'code',mode:'local', reverse:true},
-			search:{active:false},
 			pagination:{
 				active:true,
 				mode:'local'
-			},
-			select:{active:true},
+			},			
 			showTotalNumberRecords:true,
+			select:{active: false, showButton: false},
+			cancel:{showButton:false},
 			edit : {
 				active:true,
 				showButton : false,
 				withoutSelect : true,
 				columnMode : true
 			},
-			cancel : {
-				showButton:true
-			},
-			hide:{
+			exportCSV:{
 				active:true
 			},
-			exportCSV:{
-				active:false
-			},
-			columns : [
+			
+			
+			columns : [{property:"traceInformation.creationDate",
+			        	header: Messages("rawData.traceInformation.creationDate"),
+			        	type :"text",		    	  	
+			        	order:true
+			           },
 			           {property:"relatifName",
 			        	header: Messages("rawData.relatifName"),
 			        	type :"text",		    	  	
@@ -74,7 +83,7 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 	if(angular.isUndefined(mainService.getHomePage())){
 		mainService.setHomePage('consultation');
 		tabService.addTabs({label:Messages('experiments.menu.consultation'),href:jsRoutes.controllers.sra.experiments.tpl.Experiments.home("consultation").url,remove:true});
-		tabService.activeTab(0); // desactive le lien !
+		tabService.activeTab(0);  //active l'onglet en le mettant en bleu
 	}	
 	var init = function() {
 		$scope.mainService = mainService;
@@ -113,8 +122,8 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 			$scope.rawDataDT = datatable(rawDatasDTConfig);
 			$scope.rawDataDT.setData(maListRawDatas, maListRawDatas.length);
 		}).error(function(data){
-			//$scope.messages.addDetails(data);
-			//$scope.messages.setError("save");
+			$scope.messages.addDetails(data); 
+			$scope.messages.setError("save");
 		});
 		
 	};
@@ -124,7 +133,7 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 	if(angular.isUndefined(mainService.getHomePage())){
 		mainService.setHomePage('details');
 		tabService.addTabs({label:Messages('experiments.menu.details'),href:jsRoutes.controllers.sra.experiments.tpl.Experiments.home("details").url,remove:true});
-		tabService.activeTab(0); // desactive le lien !
+		tabService.activeTab(0);  // active l'onglet en le mettant en bleu
 	}			
 
 }]);

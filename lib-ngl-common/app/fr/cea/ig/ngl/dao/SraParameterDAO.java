@@ -15,27 +15,17 @@ import models.utils.InstanceConstants;
 import models.utils.dao.DAOException;
 
 @Singleton
-public class SraParameterDAO {
+public class SraParameterDAO extends GenericMongoDAO<SraParameter> {
 	
 	private static final play.Logger.ALogger logger = play.Logger.of(SraParameterDAO.class);
 	
-	private final GenericMongoDAO<SraParameter> gdao;
-	
 	@Inject
 	public SraParameterDAO() {
-		gdao = new GenericMongoDAO<>(InstanceConstants.SRA_PARAMETER_COLL_NAME,SraParameter.class);
+		super(InstanceConstants.SRA_PARAMETER_COLL_NAME,SraParameter.class);
 	}
 	
 	public SraParameter findOneByCodeAndType(String code, String type) throws DAOException {
-		return gdao.findOne(DBQuery.and(DBQuery.is("code", code),DBQuery.is("type", type)));
-	}
-	
-	public Iterable<SraParameter> find(DBQuery.Query q) throws DAOException {
-		return gdao.find(q);
-	}
-	
-	public List<SraParameter> findAsList(DBQuery.Query q) throws DAOException {
-		return gdao.findAsList(q);
+		return findOne(DBQuery.and(DBQuery.is("code", code),DBQuery.is("type", type)));
 	}
 	
 	public Map<String, String> getParameter(String type) throws DAOException {
@@ -44,7 +34,7 @@ public class SraParameterDAO {
 		if (sraParam.isEmpty()) {
 			logger.error("Absence de données de type '" + type + "' dans la table SraParmeters");
 		}
-		for (SraParameter param: sraParam){
+		for (SraParameter param : sraParam) {
 			map.put(param.code, param.value);
 		}
 		return map;

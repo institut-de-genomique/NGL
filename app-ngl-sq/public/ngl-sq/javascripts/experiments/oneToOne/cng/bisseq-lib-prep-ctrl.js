@@ -1,97 +1,99 @@
-// FDS 09/04/2018 - copiee depuis pcr-and-indexing-ctrl
-angular.module('home').controller('BisSeqLibPrepCtrl',['$scope', '$parse',  '$filter', 'atmToSingleDatatable','$http',
-                                                     function($scope, $parse, $filter, atmToSingleDatatable, $http){
-	
+//FDS 09/04/2018 - copiee depuis pcr-and-indexing-ctrl
+//22/06/2018 utilisation de la factory tagPlates dans le module tools (tag-plate-helpers.js)
+//03/11/2018 deplacement du module tools pour le rendre dispo a tous les instituts et toutes les experiences
+angular.module('home').controller('BisSeqLibPrepCtrl',['$scope', '$parse',  '$filter', 'atmToSingleDatatable','$http','tagPlates',
+	function($scope,   $parse,    $filter,   atmToSingleDatatable,  $http,  tagPlates ){
+
 	var inputExtraHeaders=Messages("experiments.inputs");
 	var outputExtraHeaders=Messages("experiments.outputs");	
-	
+
 	var datatableConfig = {
 			name: $scope.experiment.typeCode.toUpperCase(),
 
 			"columns":[
-			         //--------------------- INPUT containers section -----------------------
-			         	        
-			          { // barcode plaque entree == input support Container code
-			        	 "header":Messages("containers.table.support.name"),
-			        	 "property":"inputContainer.support.code",
-						 "hide":true,
-			        	 "type":"text",
-			        	 "position":1,
-			        	 "extraHeaders":{0: inputExtraHeaders}
-			         },    
-			         { // Ligne
-			        	 "header":Messages("containers.table.support.line"),
-			        	 "property":"inputContainer.support.line",
-			        	 "order":true,
-						 "hide":true,
-			        	 "type":"text",
-			        	 "position":2,
-			        	 "extraHeaders":{0: inputExtraHeaders}
-			         },
-			         { // colonne
-			        	 "header":Messages("containers.table.support.column"),
-			        	 // astuce GA: pour pouvoir trier les colonnes dans l'ordre naturel forcer a numerique.=> type:number,   property:  *1
-			        	 "property":"inputContainer.support.column*1",
-			        	 "order":true,
-						 "hide":true,
-			        	 "type":"number",
-			        	 "position":3,
-			        	 "extraHeaders":{0: inputExtraHeaders}
-			         },	  
-			         { // Projet(s)
-			        	"header":Messages("containers.table.projectCodes"),
-			 			"property": "inputContainer.projectCodes",
-			 			"order":true,
-			 			"hide":true,
-			 			"type":"text",
-			 			"position":4,
-			 			"render":"<div list-resize='cellValue' list-resize-min-size='3'>",
-			        	 "extraHeaders":{0: inputExtraHeaders}
-				     },
-				     { // Echantillon(s) 
-			        	"header":Messages("containers.table.sampleCodes"),
-			 			"property": "inputContainer.sampleCodes",
-			 			"order":true,
-			 			"hide":true,
-			 			"type":"text",
-			 			"position":5,
-			 			"render":"<div list-resize='cellValue' list-resize-min-size='3'>",
-			        	"extraHeaders":{0: inputExtraHeaders}
-				     },   
-					 { // Concentration
-			        	 "header":Messages("containers.table.concentration") + " (ng/µL)",
-			        	 "property":"inputContainerUsed.concentration.value",
-			        	 "order":true,
-						 "hide":true,
-			        	 "type":"number",
-			        	 "position":6,
-			        	 "extraHeaders":{0: inputExtraHeaders}
-			         }, 
-			         { //Volume 
-			        	 "header":Messages("containers.table.volume") + " (µL)", 
-			        	 "property":"inputContainerUsed.volume.value",
-			        	 "order":true,
-						 "hide":true,
-			        	 "type":"number",
-			        	 "position":6,
-			        	 "extraHeaders":{0:inputExtraHeaders}
-			         }, 
-			         { // Etat input Container 
-			        	 "header":Messages("containers.table.state.code"),
-			        	 "property":"inputContainer.state.code | codes:'state'",
-			        	 "order":true,
-						 "hide":true,
-			        	 "type":"text",
-			        	 "position":9,
-			        	 "extraHeaders":{0: inputExtraHeaders}
-			         },
-			         //--->  colonnes specifiques experience s'inserent ici  (inputUsed ??)     
-			         
-			         //------------------------- OUTPUT containers section --------------------------
-			         
-			         //--->  colonnes specifiques experience s'inserent ici  (outputUsed ??)
-			         
-		            /* ne pas afficher les containercodes  sauf pour DEBUG
+				//--------------------- INPUT containers section -----------------------
+
+				{ // barcode plaque entree == input support Container code
+					"header":Messages("containers.table.support.name"),
+					"property":"inputContainer.support.code",
+					"hide":true,
+					"type":"text",
+					"position":1,
+					"extraHeaders":{0: inputExtraHeaders}
+				},    
+				{ // Ligne
+					"header":Messages("containers.table.support.line"),
+					"property":"inputContainer.support.line",
+					"order":true,
+					"hide":true,
+					"type":"text",
+					"position":2,
+					"extraHeaders":{0: inputExtraHeaders}
+				},
+				{ // colonne
+					"header":Messages("containers.table.support.column"),
+					// astuce GA: pour pouvoir trier les colonnes dans l'ordre naturel forcer a numerique.=> type:number,   property:  *1
+					"property":"inputContainer.support.column*1",
+					"order":true,
+					"hide":true,
+					"type":"number",
+					"position":3,
+					"extraHeaders":{0: inputExtraHeaders}
+				},	  
+				{ // Projet(s)
+					"header":Messages("containers.table.projectCodes"),
+					"property": "inputContainer.projectCodes",
+					"order":true,
+					"hide":true,
+					"type":"text",
+					"position":4,
+					"render":"<div list-resize='cellValue' list-resize-min-size='3'>",
+					"extraHeaders":{0: inputExtraHeaders}
+				},
+				{ // Echantillon(s) 
+					"header":Messages("containers.table.sampleCodes"),
+					"property": "inputContainer.sampleCodes",
+					"order":true,
+					"hide":true,
+					"type":"text",
+					"position":5,
+					"render":"<div list-resize='cellValue' list-resize-min-size='3'>",
+					"extraHeaders":{0: inputExtraHeaders}
+				},   
+				{ // Concentration
+					"header":Messages("containers.table.concentration") + " (ng/µL)",
+					"property":"inputContainerUsed.concentration.value",
+					"order":true,
+					"hide":true,
+					"type":"number",
+					"position":6,
+					"extraHeaders":{0: inputExtraHeaders}
+				}, 
+				{ //Volume 
+					"header":Messages("containers.table.volume") + " (µL)", 
+					"property":"inputContainerUsed.volume.value",
+					"order":true,
+					"hide":true,
+					"type":"number",
+					"position":6,
+					"extraHeaders":{0:inputExtraHeaders}
+				}, 
+				{ // Etat input Container 
+					"header":Messages("containers.table.state.code"),
+					"property":"inputContainer.state.code | codes:'state'",
+					"order":true,
+					"hide":true,
+					"type":"text",
+					"position":9,
+					"extraHeaders":{0: inputExtraHeaders}
+				},
+				//--->  colonnes specifiques experience s'inserent ici  (inputUsed ??)     
+
+				//------------------------- OUTPUT containers section --------------------------
+
+				//--->  colonnes specifiques experience s'inserent ici  (outputUsed ??)
+
+				/* ne pas afficher les containercodes  sauf pour DEBUG
 			         {
 			        	 "header":"DEBUG code",
 			        	 "property":"outputContainer.code",
@@ -102,132 +104,109 @@ angular.module('home').controller('BisSeqLibPrepCtrl',['$scope', '$parse',  '$fi
 			        	 "position":99,
 			        	 "extraHeaders":{0: outputExtraHeaders}
 			         },*/
-			         { //  barcode plaque sortie == support Container used code... faut Used 
-			        	 "header":Messages("containers.table.support.name"),
-			        	 "property":"outputContainerUsed.locationOnContainerSupport.code", 
-						 "hide":true,
-			        	 "type":"text",
-			        	 "position":35,
-			        	 "extraHeaders":{0: outputExtraHeaders}
-			         },  
-			         { //  Ligne 
-			        	 "header":Messages("containers.table.support.line"),
-			        	 "property":"outputContainerUsed.locationOnContainerSupport.line", 
-			        	 "order":true,
-						 "hide":true,
-			        	 "type":"text",
-			        	 "position":36,
-			        	 "extraHeaders":{0: outputExtraHeaders}
-			         },     
-			         { // colonne
-			        	 "header":Messages("containers.table.support.column"),
-			        	 // astuce GA: pour pouvoir trier les colonnes dans l'ordre naturel forcer a numerique.=> type:number,   property:  *1
-			        	 "property":"outputContainerUsed.locationOnContainerSupport.column*1", 
-			        	 "order":true,
-						 "hide":true,
-			        	 "type":"number",
-			        	 "position":37,
-			        	 "extraHeaders":{0: outputExtraHeaders}
-			         },	
-			         { // Etat outpout container      
-			        	 "header":Messages("containers.table.state.code"),
-			        	 "property":"outputContainer.state.code | codes:'state'",
-			        	 "order":true,
-						 "edit":false,
-						 "hide":true,
-			        	 "type":"text",
-			        	 "position":40,
-			        	 "extraHeaders":{0: outputExtraHeaders}
-			         }
-			         ],
-			"compact":true,
-			"pagination":{
-				"active":false
-			},		
-			"search":{
-				"active":false
-			},
-			"order":{
-				"mode":"local",
-				"active":true//,
-				// FDS : ce tri donne 1,10,11,12,2.... comment avoir un tri 1,2....10,11,12,13 ??
-				//"by":"inputContainer.support.column*1"
-			},
-			"remove":{
-				"active": ($scope.isEditModeAvailable() && $scope.isNewState()),
-				"showButton": ($scope.isEditModeAvailable() && $scope.isNewState()),
-				"mode":"local"
-			},
-			"save":{
-				"active":true,
-	        	"withoutEdit": true,
-	        	"changeClass":false,
-	        	"showButton":false,
-	        	"mode":"local",
-	        	"callback":function(datatable){
-	        		copyContainerSupportCodeAndStorageCodeToDT(datatable);
-	        	}
-			},
-			"hide":{
-				"active":true
-			},
-			"edit":{ // editable si mode=Finished ????
-				active: ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F')),
-				showButton: ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F')),
-				byDefault:($scope.isCreationMode()),
-				columnMode:true
-			},
-			"messages":{
-				"active":false,
-				"columnMode":true
-			},
-			"exportCSV":{
-				"active":true,
-				"showButton":true,
-				"delimiter":";",
-				"start":false
-			},
-			"extraHeaders":{
-				"number":2,
-				"dynamic":true,
-			},
-			"otherButtons": {
-				//30/08/2017 plus de volume in donc plus besoin de bouton de copie de volume...
-			}
-	}; // fin struct datatableConfig
-	
-	
+				{ //  barcode plaque sortie == support Container used code... faut Used 
+					"header":Messages("containers.table.support.name"),
+					"property":"outputContainerUsed.locationOnContainerSupport.code", 
+					"hide":true,
+					"type":"text",
+					"position":35,
+					"extraHeaders":{0: outputExtraHeaders}
+				},  
+				{ //  Ligne 
+					"header":Messages("containers.table.support.line"),
+					"property":"outputContainerUsed.locationOnContainerSupport.line", 
+					"order":true,
+					"hide":true,
+					"type":"text",
+					"position":36,
+					"extraHeaders":{0: outputExtraHeaders}
+				},     
+				{ // colonne
+					"header":Messages("containers.table.support.column"),
+					// astuce GA: pour pouvoir trier les colonnes dans l'ordre naturel forcer a numerique.=> type:number,   property:  *1
+					"property":"outputContainerUsed.locationOnContainerSupport.column*1", 
+					"order":true,
+					"hide":true,
+					"type":"number",
+					"position":37,
+					"extraHeaders":{0: outputExtraHeaders}
+				},	
+				{ // Etat outpout container      
+					"header":Messages("containers.table.state.code"),
+					"property":"outputContainer.state.code | codes:'state'",
+					"order":true,
+					"edit":false,
+					"hide":true,
+					"type":"text",
+					"position":40,
+					"extraHeaders":{0: outputExtraHeaders}
+				}
+				],
+				"compact":true,
+				"pagination":{
+					"active":false
+				},		
+				"search":{
+					"active":false
+				},
+				"order":{
+					"mode":"local",
+					"active":true//,
+					// FDS : ce tri donne 1,10,11,12,2.... comment avoir un tri 1,2....10,11,12,13 ??
+					//"by":"inputContainer.support.column*1"
+				},
+				"remove":{
+					"active": ($scope.isEditModeAvailable() && $scope.isNewState()),
+					"showButton": ($scope.isEditModeAvailable() && $scope.isNewState()),
+					"mode":"local"
+				},
+				"save":{
+					"active":true,
+					"withoutEdit": true,
+					"changeClass":false,
+					"showButton":false,
+					"mode":"local",
+					"callback":function(datatable){
+						// NGL-2371 FDS 11/03/2019 copyContainerSupportCodeAndStorageCodeToDT deplacée dans atmService + ajout 2eme param "pos"
+						// tous les instruments de cette exp n'ont que plaque en ouputContainer, inutile de le tester ?????????????????????????????????????? A VERIFIER
+						// plaque inputContainer => pos='auto'
+						atmService.copyContainerSupportCodeAndStorageCodeToDT(datatable,'auto');
+					}
+				},
+				"hide":{
+					"active":true
+				},
+				"edit":{ // editable si mode=Finished ????
+					active: ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F')),
+					showButton: ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F')),
+					byDefault:($scope.isCreationMode()),
+					columnMode:true
+				},
+				"messages":{
+					"active":false,
+					"columnMode":true
+				},
+				"exportCSV":{
+					"active":true,
+					"showButton":true,
+					"delimiter":";",
+					"start":false
+				},
+				"extraHeaders":{
+					"number":2,
+					"dynamic":true,
+				},
+				"otherButtons": {
+				}
+	}; // fin struct datatableConfig	
+
 	$scope.$on('save', function(e, callbackFunction) {	
 		console.log("call event save");
 		$scope.atmService.data.save();
 		$scope.atmService.viewToExperimentOneToOne($scope.experiment);
 		$scope.$emit('childSaved', callbackFunction);
 	});
-	
-	var copyContainerSupportCodeAndStorageCodeToDT = function(datatable){
 
-		var dataMain = datatable.getData();
-		
-		var outputContainerSupportCode = $scope.outputContainerSupport.code;
-		var outputContainerSupportStorageCode = $scope.outputContainerSupport.storageCode;
-
-		if ( null != outputContainerSupportCode && undefined != outputContainerSupportCode){
-			for(var i = 0; i < dataMain.length; i++){
-				
-				var atm = dataMain[i].atomicTransfertMethod;
-				var newContainerCode = outputContainerSupportCode+"_"+atm.line + atm.column;
-
-				$parse('outputContainerUsed.code').assign(dataMain[i],newContainerCode);
-				$parse('outputContainerUsed.locationOnContainerSupport.code').assign(dataMain[i],outputContainerSupportCode);
-				
-				if( null != outputContainerSupportStorageCode && undefined != outputContainerSupportStorageCode){
-				    $parse('outputContainerUsed.locationOnContainerSupport.storageCode').assign(dataMain[i],outputContainerSupportStorageCode);
-				}
-			}
-		}
-	}
-	
-	// ajout showButton + suppression start = false;
 	$scope.$on('refresh', function(e) {
 		console.log("call event refresh");		
 		var dtConfig = $scope.atmService.data.getConfig();
@@ -237,32 +216,41 @@ angular.module('home').controller('BisSeqLibPrepCtrl',['$scope', '$parse',  '$fi
 		dtConfig.remove.active = ($scope.isEditModeAvailable() && $scope.isNewState());
 		$scope.atmService.data.setConfig(dtConfig);
 		$scope.atmService.refreshViewFromExperiment($scope.experiment);
+		// NGL-2371 FDS 20/03/2019 récupérer outputContainerSupport s'il été généré automatiquement (pas de barcode entré par l'utilisateur)
+		$scope.outputContainerSupport.code=$scope.experiment.atomicTransfertMethods[0].outputContainerUseds[0].locationOnContainerSupport.code;
+
 		$scope.$emit('viewRefeshed');
 	});
-	
+
 	$scope.$on('cancel', function(e) {
 		console.log("call event cancel");
 		$scope.atmService.data.cancel();
-		
+
 		if($scope.isCreationMode()){
 			var dtConfig = $scope.atmService.data.getConfig();
 			dtConfig.edit.byDefault = false;
 			$scope.atmService.data.setConfig(dtConfig);
 		}
-		
+
 	});
-	
+
 	$scope.$on('activeEditMode', function(e) {
 		console.log("call event activeEditMode");
 		$scope.atmService.data.selectAll(true);
 		$scope.atmService.data.setEdit();
 	});
-	
-		
+
+	//05/10/2018 seule la sortie en plaque est geree ==> forcer (pour le cas instrument=main)
+	$scope.$watch("experiment.instrument.outContainerSupportCategoryCode", function(){
+		$scope.experiment.instrument.outContainerSupportCategoryCode = "96-well-plate";
+	});
+
 	//Init
-	
+
 	var atmService = atmToSingleDatatable($scope, datatableConfig);
+
 	//defined new atomictransfertMethod
+	// 05/10/2018 attention : ne gere pas la sortie en tubes !!!
 	atmService.newAtomicTransfertMethod = function(l, c){
 		return {
 			class:"OneToOne",
@@ -272,18 +260,30 @@ angular.module('home').controller('BisSeqLibPrepCtrl',['$scope', '$parse',  '$fi
 			outputContainerUseds:new Array(0)
 		};
 	};
-	
+
 	//defined default output unit
 	atmService.defaultOutputUnit = {
 			volume : "µL"
 	};
-	
+
+	// NGL-1350 aide a la saisie des index
+	// !! les surcharges doivent etre faites avant experimentToView 
+	atmService.convertOutputPropertiesToDatatableColumn = function(property, pName){
+		var column = atmService.$commonATM.convertTypePropertyToDatatableColumn(property,"outputContainerUsed."+pName+".",{"0":Messages("experiments.outputs")});
+		if(property.code==="tag"){
+			// afficher les nom des tags aux utilisateurs et pas les codes 
+			// ...typeahead="v.code as v.code for v in getTags()...
+			column.editTemplate='<div class="form-control" bt-select  #ng-model filter="true" bt-options="tag.code as tag.name for tag in lists.getTags()" udt-change="updatePropertyFromUDT(value,col)" /></div>';
+		}
+		return column;
+	};
+
 	atmService.experimentToView($scope.experiment, $scope.experimentType);
-	
-	// 28/08/2017 OK countInputSupportCodes
+
+	// a ameliorer...
 	if ( $scope.countInputSupportCodes() > 1) {
 		console.log(" > 1 support en entree");
-		
+
 		$scope.messages.clear();
 		$scope.messages.clazz = "alert alert-danger";
 		$scope.messages.text = Messages("experiments.input.error.only-1-plate");
@@ -292,14 +292,23 @@ angular.module('home').controller('BisSeqLibPrepCtrl',['$scope', '$parse',  '$fi
 	} else {
 		$scope.atmService = atmService;
 	}
-	
-	
+
 	var importData = function(){
 		$scope.messages.clear();
 
-		$http.post(jsRoutes.controllers.instruments.io.IO.importFile($scope.experiment.code).url, $scope.file)
-		.success(function(data, status, headers, config) {
-			
+		// 22/10/2018 pour permettre l'import de fichier workbook par 'main' utiliser  "extra-instrument"   pour forcer
+		//  dans ExperimentService on a  pour "bissseq-lib-prep" :getInstrumentUsedTypes("sciclone-ngsx-and-zephyr","tecan-evo-150-and-zephyr","hand"), 
+		//  en fait les 2 intruments utilisent tous les 2 la classe Input de covarisandsciclone, mais on ne peut pas l'utiliser directement ici
+		//   => simuler l'appel a sciclonengsxandzephyr
+		var queryString='';// si null ou undefined plante Chrome !!!
+
+		if ( $scope.experiment.instrument.categoryCode === "hand"){
+			queryString="?extraInstrument=sciclonengsxandzephyr";
+			console.log("'hand' remplacé par 'sciclonengsxandzephyr'...");
+		}
+
+		$http.post(jsRoutes.controllers.instruments.io.IO.importFile($scope.experiment.code).url+queryString, $scope.file)
+		.success(function(data, status, headers, config) {	
 			$scope.messages.clazz="alert alert-success";
 			$scope.messages.text=Messages('experiments.msg.import.success');
 			$scope.messages.showDetails = false;
@@ -309,11 +318,9 @@ angular.module('home').controller('BisSeqLibPrepCtrl',['$scope', '$parse',  '$fi
 			$scope.file = undefined;
 			// reinit select File...
 			angular.element('#importFile')[0].value = null;
-			$scope.$emit('refresh');
-			
+			$scope.$emit('refresh');		
 		})
-		.error(function(data, status, headers, config) {
-			
+		.error(function(data, status, headers, config) {		
 			$scope.messages.clazz = "alert alert-danger";
 			$scope.messages.text = Messages('experiments.msg.import.error');
 			$scope.messages.setDetails(data);
@@ -323,160 +330,106 @@ angular.module('home').controller('BisSeqLibPrepCtrl',['$scope', '$parse',  '$fi
 			angular.element('#importFile')[0].value = null;
 		});		
 	};
-	
+
 	$scope.outputContainerSupport = { code : null , storageCode : null};	
-		
+
 	if ( undefined !== $scope.experiment.atomicTransfertMethods[0]) { 
-		 $scope.outputContainerSupport.code=$scope.experiment.atomicTransfertMethods[0].outputContainerUseds[0].locationOnContainerSupport.code;
+		$scope.outputContainerSupport.code=$scope.experiment.atomicTransfertMethods[0].outputContainerUseds[0].locationOnContainerSupport.code;
 		//console.log("previous code: "+ $scope.outputContainerSupport.code);
-	
+
 		$scope.outputContainerSupport.storageCode=$scope.experiment.atomicTransfertMethods[0].outputContainerUseds[0].locationOnContainerSupport.storageCode;
 		//console.log("previous storageCode: "+ $scope.outputContainerSupport.storageCode);
 	}
-	
-	// importer un fichier definissant quels index sont déposés dans quels containers
-	// NGL-2012 :Ajouter les permissions pour admin; supprimer condition sur EditMode
-	$scope.button = {
-		isShow:function(){
-			return ( $scope.isInProgressState() || Permissions.check("admin") );
-			},
-		isFileSet:function(){
-			return ($scope.file === undefined)?"disabled":"";
-		},
-		click:importData
-	};
-	
-	// Autre mode possible : utiliser une plaque d'index prédéfinis, l'utilisateur a juste a indiquer a partir de quelle colonne
-	// de cette plaque le robot doit prelever les index
 
+	// importer un fichier definissant quels index sont déposés dans quels containers;  NGL-2296 les import de fichiers ne marchent que a InProgress
+	$scope.button = {
+			isShow:function(){
+				return ( $scope.isInProgressState() || Permissions.check("admin") ) ;
+			},
+			isFileSet:function(){
+				return ($scope.file === undefined)?"disabled":"";
+			},
+			click:importData
+	};
+
+	// Autre mode possible : utiliser une plaque d'index prédéfinis, l'utilisateur a juste a indiquer a partir de quelle colonne de cette plaque le robot doit prelever les index
 	$scope.columns = [ {name:'---', position: undefined },
-	                   {name:'1', position:0}, {name:'2', position:8}, {name:'3', position:16}, {name:'4',  position:24}, {name:'5',  position:32}, {name:'6',  position:40},
-	                   {name:'7', position:48},{name:'8', position:56},{name:'9', position:64}, {name:'10', position:72}, {name:'11', position:80}, {name:'12', position:88}
-	                 ];
+		{name:'1', position:0}, {name:'2', position:8}, {name:'3', position:16}, {name:'4',  position:24}, {name:'5',  position:32}, {name:'6',  position:40},
+		{name:'7', position:48},{name:'8', position:56},{name:'9', position:64}, {name:'10', position:72}, {name:'11', position:80}, {name:'12', position:88}
+		];
+
 	$scope.tagPlateColumn = $scope.columns[0]; // defaut du select
 
-	$scope.plates = [ {name:"NUGEN Ovation Ultralow Methyl-Seq System 1-96",   tagCategory:"SINGLE-INDEX", tags:[] } ];
+	// 12/04/2018 NGL-2012 ne rien mettre par defaut !!!
+	$scope.plates=[];
+	$scope.plates.push( {name: "---",                                           tagCategory: undefined,      tags: undefined });
+	$scope.plates.push( {name:"NUGEN Ovation Ultralow Methyl-Seq System 1-96",  tagCategory: "SINGLE-INDEX", tags: tagPlates.populateIndex_Nuo96() });
 
-	// l'indice dans le tableau correspond a l'ordre "colonne d'abord" dans la plaque
-	// !! ce sont les codes des index qu'il faut mettre ici !!
-	//                             A         B         C         D         E         F         G         H
-	$scope.plates[0].tags.push("nuo-01", "nuo-13", "nuo-25", "nuo-37", "nuo-49", "nuo-61", "nuo-73", "nuo-85"); //colonne 1
-	$scope.plates[0].tags.push("nuo-02", "nuo-14", "nuo-26", "nuo-38", "nuo-50", "nuo-62", "nuo-74", "nuo-86"); //colonne 2
-	$scope.plates[0].tags.push("nuo-03", "nuo-15", "nuo-27", "nuo-39", "nuo-51", "nuo-63", "nuo-75", "nuo-87"); //colonne 3
-	$scope.plates[0].tags.push("nuo-04", "nuo-16", "nuo-28", "nuo-40", "nuo-52", "nuo-64", "nuo-76", "nuo-88"); //colonne 4
-	$scope.plates[0].tags.push("nuo-05", "nuo-17", "nuo-29", "nuo-41", "nuo-53", "nuo-65", "nuo-77", "nuo-89"); //colonne 5
-	$scope.plates[0].tags.push("nuo-06", "nuo-18", "nuo-30", "nuo-42", "nuo-54", "nuo-66", "nuo-78", "nuo-90"); //colonne 6
-	$scope.plates[0].tags.push("nuo-07", "nuo-19", "nuo-31", "nuo-43", "nuo-55", "nuo-67", "nuo-79", "nuo-91"); //colonne 7	
-	$scope.plates[0].tags.push("nuo-08", "nuo-20", "nuo-32", "nuo-44", "nuo-56", "nuo-68", "nuo-80", "nuo-92"); //colonne 8
-	$scope.plates[0].tags.push("nuo-09", "nuo-21", "nuo-33", "nuo-45", "nuo-57", "nuo-69", "nuo-81", "nuo-93"); //colonne 9
-	$scope.plates[0].tags.push("nuo-10", "nuo-22", "nuo-34", "nuo-46", "nuo-58", "nuo-70", "nuo-82", "nuo-94"); //colonne 10
-	$scope.plates[0].tags.push("nuo-11", "nuo-23", "nuo-35", "nuo-47", "nuo-59", "nuo-71", "nuo-83", "nuo-95"); //colonne 11
-	$scope.plates[0].tags.push("nuo-12", "nuo-24", "nuo-36", "nuo-48", "nuo-60", "nuo-72", "nuo-84", "nuo-96"); //colonne 12
-	
-	
 	$scope.tagPlate = $scope.plates[0]; // defaut du select
-
-	//NGL-2012 - 11/03/2018: Nvel algorithme plus générique, capable de gérer des plaques d'index incomplètes...(repris de small-rnaseq-lib-prep-ctrl.js)
-	//TODO ==> algorithme utilisé dans 6 experiences: mettre dans un service pour eviter duplication !!!!
-	var setTags = function(){
-		$scope.messages.clear();
-			
-		console.log("selected plate is "+ $scope.tagPlate.name);
-		console.log("selected start column is " + $scope.tagPlateColumn.name);
-		console.log("selected start position is " + $scope.tagPlateColumn.position);
-		
-		var dataMain = atmService.data.getData();
-		// trier dans l'ordre "colonne d'abord"
-		var dataMain = $filter('orderBy')(dataMain, ['atomicTransfertMethod.column*1','atomicTransfertMethod.line']); 
-		
-		if (($scope.tagPlateColumn.name === '---' ) && ($scope.tagPlate.name === '---')){
-			// remise a 0 des selects par l'utilisateur ????=> nettoyage de ce qui a ete positionné precedemment
-			console.log("suppression des index ...");
-			
-			for(var i = 0; i < dataMain.length; i++){
-				var udtData = dataMain[i];
-				var ocu=udtData.outputContainerUsed;
-				ocu.experimentProperties["tag"]= undefined;
-				ocu.experimentProperties["tagCategory"]=undefined;
-			}	
-			atmService.data.setData(dataMain);
-			
-		} else if (($scope.tagPlateColumn.name !== '---' ) && ($scope.tagPlate.name !== '---')){		
- 
-			//attention certains choix de colonne sont incorrrects !!! 
-			//le controle doit porter sur la valeur maximale de colonne trouvee sur la plaque a indexer
-			//=>dernier puit si on a trié  dans l'ordre "colonne d'abord"
-			var last=dataMain.slice(-1)[0];
-			var lastInputCol=last.atomicTransfertMethod.column*1;
-			console.log("last col in input plate="+ lastInputCol);
-			
-			var lastTagCol=$scope.tagPlate.tags.length / 8;    // ce sont des colonnes de 8
-			console.log("last col in tag plate="+ lastTagCol);
-			
-			// meme en prennant tous les index possibles, il n'y en a pas assez dans la plaque !!
-			if ( lastTagCol < lastInputCol ){
-	        	$scope.messages.clazz="alert alert-danger";
-	        	$scope.messages.text=Messages('select.msg.error.notEnoughTags.tagPlate',$scope.tagPlate.name);
-	        	$scope.messages.showDetails = false;
-	        	$scope.messages.open();
-	        	return;
-			}
-			
-			// la colonne de debut choisie est vide
-			if ( $scope.tagPlateColumn.name*1 > lastTagCol){
-	        	$scope.messages.clazz="alert alert-danger";
-	        	$scope.messages.text=Messages('select.msg.error.emptyStartColumn.tagPlate', $scope.tagPlateColumn.name, $scope.tagPlate.name );
-	        	$scope.messages.showDetails = false;
-	        	$scope.messages.open();	
-	        	return;
-	        }
-				
-			// la colonne choisie est incorrecte (toutes les puits input ne recevront pas d'index) !!INTERDIT
-		    if ( (lastTagCol - $scope.tagPlateColumn.name*1  +1) < lastInputCol ) {   	
-	        	$scope.messages.clazz="alert alert-danger";
-	        	$scope.messages.text=Messages('select.msg.error.wrongStartColumn.tagPlate', $scope.tagPlateColumn.name);
-	        	$scope.messages.showDetails = false;
-	        	$scope.messages.open();	
-	        	return;
-	        }
 	
-			for(var i = 0; i < dataMain.length; i++){
-				var udtData = dataMain[i];
-				var ocu=udtData.outputContainerUsed;
-				//console.log("outputContainerUsed.code"+udtData.outputContainerUsed.code);
+	// NGL-2972 04/08/2020 mémorisation des choix pour le nettoyage éventuel....
+	$scope.tagPlateToClean= undefined;
+	$scope.tagPlateColumnToClean=undefined;
 
-				//calculer la position sur la plaque:   pos= (col -1)*8 + line      (line est le code ascii - 65)
-				var libPos= (udtData.atomicTransfertMethod.column  -1 )*8 + ( udtData.atomicTransfertMethod.line.charCodeAt(0) -65);
-				//console.log("lib pos=" +libPos);
-				var indexPos= libPos + $scope.tagPlateColumn.position; 
-				//console.log("index pos="+indexPos);
-				console.log("=> setting index "+indexPos+ ": "+ $scope.tagPlate.tags[indexPos] );
-				
-				//ajouter dans experimentProperties les PSV tagCategory et tag
-				var ocu=udtData.outputContainerUsed;
-				if(ocu.experimentProperties===undefined || ocu.experimentProperties===null){
-					ocu.experimentProperties={};
-				}
-				
-				// attention aux positions non definies des plaques d'index ( plaques de 48..) /// ne doit plus arriver avec les tests initiaux...
-				// reste le cas possible de plan d'index avec des trous ???
-				if ( $scope.tagPlate.tags[indexPos] !== undefined) {
-					ocu.experimentProperties["tag"]={"_type":"single","value":$scope.tagPlate.tags[indexPos]};
-					ocu.experimentProperties["tagCategory"]={"_type":"single","value":$scope.tagPlate.tagCategory};
-				}
-			}	
-			
-			atmService.data.setData(dataMain);
-		}
-		// dans le dernier cas rien a faire...
-	};
-	
-	// NGL-2012 :Ajouter les permissions pour admin; supprimer condition sur EditMode
+	// NGL-2012 :Ajouter les permissions pour admin; supprimer condition sur EditMode; NGL-2272 etre coherent, tous les boutons s'affichent au meme etat!!!
 	$scope.selectColOrPlate = {
-		isShow:function(){
-			return ( $scope.isInProgressState() || Permissions.check("admin") );
-		},	
-		select:setTags
+			isShow:function(){
+				return ( $scope.isInProgressState() || Permissions.check("admin") );
+			},	
+			select:function(){
+				// NGL-2972 04/08/2020 nettoyage avec paramètres mémorisés
+				if (($scope.tagPlate.name === "---") && ($scope.tagPlateColumn.name === "---")){
+					return tagPlates.unsetTags ($scope.tagPlateToClean, $scope.tagPlateColumnToClean, atmService, $scope.messages)
+				} else if ( ($scope.tagPlate.name !== "---") && ($scope.tagPlateColumn.name !== "---") ){
+					// NGL-2944 02/06/2020 avant de mettre une nouvelle plaque nettoyer l'ancienne si existait !!!
+					if ($scope.tagPlateToClean != undefined){
+						tagPlates.unsetTags ($scope.tagPlateToClean, $scope.tagPlateColumnToClean, atmService, $scope.messages)
+					}
+					// il ne faudrait positionner ces 2 valeurs QUE si setTags s'est bien passée...!!!!!!
+					$scope.tagPlateToClean=$scope.tagPlate;
+					$scope.tagPlateColumnToClean= $scope.tagPlateColumn;
+					return tagPlates.setTags($scope.tagPlate, $scope.tagPlateColumn, atmService, $scope.messages)
+				} 
+				// dans le dernier cas (1 seul des 2 selects est positionné=> ne rien faire)
+			}
 	};
-	
+
+	// 31/08/2018 NGL-1350 aide a la saisie des tags
+	// appeller initTags() isNewState() necessaire sinon ils ne sont pas initialisés au moment du chgt etat de l'experience a InProgress
+	if ( $scope.isNewState() || $scope.isInProgressState() || Permissions.check("admin") ){ 
+		//29/10/2018 si pas de parametre passé a initTag => tous les types, sinon preciser !!! 2 valeurs existent: 'index-illumina-sequencing','index-nanopore-sequencing'
+		tagPlates.initTags("index-illumina-sequencing");
+
+		$scope.getTagGroups= function(){return tagPlates.getAllTagGroups()};
+		$scope.selectedTagGroup= $scope.getTagGroups()[0]; // valeur defaut du select (qui maintenant existe car definie sans attendre le retour de la promise)
+	}
+
+	$scope.selectGroup = {
+			isShow:function(){
+				// NGL-2246 afficher dès l'etat Nouveau mais pour l'instant un bug existe: la liste de tous les tags n'est pas initialisée !!
+				return ( $scope.isNewState() || $scope.isInProgressState() || Permissions.check("admin") );
+			},
+			// NGL-2246 ajout / GA recuperer ici l'objet groupName
+			select:function(groupName){       	
+				console.log( 'groupe choisi :'+  groupName.value );
+
+				//GA: creer une variable $scope.tags au lieu de d'ecraser la fonction getTags
+				if (groupName.value === undefined ){ 
+					//$scope.tags = tagPlates.getAllTags(); //!! L'affichage de TOUS les index dans le bt-select qui est long...
+					$scope.lists.refresh.tags({typeCodes:['index-illumina-sequencing','index-nanopore-sequencing']});
+				} else { 
+					//$scope.tags = $filter('filter')(tagPlates.getAllTags(),{groupNames:groupName.value}, true);
+					$scope.lists.refresh.tags({typeCodes:['index-illumina-sequencing','index-nanopore-sequencing'],groupNames:[groupName.value]});
+				}
+			}
+	};
+
+	// 26/06/2018 ajout pour selection manuelle d'index
+	$scope.updatePropertyFromUDT = function(value, col){
+		//console.log("update from property : "+col.property);
+		if(col.property === 'outputContainerUsed.experimentProperties.tag.value'){
+			tagPlates.computeTagCategory(value.data);
+		}
+	}
+
 }]);

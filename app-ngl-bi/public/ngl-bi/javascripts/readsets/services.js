@@ -250,14 +250,14 @@
 				lists.refresh.types({objectTypeCode:"Run"},"runTypes");
 				lists.refresh.types({objectTypeCode:"ReadSet"},"readSetTypes");
 				lists.refresh.runs();
-				lists.refresh.instruments({categoryCodes:["illumina-sequencer","extseq","nanopore-sequencer"]});
+				lists.refresh.instruments({categoryCodes:["illumina-sequencer","extseq","nanopore-sequencer", "opt-map-bionano"]});
 				//TODO Warn if pass to one application page
 				lists.refresh.reportConfigs({pageCodes:["readsets"+"-"+mainService.getHomePage()]});
 				lists.refresh.reportConfigs({pageCodes:["readsets-addcolumns"]}, "readsets-addcolumns");
 				lists.refresh.filterConfigs({pageCodes:["readsets-addfilters"]}, "readsets-addfilters");
 				
 				lists.refresh.resolutions({objectTypeCode:"ReadSet"});
-				lists.refresh.context({categoryCode:"readset"});
+				lists.refresh.context({categoryCode:"readset", typeCode:'context-description'});
 				
 				lists.refresh.users();
 				isInit=true;
@@ -275,6 +275,7 @@
 				additionalColumns:[],
 				additionalColumnsContext:[],
 				mapAdditionnalColumn : new Map(),
+				mainFilters:[],
 				additionalFilters:[],
 				selectedAddColumns:[],
 				contextValue:undefined,
@@ -321,7 +322,24 @@
 						
 					}
 					
-					if(this.form.reportingQuery){
+					if(this.reportingConfiguration && this.reportingConfiguration.queryConfiguration 
+							&& this.reportingConfiguration.queryConfiguration.query){
+						this.form.reportingQuery = this.reportingConfiguration.queryConfiguration.query;
+						this.form.reporting=true;
+						this.form.aggregate=false;
+						if(this.reportingConfiguration.queryConfiguration.type === 'aggregate'){
+							this.form.aggregate=true;
+						}
+						
+						for(var key in this.aggregateForm){
+							//replace "#someThing" by "somethingValue" but in case of number does not work because number cannot be inside a double quote
+							this.form.reportingQuery = this.form.reportingQuery.replace(new RegExp("#"+key,"g"),this.aggregateForm[key]);
+						}
+						
+						//replace form value;
+						console.log(this.aggregateForm);
+						
+					}else if(this.form.reportingQuery){
 						this.form.reportingQuery.trim();
 						if(this.form.reportingQuery.length > 0){
 							this.form.reporting=true;
@@ -335,10 +353,6 @@
 				
 				convertForm : function(){
 					var _form = angular.copy(this.form);
-					if(_form.fromDate)_form.fromDate = moment(_form.fromDate, Messages("date.format").toUpperCase()).valueOf();
-					if(_form.toDate)_form.toDate = moment(_form.toDate, Messages("date.format").toUpperCase()).valueOf();		
-					if(_form.fromEvalDate)_form.fromEvalDate = moment(_form.fromEvalDate, Messages("date.format").toUpperCase()).valueOf();
-					if(_form.toEvalDate)_form.toEvalDate = moment(_form.toEvalDate, Messages("date.format").toUpperCase()).valueOf();	
 					return _form
 				},
 				
@@ -350,6 +364,15 @@
 							this.form.stateCodes = ["IW-VQC", "IP-VQC", "IW-VBA"];
 						}		
 					}
+				},
+
+				resetTextareas : function(){
+					Array.from(document.getElementsByTagName('textarea')).forEach(function (element) {
+						var elementScope = angular.element(element).scope();
+						if(elementScope.textareaValue){
+							elementScope.textareaValue = null;
+						}
+					});
 				},
 				
 				resetSampleCodes : function(){
@@ -375,25 +398,7 @@
 						return this.lists.get('statetrue');
 					//}
 				},
-				/**
-				 * Update column when change reportingConfiguration
-				 */
-				updateColumn : function(){
-					this.initAdditionalColumns();
-					if(this.reportingConfigurationCode){
-						$http.get(jsRoutes.controllers.reporting.api.ReportingConfigurations.get(this.reportingConfigurationCode).url,{searchService:this, datatable:this.datatable})
-								.success(function(data, status, headers, config) {
-									config.searchService.reportingConfiguration = data;
-									config.searchService.search();
-									config.datatable.setColumnsConfig(data.columns);																								
-						});
-					}else{
-						this.reportingConfiguration = undefined;
-						this.datatable.setColumnsConfig(this.getDefaultColumns());
-						this.search();
-					}
-					
-				},
+				
 				
 				initAdditionalColumns:function(){
 					this.additionalColumns=[];
@@ -422,15 +427,19 @@
 					var allColumns = angular.copy(lists.get("readsets-addcolumns")[0].columns);
 					var allColumnsFiltered = [];
 					for(var i=0; i<allColumns.length; i++){
-						if(this.mapAdditionnalColumn.get(allColumns[i].position)==undefined){
-							//if(this.contextValue==undefined || (this.contextValue!=undefined && allColumns[i].context!=null && allColumns[i].context.includes(this.contextValue))){
-								allColumnsFiltered.push(allColumns[i]);
-								var tabColumn=[];
-								tabColumn.push(allColumns[i]);
-								this.mapAdditionnalColumn.set(allColumns[i].position,tabColumn);
- 							//}
+						if(allColumns[i].groupHeader==undefined){
+							allColumnsFiltered.push(allColumns[i]);
 						}else{
-							this.mapAdditionnalColumn.get(allColumns[i].position).push(allColumns[i]);
+							if(this.mapAdditionnalColumn.get(allColumns[i].groupHeader)==undefined){
+								//if(this.contextValue==undefined || (this.contextValue!=undefined && allColumns[i].context!=null && allColumns[i].context.includes(this.contextValue))){
+									allColumnsFiltered.push(allColumns[i]);
+									var tabColumn=[];
+									tabColumn.push(allColumns[i]);
+									this.mapAdditionnalColumn.set(allColumns[i].groupHeader,tabColumn);
+									//}
+							}else{
+								this.mapAdditionnalColumn.get(allColumns[i].groupHeader).push(allColumns[i]);
+							}
 						}
 					}
 					return allColumnsFiltered;
@@ -478,8 +487,12 @@
 					for(var i = 0 ; i < this.additionalColumns.length ; i++){
 						for(var j = 0; j < this.additionalColumns[i].length; j++){
 							if(this.additionalColumns[i][j].select){
-								for(var c=0; c<this.mapAdditionnalColumn.get(this.additionalColumns[i][j].position).length; c++){
-									this.selectedAddColumns.push(this.mapAdditionnalColumn.get(this.additionalColumns[i][j].position)[c]);
+								if(this.additionalColumns[i][j].groupHeader!=undefined){
+									for(var c=0; c<this.mapAdditionnalColumn.get(this.additionalColumns[i][j].groupHeader).length; c++){
+										this.selectedAddColumns.push(this.mapAdditionnalColumn.get(this.additionalColumns[i][j].groupHeader)[c]);
+									}
+								}else{
+									this.selectedAddColumns.push(this.additionalColumns[i][j]);
 								}
 							}
 						}
@@ -489,27 +502,65 @@
 					}else{
 						this.datatable.setColumnsConfig(this.getDefaultColumns().concat(this.selectedAddColumns));						
 					}
-					this.search();
+					if(this.datatable.isData()){
+						this.search();
+					}
 				},	
 				
 				resetDatatableColumns:function(){
-					this.initAdditionalColumns();
-					this.datatable.setColumnsConfig(this.getDefaultColumns());
-					this.search();
+					this.updateColumn();
+					if(this.datatable.isData()){
+						this.search();
+					}
 				},
-
+				
+				/**
+				 * Update column when change reportingConfiguration
+				 */
+				updateColumn : function(){
+					this.initAdditionalColumns();
+					if(this.reportingConfigurationCode){
+						$http.get(jsRoutes.controllers.reporting.api.ReportingConfigurations.get(this.reportingConfigurationCode).url,{searchService:this, datatable:this.datatable})
+								.success(function(data, status, headers, config) {
+									
+									config.searchService.reportingConfiguration = data;
+									if(config.searchService.lists.get('reportConfigs').length > 1 && config.datatable.isData()){
+										config.searchService.search();
+									}
+									config.datatable.setColumnsConfig(data.columns);
+									config.searchService.mainFilters = config.searchService.organizeFilters(data.filters);								
+						});
+					}else{
+						
+						this.reportingConfiguration = undefined;
+						this.initAdditionalFilters();
+						this.mainFilters = [];							
+						this.datatable.setColumnsConfig(this.getDefaultColumns());
+						if(this.datatable.isData()){
+							this.search();
+						}
+					}
+					
+				},
 				initAdditionalFilters:function(){
 					this.additionalFilters=[];
 					
 					if(lists.get("readsets-addfilters") && lists.get("readsets-addfilters").length === 1){
-						var formFilters = [];
 						var allFilters = angular.copy(lists.get("readsets-addfilters")[0].filters);
+						
 						/* add static filters*/
-						allFilters.push({property:"fromEvalDate",html:"<input type='text' class='form-control' ng-model='searchService.form.fromEvalDate' placeholder='"+Messages("search.placeholder.fromEvalDate")+"' title='"+Messages("search.placeholder.fromEvalDate")+"'>",position:allFilters.length+1});
-						allFilters.push({property:"toEvalDate",html:'<input type="text" class="form-control" ng-model="searchService.form.toEvalDate" placeholder="'+Messages("search.placeholder.toEvalDate")+'" title="'+Messages("search.placeholder.toEvalDate")+'">',position:allFilters.length+1});
+						allFilters.push({property:"fromEvalDate",html:"<input type='text' class='form-control' ng-model='searchService.form.fromEvalDate' placeholder='"+Messages("search.placeholder.fromEvalDate")+"' title='"+Messages("search.placeholder.fromEvalDate")+"' date-timestamp>",position:allFilters.length+1});
+						allFilters.push({property:"toEvalDate",html:'<input type="text" class="form-control" ng-model="searchService.form.toEvalDate" placeholder="'+Messages("search.placeholder.toEvalDate")+'" title="'+Messages("search.placeholder.toEvalDate")+'" date-timestamp>',position:allFilters.length+1});
 						
-						
-						
+						this.additionalFilters = this.organizeFilters(allFilters);					
+					}
+				},
+				
+				
+				organizeFilters : function(allFilters){
+					if(allFilters !== undefined && allFilters !== null && allFilters.length > 0){
+					
+						var formFilters = [];
 						var nbElementByColumn = Math.ceil(allFilters.length / 5); //5 columns
 						for(var i = 0; i  < 5 && allFilters.length > 0 ; i++){
 							formFilters.push(allFilters.splice(0, nbElementByColumn));	    								
@@ -519,16 +570,21 @@
 							formFilters.push([]);
 						}
 							
-						this.additionalFilters = formFilters;
+						return formFilters;
+					}else{
+						return [];
 					}
 				},
-				
 				getAddFiltersToForm : function(){
 					if(this.additionalFilters.length === 0){
 						this.initAdditionalFilters();
 					}
 					return this.additionalFilters;									
-				},	
+				},
+				
+				getMainFiltersToForm:function(){
+					return this.mainFilters;	
+				},
 				/**
 				 * initialise the service
 				 */

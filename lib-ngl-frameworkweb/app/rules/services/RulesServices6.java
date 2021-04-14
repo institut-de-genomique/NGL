@@ -6,23 +6,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-// import org.drools.runtime.StatefulKnowledgeSession;
 import org.kie.api.KieBase;
 import org.kie.api.KieBaseConfiguration;
 import org.kie.api.KieServices;
-// import org.kie.api.builder.KieBuilder;
-// import org.kie.api.builder.KieFileSystem;
-// import org.kie.api.builder.KieRepository;
-// import org.kie.api.builder.Message.Level;
-// import org.kie.api.io.KieResources;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 
-// import play.Logger;
-// import play.Play;
 import play.Application;
-
-// import javax.inject.Inject;
 
 public class RulesServices6 {
 	
@@ -82,7 +72,7 @@ public class RulesServices6 {
 	}
 	
 	private void buildKnowledgeBase(Application app) {
-		if (null == kbase && StringUtils.isNotBlank(kbasename)) {
+		if (kbase == null && StringUtils.isNotBlank(kbasename)) {
 			logger.info("Load Drools Rules for KBaseName = "+ kbasename);
 			KieServices kieServices = KieServices.Factory.get();
 			KieContainer kContainer = kieServices.newKieClasspathContainer(/*play.Play.application()*/app.classloader());
@@ -95,34 +85,39 @@ public class RulesServices6 {
 
 	private KieBase getKieBase() {
 		if (kbase == null)
-			// buildKnowledgeBase();
 			throw new RuntimeException("KieBase instance should have been created at RulesServices6 creation");
 		return kbase;
 	}
 	
+	/**
+	 * Synchronous firing of the rules matching the rule name and the annotation name. 
+	 * @param keyRules           key rules
+	 * @param ruleAnnotationName rule name
+	 * @param factsToInsert      facts
+	 */
 	public void callRules(String keyRules, String ruleAnnotationName, List<Object> factsToInsert) {
-		//Create new statefull session
 		KieSession kSession = getKieBase().newKieSession();
-		for (Object fact : factsToInsert) {
+		for (Object fact : factsToInsert) 
 			kSession.insert(fact);
-		}
 		kSession.fireAllRules(RulesAgendaFilter6.getInstance(keyRules, ruleAnnotationName));
-		//Close session
 		kSession.dispose();		
 	}
 	
+	/**
+	 * Synchronous firing of the rules matching the rule name and the annotation name
+	 * and return the drools facts. 
+	 * @param keyRules           key rules
+	 * @param ruleAnnotationName rule name
+	 * @param factsToInsert      facts
+	 * @return                   drools returned facts
+	 */	
 	public List<Object> callRulesWithGettingFacts(String keyRules, String ruleAnnotationName, List<Object> factsToInsert) {
-
-		// Create new session
 		KieSession kSession = getKieBase().newKieSession();
-		for (Object fact : factsToInsert) {
+		for (Object fact : factsToInsert)
 			kSession.insert(fact);
-		}
-		kSession.fireAllRules(RulesAgendaFilter6.getInstance(keyRules,ruleAnnotationName));
+		kSession.fireAllRules(RulesAgendaFilter6.getInstance(keyRules, ruleAnnotationName));
 		List<Object> factsAfterRules = new ArrayList<>(kSession.getObjects());
-		// Close session
 		kSession.dispose();
-
 		return factsAfterRules;
 	}
 	

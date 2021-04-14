@@ -40,6 +40,11 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 				},
 			},
 			columns : [
+			        {property:"traceInformation.creationDate",
+			        	header: "traceInformation.creationDate",
+			        	type :"date",		    	  	
+			        	order:true
+			        },	
 			        {property:"code",
 			        	header: "code",
 			        	type :"text",		    	  	
@@ -124,7 +129,7 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 /*	if(angular.isUndefined(mainService.getHomePage())){
 		mainService.setHomePage('create');
 		tabService.addTabs({label:Messages('configurations.menu.create'),href:jsRoutes.controllers.sra.configurations.tpl.Configurations.home("create").url,remove:true});
-		tabService.activeTab(0); // desactive le lien !
+		tabService.activeTab(0); //  active l'onglet en le mettant en bleu
 	}
 	*/
 	// si on declare dans services.js => var sraVariables = {};

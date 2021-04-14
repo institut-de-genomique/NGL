@@ -1,5 +1,6 @@
 "use strict";
-angular.module('home', ['ngRoute','ultimateDataTableServices','valuationServices','commonsServices','biCommonsServices', 'biWorkflowChartServices', 'ui.bootstrap','ngl-bi.RunsServices'], function($routeProvider, $locationProvider) {
+angular.module('home', ['ngRoute','ultimateDataTableServices','valuationServices','commonsServices','biCommonsServices', 'biWorkflowChartServices', 
+						'ui.bootstrap','ngl-bi.RunsServices']).config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
 	
 	$routeProvider.when('/runs/search/home', {
 		templateUrl : '/tpl/runs/search/default',
@@ -26,5 +27,4 @@ angular.module('home', ['ngRoute','ultimateDataTableServices','valuationServices
 
 	// configure html5 to get links working with bookmarked
 	$locationProvider.html5Mode({enabled: true, requireBase: false});
-});
-
+}]);

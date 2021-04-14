@@ -17,8 +17,8 @@ public class SampleReadSet {
 	public String runTypeCode;
 	public Date runSequencingStartDate;
 	
-	public Valuation productionValuation;    //TODO rename to QCValuation
-	public Valuation bioinformaticValuation; //TODO rename to bioinformaticUsable
+	public Valuation productionValuation;    // GA: rename to QCValuation
+	public Valuation bioinformaticValuation; // GA: rename to bioinformaticUsable
 	public SampleOnContainer sampleOnContainer;
 	public Map<String,Treatment> treatments;
 	

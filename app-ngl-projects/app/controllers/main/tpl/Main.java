@@ -3,14 +3,15 @@ package controllers.main.tpl;
 
 import javax.inject.Inject;
 
+import controllers.NGLController;
 import fr.cea.ig.authentication.Authenticated;
 import fr.cea.ig.authorization.Authorized;
 import fr.cea.ig.lfw.Historized;
 import fr.cea.ig.ngl.NGLApplication;
-import fr.cea.ig.ngl.NGLController;
 import fr.cea.ig.ngl.support.Executor;
 import fr.cea.ig.ngl.support.NGLJavascript;
 import fr.cea.ig.ngl.support.api.CodeLabelAPIHolder;
+import fr.cea.ig.ngl.support.api.PermissionAPIHolder;
 import fr.cea.ig.ngl.utils.NGLJavascriptGeneration.Codes;
 import play.mvc.Result;
 import views.html.home ;
@@ -20,6 +21,7 @@ import views.html.home ;
 public class Main extends NGLController
                  implements NGLJavascript,
                             Executor,
+                            PermissionAPIHolder,
                             CodeLabelAPIHolder {
 
 	// final static JsMessages messages = JsMessages.create(play.Play.application());

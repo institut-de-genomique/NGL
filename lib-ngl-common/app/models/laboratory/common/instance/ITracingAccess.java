@@ -31,8 +31,16 @@ public interface ITracingAccess {
 	 * @param ctx      validation context
 	 * @param userName user name to stamp trace with
 	 */
-	default void setTraceUpdateStamp(ContextValidation ctx, String userName) {
+	default void setTraceModificationStamp(ContextValidation ctx, String userName) {
 		getTraceInformation().modificationStamp(ctx,userName);
+	}
+	
+	/**
+	 * Set the update stamp using the current user and the current time.
+	 * @param userName user name to stamp trace with
+	 */
+	default void setTraceUpdateStamp(String userName) {
+		getTraceInformation().modificationStamp(userName);
 	}
 	
 }

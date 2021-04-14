@@ -1,8 +1,5 @@
 package controllers.commons.api;
 
-// import static play.data.Form.form;
-//import static fr.cea.ig.play.IGGlobals.form;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,14 +8,12 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 
 import controllers.APICommonController;
-//import controllers.CommonController;
 import controllers.authorisation.Permission;
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import models.administration.authorisation.User;
 import models.administration.authorisation.description.dao.UserDAO;
 import models.utils.ListObject;
 import models.utils.dao.DAOException;
-//import play.Logger;
 import play.api.modules.spring.Spring;
 import play.data.Form;
 import play.libs.Json;
@@ -26,25 +21,31 @@ import play.mvc.Result;
 import play.mvc.Results;
 import views.components.datatable.DatatableResponse;
 
-public class Users extends APICommonController<UserSearchForm> { //CommonController{
+public class Users extends APICommonController<UserSearchForm> {
 
 	private static final play.Logger.ALogger logger = play.Logger.of(Users.class);
 	
-	//	private final /*static*/ Form<UserSearchForm> userSearchForm; // = form(UserSearchForm.class);
-	private final /*static*/ Form<User> userForm; // = form(User.class);
+	private final Form<User> userForm; 
+	
+//	@Inject
+//	public Users(NGLContext ctx) {
+//		super(ctx, UserSearchForm.class);
+////		this.userSearchForm = ctx.form(UserSearchForm.class);
+//		this.userForm = ctx.form(User.class);
+//	}
 	
 	@Inject
-	public Users(NGLContext ctx) {
-		super(ctx, UserSearchForm.class);
+	public Users(NGLApplication app) {
+		super(app, UserSearchForm.class);
 //		this.userSearchForm = ctx.form(UserSearchForm.class);
-		this.userForm = ctx.form(User.class);
+		this.userForm = app.form(User.class);
 	}
-	
+
 	/*
 	 * Get Method
 	 */
 	public Result get(String login) throws DAOException{
-		User user = User.find.findByLogin(login);
+		User user = User.find.get().findByLogin(login);
 		if (user == null)
 			return notFound(login);
 		return ok(Json.toJson(user));
@@ -59,9 +60,9 @@ public class Users extends APICommonController<UserSearchForm> { //CommonControl
 		try {
 			List<User> users = new ArrayList<>();
 			if (StringUtils.isNotBlank(form.login)) {
-				users = User.find.findByLikeLogin(toLikeLogin(form.login));
+				users = User.find.get().findByLikeLogin(toLikeLogin(form.login));
 			} else {
-				users = User.find.findAll();
+				users = User.find.get().findAll();
 			}
 			if (form.datatable) {
 				return ok(Json.toJson(new DatatableResponse<>(users, users.size()))); 
@@ -119,7 +120,7 @@ public class Users extends APICommonController<UserSearchForm> { //CommonControl
 	 * 		used in update()..
 	 */
 	private User getUsers(String aLogin) throws DAOException{
-		User user = User.find.findByLogin(aLogin);
+		User user = User.find.get().findByLogin(aLogin);
 		return user;
 	}
 	

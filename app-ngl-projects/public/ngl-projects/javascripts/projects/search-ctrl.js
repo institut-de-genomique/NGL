@@ -4,7 +4,7 @@ angular.module('home').controller('SearchCtrl',['$scope', '$routeParams','datata
                                                 function($scope, $routeParams, datatable,mainService,tabService,projectsSearchService) {
 	
 	var datatableConfig = {
-			order :{by:'code', reverse:false},
+			order :{mode:'local', by:'traceInformation.creationDate', reverse:true},
 			search:{
 				url:jsRoutes.controllers.projects.api.Projects.list()
 			},
@@ -20,6 +20,22 @@ angular.module('home').controller('SearchCtrl',['$scope', '$routeParams','datata
 			pagination:{
 				mode:'local'
 			},
+			hide:{
+				active:true
+			},
+			edit:{
+				active:Permissions.check("writing")?true:false,
+				columnMode:true
+			},
+			save:{
+				active:Permissions.check("writing")?true:false,
+				url:function(line){return jsRoutes.controllers.projects.api.Projects.update(line.code).url;},
+				mode:'remote',
+				method:'put',
+			},
+			group:{
+				active:true
+			},
 			name:"Projects"
 	};
 
@@ -28,13 +44,14 @@ angular.module('home').controller('SearchCtrl',['$scope', '$routeParams','datata
 	};
 	
 	$scope.reset = function(){
-		$scope.searchService.reset();
+		$scope.searchService.resetForm();
+		$scope.searchService.resetTextareas();
 	};
 	
 	if(angular.isUndefined(mainService.getHomePage())){
 		mainService.setHomePage('search');
 		tabService.addTabs({label:Messages('projects.menu.search'),href:jsRoutes.controllers.projects.tpl.Projects.home("search").url,remove:true});
-		tabService.activeTab(0); // desactive le lien !
+		tabService.activeTab(0); // active l'onglet, le met en bleu
 	}
 	
 	$scope.searchService = projectsSearchService;	

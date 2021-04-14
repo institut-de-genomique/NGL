@@ -46,7 +46,8 @@ angular.module('home').controller('SearchCtrl', ['$scope', '$window', 'datatable
 	};
 	
 	$scope.reset = function(){
-		$scope.searchService.resetForm();		
+		$scope.searchService.resetForm();	
+		$scope.searchService.resetTextareas();	
 	};
 	
 	$scope.openPrintTagsPage = function(supports){
@@ -84,7 +85,9 @@ angular.module('home').controller('SearchStateCtrl', ['$scope','$location','$rou
 				
 			},
 			order:{
-				by:'code'
+				by:'traceInformation.creationDate',
+				reverse:true,
+				mode:'local'
 			},
 			edit:{
 				active:Permissions.check("writing")?true:false,
@@ -114,6 +117,7 @@ angular.module('home').controller('SearchStateCtrl', ['$scope','$location','$rou
 
 	$scope.reset = function(){
 		$scope.searchService.resetForm();
+		$scope.searchService.resetTextareas();	
 	};
 	
 	$scope.search = function(){	

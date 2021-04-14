@@ -1,27 +1,21 @@
 package models.laboratory.run.description;
 
-import java.util.List;
+import java.util.function.Supplier;
 
+import fr.cea.ig.ngl.utils.SpringSupplier;
 import models.laboratory.common.description.CommonInfoType;
-import models.laboratory.common.description.Level;
-import models.laboratory.common.description.PropertyDefinition;
 import models.laboratory.run.description.dao.AnalysisTypeDAO;
+import ngl.refactoring.MiniDAO;
 
 public class AnalysisType extends CommonInfoType {
 
-//	public static CommonInfoType.AbstractCommonInfoTypeFinder<AnalysisType> find = new CommonInfoType.AbstractCommonInfoTypeFinder<AnalysisType>(AnalysisTypeDAO.class);
+	@SuppressWarnings("hiding") 
+	public static final Supplier<AnalysisTypeDAO>       find     = new SpringSupplier<>(AnalysisTypeDAO.class);
 	
-	// AnalysisTypeDAO = AbstractDAOCommonInfoType<AnalysisType>
-	@SuppressWarnings("hiding") // Super class should not be concrete
-	public static final CommonInfoType.AbstractCommonInfoTypeFinder<AnalysisType,AnalysisTypeDAO> find = 
-			new CommonInfoType.AbstractCommonInfoTypeFinder<>(AnalysisTypeDAO.class); 
-	
-	public AnalysisType() {
-		super(AnalysisTypeDAO.class.getName());
-	}
-		
-	public List<PropertyDefinition> getPropertiesDefinitionDefaultLevel(){
-		return getPropertyDefinitionByLevel(Level.CODE.Analysis);
-	}
+	public static final Supplier<MiniDAO<AnalysisType>> miniFind = MiniDAO.createSupplier(find);
+			
+//	public List<PropertyDefinition> getPropertiesDefinitionDefaultLevel() {
+//		return getPropertyDefinitionByLevel(Level.CODE.Analysis);
+//	}
 
 }

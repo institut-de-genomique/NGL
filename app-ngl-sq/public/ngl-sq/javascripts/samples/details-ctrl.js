@@ -15,25 +15,7 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 	};
 
 
-	// move to a directive 
-/*	$scope.setImage = function(imageData, imageName, imageFullSizeWidth, imageFullSizeHeight) {
-		$scope.modalImage = imageData;
-
-		$scope.modalTitle = imageName;
-
-		var margin = 25;		
-		var zoom = Math.min((document.body.clientWidth - margin) / imageFullSizeWidth, 1);
-
-		$scope.modalWidth = imageFullSizeWidth * zoom;
-		$scope.modalHeight = imageFullSizeHeight * zoom; // in order to
-															// conserve image
-															// ratio
-		$scope.modalLeft = (document.body.clientWidth - $scope.modalWidth)/2;
-
-		$scope.modalTop = (window.innerHeight - $scope.modalHeight)/2;
-
-		$scope.modalTop = $scope.modalTop - 50; // height of header and footer
-	};*/
+	
 	 //buttons section 
 	
 	$scope.convertToBr = function(text){
@@ -44,7 +26,6 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 		saveInProgress = true;	
 		console.log("sample "+$scope.sample.code);
 		$http.put(jsRoutes.controllers.samples.api.Samples.update($scope.sample.code).url, $scope.sample)
-	//	$http.put("/api/samples/"+$scope.sample.code, $scope.sample)
 		.success(function(data, status, headers, config) {
 		
 			$scope.sample = data;
@@ -63,8 +44,7 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 
 	$scope.cancel = function(){
 		$scope.messages.clear();
-		mainService.stopEditMode();
-		updateData();				
+		mainService.stopEditMode();				
 	};
 
 	$scope.activeEditMode = function(){

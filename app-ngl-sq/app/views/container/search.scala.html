@@ -2,88 +2,135 @@
 @()
 
 @import views.html.helper._
+
+@** FDS 24/11/2020 remise en forme de l'ordre des attributs...
+                   NGL-3152 ajout des titles manquants sur bt-input => va sur 'icone d'ouverture des textarea => messages spécifiques ajoutés 
+                   ajout des autres titles manquants  title=placehoder  **@
 @form() = {
 	@columnSearchForm{			
 		@formGroup{
-			<div class="form-control" bt-select ng-model="searchService.form.projectCodes" multiple="true" textarea="true" filter="true" placeholder='@Messages("search.placeholder.projects")' bt-options="project.code as project|formatProjectListLabel for project in searchService.lists.getProjects()" ng-change="searchService.resetSampleCodes()"></div>
+			<div class="form-control" bt-select placeholder='@Messages("search.placeholder.projects")' title='@Messages("search.placeholder.projects")'
+				 multiple="true" textarea="true" filter="true" 
+			     ng-model="searchService.form.projectCodes"
+			     bt-options="project.code as project|formatProjectListLabel for project in searchService.lists.getProjects()" 
+			     ng-change="searchService.resetSampleCodes()">
+			</div>
 		}
 		@formGroup{
-			<div bt-select placeholder="@Messages("containers.select.state")" multiple="true" filter="true" class="form-control" ng-model="searchService.form.stateCodes" bt-options="stateCode.code as stateCode.name for stateCode in searchService.lists.getStates()" auto-select></div>	
-								
+			<div class="form-control" bt-select placeholder='@Messages("containers.select.state")' title='@Messages("containers.select.state")' 
+			     multiple="true" filter="true" class="form-control" 
+			     ng-model="searchService.form.stateCodes" 
+			     bt-options="stateCode.code as stateCode.name for stateCode in searchService.lists.getStates()" auto-select>
+			</div>	
 		}	
 		@formGroup{
-			<div bt-select placeholder="@Messages("processes.select.processCategory")" class="form-control" ng-model="searchService.form.processCategory" bt-options="processCategory.code as processCategory.name for processCategory in searchService.lists.getProcessCategories()" ng-change="searchService.changeProcessCategory()" auto-select></div>								
+			<div class="form-control" bt-select placeholder='@Messages("processes.select.processCategory")'  title='@Messages("processes.select.processCategory")' 
+			     ng-model="searchService.form.processCategory" 
+			     bt-options="processCategory.code as processCategory.name for processCategory in searchService.lists.getProcessCategories()" 
+			     ng-change="searchService.changeProcessCategory()" auto-select>
+			</div>
 			}
 		@formGroup{
-			<div class="form-control" bt-select ng-model="searchService.form.valuations" multiple="true" placeholder="@Messages("containers.table.valid")" 
-				bt-options="valuation.code as valuation.name for valuation in searchService.lists.getValuations()"></div>
+			<div class="form-control" bt-select placeholder='@Messages("containers.table.valid")' title='@Messages("containers.table.valid")' 
+			     multiple="true"
+			     ng-model="searchService.form.valuations"  placeholder='@Messages("containers.table.valid")' 
+				 bt-options="valuation.code as valuation.name for valuation in searchService.lists.getValuations()">
+			</div>
 		}	
-		
 	}
 	@columnSearchForm{
 		@formGroup{
-			<div class="form-control" bt-select ng-model="searchService.form.sampleCodes" multiple="true" textarea="true" filter="true" placeholder='@Messages("search.placeholder.samples")' bt-options="sample.code as sample.code for sample in searchService.lists.getSamples()" ng-focus="searchService.refreshSamples()"></div>			
+			<div class="form-control" bt-select placeholder='@Messages("search.placeholder.samples")' title='@Messages("search.placeholder.samples")'
+				 multiple="true" textarea="true" filter="true"
+			     ng-model="searchService.form.sampleCodes"
+			     bt-options="sample.code as sample.code for sample in searchService.lists.getSamples()" 
+			     ng-focus="searchService.refreshSamples()">
+			 </div>	
 		}
 		@formGroup{	
-			<div  class="form-control" bt-select ng-model="searchService.form.stateResolutionCodes" multiple="true" placeholder="@Messages("search.placeholder.resolutions")" bt-options="valid.code as valid.name for valid in searchService.lists.get('containerResolutions')"></div>														
+			<div class="form-control" bt-select placeholder='@Messages("search.placeholder.resolutions")' title='@Messages("search.placeholder.resolutions")'
+			     multiple="true"
+			     ng-model="searchService.form.stateResolutionCodes"
+			     bt-options="valid.code as valid.name for valid in searchService.lists.get('containerResolutions')">
+			</div>
 		}	
 		@formGroup{
-			<div bt-select placeholder="@Messages("processes.select.processType")" class="form-control" ng-model="searchService.form.processTypeCode" bt-options="processType.code as processType.name for processType in searchService.lists.getProcessTypes()" ng-change="searchService.changeProcessType()" auto-select></div>					
+			<div class="form-control" bt-select placeholder='@Messages("processes.select.processType")' title='@Messages("processes.select.processType")' 
+			     ng-model="searchService.form.processTypeCode" 
+			     bt-options="processType.code as processType.name for processType in searchService.lists.getProcessTypes()" 
+			     ng-change="searchService.changeProcessType()" auto-select>
+			</div>
 		}
-		
 	}
 	@columnSearchForm{
 		@formGroup{
-			<div bt-select placeholder="@Messages("containers.select.categorySupportCode")" class="form-control" multiple="true" ng-model="searchService.form.containerSupportCategories" bt-options="CategorySupport.code as CategorySupport.name for CategorySupport in searchService.lists.getContainerSupportCategories()"  auto-select></div>					
-		}
-		@formGroup{
-			@***
-			<input class="form-control" type="text" ng-model="searchService.form.supportCodeRegex"  placeholder='@Messages("search.placeholder.containerSupport")' title='@Messages("search.placeholder.containerSupport")'>			
-			***@
-			
-			<bt-input  class="form-control"  input-ng-model="searchService.form.supportCodeRegex" textarea-ng-model="searchService.form.supportCodes" placeholder='@Messages("search.placeholder.containerSupport")' ></bt-input>									
-		}		
-		@formGroup{
-			<bt-input  class="form-control"  input-ng-model="searchService.form.codeRegex" textarea-ng-model="searchService.form.codes" placeholder='@Messages("search.placeholder.container")' ></bt-input>									
-		}						
-	}
-	@columnSearchForm{		
-		
-			@formGroup{
-			<input class="form-control" type="text" ng-model="searchService.form.fromDate" placeholder='@Messages("containers.placeholder.fromDate")' title='@Messages("containers.placeholder.fromDate")'>					
-		
-		}
-		@formGroup{
-			<div class="form-control" bt-select ng-model="searchService.form.fromTransformationTypeCodes" multiple="true" placeholder="@Messages("containers.select.fromTransformationTypeCodes")" 
-				bt-options="expType.code as expType.name for expType in searchService.lists.get('transformation',true)">
+			<div class="form-control" bt-select placeholder='@Messages("containers.select.categorySupportCode")' title='@Messages("containers.select.categorySupportCode")' 
+			     multiple="true" 
+			     ng-model="searchService.form.containerSupportCategories" 
+			     bt-options="CategorySupport.code as CategorySupport.name for CategorySupport in searchService.lists.getContainerSupportCategories()" auto-select>
 			</div>
 		}
 		@formGroup{
-			<div class="form-control" bt-select ng-model="searchService.form.fromPurificationTypeCodes" multiple="true"  placeholder="@Messages("containers.select.fromPurificationCode")"
-									bt-options="expType.code as expType.name for expType in searchService.lists.get('purification',true)">
+			<bt-input class="form-control" placeholder='@Messages("search.placeholder.containerSupport")' title='@Messages("search.title.containerSupportRegexArea")'
+			    input-ng-model="searchService.form.supportCodeRegex" 
+			    textarea-ng-model="searchService.form.supportCodes" >
+			</bt-input>	
+		}
+		@formGroup{
+			<bt-input class="form-control" placeholder='@Messages("search.placeholder.container")' title='@Messages("search.title.containerRegexArea")'
+			    input-ng-model="searchService.form.codeRegex" 
+			    textarea-ng-model="searchService.form.codes" >
+			</bt-input>
+		}
+	}
+	@columnSearchForm{
+		@formGroup{
+		<input class="form-control" type="text" placeholder='@Messages("containers.placeholder.fromDate")' title='@Messages("containers.placeholder.fromDate")' date-timestamp 
+		       ng-model="searchService.form.fromDate" >
+		}
+		@formGroup{
+			<div class="form-control" bt-select placeholder='@Messages("containers.select.fromTransformationTypeCodes")' title='@Messages("containers.select.fromTransformationTypeCodes")'  
+			     ng-model="searchService.form.fromTransformationTypeCodes" 
+			     multiple="true" 
+			     bt-options="expType.code as expType.name for expType in searchService.lists.get('transformation',true)">
+			</div>
+		}
+		@formGroup{
+			<div class="form-control" bt-select placeholder='@Messages("containers.select.fromPurificationCode")' title='@Messages("containers.select.fromPurificationCode")' 
+			     multiple="true"
+			     ng-model="searchService.form.fromPurificationTypeCodes"   
+				bt-options="expType.code as expType.name for expType in searchService.lists.get('purification',true)">
 			</div>				
 		}
-		}
+	}
 	@columnSearchForm{	
 		@formGroup{
-			<input class="form-control" type="text" ng-model="searchService.form.toDate" placeholder='@Messages("containers.placeholder.toDate")' title='@Messages("containers.placeholder.toDate")'>
-					
+			<input class="form-control" type="text" placeholder='@Messages("containers.placeholder.toDate")' title='@Messages("containers.placeholder.toDate")' date-timestamp 
+			       ng-model="searchService.form.toDate" >
 		}
 		@formGroup{
-			<input class="form-control" type="text" ng-model="searchService.form.createUser" typeahead="user.name as user.name for user in searchService.lists.getUsers() | filter:$viewValue | limitTo:20" placeholder='@Messages("containers.table.createUser")' title='@Messages("containers.placeholder.user")'>	
+			<input class="form-control" type="text" placeholder='@Messages("containers.table.createUser")' title='@Messages("containers.placeholder.user")'
+			       ng-model="searchService.form.createUser" 
+			       typeahead="user.name as user.name for user in searchService.lists.getUsers() | filter:$viewValue | limitTo:20" >	
 		}
 		@formGroup{
-			<div class="form-control" bt-select ng-model="searchService.form.fromTransfertTypeCodes" multiple="true" placeholder="@Messages("containers.select.fromTransfertCode")" 
-							bt-options="expType.code as expType.name for expType in searchService.lists.get('transfert',true)">
+			<div class="form-control" bt-select placeholder='@Messages("containers.select.fromTransfertCode")' title='@Messages("containers.select.fromTransfertCode")'
+			     multiple="true"
+			     ng-model="searchService.form.fromTransfertTypeCodes"
+			     bt-options="expType.code as expType.name for expType in searchService.lists.get('transfert',true)">
 			</div>
-		}	
+		}
 	}
-			
 }
 
 @buttons() = {
 	@formGroup{
-		<div class="form-control" auto-select bt-select ng-model="searchService.reportingConfigurationCode" ng-change="searchService.updateColumn()" placeholder="@Messages("search.placeholder.reporting.configuration")" bt-options="valid.code as valid.name for valid in searchService.lists.get('reportConfigs')" ng-if="searchService.lists.get('reportConfigs').length > 0"></div>
+		<div class="form-control" auto-select bt-select placeholder='@Messages("search.placeholder.reporting.configuration")' title='@Messages("search.placeholder.reporting.configuration")'
+		     ng-model="searchService.reportingConfigurationCode" 
+		     ng-change="searchService.updateColumn()"
+		     bt-options="valid.code as valid.name for valid in searchService.lists.get('reportConfigs')" 
+		     ng-if="searchService.lists.get('reportConfigs').length > 0">
+		</div>
 	}	
 }
 <!-- @searchForm(form)()("searchService.datatable") -->
@@ -95,30 +142,52 @@
 	   	<li class="active"><a href="#" data-target="#filters" data-toggle="tab">@Messages("search.tab.filters")</a></li>
 	   	<li ng-if="searchService.getAddFiltersToForm().length > 0"><a href="#" data-target="#addfilters" data-toggle="tab">@Messages("search.tab.addfilters")</a></li>
 	   	<li ng-if="searchService.getAddColumnsToForm().length > 0"><a href="#" data-target="#addcolumns" data-toggle="tab">@Messages("search.tab.addcolumns")</a></li>       
-	   	<li><a href="#" data-target="#nativeQuery" data-toggle="tab">Experimental search mode</a></li>       
+	   	<li><a href="#" data-target="#nativeQuery" data-toggle="tab">@Messages("search.tab.experimental")</a></li>       
 	   	
 	   	</ul>
 			
 <div class="tab-content">
 	<div class="tab-pane active" id="filters">
-			<form class="well well-small">
-			<div class="row">
-			@form
-			@columnSearchForm{
-				@formGroup{
-				<div class="btn-toolbar">
-					<button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="search()" class="btn btn-primary" >
-						<i class="fa fa-search"></i>
-					</button>
-					<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="reset()"  class="btn btn-default">
-						<i class="fa fa-undo"></i>
-					</button>						 	
+			<form class="well well-small" ng-switch="searchService.getMainFiltersToForm().length">
+			<div class="row" ng-switch-when="0">
+				@form
+				@columnSearchForm{
+					@formGroup{
+					<div class="btn-toolbar">
+						<button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="search()" class="btn btn-primary" >
+							<i class="fa fa-search"></i>
+						</button>
+						<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="reset()"  class="btn btn-default">
+							<i class="fa fa-undo"></i>
+						</button>						 	
+					</div>
+					}
+					@formGroup{
+						@buttons
+					}
+				}
+			</div>
+			<div class="row" ng-switch-default>
+				<div class="col-md-2 col-lg-2" ng-repeat="filters in searchService.getMainFiltersToForm()">
+					<div class="form-group" ng-repeat="filter in filters">
+						<div udt-compile="filter.html"></div> <!-- used directive from datatable to compile html -->
+					</div>
 				</div>
+				@columnSearchForm{
+					@formGroup{
+					<div class="btn-toolbar">
+						<button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="search()" class="btn btn-primary" >
+							<i class="fa fa-search"></i>
+						</button>
+						<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="searchService.aggregateForm = {}"  class="btn btn-default">
+							<i class="fa fa-undo"></i>
+						</button>						 	
+					</div>
+					}
+					@formGroup{
+						@buttons
+					}
 				}
-				@formGroup{
-					@buttons
-				}
-			}
 			</div>		
 		</form>	
 	</div>
@@ -163,7 +232,7 @@
 			 @columnSearchForm{
 				@formGroup{
 				<div class="btn-toolbar">
-					<button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="searchService.addColumnsToDatatable()" class="btn btn-primary" >
+					<button type="submit" title='@Messages("button.add.columns")' data-toggle="tooltip" ng-click="searchService.addColumnsToDatatable()" class="btn btn-primary" >
 						<i class="fa fa-plus"></i>
 					</button>
 					<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="searchService.resetDatatableColumns()"  class="btn btn-default">
@@ -197,6 +266,15 @@
 				</div>
 				}				
 			}
+			@columnSearchForm{
+				@formGroup{
+			  		<div class="checkbox">
+				    <label>
+				      <input type="checkbox" ng-model="searchService.form.aggregate"> @Messages("search.tab.aggregateSearchMode")
+				    </label>
+				  </div>	
+				  }
+			}	
 			</div>		
 		</form>	
 	</div>

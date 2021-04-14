@@ -1,15 +1,11 @@
 package views.components.datatable;
 
 import java.util.List;
-// import java.util.Map;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-
-// import play.Logger;
 import play.libs.Json;
 import play.libs.Scala;
-
 import scala.collection.Seq;
 
 public class DatatableConfig {
@@ -29,33 +25,37 @@ public class DatatableConfig {
 	public Boolean remove     = Boolean.FALSE; // mode suppression
 	public Boolean hidding    = Boolean.FALSE; // mode cacher. attention très consomateur en resource
 	public Boolean show       = Boolean.FALSE; // mode details
-	public String name        = "datatable";   // default js name
+	public String  name       = "datatable";   // default js name
 	public Boolean compact    = Boolean.TRUE;  // mode compact pour le nom des bouttons
 	
-		
-	public DatatableConfig() {
-		
+	public DatatableConfig() {	
 	}
 	
 	public DatatableConfig(List<DatatableColumn> columns) {
 		this.columnList = columns;
-		this.columns = Scala.toSeq(columns);		
+		this.columns    = Scala.toSeq(columns);		
 		int count = 0;		
-		for(DatatableColumn column:  columns){
-			if(column.edit.booleanValue()){
-				this.edit = Boolean.TRUE;
-				this.editColumn = Boolean.TRUE;
-			}
-			if(column.hide.booleanValue()){
-				this.hidding = Boolean.TRUE;
-			}
-			if(column.order.booleanValue()){
-				this.order = Boolean.TRUE;
-			}
-			column.id = "p"+count++;
+		for (DatatableColumn column:  columns) {
+//			if (column.edit.booleanValue()) {
+//				this.edit       = Boolean.TRUE;
+//				this.editColumn = Boolean.TRUE;
+//			}
+//			if (column.hide.booleanValue()) {
+//				this.hidding = Boolean.TRUE;
+//			}
+//			if (column.order.booleanValue()) { 
+//				this.order = Boolean.TRUE;
+//			}
+			edit       = edit       || column.edit;
+			editColumn = editColumn || column.edit;
+			hidding    = hidding    || column.hide;
+			order      = order      || column.order;
+			column.id = "p" + count++;
 		}
-		if(this.edit)this.save = Boolean.TRUE; //if edition so save
-		this.button = (this.edit.booleanValue() || this.hidding.booleanValue() || this.show.booleanValue() || this.remove.booleanValue())?Boolean.TRUE:Boolean.FALSE;
+//		if (this.edit) this.save = Boolean.TRUE; //if edition so save
+		save = save || edit;
+//		this.button = (this.edit.booleanValue() || this.hidding.booleanValue() || this.show.booleanValue() || this.remove.booleanValue()) ? Boolean.TRUE : Boolean.FALSE;
+		button = edit || hidding || show || remove;
 	}	
 	
 	public JsonNode toJson() {
@@ -65,4 +65,5 @@ public class DatatableConfig {
 	public JsonNode allConfigtoJson() {
 		return Json.toJson(this);		
 	}
+	
 }

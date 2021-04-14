@@ -40,11 +40,20 @@ angular.module('home').controller('SearchCtrl', ['$scope','$location','$routePar
 
 	$scope.reset = function(){
 		$scope.searchService.resetForm();
+		$scope.searchService.resetTextareas();
 	};
 	
 	$scope.search = function(){	
 		$scope.searchService.search();
 	};
+	
+	// FDS pour NGL-3260 dans process/search.scala.htlm
+	$scope.isShowConsigne=false;
+	$scope.toggleShowConsigne=function(){
+		//console.log("TOGGLE search-ctrl.js");
+		if ( $scope.isShowConsigne===false) { $scope.isShowConsigne=true}
+		else {$scope.isShowConsigne=false}
+	}
 	
 	//init
 	if(angular.isUndefined($scope.getHomePage())){
@@ -95,11 +104,15 @@ angular.module('home').controller('SearchStateCtrl', ['$scope','$location','$rou
 				value:function(process){
 					return process.state;
 				}
+			},
+			objectsMustBeAddInGetFinalValue:{
+				"searchService":processesSearchService
 			}
 	};
 
 	$scope.reset = function(){
 		$scope.searchService.resetForm();
+		$scope.searchService.resetTextareas();	
 	};
 	
 	$scope.search = function(){	
@@ -161,11 +174,15 @@ angular.module('home').controller('SearchRemoveCtrl', ['$scope','$location','$ro
 			},
 			exportCSV:{
 				active:true,
+			},
+			objectsMustBeAddInGetFinalValue:{
+				"searchService":processesSearchService
 			}
 	};
 
 	$scope.reset = function(){
 		$scope.searchService.resetForm();
+		$scope.searchService.resetTextareas();
 	};
 	
 	$scope.search = function(){	

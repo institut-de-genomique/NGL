@@ -2,13 +2,13 @@ package controllers.authorisation.tpl;
 
 import javax.inject.Inject;
 
+import controllers.NGLController;
 import play.mvc.Result;
 import views.html.authorisation.users.*;
 import fr.cea.ig.authentication.Authenticated;
 import fr.cea.ig.authorization.Authorized;
 import fr.cea.ig.lfw.Historized;
 import fr.cea.ig.ngl.NGLApplication;
-import fr.cea.ig.ngl.NGLController;
 import fr.cea.ig.ngl.support.NGLJavascript;
 
 /**

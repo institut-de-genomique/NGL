@@ -1,6 +1,6 @@
 "use strict";
 
-angular.module('home', ['commonsServices','ngRoute','ultimateDataTableServices','ui.bootstrap'], function($routeProvider, $locationProvider) {
+angular.module('home', ['commonsServices','ngRoute','ultimateDataTableServices','ui.bootstrap']).config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
 	
 	$routeProvider.when('/admin/supports/switch-index/home', {
 		templateUrl : jsRoutes.controllers.admin.supports.tpl.Supports.search('switch-index').url,
@@ -16,4 +16,4 @@ angular.module('home', ['commonsServices','ngRoute','ultimateDataTableServices',
 
 	// configure html5 to get links working with bookmarked
 	$locationProvider.html5Mode({enabled: true, requireBase: false});
-});
+}]);

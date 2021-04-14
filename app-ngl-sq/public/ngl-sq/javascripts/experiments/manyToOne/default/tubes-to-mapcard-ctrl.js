@@ -1,5 +1,6 @@
-angular.module('home').controller('TubesToMapCardCtrl',['$scope', '$parse', 'atmToSingleDatatable',
-                                                               function($scope, $parse, atmToSingleDatatable) {
+// FDS 07/10/2020 NGL-3000 ajout dateServices
+angular.module('home').controller('TubesToMapCardCtrl',['$scope', '$parse', 'atmToSingleDatatable', 'dateServices',
+                                                               function($scope, $parse, atmToSingleDatatable, dateServices) {
 	
 	// NGL-1055: name explicite pour fichier CSV exporté: typeCode experience
 	// NGL-1055: mettre getArray et codes:'' dans filter et pas dans render
@@ -174,12 +175,32 @@ angular.module('home').controller('TubesToMapCardCtrl',['$scope', '$parse', 'atm
 		//datatable.setData(dataMain);
 	}
 	
+	// NGL-3000 ajouter une vérification de la date saisie
+	// 21/10/2020 isValidDateFormat ne controle pas une date entrée sur 2 digits...la retirer pour l'instant
 	$scope.$on('save', function(e, callbackFunction) {	
 		console.log("call event save");
+		// toutes les experiences avec mapcard en sortie n'ont pas de runStartDate....tester si la propriété existe !!!
+		if ( ! $scope.experiment.experimentProperties.runStartDate ) {
+			save(callbackFunction);
+		} else {
+				// une valeur definie existe => la controler
+				// avec l'utilisation d'un calendrier cette verification est superflue...
+				/*if ( ! dateService.isValidDateFormat($scope.experiment.experimentProperties.runStartDate.value, Messages("date.format"))){
+					$scope.messages.setError(Messages("experiment.msg.badformat", "Date réelle de dépôt", Messages("date.format")));
+					$scope.$emit('childSavedError', callbackFunction);
+				} else {*/
+					//tout OK sauvegarder !!!
+					save(callbackFunction);
+				//}
+		}
+	});
+	
+	// ancien contenu de $scope.$on('save', ......
+	function save(callbackFunction){
 		$scope.atmService.data.save();
 		$scope.atmService.viewToExperimentManyToOne($scope.experiment);
 		$scope.$emit('childSaved', callbackFunction);
-	});
+	}
 	
 	$scope.$on('refresh', function(e) {
 		console.log("call event refresh");
@@ -220,4 +241,15 @@ angular.module('home').controller('TubesToMapCardCtrl',['$scope', '$parse', 'atm
 	atmService.experimentToView($scope.experiment, $scope.experimentType);
 	
 	$scope.atmService = atmService;
+	
+	// ajouté pour NGL-3000
+	var dateService=dateServices($scope);
+	
+	//en mode creation initialiser experimentProperties.runStartDate si elle est definie !!! sinon pb avec NGL-3000
+	if($scope.isCreationMode()){
+		if(!$parse("experimentProperties.runStartDate")($scope.experiment)){
+			console.log('initialiser experimentProperties.runStartDate.value');
+			$parse("experimentProperties.runStartDate.value").assign($scope.experiment, undefined); 
+		}
+	}
 }]);

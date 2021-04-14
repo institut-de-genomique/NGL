@@ -1,7 +1,7 @@
  "use strict";
 
- angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$parse', '$q', '$routeParams', '$sce', '$location', 'mainService', 'tabService', 'datatable', 'messages', 'lists', 'treatments', '$window', 'valuationService', 
-     function($scope, $http, $parse, $q, $routeParams, $sce, $location, mainService, tabService, datatable, messages, lists, treatments, $window, valuationService) {
+ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$parse', '$q', '$routeParams', '$sce', '$location', 'mainService', 'tabService', 'datatable', 'messages', 'lists', 'treatments', '$window', 'valuationService', 'convertValueServices', 
+     function($scope, $http, $parse, $q, $routeParams, $sce, $location, mainService, tabService, datatable, messages, lists, treatments, $window, valuationService, convertValueServices) {
 
 	 
 	 $scope.getTabClass = function(value){
@@ -194,6 +194,29 @@
 	    return -parseInt(trt.abundance);
 	};
 	
+	$scope.setFilterTaxonBilan = function(value){
+		 mainService.put('filterTaxonBilan', value);
+	}
+	
+	$scope.setFilterTaxonBilanDefault = function(value){
+		 mainService.put('filterTaxonBilanDefault', value);
+	}
+	
+	$scope.setFilterTaxonBilanCommon = function(key,value){
+		 mainService.put(key, value);
+	}
+	
+	$scope.setFilterTaxonBilanPlastid = function(value){
+		 mainService.put('filterTaxonBilanPlastid', value);
+	}
+	
+	$scope.setFiltertaxonBilanContamination = function(value){
+		 mainService.put('filtertaxonBilanContamination', value);
+	}
+	$scope.setFilterKmerPercentBilanDefault = function(value){
+		 mainService.put('filterKmerPercentDefault', value);
+	}
+	
 	var init = function(){
 		$scope.messages = messages();
 		$scope.lists = lists;
@@ -204,6 +227,9 @@
 		$scope.filterTaxonBilanMitochondrion=0.2;
 		$scope.filterTaxonBilanPlastid=0.2;
 		$scope.filtertaxonBilanContamination=0.2;
+		$scope.filterKmerPercentDefault=1;
+		$scope.arrayExpectedSeq=[];
+		$scope.convertValueServices = convertValueServices();
 		
 		mainService.stopEditMode();
 		if(isValuationMode()){
@@ -211,7 +237,7 @@
 		}
 		
 		$http.get(jsRoutes.controllers.readsets.api.ReadSets.get($routeParams.code).url).success(function(data) {
-			$scope.readset = data;	
+			$scope.readset = data;
 				
 			if(tabService.getTabs().length == 0){
 				if(isValuationMode()){ //valuation mode
@@ -228,8 +254,17 @@
 			$scope.lists.refresh.valuationCriterias({typeCode:$scope.readset.typeCode, objectTypeCode:"ReadSet", orderBy:'name'});
 			$scope.lists.refresh.states({objectTypeCode:"ReadSet"});
 			
+			if(angular.isDefined($scope.readset.sampleOnContainer.properties.expectedSequences)){
+				var expectedSequences = $scope.readset.sampleOnContainer.properties.expectedSequences.value.replace(/["]/g,'');
+				var lastChar = expectedSequences.charAt(expectedSequences.length-1);
+				if(lastChar==","){
+					expectedSequences=expectedSequences.substr(0,expectedSequences.length-1);
+				}
+				$scope.arrayExpectedSeq=expectedSequences.split(',');
+			}
+			
 			if(angular.isDefined($scope.readset.treatments)){				
-				$scope.treatments.init($scope.readset.treatments, jsRoutes.controllers.readsets.tpl.ReadSets.treatments, 'readsets', {global:true});				
+				$scope.treatments.init($scope.readset.treatments, jsRoutes.controllers.readsets.tpl.ReadSets.treatments, 'readsets', {global:true,primaryDemultiplexing:true});				
 			}
 			
 			if($scope.readset.laneNumber){
@@ -238,9 +273,12 @@
 				});	
 			}
 			
-			$http.get(jsRoutes.controllers.runs.api.RunTreatments.get($scope.readset.runCode, "ngsrg").url).success(function(data) {
-				$scope.runNGSRG = data;	
-			});	
+			// NGL-2970 - Vue Bionano. La requête part alors qu'il n'y a pas de traitements ngsrg dans bionano.
+			if (data.typeCode != 'rsbionano') {
+				$http.get(jsRoutes.controllers.runs.api.RunTreatments.get($scope.readset.runCode, "ngsrg").url).success(function(data) {
+					$scope.runNGSRG = data;	
+				});	
+			}
 			
 			$http.get(jsRoutes.controllers.commons.api.StatesHierarchy.list().url,  {params: {objectTypeCode:"ReadSet"}}).success(function(data) {
 				$scope.statesHierarchy = data;	
@@ -252,6 +290,28 @@
 					
 			if(undefined == mainService.get('readSetActiveTab')){
 				 mainService.put('readSetActiveTab', 'general');
+			 }
+			
+			if(undefined != mainService.get('filterTaxonBilan')){
+				$scope.filterTaxonBilan=mainService.get('filterTaxonBilan');
+			 }
+			
+			if(undefined != mainService.get('filterTaxonBilanDefault')){
+				$scope.filterTaxonBilanDefault=mainService.get('filterTaxonBilanDefault');
+			 }
+			
+			if(undefined != mainService.get('taxonBilanMitochondrion')){
+				$scope.filterTaxonBilanMitochondrion=mainService.get('taxonBilanMitochondrion');
+			 }
+			if(undefined != mainService.get('taxonBilanPlastid')){
+				$scope.filterTaxonBilanPlastid=mainService.get('taxonBilanPlastid');
+			 }
+			if(undefined != mainService.get('taxonBilanContamination')){
+				$scope.filtertaxonBilanContamination=mainService.get('taxonBilanContamination');
+			 }
+			
+			if(undefined != mainService.get('filterKmerPercentDefault')){
+				$scope.filterKmerPercentDefault=mainService.get('filterKmerPercentDefault');
 			 }
 		});
 		

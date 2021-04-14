@@ -43,9 +43,8 @@ public class ImportDataUtil {
 		return Duration.create(c.getTimeInMillis() - System.currentTimeMillis(),TimeUnit.MILLISECONDS);
 	}
 	
-	// TODO: fix comment, "with specified minute" but the argument name is hour. 
 	/**
-	 * Get the duration for next time with specific minute.
+	 * Get the duration for next time with specific hour.
 	 * @param hour hour
 	 * @return     duration
 	 */

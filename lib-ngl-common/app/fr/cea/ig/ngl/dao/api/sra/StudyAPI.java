@@ -11,6 +11,7 @@ import fr.cea.ig.ngl.dao.api.APIException;
 import fr.cea.ig.ngl.dao.api.APIValidationException;
 import fr.cea.ig.ngl.dao.api.GenericAPI;
 import fr.cea.ig.ngl.dao.sra.StudyDAO;
+import fr.cea.ig.play.IGGlobals;
 import models.sra.submit.common.instance.Study;
 
 public class StudyAPI extends GenericAPI<StudyDAO, Study> {
@@ -26,7 +27,14 @@ public class StudyAPI extends GenericAPI<StudyDAO, Study> {
 //	public StudyAPI (StudyDAO studyDAO) {
 //		this.dao = studyDAO;
 //	}
-
+	
+	//SGAS
+	// Retourner uniquement de type Study et non ExternalStudy en ajoutant filtre
+	// ne marche pas utiliser dao_all() de AbstractStudy
+//	public Iterable<Study> dao_all() {
+//		return dao.all();
+//	}
+	
 	public Study dao_getObject(String studyCode) {
 		return dao.getObject(studyCode);
 	}
@@ -80,5 +88,15 @@ public class StudyAPI extends GenericAPI<StudyDAO, Study> {
 			throws APIException, APIValidationException {
 		return null;
 	}
-	
+
+	/**
+	 * Acces à une instance globale de StudyAPI, qui permet de remplacer les appels
+	 * à MongoDBDAO qui est une globale, dans un contexte ou on ne peut pas injecter. 
+	 * Exemple dans objets du domaine (sra.Experiment, ...)
+	 * @return StudyAPI
+	 */
+	public static StudyAPI get() {
+		return IGGlobals.instanceOf(StudyAPI.class);
+	}
+		
 }

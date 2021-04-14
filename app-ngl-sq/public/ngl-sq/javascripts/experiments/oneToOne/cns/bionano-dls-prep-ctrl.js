@@ -321,14 +321,15 @@ angular.module('home').controller('BionanoDLSPrepCtrl',['$scope', '$parse', 'atm
 				var ocu = atm.outputContainerUseds[j];
 				if(ocu.experimentProperties && ocu.experimentProperties.averageConcentration && ocu.experimentProperties.averageConcentration.value){
 					if (ocu.experimentProperties.averageConcentration2 && ocu.experimentProperties.averageConcentration2.value){
-						ocu.concentration.value= (ocu.experimentProperties.averageConcentration.value + ocu.experimentProperties.averageConcentration2.value)/2;	
+						ocu.concentration.value= ocu.experimentProperties.averageConcentration2.value;	
 						ocu.concentration.unit=ocu.experimentProperties.averageConcentration.unit;	
 					}else{
 						ocu.concentration= ocu.experimentProperties.averageConcentration;
 					}
 
 				}else{
-					ocu.concentration = null;
+					ocu.concentration.value = null;
+					ocu.concentration.unit = null;
 				}		
 				console.log("output concentration "+ocu.concentration.value);
 			}

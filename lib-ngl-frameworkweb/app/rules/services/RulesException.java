@@ -1,14 +1,13 @@
 package rules.services;
 
-public class RulesException extends Exception{
+public class RulesException extends Exception {
 
 	/**
-	 * 
+	 * Serialization UID.
 	 */
 	private static final long serialVersionUID = 1L;
 
 	public RulesException() {
-		super();
 	}
 
 	public RulesException(String message, Throwable cause) {
@@ -22,7 +21,5 @@ public class RulesException extends Exception{
 	public RulesException(Throwable cause) {
 		super(cause);
 	}
-
-	
 	
 }

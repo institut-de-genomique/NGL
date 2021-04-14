@@ -36,7 +36,7 @@ angular.module('home').controller('ContentUpdateCtrl', ['$scope', '$filter', '$h
 			         {
 			        	 "header":"Project",
 			        	 "property":"projectCode",
-			        	"order":true,
+			        	 "order":true,
 						 "edit":false,
 						 "type":"text",
 			        	 "position":4
@@ -50,7 +50,7 @@ angular.module('home').controller('ContentUpdateCtrl', ['$scope', '$filter', '$h
 			        	 "position":5
 			         },			         
 			         {
-			        	 "header":"Proprerty",
+			        	 "header":Messages("admin.supports.table.property"),
 			        	 "property":"contentPropertyNameUpdated",
 			        	 "order":true,
 						 "edit":false,
@@ -58,7 +58,7 @@ angular.module('home').controller('ContentUpdateCtrl', ['$scope', '$filter', '$h
 			        	 "position":6
 			         },
 			         {
-			        	 "header":"Current value",
+			        	 "header":Messages("admin.supports.table.currentValue"),
 			        	 "property":"currentValue",
 			        	 "order":true,
 						 "edit":false,
@@ -66,7 +66,7 @@ angular.module('home').controller('ContentUpdateCtrl', ['$scope', '$filter', '$h
 			        	 "position":7
 			         },
 			         {
-			        	 "header":"Nb occurrences",
+			        	 "header":Messages("admin.supports.table.nbOccurences"),
 			        	 "property":"nbOccurrences",
 			        	 "order":true,
 						 "edit":false,
@@ -121,7 +121,7 @@ angular.module('home').controller('ContentUpdateCtrl', ['$scope', '$filter', '$h
 			datatableBI : undefined,
 			searchInProgress:false,
 			resetSampleCodes : function(){
-				this.form.sampleCode = undefined;									
+				this.form.sampleCode = undefined;
 			},
 		
 			refreshSamples : function(){
@@ -153,7 +153,7 @@ angular.module('home').controller('ContentUpdateCtrl', ['$scope', '$filter', '$h
 			
 			updateForm : function(){
 				if(!this.form.collectionNames){
-					this.form.collectionNames = ["ngl_sq.Container","ngl_sq.Process","ngl_sq.Experiment","ngl_bi.ReadSetIllumina"];					
+					this.form.collectionNames = ["ngl_sq.Container","ngl_sq.Process","ngl_sq.Experiment","ngl_bi.ReadSetIllumina"];
 				}
 			},
 			isSearchInProgress : function(){
@@ -194,16 +194,17 @@ angular.module('home').controller('ContentUpdateCtrl', ['$scope', '$filter', '$h
 	};
 	
 	//init
+	// FDS 10/02/2020  correction du label; mais le template reste le meme????
 	if(angular.isUndefined($scope.getHomePage())){
 		mainService.setHomePage('search');
-		tabService.addTabs({label:Messages('admin.supports.switch-index.tabs.search'),href:jsRoutes.controllers.admin.supports.tpl.Supports.home('switch-index').url,remove:false});
+		tabService.addTabs({label:Messages('admin.supports.content-update.tab.search'),href:jsRoutes.controllers.admin.supports.tpl.Supports.home('switch-index').url,remove:false});
 		tabService.activeTab(0);
 	}
 	$scope.messages = messages();
 	
 	var dtConfigSQ = angular.copy(datatableConfig);
 	dtConfigSQ.columns.push({
-		   	 "header":"New value",
+		   	 "header":Messages("admin.supports.table.newValue"),
 			 "property":"newValue",
 			 "order":true,
 			 "edit":true,
@@ -214,7 +215,7 @@ angular.module('home').controller('ContentUpdateCtrl', ['$scope', '$filter', '$h
 			 "position":8
 			},
 			{
-		   	 "header":"Action",
+		   	 "header":Messages("admin.supports.table.action"),
 			 "property":"action",
 			 "order":true,
 			 "edit":true,
@@ -228,7 +229,7 @@ angular.module('home').controller('ContentUpdateCtrl', ['$scope', '$filter', '$h
 	
 	var dtConfigBI = angular.copy(datatableConfig);
 	dtConfigBI.columns.push({
-	   	 "header":"New value",
+	   	 "header":Messages("admin.supports.table.newValue"),
 		 "property":"newValue",
 		 "order":true,
 		 "edit":true,
@@ -239,7 +240,7 @@ angular.module('home').controller('ContentUpdateCtrl', ['$scope', '$filter', '$h
 		 "position":8
 		},		
 		{
-	   	 "header":"Action",
+	   	 "header":Messages("admin.supports.table.action"),
 		 "property":"action",
 		 "order":true,
 		 "edit":true,

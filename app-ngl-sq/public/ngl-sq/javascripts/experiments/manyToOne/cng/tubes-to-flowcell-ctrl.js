@@ -124,6 +124,119 @@ angular.module('home').controller('CNGTubesToFlowcellCtrl',['$scope', '$parse','
 	
 	atmToSingleDatatable.addExperimentPropertiesToDatatable($scope.experimentType.propertiesDefinitions);
 	
+	//FDS 15/03/2019 NGL-2474: ajoute controles de coherence 
+	//-1- type instrument
+	/* jamais declenché sert a rien !!!!!!!
+	$scope.$watch("experiment.instrument.typeCode" , function(newValue, oldValue){
+		if (newValue && newValue !== oldValue ){
+			console.log("1/watch-------instrument.typeCode.value="+newValue+"---------");
+			checkAll();
+		}
+	})
+	*/
+	
+	//-2- code instrument
+	$scope.$watch("experiment.instrument.code", function(newValue, oldValue){
+		if (newValue && newValue !== oldValue ) {
+			console.log("2/watch-------instrument.code.value="+newValue+"---------");
+			
+			checkAll();
+		}
+	});
+	
+	//-3- category support output
+	$scope.$watch("experiment.instrument.outContainerSupportCategoryCode", function(newValue, oldValue){
+		if (newValue && newValue !== oldValue ) {
+			console.log("3/watch--------instrument.outContainerSupportCategoryCode.value="+newValue+"---------");
+			
+			checkAll();
+		}
+	});	
+	
+	//-4- code Flowcell !! Necessaire car sinon dans certains cas ca ne fonctionne pas dans le cas initial
+	$scope.$watch("experiment.instrumentProperties.containerSupportCode.value", function(newValue, oldValue){
+		if (newValue && newValue !== oldValue ) {
+			console.log("4/watch-------containerSupportCode.value="+newValue+"---------");
+
+			checkAll();
+		}
+	});	
+	
+	function checkAll(){
+		$scope.messages.clear();
+		
+		$scope.messages.clazz = "alert alert-warning";
+		$scope.messages.text = "Alertes de configuration";
+		$scope.data = { Alertes:[]} 
+		
+		//-1 nb lane
+		checkNbLaneCompat();
+		//-2 eventuellement plus tard les pattern de flowcell ??
+		//  possible uniquement pour les cbot-OnBoard car le type est dans le nom
+		//  pas de pattern Illumina disponible....
+		
+		if ( $scope.data.Alertes.length > 0 ){
+			$scope.messages.showDetails = true;
+			$scope.messages.open();
+		}
+	}
+	
+	function setAlert(msgKey, msgDetails){
+		$scope.data[msgKey].push(msgDetails);
+		$scope.messages.setDetails($scope.data);
+	}
+	
+	function checkNbLaneCompat(){
+		console.log("checkNbLaneCompat...");
+		
+		if ( undefined==$scope.experiment.instrument.outContainerSupportCategoryCode ||
+			 undefined==$scope.experiment.instrument.typeCode ||
+		     undefined==$scope.experiment.instrument.code) { return; }
+		
+		outContainerSupportCategoryCode=$scope.experiment.instrument.outContainerSupportCategoryCode
+		instrumentTypecode=$scope.experiment.instrument.typeCode;
+		instrumentCode=$scope.experiment.instrument.code;
+		console.log("checkNbLaneCompat..."+instrumentCode+"/"+outContainerSupportCategoryCode)
+		
+		if ( instrumentTypecode === "cBot-onboard" ){
+			if ( instrumentCode.match(/-Miseq/) && outContainerSupportCategoryCode != "flowcell-1" ){          // !!! (/Miseq/) avec "s"
+				setAlert("Alertes","L'instrument Miseq n'accepte que la flowcell 1 piste.");
+				//NB il y a aussi un blocage a la sauvegarde=> drools/prepa-flowcell/validation.drl
+				
+			} else if ( instrumentCode.match(/-NextSeq/) && outContainerSupportCategoryCode != "flowcell-4" ){ // !!! (/NextSeq/) avec "S"
+				setAlert("Alertes","L'instrument NextSeq 500 n'accepte que la flowcell 4 pistes.");
+				//NB il y a aussi un blocage a la sauvegarde=> drools/prepa-flowcell/validation.drl
+				
+			} else if ( instrumentCode.match(/-Hi/) && outContainerSupportCategoryCode != "flowcell-2" ){
+				// cBot-interne-Hi9 ou 10 ou 11-A ou B), warning si différent de 2 pistes 
+				setAlert("Alertes","Les Hiseq 2500 rapides n'acceptent que la flowcell 2 pistes.");
+			}	
+			// 18/11/2019 NGL-2752: Les NovaSeq 6000 ne doivent pas etre utilises en prepaflowcell classique !!!!!
+			else if (isInstrumentNovaSeq6000()){
+				setAlert("Alertes","L'instrument NovaSeq 6000 n'est pas utilisable dans cette expérience");
+				//NB il faut une règle drools pour générer une erreur si l'utilisateur valide malgré cette alerte
+			}
+		
+		} else if ( instrumentTypecode === "cBotV2" ){
+			// cBotA,cBotB,cBotC,cBotD,cBotE,cBotF), warning si différent de 8 pistes 	
+			if ( outContainerSupportCategoryCode != "flowcell-8" ){ 
+				setAlert("Alertes","Les Hiseq 2000 et Hiseq 2500 High Throughput n'acceptent que la flowcell 8 pistes.");
+			}
+		}
+	}
+	
+	
+	//18/11/2019  NGL-2752 ajout SuperNova => pour prévoir l'arrivée d'autres instruments Novaseq créer fonction dédiée
+	//            NB ce n'est pas un oubli, pas de novaseq-xp-fc-dock ici !!!
+	function isInstrumentNovaSeq6000(){
+		if ( instrumentCode.match(/MarieCurix/) || 
+			 instrumentCode.match(/SuperNova/)  ||
+			 instrumentCode.match(/BossaNova/) ) {
+			return true;
+		} else 
+			return false;
+	}
+	
 	
     /* 16/01/2017 FDS reunion Prod=> NON pas d'import du fichier des cBotV2 pour les prep Flowcell 2000, ce n'est vrai que pour
        prep-flowcell-ordered pour l'instant

@@ -15,7 +15,7 @@ import fr.cea.ig.DBObject;
  *
  * @param <T> type of referenced objects
  */
-@SuppressWarnings("unused") // The type is used to provide information so it's actually not used
+// @SuppressWarnings("unused") // The type is used to provide information so it's actually not used
 public class CodeReference<T> {
 
 	private String code;

@@ -9,7 +9,7 @@ angular.module('home').controller('StatsSearchLanesCtrl',['$scope', '$routeParam
 		tabService.addTabs({label:Messages('stats.page.tab.lanes.select'),href:jsRoutes.controllers.stats.tpl.Stats.home("lanes").url});
 		tabService.addTabs({label:Messages('stats.page.tab.show'),href:jsRoutes.controllers.stats.tpl.Stats.home("lanes-show").url});		
 		
-		tabService.activeTab(0); // desactive le lien !
+		tabService.activeTab(0); // active l'onglet, le met en bleu
 	}
 	
 	var datatableConfig = {
@@ -55,7 +55,7 @@ angular.module('home').controller('StatsShowLanesCtrl',['$scope', '$routeParams'
 			tabService.addTabs({label:Messages('stats.page.tab.lanes.select'),href:jsRoutes.controllers.stats.tpl.Stats.home("lanes").url});
 			//tabService.addTabs({label:Messages('stats.page.tab.lanes.config'),href:jsRoutes.controllers.stats.tpl.Stats.home("lanes-config").url});		
 			tabService.addTabs({label:Messages('stats.page.tab.show'),href:jsRoutes.controllers.stats.tpl.Stats.home("lanes-show").url});			
-			tabService.activeTab(0); // desactive le lien !
+			tabService.activeTab(0); // active l'onglet, le met en bleu
 		}
 	
 	

@@ -109,7 +109,18 @@ angular.module('home').controller('FragmentationCtrl',['$scope','$http', '$parse
 								 "type":"number",
 					        	 "position":51,
 					        	 "extraHeaders":{0:Messages("experiments.outputs")}
-					         },
+							 },
+							 {
+								"header":Messages("containers.table.quantity") + " (ng)",
+								"property":"outputContainerUsed.quantity.value",
+								"order":true,
+								"edit":false,
+								"hide":true,
+								"required":false,
+								"type":"number",
+								"position":52,
+								"extraHeaders":{0:Messages("experiments.outputs")}
+							},
 					         /*
 					         {
 					        	 "header":Messages("containers.table.code"),
@@ -198,7 +209,11 @@ angular.module('home').controller('FragmentationCtrl',['$scope','$http', '$parse
 		                complex:true,
 		                template:  ''
 		                	+$scope.plateUtils.templates.buttonLineMode()
-		                	+$scope.plateUtils.templates.buttonColumnMode()              	   
+		                	+$scope.plateUtils.templates.buttonColumnMode()   
+							+$scope.plateUtils.templates.buttonCopyPosition()
+							+'<div class="btn-group" style="margin-left:5px">'
+							+'<button class="btn btn-default" ng-click="copyQuantityInToOut()" data-toggle="tooltip" title="'+Messages("experiments.button.plate.copyQuantity.title")+'"  ng-disabled="!isEditMode()"><i class="fa fa-files-o" aria-hidden="true"></i> '+Messages("experiments.button.plate.copyQuantity")+'</button>'                	                	
+							+'</div>'
 		            }
 
 			};	
@@ -210,7 +225,15 @@ angular.module('home').controller('FragmentationCtrl',['$scope','$http', '$parse
 				atm.line = atm.outputContainerUseds[0].locationOnContainerSupport.line;
 				atm.column = atm.outputContainerUseds[0].locationOnContainerSupport.column;
 			});
-		}		
+		}
+		if(experiment.instrument.outContainerSupportCategoryCode=="tube"){
+			experiment.atomicTransfertMethods.forEach(function(atm){
+				atm.line = "1";
+				atm.column = "1";
+				atm.outputContainerUseds[0].locationOnContainerSupport.line="1";
+				atm.outputContainerUseds[0].locationOnContainerSupport.column="1";
+			});
+		}
 	}
 	
 	$scope.$on('save', function(e, callbackFunction) {	
@@ -252,7 +275,7 @@ angular.module('home').controller('FragmentationCtrl',['$scope','$http', '$parse
 	});
 	
 	$scope.updatePropertyFromUDT = function(value, col){
-		console.log("update from property : "+col.property);
+		console.log("update from property : " + col.property);
 		
 		if(col.property === 'outputContainerUsed.volume.value' || col.property === 'inputContainerUsed.experimentProperties.requiredQuantity.value'){
 			computeRequiredVolume(value.data);
@@ -260,14 +283,28 @@ angular.module('home').controller('FragmentationCtrl',['$scope','$http', '$parse
 			computeInputQuantity(value.data);
 			computeBufferVolume(value.data);
 			updateVolUnquantifiableSamples(value.data);
-		}/*else if(col.property === 'inputContainerUsed.experimentProperties.requiredQuantity.value'){
-			computeRequiredVolume(value.data);
-			computeInputVolume(value.data);
-			computeInputQuantity(value.data);
-			computeBufferVolume(value.data);
-		}*/
-		
-	}
+		}		
+	};
+
+	$scope.$on('finishExperiment', function(event, e){ 
+		$scope.atmService.data.displayResult.map(function(data) { return data.data; }).forEach(function(data) {
+			// copy 'Qté réelle engagée ds FRG' to 'Quantité (ng)'
+			data.outputContainerUsed.quantity = data.inputContainerUsed.experimentProperties.frgInputQuantity;
+			data.outputContainerUsed.quantity.unit = $scope.atmService.defaultOutputUnit.quantity;
+		});	
+	});
+
+	$scope.copyQuantityInToOut = function(){
+		var data = $scope.atmService.data.displayResult;
+		data.forEach(function(value){
+			if (value.data.inputContainerUsed.quantity && value.data.inputContainerUsed.quantity.value !== null) { 
+				if (!value.data.inputContainerUsed.experimentProperties) {
+					value.data.inputContainerUsed.experimentProperties = {requiredQuantity: {}};
+				}
+				value.data.inputContainerUsed.experimentProperties.requiredQuantity.value = value.data.inputContainerUsed.quantity.value;
+			}
+		})		
+	};
 	
 	var updateVolUnquantifiableSamples = function (udtData){
 		var outputVol = $parse("outputContainerUsed.volume.value")(udtData);
@@ -541,7 +578,7 @@ angular.module('home').controller('FragmentationCtrl',['$scope','$http', '$parse
 	
 	var atmService = atmToSingleDatatable($scope, datatableConfig);
 	//defined new atomictransfertMethod
-	atmService.newAtomicTransfertMethod =  function(line, column){
+	/*atmService.newAtomicTransfertMethod =  function(line, column){
 		var getLine = function(line){
 			if($scope.experiment.instrument.outContainerSupportCategoryCode 
 					=== $scope.experiment.instrument.inContainerSupportCategoryCode){
@@ -563,10 +600,21 @@ angular.module('home').controller('FragmentationCtrl',['$scope','$http', '$parse
 			inputContainerUseds:new Array(0), 
 			outputContainerUseds:new Array(0)
 		};
-	};
+	};*/
+	 atmService.newAtomicTransfertMethod =  function(line, column){
+	        
+	        return {
+	            class:"OneToOne",
+	            line:undefined,
+	            column:undefined,                 
+	            inputContainerUseds:new Array(0),
+	            outputContainerUseds:new Array(0)
+	        };
+	    };
 	//defined default output unit
 	atmService.defaultOutputUnit = {
-			volume : "µL"
+			volume : "µL",
+			quantity : "ng"
 	}
 	
 	atmService.experimentToView($scope.experiment, $scope.experimentType);

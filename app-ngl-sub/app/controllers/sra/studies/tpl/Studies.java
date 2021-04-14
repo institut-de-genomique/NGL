@@ -2,17 +2,18 @@ package controllers.sra.studies.tpl;
 
 import javax.inject.Inject;
 
+import controllers.NGLController;
 //import controllers.NGLBaseController;
 import fr.cea.ig.authentication.Authenticated;
 import fr.cea.ig.lfw.Historized;
 import fr.cea.ig.ngl.NGLApplication;
-import fr.cea.ig.ngl.NGLController;
 import fr.cea.ig.ngl.support.NGLJavascript;
 import play.mvc.Result;
 import views.html.studies.consultation;
 import views.html.studies.create;
 import views.html.studies.details;
 import views.html.studies.home;
+import views.html.studies.update;
 
 //import controllers.CommonController;               // done
 // public class Studies extends -CommonController {  // done
@@ -22,14 +23,17 @@ public class Studies extends NGLController implements NGLJavascript  { // NGLBas
 	private final create create;
 	private final consultation consultation;
 	private final details details;
+	private final update update;
+
 	
 	@Inject
-	public Studies(NGLApplication app, home home, create create, consultation consultation, details details) {
+	public Studies(NGLApplication app, home home, create create, consultation consultation, details details, update update) {
 		super(app);
 		this.home         = home; 
 		this.create       = create;
 		this.consultation = consultation;
 		this.details      = details;
+		this.update       = update;
 	}
 	
 	@Authenticated
@@ -59,6 +63,11 @@ public class Studies extends NGLController implements NGLJavascript  { // NGLBas
 		return ok(details.render());
 	}	
 	
+	// No annotation for tpl 
+	public Result update() {
+		return ok(update.render());
+	}
+	
 	/*public static Result release() {
 		return ok(release.render());
 	}	
@@ -76,12 +85,17 @@ public class Studies extends NGLController implements NGLJavascript  { // NGLBas
   	    				controllers.sra.studies.tpl.routes.javascript.Studies.get(),
   	    				controllers.sra.studies.api.routes.javascript.Studies.list(),
   	    				controllers.sra.studies.api.routes.javascript.Studies.update(),
-  	    				controllers.sra.studies.api.routes.javascript.Studies.release(),
   	    				controllers.sra.experiments.api.routes.javascript.Experiments.list(),
   	    				controllers.sra.experiments.api.routes.javascript.Experiments.get(),
-  	    				controllers.sra.submissions.api.routes.javascript.Submissions.createFromStudy());
+  	    				controllers.sra.submissions.api.routes.javascript.Submissions.createFromStudyRelease(),
+  	    				controllers.sra.submissions.api.routes.javascript.Submissions.createForUpdate(),
+  	    				controllers.sra.submissions.api.routes.javascript.Submissions.updateState()
+  	    				);
  	    
 	}
+		/*controllers.sra.submissions.api.routes.javascript.Submissions.createFromStudy()
+		 
+		 */
 
 	/*
 	public Result javascriptRoutes() {
@@ -100,7 +114,7 @@ public class Studies extends NGLController implements NGLJavascript  { // NGLBas
   	    				controllers.sra.studies.tpl.routes.javascript.Studies.get(),
   	    				controllers.sra.studies.api.routes.javascript.Studies.list(),
   	    				controllers.sra.studies.api.routes.javascript.Studies.update(),
-  	    				controllers.sra.studies.api.routes.javascript.Studies.release(),
+	    				controllers.sra.studies.api.routes.javascript.Studies.release(),
   	    				controllers.sra.studies.api.routes.javascript.Studies.updateState(),
   	    				controllers.sra.samples.api.routes.javascript.Samples.list(),
   	    				controllers.sra.samples.api.routes.javascript.Samples.get(),

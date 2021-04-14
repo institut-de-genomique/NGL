@@ -1,6 +1,6 @@
 "use strict";
 
-angular.module('home', ['commonsServices','ngRoute','ultimateDataTableServices','ui.bootstrap','ngl-sq.containersServices','dragndropServices'], function($routeProvider, $locationProvider) {
+angular.module('home', ['commonsServices','ngRoute','ultimateDataTableServices','ui.bootstrap','ngl-sq.containersServices','dragndropServices']).config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
 	
 	$routeProvider.when('/containers/search/home', {
 		templateUrl : jsRoutes.controllers.containers.tpl.Containers.search().url,
@@ -25,4 +25,4 @@ angular.module('home', ['commonsServices','ngRoute','ultimateDataTableServices',
 
 	// configure html5 to get links working with bookmarked
 	$locationProvider.html5Mode({enabled: true, requireBase: false});
-});
+}]);

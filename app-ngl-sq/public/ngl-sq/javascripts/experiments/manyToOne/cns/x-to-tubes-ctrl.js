@@ -51,7 +51,7 @@ angular.module('home').controller('CNSXToTubesCtrl',['$scope', '$http','$parse',
 				computeInputVolume(inputContainerUsed, atm);
 			});
 			
-		}else if(propertyName.match(/inputContainerUseds\[\d\].percentage/) != null){
+		}else if(propertyName.match(/inputContainerUseds\[\d+\].percentage/) != null){
 			console.log("compute one input volume");
 			computeInputVolume(containerUsed, atm);
 		}
@@ -127,18 +127,27 @@ angular.module('home').controller('CNSXToTubesCtrl',['$scope', '$http','$parse',
 		var atm = $scope.atmService.data.atm;	
 		angular.forEach(atm, function(value){
 			var sizeTotal=0;
+			var nbContentTotal=0;
 			value.inputContainerUseds.forEach(function(icu){
-				if(icu.size==null || icu.size.value==null){
+				if(icu.size==null || icu.size.value==null || icu.contents==null || icu.contents.length==0){
 					sizeTotal=undefined;
 				}
 				if(sizeTotal!=undefined){
-				sizeTotal+=icu.size.value;
+					sizeTotal+=(icu.size.value*icu.contents.length);
+					nbContentTotal+=icu.contents.length;
 				}
 			})
 			if(value.outputContainerUseds!=null && sizeTotal!=undefined){
 				var size= {value : undefined, unit : 'pb'};
-				size.value= Math.round(sizeTotal/value.inputContainerUseds.length*1)/1;
+				size.value= Math.round(sizeTotal/nbContentTotal*1)/1;
 				$parse("outputContainerUseds[0].size").assign(value, size);
+			}else{
+				$scope.messages.setError(Messages('experiments.input.warn.unquantifiableSample'));		
+				$scope.messages.clear();
+				$scope.messages.clazz = "alert alert-warning";
+				$scope.messages.text = "Le calcul \"moyenne pondérée des tailles\" ne peut pas s'effectuer car la taille est manquante chez au moins un container d'entrée";
+				$scope.messages.showDetails = false;
+				$scope.messages.open();
 			}
 			
 		});
@@ -163,11 +172,36 @@ angular.module('home').controller('CNSXToTubesCtrl',['$scope', '$http','$parse',
 	config.otherButtons= {
 		active : ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F')),
         template: 
-        	'<button class="btn btn-default" ng-click="computeInSizeToOut()" data-toggle="tooltip" ng-disabled="!(isEditModeAvailable() && isWorkflowModeAvailable(\'F\'))"  title="'+Messages("experiments.button.title.computeSize")+'" "><i class="fa fa-magic" aria-hidden="true"></i> '+ Messages("experiments.button.computeSize")+' </button>'                	                	
+        	'<button class="btn btn-default" ng-click="computeInSizeToOut()" data-toggle="tooltip" ng-disabled="!(isEditModeAvailable() && isWorkflowModeAvailable(\'F\'))"  title="'+Messages("experiments.button.title.computeSizeWeighted")+'" "><i class="fa fa-magic" aria-hidden="true"></i> '+ Messages("experiments.button.computeSize")+' </button>'                	                	
     };
 	
 
 	var columns = $scope.atmService.$atmToSingleDatatable.data.getColumnsConfig();
+
+	columns.push({
+        "header": Messages("containers.table.contents.length"),
+ 		"property": "inputContainer.contents.length",
+ 		"filter": "getArray:'properties.secondaryTag.value'| unique",
+ 		"order":true,
+ 		"hide":true,
+ 		"type":"number",
+ 		"position":5.9,
+        "extraHeaders":{0:Messages("experiments.inputs")}
+	});
+	
+	columns.push({
+        "header": Messages("containers.table.secondaryTags"),
+ 		"property": "inputContainer.contents",
+ 		"filter": "getArray:'properties.secondaryTag.value'| unique",
+ 		"order":true,
+ 		"hide":true,
+ 		"type":"text",
+ 		"position":6.9,
+ 		"render":"<div list-resize='cellValue' list-resize-min-size='3'>",
+        "extraHeaders":{0:Messages("experiments.inputs")}
+	});
+	
+	
 	columns.push({
 		"header" : Messages("containers.table.size"),
 		"property": "inputContainerUsed.size.value",
@@ -194,6 +228,7 @@ angular.module('home').controller('CNSXToTubesCtrl',['$scope', '$http','$parse',
 			0 : Messages("experiments.outputs")
 		}
 	});
+	
 	$scope.atmService.$atmToSingleDatatable.data.setColumnsConfig(columns);
 	
 	

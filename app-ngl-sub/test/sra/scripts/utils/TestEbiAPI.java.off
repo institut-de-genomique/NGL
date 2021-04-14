@@ -1,0 +1,44 @@
+package sra.scripts.utils;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Test;
+
+import ngl.sub.Global;
+import services.EbiAPI;
+
+public class TestEbiAPI {
+
+	public void ebiSampleExists(String accession) throws Exception {
+		String errorMessage = "Le numeros d'accession "+ accession + " n'existe pas à l'EBI";
+		Global.af.run(app->{
+			EbiAPI ebiAPI = app.injector().instanceOf(EbiAPI.class);
+			assertTrue(errorMessage, ebiAPI.ebiSampleExists(accession));
+		});
+	}
+
+	public void ebiSampleNotExists(String accession) throws Exception {
+		String errorMessage = "Le numeros d'accession "+ accession + " existe à l'EBI";
+		Global.af.run(app->{
+			EbiAPI ebiAPI = app.injector().instanceOf(EbiAPI.class);
+			assertFalse(errorMessage, ebiAPI.ebiSampleExists(accession));
+		});
+	}
+	
+	@Test
+	public void test_sample_ERS487755() throws Exception {
+		ebiSampleExists("ERS487755");
+	}
+	
+	@Test
+	public void test_sample_toto() throws Exception {
+		ebiSampleNotExists("toto");
+	}
+	
+	@Test
+	public void test_sample_ERXjdflksjqdskjf() throws Exception {
+		ebiSampleNotExists("ERXjdflksjqdskjf");
+	}
+	
+}

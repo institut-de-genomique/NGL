@@ -3,13 +3,15 @@
 @import controllers.instruments.io.utils._;
 @import java.text.SimpleDateFormat
 @import java.util.Locale
+@import java.lang.String; var supplier="";var index_1="";var index_2="";var genomefolder=""; var perc="";
+
 @***
 02/06/2016 GenomeFolder en un seul mot; Assay->TruSeq HT; Chemistry->Amplicon
            Supression Project Name
 29/08/2016 declaration de variables avec le mot cle 'var' et toutes sur une seule ligne 
-           JIRA NGL-1046 mettre dans Sample_ID la meme chose que dans Sample_Name + tri sur c.code           
+           JIRA NGL-1046 mettre dans Sample_ID la meme chose que dans Sample_Name + tri sur c.code
+30/03/2020 NGL-2201 remplacer "." par "_" dans co.percentage (pour le logiciel Illumina LRM)
 ***@
-@import java.lang.String; var supplier="";var index_1="";var index_2="";var genomefolder="";
 
 [Header]\u000D\u000A
 IEMFileVersion,4\u000D\u000A
@@ -38,14 +40,11 @@ AdapterRead2,AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT\u000D\u000A
 Sample_ID,Sample_Name,Sample_Plate,Sample_Well,I7_Index_ID,index,I5_Index_ID,index2,GenomeFolder,Sample_Project,Description\u000D\u000A
 @for(c <- containers.sortWith((a,b) => a.support.column+a.support.line<b.support.column+b.support.line)){  
 	@for(co <- c.contents){
-		@** OLD
-		@(c.support.line)_@(co.sampleCode)_@(OutputHelper.getContentProperty(co,"libProcessTypeCode"))_@(OutputHelper.getContentProperty(co,"tag")),@(c.code),,,@OutputHelper.getSupplierName(OutputHelper.getIndex("index-illumina-sequencing",OutputHelper.getContentProperty(co,"tag")),"illumina"),@OutputHelper.getSequence(OutputHelper.getIndex("index-illumina-sequencing",OutputHelper.getContentProperty(co,"tag"))).split("-")(0),,@OutputHelper.getSequence(OutputHelper.getIndex("index-illumina-sequencing",OutputHelper.getContentProperty(co,"tag"))).split("-")(1),@experiment.instrumentProperties.get("genomeFolder").value,,@(OutputHelper.getContentProperty(co,"tag"))_@(co.percentage)\u000D\u000A
-		**@
-		@{supplier=OutputHelper.getSupplierName(OutputHelper.getIndex("index-illumina-sequencing",OutputHelper.getContentProperty(co,"tag")),"illumina")}
 		@{index_1=OutputHelper.getSequence(OutputHelper.getIndex("index-illumina-sequencing",OutputHelper.getContentProperty(co,"tag"))).split("-")(0)}
 		@{index_2=OutputHelper.getSequence(OutputHelper.getIndex("index-illumina-sequencing",OutputHelper.getContentProperty(co,"tag"))).split("-")(1)}
+		@{perc=Double.toString(co.percentage).replace(".","_")}
 		
-		@(c.code),@(c.code),,,@(supplier),@(index_1),,@(index_2),@experiment.instrumentProperties.get("genomeFolder").value,,@(OutputHelper.getContentProperty(co,"tag"))_@(co.percentage)\u000D\u000A
+		@(c.code),@(c.code),,,,@(index_1),,@(index_2),@experiment.instrumentProperties.get("genomeFolder").value,,@(OutputHelper.getContentProperty(co,"tag"))_@(perc)\u000D\u000A
 	}
 } 
 

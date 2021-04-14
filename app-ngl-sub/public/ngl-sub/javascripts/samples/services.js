@@ -1,181 +1,191 @@
 "use strict";
+ 
+ angular.module('ngl-sub.Services', []).
+	factory('services', ['$http', 'mainService', 'lists', 'datatable', 'toolsServices', 
+		function($http, mainService, lists, datatable, toolsServices) {
+
+		var service = {
 
 
-angular.module('ngl-sub.SamplesServices', []).
-	factory('samplesConsultationService', ['$http', 'mainService', 'lists', 'datatable', 
-		function($http, mainService, lists, datatable) {
+	    //methode utilisée pour definir les colonnes 
+		getSampleColumns:function() { 		
+			var columns = [];
+			columns.push({property:"traceInformation.creationDate",
+						  header: Messages("traceInformation.creationDate"),
+						  type :"date",	
+						  hide:true,
+						  order:true
+						});		
+			columns.push({property:"traceInformation.createUser",
+						  header: Messages("traceInformation.creationUser"),
+						  type :"date",		    	  	
+						  order:true
+						});
+			columns.push({property:"state.code",
+						  "filter":"codes:'state'",
+						  header: Messages("sample.state"),
+						  type :"text",		    	  	
+						  order:true,
+						  edit:false,
+						  order:true
+						});	
+			columns.push({property : "code",
+						  header   : Messages("sample.code"),
+						  type     : "text",		    	  	
+						  order    : true
+						});		
+			columns.push({property : "accession",
+						  header   : Messages("sample.accession"),
+						  type     : "text",		    	  	
+						  order    : true,
+						  edit     : false,
+						  hide         : true,
+						  choiceInList : false  
+						  
+						});	
+			columns.push({property : "externalId",
+						  header   : Messages("sample.externalId"),
+						  type     : "text",		    	  	
+						  order    : true,
+						  edit     : false,
+						  hide         : true,
 
-    //methode utilisée pour definir les colonnes 
-    var getColumns = function() {
-		var columns = [];
-		columns.push({property : "code",
-  	  	      	  	  header   : Messages("sample.code"),
-			          type     : "text",		    	  	
-			          order    : true
-			        });		
-		columns.push({property : "accession",
-			      	  header   : Messages("sample.accession"),
-			          type     : "text",		    	  	
-			          order    : true,
-			          edit     : false,
-			          choiceInList : false  
-			    	});	
-		columns.push({property : "externalId",
-			      	  header   : Messages("sample.externalId"),
-			          type     : "text",		    	  	
-			          order    : true,
-			          edit     : false,
-			          choiceInList : false  
-			    	});				    	
-		columns.push({property : "projectCode",
-			      	  header   : Messages("sample.projectCode"),
-			          type     : "text",		    	  	
-			          order    : true,
-			          edit     : false,
-			          choiceInList : false  
-			    	});				    	
-		columns.push({property : "state.code",
-			          header   : Messages("sample.state.code"),
-			          "filter" : "codes:'state'",
-			          type     : "text",		    	  	
-			          order    : true
-			     	});	    
-		columns.push({property : "clone",
-			          header   : Messages("sample.clone"),
-			          edit     : true,
-			          hide     : true,
-			          type     : "text",		    	  	
-			          order    : true
-			     	});			     		     			        			            
-		columns.push({property : "taxonId",
-				      header   : Messages("sample.taxonId"),
-				      type     : "String",
-			          hide     : true,
-			          edit     : false,
-				      order    : true,
-				      choiceInList:false
-					});	
-		columns.push({property : "scientificName",
-				      header   : Messages("sample.scientificName"),
-				      type     : "String",
-			          hide     : true,
-			          edit     : false,
-				      order    : true,
-				      choiceInList : false
-					});						
-/*		columns.push({property : "commonName",
-				      header   : Messages("sample.commonName"),
-				      type     : "String",
-			          hide     : true,
-			          edit     : false,
-				      order    : true,
-				      choiceInList : false
-					});		
-*/
-		columns.push({property : "title",
-				      header   : Messages("sample.title"),
-				      type     : "String",
-			          hide     : true,
-			          edit     : true,
-				      order    : true,
-				      choiceInList : false
-					});					 
-		columns.push({property : "description",
-				      header   : Messages("sample.description"),
-				      type     : "String",
-			          hide     : true,
-			          edit     : true,
-				      order    : true,
-				      choiceInList : false
-					});			
-		return columns;
-	};
-	
-	
-	var isInit = false;
-	
-	var initListService = function() {
-		if(!isInit) {
-			console.log("dans samples.services.initListService.js");
-			consultationService.lists.refresh.projects();
-			lists.refresh.states({objectTypeCode:"SRASubmission"});
-			isInit=true;
-		}
-	};
-	
-	var consultationService = {
-			//console.log("dans samples.services.consultationService.js");
-			isRouteParam : false,
-			lists : lists,
-			form : undefined,
-			datatable : undefined,
-			sraVariables : {},
-			//console.log("dans samples.services.js");
+						  choiceInList : false  
+						});				    	
+			columns.push({property : "projectCode",
+						  header   : Messages("sample.projectCode"),
+						  type     : "text",		    	  	
+						  order    : true,
+						  edit     : false,
+						  hide         : true,
 
-			//console.log("sraVariables :" + sraVariables); 
-			// Recherche l'ensemble de samples pour un projCode :
+						  choiceInList : false  
+						});				    	  			     		     			        			            
+			columns.push({property : "taxonId",
+						  header   : Messages("sample.taxonId"),
+						  type     : "String",
+						  hide     : true,
+						  edit     : false,
+						  order    : true,
+						  choiceInList:false
+						});	
+			columns.push({property : "scientificName",
+						  header   : Messages("sample.scientificName"),
+						  type     : "String",
+						  hide     : true,
+						  edit     : false,
+						  order    : true,
+						  choiceInList : false
+						});						
+			columns.push({property : "title",
+						  header   : Messages("sample.title"),
+						  type     : "String",
+						  hide     : false,
+						  edit     : true,
+						  order    : true,
+						  choiceInList : false
+						});					 
+			columns.push({property : "description",
+						  header   : Messages("sample.description"),
+						  type     : "String",
+						  hide     : false,
+						  edit     : true,
+						  order    : true,
+						  choiceInList : false
+						});	
+			columns.push({property : "anonymizedName",
+				  header   : Messages("sample.anonymizedName"),
+				  type     : "String",
+				  hide     : false,
+				  edit     : true,
+				  order    : true,
+				  choiceInList : false
+				});	
+			columns.push({property : "attributes",
+						  header   : Messages("sample.attributes"),
+						  type     : "String",
+						  hide     : false,
+						  edit     : true,
+						  order    : true,
+						  choiceInList : false
+						});	
 			
-			search : function() {
-				//this.form.accessions = [];
-				//this.form.accessions.push("ERP005930");
-				//this.datatable.search({projCodes:this.form.projCodes, accessions:this.form.accessions, codes:this.form.codes, accessionRegex:this.form.accessionRegex, codeRegex:this.form.codeRegex});				
-				//console.log("dans samples.services.js, form.accessionRegex=" + form.accessionRegex);
-				//console.log("dans samples.services.js, form.projCodes=" + form.projCodes);
-				this.datatable.search(this.form);
-			},
-		
-			cancel : function() {
-				this.datatable.setData([],0);
-			},
+			return columns;
 			
-			resetForm : function(){
-				this.form = {};	
-			},
-			
-			// important pour avoir le menu permettant d'epingler : 
-			setRouteParams:function($routeParams){
-					var count = 0;
-					for(var p in $routeParams){
-						count++;getColumns
-						break;
-					}
-					if(count > 0){
-						this.isRouteParam = true;
-						this.form = $routeParams;
-					}
-				},
-				
-			//
-			// initialization of the service
-			 //
-			init : function($routeParams, samplesDTConfig){
-				initListService();
-				
-				//to avoid to lost the previous search
-				if(samplesDTConfig && angular.isUndefined(mainService.getDatatable())){
-					consultationService.datatable = datatable(samplesDTConfig);
-					mainService.setDatatable(consultationService.datatable);
-					// On definit la config du tableau samplesDTConfig dans consultation-ctrl.js et les colonnes à afficher dans
-					// consultation-ctrl.js ou bien dans services.js (dernier cas qui permet de reutiliser la definition des colonnes => factorisation du code)
-					// Dans notre cas definition des colonnes dans consultationService.js d'ou ligne suivante 
-					consultationService.datatable.setColumnsConfig(getColumns());	
+		},
 						
-				}else if(angular.isDefined(mainService.getDatatable())){
-					consultationService.datatable = mainService.getDatatable();			
-				}			
-				//to avoid to lost the previous search
-				if(angular.isDefined(mainService.getForm())){
-					consultationService.form = mainService.getForm();	
-				}else{
-					consultationService.resetForm();						
-				}
+					   
+		
+		mergeSampleInfos:function(samples_db, mapUserSamples, editableCreateUser, editableStateCode, editableType) {
+			//console.log("Dans $scope.mergeSampleInfos");
+			var tab_final_samples = [];
+			//console.log("editableCreateUser", editableCreateUser);
+			//console.log("editableStateCode", editableStateCode);			
+			
+			samples_db.forEach(function(sample_db) {
+								
+				//console.log("sample_db.code = ", sample_db.code);
+				if (mapUserSamples[sample_db.code] &&
+				    editableCreateUser==sample_db.traceInformation.createUser && 
+					editableType==sample_db._type &&
+				    editableStateCode==sample_db.state.code) {
+					//console.log("YYYYYYYYY   La donnee "  + sample_db.code + " est editable et existe bien dans le fichier utilisateur");
+					var userSample = mapUserSamples[sample_db.code];
+					if (userSample != null) {
+						//console.log("userSample : ", userSample);
+						if(toolsServices.isNotBlank(userSample.title)) {
+							sample_db.title = userSample.title;
+						}
+						if(toolsServices.isNotBlank(userSample.description)) {
+							sample_db.description = userSample.description;
+						}
+						if(toolsServices.isNotBlank(userSample.anonymizedName)) {
+							sample_db.anonymizedName = userSample.anonymizedName;
+						}
+						if(toolsServices.isNotBlank(userSample.attributes)) {
+							sample_db.attributes = userSample.attributes;
+						}
+					} // end if userSample
+				} // end if editable
+				tab_final_samples.push(sample_db);
+			}) // end forEach
+			return tab_final_samples;
+		}, // end mergeSampleInfos
+
+		
+		loadUserSampleInfosAndAdd2SamplesDT:function(base64UserFileSample, samples_db, mapUserSamples, editableCreateUser, editableStateCode, editableType, samplesDT, messages, form) {
+			//console.log("Dans loadUserSampleInfosAndAdd2SamplesDT, base64UserFileSample: ", base64UserFileSample);
+			//console.log("KKKKKKKKKKK , editableStateCode: ", editableStateCode);
+			//console.log("KKKKKKKKKKK , editableType: ", editableType);
+			var that = this; // this n'est pas connu dans $https. 
+			// Il faut sauvegarder this dans une variable(ici that) pour l'utiliser 
+			// dans $https
+			var fileBase64 = {"base64UserFileSample" : base64UserFileSample};
+			$http.post(jsRoutes.controllers.sra.samples.api.Samples.loadUserFileSample().url, fileBase64)
+			.success(function(data) {
+				var mapUserSamples = data;	
+				var tab_final_samples = that.mergeSampleInfos(samples_db, mapUserSamples, editableCreateUser, editableStateCode, editableType);
+				//Init datatable
+				//console.log("loadUserSampleInfosAndAdd2SamplesDT::tab_final_samples= ", tab_final_samples);
+				//console.log("loadUserSampleInfosAndAdd2SamplesDT::tab_final_samples.length = ", tab_final_samples.length);
+				//console.log("loadUserSampleInfosAndAdd2SamplesDT::editableType = ", editableType);
+				//console.log("loadUserSampleInfosAndAdd2SamplesDT::samplesDT = ", samplesDT);
+
+				samplesDT.setData(tab_final_samples, tab_final_samples.length);
+			}).error(function(error) {
+				//console.log("error : ", error);
+				messages.addDetails(error);
+				messages.setError("PROBLEME dans userFileSample :");
+			});
+			base64UserFileSample = "";
+			form = {};
+		} // end loadUserSamples.
 				
-				if(angular.isDefined($routeParams)){
-					this.setRouteParams($routeParams);
-				}
-			}
-	};
-	return consultationService;
-	}
+		
+		
+		} // end var service		
+		return service;
+	}]);
+
 	
-]);
+	

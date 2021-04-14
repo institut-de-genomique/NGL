@@ -44,6 +44,20 @@ angular.module('home').controller('XToPlatesCtrl',['$scope', '$http','$parse', '
 	}
 	//---------------------------------------------------------------------------------------------------------------------------
 	
+	// APR 28/02/2020 met le numéro de colonne au début du code, pour que le tri se fasse d'abord par colonne
+	$scope.atmService.sortByColumn = function(obj) {
+		var code = obj.code;
+		//console.log (code);
+		//var columnIndex = Number(code.substr(code.length - 1)); FAUX  !! dans le cas des colonnes 10,11,12 il faudrait faire -2 
+		var arr=code.split("_");
+		var pos=arr[1];// récupérer la partie position du code container
+		var col=pos.substring(1);  // récupérer la partie colonne
+		var columnIndex = Number(col)<10 ? '0'+col+code : col+code; // ajouter 0 si col<10
+		
+		//console.log(columnIndex + code);
+		return columnIndex + code;
+	};
+	
 	// s'execute a la creation de chaque ATM meme sans mise a jour de concentration le nom est trompeur!!!
 	$scope.atmService.updateOutputConcentration = function(atm){
 		
@@ -174,7 +188,7 @@ angular.module('home').controller('XToPlatesCtrl',['$scope', '$http','$parse', '
 			console.log("compute buffer volume");
 			computeBufferVolume(atm);
 			
-		}else if(propertyName.match(/inputContainerUseds\[\d\].percentage/) != null){
+		}else if(propertyName.match(/inputContainerUseds\[\d+\].percentage/) != null){
 			console.log("compute one input volume");
 			computeInputVolume(containerUsed, atm);
 			
@@ -560,4 +574,7 @@ angular.module('home').controller('XToPlatesCtrl',['$scope', '$http','$parse', '
     	$scope.atmService.data.dropInSelectInputContainer();
     }
     
+	//NGL-3203 ajout information masquable; commencer masqué
+	$scope.setIsShowInformation (false);
+	
 }]);

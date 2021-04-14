@@ -43,6 +43,15 @@
 							    	"possibleValues":'searchService.lists.getStates()',
 							    	"position":5	
 								},
+								{	"header": Messages("runs.countRS"),
+									"property" :"lanes",
+									"type" : "number", 
+									"order":true,
+									"hide":true,
+									"filter": "collect:'readSetCodes' | length",
+									//"filter": "countReadsetInRun",
+							    	"position":6	
+								},
 								{	"property":"valuation.valid",
 									"filter":"codes:'valuation'",					
 									"header": Messages("runs.valuation.valid"),
@@ -52,11 +61,13 @@
 								},
 								{	"property":"valuation.resolutionCodes",
 									"header": Messages("runs.valuation.resolutions"),
+									"filter":"codes:'resolution'",
+									"groupMethod":"collect:true",
 									"render":'<div bt-select ng-model="value.data.valuation.resolutionCodes" bt-options="valid.code as valid.name group by valid.category.name for valid in searchService.lists.getResolutions()" ng-edit="false"></div>',
 									"type" :"text",
 									"hide":true,
 									"position":101
-								} 
+								}
 							];						
 				return columns;
 			
@@ -74,7 +85,7 @@
 				lists.refresh.resolutions({objectTypeCode:"Run"});
 				lists.refresh.runs();
 				lists.refresh.runCategories();
-				lists.refresh.instruments({categoryCodes:["illumina-sequencer","extseq","nanopore-sequencer"]});
+				lists.refresh.instruments({categoryCodes:["illumina-sequencer","extseq","nanopore-sequencer", "opt-map-bionano"]});
 				lists.refresh.users();
 				lists.refresh.filterConfigs({pageCodes:["runs-addfilters"]}, "runs-addfilters");
 				lists.refresh.reportConfigs({pageCodes:["runs-addcolumns"]}, "runs-addcolumns");
@@ -142,6 +153,15 @@
 				
 				resetForm : function(){
 					this.form = {};
+				},
+
+				resetTextareas : function(){
+					Array.from(document.getElementsByTagName('textarea')).forEach(function(element) {
+						var elementScope = angular.element(element).scope();
+						if(elementScope.textareaValue){
+							elementScope.textareaValue = null;
+						}
+					}); 
 				},
 				
 				resetSampleCodes : function(){

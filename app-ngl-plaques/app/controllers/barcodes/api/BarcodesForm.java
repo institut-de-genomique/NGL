@@ -7,6 +7,5 @@ public class BarcodesForm {
 	public String projectCode;
 	
 	public Integer number;
-	
 
 }

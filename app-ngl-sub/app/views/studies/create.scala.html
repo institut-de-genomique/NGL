@@ -2,32 +2,48 @@
 @()
 @import views.html.helper._
 
+			   
 @form() = {
-
+		<!-- <div class="row" >
+			<div class="col-xs-10 col-sm-10 col-md-10 col-lg-10">
+			  <div class="panel panel-default">
+			  <div class="panel-heading">			  	
+				  <h2 class="panel-title">Study</h2>		  	
+			  </div>
+			   <div class="panel-body"> -->
 	@columnSearchForm{
-		@formGroup{
-			<input type="text" class="form-control" ng-model="createService.form.title" placeholder='@Messages("create.placeholder.studiesTitle")' required>	
-		}
 		@formGroup{
 			<div class="form-control" bt-select  ng-model="createService.form.projectCodes" filter="true" multiple="true" placeholder='@Messages("create.placeholder.projectCodes")' bt-options="project.code as project|formatProjectListLabel for project in createService.lists.getProjects()" required></div>			
 		}
 		@formGroup{
+			<textarea type="text" class="form-control"  rows="1" ng-model="createService.form.title" placeholder='@Messages("create.placeholder.studiesTitle")' required></textarea>		
+		}
+		@formGroup{
 			<div class="form-control" bt-select ng-model="createService.form.existingStudyType" placeholder='@Messages("create.placeholder.existingStudyType")' bt-options="study.code as study.name for study in createService.sraVariables.existingStudyType" required></div>			
 		}								
-						
-	}
-	@columnSearchForm{
-		@formGroup{
-			<textarea rows="3" ng-model="createService.form.studyAbstract" placeholder='@Messages("create.placeholder.abstract")' required></textarea>		
-		}
-		@formGroup{
-			<textarea rows="3" ng-model="createService.form.description" placeholder='@Messages("create.placeholder.description")' required></textarea>
-		}
-		
-		
-	}	
-}
 
+		@formGroup{
+			<textarea class="form-control" rows="3" ng-model="createService.form.studyAbstract" placeholder='@Messages("create.placeholder.abstract")' required></textarea>		
+		}
+		@formGroup{
+			<textarea class="form-control" rows="3" ng-model="createService.form.description" placeholder='@Messages("create.placeholder.description")' required></textarea>
+		}
+		<!-- 		
+		@formGroup{
+			<textarea class="form-control" style="border: 1px solid red" rows="3" ng-model="createService.form.description" placeholder='@Messages("create.placeholder.description")' required></textarea>
+		}
+		-->	
+	}
+	<!--  </div>
+	</div>
+	</div>
+	</div> -->
+	
+}
+	 </div>
+	</div>
+	</div>
+	</div> 
 <div class="row">
 <div class="col-md-12 col-lg-12"  messages="messages"></div>
 </div>

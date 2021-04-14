@@ -4,22 +4,13 @@ import static views.components.datatable.DatatableConfig.DEFAULT_NB_ELEMENT;
 import static views.components.datatable.DatatableConfig.DEFAULT_ORDER_SENSE;
 import static views.components.datatable.DatatableConfig.DEFAULT_PAGE_NUMBER;
 
-// import java.util.ArrayList;
-// import java.util.Date;
-// import java.util.HashMap;
-// import java.util.List;
 import java.util.Map;
 
 import play.data.Form;
 import play.data.Form.Field;
-
 // This is an interface and we need some injected implementation.
 // Inject something like MessagesApi. 
 import play.i18n.Messages;
-import views.components.datatable.DatatableColumn;
-
-
-// TODO: cleanup
 
 public class DatatableHelpers {
 	

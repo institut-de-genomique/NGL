@@ -46,7 +46,7 @@ public class StateMappingQuery extends NGLMappingSqlQuery<State> {
 		long idCategory = rs.getLong("fk_state_category");
 		StateCategory category = null;
 		try {
-			category = StateCategory.find.findById(idCategory);
+			category = StateCategory.find.get().findById(idCategory);
 		} catch (DAOException e) {
 			throw new SQLException(e);
 		}

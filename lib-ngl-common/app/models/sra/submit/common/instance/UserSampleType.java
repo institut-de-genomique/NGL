@@ -1,26 +1,31 @@
 package models.sra.submit.common.instance;
 
+import play.Logger;
+import validation.ContextValidation;
+import validation.sra.SraValidationHelper;
+import validation.utils.ValidationHelper;
+
 public class UserSampleType {
-	private String alias = null;
-	private String title = null;
-	private String commonName = null;
+	private String code           = null;
+	private String title          = null;
 	private String anonymizedName = null;
-	private String description = null;
+	private String description    = null;
+	private String attributes     = null;
 
-
+	
 	public UserSampleType() {
 	}
 	
-	public UserSampleType(String alias) {
-		this.setAlias(alias);
+	public UserSampleType(String code) {
+		this.setCode(code);
 	}
 
-	public String getAlias() {
-		return alias;
+	public String getCode() {
+		return code;
 	}
 
-	public void setAlias(String alias) {
-		this.alias = alias;
+	public void setCode(String code) {
+		this.code = code;
 	}
 
 
@@ -40,12 +45,12 @@ public class UserSampleType {
 		this.description = description;
 	}
 
-	public String getCommonName() {
-		return commonName;
+	public String getAttributes() {
+		return attributes;
 	}
 
-	public void setCommonName(String commonName) {
-		this.commonName = commonName;
+	public void setAttributes(String attributes) {
+		this.attributes = attributes;
 	}
 	public String getAnonymizedName() {
 		return anonymizedName;
@@ -54,5 +59,15 @@ public class UserSampleType {
 	public void setAnonymizedName(String anonymizedName) {
 		this.anonymizedName = anonymizedName;
 	}
-
+	
+	public void validate(ContextValidation contextValidation) {
+		Logger.debug("Dans UserSampleType.validate: ");
+		contextValidation = contextValidation.appendPath("sample");
+		if (ValidationHelper.validateNotEmpty(contextValidation, code, "code")) 
+			contextValidation = contextValidation.appendPath(code);				
+		SraValidationHelper.validateFreeText(contextValidation, this.getDescription(), "description");
+		SraValidationHelper.validateFreeText(contextValidation, this.getTitle(), "title");
+		SraValidationHelper.validateFreeText(contextValidation, this.getAnonymizedName(), "");
+		SraValidationHelper.validateAttributes (contextValidation,"attributes", this.getAttributes());
+	}
 }

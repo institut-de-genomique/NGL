@@ -31,7 +31,7 @@ public class ContainerSupportHelper {
 	public static LocationOnContainerSupport getContainerSupport(
 			String containerCategoryCode, int nbUsableContainer, String containerSupportCode, String x, String y, String storageCode) throws DAOException {
 
-		List<ContainerSupportCategory> containerSupportCategories=ContainerSupportCategory.find.findByContainerCategoryCode(containerCategoryCode);
+		List<ContainerSupportCategory> containerSupportCategories=ContainerSupportCategory.find.get().findByContainerCategoryCode(containerCategoryCode);
 
 		LocationOnContainerSupport containerSupport=new LocationOnContainerSupport();
 

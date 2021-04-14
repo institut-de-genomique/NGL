@@ -69,4 +69,10 @@ public class PropertiesFieldConfiguration extends AbstractFieldConfiguration {
 		return properties;
 	}
 
+	@Override
+	public void updateFromHeader(ContextValidation vc, Map<Integer, String> header) {
+		for (AbstractFieldConfiguration c : configs.values()) 
+			c.updateFromHeader(vc,header);
+	}
+
 }

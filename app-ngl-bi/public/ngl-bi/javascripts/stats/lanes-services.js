@@ -96,14 +96,15 @@ factory('chartsLanesService', ['$http', '$q','$parse', '$window', '$filter', 'da
 				}
 				display+="</tr></thead><tbody>";
 				var mapData = getDataLane(value.lanes,treatment,valueColumn);
-				for(var key of mapData.keys()){
+				for (var i = 0; i < mapData.keys().length; i++) {
+					var key = mapData.keys()[i];
 					display += "<tr><td>"+key+"</td>";
 					var tabData = mapData.get(key);
 					for(var t=0; t<tabData.length; t++){
 						display+="<td>{{"+tabData[t]+"|number:2}}</td>";
 					}
 					display+="</tr>";
-				}
+				} 
 				display +="</tbody></table>";
 				
 				if(mapData.size==0)
@@ -221,7 +222,8 @@ factory('chartsLanesService', ['$http', '$q','$parse', '$window', '$filter', 'da
 			computeAllData(data);
 		}
 		
-		for(var key of allData.laneData.keys()){
+		for(var i = 0; i < allData.laneData.keys().length; i++){
+			var key = allData.laneData.keys()[i];
 			if(propertyGroupGetter!=undefined){
 				charts.push(getChartGroup(key, allDataGroup.laneDataGroup.get(key),propertyGroupGetter));
 			}else{
@@ -524,10 +526,12 @@ factory('chartsLanesService', ['$http', '$q','$parse', '$window', '$filter', 'da
 	var getChartGroup = function(laneNumber, dataLane,propertyGroup) {
 		
 		var allSeries = [];
-		for(var key of dataLane.keys()){
+
+		for(var i = 0; i < dataLane.keys().length; i++){
+			var key = dataLane.keys()[i];
 			var data = dataLane.get(key);
 			allSeries.push({name:key,data:data.dataGroup});
-		}
+		} 
 		var chart = getCommonChart();
 		chart.title = {text : statsConfigs.header+' Lane '+laneNumber,};
 		chart.plotOptions.scatter.tooltip={
@@ -576,10 +580,12 @@ factory('chartsLanesService', ['$http', '$q','$parse', '$window', '$filter', 'da
 	var getChartMeanGroup = function(dataMean,propertyGroup) {
 		
 		var allSeries = [];
-		for(var key of dataMean.keys()){
+
+		for(var i = 0; i < dataMean.keys().length; i++){
+			var key = dataMean.keys()[i];
 			var data = dataMean.get(key);
 			allSeries.push({name:key,data:data.dataGroup});
-		}
+		} 
 		
 		var chart = getCommonChart();
 		chart.title = {text :  statsConfigs.header,};

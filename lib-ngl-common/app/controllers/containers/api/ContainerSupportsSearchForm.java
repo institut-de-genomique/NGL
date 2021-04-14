@@ -46,7 +46,7 @@ public class ContainerSupportsSearchForm extends DBObjectListForm<ContainerSuppo
 	public String storageCodeRegex;     //  23/05/2016 FDS ajout
 	public String storageCode;          //  23/05/2016 FDS ajout
 	
-	// TODO: suggest fix
+	// No information available about why and how the deprecation is to be done
 	// @Deprecated
 	public Map<String, List<String>> properties = new HashMap<>();
 	
@@ -95,7 +95,7 @@ public class ContainerSupportsSearchForm extends DBObjectListForm<ContainerSuppo
 		}		
 		//These fields are not in the ContainerSupport collection then we use the Container collection
 		
-		//TODO GA allways used ?????
+		// GA: allways used ?????
 		if (StringUtils.isNotBlank(this.nextExperimentTypeCode) || StringUtils.isNotBlank(this.processTypeCode)) {
 			logger.error("Allready used nextExperimentTypeCode in search container support. Please find where in java code");
 

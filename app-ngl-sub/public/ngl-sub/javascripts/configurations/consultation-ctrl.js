@@ -10,17 +10,21 @@ angular.module('home').controller('ConsultationCtrl',[ '$http', '$scope', '$rout
 			search:{
 				url:jsRoutes.controllers.sra.configurations.api.Configurations.list()
 			},
-			pagination:{active:false},
-			select:{active:true},
-			showTotalNumberRecords:false,
+			pagination:{
+				active:true,
+				mode:'local',
+                numberRecordsPerPage: 100
+			},
+			select:{active:false},
+			showTotalNumberRecords:true,
 		
 			edit : {
-				active:true, // permettre edition des champs editables
-				showButton : true,// bouton d'edition visible
+				active: false, // permettre edition des champs editables
+				showButton : false,// bouton d'edition visible
 				withoutSelect : true,
 				columnMode : true,
 				lineMode : function(line){
-					if(line.state.code === "N")
+					if(line.state.code === "NONE")
 						return true;
 					else 
 						return false;
@@ -29,14 +33,14 @@ angular.module('home').controller('ConsultationCtrl',[ '$http', '$scope', '$rout
 						
 			
 			cancel : {
-				showButton:true
+				showButton:false
 			},
 			hide:{
 				active:true,
 				showButton:true
 			},
 			exportCSV:{
-				active:false
+				active:true
 			},
 			/*show:{                   // bouton pour epingler si on passe par details-ctrl.js 
 				active:true,
@@ -45,8 +49,8 @@ angular.module('home').controller('ConsultationCtrl',[ '$http', '$scope', '$rout
 				}
 			},*/
 			save : {
-				active:true,
-				showButton : true,
+				active:false,
+				showButton : false,
 				changeClass : false,
 				url:function(line){
 					return jsRoutes.controllers.sra.configurations.api.Configurations.update(line.code).url; // jamais utilisé en mode local
@@ -66,7 +70,7 @@ angular.module('home').controller('ConsultationCtrl',[ '$http', '$scope', '$rout
 	if(angular.isUndefined(mainService.getHomePage())){
 		mainService.setHomePage('consultation');
 		tabService.addTabs({label:Messages('configurations.menu.consultation'),href:jsRoutes.controllers.sra.configurations.tpl.Configurations.home("consultation").url,remove:true});
-		tabService.activeTab(0); // desactive le lien !
+		tabService.activeTab(0); //  active l'onglet en le mettant en bleu
 	}
 	// si on declare dans services => var sraVariables = {};
 	// si on declare dans le controlleur : $scope.sraVariables = {};
@@ -75,6 +79,7 @@ angular.module('home').controller('ConsultationCtrl',[ '$http', '$scope', '$rout
 	$scope.consultationService.init($routeParams, configurationDTConfig);
 	
 	$scope.search = function(){
+		$scope.messages = messages();	
 		if($scope.consultationService.form.projCodes && $scope.consultationService.form.projCodes.length > 0){
 			$scope.consultationService.search();
 		} else {

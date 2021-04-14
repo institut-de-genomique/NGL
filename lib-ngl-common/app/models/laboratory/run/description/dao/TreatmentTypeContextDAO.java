@@ -11,7 +11,7 @@ import models.utils.dao.AbstractDAODefault;
 import models.utils.dao.DAOException;
 
 @Repository
-public class TreatmentTypeContextDAO extends AbstractDAODefault<TreatmentTypeContext>{
+public class TreatmentTypeContextDAO extends AbstractDAODefault<TreatmentTypeContext> {
 
 	protected TreatmentTypeContextDAO() {
 		super("treatment_context", TreatmentTypeContext.class, true);	
@@ -19,33 +19,34 @@ public class TreatmentTypeContextDAO extends AbstractDAODefault<TreatmentTypeCon
 	
 	@SuppressWarnings("deprecation")
 	public List<TreatmentTypeContext> findByTreatmentTypeId(Long id) throws DAOException {
-		
-		String sql ="SELECT t.id, t.code, t.name, ttc.required "+
-				"FROM treatment_context as t "+
-				"JOIN treatment_type_context as ttc ON ttc.fk_treatment_context=t.id "+
-				"WHERE ttc.fk_treatment_type = ? ";
+		String sql = "SELECT t.id, t.code, t.name, ttc.required "
+	               + "FROM treatment_context as t "
+				   + "JOIN treatment_type_context as ttc ON ttc.fk_treatment_context=t.id "
+	               + "WHERE ttc.fk_treatment_type = ?";
 		BeanPropertyRowMapper<TreatmentTypeContext> mapper = new BeanPropertyRowMapper<>(TreatmentTypeContext.class);
-		return this.jdbcTemplate.query(sql, mapper, id);
-		
+		return jdbcTemplate.query(sql, mapper, id);
 	}
 	
-	public TreatmentTypeContext findByTreatmentTypeId(String code, Long id) {
-		
-		String sql = "SELECT t.id, t.code, t.name, ttc.required "+
-				"FROM treatment_context as t "+
-				"JOIN treatment_type_context as ttc ON ttc.fk_treatment_context=t.id "+
-				"WHERE ttc.fk_treatment_type = ? and t.code = ?";
+	/**
+	 * Get {@link TreatmentTypeContext} from database.
+	 * @param code treatment context code
+	 * @param id   treatment type context identifier
+	 * @return     treatment type context
+	 */
+	public TreatmentTypeContext findByTreatmentTypeId(String code, Long id) {		
+		String sql = "SELECT t.id, t.code, t.name, ttc.required "
+	               + "FROM treatment_context as t "
+	               + "JOIN treatment_type_context as ttc ON ttc.fk_treatment_context=t.id "
+	               + "WHERE ttc.fk_treatment_type = ? and t.code = ?";
 		
 		BeanPropertyRowMapper<TreatmentTypeContext> mapper = new BeanPropertyRowMapper<>(TreatmentTypeContext.class);
 		@SuppressWarnings("deprecation")
-		List<TreatmentTypeContext> result = this.jdbcTemplate.query(sql, mapper, id, code);
-		if(result != null && result.size() == 1){
+		List<TreatmentTypeContext> result = jdbcTemplate.query(sql, mapper, id, code);
+		if (result != null && result.size() == 1) {
 			return result.get(0);
-		}else{
+		} else {
 			return null;
 		}
-		
-		
 	}
 	
 	@Override

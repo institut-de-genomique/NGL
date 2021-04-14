@@ -23,6 +23,8 @@ public class QualityControlResult implements IValidation {
 	public Integer   index;
 	public String    code;
 	public String    typeCode;
+	public String    instrumentUsedTypeCode; //not required because result can be external just used in inside QC.
+	
 	public Date      date;
 	public Valuation valuation;
 	public Map<String,PropertyValue> properties;
@@ -30,10 +32,11 @@ public class QualityControlResult implements IValidation {
 	public QualityControlResult() {	
 	}
 	
-	public QualityControlResult(String code, String typeCode, Integer index, Map<String,PropertyValue> expProperties, Map<String,PropertyValue> instProperties, Valuation valuation) {
+	public QualityControlResult(String code, String typeCode, String instrumentUsedTypeCode, Integer index, Map<String,PropertyValue> expProperties, Map<String,PropertyValue> instProperties, Valuation valuation) {
 		this.index      = index;
 		this.code       = code;
 		this.typeCode   = typeCode;
+		this.instrumentUsedTypeCode       = instrumentUsedTypeCode;
 		this.date       = new Date();
 		this.properties = expProperties;
 		if(MapUtils.isNotEmpty(this.properties) && MapUtils.isNotEmpty(instProperties))

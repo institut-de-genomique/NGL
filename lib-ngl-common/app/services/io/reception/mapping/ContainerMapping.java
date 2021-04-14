@@ -24,7 +24,6 @@ import models.laboratory.sample.description.SampleType;
 import models.laboratory.sample.instance.Sample;
 import models.utils.InstanceConstants;
 import models.utils.InstanceHelpers;
-//import play.Logger;
 import services.io.reception.Mapping;
 import validation.ContextValidation;
 import validation.utils.ValidationConstants;
@@ -32,11 +31,11 @@ import validation.utils.ValidationConstants;
 public class ContainerMapping extends Mapping<Container> {
 
 	private static final play.Logger.ALogger logger = play.Logger.of(ContainerMapping.class);
-	
+
 	public ContainerMapping(Map<String, Map<String, DBObject>> objects,
-			                Map<String, ? extends AbstractFieldConfiguration> configuration, 
-			                Action action, 
-			                ContextValidation contextValidation) {
+			Map<String, ? extends AbstractFieldConfiguration> configuration, 
+			Action action, 
+			ContextValidation contextValidation) {
 		super(objects, configuration, action, InstanceConstants.CONTAINER_COLL_NAME, Container.class, Mapping.Keys.container, contextValidation);
 	}
 
@@ -55,13 +54,13 @@ public class ContainerMapping extends Mapping<Container> {
 						object.code = code;
 						object = MongoDBDAO.findByCode(collectionName, type, object.code);	
 						if(errorIsNotFound && null == object){
-							contextValidation.addErrors("Error", "not found "+type.getSimpleName()+" for code "+code);
+							contextValidation.addError("Error", "not found "+type.getSimpleName()+" for code "+code);
 						}
 					} else {
 						object = super.get(object, rowMap, errorIsNotFound);
 					}
 				} else if(supportConfig.required) {
-					contextValidation.addErrors("Error", "not found "+type.getSimpleName()+" support !!!");
+					contextValidation.addError("Error", "not found "+type.getSimpleName()+" support !!!");
 				} else {
 					object = super.get(object, rowMap, errorIsNotFound);
 				}
@@ -70,15 +69,15 @@ public class ContainerMapping extends Mapping<Container> {
 			}
 		} catch (Exception e) {
 			logger.error("Error", e.getMessage(), e);
-			contextValidation.addErrors("Error", e.getMessage());
+			contextValidation.addError("Error", e.getMessage());
 			throw new RuntimeException(e);
 		}		
 		return object;
 	}
-	
+
 	@Override
 	protected void update(Container container) {
-		// TODO: update categoryCode if not a code but a label.
+		// GA: update categoryCode if not a code but a label.
 		if (Action.update.equals(action)) {
 			container.traceInformation.setTraceInformation(contextValidation.getUser());
 		} else {
@@ -88,34 +87,34 @@ public class ContainerMapping extends Mapping<Container> {
 	}
 	/**
 	 * Compute the container code if possible
-	 * @param container
-	 * @return
+	 * @param  container container
+	 * @return           container code
 	 */
 	private String computeCode(Container container) {
 		String code = null;
-		if(container.support != null && container.support.code != null && container.support.line != null && container.support.column != null){
+		if (container.support != null && container.support.code != null && container.support.line != null && container.support.column != null) {
 			// FDS 03/03/2018 verifier que container.support.categoryCode existe bien !!
-			if ( null == ContainerSupportCategory.find.findByCode(container.support.categoryCode)) {
-				contextValidation.addErrors("container.support.categoryCode", ValidationConstants.ERROR_NOTEXISTS_MSG, container.support.categoryCode);
+			if (ContainerSupportCategory.find.get().findByCode(container.support.categoryCode) == null) {
+				contextValidation.addError("container.support.categoryCode", ValidationConstants.ERROR_NOTEXISTS_MSG, container.support.categoryCode);
 			} else {
-				ContainerSupportCategory csc = ContainerSupportCategory.find.findByCode(container.support.categoryCode);
+				ContainerSupportCategory csc = ContainerSupportCategory.find.get().findByCode(container.support.categoryCode);
 				if(csc.nbLine == 1 && csc.nbColumn == 1){
 					code= container.support.code;
 				}else if(csc.nbLine > 1 && csc.nbColumn == 1){
 					container.support.line = container.support.line.toUpperCase();
 					code=container.support.code+"_"+container.support.line;
-		
+
 				}else if(csc.nbLine > 1 && csc.nbColumn > 1){
 					container.support.line = container.support.line.toUpperCase();
 					container.support.column = container.support.column.toUpperCase();
-					
+
 					code=container.support.code+"_"+container.support.line+container.support.column;
 				}
 			}
 		}
 		return code;
 	}
-	
+
 	@Override
 	public void consolidate(Container c) {
 		if (c.state == null || c.state.code == null) {
@@ -124,11 +123,11 @@ public class ContainerMapping extends Mapping<Container> {
 			c.state.user = contextValidation.getUser();
 		}
 		if (c.categoryCode == null && c.support.categoryCode != null) {
-			c.categoryCode = ContainerCategory.find.findByContainerSupportCategoryCode(c.support.categoryCode).code;
+			c.categoryCode = ContainerCategory.find.get().findByContainerSupportCategoryCode(c.support.categoryCode).code;
 		}
 		c.projectCodes = new TreeSet<>();
 		c.sampleCodes  = new TreeSet<>();
-		
+
 		double percentage = (new BigDecimal(100.00/c.contents.size()).setScale(3, BigDecimal.ROUND_HALF_UP).doubleValue());
 		c.contents.forEach(content -> {
 			Sample sample = getSample(content.sampleCode);
@@ -150,6 +149,17 @@ public class ContainerMapping extends Mapping<Container> {
 	private Map<String, PropertyValue> computeProperties(Map<String, PropertyValue> properties, Sample sample, String containerCode) {
 		setPropertiesFromSample(properties, sample);
 		if(sample.life != null && sample.life.from != null && sample.life.from.sampleCode != null && sample.life.from.projectCode != null){
+			//Récupère tous les grand parent NGL-2521
+			if(sample.life.path!=null) {
+				String[] parentSamples = sample.life.path.substring(1).split(",");
+				if(parentSamples.length>1) {
+					//On commence par le premier dans l'arbre de vie
+					for(int i=parentSamples.length-2; i>=0; i--) {
+						Sample grandParentSample = MongoDBDAO.findByCode(InstanceConstants.SAMPLE_COLL_NAME, Sample.class, parentSamples[i]);
+						setPropertiesFromSample(properties, grandParentSample);
+					}
+				}
+			}
 			PropertySingleValue fromSampleTypeCode = new PropertySingleValue(sample.life.from.sampleTypeCode);
 			properties.put("fromSampleTypeCode", fromSampleTypeCode);
 			PropertySingleValue fromSampleCode = new PropertySingleValue(sample.life.from.sampleCode);
@@ -157,7 +167,7 @@ public class ContainerMapping extends Mapping<Container> {
 			PropertySingleValue fromProjectCode = new PropertySingleValue(sample.life.from.projectCode);
 			properties.put("fromProjectCode", fromProjectCode);			
 			Sample parentSample = MongoDBDAO.findOne(InstanceConstants.SAMPLE_COLL_NAME, Sample.class, 
-					                                 DBQuery.is("code",sample.life.from.sampleCode).in("projectCodes", sample.life.from.projectCode));
+					DBQuery.is("code",sample.life.from.sampleCode).in("projectCodes", sample.life.from.projectCode));
 			setPropertiesFromSample(properties, parentSample);
 		}
 		// HACK to have the original container on the readset
@@ -169,11 +179,11 @@ public class ContainerMapping extends Mapping<Container> {
 	}
 
 	private void setPropertiesFromSample(Map<String, PropertyValue> properties, Sample sample) {
-		SampleType sampleType = SampleType.find.findByCode(sample.typeCode);
+		SampleType sampleType = SampleType.find.get().findByCode(sample.typeCode);
 		if (sampleType != null) {
 			InstanceHelpers.copyPropertyValueFromPropertiesDefinition(sampleType.getPropertyDefinitionByLevel(Level.CODE.Content), sample.properties,properties);
 		}
-		ImportType importType = ImportType.find.findByCode(sample.importTypeCode);
+		ImportType importType = ImportType.find.get().findByCode(sample.importTypeCode);
 		if (importType != null) {
 			InstanceHelpers.copyPropertyValueFromPropertiesDefinition(importType.getPropertyDefinitionByLevel(Level.CODE.Content), sample.properties,properties);
 		}

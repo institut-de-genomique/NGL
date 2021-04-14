@@ -1,5 +1,4 @@
 // FDS 27/07/2017 -- JIRA NGL-1201. Duplication a partir de additional-normalization
-// A ADAPTER !!!!!!!!!!
 angular.module('home').controller('CaptureCtrl',['$scope', '$parse', '$http', 'atmToSingleDatatable',
                                                      function($scope, $parse, $http, atmToSingleDatatable){
 
@@ -238,7 +237,10 @@ angular.module('home').controller('CaptureCtrl',['$scope', '$parse', '$http', 'a
 	        	showButton:false,
 	        	mode:'local',
 	        	callback:function(datatable){
-	        		copyContainerSupportCodeAndStorageCodeToDT(datatable);
+	        		// NGL-2371 FDS 11/03/2019 copyContainerSupportCodeAndStorageCodeToDT deplacée dans atmService + ajout 2eme param "pos"
+	        		// tous les instruments de cette exp n'ont que plaque en ouputContainer, inutile de le tester
+	        		// plaque inputContainer => pos='auto'
+	        		atmService.copyContainerSupportCodeAndStorageCodeToDT(datatable,'auto');
 	        	}
 			},
 			hide:{
@@ -268,33 +270,10 @@ angular.module('home').controller('CaptureCtrl',['$scope', '$parse', '$http', 'a
 
 	$scope.$on('save', function(e, callbackFunction) {	
 		console.log("call event save");
-		$scope.atmService.data.save();
-		$scope.atmService.viewToExperimentOneToOne($scope.experiment);
-		$scope.$emit('childSaved', callbackFunction);
+			$scope.atmService.data.save();
+			$scope.atmService.viewToExperimentOneToOne($scope.experiment);
+			$scope.$emit('childSaved', callbackFunction);
 	});
-	
-	var copyContainerSupportCodeAndStorageCodeToDT = function(datatable){
-
-		var dataMain = datatable.getData();
-		
-		var outputContainerSupportCode = $scope.outputContainerSupport.code;
-		var outputContainerSupportStorageCode = $scope.outputContainerSupport.storageCode;
-
-		if ( null != outputContainerSupportCode && undefined != outputContainerSupportCode){
-			for(var i = 0; i < dataMain.length; i++){
-				
-				var atm = dataMain[i].atomicTransfertMethod;
-				var newContainerCode = outputContainerSupportCode+"_"+atm.line + atm.column;
-
-				$parse('outputContainerUsed.code').assign(dataMain[i],newContainerCode);
-				$parse('outputContainerUsed.locationOnContainerSupport.code').assign(dataMain[i],outputContainerSupportCode);
-				
-				if( null != outputContainerSupportStorageCode && undefined != outputContainerSupportStorageCode){
-				    $parse('outputContainerUsed.locationOnContainerSupport.storageCode').assign(dataMain[i],outputContainerSupportStorageCode);
-				}
-			}
-		}
-	}
 	
 	$scope.$on('refresh', function(e) {
 		console.log("call event refresh");		
@@ -307,6 +286,9 @@ angular.module('home').controller('CaptureCtrl',['$scope', '$parse', '$http', 'a
 		dtConfig.remove.active = ($scope.isEditModeAvailable() && $scope.isNewState());
 		$scope.atmService.data.setConfig(dtConfig);
 		$scope.atmService.refreshViewFromExperiment($scope.experiment);
+		// NGL-2371 FDS 20/03/2019 récupérer outputContainerSupport s'il été généré automatiquement (pas de barcode entré par l'utilisateur)
+		$scope.outputContainerSupport.code=$scope.experiment.atomicTransfertMethods[0].outputContainerUseds[0].locationOnContainerSupport.code;
+
 		$scope.$emit('viewRefeshed');
 	});
 	
@@ -340,8 +322,7 @@ angular.module('home').controller('CaptureCtrl',['$scope', '$parse', '$http', 'a
 				$scope.messages.text = "Plusieurs noms de travail (robot) trouvés parmi les containers d'entrée (info processus)";
 				$scope.messages.open();			
 			
-				console.log('>1  run workLabel trouvé !!');
-				
+				//console.log('>1  run workLabel trouvé !!');
 			} else if ( workLabels.length === 1 ){
 				// verifier que TOUS les containers ont une valeur...
 				var contents= $scope.$eval("getBasket().get()|getArray:'contents[0]'");
@@ -352,9 +333,15 @@ angular.module('home').controller('CaptureCtrl',['$scope', '$parse', '$http', 'a
 					$scope.messages.text = "Certains containers en entrée n'ont pas de nom de travail run (robot) (info processus)";
 					$scope.messages.open();			
 				
-					console.log("Certains containers n'ont pas de workLabel.");
+					//console.log("Certains containers n'ont pas de workLabel.");
 				} else {
-					$parse("instrumentProperties.robotRunCode.value").assign($scope.experiment, workLabels[0]);
+					// NGL-2160/NGL-2164 ne faire l'assignation que si l'instrument possede la propriété robotRunCode (sinon erreur de sauvegarde experience!)
+					if ( $scope.instrumentHasProperty('robotRunCode') ) {
+						$parse("instrumentProperties.robotRunCode.value").assign($scope.experiment, workLabels[0]);
+					} else {
+						console.log("la propriété n'est pas gérée par l'instrument!");
+						// faut-il une alerte utilisateur ??
+					}
 				}
 			} 
 			// si aucun workLabel ne rien faire

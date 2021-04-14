@@ -1,8 +1,6 @@
 "use strict";
  
-angular.module('home', ['ngRoute','ultimateDataTableServices','basketServices', 'commonsServices','valuationServices','ui.bootstrap','atomicTransfereServices','dragndropServices','ngl-sq.experimentsServices','tools'], 
-		function($routeProvider, $locationProvider) {
-	
+angular.module('home', ['ngRoute','ultimateDataTableServices','basketServices', 'commonsServices','valuationServices','ui.bootstrap','atomicTransfereServices','dragndropServices','ngl-sq.experimentsServices','tools','toolsHelpers']).config(['$routeProvider', '$locationProvider', '$compileProvider', function ($routeProvider, $locationProvider, $compileProvider) {
 	$routeProvider.when('/experiments/new/home', {
 		templateUrl : jsRoutes.controllers.experiments.tpl.Experiments.searchContainers().url,
 		controller : 'SearchContainersCtrl'
@@ -52,8 +50,7 @@ angular.module('home', ['ngRoute','ultimateDataTableServices','basketServices', 
 		  enabled: true,
 		  requireBase: false
 		});
-	
-}).config(function ( $compileProvider) {
+
 	$compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|mailto|data):/);
 
-});
+}]);

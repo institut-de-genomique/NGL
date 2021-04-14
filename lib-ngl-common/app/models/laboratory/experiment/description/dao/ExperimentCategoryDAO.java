@@ -29,5 +29,14 @@ public class ExperimentCategoryDAO extends AbstractDAODefault<ExperimentCategory
 			return null;
 		}
 	}
+	
+	public boolean hasOutputContainerUsed() {
+		return false;
+	}
 
+	
+	@Override
+	protected List<String> getColumns() {
+		return enumColumns;
+	}
 }

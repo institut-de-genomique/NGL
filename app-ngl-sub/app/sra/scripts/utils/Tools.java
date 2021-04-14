@@ -1,8 +1,16 @@
 package sra.scripts.utils;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
+
+import models.sra.submit.common.instance.UserRefCollabType;
 
 public class Tools {
 
@@ -17,6 +25,12 @@ public class Tools {
 		Set<A> diff = new HashSet<>(plus);
 		diff.removeAll(min);
 		return diff;
+	}
+
+	public static void writeInFile(String pahtOutputFile, String message) throws IOException {
+		try (BufferedWriter output_buffer = new BufferedWriter(new java.io.FileWriter(new File("pahtOutputFile")))) {
+			output_buffer.write(message);
+		} 
 	}
 	
 }

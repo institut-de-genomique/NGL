@@ -1,0 +1,118 @@
+package rules
+
+rule "Create Run Bionano"
+	@nglSQ( workflow )
+	dialect "java"
+	salience 1000
+	no-loop
+	when 
+	$experiment:Experiment($state:state.code,$typeCode:typeCode,$typeCode=="bionano-depot",$state=="F",$instrumentUsed:instrument, $inputContainerSupportCodes:inputContainerSupportCodes, $inputContainerCodes: inputContainerCodes)
+	then
+		Logger.debug("Dépot Bionano - Create Run");
+
+		Run run=new Run();
+		run.state=new State("N","ngl-sq");
+
+		Date runStartDate = (Date) $experiment.experimentProperties.get("runStartDate").value;
+		run.sequencingStartDate=runStartDate;
+		
+		String codeSupport="" + $inputContainerSupportCodes.toArray()[0];
+		run.containerSupportCode=codeSupport; 
+   		
+		run.traceInformation=new TraceInformation();
+   		run.traceInformation.setTraceInformation("ngl-sq");
+
+		run.lanes = new ArrayList<Lane>();
+
+		for (int i = 0; i < $inputContainerCodes.toArray().length; i++) {
+			Lane lane = new Lane();
+			lane.number = (i + 1);
+
+			Treatment t = new Treatment();
+			t.code = "mapCreationJobId";
+			t.typeCode = "map-creation-job-id";
+			t.categoryCode = "bionanoAccess";
+			t.results.put("default",new HashMap<String, PropertyValue>(0));
+			
+			lane.treatments.put("mapCreationJobId", t);
+
+			run.lanes.add(lane);
+		}
+
+		run.instrumentUsed=new InstrumentUsed();
+   		run.instrumentUsed.typeCode=$experiment.instrument.typeCode;
+   		run.instrumentUsed.code=$experiment.instrument.code;
+		
+		run.properties.put("chipIteration",$experiment.experimentProperties.get("chipIteration"));
+    	
+    	run.code=((new SimpleDateFormat("yyMMdd")).format(runStartDate))+"_"+run.instrumentUsed.code+"_"+run.containerSupportCode+"_"+$experiment.experimentProperties.get("chipIteration").value;
+
+		Run runInDb = MongoDBDAO.findOne(InstanceConstants.RUN_ILLUMINA_COLL_NAME, Run.class, DBQuery.is("code", run.code));
+
+ 		if (runInDb == null) { // Si le run n'existe pas déjà, on continue. Sinon, on s'arrête.
+			insert(run);			
+		} else {
+			Logger.error("Run with code '" + run.code + "' already exists with state '" + runInDb.state.code + "', aborting rule 'Create Run Bionano'.");
+		}
+end
+
+rule "Update type Run SAPHYR"
+	@nglSQ( workflow )
+	dialect "java"
+	salience 900
+	no-loop
+	when 
+		$run:Run(typeCode==null,$instrumentTypeCode:instrumentUsed.typeCode,$instrumentTypeCode=="SAPHYR")
+	then
+		 Logger.debug("typeCode RSAPHYR");
+		$run.typeCode="RSAPHYR";	
+		$run.categoryCode="bionano";
+		update($run);
+end
+
+rule "Update type Run IRYS"
+	@nglSQ( workflow )
+	dialect "java"
+	salience 900
+	no-loop
+	when 
+		$run:Run(typeCode==null,$instrumentTypeCode:instrumentUsed.typeCode,$instrumentTypeCode=="IRYS")
+	then
+		Logger.debug("typeCode RIRYS");
+		$run.typeCode="RIRYS";	
+		$run.categoryCode="bionano";
+		update($run);
+end
+
+rule "Save Run Bionano"
+	@nglSQ( workflow )
+	dialect "java"
+	salience 800
+	no-loop
+	when 
+		$run:Run(categoryCode=="bionano")	
+    	$contextError:ContextValidation()
+	then
+		Logger.debug("Save run bionano");
+		$contextError.setCreationMode();
+		$run = (Run)InstanceHelpers.save(InstanceConstants.RUN_ILLUMINA_COLL_NAME,$run,$contextError,true);
+		update($run);			
+end
+
+rule "Update Workflow Run Bionano"
+	@nglSQ( workflow )
+	dialect "java"
+	salience 600
+	no-loop
+	when 
+		$run:Run(categoryCode=="bionano")	
+    	$contextError:ContextValidation()
+	then
+		Logger.debug("Update Workflow run bionano");
+		State nextState = new State();
+		nextState.code = "IP-S";
+		nextState.date = new Date();
+		nextState.user = "ngl-sq";
+		RunWorkflows workflows = IGGlobals.injector().instanceOf(RunWorkflows.class);
+		workflows.setState($contextError, $run, nextState);			
+end

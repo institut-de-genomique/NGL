@@ -32,6 +32,9 @@ angular.module('home').controller('SearchContainersCtrl', ['$scope','$filter','$
 	 		reverse : true,
 			mode:'local'
 		 },
+		 exportCSV:{
+				active:true
+		},
 	     otherButtons :{
 				active:true,
 				template:'<button class="btn" ng-disabled="!searchService.datatable.isSelect() && !searchService.datatable.isSelectGroup()" ng-click="addToBasket(searchService.datatable.getSelection(true))" data-toggle="tooltip" title="'+Messages("button.addbasket")+'">'
@@ -54,28 +57,35 @@ angular.module('home').controller('SearchContainersCtrl', ['$scope','$filter','$
 		$scope.basket.reset();
 		$scope.searchService.datatable.setData([]);
 		
-		$http.get(jsRoutes.controllers.processes.api.ProcessTypes.get($scope.searchService.form.nextProcessTypeCode).url)
-			.then(function(result){
-				console.log(result);
-			});
 		$scope.processGraphService.changeProcessType($scope.searchService.form.nextProcessTypeCode);
 	};
 	
 	$scope.selectDefaultFromExperimentType = function(){
-		var selectionList = {};	
+		//var selectionList = {};	
 		$scope.searchService.form.fromTransformationTypeCodes=[];
 			
 		if($scope.searchService.form.nextProcessTypeCode){
+			// FDS 06/04/2020 ca parait logique de ne chercher que les experiment-types de type 'transformation en entree de processus 
+			// mais code inutilisé !!!=> mise en commentaire
+			//selectionList = angular.copy($scope.searchService.lists.get('transformation',true));
 			
-			selectionList = angular.copy($scope.searchService.lists.get('transformation',true));
 			$http.get(jsRoutes.controllers.experiments.api.ExperimentTypes.getDefaultFirstExperiments($scope.searchService.form.nextProcessTypeCode).url)
 			.success(function(data, status, headers, config) {
+				
+				//FDS 06/04/2020 compter s'il y a des experiences 'ext' sinon c'est volontaire!!! voir JIRA NGL-2898
+				var nbext= data.filter(function(exp){
+					return exp.code.startsWith("ext");
+				});
 				
 				data = data.filter(function(exp){
 					return !exp.code.startsWith("ext");
 				});
 				
-				data.unshift({name: "None", code: "none"});				
+				// FDS 06/04/2020 inserer none dans la liste en premiere position UNIQUEMENT s'il y a moins une experience 'ext'
+				if ( nbext.length > 0 ){
+					data.unshift({name: "None", code: "none"});
+				}
+				
 				$scope.defaultFirstExperimentTypes = data;
 			});
 		}else{
@@ -84,7 +94,8 @@ angular.module('home').controller('SearchContainersCtrl', ['$scope','$filter','$
 	};
 
 	$scope.reset = function(){
-		$scope.searchService.resetForm();		
+		$scope.searchService.resetForm();	
+		$scope.searchService.resetTextareas();	
 	};
 	
 	$scope.search = function(){		
@@ -212,6 +223,7 @@ angular.module('home').controller('SearchSamplesCtrl', ['$scope','$filter','bask
 		
 		$scope.reset = function(){
 			$scope.searchService.resetForm();		
+			$scope.searchService.resetTextareas();
 		};
 	
 		$scope.changeProcessCategory = function(){
@@ -224,19 +236,25 @@ angular.module('home').controller('SearchSamplesCtrl', ['$scope','$filter','bask
 		};
 		
 		$scope.changeProcessType = function(){
-			$scope.removeTab(1);
-			$scope.basket.reset();
-			$scope.searchService.datatable.setData([]);
 			$scope.processGraphService.changeProcessType($scope.processForm.nextProcessTypeCode);
+		};
+		
+		var random = function getRandomInt(max) {
+			  return Math.floor(Math.random() * Math.floor(max));
+		};
+		
+		$scope.addProcessType = function(){
+			if(($scope.processForm.nextProcessTypeCode)){			
+				tabService.addTabs({label:$filter('codes')($scope.processForm.nextProcessTypeCode,"type"),href:'/processes/new-from-samples/'+$scope.processForm.nextProcessTypeCode+'/'+random(1000),remove:true});				
+			}
 		};
 		
 		$scope.addToBasket  = function(samples){
 			samples.forEach(function(sample){
-				$scope.basket.add(sample);	
+				if($scope.basket.get().map(function(c) { return c.code }).indexOf(sample.code) === -1){
+					$scope.basket.add(sample);
+				}
 			});
-			if(($scope.processForm.nextProcessTypeCode) && this.basket.length() > 0 && tabService.getTabs().length === 1){
-				tabService.addTabs({label:$filter('codes')($scope.processForm.nextProcessTypeCode,"type"),href:$scope.processForm.nextProcessTypeCode,remove:false});
-			}
 		};
 		
 		if(angular.isUndefined($scope.getHomePage())){
@@ -276,21 +294,37 @@ angular.module('home').controller('SearchSamplesCtrl', ['$scope','$filter','bask
 			}
 		}
 }]);
-angular.module('home').controller('NewFromSamplesCtrl', ['$scope','$routeParams','processesNewFromSamplesService', 
-	function($scope,$routeParams,processesNewService) {
+angular.module('home').controller('NewFromSamplesCtrl', ['$scope','$routeParams','mainService','processesNewFromSamplesService', 
+	function($scope,$routeParams,mainService,processesNewService) {
 	
-	if($routeParams.processTypeCode){
-		$scope.newService = processesNewService;
-		$scope.newService.init($routeParams.processTypeCode);
+	if(mainService.getBasket().length() > 0 && $routeParams.processTypeCode !== undefined && $routeParams.tabid !== undefined){
+		var key = $routeParams.processTypeCode+"#"+$routeParams.tabid
+		if(mainService.get(key) === undefined){
+			var newService = processesNewService();
+			newService.init($routeParams.processTypeCode);
+			mainService.put(key, newService);
+			$scope.newService = newService;
+			
+		}else if(mainService.get(key) !== undefined){
+			$scope.newService = mainService.get(key);
+		}else{
+			throw 'bad parameters';
+		}
 	}
 	
 }]);
 angular.module('home').controller('NewFromContainersCtrl', ['$scope','$routeParams','processesNewFromContainersService', 
 	function($scope,$routeParams,processesNewService) {
 	
+	$scope.getSpinner = function(){
+		return $scope.spinner;
+	};
+	
 	if($routeParams.processTypeCode){
-		$scope.newService = processesNewService;
-		$scope.newService.init($routeParams.processTypeCode);
+		$scope.newService = processesNewService();
+		$scope.spinner=true;
+		$scope.newService.init($routeParams.processTypeCode,$scope);
+		//$scope.spinner=false;
 	}
 	
 }]);
@@ -578,6 +612,7 @@ angular.module('home').controller('SearchContainersCtrlOld', ['$scope', 'datatab
 
 	$scope.reset = function(){
 		$scope.searchService.form = {};
+		$scope.searchService.resetTextareas();
 	};
 
 	$scope.resetSampleCodes = function(){

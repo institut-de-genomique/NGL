@@ -1,7 +1,7 @@
 "use strict";
 
-angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$routeParams', '$window', '$filter', '$sce', 'mainService', 'tabService', 'datatable', 'messages', 'lists', 'treatments', 'valuationService', 
-                                                  function($scope, $http, $q, $routeParams, $window, $filter, $sce, mainService, tabService, datatable, messages, lists, treatments, valuationService) {
+angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$routeParams', '$window', '$filter', '$sce', 'mainService', 'tabService', 'datatable', 'messages', 'lists', 'treatments', 'valuationService', 'convertValueServices', 
+                                                  function($scope, $http, $q, $routeParams, $window, $filter, $sce, mainService, tabService, datatable, messages, lists, treatments, valuationService, convertValueServices) {
 	/* configuration datatables */	
 	var lanesDTConfig = {
 			name:'lanesDT',
@@ -63,7 +63,7 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 			    	"order":false,
 			    	"choiceInList":true,
 			    	"listStyle":'bt-select',
-			    	"possibleValues":'lists.getValuations()'			    	
+					"possibleValues":'lists.getValuations()'			    	
 				},
 				{	"property":"valuation.resolutionCodes",
 					"header": Messages("runs.lane.valuation.resolutions"),
@@ -74,7 +74,7 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 			    	"choiceInList":true,
 			    	"listStyle":'bt-select-multiple',
 			    	"possibleValues":'lists.getResolutions()',
-			    	"groupBy":'category.name'
+					"groupBy":'category.name'
 				}
 			]				
 	};
@@ -84,7 +84,10 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 			name:'readSetsDT',
 			order :{by:'laneNumber',mode:'local'},
 			search:{active:false},
-			pagination:{active:false},
+			pagination:{
+				active:true,
+				mode:'local'
+			},
 			select:{active:false},
 			showTotalNumberRecords:false,
 			cancel : {active:false},		
@@ -134,11 +137,80 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 			]
 	};
 	
+	var readSetsPrimaryDTConfig = {
+			name:'readSetsPrimaryDT',
+			order :{by:'laneNumber',mode:'local'},
+			search:{active:false},
+			pagination:{active:false},
+			exportCSV: {active: true},
+			select:{active:false},
+			showTotalNumberRecords:false,
+			cancel : {active:false},		
+			columns : [
+				{  	"property":"laneNumber",
+					"header": Messages("readsets.laneNumber"),
+					"type":"text",
+					"order":true,
+					"position":1
+				}, 
+				{  	"property":"primaryIndex",
+					"header": Messages("readsets.primaryTag"),
+					"type":"text",
+					"order":true,
+					"position":2
+				},
+				{	"property":"primaryQ30",
+					"header": Messages("readsets.treatments.ngsrg_primary.Q30"),
+					"type":"number",
+					"order":true,
+					"tdClass": "valuationService.valuationCriteriaClass(value.data, run.valuation.criteriaCode, col.property)",
+					"position":3
+				},
+				{  	
+					"property":"primaryQualityScore",
+					"header": Messages("readsets.treatments.ngsrg_primary.qualityScore"),
+					"type":"number",
+					"order":true,
+					"tdClass": "valuationService.valuationCriteriaClass(value.data, run.valuation.criteriaCode, col.property)",
+					"position":4
+				},	
+				{	"property":"primaryNbCluster",
+					"header": Messages("readsets.treatments.ngsrg_primary.nbCluster"),
+					"type":"number",
+					"order":true,
+					"position":5
+				},	
+				{	"property":"lossDmplxImaryIIndary",
+					"header": Messages("readsets.treatments.ngsrg_primary.seqLossPctbetweenImaryAnd2ndaryDmplxing"),
+					"type":"number",
+					"order":true,
+					"tdClass": "valuationService.valuationCriteriaClass(value.data, run.valuation.criteriaCode, col.property)",
+					"position":6
+				},
+				{	"property":"sumPercentPerIndex",
+					"header": Messages("readsets.sampleOnContainer.properties.sumPercentPerLane"),
+					"type":"number",
+					"format":2,
+					"order":true,
+					"position":7
+				}
+			    
+			]
+	};
+	
 	var saveRun = function(){
 		var queries = [];
-		queries.push($http.put(jsRoutes.controllers.runs.api.Runs.update($scope.run.code).url+"?fields=keep", {keep:$scope.run.keep}));
+		queries.push($http.put(jsRoutes.controllers.runs.api.Runs.update($scope.run.code).url+"?fields=keep", {
+			keep: $scope.run.keep
+		}));
 		queries.push($http.put(jsRoutes.controllers.runs.api.Runs.valuation($scope.run.code).url, $scope.run.valuation));
 		
+		if ($scope.run.typeCode == 'RSAPHYR' || $scope.run.typeCode == 'RIRYS') {
+			for (var i = 0; i < $scope.run.lanes.length; i++) {
+				queries.push($http.put(jsRoutes.controllers.runs.api.LaneTreatments.update($scope.run.code, $scope.run.lanes[i].number, "mapCreationJobId").url, $scope.run.lanes[i].treatments.mapCreationJobId));
+			} 
+		} 
+
 		$q.all(queries).then(function(results){
 			var error = false;
 			for(var i = 0; i  < results.length; i++){
@@ -168,10 +240,20 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 		 mainService.put('runActiveTab', value);
 	 };
 	 
+	 $scope.getTabClassRS = function(value){
+		 if(value === mainService.get('readSetActiveTab')){
+			 return 'active';
+		 }
+	 };
+	 
+	 $scope.setActiveTabRS = function(value){
+		 mainService.put('readSetActiveTab', value);
+	 };
 	
 	/* buttons section */
 	$scope.save = function(){
 		if($scope.isLanesExist()){
+			$scope.lanesDT.callbackEndDisplayResult
 			$scope.lanesDT.save();
 		}else{
 			saveRun();
@@ -207,8 +289,25 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 		var laneNum = [];
 		if($scope.form.laneNumbers) laneNum = $scope.form.laneNumbers;		
 		//query by laneNumbers
-		$http.get(jsRoutes.controllers.readsets.api.ReadSets.list().url,{params:{runCode:$scope.run.code,laneNumbers:laneNum}}).success(function(data) {
+		// includes permet de recuperer les colonnes indiquees ici sans ramener celles indiquer dans defaultKeys
+		$http.get(jsRoutes.controllers.readsets.api.ReadSets.list().url,{params:{runCode:$scope.run.code,laneNumbers:laneNum,includes:[
+			"laneNumber",
+			"code",
+			"state.code",
+			"sampleOnContainer.percentage",
+			"treatments.primaryDemultiplexing", 
+			"treatments.ngsrg.default.validSeqPercent",
+			"treatments.ngsrg.default.nbBases.value",
+            "treatments.ngsrg.default.Q30.value",
+            "treatments.ngsrg.default.qualityScore.value",
+			"treatments.ngsrg.default.nbCluster.value",
+			"productionValuation.valid",
+			"bioinformaticValuation.valid"
+		]}}).success(function(data) {
+			// console.log("search data:", data);
 			$scope.readSetsDT.setData(data, data.length);
+			//console.log("config", $scope.readSetsDT) // pour avoir les noms des colonnes affichees dans config.configDefault.columns pour config.name=readSetsDT
+			//console.log("search end:");
 		});
 	};
 	
@@ -276,7 +375,9 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 			}
 	};
 	
-	
+	$scope.isIPS = function() {
+		return $scope.run.state.code == "IP-S";
+	};
 	
     $scope.deliberatelyTrustHTMLComment = function() {
     	if ($scope.run && $scope.run.valuation && $scope.run.valuation.comment && $scope.run.valuation.comment != null) {
@@ -302,10 +403,7 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 		$scope.modalWidth = imageFullSizeWidth * zoom;
 		$scope.modalHeight = imageFullSizeHeight * zoom; //in order to conserve image ratio
 		$scope.modalLeft = (document.body.clientWidth - $scope.modalWidth)/2;
-	
-		//$scope.modalTop = (window.innerHeight - $scope.modalHeight)/2;	
-		//$scope.modalTop = $scope.modalTop - 50; //height of header and footer
-	}
+	};
 	
 	 $scope.goToSeq=function(){
 		$scope.value = AppURL("sq");
@@ -318,6 +416,8 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 			$scope.typeCodeExp=["opgen-depot"];
 		}else if($scope.run.categoryCode === "illumina"){
 			$scope.typeCodeExp=["prepa-flowcell","prepa-fc-ordered"];
+		}else if($scope.run.categoryCode === "bionano"){
+			$scope.typeCodeExp=["irys-chip-preparation"];
 		}
 		
 		if($scope.typeCodeExp !== undefined){
@@ -332,7 +432,8 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 		}else{
 			$window.open($scope.value+"/supports/"+$scope.run.containerSupportCode, 'seq');
 		}
-	}
+	};
+
 	var init = function(){
 		$scope.messages = messages();
 		$scope.lists = lists;
@@ -341,6 +442,8 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 		$scope.mainService.stopEditMode();
 		$scope.valuationService = valuationService();
 		$scope.run = {};
+		$scope.dataReadSetPrimary = [];
+		$scope.convertValueServices = convertValueServices();
 		
 		$http.get(jsRoutes.controllers.runs.api.Runs.get($routeParams.code).url).success(function(data) {
 			
@@ -361,7 +464,6 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 			
 			$scope.lists.clear("valuationCriterias");
 			$scope.lists.refresh.valuationCriterias({typeCode:$scope.run.typeCode, objectTypeCode:"Run", orderBy:'name'});
-			
 			if ($scope.isLanesExist()) {
 				$scope.lanesDT = datatable(lanesDTConfig);
 				$scope.lanesDT.setData($scope.run.lanes, $scope.run.lanes.length);
@@ -369,10 +471,18 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 					$scope.mainService.startEditMode();	
 					$scope.lanesDT.setEdit();
 				}
-				
-				if(angular.isDefined($scope.run.lanes[0].treatments)){
-					$scope.treatments.init($scope.run.lanes[0].treatments, jsRoutes.controllers.runs.tpl.Runs.laneTreatments, 'runs');				
+
+				var treatments = {};
+
+				for (var index in $scope.run.lanes) {
+					for (var treatment in $scope.run.lanes[index].treatments) {
+						if (!treatments[$scope.run.lanes[index].treatments[treatment].code]) {
+							treatments[$scope.run.lanes[index].treatments[treatment].code] = $scope.run.lanes[index].treatments[treatment];
+						} 
+					}
 				}
+				
+				$scope.treatments.init(treatments, jsRoutes.controllers.runs.tpl.Runs.laneTreatments, 'runs');				
 				
 				$scope.laneOptions = $filter('orderBy')($scope.run.lanes, 'number');				
 				
@@ -467,8 +577,36 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 				$scope.statesHierarchy = data;	
 			});	
 			
+			//get readSet with primaryDemultiplexing
+			$http.get(jsRoutes.controllers.readsets.api.ReadSets.list().url,{params:{runCode:$scope.run.code, includes:["code","laneNumber","treatments.primaryDemultiplexing", "sampleOnContainer"],existingFields:["treatments.primaryDemultiplexing"]}}).success(function(data) {
+				var mapReadSetPrimary = new Map();
+				for (var i=0; i<data.length; i++) {
+					//Get tag value
+					var tag = data[i].sampleOnContainer.properties.tag.value;
+					var laneNumber = data[i].laneNumber;
+					var keyTag = tag+''+laneNumber;
+					 if(mapReadSetPrimary.get(keyTag) != undefined){
+						 mapReadSetPrimary.get(keyTag).sumPercent +=data[i].sampleOnContainer.percentage;
+					 }else{
+						 mapReadSetPrimary.set(keyTag, {		laneNumber : data[i].laneNumber,	
+							 						primaryIndex : tag,
+													primaryQ30 : data[i].treatments.primaryDemultiplexing.default.Q30.value,
+													primaryQualityScore : data[i].treatments.primaryDemultiplexing.default.qualityScore.value,
+													primaryNbCluster : data[i].treatments.primaryDemultiplexing.default.nbCluster.value,
+													lossDmplxImaryIIndary : data[i].treatments.primaryDemultiplexing.default.seqLossPctbetweenImaryAnd2ndaryDmplxing.value,
+													sumPercentPerIndex : data[i].sampleOnContainer.percentage});
+					 }
+				}
+				var dataReadSetPrimary=Array.from(mapReadSetPrimary.values());
+				$scope.readSetsPrimaryDT = datatable(readSetsPrimaryDTConfig);
+				$scope.readSetsPrimaryDT.setData(dataReadSetPrimary, dataReadSetPrimary.length);	
+			});
+			
 			if(undefined == mainService.get('runActiveTab')){
 				 mainService.put('runActiveTab', 'general');
+			}
+			if(undefined == mainService.get('readSetActiveTab')){
+				 mainService.put('readSetActiveTab', 'RSgeneral');
 			}
 		});
 		
@@ -550,7 +688,7 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 }]).controller('RunNGSRGIlluminaCtrl', [ '$scope', 'datatable', function($scope, datatable) {
 	
 	$scope.getNbCycles = function(){
-    	if($scope.run.treatments){
+    	if($scope.run.treatments && $scope.run.treatments.ngsrg){
     		var ngsrg = $scope.run.treatments.ngsrg["default"];
     		if(ngsrg.nbCycleRead1){
     			return ngsrg.nbCycleRead1.value+', '+ngsrg.nbCycleReadIndex1.value+', '+ngsrg.nbCycleReadIndex2.value+', '+ngsrg.nbCycleRead2.value;
@@ -740,7 +878,9 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 					    	"extraHeaders":{"0":Messages("runs.lane.sav.read1")}
 						},
 						{  	"property":function(value){
-							return $filter('number')(value.treatments.sav.read1.densityPF.value,2) +' +/- '+$filter('number')(value.treatments.sav.read1.densityPFStd.value,2);						
+							    if (value.treatments.sav.read1.densityPF) {
+							        return $filter('number')(value.treatments.sav.read1.densityPF.value,2) +' +/- '+$filter('number')(value.treatments.sav.read1.densityPFStd.value,2);						
+						        }
 							},
 					    	"header": Messages("runs.lane.sav.densityPF"),
 					    	"type":"text",
@@ -866,8 +1006,10 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 			    	"extraHeaders":{"0":Messages("runs.lane.sav.read2")}
 				},
 				{  	"property":function(value){
-					return $filter('number')(value.treatments.sav.read2.densityPF.value,2) +' +/- '+$filter('number')(value.treatments.sav.read2.densityPFStd.value,2);						
-					},
+					   if (value.treatments.sav.read2.densityPF) {
+					      return $filter('number')(value.treatments.sav.read2.densityPF.value,2) +' +/- '+$filter('number')(value.treatments.sav.read2.densityPFStd.value,2);						
+						}
+				    },
 			    	"header": Messages("runs.lane.sav.densityPF"),
 			    	"type":"text",
 			    	"order":false,

@@ -1,6 +1,7 @@
 "use strict";
 angular.module('home', ['ngRoute', 'ultimateDataTableServices','commonsServices','valuationServices','biCommonsServices', 'ui.bootstrap', 
-                        'ngl-bi.ReadSetsStatsServices','ngl-bi.LanesStatsServices','ngl-bi.ReadSetsServices', 'ngl-bi.RunsServices', 'basketServices'], function($routeProvider, $locationProvider) {
+						'ngl-bi.ReadSetsStatsServices','ngl-bi.LanesStatsServices','ngl-bi.ReadSetsServices', 'ngl-bi.RunsServices', 'basketServices']).config(
+						['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
 	
 	$routeProvider.when('/stats/readsets/home', {
 		templateUrl : '/tpl/stats/readsets/choice',
@@ -41,5 +42,4 @@ angular.module('home', ['ngRoute', 'ultimateDataTableServices','commonsServices'
 
 	// configure html5 to get links working with bookmarked
 	$locationProvider.html5Mode({enabled: true, requireBase: false});
-});
-
+}]);

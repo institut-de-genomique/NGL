@@ -1,8 +1,7 @@
 package services.instance.resolution;
 
-import static fr.cea.ig.play.IGGlobals.configuration;
-
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -15,14 +14,12 @@ import models.laboratory.resolutions.instance.ResolutionConfiguration;
 import models.utils.InstanceConstants;
 import models.utils.InstanceHelpers;
 import models.utils.dao.DAOException;
-//import play.Logger;
-//import play.Logger.ALogger;
-import services.instance.InstanceFactory;
 import validation.ContextValidation;
 
 /**
  * Create Resolutions : for more flexibility, these data are created in a specific collection (in MongoDB) 
- * instead of being created in the description database
+ * instead of being created in the description database.
+ * 
  * 23-06-2014  
  * @author dnoisett
  *
@@ -32,551 +29,529 @@ public class ResolutionService {
 	private static final play.Logger.ALogger logger = play.Logger.of(ResolutionService.class);
 	
 	private static HashMap<String, ResolutionCategory> resolutionCategories; 
-	
-//	public static void main(ContextValidation ctx) {			
-//		String inst=play.Play.application().configuration().getString("institute");
-//		if ( inst.equals("CNS") || inst.equals("CNG") || inst.equals("TEST") ) {
-//			Logger.info("Create and save "+inst+ " resolution categories ...");
-//			saveResolutions(ctx, inst);
-//			Logger.info(inst+" Resolution collection creation is done!");
-//		}
-//		else {
-//			Logger.error("You need to specify only one institute !");
-//		}
-//		ctx.displayErrors(logger);
-//	}
-	
-	public static void main(ContextValidation ctx) {			
-		String inst = configuration().getString("institute");
-		switch (inst) {
-		case "CNS"  :
-		case "CNG"  :
-		case "TEST" :
-			logger.info("Create and save "+inst+ " resolution categories ...");
-			saveResolutions(ctx, inst);
-			logger.info(inst+" Resolution collection creation is done!");
-			break;
-		default  :
-			logger.error("You need to specify only one institute !");
-		}
-		ctx.displayErrors(logger);
-	}
-	
-	// FDS 15/01: fusion en 1 seule methode avec parametre inst
-	// FDS 20/01: ajout creation des categories
-	// FDS 23/11/2016 methodes distinctes par institut pour ProcessResolution
-	public static void saveResolutions(ContextValidation ctx, String inst) {	
-		if ( inst.equals("CNG") ){
-			resolutionCategories = createResolutionCategoriesCNG();
-			
-			createRunResolutionCNG(ctx); 
-			createReadSetResolutionCNG(ctx); 
-			// FDS 15/01: no Analysis Resolutions ???
-			createIlluminaPrepFCDepotResolutionCNG(ctx);
-			createPrepPcrFreeResolutionCNG(ctx);
-			createQCMiseqResolutionCNG(ctx);
-			createExperimentResolution(ctx); // ajoute les resolutions par defaut sur toutes les experiences
-			createProcessResolutionCNG(ctx);
-			createContainerResolutionCNG(ctx);
-		}
-		else if ( inst.equals("CNS") ){			
-			resolutionCategories = createResolutionCategoriesCNS();
-			
-			createRunResolutionCNS(ctx); 
-			createReadSetResolutionCNS(ctx); 
-			createAnalysisResolutionCNS(ctx); 
-			createOpgenDepotResolutionCNS(ctx);
-			createIlluminaPrepFCDepotResolutionCNS(ctx);
-			createIryPreparationNLRSResolutionCNS(ctx);
-			createDepotBionanoResolutionCNS(ctx);
-			createSamplePrepResolutionCNS(ctx);
-			createGelMigrationResolutionCNS(ctx);
-			createExperimentResolution(ctx); // ajoute les resolutions par defaut sur toutes les experiences
-			createProcessResolutionCNS(ctx);
-			createContainerResolutionCNS(ctx);
-		}
-		else if ( inst.equals("TEST") ){		
-			resolutionCategories = createResolutionCategoriesCNS();
-			
-			createExperimentResolution(ctx); 
-			createProcessResolutionCNS(ctx); // CNS???
-		}
-	}
 
-	// FDS 20/01 retour aux 2 methodes initiales, mais correction pour CNG: ajout    resoCategories.put("Default",...
-	public static HashMap<String, ResolutionCategory> createResolutionCategoriesCNG(){	
+	public static void saveResolutionsCNG(ContextValidation ctx) {
+		resolutionCategories = createResolutionCategoriesCNG();
+
+		createRunResolutionCNG(ctx); 
+		createReadSetResolutionCNG(ctx); 
+		// FDS 15/01: no Analysis Resolutions ???
+		createIlluminaPrepFCDepotResolutionCNG(ctx);
+		createPrepPcrFreeResolutionCNG(ctx);
+		createQCMiseqResolutionCNG(ctx);
+		createExperimentResolution(ctx); // ajoute les resolutions par defaut sur toutes les experiences
+		createProcessResolutionCNG(ctx);
+		createContainerResolutionCNG(ctx);		
+	}
+	
+	public static void saveResolutionsCNS(ContextValidation ctx) {
+		resolutionCategories = createResolutionCategoriesCNS();
+		
+		createRunResolutionCNS(ctx); 
+		createReadSetResolutionCNS(ctx); 
+		createAnalysisResolutionCNS(ctx); 
+		createOpgenDepotResolutionCNS(ctx);
+		createDepotNanoporeResolutionCNS(ctx);
+		createIlluminaPrepFCDepotResolutionCNS(ctx);
+		createIryPreparationNLRSResolutionCNS(ctx);
+		createDepotBionanoResolutionCNS(ctx);
+		createSamplePrepResolutionCNS(ctx);
+		createGelMigrationResolutionCNS(ctx);
+		createExperimentResolution(ctx); // ajoute les resolutions par defaut sur toutes les experiences
+		createProcessResolutionCNS(ctx);
+		createContainerResolutionCNS(ctx);
+	}
+	
+	public static HashMap<String, ResolutionCategory> createResolutionCategoriesCNG() {	
 		HashMap<String, ResolutionCategory> resoCategories = new HashMap<>();
 		
-		//Run
-		resoCategories.put("SAV", new ResolutionCategory("Problème qualité : SAV", (short) 10)); //10 for CNG only
-		resoCategories.put("PbM", new ResolutionCategory("Problème machine", (short) 20));
-		resoCategories.put("PbR", new ResolutionCategory("Problème réactifs", (short) 30)); 
-		resoCategories.put("LIB", new ResolutionCategory("Problème librairie", (short) 50)); 
-		resoCategories.put("PbI", new ResolutionCategory("Problème informatique", (short) 60));
-		resoCategories.put("RUN-Info", new ResolutionCategory("Informations", (short) 70)); 
-		resoCategories.put("QC", new ResolutionCategory("Observations QC", (short) 80));
+		// Run
+		resoCategories.put("SAV",      new ResolutionCategory("Problème qualité : SAV",    (short) 10));
+		resoCategories.put("PbM",      new ResolutionCategory("Problème machine",          (short) 20));
+		resoCategories.put("PbR",      new ResolutionCategory("Problème réactifs",         (short) 30));
+		resoCategories.put("LIB",      new ResolutionCategory("Problème librairie",        (short) 50));
+		resoCategories.put("PbI",      new ResolutionCategory("Problème informatique",     (short) 60));
+		resoCategories.put("RUN-Info", new ResolutionCategory("Informations",              (short) 70));
+		resoCategories.put("QC",       new ResolutionCategory("Observations QC",           (short) 80));
 		
-		//ReadSet
-		resoCategories.put("Run", new ResolutionCategory("Problème run", (short) 5));
-		resoCategories.put("Qte", new ResolutionCategory("Problème quantité", (short) 15));
-		resoCategories.put("IND", new ResolutionCategory("Problème indexing", (short) 20));
-		resoCategories.put("Qlte", new ResolutionCategory("Problème qualité", (short) 25));
-		resoCategories.put("MAP", new ResolutionCategory("Problème mapping", (short) 40));
-		resoCategories.put("Sample", new ResolutionCategory("Problème échantillon", (short) 55));
-		resoCategories.put("LIMS", new ResolutionCategory("Problème déclaration LIMS", (short) 60));
-		resoCategories.put("Info", new ResolutionCategory("Informations", (short) 65));	
+		// ReadSet
+		resoCategories.put("Run",      new ResolutionCategory("Problème run",              (short)  5));
+		resoCategories.put("Qte",      new ResolutionCategory("Problème quantité",         (short) 15));
+		resoCategories.put("IND",      new ResolutionCategory("Problème indexing",         (short) 20));
+		resoCategories.put("Qlte",     new ResolutionCategory("Problème qualité",          (short) 25));
+		resoCategories.put("MAP",      new ResolutionCategory("Problème mapping",          (short) 40));
+		resoCategories.put("Sample",   new ResolutionCategory("Problème échantillon",      (short) 55));
+		resoCategories.put("LIMS",     new ResolutionCategory("Problème déclaration LIMS", (short) 60));
+		resoCategories.put("Info",     new ResolutionCategory("Informations",              (short) 65));
 		
-		//Analysis
+		// Analysis
 		
-		//Experiment
-		
-		resoCategories.put("Default", new ResolutionCategory("Default", (short) 0));
+		// Experiment
+		resoCategories.put("Default",  new ResolutionCategory("Default",                   (short)  0));
 		
 		return resoCategories;
 	}
 
-	public static HashMap<String, ResolutionCategory> createResolutionCategoriesCNS(){	
+	public static HashMap<String, ResolutionCategory> createResolutionCategoriesCNS() {
 		HashMap<String, ResolutionCategory> resoCategories = new HashMap<>();
+		
 		//Run
-		resoCategories.put("PbM", new ResolutionCategory("Problème machine", (short) 20));
-		resoCategories.put("PbR", new ResolutionCategory("Problème réactifs", (short) 30)); 
-		resoCategories.put("SAV", new ResolutionCategory("Problème qualité : SAV", (short) 40)); //40 for CNS only
-		resoCategories.put("PbI", new ResolutionCategory("Problème informatique", (short) 60));
-		resoCategories.put("Info", new ResolutionCategory("Informations", (short) 70));
+		resoCategories.put("PbM",      new ResolutionCategory("Problème machine",          (short) 20));
+		resoCategories.put("PbR",      new ResolutionCategory("Problème réactifs",         (short) 30));
+		resoCategories.put("SAV",      new ResolutionCategory("Problème qualité : SAV",    (short) 40));
+		resoCategories.put("PbI",      new ResolutionCategory("Problème informatique",     (short) 60));
+		resoCategories.put("Info",     new ResolutionCategory("Informations",              (short) 70));
+		resoCategories.put("BioN",     new ResolutionCategory("Runs BIONANO",              (short) 80));// Run Bionano
 		
 		//ReadSet
-		resoCategories.put("Run", new ResolutionCategory("Problème run", (short) 5));
-		resoCategories.put("LIB", new ResolutionCategory("Problème librairie", (short) 10));
-		resoCategories.put("Qte", new ResolutionCategory("Problème quantité", (short) 15));
-		resoCategories.put("IND", new ResolutionCategory("Problème indexing", (short) 20));
-		resoCategories.put("Qlte", new ResolutionCategory("Problème qualité", (short) 25));
-		resoCategories.put("TAXO", new ResolutionCategory("Problème taxon", (short) 30));
-		resoCategories.put("RIBO", new ResolutionCategory("Problème ribosomes", (short) 35));
-		resoCategories.put("MAP", new ResolutionCategory("Problème mapping", (short) 40));
-		resoCategories.put("MERG", new ResolutionCategory("Problème merging", (short) 45));
-		resoCategories.put("Info", new ResolutionCategory("Informations", (short) 50));     //FDS 20/01/15   doublon ?????
+		resoCategories.put("Run",      new ResolutionCategory("Problème run",              (short)  5));
+		resoCategories.put("LIB",      new ResolutionCategory("Problème librairie",        (short) 10));
+		resoCategories.put("Qte",      new ResolutionCategory("Problème quantité",         (short) 15));
+		resoCategories.put("IND",      new ResolutionCategory("Problème indexing",         (short) 20));
+		resoCategories.put("Qlte",     new ResolutionCategory("Problème qualité",          (short) 25));
+		resoCategories.put("TAXO",     new ResolutionCategory("Problème taxon",            (short) 30));
+		resoCategories.put("RIBO",     new ResolutionCategory("Problème ribosomes",        (short) 35));
+		resoCategories.put("MAP",      new ResolutionCategory("Problème mapping",          (short) 40));
+		resoCategories.put("MERG",     new ResolutionCategory("Problème merging",          (short) 45));
+		resoCategories.put("Info",     new ResolutionCategory("Informations",              (short) 50));
+		resoCategories.put("dsBioN",   new ResolutionCategory("Dataset BIONANO",           (short) 60));//DatasetBionano
 		
 		//Analysis
-		resoCategories.put("BA-MERG", new ResolutionCategory("Merging", (short) 10)); 
-		resoCategories.put("CTG", new ResolutionCategory("Contigage", (short) 20));
-		resoCategories.put("SIZE", new ResolutionCategory("Size Filter", (short) 30));
-		resoCategories.put("SCAFF", new ResolutionCategory("Scaffolding", (short) 40));
-		resoCategories.put("GAP", new ResolutionCategory("Gap Closing", (short) 50));
+		resoCategories.put("BA-MERG",  new ResolutionCategory("Merging",                   (short) 10));
+		resoCategories.put("CTG",      new ResolutionCategory("Contigage",                 (short) 20));
+		resoCategories.put("SIZE",     new ResolutionCategory("Size Filter",               (short) 30));
+		resoCategories.put("SCAFF",    new ResolutionCategory("Scaffolding",               (short) 40));
+		resoCategories.put("GAP",      new ResolutionCategory("Gap Closing",               (short) 50));
 		
 		//Experiment	
-		
-		resoCategories.put("Default", new ResolutionCategory("Default", (short) 0));
+		resoCategories.put("Default",  new ResolutionCategory("Default",                   (short)  0));
 		
 		return resoCategories;
 	}
 
+	
 	/* sub-methods */
 	
 	public static void createRunResolutionCNG(ContextValidation ctx) {
 		List<Resolution> l = new ArrayList<>();
 		
-		// FDS 16/01: rendre moins verbeux avec variables XXrC
-		
 		// PbM
-		ResolutionCategory PbMrC= resolutionCategories.get("PbM");		
-				
-		l.add(InstanceFactory.newResolution("Indéterminé","PbM-indetermine", PbMrC, (short) 1));	
-		l.add(InstanceFactory.newResolution("Chiller","PbM-chiller", PbMrC, (short) 2));
-		l.add(InstanceFactory.newResolution("Pelletier","PbM-pelletier", PbMrC, (short) 3));
-		l.add(InstanceFactory.newResolution("Fluidique","PbM-fluidiq", PbMrC, (short) 4));
-		l.add(InstanceFactory.newResolution("Laser","PbM-laser", PbMrC, (short) 5));
-		l.add(InstanceFactory.newResolution("Camera","PbM-camera", PbMrC, (short) 6));
-		l.add(InstanceFactory.newResolution("Focus","PbM-focus", PbMrC, (short) 7));
-		l.add(InstanceFactory.newResolution("Pb de vide","PbM-pbVide", PbMrC, (short) 8));
-		l.add(InstanceFactory.newResolution("PE module","PbM-PEmodule", PbMrC, (short) 9));
-		l.add(InstanceFactory.newResolution("Zone de dépôt","PbM-zoneDepot", PbMrC, (short) 10));				
-		l.add(InstanceFactory.newResolution("cBot","PbM-cBot", PbMrC, (short) 11));		
+		l.addAll(rList(getResolutionCategory("PbM"),		
+				newResolution("Indéterminé",   "PbM-indetermine"),	
+				newResolution("Chiller",       "PbM-chiller"),
+				newResolution("Pelletier",     "PbM-pelletier"),
+				newResolution("Fluidique",     "PbM-fluidiq"),
+				newResolution("Laser",         "PbM-laser"),
+				newResolution("Camera",        "PbM-camera"),
+				newResolution("Focus",         "PbM-focus"),
+				newResolution("Pb de vide",    "PbM-pbVide"),
+				newResolution("PE module",     "PbM-PEmodule"),
+				newResolution("Zone de dépôt", "PbM-zoneDepot"),				
+				newResolution("cBot",          "PbM-cBot")));		
 		
 		// SAV
-		ResolutionCategory SAVrC= resolutionCategories.get("SAV");	
+		l.addAll(rList(getResolutionCategory("SAV"),	
+				newResolution("Intensité",                    "SAV-intensite"),
+				newResolution("Intensité faible A",           "SAV-intFbleA"),
+				newResolution("Intensité faible T",           "SAV-intFbleT"),
+				newResolution("Intensité faible C",           "SAV-intFbleC"),
+				newResolution("Intensité faible G",           "SAV-intFbleG"),
+				newResolution("Densité clusters trop élevée", "SAV-densiteElevee"),
+				newResolution("Densité clusters trop faible", "SAV-densiteFaible"),
+				newResolution("Densité clusters nulle",       "SAV-densiteNulle"),
+				newResolution("%PF",                          "SAV-PF"),
+				newResolution("Phasing",                      "SAV-phasing"),
+				newResolution("Prephasing",                   "SAV-prephasing"),
+				newResolution("Error rate",                   "SAV-errorRate"),
+				newResolution("Focus",                        "SAV-focus"),
+				newResolution("Q30",                          "SAV-Q30"),
+				newResolution("% bases déséquilibré",         "SAV-perctBasesDeseq"),
+				newResolution("Index non représenté",         "SAV-indexNonPresent"),
+				newResolution("Index sous-représenté",        "SAV-indexFblePerc"),
+				newResolution("Indexing / demultiplexage",    "SAV-IndDemultiplex")));
 		
-		l.add(InstanceFactory.newResolution("Intensité","SAV-intensite", SAVrC, (short) 1));
-		l.add(InstanceFactory.newResolution("Intensité faible A","SAV-intFbleA", SAVrC, (short) 2));
-		l.add(InstanceFactory.newResolution("Intensité faible T","SAV-intFbleT", SAVrC, (short) 3));
-		l.add(InstanceFactory.newResolution("Intensité faible C","SAV-intFbleC", SAVrC, (short) 4));
-		l.add(InstanceFactory.newResolution("Intensité faible G","SAV-intFbleG", SAVrC, (short) 5));
-		l.add(InstanceFactory.newResolution("Densité clusters trop élevée","SAV-densiteElevee", SAVrC, (short) 6));
-		l.add(InstanceFactory.newResolution("Densité clusters trop faible","SAV-densiteFaible", SAVrC, (short) 7));
-		l.add(InstanceFactory.newResolution("Densité clusters nulle","SAV-densiteNulle", SAVrC, (short) 8));
-		l.add(InstanceFactory.newResolution("%PF","SAV-PF", SAVrC, (short) 9));
-		l.add(InstanceFactory.newResolution("Phasing","SAV-phasing", SAVrC, (short) 10));
-		l.add(InstanceFactory.newResolution("Prephasing","SAV-prephasing", SAVrC, (short) 11));
-		l.add(InstanceFactory.newResolution("Error rate","SAV-errorRate", SAVrC, (short) 12));
-		l.add(InstanceFactory.newResolution("Focus","SAV-focus", SAVrC, (short) 13));
-		l.add(InstanceFactory.newResolution("Q30","SAV-Q30", SAVrC, (short) 14));
-		l.add(InstanceFactory.newResolution("% bases déséquilibré","SAV-perctBasesDeseq", SAVrC, (short) 15));
-		l.add(InstanceFactory.newResolution("Index non représenté","SAV-indexNonPresent", SAVrC, (short) 16));
-		l.add(InstanceFactory.newResolution("Index sous-représenté","SAV-indexFblePerc", SAVrC, (short) 17));
-		l.add(InstanceFactory.newResolution("Indexing / demultiplexage","SAV-IndDemultiplex", SAVrC, (short) 18));
+		// PbR
+		l.addAll(rList(getResolutionCategory("PbR"),
+				newResolution("Indéterminé",     "PbR-indetermine"),
+				newResolution("Flowcell",        "PbR-FC"),
+				newResolution("cBot",            "PbR-cBot"),
+				newResolution("Séquencage",      "PbR-sequencage"),
+				newResolution("Indexing",        "PbR-indexing"),
+				newResolution("PE module",       "PbR-PEmodule"),
+				newResolution("Rehyb primer R1", "PbR-rehybR1"),
+				newResolution("Rehyb primer R2", "PbR-rehybR2"),
+				newResolution("Erreur réactifs", "PbR-erreurReac"),
+				newResolution("Rajout réactifs", "PbR-ajoutReac")));
 		
-		//PbR
-		ResolutionCategory PbRrC= resolutionCategories.get("PbR");
-			
-		l.add(InstanceFactory.newResolution("Indéterminé","PbR-indetermine", PbRrC, (short) 1));
-		l.add(InstanceFactory.newResolution("Flowcell","PbR-FC", PbRrC, (short) 2));
-		l.add(InstanceFactory.newResolution("cBot","PbR-cBot", PbRrC, (short) 3));
-		l.add(InstanceFactory.newResolution("Séquencage","PbR-sequencage", PbRrC, (short) 4));
-		l.add(InstanceFactory.newResolution("Indexing","PbR-indexing", PbRrC, (short) 5));
-		l.add(InstanceFactory.newResolution("PE module","PbR-PEmodule", PbRrC, (short) 6));
-		l.add(InstanceFactory.newResolution("Rehyb primer R1","PbR-rehybR1", PbRrC, (short) 7));
-		l.add(InstanceFactory.newResolution("Rehyb primer R2","PbR-rehybR2", PbRrC, (short) 8));
-		l.add(InstanceFactory.newResolution("Erreur réactifs","PbR-erreurReac", PbRrC, (short) 9));
-		l.add(InstanceFactory.newResolution("Rajout réactifs","PbR-ajoutReac", PbRrC, (short) 10));
+		// LIB
+		l.addAll(rList(getResolutionCategory("LIB"),
+				newResolution("Construction librairie",   "LIB-construction"),
+				newResolution("Cause profil : librairie", "LIB-profilIntLib"),
+				newResolution("Cause profil : exp type",  "LIB-profilIntExpType"),
+				newResolution("Pb dilution",              "LIB-pbDilution"),
+				newResolution("Pb dilution spike-In",     "LIB-pbDilSpikeIn")));
 		
-		//LIB
-		ResolutionCategory LIBRc= resolutionCategories.get("LIB");
+		// PbI
+		l.addAll(rList(getResolutionCategory("PbI"),		
+				newResolution("Indéterminé",            "PbI-indetermine"),
+				newResolution("PC",                     "PbI-PC"),
+				newResolution("Ecran",                  "PbI-ecran"),
+				newResolution("Espace disq insuf",      "PbI-espDisqInsuf"),
+				newResolution("Logiciel",               "PbI-logiciel"),
+				newResolution("Reboot PC",              "PbI-rebootPC"),
+				newResolution("Retard robocopy",        "PbI-robocopy"),
+				newResolution("Erreur paramétrage run", "PbI-parametrageRun")));
 		
-		l.add(InstanceFactory.newResolution("Construction librairie","LIB-construction", LIBRc, (short) 1));
-		l.add(InstanceFactory.newResolution("Cause profil : librairie","LIB-profilIntLib", LIBRc, (short) 2));
-		l.add(InstanceFactory.newResolution("Cause profil : exp type","LIB-profilIntExpType", LIBRc, (short) 3));
-		l.add(InstanceFactory.newResolution("Pb dilution","LIB-pbDilution", LIBRc, (short) 4));
-		l.add(InstanceFactory.newResolution("Pb dilution spike-In","LIB-pbDilSpikeIn", LIBRc, (short) 5));
-		
-		//PbI
-		ResolutionCategory PbIrC= resolutionCategories.get("PbI");		
-		
-		l.add(InstanceFactory.newResolution("Indéterminé","PbI-indetermine", PbIrC, (short) 1));
-		l.add(InstanceFactory.newResolution("PC","PbI-PC", PbIrC, (short) 2));
-		l.add(InstanceFactory.newResolution("Ecran","PbI-ecran", PbIrC, (short) 3));
-		l.add(InstanceFactory.newResolution("Espace disq insuf","PbI-espDisqInsuf", PbIrC, (short) 4));
-		l.add(InstanceFactory.newResolution("Logiciel","PbI-logiciel", PbIrC, (short) 5));
-		l.add(InstanceFactory.newResolution("Reboot PC","PbI-rebootPC", PbIrC, (short) 6));
-		l.add(InstanceFactory.newResolution("Retard robocopy","PbI-robocopy", PbIrC, (short) 7));
-		l.add(InstanceFactory.newResolution("Erreur paramétrage run","PbI-parametrageRun", PbIrC, (short) 8));
-		
-		//RUN-Info
-		ResolutionCategory RUNInforC= resolutionCategories.get("RUN-Info");
-			
-		l.add(InstanceFactory.newResolution("Run de validation","Info-runValidation", RUNInforC, (short) 1));
-		l.add(InstanceFactory.newResolution("Remboursement","Info-remboursement", RUNInforC, (short) 2));
+		// RUN-Info
+		l.addAll(rList(getResolutionCategory("RUN-Info"),
+				newResolution("Run de validation", "Info-runValidation"),
+				newResolution("Remboursement",     "Info-remboursement")));
 
-		//QC
-		ResolutionCategory QCRc= resolutionCategories.get("QC");
-		
-		l.add(InstanceFactory.newResolution("Intensité B.M.S","QC-intBMS", QCRc, (short) 1));
-		l.add(InstanceFactory.newResolution("Tiles out","QC-tilesOut", QCRc, (short) 2));
-		l.add(InstanceFactory.newResolution("Saut de chimie","QC-sautChimie", QCRc, (short) 3));
+		// QC
+		l.addAll(rList(getResolutionCategory("QC"),
+				newResolution("Intensité B.M.S", "QC-intBMS"),
+				newResolution("Tiles out",       "QC-tilesOut"), 
+				newResolution("Saut de chimie",  "QC-sautChimie")));
 		
 		ResolutionConfiguration r = new ResolutionConfiguration();
-		r.code = "runReso";
-		r.resolutions = l;
+		r.code           = "runReso";
+		r.resolutions    = l;
 		r.objectTypeCode = "Run";
-		
-		ArrayList<String> al = new ArrayList<>();
-		al.add("RHS2000");
-		al.add("RHS2500");
-		al.add("RHS2500R");
-		al.add("RHS4000");
-		al.add("RHSX");
-		al.add("RMISEQ");
-		al.add("RNEXTSEQ500");
-		al.add("RNVS6000");  // NGL-1730 ajout 14/12/2017
-		r.typeCodes = al;
+		r.typeCodes = Arrays.asList(
+				"RHS2000",
+				"RHS2500",
+				"RHS2500R",
+				"RHS4000",
+				"RHSX",
+				"RMISEQ",
+				"RNEXTSEQ500",
+				"RNVS6000"    // NGL-1730 ajout 14/12/2017
+				);
 		
 		MongoDBDAO.deleteByCode(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class, "runReso");
-		InstanceHelpers.save(InstanceConstants.RESOLUTION_COLL_NAME,r,ctx, false);
+		InstanceHelpers.save(ctx,InstanceConstants.RESOLUTION_COLL_NAME,r, false);
 	}
 	
 	public static void createReadSetResolutionCNG(ContextValidation ctx) {	
 		List<Resolution> l = new ArrayList<>();
 		
-		// FDS 16/01 rendre moins verbeux avec variables XXrC
-
 		// Run
-		l.add(InstanceFactory.newResolution("Lane abandonnée","Run-abandonLane", resolutionCategories.get("Run"), (short) 1));
+		l.addAll(rList(getResolutionCategory("Run"),
+				newResolution("Lane abandonnée","Run-abandonLane")));
 		
 		//Qte
-		l.add(InstanceFactory.newResolution("Nb seq brutes faible","Qte-seqRawInsuf", resolutionCategories.get("Qte"),(short) 1));
-		l.add(InstanceFactory.newResolution("Couverture en X hors spec.","Qte-couverture", resolutionCategories.get("Qte"),(short) 2));
+		l.addAll(rList(getResolutionCategory("Qte"),
+				newResolution("Nb seq brutes faible",       "Qte-seqRawInsuf"),
+				newResolution("Couverture en X hors spec.", "Qte-couverture")));
 	
 		//IND
-		l.add(InstanceFactory.newResolution("Index incorrect","IND-indexIncorrect", resolutionCategories.get("IND"),(short) 1));
+		l.addAll(rList(getResolutionCategory("IND"),
+				newResolution("Index incorrect", "IND-indexIncorrect")));
 				
 		//Qlte
-		ResolutionCategory QlterC= resolutionCategories.get("Qlte");
-			
-		l.add(InstanceFactory.newResolution("Q30 hors spec.","Qlte-Q30HorsSpec", QlterC,(short) 1));
-		l.add(InstanceFactory.newResolution("Répartition bases","Qlte-repartitionBases", QlterC, (short) 2));
-		l.add(InstanceFactory.newResolution("% adaptateurs détectés","Qlte-adapterPercent", QlterC,(short) 3));
-		l.add(InstanceFactory.newResolution("% duplicat élevé","Qlte-duplicatElevee", QlterC,(short) 4));	
-		l.add(InstanceFactory.newResolution("% NT 30X","Qlte-30XntPercent", QlterC,(short)5));
-		l.add(InstanceFactory.newResolution("% Target","Qlte-targetPercent", QlterC,(short)6));
+		l.addAll(rList(getResolutionCategory("Qlte"),
+				newResolution("Q30 hors spec.",         "Qlte-Q30HorsSpec"),
+				newResolution("Répartition bases",      "Qlte-repartitionBases"),
+				newResolution("% adaptateurs détectés", "Qlte-adapterPercent"),
+				newResolution("% duplicat élevé",       "Qlte-duplicatElevee"),	
+				newResolution("% NT 30X",               "Qlte-30XntPercent"),
+				newResolution("% Target",               "Qlte-targetPercent")));
 
 		// MAP
-		l.add(InstanceFactory.newResolution("% mapping faible","MAP-PercMappingFble", resolutionCategories.get("MAP"),(short) 1));
+		l.addAll(rList(getResolutionCategory("MAP"),
+				newResolution("% mapping faible", "MAP-PercMappingFble")));
 		
 		// Sample
-		l.add(InstanceFactory.newResolution("Sexe incorrect","Sample-sexeIncorrect", resolutionCategories.get("Sample"),(short) 1));
+		l.addAll(rList(getResolutionCategory("Sample"),
+				newResolution("Sexe incorrect", "Sample-sexeIncorrect")));
 		
 		// Info
-		ResolutionCategory InforC= resolutionCategories.get("Info");
-				
-		l.add(InstanceFactory.newResolution("Test Dev","Info-testDev", InforC,(short) 1));
-		l.add(InstanceFactory.newResolution("Test Prod","Info-testProd", InforC,(short) 2));
-		l.add(InstanceFactory.newResolution("Redo effectué","Info-redoDone", InforC,(short) 3));
+		l.addAll(rList(getResolutionCategory("Info"),
+				newResolution("Test Dev",      "Info-testDev"),
+				newResolution("Test Prod",     "Info-testProd"),
+				newResolution("Redo effectué", "Info-redoDone")));
 		
 		// LIMS
-		l.add(InstanceFactory.newResolution("erreur Experimental Type","LIMS-erreurExpType", resolutionCategories.get("LIMS"),(short) 1));
+		l.addAll(rList(getResolutionCategory("LIMS"),
+				newResolution("erreur Experimental Type","LIMS-erreurExpType")));
 		
 		ResolutionConfiguration r = new ResolutionConfiguration();
-		r.code = "readSetReso";
-		r.resolutions = l;
+		r.code           = "readSetReso";
+		r.resolutions    = l;
 		r.objectTypeCode = "ReadSet";
-		ArrayList<String> al = new ArrayList<>();
-		al.add("default-readset");
-		al.add("rsillumina");		
-		r.typeCodes = al;
+		r.typeCodes = Arrays.asList(
+				"default-readset",
+				"rsillumina"
+				);		
 		
 		MongoDBDAO.deleteByCode(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class, "readSetReso");
-		InstanceHelpers.save(InstanceConstants.RESOLUTION_COLL_NAME,r,ctx, false);
+		InstanceHelpers.save(ctx,InstanceConstants.RESOLUTION_COLL_NAME,r, false);
 	}	
 	
 	public static void createRunResolutionCNS(ContextValidation ctx) {
 		List<Resolution> l = new ArrayList<>();
 		
-		// FDS 16/01 rendre moins verbeux avec variables XXrC
-		
 		// PbM
-		ResolutionCategory PbMrC= resolutionCategories.get("PbM");
-
-		l.add(InstanceFactory.newResolution("Indéterminé","PbM-indetermine", PbMrC,  (short) 1));
-		l.add(InstanceFactory.newResolution("Chiller","PbM-chiller", PbMrC, (short) 2));
-		l.add(InstanceFactory.newResolution("Pelletier","PbM-pelletier", PbMrC, (short) 3));
-		l.add(InstanceFactory.newResolution("Fluidique","PbM-fluidiq", PbMrC, (short) 4));
-		l.add(InstanceFactory.newResolution("Laser","PbM-laser", PbMrC, (short) 5));
-		l.add(InstanceFactory.newResolution("Camera","PbM-camera", PbMrC, (short) 6));
-		l.add(InstanceFactory.newResolution("Focus","PbM-focus", PbMrC, (short) 7));    
-		l.add(InstanceFactory.newResolution("Pb de vide","PbM-pbVide", PbMrC, (short) 8));
-		l.add(InstanceFactory.newResolution("PE module","PbM-PEmodule", PbMrC, (short) 9));
-		l.add(InstanceFactory.newResolution("cBot","PbM-cBot", PbMrC, (short) 10));		
+		l.addAll(rList(getResolutionCategory("PbM"),
+				newResolution("Indéterminé", "PbM-indetermine"),
+				newResolution("Chiller",     "PbM-chiller"),
+				newResolution("Pelletier",   "PbM-pelletier"),
+				newResolution("Fluidique",   "PbM-fluidiq"),
+				newResolution("Laser",       "PbM-laser"),
+				newResolution("Camera",      "PbM-camera"),
+				newResolution("Focus",       "PbM-focus"),    
+				newResolution("Pb de vide",  "PbM-pbVide"),
+				newResolution("PE module",   "PbM-PEmodule"),
+				newResolution("cBot",        "PbM-cBot")));		
 			
 		// PbR
-		ResolutionCategory PbRrC= resolutionCategories.get("PbR");
-			
-		l.add(InstanceFactory.newResolution("Indéterminé","PbR-indetermine", PbRrC, (short) 1));
-		l.add(InstanceFactory.newResolution("Flowcell","PbR-FC", PbRrC, (short) 2));
-		l.add(InstanceFactory.newResolution("cBot","PbR-cBot", PbRrC, (short) 3));
-		l.add(InstanceFactory.newResolution("Séquencage","PbR-sequencage", PbRrC, (short) 4));
-		l.add(InstanceFactory.newResolution("Indexing","PbR-indexing", PbRrC, (short) 5));
-		l.add(InstanceFactory.newResolution("PE module","PbR-PEmodule", PbRrC, (short) 6));
-		l.add(InstanceFactory.newResolution("Rehyb primer R1","PbR-rehybR1", PbRrC, (short) 7));
-		l.add(InstanceFactory.newResolution("Rehyb indexing","PbR-rehybIndexing", PbRrC, (short) 8));
-		l.add(InstanceFactory.newResolution("Rehyb primer R2","PbR-rehybR2", PbRrC, (short) 9));
-		l.add(InstanceFactory.newResolution("Erreur réactifs","PbR-erreurReac", PbRrC, (short) 10));
-		l.add(InstanceFactory.newResolution("Rajout réactifs","PbR-ajoutReac", PbRrC, (short) 11));
+		l.addAll(rList(getResolutionCategory("PbR"),
+				newResolution("Indéterminé",     "PbR-indetermine"),
+				newResolution("Flowcell",        "PbR-FC"),
+				newResolution("cBot",            "PbR-cBot"),
+				newResolution("Séquencage",      "PbR-sequencage"),
+				newResolution("Indexing",        "PbR-indexing"),
+				newResolution("PE module",       "PbR-PEmodule"),
+				newResolution("Rehyb primer R1", "PbR-rehybR1"),
+				newResolution("Rehyb indexing",  "PbR-rehybIndexing"),
+				newResolution("Rehyb primer R2", "PbR-rehybR2"),
+				newResolution("Erreur réactifs", "PbR-erreurReac"),
+				newResolution("Rajout réactifs", "PbR-ajoutReac")));
 
 		// SAV
-		ResolutionCategory SAVrC= resolutionCategories.get("SAV");
-		
-		l.add(InstanceFactory.newResolution("Intensité","SAV-intensite", SAVrC, (short) 1));
-		l.add(InstanceFactory.newResolution("Densité clusters trop élevée","SAV-densiteElevee", SAVrC, (short) 2));
-		l.add(InstanceFactory.newResolution("Densité clusters trop faible","SAV-densiteFaible", SAVrC, (short) 3));
-		l.add(InstanceFactory.newResolution("Densité clusters nulle","SAV-densiteNulle", SAVrC, (short) 4));
-		l.add(InstanceFactory.newResolution("%PF","SAV-PF", SAVrC, (short) 5));
-		l.add(InstanceFactory.newResolution("Phasing","SAV-phasing", SAVrC, (short) 6));
-		l.add(InstanceFactory.newResolution("Prephasing","SAV-prephasing", SAVrC, (short) 7));
-		l.add(InstanceFactory.newResolution("Error rate","SAV-errorRate", SAVrC, (short) 8));
-		l.add(InstanceFactory.newResolution("Q30","SAV-Q30", SAVrC, (short) 9));
-		l.add(InstanceFactory.newResolution("Indexing / demultiplexage","SAV-IndDemultiplex", SAVrC, (short) 10));
+		l.addAll(rList(getResolutionCategory("SAV"),
+				newResolution("Intensité",                    "SAV-intensite"),
+				newResolution("Densité clusters trop élevée", "SAV-densiteElevee"),
+				newResolution("Densité clusters trop faible", "SAV-densiteFaible"),
+				newResolution("Densité clusters nulle",       "SAV-densiteNulle"),
+				newResolution("%PF",                          "SAV-PF"),
+				newResolution("Phasing",                      "SAV-phasing"),
+				newResolution("Prephasing",                   "SAV-prephasing"),
+				newResolution("Error rate",                   "SAV-errorRate"),
+				newResolution("Q30",                          "SAV-Q30"),
+				newResolution("Indexing / demultiplexage",    "SAV-IndDemultiplex")));
 		
 		// PbI
-		ResolutionCategory PbIrC= resolutionCategories.get("PbI");
-		
-		l.add(InstanceFactory.newResolution("Indéterminé","PbI-indetermine", PbIrC, (short) 1));
-		l.add(InstanceFactory.newResolution("PC","PbI-PC", PbIrC, (short) 2));
-		l.add(InstanceFactory.newResolution("Ecran","PbI-ecran", PbIrC, (short) 3));
-		l.add(InstanceFactory.newResolution("Espace disq insuf","PbI-espDisqInsuf", PbIrC, (short) 4));
-		l.add(InstanceFactory.newResolution("Logiciel","PbI-logiciel", PbIrC, (short) 5));
-		l.add(InstanceFactory.newResolution("Reboot PC","PbI-rebootPC", PbIrC, (short) 6));
-		l.add(InstanceFactory.newResolution("Erreur paramétrage run","PbI-parametrageRun", PbIrC, (short) 7));
+		l.addAll(rList(getResolutionCategory("PbI"),
+				newResolution("Indéterminé",            "PbI-indetermine"),
+				newResolution("PC",                     "PbI-PC"),
+				newResolution("Ecran",                  "PbI-ecran"),
+				newResolution("Espace disq insuf",      "PbI-espDisqInsuf"),
+				newResolution("Logiciel",               "PbI-logiciel"),
+				newResolution("Reboot PC",              "PbI-rebootPC"),
+				newResolution("Erreur paramétrage run", "PbI-parametrageRun")));
 		
 		// Info
-		ResolutionCategory InforC= resolutionCategories.get("Info");
+		l.addAll(rList(getResolutionCategory("Info"),
+				newResolution("Run de validation",  "Info-runValidation"),
+				newResolution("Arrêt séquenceur",   "Info-arretSeq"),
+				newResolution("Arrêt logiciel",     "Info_arretLogiciel"),
+				newResolution("Remboursement",      "Info-remboursement"),
+				newResolution("Flowcell redéposée", "Info-FCredeposee")));		
+		//BioNano NGL-3201
+				l.addAll(rList(getResolutionCategory("BioN"),
+						newResolution("problème run / flow cell",  "BioN-pbRunOuFC"),
+						newResolution("problème instrument",   "BioN-instrument"),
+						newResolution("problème réactifs",     "BioN-reactifs")));	
 				
-		l.add(InstanceFactory.newResolution("Run de validation","Info-runValidation", InforC, (short) 1));
-		l.add(InstanceFactory.newResolution("Arrêt séquenceur","Info-arretSeq", InforC, (short) 2));
-		l.add(InstanceFactory.newResolution("Arrêt logiciel","Info_arretLogiciel", InforC, (short) 3));
-		l.add(InstanceFactory.newResolution("Remboursement","Info-remboursement", InforC, (short) 4));
-		l.add(InstanceFactory.newResolution("Flowcell redéposée","Info-FCredeposee", InforC, (short) 5));		
-		
 		ResolutionConfiguration r = new ResolutionConfiguration();
-		r.code = "runReso";
-		r.resolutions = l;
+		r.code           = "runReso";
+		r.resolutions    = l;
 		r.objectTypeCode = "Run";
-		ArrayList<String> al = new ArrayList<>();
-		al.add("RHS2000");
-		al.add("RHS2500");
-		al.add("RHS2500R");
-		al.add("RMISEQ");
-		al.add("RGAIIx");
-		//al.add("RARGUS");
-		
-		al.add("RMINION");
-		al.add("RMKI");
-		al.add("RMKIB");
-		al.add("RHS4000");
-		al.add("RNVS6000");
-		al.add("RPROMETHION");
-		
-		r.typeCodes = al;
+		r.typeCodes = Arrays.asList(
+				"RHS2000",
+				"RHS2500",
+				"RHS2500R",
+				"RMISEQ",	
+				"RGAIIx",
+				// "RARGUS",
+				"RMINION",
+				"RMKI",
+				"RMKIB",
+				"RMKIC",
+				"RHS4000",
+				"RNVS6000",
+				"RPROMETHION",
+				"RSAPHYR", //BioNano
+				"RIRYS" // BioNano
+				);
 		
 		MongoDBDAO.deleteByCode(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class, "runReso");
-		InstanceHelpers.save(InstanceConstants.RESOLUTION_COLL_NAME,r,ctx, false);
+		InstanceHelpers.save(ctx,InstanceConstants.RESOLUTION_COLL_NAME,r, false);
 	}	
 	
 	public static void createReadSetResolutionCNS(ContextValidation ctx) {	
 		List<Resolution> l = new ArrayList<>();
-
-		// FDS 16/01 rendre moins verbeux avec variables XXrC
 		
 		// Run
-		l.add(InstanceFactory.newResolution("Lane abandonnée","Run-abandonLane", resolutionCategories.get("Run"), (short) 1));
+		l.addAll(rList(getResolutionCategory("Run"),
+				newResolution("Lane abandonnée", "Run-abandonLane")));
 		
 		// LIB
-		l.add(InstanceFactory.newResolution("Pb protocole banque","LIB-pbProtocole", resolutionCategories.get("LIB"),(short) 1));
-		l.add(InstanceFactory.newResolution("Erreur dépôt banque","LIB-erreurDepot", resolutionCategories.get("LIB"),(short) 2));
+		l.addAll(rList(getResolutionCategory("LIB"),
+				newResolution("Pb protocole banque", "LIB-pbProtocole"),
+				newResolution("Erreur dépôt banque", "LIB-erreurDepot"),
+				newResolution("Pic d’intérêt minoritaire", "LIB-intoQuestionProfile")));
 		
 		// Qte
-		l.add(InstanceFactory.newResolution("Seq valides insuf","Qte-seqValInsuf", resolutionCategories.get("Qte"),(short) 1));
-		l.add(InstanceFactory.newResolution("Seq utiles insuf","Qte-seqUtileInsuf", resolutionCategories.get("Qte"),(short) 2));
+		l.addAll(rList(getResolutionCategory("Qte"),
+				newResolution("Seq valides insuf", "Qte-seqValInsuf"),
+				newResolution("Seq utiles insuf",  "Qte-seqUtileInsuf")));
 		
 		// IND
-		l.add(InstanceFactory.newResolution("Pb demultiplexage","IND-pbDemultiplex", resolutionCategories.get("IND"),(short) 1));
-		l.add(InstanceFactory.newResolution("Pb manip","IND-pbManip", resolutionCategories.get("IND"),(short) 2));
+		l.addAll(rList(getResolutionCategory("IND"),
+				newResolution("Pb demultiplexage", "IND-pbDemultiplex"),
+				newResolution("Pb manip",          					"IND-pbManip"),
+				newResolution("% perte demulpltiplexage bq bidée",  "IND-pbDmplxImaireIIdaire")));
 
 		// Qlte
-		ResolutionCategory QlterC= resolutionCategories.get("Qlte");
-	
-		l.add(InstanceFactory.newResolution("Q30","Qlte-Q30", QlterC,(short) 1));				
-		l.add(InstanceFactory.newResolution("Répartition bases","Qlte-repartitionBases", QlterC, (short) 2));
-		l.add(InstanceFactory.newResolution("Dimère adaptateur","Qlte-adapterDimere", QlterC, (short) 3));
-		l.add(InstanceFactory.newResolution("Adaptateurs/Kmers","Qlte-adapterKmer", QlterC,(short) 4));		
-		l.add(InstanceFactory.newResolution("Duplicat pairs > 20","Qlte-duplicatPairs", QlterC,(short) 5));
-		l.add(InstanceFactory.newResolution("Duplicat > 30","Qlte-duplicat", QlterC,(short) 6));
-		l.add(InstanceFactory.newResolution("Score qualité moyen","Qlte-qualityScore", QlterC,(short) 7));
+		l.addAll(rList(getResolutionCategory("Qlte"),
+				newResolution("Q30",                 "Qlte-Q30"),				
+				newResolution("Répartition bases",   "Qlte-repartitionBases"),
+				newResolution("Dimère adaptateur",   "Qlte-adapterDimere"),
+				newResolution("Adaptateurs/Kmers",   "Qlte-adapterKmer"),		
+				newResolution("Duplicat pairs > 20", "Qlte-duplicatPairs"),
+				newResolution("Duplicat > 30",       "Qlte-duplicat"),
+				newResolution("Score qualité moyen", "Qlte-qualityScore")));
 		
 		// TAXO
-		ResolutionCategory TAXOrC= resolutionCategories.get("TAXO");
+		l.addAll(rList(getResolutionCategory("TAXO"),
+				newResolution("Conta indéterminée",   "TAXO-contaIndeterm"),
+				newResolution("Conta manip",          "TAXO-contaManip"),
+				newResolution("Conta mat ori",        "TAXO-contaMatOri"),
+				newResolution("Non conforme",         "TAXO-nonConforme"),
+				newResolution("Mitochondrie",         "TAXO-mitochondrie"),
+				newResolution("Chloroplast",          "TAXO-chloroplast"),
+				newResolution("Virus",                "TAXO-virus"),
+				newResolution("Bactérie",             "TAXO-bacteria"), 
+				newResolution("Fungi",                "TAXO-fungi"),
+				newResolution("OK post clean rRNA",   "TAXO-postCleanrRNA"),
+				newResolution("Contaminant amplicon", "TAXO-contaAmplicon"),
+				newResolution("% Hominidae",          "TAXO-hominidae")));
+		
 			
-		l.add(InstanceFactory.newResolution("Conta indéterminée","TAXO-contaIndeterm", TAXOrC,(short) 1));
-		l.add(InstanceFactory.newResolution("Conta manip","TAXO-contaManip", TAXOrC,(short) 2));
-		l.add(InstanceFactory.newResolution("Conta mat ori","TAXO-contaMatOri", TAXOrC,(short) 3));
-		l.add(InstanceFactory.newResolution("Non conforme","TAXO-nonConforme", TAXOrC,(short) 4));
-		l.add(InstanceFactory.newResolution("Mitochondrie","TAXO-mitochondrie", TAXOrC,(short) 5));
-		l.add(InstanceFactory.newResolution("Chloroplast","TAXO-chloroplast", TAXOrC,(short) 6));
-		l.add(InstanceFactory.newResolution("Virus","TAXO-virus", TAXOrC,(short) 7));
-		l.add(InstanceFactory.newResolution("Bactérie","TAXO-bacteria", TAXOrC,(short) 8)); 
-		l.add(InstanceFactory.newResolution("Fungi","TAXO-fungi", TAXOrC,(short) 9));
-		l.add(InstanceFactory.newResolution("OK post clean rRNA","TAXO-postCleanrRNA", TAXOrC,(short) 10));
-		l.add(InstanceFactory.newResolution("Contaminant amplicon","TAXO-contaAmplicon", TAXOrC,(short) 11));
-		l.add(InstanceFactory.newResolution("% Hominidae","TAXO-hominidae", TAXOrC,(short) 12));
-					
 		// RIBO
-		l.add(InstanceFactory.newResolution("% rRNA élevé","RIBO-percEleve", resolutionCategories.get("RIBO"),(short) 1));
+		l.addAll(rList(getResolutionCategory("RIBO"),
+				newResolution("% rRNA élevé", "RIBO-percEleve")));
 		
 		// MAP
-		l.add(InstanceFactory.newResolution("% MP","MAP-PercentMP", resolutionCategories.get("MAP"),(short) 1));
-		l.add(InstanceFactory.newResolution("Taille moyenne MP","MAP-tailleMP", resolutionCategories.get("MAP"),(short) 2));
+		l.addAll(rList(getResolutionCategory("MAP"),
+				newResolution("% MP",              "MAP-PercentMP"),
+				newResolution("Taille moyenne MP", "MAP-tailleMP")));
 		
 		// MERG
-		l.add(InstanceFactory.newResolution("% lec mergées","MERG-PercLecMerg", resolutionCategories.get("MERG"),(short) 1));
-		l.add(InstanceFactory.newResolution("Médiane lect mergées","MERG-MedLecMerg", resolutionCategories.get("MERG"),(short) 2));
-		l.add(InstanceFactory.newResolution("Distribution lect mergées","MERG-Distribution", resolutionCategories.get("MERG"),(short) 3));
+		l.addAll(rList(getResolutionCategory("MERG"),
+				newResolution("% lec mergées",             "MERG-PercLecMerg"),
+				newResolution("Médiane lect mergées",      "MERG-MedLecMerg"),
+				newResolution("Distribution lect mergées", "MERG-Distribution")));
 	
 		// Info
-		l.add(InstanceFactory.newResolution("Test Dev","Info-testDev", resolutionCategories.get("Info"),(short) 1));
-		l.add(InstanceFactory.newResolution("Nouveaux critères d'évaluation","Info-nvoCritereEval", resolutionCategories.get("Info"),(short) 2));
+		l.addAll(rList(getResolutionCategory("Info"),
+				newResolution("Test Dev",                       "Info-testDev"),
+				newResolution("Nouveaux critères d'évaluation", "Info-nvoCritereEval")));
+
+		//Dataset BIONANO
+		l.addAll(rList(getResolutionCategory("dsBioN"),
+				newResolution("taux de labelling insuffisant",   "BioN-labelling"),
+				newResolution("taille molécules insuffisante",          "BioN-tailleMolecule"),
+				newResolution("problème réactifs",        "BioN-reactifs"),
+				newResolution("problème échantillon",        "BioN-echantillon"),
+				newResolution("problème MQR",        "BioN-MQR"),
+				newResolution("assemblage",          "BioN-assemblage")));
+
 		
+		//Dataset BIONANO
+				l.addAll(rList(getResolutionCategory("dsBioN"),
+						newResolution("taux de labelling insuffisant",   "BioN-labelling"),
+						newResolution("taille molécules insuffisante",          "BioN-tailleMolecule"),
+						newResolution("problème réactifs",        "BioN-reactifs"),
+						newResolution("problème échantillon",        "BioN-echantillon"),
+						newResolution("problème MQR",        "BioN-MQR"),
+						newResolution("assemblage",          "BioN-assemblage")));
+
 		ResolutionConfiguration r = new ResolutionConfiguration();
-		r.code = "readSetReso";
-		r.resolutions = l;
+		r.code           = "readSetReso";
+		r.resolutions    = l;
 		r.objectTypeCode = "ReadSet";
-		ArrayList<String> al = new ArrayList<>();
-		al.add("default-readset");
-		al.add("rsillumina");
-		al.add("rsnanopore");
-		
-		r.typeCodes = al;
+		r.typeCodes = Arrays.asList(
+				"default-readset",
+				"rsillumina",
+				"rsnanopore",
+				"rsbionano"
+				);
 		
 		MongoDBDAO.deleteByCode(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class, "readSetReso");
-		InstanceHelpers.save(InstanceConstants.RESOLUTION_COLL_NAME,r,ctx, false);
+		InstanceHelpers.save(ctx,InstanceConstants.RESOLUTION_COLL_NAME,r, false);
 	}	
 	
 	public static void createAnalysisResolutionCNS(ContextValidation ctx) {
 		List<Resolution> l = new ArrayList<>();
 		
-		// FDS 16/01 rendre moins verbeux avec variables XXrC
-
 		// BA-MERG
-		l.add(InstanceFactory.newResolution("% merging","MERG-BA-MERGPercent", resolutionCategories.get("BA-MERG"),(short) 1));
-		l.add(InstanceFactory.newResolution("reads size","MERG-readSize", resolutionCategories.get("BA-MERG"),(short) 2));
+		l.addAll(rList(getResolutionCategory("BA-MERG"),
+				newResolution("% merging",  "MERG-BA-MERGPercent"),
+				newResolution("reads size", "MERG-readSize")));
 		
 		// CTG
-		ResolutionCategory CTGrC= resolutionCategories.get("CTG");
-		
-		l.add(InstanceFactory.newResolution("N50","CTG-N50", CTGrC,(short) 1));
-		l.add(InstanceFactory.newResolution("Cumul","CTG-cumul", CTGrC,(short)2));
-		l.add(InstanceFactory.newResolution("Nb contigs","CTG-nbCtgs", CTGrC,(short)3));
-		l.add(InstanceFactory.newResolution("Max size","CTG-maxSize", CTGrC,(short)4));
-		l.add(InstanceFactory.newResolution("Assembled reads","CTG-assReads", CTGrC,(short)5));
+		l.addAll(rList(getResolutionCategory("CTG"),
+				newResolution("N50",             "CTG-N50"),
+				newResolution("Cumul",           "CTG-cumul"),
+				newResolution("Nb contigs",      "CTG-nbCtgs"),
+				newResolution("Max size",        "CTG-maxSize"),
+				newResolution("Assembled reads", "CTG-assReads")));
 		
 		// SIZE
-		l.add(InstanceFactory.newResolution("% lost bases","SIZE-lostBasesPerc", resolutionCategories.get("SIZE"),(short)1));
+		l.addAll(rList(getResolutionCategory("SIZE"),
+				newResolution("% lost bases", "SIZE-lostBasesPerc")));
 		
 		// SCAFF
-		ResolutionCategory SCAFFrC= resolutionCategories.get("SCAFF");
-				
-		l.add(InstanceFactory.newResolution("N50","SCAFF-N50", SCAFFrC,(short) 1));
-		l.add(InstanceFactory.newResolution("Cumul","SCAFF-cumul", SCAFFrC,(short) 2));
-		l.add(InstanceFactory.newResolution("Nb scaff","SCAFF-nbScaff", SCAFFrC,(short) 3));
-		l.add(InstanceFactory.newResolution("Max size","SCAFF-maxSize", SCAFFrC,(short) 4));
-		l.add(InstanceFactory.newResolution("Median insert size","SCAFF-medInsertSize", SCAFFrC,(short) 5));
-		l.add(InstanceFactory.newResolution("% satisfied pairs","SCAFF-satisfPairsPerc", SCAFFrC,(short) 6));
-		l.add(InstanceFactory.newResolution("% N","SCAFF-Npercent", SCAFFrC,(short) 7));
+		l.addAll(rList(getResolutionCategory("SCAFF"),
+				newResolution("N50",                "SCAFF-N50"),
+				newResolution("Cumul",              "SCAFF-cumul"),
+				newResolution("Nb scaff",           "SCAFF-nbScaff"),
+				newResolution("Max size",           "SCAFF-maxSize"),
+				newResolution("Median insert size", "SCAFF-medInsertSize"),
+				newResolution("% satisfied pairs",  "SCAFF-satisfPairsPerc"),
+				newResolution("% N",                "SCAFF-Npercent")));
 		
 		// GAP
-		ResolutionCategory GAPrC= resolutionCategories.get("GAP");
-			
-		l.add(InstanceFactory.newResolution("Gap sum","GAP-sum",GAPrC,(short) 1));
-		l.add(InstanceFactory.newResolution("Gap count","GAP-count",GAPrC,(short) 2));
-		l.add(InstanceFactory.newResolution("Corrected gap sum","GAP-correctedSum",GAPrC,(short) 3));
-		l.add(InstanceFactory.newResolution("Corrected gap count","GAP-correctedCount",GAPrC,(short) 4));
-		l.add(InstanceFactory.newResolution("% N","GAP-Npercent",GAPrC,(short) 5));
+		l.addAll(rList(getResolutionCategory("GAP"),
+				newResolution("Gap sum",             "GAP-sum"),
+				newResolution("Gap count",           "GAP-count"),
+				newResolution("Corrected gap sum",   "GAP-correctedSum"),
+				newResolution("Corrected gap count", "GAP-correctedCount"),
+				newResolution("% N",                 "GAP-Npercent")));
 		
 		ResolutionConfiguration r = new ResolutionConfiguration();
-		r.code = "analysisReso";
-		r.resolutions = l;
+		r.code           = "analysisReso";
+		r.resolutions    = l;
 		r.objectTypeCode = "Analysis";
-		ArrayList<String> al = new ArrayList<>();
-		al.add("BPA");
-		r.typeCodes = al;
+		r.typeCodes = Arrays.asList(
+				"BPA"
+				);
 		
 		MongoDBDAO.deleteByCode(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class, "analysisReso");
-		InstanceHelpers.save(InstanceConstants.RESOLUTION_COLL_NAME,r,ctx, false);
+		InstanceHelpers.save(ctx,InstanceConstants.RESOLUTION_COLL_NAME,r, false);
 	}
 
+	// Commune CNS/CNG
 	public static void createExperimentResolution(ContextValidation ctx) {	
 		List<Resolution> l = getDefaultResolutionCNS();
 				
 		ResolutionConfiguration r = new ResolutionConfiguration();
-		r.code = "experimentReso";
-		r.resolutions = l;
+		r.code           = "experimentReso";
+		r.resolutions    = l;
 		r.objectTypeCode = "Experiment";
 		ArrayList<String> al = new ArrayList<>(); 
 		
 		MongoDBDAO.deleteByCode(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class,r.code);
-		// JacksonDBCollection.distinct return type is a raw List
-		@SuppressWarnings("unchecked")
+		// JacksonDBCollection 'distinct' return type is a raw List, this produces a warning
+		// with javac but not with eclipse.
 		List<String> typeCodes = 
 				MongoDBDAO.getCollection(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class)
 				          .distinct("typeCodes");
 		try {
-			List<ExperimentType> expTypes = ExperimentType.find.findAll();
+			List<ExperimentType> expTypes = ExperimentType.find.get().findAll();
 			for (ExperimentType expType : expTypes) {
 				if (typeCodes == null || !typeCodes.contains(expType.code)) {
 					logger.debug("Add experimentType default resolution "+ expType.code);
@@ -587,293 +562,321 @@ public class ResolutionService {
 			logger.error("Creation Resolution for ExperimentType error " + e.getMessage());
 		}
 		r.typeCodes = al;
+		
 		ctx.setCreationMode();
-		InstanceHelpers.save(InstanceConstants.RESOLUTION_COLL_NAME, r,ctx, false);
+		InstanceHelpers.save(ctx, InstanceConstants.RESOLUTION_COLL_NAME, r, false);
 	}	
 
 	public static void createOpgenDepotResolutionCNS(ContextValidation ctx) {
 		List<Resolution> l = new ArrayList<>();
 		
-		l.addAll(getDefaultResolutionCNS());
-		
-		l.add(InstanceFactory.newResolution("Nombre molécules insuffisant pour assemblage correct", "echec-nbMoleculesInsuf", resolutionCategories.get("Default"), (short) 4));
-		l.add(InstanceFactory.newResolution("Surface cassée", "echec-surface", resolutionCategories.get("Default"), (short) 5));	
-		l.add(InstanceFactory.newResolution("Problème digestion", "echec-digestion", resolutionCategories.get("Default"), (short) 6));	
+		l.addAll(rList(getResolutionCategory("Default"),
+				getDefaultResolutionCNS(),
+				newResolution("Nombre molécules insuffisant pour assemblage correct", "echec-nbMoleculesInsuf"),
+				newResolution("Surface cassée",                                       "echec-surface"),	
+				newResolution("Problème digestion",                                   "echec-digestion")));	
 		
 		ResolutionConfiguration r = new ResolutionConfiguration();
-		r.code = "expODReso";
-		r.resolutions = l;
+		r.code           = "expODReso";
+		r.resolutions    = l;
 		r.objectTypeCode = "Experiment";
-		ArrayList<String> al = new ArrayList<>();
-		al.add("void-opgen-depot");
-		al.add("opgen-depot");		
-		r.typeCodes = al;
+		r.typeCodes = Arrays.asList(
+				"void-opgen-depot",
+				"opgen-depot"
+				);		
 		
 		MongoDBDAO.deleteByCode(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class, r.code);
-		InstanceHelpers.save(InstanceConstants.RESOLUTION_COLL_NAME, r,ctx, false);
+		InstanceHelpers.save(ctx, InstanceConstants.RESOLUTION_COLL_NAME,r, false);
 	}
 	
 	public static void createIlluminaPrepFCDepotResolutionCNG(ContextValidation ctx) {
 		List<Resolution> l = new ArrayList<>();
 		
-		l.addAll(getDefaultResolutionCNS());
-		
-		l.add(InstanceFactory.newResolution("Réhybridation FC", "rehyb-FC", resolutionCategories.get("Default"), (short) 4));
+		l.addAll(rList(getResolutionCategory("Default"),
+				getDefaultResolutionCNS(),
+				newResolution("Réhybridation FC", "rehyb-FC")));
 		
 		ResolutionConfiguration r = new ResolutionConfiguration();
-		r.code = "expIPDReso";
-		r.resolutions = l;
+		r.code           = "expIPDReso";
+		r.resolutions    = l;
 		r.objectTypeCode = "Experiment";
-		ArrayList<String> al = new ArrayList<>();
-		al.add("ext-to-prepa-flowcell");
-		al.add("prepa-flowcell");		
-		al.add("ext-to-prepa-fc-ordered"); //FDS ajout 10/11/2015  -- JIRA NGL-838
-		al.add("prepa-fc-ordered");	       //FDS ajout 10/11/2015  -- JIRA NGL-838
-		al.add("illumina-depot");	
-		r.typeCodes = al;
+		r.typeCodes = Arrays.asList(
+				"ext-to-prepa-flowcell",
+				"prepa-flowcell",		
+				"ext-to-prepa-fc-ordered", //FDS ajout 10/11/2015  -- JIRA NGL-838
+				"prepa-fc-ordered",	       //FDS ajout 10/11/2015  -- JIRA NGL-838
+				"illumina-depot"
+				);	
 		
 		MongoDBDAO.deleteByCode(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class, r.code);
-		InstanceHelpers.save(InstanceConstants.RESOLUTION_COLL_NAME, r,ctx, false);
+		InstanceHelpers.save(ctx, InstanceConstants.RESOLUTION_COLL_NAME,r, false);
 	}
 	
 	public static void createIlluminaPrepFCDepotResolutionCNS(ContextValidation ctx) {
 		List<Resolution> l = new ArrayList<>();
 		
-		l.addAll(getDefaultResolutionCNS());
-		
-		l.add(InstanceFactory.newResolution("Réhybridation FC", "rehyb-FC", resolutionCategories.get("Default"), (short) 4));
+		l.addAll(rList(getResolutionCategory("Default"),
+				getDefaultResolutionCNS(),
+				newResolution("Réhybridation FC", "rehyb-FC")));
 		
 		ResolutionConfiguration r = new ResolutionConfiguration();
-		r.code = "expIPDReso";
-		r.resolutions = l;
+		r.code           = "expIPDReso";
+		r.resolutions    = l;
 		r.objectTypeCode = "Experiment";
-		ArrayList<String> al = new ArrayList<>();
-		al.add("ext-to-prepa-flowcell");
-		al.add("prepa-flowcell");	
-		al.add("prepa-fc-ordered");	
-		al.add("illumina-depot");	
-		r.typeCodes = al;
+		r.typeCodes = Arrays.asList(
+				"ext-to-prepa-flowcell",
+				"prepa-flowcell",	
+				"prepa-fc-ordered",	
+				"illumina-depot"
+				);	
 		
 		MongoDBDAO.deleteByCode(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class, r.code);
-		InstanceHelpers.save(InstanceConstants.RESOLUTION_COLL_NAME, r,ctx, false);
+		InstanceHelpers.save(ctx, InstanceConstants.RESOLUTION_COLL_NAME,r, false);
 	}
 	
 	private static void createIryPreparationNLRSResolutionCNS(ContextValidation ctx) {
-	List<Resolution> l = new ArrayList<>();
+		List<Resolution> l = new ArrayList<>();
 		
-		l.addAll(getDefaultResolutionCNS());
-		
-		l.add(InstanceFactory.newResolution("Marquage incorrect", "echec-labeling", resolutionCategories.get("Default"), (short) 4));
-		l.add(InstanceFactory.newResolution("Hors gamme", "out-of-range", resolutionCategories.get("Default"), (short) 5));
-		l.add(InstanceFactory.newResolution("Conc. < 5 : over-staining risk", "over-staining-risk", resolutionCategories.get("Default"), (short) 6));
-		l.add(InstanceFactory.newResolution("Conc. > 9 : over-loading risk", "over-loading-risk", resolutionCategories.get("Default"), (short) 7));
+		l.addAll(rList(getResolutionCategory("Default"),
+				getDefaultResolutionCNS(),
+				newResolution("Marquage incorrect",             "echec-labeling"),
+				newResolution("Hors gamme",                     "out-of-range"),
+				newResolution("Conc. < 5 : over-staining risk", "over-staining-risk"),
+				newResolution("Conc. > 9 : over-loading risk",  "over-loading-risk")));
 		
 		ResolutionConfiguration r = new ResolutionConfiguration();
-		r.code = "expIrysPrepNLRSReso";
-		r.resolutions = l;
+		r.code           = "expIrysPrepNLRSReso";
+		r.resolutions    = l;
 		r.objectTypeCode = "Experiment";
-		ArrayList<String> al = new ArrayList<>();
-		al.add("irys-nlrs-prep");
-		al.add("bionano-dls-prep");
-		r.typeCodes = al;
+		r.typeCodes = Arrays.asList(
+				"irys-nlrs-prep",
+				"bionano-dls-prep"
+				);
 		
 		MongoDBDAO.deleteByCode(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class, r.code);
-		InstanceHelpers.save(InstanceConstants.RESOLUTION_COLL_NAME, r,ctx, false);
+		InstanceHelpers.save(ctx, InstanceConstants.RESOLUTION_COLL_NAME,r, false);
 	}
 	
 	private static void createDepotBionanoResolutionCNS(ContextValidation ctx) {
 		List<Resolution> l = new ArrayList<>();
 		
-		l.addAll(getDefaultResolutionCNS());
-		
-		l.add(InstanceFactory.newResolution("Nb cycles insuffisant", "echec-nbCycleInsuf", resolutionCategories.get("Default"), (short) 4));
-		l.add(InstanceFactory.newResolution("Problème passage des molécules région pillar", "echec-pillarRegion", resolutionCategories.get("Default"), (short) 5));
-		l.add(InstanceFactory.newResolution("Labelling incorrect", "echec-labeling", resolutionCategories.get("Default"), (short) 6));
-		l.add(InstanceFactory.newResolution("Utilisation du NanoAnalyzer", "nanoAnalyzer", resolutionCategories.get("Default"), (short) 7));
+		l.addAll(rList(getResolutionCategory("Default"),
+				getDefaultResolutionCNS(),
+				newResolution("Nb cycles insuffisant",                        "echec-nbCycleInsuf"),
+				newResolution("Problème passage des molécules région pillar", "echec-pillarRegion"),
+				newResolution("Labelling incorrect",                          "echec-labeling"),
+				newResolution("Utilisation du NanoAnalyzer",                  "nanoAnalyzer")));
 			
 		ResolutionConfiguration r = new ResolutionConfiguration();
-		r.code = "expDepotBionanoReso";
-		r.resolutions = l;
+		r.code           = "expDepotBionanoReso";
+		r.resolutions    = l;
 		r.objectTypeCode = "Experiment";
-		ArrayList<String> al = new ArrayList<>();
-		al.add("bionano-depot");
-		r.typeCodes = al;
+		r.typeCodes = Arrays.asList(
+				"bionano-depot"
+				);
 		
 		MongoDBDAO.deleteByCode(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class, r.code);
-		InstanceHelpers.save(InstanceConstants.RESOLUTION_COLL_NAME, r,ctx, false);	
+		InstanceHelpers.save(ctx, InstanceConstants.RESOLUTION_COLL_NAME,r, false);	
 	}
+	
+	//NGL-2837
+	private static void createDepotNanoporeResolutionCNS(ContextValidation ctx) {
+		List<Resolution> l = new ArrayList<>();
+		
+		l.addAll(rList(getResolutionCategory("Default"),
+				getDefaultResolutionCNS(),
+				newResolution("Nuclease flush", "nuclease-flush"),
+				newResolution("Refueling", "refueling"),
+				newResolution("Détails en commentaire", "comments-details")));
+			
+		ResolutionConfiguration r = new ResolutionConfiguration();
+		r.code           = "expDepotNanoporeReso";
+		r.resolutions    = l;
+		r.objectTypeCode = "Experiment";
+		r.typeCodes = Arrays.asList(
+				"nanopore-depot"
+				);
+		
+		MongoDBDAO.deleteByCode(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class, r.code);
+		InstanceHelpers.save(ctx, InstanceConstants.RESOLUTION_COLL_NAME,r, false);	
+	}
+	
 	
 	private static void createSamplePrepResolutionCNS(ContextValidation ctx) {
 		List<Resolution> l = new ArrayList<>();
 		
-		l.addAll(getDefaultResolutionCNS());	
-		l.add(InstanceFactory.newResolution("Tube cassé dans cryobroyeur", "broken-tube-in-freezer-mill", resolutionCategories.get("Default"), (short) 4));
-		l.add(InstanceFactory.newResolution("Tube vide", "empty-tube", resolutionCategories.get("Default"), (short) 5));
-		l.add(InstanceFactory.newResolution("Colonne élution bouchée", "elution-column-blocked", resolutionCategories.get("Default"), (short) 6));
+		l.addAll(rList(getResolutionCategory("Default"),
+				getDefaultResolutionCNS(),
+				newResolution("Tube cassé dans cryobroyeur", "broken-tube-in-freezer-mill"),
+				newResolution("Tube vide",                   "empty-tube"),
+				newResolution("Colonne élution bouchée",     "elution-column-blocked")));
 
 		ResolutionConfiguration r = new ResolutionConfiguration();
-		r.code = "expExtractionDNARNAReso";
-		r.resolutions = l;
+		r.code           = "expExtractionDNARNAReso";
+		r.resolutions    = l;
 		r.objectTypeCode = "Experiment";
-		ArrayList<String> al = new ArrayList<>();
-		al.add("dna-rna-extraction");
-		
-		r.typeCodes = al;
+		r.typeCodes = Arrays.asList(
+				"dna-rna-extraction"
+				);		
 		
 		MongoDBDAO.deleteByCode(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class, r.code);
-		InstanceHelpers.save(InstanceConstants.RESOLUTION_COLL_NAME, r,ctx, false);
+		InstanceHelpers.save(ctx, InstanceConstants.RESOLUTION_COLL_NAME,r, false);
 		
 		l = new ArrayList<>();
 
 		l.addAll(getDefaultResolutionCNS());	
 
 		r = new ResolutionConfiguration();
-		r.code = "expBroyageReso";
-		r.resolutions = l;
+		r.code           = "expBroyageReso";
+		r.resolutions    = l;
 		r.objectTypeCode = "Experiment";
-		al = new ArrayList<>();
-		al.add("grinding");
-		r.typeCodes = al;
+		r.typeCodes = Arrays.asList(
+				"grinding"
+				);
 		
 		MongoDBDAO.deleteByCode(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class, r.code);
-		InstanceHelpers.save(InstanceConstants.RESOLUTION_COLL_NAME, r,ctx, false);	
+		InstanceHelpers.save(ctx, InstanceConstants.RESOLUTION_COLL_NAME,r, false);	
 	}
 	
 	private static void createGelMigrationResolutionCNS(ContextValidation ctx) {
 		List<Resolution> l = new ArrayList<>();
 		
-		l.addAll(getDefaultResolutionCNS());	
-		l.add(InstanceFactory.newResolution("Tâche de faible poids moléculaire", "low-molecular-weight-spot", resolutionCategories.get("Default"), (short) 4));
-		l.add(InstanceFactory.newResolution("Contamination ARN", "rna-contamination", resolutionCategories.get("Default"), (short) 5));
-		l.add(InstanceFactory.newResolution("ADN dégradé", "degraded-dna", resolutionCategories.get("Default"), (short) 6));
-		l.add(InstanceFactory.newResolution("MétaGénome", "metagenome", resolutionCategories.get("Default"), (short) 7));
-		l.add(InstanceFactory.newResolution("Présence de plasmide(s)", "plasmid-presence", resolutionCategories.get("Default"), (short) 8));
-		l.add(InstanceFactory.newResolution("Profil inhabituel", "unusual-profile", resolutionCategories.get("Default"), (short) 9));
+		l.addAll(rList(resolutionCategories.get("Default"),
+				getDefaultResolutionCNS(),
+				newResolution("Tâche de faible poids moléculaire", "low-molecular-weight-spot"),
+				newResolution("Contamination ARN",                 "rna-contamination"),
+				newResolution("ADN dégradé",                       "degraded-dna"),
+				newResolution("MétaGénome",                        "metagenome"),
+				newResolution("Présence de plasmide(s)",           "plasmid-presence"),
+				newResolution("Profil inhabituel",                 "unusual-profile")));
 		
 		ResolutionConfiguration r = new ResolutionConfiguration();
-		r.code = "expGelMigrationReso";
-		r.resolutions = l;
+		r.code           = "expGelMigrationReso";
+		r.resolutions    = l;
 		r.objectTypeCode = "Experiment";
-		ArrayList<String> al = new ArrayList<>();
-		al.add("gel-migration");
-		r.typeCodes = al;
+		r.typeCodes = Arrays.asList(
+				"gel-migration"
+				);
 		
 		MongoDBDAO.deleteByCode(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class, r.code);
-		InstanceHelpers.save(InstanceConstants.RESOLUTION_COLL_NAME, r,ctx, false);
+		InstanceHelpers.save(ctx, InstanceConstants.RESOLUTION_COLL_NAME,r, false);
 	}
 	
 	// FDS 05/02/2016 -- JIRA NGL-894 experience processus X5
 	private static void createPrepPcrFreeResolutionCNG(ContextValidation ctx) {
 		List<Resolution> l = new ArrayList<>();
 		
-		l.addAll(getDefaultResolutionCNS());
-		
-		l.add(InstanceFactory.newResolution("Echec échantillons par puits", "echec-echPuit", resolutionCategories.get("Default"), (short) 4));
-		l.add(InstanceFactory.newResolution("Contamination", "contamination", resolutionCategories.get("Default"), (short) 5));
+		l.addAll(rList(resolutionCategories.get("Default"),
+				getDefaultResolutionCNS(),
+				newResolution("Echec échantillons par puits", "echec-echPuit"),
+				newResolution("Contamination",                "contamination")));
 		
 		ResolutionConfiguration r = new ResolutionConfiguration();
-		r.code = "expPrepPcrFreeReso";
-		r.resolutions = l;
+		r.code           = "expPrepPcrFreeReso";
+		r.resolutions    = l;
 		r.objectTypeCode = "Experiment";
-		ArrayList<String> al = new ArrayList<>();
-		al.add("prep-pcr-free"); 
-		r.typeCodes = al;
+		r.typeCodes = Arrays.asList(
+				"prep-pcr-free"
+				); 
 		
 		MongoDBDAO.deleteByCode(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class, r.code);
-		InstanceHelpers.save(InstanceConstants.RESOLUTION_COLL_NAME, r,ctx, false);	
+		InstanceHelpers.save(ctx, InstanceConstants.RESOLUTION_COLL_NAME,r, false);	
 	}
 	
 	private static void createQCMiseqResolutionCNG(ContextValidation ctx) {
 		List<Resolution> l = new ArrayList<>();
 		
-		l.addAll(getDefaultResolutionCNS());
-
-		l.add(InstanceFactory.newResolution("Run Miseq invalide : résultats non importés", "invalid-miseq-run", resolutionCategories.get("Default"), (short) 4));
+		l.addAll(rList(getResolutionCategory("Default"),
+				getDefaultResolutionCNS(),
+				newResolution("Run Miseq invalide : résultats non importés", "invalid-miseq-run")));
 		
 		ResolutionConfiguration r = new ResolutionConfiguration();
-		r.code = "expMiseqQCReso";
-		r.resolutions = l;
+		r.code           = "expMiseqQCReso";
+		r.resolutions    = l;
 		r.objectTypeCode = "Experiment";
-		ArrayList<String> al = new ArrayList<>();
-		al.add("miseq-qc"); 
-		r.typeCodes = al;
+		r.typeCodes = Arrays.asList(
+				"miseq-qc"
+				); 
 		
 		MongoDBDAO.deleteByCode(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class, r.code);
-		InstanceHelpers.save(InstanceConstants.RESOLUTION_COLL_NAME, r,ctx, false);	
+		InstanceHelpers.save(ctx, InstanceConstants.RESOLUTION_COLL_NAME,r, false);	
 	}
 	
 	// FDS 23/11/2016 NGL-1158: renommage pour separation des resolutions de Processus entre CNG et CNS
+	// Seems that the original data has entry 21 defined twice.
 	public static void createProcessResolutionCNS(ContextValidation ctx) {
 		List<Resolution> l = new ArrayList<>();
 		
-		l.add(InstanceFactory.newResolution("Déroulement correct","correct", resolutionCategories.get("Default"), (short) 1));
-		l.add(InstanceFactory.newResolution("Standby","standby", resolutionCategories.get("Default"), (short) 2));
-		l.add(InstanceFactory.newResolution("Arrêt - réorientation manip","stop-reor-manip", resolutionCategories.get("Default"), (short) 3));
-		l.add(InstanceFactory.newResolution("Arrêt - abandon","stop-abandon", resolutionCategories.get("Default"), (short) 4));
-		l.add(InstanceFactory.newResolution("Arrêt - pb broyage","stop-pb-broyage", resolutionCategories.get("Default"), (short) 5));
-		l.add(InstanceFactory.newResolution("Arrêt - pb cryobroyeur","stop-pb-cryobroyeur", resolutionCategories.get("Default"), (short) 6));
-		l.add(InstanceFactory.newResolution("Arrêt - pb extraction ADN/ARN","stop-pb-extraction", resolutionCategories.get("Default"), (short) 7));
-		l.add(InstanceFactory.newResolution("Arrêt - pb bq RNA","stop-pb-bq-rna", resolutionCategories.get("Default"), (short) 8));
-		l.add(InstanceFactory.newResolution("Arrêt - pb synthèse cDNA","stop-pb-synthese-cdna", resolutionCategories.get("Default"), (short) 9));
-		l.add(InstanceFactory.newResolution("Arrêt - pb fragmentation","stop-pb-fragmentation", resolutionCategories.get("Default"), (short) 10));
-		l.add(InstanceFactory.newResolution("Arrêt - pb prep Tag","stop-pb-prep-tag", resolutionCategories.get("Default"), (short) 11));
-		l.add(InstanceFactory.newResolution("Arrêt - pb bq DNA","stop-pb-bq-dna", resolutionCategories.get("Default"), (short) 12));
-		l.add(InstanceFactory.newResolution("Arrêt - pb PCR amplif","stop-pb-pcr-ampli", resolutionCategories.get("Default"), (short) 13));
-		l.add(InstanceFactory.newResolution("Arrêt - pb sizing sur gel","stop-pb-sizing-gel", resolutionCategories.get("Default"), (short) 14));
-		l.add(InstanceFactory.newResolution("Arrêt - pb Ampure/SpriSelect","stop-pb-ampure-spriselect", resolutionCategories.get("Default"), (short) 15));
-		l.add(InstanceFactory.newResolution("Arrêt - pb sol stock","stop-pb-sol-stock", resolutionCategories.get("Default"), (short) 16));
-		l.add(InstanceFactory.newResolution("Arrêt - échec run","stop-pb-run", resolutionCategories.get("Default"), (short) 17));
-		
-		l.add(InstanceFactory.newResolution("Processus partiel (MUST BE REPLACE)","processus-partiel", resolutionCategories.get("Default"), (short) 18));
-		l.add(InstanceFactory.newResolution("Arrêt - erreur déclaration","stop-pb-declaration", resolutionCategories.get("Default"), (short) 19));
-		l.add(InstanceFactory.newResolution("Arrêt - Rendement trop faible","stop-pb-yield-too-low", resolutionCategories.get("Default"), (short) 20));	
-	l.add(InstanceFactory.newResolution("Arrêt - pour séquençage Sanger","stop-seq-sanger", resolutionCategories.get("Default"), (short) 21));		l.add(InstanceFactory.newResolution("Arrêt - erreur manip","stop-pb-experiment", resolutionCategories.get("Default"), (short) 21));	
+		l.addAll(rList(getResolutionCategory("Default"),
+				newResolution("Déroulement correct",                 "correct"),
+				newResolution("Standby",                             "standby"),
+				newResolution("Attente retour collaborateur pour la suite","next-experiments-waiting-for-collab"),
+				newResolution("Arrêt - réorientation manip",         "stop-reor-manip"),
+				newResolution("Arrêt - abandon",                     "stop-abandon"),
+				newResolution("Arrêt - pb broyage",                  "stop-pb-broyage"),
+				newResolution("Arrêt - pb cryobroyeur",              "stop-pb-cryobroyeur"),
+				newResolution("Arrêt - pb extraction ADN/ARN",       "stop-pb-extraction"),
+				newResolution("Arrêt - pb bq RNA",                   "stop-pb-bq-rna"),
+				newResolution("Arrêt - pb synthèse cDNA",            "stop-pb-synthese-cdna"),
+				newResolution("Arrêt - pb fragmentation",            "stop-pb-fragmentation"),
+				newResolution("Arrêt - pb prep Tag",                 "stop-pb-prep-tag"),
+				newResolution("Arrêt - pb bq DNA",                   "stop-pb-bq-dna"),
+				newResolution("Arrêt - pb PCR amplif",               "stop-pb-pcr-ampli"),
+				newResolution("Arrêt - pb sizing sur gel",           "stop-pb-sizing-gel"),
+				newResolution("Arrêt - pb Ampure/SpriSelect",        "stop-pb-ampure-spriselect"),
+				newResolution("Arrêt - pb sol stock",                "stop-pb-sol-stock"),
+				newResolution("Arrêt - échec run",                   "stop-pb-run"),
+				newResolution("Processus partiel", "processus-partiel"),
+				newResolution("Arrêt - erreur déclaration",          "stop-pb-declaration"),
+				newResolution("Arrêt - Rendement trop faible",       "stop-pb-yield-too-low"),
+				newResolution("Arrêt - pour séquençage Sanger",      "stop-seq-sanger"),
+				newResolution("Arrêt - erreur manip",                "stop-pb-experiment")));
 		
 		ResolutionConfiguration r = new ResolutionConfiguration();
-		r.code = "processReso";
-		r.resolutions = l;
+		r.code           = "processReso";
+		r.resolutions    = l;
 		r.objectTypeCode = "Process";
+		
 		ArrayList<String> al = new ArrayList<>();
 		
 		try {
-			List<ProcessType> processTypes=ProcessType.find.findAll();
+			List<ProcessType> processTypes = ProcessType.find.get().findAll();
 			for(ProcessType processType:processTypes){
-					logger.debug("Add processType default resolution "+ processType.code);
-					al.add(processType.code);
+				logger.debug("Add processType default resolution "+ processType.code);
+				al.add(processType.code);
 			}
 		} catch (DAOException e) {
 			logger.error("Creation Resolution for Process Type error "+e.getMessage());
 		}
 		r.typeCodes = al;
+		
 		MongoDBDAO.deleteByCode(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class, r.code);
-		InstanceHelpers.save(InstanceConstants.RESOLUTION_COLL_NAME, r,ctx, false);
+		InstanceHelpers.save(ctx, InstanceConstants.RESOLUTION_COLL_NAME,r, false);
 	}
 	
 	// FDS 23/11/2016 NGL-1158: creation pour separation des resolutions de Processus entre CNG et CNS
 	public static void createProcessResolutionCNG(ContextValidation ctx) {
 		List<Resolution> l = new ArrayList<>();
 
-		// pour l'instant les 2 premières ne sont pas demandées...
-		//l.add(InstanceFactory.newResolution("Déroulement correct","correct", resolutionCategories.get("Default"), (short) 1));
-		//l.add(InstanceFactory.newResolution("Processus partiel","processus-partiel", resolutionCategories.get("Default"), (short) 2));
-		
-		l.add(InstanceFactory.newResolution("REDO","stop-redo", resolutionCategories.get("Default"), (short) 3));
-		l.add(InstanceFactory.newResolution("concentration insuffisante","stop-conc-insuffisante", resolutionCategories.get("Default"), (short) 4));
-		l.add(InstanceFactory.newResolution("problème profil","stop-pb-profil", resolutionCategories.get("Default"), (short) 5));
-		l.add(InstanceFactory.newResolution("problème technique","stop-pb-technique", resolutionCategories.get("Default"), (short) 6));
-		l.add(InstanceFactory.newResolution("contamination","stop-contamination", resolutionCategories.get("Default"), (short) 7));
-		
-		// 29/08/2017 ajout. nom et codes exacts a définir....
-		l.add(InstanceFactory.newResolution("sauvegarde","stop-backup", resolutionCategories.get("Default"), (short) 8));
+		l.addAll(rList(getResolutionCategory("Default"),
+				//newResolution("Déroulement correct",          "correct"), ...pour l'instant pas demandée
+				//newResolution("Processus partiel",            "processus-partiel"), ...pour l'instant pas demandée
+				newResolution("REDO",                       "stop-redo"),
+				newResolution("concentration insuffisante", "stop-conc-insuffisante"),
+				newResolution("problème profil",            "stop-pb-profil"),
+				newResolution("problème technique",         "stop-pb-technique"),
+				newResolution("contamination",              "stop-contamination"),
+				newResolution("sauvegarde",                 "stop-backup")));   // 29/08/2017 ajout.... nom et codes exacts a définir....
 		
 		ResolutionConfiguration r = new ResolutionConfiguration();
-		r.code = "processReso";
-		r.resolutions = l;
+		r.code           = "processReso";
+		r.resolutions    = l;
 		r.objectTypeCode = "Process";
+		
 		ArrayList<String> al = new ArrayList<>();
 		
 		try {
-			List<ProcessType> processTypes=ProcessType.find.findAll();
+			List<ProcessType> processTypes = ProcessType.find.get().findAll();
 			for (ProcessType processType:processTypes) {
 					logger.debug("Add processType default resolution "+ processType.code);
 					al.add(processType.code);
@@ -884,48 +887,89 @@ public class ResolutionService {
 		r.typeCodes = al;
 		
 		MongoDBDAO.deleteByCode(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class, r.code);
-		InstanceHelpers.save(InstanceConstants.RESOLUTION_COLL_NAME, r,ctx, false);
+		InstanceHelpers.save(ctx, InstanceConstants.RESOLUTION_COLL_NAME,r, false);
 	}
 	
-	public static List<Resolution> getDefaultResolutionCNS(){
-		List<Resolution> l = new ArrayList<>();
-		
-		l.add(InstanceFactory.newResolution("Déroulement correct",	"correct", resolutionCategories.get("Default"), (short) 1));
-		l.add(InstanceFactory.newResolution("Problème signalé en commentaire", "pb-commentaire", resolutionCategories.get("Default"), (short) 2));
-		l.add(InstanceFactory.newResolution("Echec expérience", "echec-experience", resolutionCategories.get("Default"), (short) 3));	
-
-		return l;
+	// !! attention commune CNS/CNG
+	public static List<Resolution> getDefaultResolutionCNS() {
+		return rList(getResolutionCategory("Default"),
+				newResolution("Déroulement correct",             "correct"),
+				newResolution("Problème signalé en commentaire", "pb-commentaire"),
+				newResolution("Echec expérience",                "echec-experience"));	
 	}
 	
 	public static void createContainerResolutionCNG(ContextValidation ctx) {
 		List<Resolution> l = new ArrayList<>();
-
-		l.add(InstanceFactory.newResolution("Epuisé","empty", resolutionCategories.get("Default"), (short) 2));
-		l.add(InstanceFactory.newResolution("Renvoyé collaborateur","return-collab", resolutionCategories.get("Default"), (short) 3));
+		
+		l.addAll(rList(getResolutionCategory("Default"),
+				newResolution("Epuisé",                "empty"),
+				newResolution("Renvoyé collaborateur", "return-collab")));
 		
 		ResolutionConfiguration r = new ResolutionConfiguration();
-		r.code = "containerReso";
-		r.resolutions = l;
+		r.code           = "containerReso";
+		r.resolutions    = l;
 		r.objectTypeCode = "Container";
 		
 		MongoDBDAO.deleteByCode(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class, r.code);
-		InstanceHelpers.save(InstanceConstants.RESOLUTION_COLL_NAME, r,ctx, false);
+		InstanceHelpers.save(ctx, InstanceConstants.RESOLUTION_COLL_NAME,r, false);
 	}
 	
 	public static void createContainerResolutionCNS(ContextValidation ctx) {
 		List<Resolution> l = new ArrayList<>();
 
-		l.add(InstanceFactory.newResolution("Sauvegarde prod","prod-backup", resolutionCategories.get("Default"), (short) 1));
-		l.add(InstanceFactory.newResolution("Epuisé","empty", resolutionCategories.get("Default"), (short) 2));
-		l.add(InstanceFactory.newResolution("Jeté","trash", resolutionCategories.get("Default"), (short) 3));
-		l.add(InstanceFactory.newResolution("Renvoyé collaborateur","return-collab", resolutionCategories.get("Default"), (short) 4));
+		l.addAll(rList(getResolutionCategory("Default"),
+				newResolution("En attente d'objectif", "iw-objective"),
+				newResolution("Sauvegarde prod",       "prod-backup"),
+				newResolution("Epuisé",                "empty"),
+				newResolution("Jeté",                  "trash"),
+				newResolution("Renvoyé collaborateur", "return-collab")));
 		
 		ResolutionConfiguration r = new ResolutionConfiguration();
-		r.code = "containerReso";
-		r.resolutions = l;
+		r.code           = "containerReso";
+		r.resolutions    = l;
 		r.objectTypeCode = "Container";
 		
 		MongoDBDAO.deleteByCode(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class, r.code);
-		InstanceHelpers.save(InstanceConstants.RESOLUTION_COLL_NAME, r,ctx, false);
+		InstanceHelpers.save(ctx, InstanceConstants.RESOLUTION_COLL_NAME,r, false);
 	}
+
+	// Checked category access by name
+	private static ResolutionCategory getResolutionCategory(String name) {
+		ResolutionCategory rc = resolutionCategories.get(name);
+		if (rc == null)
+			throw new RuntimeException("undefined resolution category '" + name + "'");
+		return rc;
+	}
+
+	// -- syntax lightening effort --
+	
+	// Incomplete resolution definition, to be completed later using rList
+	private static Resolution newResolution(String name, String code) {
+		return new Resolution(name, code, null, (short)-1);
+	}
+	
+	private static List<Resolution> rList(ResolutionCategory rc, Resolution... resolutions) {
+		return rList(rc, Arrays.asList(resolutions));
+	}
+	
+	// Allows light syntax merging
+	private static List<Resolution> rList(ResolutionCategory rc, List<Resolution> rs0, Resolution... rs1) {
+		List<Resolution> result = new ArrayList<>();
+		result.addAll(rs0);
+		result.addAll(Arrays.asList(rs1));
+		return rList(rc, result);
+	}
+
+	// Sets the resolution category and assigns element numbers starting at 1.
+	private static List<Resolution> rList(ResolutionCategory rc, List<Resolution> resolutions) {
+		if (rc == null)
+			throw new IllegalArgumentException();
+		for (int i=0; i<resolutions.size(); i++) {
+			Resolution r = resolutions.get(i);
+			r.category     = rc;
+			r.displayOrder = (short)(i+1);
+		}
+		return resolutions;
+	}
+
 }

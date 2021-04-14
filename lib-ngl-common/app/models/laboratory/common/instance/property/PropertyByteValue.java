@@ -12,13 +12,9 @@ import validation.utils.ValidationHelper;
 
 /**
  * Property value that is a byte array.
- * 
- *
  */
-//public class PropertyByteValue extends PropertyValue<byte[]> {
 public class PropertyByteValue extends PropertyValue {
 	
-	// TODO: Should be protected and define typeless constructors. 
 	public PropertyByteValue(String _type) {
 		super(_type);
 	}
@@ -27,7 +23,6 @@ public class PropertyByteValue extends PropertyValue {
 		super(_type, value);		
 	}
 
-	// TODO : activate this method, fails at the moment because the value field holds a String value in some cases.
 	@Override
 	public byte[] getValue() {
 		return byteValue();
@@ -52,15 +47,44 @@ public class PropertyByteValue extends PropertyValue {
 		return "PropertyByteValue [value=" + value + ", class=" + value.getClass().getName() + "]";
 	}
 	
+//	@Override
+//	public void validate(ContextValidation contextValidation) { 
+//		super.validate(contextValidation);
+//		PropertyDefinition propertyDefinition = first(contextValidation.<Collection<PropertyDefinition>>getTypedObject("propertyDefinitions")).orElse(null);
+//		if (ValidationHelper.checkIfActive(contextValidation, propertyDefinition)) {
+////			PropertyByteValue.validateProperty(contextValidation, propertyDefinition, this); 
+//			validate(contextValidation, propertyDefinition); 
+//		}		
+//	}
 	@Override
-	public void validate(ContextValidation contextValidation) { 
-		super.validate(contextValidation);
-//		@SuppressWarnings("unchecked") // uncheckable access to validation context object 
-//		PropertyDefinition propertyDefinition = (PropertyDefinition) ((Collection<PropertyDefinition>)contextValidation.getObject("propertyDefinitions")).toArray()[0];
-		PropertyDefinition propertyDefinition = first(contextValidation.<Collection<PropertyDefinition>>getTypedObject("propertyDefinitions")).orElse(null);
-		if (ValidationHelper.checkIfActive(contextValidation, propertyDefinition)) {
-			ValidationHelper.required(contextValidation, this, propertyDefinition); 
-		}		
+	public void validate(ContextValidation contextValidation, Collection<PropertyDefinition> propertyDefinitions) { 
+		super.validate(contextValidation, propertyDefinitions);
+		PropertyDefinition propertyDefinition = first(propertyDefinitions).orElse(null);
+		if (ValidationHelper.checkIfActive(contextValidation, propertyDefinition)) 
+			validate(contextValidation, propertyDefinition); 
+	}
+
+//	/**
+//	 * Validate that a property byte value conforms to a property definition 
+//	 * @param contextValidation  validation context
+//	 * @param propertyDefinition property definition
+//	 * @param propertyValue      property value
+//	 * @return true if the value conforms to the definition, false otherwise
+//	 */
+//	private static boolean validateProperty(ContextValidation contextValidation, PropertyDefinition propertyDefinition, PropertyByteValue propertyValue) {
+//		return ValidationHelper.validatePropertyCore(contextValidation, propertyDefinition, propertyValue,
+//				() -> ValidationHelper.validateNotEmpty(contextValidation, propertyValue.value, propertyDefinition.code + ".value"));
+//	}
+	
+	/**
+	 * Validate that this property byte value conforms to a property definition 
+	 * @param contextValidation  validation context
+	 * @param propertyDefinition property definition
+	 * @return true if the value conforms to the definition, false otherwise
+	 */
+	private boolean validate(ContextValidation contextValidation, PropertyDefinition propertyDefinition) {
+		return validateProperty(contextValidation, propertyDefinition,
+				() -> ValidationHelper.validateNotEmpty(contextValidation, value, propertyDefinition.code + ".value"));
 	}
 		
 }

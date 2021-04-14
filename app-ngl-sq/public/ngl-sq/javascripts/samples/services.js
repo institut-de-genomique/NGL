@@ -87,6 +87,24 @@ factory('samplesSearchService', ['$http', 'mainService', 'lists', 'datatable', f
 			"type":"text",
 			"groupMethod":"unique"
 		});
+		columns.push({
+			"header":Messages("samples.table.modifyDate"),
+			"property":"traceInformation.modifyDate",
+			"order":true,
+			"hide":true,
+			"position":15,			
+			"type":"date",
+			"groupMethod":"unique"
+				});
+		columns.push({
+			"header":Messages("samples.table.modifyUser"),
+			"property":"traceInformation.modifyUser",
+			"order":true,
+			"hide":true,
+			"position":16,
+			"type":"text",
+			"groupMethod":"unique"
+		});
 		
 		/*
 		columns.push({
@@ -178,6 +196,7 @@ factory('samplesSearchService', ['$http', 'mainService', 'lists', 'datatable', f
 			lists.refresh.experimentTypes({categoryCodes:["transformation"], withoutOneToVoid:false},"transformation");
 			lists.refresh.states({objectTypeCode:"Sample"});
 			lists.refresh.users();
+			console.log("samples"+"-"+mainService.getHomePage());
 			lists.refresh.reportConfigs({pageCodes:["samples"+"-"+mainService.getHomePage()]});
 			lists.refresh.reportConfigs({pageCodes:["samples-addcolumns"]}, "samples-addcolumns");
 			lists.refresh.filterConfigs({pageCodes:["samples-search-addfilters"]}, "samples-search-addfilters");
@@ -268,9 +287,19 @@ factory('samplesSearchService', ['$http', 'mainService', 'lists', 'datatable', f
 			resetForm : function(){
 				this.form = {};									
 			},
+
+			resetTextareas : function(){
+				Array.from(document.getElementsByTagName('textarea')).forEach(function(element) {
+					var elementScope = angular.element(element).scope();
+					if(elementScope.textareaValue){
+						elementScope.textareaValue = null;
+					}
+				}); 
+			},
 			
 			resetSampleCodes : function(){
-				this.form.sampleCodes = [];									
+				this.form.sampleCodes = [];	
+				lists.clear('samples');								
 			},
 
 			
@@ -280,20 +309,10 @@ factory('samplesSearchService', ['$http', 'mainService', 'lists', 'datatable', f
 				this.datatable.search(this.convertForm());
 				
 			},
+
 			refreshSamples : function(){
 				if(this.form.projectCodes && this.form.projectCodes.length>0){
 					lists.refresh.samples({projectCodes:this.form.projectCodes});
-				}
-			},
-			changeProject : function(){
-				if(this.form.project){
-					lists.refresh.samples({projectCode:this.form.project.code});
-				}else{
-					lists.clear("samples");
-				}
-
-				if(this.form.type){
-					this.search();
 				}
 			},
 
@@ -331,15 +350,19 @@ factory('samplesSearchService', ['$http', 'mainService', 'lists', 'datatable', f
 				var allColumns = angular.copy(lists.get("samples-addcolumns")[0].columns);
 				var allColumnsFiltered = [];
 				for(var i=0; i<allColumns.length; i++){
-					if(this.mapAdditionnalColumn.get(allColumns[i].position)==undefined){
-						//if(this.contextValue==undefined || (this.contextValue!=undefined && allColumns[i].context!=null && allColumns[i].context.includes(this.contextValue))){
+					if(allColumns[i].groupHeader==undefined){
+						allColumnsFiltered.push(allColumns[i]);
+					}else{
+						if(this.mapAdditionnalColumn.get(allColumns[i].groupHeader)==undefined){
+							//if(this.contextValue==undefined || (this.contextValue!=undefined && allColumns[i].context!=null && allColumns[i].context.includes(this.contextValue))){
 							allColumnsFiltered.push(allColumns[i]);
 							var tabColumn=[];
 							tabColumn.push(allColumns[i]);
-							this.mapAdditionnalColumn.set(allColumns[i].position,tabColumn);
+							this.mapAdditionnalColumn.set(allColumns[i].groupHeader,tabColumn);
 							//}
-					}else{
-						this.mapAdditionnalColumn.get(allColumns[i].position).push(allColumns[i]);
+						}else{
+							this.mapAdditionnalColumn.get(allColumns[i].groupHeader).push(allColumns[i]);
+						}
 					}
 				}
 				return allColumnsFiltered;
@@ -359,8 +382,12 @@ factory('samplesSearchService', ['$http', 'mainService', 'lists', 'datatable', f
 				for(var i = 0 ; i < this.additionalColumns.length ; i++){
 					for(var j = 0; j < this.additionalColumns[i].length; j++){
 						if(this.additionalColumns[i][j].select){
-							for(var c=0; c<this.mapAdditionnalColumn.get(this.additionalColumns[i][j].position).length; c++){
-								this.selectedAddColumns.push(this.mapAdditionnalColumn.get(this.additionalColumns[i][j].position)[c]);
+							if(this.additionalColumns[i][j].groupHeader!=undefined){
+								for(var c=0; c<this.mapAdditionnalColumn.get(this.additionalColumns[i][j].groupHeader).length; c++){
+									this.selectedAddColumns.push(this.mapAdditionnalColumn.get(this.additionalColumns[i][j].groupHeader)[c]);
+								}
+							}else{
+								this.selectedAddColumns.push(this.additionalColumns[i][j]);
 							}
 						}
 					}

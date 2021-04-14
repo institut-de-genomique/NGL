@@ -17,7 +17,6 @@ public class MailServices {
 
 	private static final play.Logger.ALogger logger = play.Logger.of(MailServices.class);
 	
-	// private static final String mailSmtpHost = Play.application().configuration().getString("mail.smtp.host");
 	private static final String mailSmtpHost() {
 		return configuration().getString("mail.smtp.host");
 	}
@@ -43,8 +42,7 @@ public class MailServices {
 		}
 	}
 
-	private InternetAddress getInternetAddress(String mail)
-			 {
+	private InternetAddress getInternetAddress(String mail) {
 		try {
 			return new InternetAddress(mail);
 		} catch (AddressException e) {

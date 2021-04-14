@@ -36,7 +36,7 @@ angular.module('home').controller('SearchUsersCtrl', ['$scope', '$routeParams', 
 	if(angular.isUndefined(mainService.getHomePage())){
 		mainService.setHomePage('search');
 		tabService.addTabs({label:Messages('authorisation.users.page.tab.search'),href:jsRoutes.controllers.authorisation.tpl.Users.home("search").url,remove:true});
-		tabService.activeTab(0); // desactive le lien !
+		tabService.activeTab(0); // active l'onglet, le met en bleu
 	}
 	
 	$scope.searchService = usersSearchService;	

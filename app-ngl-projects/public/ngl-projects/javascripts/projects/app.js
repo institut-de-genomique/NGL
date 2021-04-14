@@ -1,5 +1,5 @@
 "use strict";
-angular.module('home', ['ngRoute', 'ultimateDataTableServices', 'commonsServices', 'ui.bootstrap', 'ngl-projects.ProjectsServices'], function($routeProvider, $locationProvider) {
+angular.module('home', ['ngRoute', 'ultimateDataTableServices', 'commonsServices', 'ui.bootstrap', 'ngl-projects.ProjectsServices']).config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
 	
 	$routeProvider.when('/projects/search/home', {
 		templateUrl : '/tpl/projects/search/default',
@@ -14,4 +14,4 @@ angular.module('home', ['ngRoute', 'ultimateDataTableServices', 'commonsServices
 
 	// configure html5 to get links working with bookmarked
 	$locationProvider.html5Mode({enabled: true, requireBase: false});
-});
+}]);

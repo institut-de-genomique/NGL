@@ -1,7 +1,6 @@
 package rules.services;
 
 import java.util.List;
-// import java.util.function.Supplier;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -9,23 +8,27 @@ import javax.inject.Singleton;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
+import fr.cea.ig.lfw.LFWConfig;
 import fr.cea.ig.lfw.utils.LazyLambdaSupplier;
-import fr.cea.ig.play.migration.NGLConfig;
 
 @Singleton
 class LazyRulesKey extends LazyLambdaSupplier<String> {
 	
 	@Inject
-	public LazyRulesKey(NGLConfig config) {
+	public LazyRulesKey(LFWConfig config) {
 		super(() -> config.getRulesKey());
 	}
 	
 }
 
-// Is this a singleton ? Looks like it could be as the initializers were
-// static.
+/**
+ * Asynchronous (actor system) based drools rules execution.
+ * 
+ * @author vrd
+ *
+ */
 @Singleton
-public class LazyRules6Actor extends LazyLambdaSupplier<ActorRef> {
+public class LazyRules6Actor extends LazyLambdaSupplier<ActorRef> implements IDrools6Actor {
 	
 	private LazyRulesKey rulesKey;
 	
@@ -35,12 +38,17 @@ public class LazyRules6Actor extends LazyLambdaSupplier<ActorRef> {
 		this.rulesKey = rulesKey;
 	}
 	
+	@Override
 	public void tellMessage(String rulesCode, List<Object> objects) {
-		get().tell(new RulesMessage(rulesKey.get(), rulesCode, objects),null);
+		get().tell(new RulesMessage(rulesKey.get(), rulesCode, objects), null);
 	}
 	
-	public void tellMessage(String rulesCode, Object... objects) {
-		get().tell(new RulesMessage(rulesKey.get(), rulesCode, objects),null);
-	}
+//	@Override
+//	public void tellMessage(String rulesCode, Object... objects) {
+//		get().tell(new RulesMessage(rulesKey.get(), rulesCode, objects), null);
+//	}
 	
 }
+
+
+

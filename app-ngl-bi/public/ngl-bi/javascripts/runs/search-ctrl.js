@@ -30,12 +30,13 @@ angular.module('home').controller('SearchCtrl', ['$scope', '$routeParams', 'main
 	
 	$scope.reset = function(){
 		$scope.searchService.resetForm();
+		$scope.searchService.resetTextareas();
 	};
 	
 	if(angular.isUndefined(mainService.getHomePage())){
 		mainService.setHomePage('search');
 		tabService.addTabs({label:Messages('runs.page.tab.search'),href:jsRoutes.controllers.runs.tpl.Runs.home("search").url,remove:true});
-		tabService.activeTab(0); // desactive le lien !
+		tabService.activeTab(0); // active l'onglet, le met en bleu
 	}
 	
 	$scope.searchService = runSearchService;	
@@ -73,13 +74,14 @@ angular.module('home').controller('SearchValuationCtrl', ['$scope', '$routeParam
 	
 	$scope.reset = function(){
 		$scope.searchService.resetForm();
+		$scope.searchService.resetTextareas();
 	};
 	
 	
 	if(angular.isUndefined(mainService.getHomePage())){
 		mainService.setHomePage('valuation');
 		tabService.addTabs({label:Messages('runs.page.tab.validate'),href:jsRoutes.controllers.runs.tpl.Runs.home("valuation").url,remove:true});
-		tabService.activeTab(0); // desactive le lien !
+		tabService.activeTab(0); // active l'onglet, le met en bleu
 	}
 	
 	$scope.searchService = runSearchService;	
@@ -106,7 +108,7 @@ angular.module('home').controller('SearchStateCtrl', ['$scope', '$routeParams', 
 			},
 			save : {
 				active:Permissions.check("writing")?true:false,
-				url: jsRoutes.controllers.runs.api.State.updateBatch().url,				
+				url: jsRoutes.controllers.runs.api.States.updateStateBatch().url,				
 				batch:true,
 				method:'put',
 				value:function(line){return {code:line.code,state:line.state};}				
@@ -128,12 +130,13 @@ angular.module('home').controller('SearchStateCtrl', ['$scope', '$routeParams', 
 	
 	$scope.reset = function(){
 		$scope.searchService.resetForm();
+		$scope.searchService.resetTextareas();
 	};
 	
 	if(angular.isUndefined(mainService.getHomePage())){
 		mainService.setHomePage('state');
 		tabService.addTabs({label:Messages('runs.page.tab.state'),href:jsRoutes.controllers.runs.tpl.Runs.home("state").url,remove:true});
-		tabService.activeTab(0); // desactive le lien !
+		tabService.activeTab(0); // active l'onglet, le met en bleu
 	}
 	
 	$scope.searchService = runSearchService;	

@@ -9,21 +9,24 @@ angular.module('home').controller('CreateCtrl',[ '$http', '$scope', '$routeParam
 	if(angular.isUndefined(mainService.getHomePage())){
 		mainService.setHomePage('create');
 		tabService.addTabs({label:Messages('configurations.menu.create'),href:jsRoutes.controllers.sra.configurations.tpl.Configurations.home("create").url,remove:true});
-		tabService.activeTab(0); // desactive le lien !
+		tabService.activeTab(0); //  active l'onglet en le mettant en bleu
 	}
 	
 	$scope.createService = configurationsCreateService;	
 	$scope.createService.init($routeParams);
 	
 	$scope.save = function(){
+		$scope.messages = messages();	
 		mainService.setForm($scope.createService.form);
 			$http.post(jsRoutes.controllers.sra.configurations.api.Configurations.save().url, mainService.getForm()).success(function(data) {
 				$scope.messages.clazz="alert alert-success";
 				$scope.messages.text=Messages('configurations.msg.save.success')+" : "+data;
 				$scope.messages.open();
+				$scope.createService.resetForm();
 			}).error(function(data){
 				$scope.messages.setDetails(data);
 				$scope.messages.setError("save");
+				$scope.createService.resetForm();
 			});
 	};
 	

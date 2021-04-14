@@ -65,7 +65,7 @@ rule "Validation code flowcell on exp.instrumentProperties nanopore-depot"
 	$contextValidation:ContextValidation($errors : errors)
 	then
 		 Logger.debug("Error code nanopore-depot "+$containerSupportCode.value);
-		 $contextValidation.addErrors("instrumentProperties[containerSupportCode]",	"error.validationexp.containerSupportCodeContainString", $containerSupportCode.value, "[A-Z0-9]+_[A-Z]"); 
+		 $contextValidation.addErrors("instrumentProperties[containerSupportCode]",	"error.validationexp.containerSupportCodeMustContainString", $containerSupportCode.value, "[A-Z0-9]+_[A-Z]"); 
 end
 
 
@@ -83,6 +83,6 @@ rule "Validation code flowcell on atm.output.instrumentProperties nanopore-depot
 	$contextValidation:ContextValidation($errors : errors)
 	then
 		 Logger.debug("Error code nanopore-depot "+$containerSupportCode.value);
-		 $contextValidation.addErrors("atm["+$atomicTransfert.viewIndex+"].instrumentProperties[containerSupportCode]",	"error.validationexp.containerSupportCodeContainString", $containerSupportCode.value, "[A-Z0-9]+_[A-Z]"); 
+		 $contextValidation.addErrors("atm["+$atomicTransfert.viewIndex+"].instrumentProperties[containerSupportCode]",	"error.validationexp.containerSupportCodeMustContainString", $containerSupportCode.value, "[A-Z0-9]+_[A-Z]"); 
 end
 

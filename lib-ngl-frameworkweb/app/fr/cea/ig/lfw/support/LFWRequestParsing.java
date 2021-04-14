@@ -6,8 +6,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bson.BSONObject;
@@ -34,23 +36,26 @@ public interface LFWRequestParsing extends LFWApplicationHolder {
 	
 	/**
 	 * Fill a form from the request query string. <br>
-	 * The method throws a RuntimeException if an exception if catch during the reflection
-	 * @param clazz class of form
-	 * @return the filled form
+	 * The method throws a RuntimeException if an exception if catch during the reflection.
+	 * @param  <T>   type of object to build
+	 * @param  clazz class of form
+	 * @return       the filled form
 	 */
 	// extracted from APICommonController
 	default <T> T objectFromRequestQueryString(Class<T> clazz) {		
 		try {
 			Map<String, String[]> queryString = request().queryString();
-			BeanWrapper wrapper = PropertyAccessorFactory.forBeanPropertyAccess(clazz.newInstance());
+			T instance = clazz.newInstance();
+//			BeanWrapper wrapper = PropertyAccessorFactory.forBeanPropertyAccess(clazz.newInstance());
+			BeanWrapper wrapper = PropertyAccessorFactory.forBeanPropertyAccess(instance);
 			wrapper.setAutoGrowNestedPaths(true);
-			for(String key :queryString.keySet()){
+			for (String key : queryString.keySet()) {
 				try {
-					if(isNotEmpty(queryString.get(key))){
+					if (isNotEmpty(queryString.get(key))) {
 						Object value = queryString.get(key);
-						if(wrapper.isWritableProperty(key)){
+						if (wrapper.isWritableProperty(key)) {
 							Class<?> c = wrapper.getPropertyType(key);
-							if(null != c && Date.class.isAssignableFrom(c)){
+							if (c != null && Date.class.isAssignableFrom(c)) {
 								value = convertTimestampStringToDate(((String[])value)[0]);
 							}							
 						}
@@ -60,13 +65,12 @@ public interface LFWRequestParsing extends LFWApplicationHolder {
 					throw new RuntimeException(e);
 				} 
 			}
-			@SuppressWarnings("unchecked")
-			T instance = (T)wrapper.getWrappedInstance();
+//			@SuppressWarnings("unchecked")
+//			T instance = (T)wrapper.getWrappedInstance();
 			return instance; 
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		} 
-
 	}
 	
 	default Date convertTimestampStringToDate(String timestamp) {
@@ -84,6 +88,7 @@ public interface LFWRequestParsing extends LFWApplicationHolder {
 		return results;
 	}
 
+	// what if there is more than one string in the array ?
 	default boolean isNotEmpty(String[] strings) {
 		if (strings == null)     return false;
 		if (strings.length == 0) return false;
@@ -112,29 +117,37 @@ public interface LFWRequestParsing extends LFWApplicationHolder {
 	default BasicDBObject getExcludeKeys(String[] keys) {
 		Arrays.sort(keys, Collections.reverseOrder());
 		BasicDBObject values = new BasicDBObject();
-		for(String key : keys){
+		for (String key : keys) {
 		    values.put(key, 0);
 		}
 		return values;
     }
 	
-	/**
-	 * can not access to default keys in controller (restriction to the API)
-	 * replace by: fr.cea.ig.ngl.support.ListFormWrapper.getKeys(defaultKeys).
-	 * 
-	 * @param form        IDatatableForm
-	 * @param defaultKeys {@literal List<String>}
-	 * @return            form IDatatableForm
-	 */
-	@Deprecated
-	default IDatatableForm updateForm(IDatatableForm form, List<String> defaultKeys) {
-		if(form.includes().contains("default")){
-			form.includes().remove("default");
-			if(defaultKeys != null){
-				form.includes().addAll(defaultKeys);
-			}
-		}
-		return form;
-	}
+	default String generateJSONKeys(IDatatableForm form) {
+        Set<String> keys = new HashSet<>();
+        if(null != form.includes() && form.includes().size() > 0 && !form.includes().contains("*")){
+            getIncludeJSONKeys(form.includes().toArray(new String[form.includes().size()]),keys);
+        }else if(null != form.excludes() && form.excludes().size() > 0){
+            getExcludeJSONKeys(form.excludes().toArray(new String[form.excludes().size()]),keys);                   
+        }
+        String jsonKey = "{"+String.join(",", keys)+"}";
+        return jsonKey;
+    }
+	
+	default void getIncludeJSONKeys(String[] includes, Set<String> keys) {
+        Arrays.sort(includes, Collections.reverseOrder());
+        for (int i=0; i<includes.length; i++) {
+            keys.add(includes[i]+":1");
+        }
+//        Iterables.zenThem(includes).each(k -> keys.add(k + ":1"));
+    }
+	
+	default void getExcludeJSONKeys(String[] excludes, Set<String> keys) {
+        Arrays.sort(excludes, Collections.reverseOrder());
+        for (int i=0; i<excludes.length; i++) {
+            keys.add(excludes[i]+":0");
+        }
+//        Iterables.zenThem(excludes).each(k -> keys.add(k + ":0"));
+    }
 	
 }

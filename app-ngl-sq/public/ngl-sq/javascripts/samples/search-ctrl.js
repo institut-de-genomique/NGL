@@ -32,7 +32,6 @@ angular.module('home').controller('SearchCtrl', ['$scope',  '$window','datatable
 				tabService.addTabs({label:line.code,href:jsRoutes.controllers.samples.tpl.Samples.get(line.code).url, remove:true});
 			}
 		}
-		
 		,
 		edit:{
 			active:Permissions.check("writing")?true:false,
@@ -41,25 +40,28 @@ angular.module('home').controller('SearchCtrl', ['$scope',  '$window','datatable
 		save:{
 			active:Permissions.check("writing")?true:false,
 			url:function(value){
-				var fields = "fields=valuation";
-					if(value.comments)fields = fields+"&fields=comments";
+				var fields = "";
+				
+				if(value.comments) {
+					fields = "fields=comments";
+				}
 				
 				return jsRoutes.controllers.samples.api.Samples.update(value.code).url+"?"+fields;
 			},
 			method:'put',
 			mode:'remote'			
 		}
-	}
-
-	
+	};	
 	
 	$scope.search = function(){		
 		$scope.searchService.search();
 	};
 	
 	$scope.reset = function(){
-		$scope.searchService.resetForm();		
+		$scope.searchService.resetForm();
+		$scope.searchService.resetTextareas();		
 	};
+	
 	$scope.goToReadSet = function(code, $event){
 		$window.open(AppURL("bi")+"/readsets/"+code, 'readset');
 		if($event)$event.stopPropagation();

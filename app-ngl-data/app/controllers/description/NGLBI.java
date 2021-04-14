@@ -4,30 +4,25 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import play.Logger;
+import javax.inject.Inject;
+
+import nglapps.DataService;
 import play.data.validation.ValidationError;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
-// import services.description.common.InstituteService;
-// import services.description.common.LevelService;
-// import services.description.common.MeasureService;
-// import services.description.common.ObjectTypeService;
-// import services.description.common.StateService;
-// import services.description.container.ContainerService;
-// import services.description.experiment.ExperimentService;
-// import services.description.instrument.InstrumentService;
-// import services.description.process.ProcessService;
-// import services.description.project.ProjectService;
-import services.description.run.RunService;
 import services.description.run.TreatmentService;
 
-public class NGLBI extends Controller { // NGLController { // NGLBaseController { //CommonController {
+public class NGLBI extends Controller { 
+
+	private static final play.Logger.ALogger logger = play.Logger.of(NGLBI.class);
 	
-//	@Inject
-//	public NGLBI(NGLApplication app) {
-//		super(app);
-//	}
+	private final DataService dataService;
+	
+	@Inject
+	public NGLBI(DataService dataService) {
+		this.dataService = dataService;
+	}
 	
 	public Result save(){
 		try {
@@ -44,16 +39,17 @@ public class NGLBI extends Controller { // NGLController { // NGLBaseController 
 			//ImportService.main(errors);
 			//ExperimentService.main(errors);
 			//ProcessService.main(errors);
-			//ProjectService.main(errors);
-			RunService.main(errors);
+//			RunService.main(errors);
+			dataService.saveRunData(errors);
 			TreatmentService.main(errors);
 			if (errors.size() > 0) {
 				return badRequest(Json.toJson(errors));
 			} else {
+				logger.info("NGLBI description is loaded!");
 				return ok();
 			}
 		} catch (Exception e) {
-			Logger.error(e.getMessage(), e);
+			logger.error(e.getMessage(), e);
 			return internalServerError(e.getMessage());
 		}				
 	}

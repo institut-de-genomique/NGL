@@ -45,14 +45,13 @@ public class AnalysisWorkflowsHelper {
 	public void updateStateMasterReadSetCodes(Analysis analysis, ContextValidation validation, String nextStepCode)	{
 		for (String rsCode : analysis.masterReadSetCodes) {
 			ReadSet readSet = MongoDBDAO.findByCode(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, rsCode, getReadSetKeys());
-			State nextStep = cloneState(readSet.state, validation.getUser());
+			State nextStep = State.cloneState(readSet.state, validation.getUser());
 			nextStep.code = nextStepCode;
 			readSetWorkflows.setState(validation, readSet, nextStep);
 		}
 	}
 	
-	public void updateBioinformaticValuationMasterReadSetCodes(Analysis analysis, ContextValidation validation, TBoolean valid, String user, Date date)
-	{
+	public void updateBioinformaticValuationMasterReadSetCodes(Analysis analysis, ContextValidation validation, TBoolean valid, String user, Date date)	{
 		for(String rsCode : analysis.masterReadSetCodes){
 			ReadSet readSet = MongoDBDAO.findByCode(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, rsCode, getReadSetKeys());
 			//if different of state IW-VBA
@@ -78,19 +77,6 @@ public class AnalysisWorkflowsHelper {
 		BasicDBObject keys = new BasicDBObject();
 		keys.put("treatments", 0);
 		return keys;
-	}
-	
-	/**
-	 * Clone State without historical
-	 * @param state
-	 * @return
-	 */
-	private static State cloneState(State state, String user) {
-		State nextState = new State();
-		nextState.code = state.code;
-		nextState.date = new Date();
-		nextState.user = user;
-		return nextState;
 	}
 	
 }

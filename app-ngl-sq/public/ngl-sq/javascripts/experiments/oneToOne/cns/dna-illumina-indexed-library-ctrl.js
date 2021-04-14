@@ -185,6 +185,17 @@ angular.module('home').controller('DNAIlluminaIndexedLibraryCtrl',['$scope', '$p
 			extraHeaders:{
 				number:1,
 				dynamic:true,
+			},
+			otherButtons: {
+				active: ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F')),
+				complex:true,
+				template:  ''
+					+$scope.plateUtils.templates.buttonLineMode()
+					+$scope.plateUtils.templates.buttonColumnMode()   
+					+$scope.plateUtils.templates.buttonCopyPosition()
+					+'<div class="btn-group" style="margin-left:5px">'
+					+'<button class="btn btn-default" ng-click="copyVolumeInToOut()" data-toggle="tooltip" title="'+Messages("experiments.button.plate.copyVolumeDnaIlluminaBq")+'"  ng-disabled="!isEditMode()"><i class="fa fa-files-o" aria-hidden="true"></i> '+Messages("experiments.button.plate.copyVolumeDnaIlluminaBq.title")+'</button>'                	                	
+					+'</div>'
 			}
 	};
 
@@ -225,6 +236,19 @@ angular.module('home').controller('DNAIlluminaIndexedLibraryCtrl',['$scope', '$p
 		$scope.atmService.data.setEdit();
 	});
 	
+	$scope.copyVolumeInToOut = function(){
+		var data = $scope.atmService.data.displayResult;
+
+		data.forEach(function(value){
+			if (value.data.inputContainerUsed.volume && value.data.inputContainerUsed.volume.value !== null) { 
+				if (!value.data.inputContainerUsed.experimentProperties) {
+					value.data.inputContainerUsed.experimentProperties = {inputVolume: {}};
+				}
+
+				value.data.inputContainerUsed.experimentProperties.inputVolume.value = value.data.inputContainerUsed.volume.value;
+			}
+		});
+	};
 	
 	$scope.updatePropertyFromUDT = function(value, col){
 		console.log("update from property : "+col.property);
@@ -471,6 +495,7 @@ angular.module('home').controller('DNAIlluminaIndexedLibraryCtrl',['$scope', '$p
 	$scope.indexPlates.push({label:"12BA193-12BA288", value:populateIndexLinePlate("12BA", 193, 288)});
 	$scope.indexPlates.push({label:"12BA289-12BA384", value:populateIndexLinePlate("12BA", 289, 384)});
 	$scope.indexPlates.push({label:"IND1-IND48", value:populateIndex6ColumnPlate(1, 48)});
+	$scope.indexPlates.push({label:"UDI001-UDI096", value:populateIndexLinePlate("UDI", 1, 96)});
 	
 	$scope.indexPlates.push({label:"FLD0001-FLD0096 (EPGV)", value:populateIndexColumnPlate("fld0", 1, 96)});
 	$scope.indexPlates.push({label:"FLD0097-FLD0192 (EPGV)", value:populateIndexColumnPlate("fld0", 97, 192)});

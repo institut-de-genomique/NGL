@@ -3,62 +3,69 @@
 */
 "use strict";
 
-//angular.module('ultimateDataTableServices', ['infinite-scroll']).
+// angular.module('ultimateDataTableServices', ['infinite-scroll']).
 angular.module('ultimateDataTableServices', []).
 factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', '$timeout', '$anchorScroll', '$location',
-		function($http, $filter, $parse, $window, $q, udtI18n, $timeout, $anchorScroll, $location) { //service to manage datatable
+		function($http, $filter, $parse, $window, $q, udtI18n, $timeout, $anchorScroll, $location) { // service
+																										// to
+																										// manage
+																										// datatable
     var constructor = function(iConfig) {
         var datatable = {
             configDefault: {
                 name: "datatable",
                 extraHeaders: {
                     number: 0, // Number of extra headers
-                    list: {}, //if dynamic=false
-                    dynamic: true //if dynamic=true, the headers will be auto generated
-                }, //ex: extraHeaders:{number:2,dynamic:false,list:{0:[{"label":"test","colspan":"1"},{"label":"a","colspan":"1"}],1:[{"label":"test2","colspan":"5"}]}}
+                    list: {}, // if dynamic=false
+                    dynamic: true // if dynamic=true, the headers will be auto
+									// generated
+                }, // ex:
+					// extraHeaders:{number:2,dynamic:false,list:{0:[{"label":"test","colspan":"1"},{"label":"a","colspan":"1"}],1:[{"label":"test2","colspan":"5"}]}}
                 columns: [],
-                /*ex :
-                       {
-                       "header":"Code Container", //the title //used by default Messages
-                       "headerTpl":"", //html template to custom render
-                       "property":"code", //the property to bind
-                       "filter":"", angular filter to filter the value only used in read mode
-                       "render" : function() //render the column used to add style around value
-                       "editDirectives":""//Add directives to the edit element
-                       "id":'', //the column id
-                       "edit":false, //can be edited or not
-                       "convertValue":{
-                       active:false, //True if the value have to be converted when displayed to the user
-                       displayMeasureValue:"",//The unit display to the user, mandatory if active=true
-                       saveMeasureValue:"" //The unit in database,  mandatory if active=true
-                     },
-                     "hide":true, //can be hidden or not
-                     "order":true, //can be ordered or not
-                     "type":"text"/"number"/"month"/"week"/"time"/"datetime"/"range"/"color"/"mail"/"tel"/"date", //the column type
-                     "choiceInList":false, //when the column is in edit mode, the edition is a list of choices or not
-                     "listStyle":"select"/"radio", //if choiceInList=true, listStyle="select" is a select input, listStyle="radio" is a radio input
-                     "possibleValues":null, //The list of possible choices
-                     "format" : null, //number format or date format or datetime format
-                     "extraHeaders":{"0":"Inputs"}, //the extraHeaders list
-                     "tdClass" : function with data and property as parameter than return css class or just the css class",
-                     "thClass" : function with data and property as parameter than return css class or just the css class",
-                     "position": position of the column,
-                     "group": false //if column can be used to group data
-                     "groupMethod": sum, average, countDistinct, collect
-                     "defaultValues":"" //If the value of the column is undefined or "" when the user edit, this value show up
-                     "url"://to lazy data
-                     "mergeCells":false //to enable merge cell on this column
-                     "required":true/false //to add * on column header if required
-                     "
-                   }*/
-                columnsUrl: undefined, //Load columns config
+                /*
+				 * ex : { "header":"Code Container", //the title //used by
+				 * default Messages "headerTpl":"", //html template to custom
+				 * render "property":"code", //the property to bind or function
+				 * used to extract the value "filter":"", angular filter to
+				 * filter the value only used in read mode "render" : function()
+				 * //render the column used to add style around value
+				 * "editDirectives":""//Add directives to the edit element
+				 * "id":'', //the column id "edit":false, //can be edited or not
+				 * "convertValue":{ active:false, //True if the value have to be
+				 * converted when displayed to the user
+				 * displayMeasureValue:"",//The unit display to the user,
+				 * mandatory if active=true saveMeasureValue:"" //The unit in
+				 * database, mandatory if active=true }, "hide":true, //can be
+				 * hidden or not "order":true, //can be ordered or not
+				 * "type":"text"/"number"/"month"/"week"/"time"/"datetime"/"range"/"color"/"mail"/"tel"/"date",
+				 * //the column type "choiceInList":false, //when the column is
+				 * in edit mode, the edition is a list of choices or not
+				 * "listStyle":"select"/"radio", //if choiceInList=true,
+				 * listStyle="select" is a select input, listStyle="radio" is a
+				 * radio input "possibleValues":null, //The list of possible
+				 * choices "format" : null, //number format or date format or
+				 * datetime format "extraHeaders":{"0":"Inputs"}, //the
+				 * extraHeaders list "tdClass" : function with data and property
+				 * as parameter than return css class or just the css class",
+				 * "thClass" : function with data and property as parameter than
+				 * return css class or just the css class", "position": position
+				 * of the column, "group": false //if column can be used to
+				 * group data "groupMethod": sum, average, countDistinct,
+				 * collect "defaultValues":"" //If the value of the column is
+				 * undefined or "" when the user edit, this value show up
+				 * "url"://to lazy data "mergeCells":false //to enable merge
+				 * cell on this column "required":true/false //to add * on
+				 * column header if required " }
+				 */
+                columnsUrl: undefined, // Load columns config
                 lines: {
-                    trClass: undefined // function with data than return css class or just the css class
+                    trClass: undefined // function with data than return css
+										// class or just the css class
                 },
                 search: {
                     active: true,
                     mode: 'remote',
-                    url: undefined
+                    url: undefined,
                 },
                 filter: {
                     active: false,
@@ -80,11 +87,14 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                 order: {
                     active: true,
                     showButton: true,
-                    mode: 'remote', //or local
+                    mode: 'remote', // or local
                     by: undefined,
                     reverse: false,
-                    callback: undefined, //used to have a callback after order all element. the datatable is pass to callback method and number of error
-                    columns: {} //key is the column index
+                    callback: undefined, // used to have a callback after
+											// order all element. the datatable
+											// is pass to callback method and
+											// number of error
+                    columns: {} // key is the column index
                 },
                 add: {
                     active: false,
@@ -104,49 +114,69 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                 hide: {
                     active: false,
                     showButton: true,
-                    byDefault:undefined, //Array with column property
-                    columns: {} //columnIndex : true / false
+                    byDefault:undefined, // Array with column property
+                    columns: {} // columnIndex : true / false
                 },
                 edit: {
                     active: false,
-                    withoutSelect: false, //edit all line without selected it
+                    withoutSelect: false, // edit all line without selected it
                     showButton: true,
-                    showLineButton: false, // Show the edit button left of each line
+                    showLineButton: false, // Show the edit button left of each
+											// line
                     columnMode: false,
-                    byDefault: false, //put in edit mode when the datatable is build
+                    byDefault: false, // put in edit mode when the datatable
+										// is build
                     start: false,
                     all: false,
-                    columns: {}, //columnIndex : {edit : true/false, value:undefined}
-                    lineMode: undefined //function used to define if line is editable.
+                    columns: {}, // columnIndex : {edit : true/false,
+									// value:undefined}
+                    lineMode: undefined // function used to define if line is
+										// editable.
                 },
                 save: {
                     active: false,
-                    withoutEdit: false, //usable only for active/inactive save button by default !!!
-                    keepEdit: false, //keep in edit mode after safe
+                    withoutEdit: false, // usable only for active/inactive save
+										// button by default !!!
+                    keepEdit: false, // keep in edit mode after safe
                     showButton: true,
-                    changeClass: true, //change class to success or error
-                    mode: 'remote', //or local
-                    url: undefined,
-                    batch: false, //for batch mode one url with all data
-                    method: 'post',
-                    value: undefined, //used to transform the value send to the server
-                    callback: undefined, //used to have a callback after save all element. the datatable is pass to callback method and number of error
-                    start: false, //if save started
-                    number: 0, //number of element in progress
+                    changeClass: true, // change class to success or error
+                    mode: 'remote', // or local
+                    url: undefined, // mode remote only url or function that
+									// takes the value
+                    batch: false, // for batch mode one url with all data.
+									// //mode remote only
+                    method: 'post', // mode remote only or funtion with value as
+									// parameter in batch mode an array
+                    value: undefined, // used to transform the value send to
+										// the server //mode remote only
+                    callback: undefined, // used to have a callback after
+											// save all element. the datatable
+											// is pass to callback method and
+											// number of error
+                    beforeSave: undefined, // function that will be return a
+											// promise that will be executed
+											// before save (remote or local).
+											// useful to chain two url.
+                    start: false, // if save started
+                    number: 0, // number of element in progress
                     error: 0,
                     newData: [],
                     enableValidation:false
                 },
                 remove: {
                     active: false,
-                    withEdit: false, //to authorize to remove a line in edition mode
+                    withEdit: false, // to authorize to remove a line in
+										// edition mode
                     showButton: true,
-                    mode: 'remote', //or local
-                    url: undefined, //function with object in parameter !!!
-                    callback: undefined, //used to have a callback after remove all element. the datatable is pass to callback method and number of error
+                    mode: 'remote', // or local
+                    url: undefined, // function with object in parameter !!!
+                    callback: undefined, // used to have a callback after
+											// remove all element. the datatable
+											// is pass to callback method and
+											// number of error
                     start: false,
                     counter: 0,
-                    number: 0, //number of element in progress
+                    number: 0, // number of element in progress
                     error: 0,
                     ids: {
                         errors: [],
@@ -157,13 +187,19 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                     active: true,
                     showButton: true,
                     isSelectAll: false,
-                    callback: undefined // DEPRECATED in favor of mouseevents.clickCallback.
+                    callback: undefined // DEPRECATED in favor of
+										// mouseevents.clickCallback.
                 },
                 mouseevents: {
                     active: false,
-                    overCallback: undefined,  // used to have a callback when the user passes the mouse over a row.
-                    leaveCallback: undefined,  // used to have a callback when the mouse of the user leaves a row.
-                    clickCallback: undefined  // used to have a callback when the user clicks on a row.
+                    overCallback: undefined,  // used to have a callback when
+												// the user passes the mouse
+												// over a row.
+                    leaveCallback: undefined,  // used to have a callback when
+												// the mouse of the user leaves
+												// a row.
+                    clickCallback: undefined  // used to have a callback when
+												// the user clicks on a row.
                 },
                 cancel: {
                     active: true,
@@ -177,7 +213,8 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                 },
                 otherButtons: {
                     active: false,
-					complex : false, //used to inject several buttons in toolbars.
+					complex : false, // used to inject several buttons in
+										// toolbars.
                     template: undefined
                 },
                 messages: {
@@ -200,14 +237,18 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                     }
                 },
                 group: {
-                    active: false, //group add group=true in each line of type group
+                    active: false, // group add group=true in each line of type
+									// group
                     callback: undefined,
                     by: undefined,
                     showButton: true,
-                    after: true, //to position group line before or after lines
-                    showOnlyGroups: false, //to display only group line in datatable
+                    after: true, // to position group line before or after
+									// lines
+                    showOnlyGroups: false, // to display only group line in
+											// datatable
                     start: false,
-                    enableLineSelection: false, //used to authorized selection on group line
+                    enableLineSelection: false, // used to authorized selection
+												// on group line
                     columns: {}
                 },
                 mergeCells: {
@@ -225,8 +266,10 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                 	currentLimitTo : undefined
                 },                
                 callbackEndDisplayResult : function(){},
-                compact: true, //mode compact pour le nom des bouttons
-                objectsMustBeAddInGetFinalValue:{} //object used in $parse to apply function on extract value.
+                compact: true, // mode compact pour le nom des bouttons
+                objectsMustBeAddInGetFinalValue:{} // object used in $parse to
+													// apply function on extract
+													// value.
 
             },
             config: undefined,
@@ -236,25 +279,31 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
             displayResult: undefined,
             totalNumberRecords: 0,
             computeDisplayResultTimeOut: undefined,
-            urlCache: {}, //used to cache data load from column with url attribut
-            lastSearchParams: undefined, //used with pagination when length or page change
-            inc: 0, //used for unique column ids
+            urlCache: {}, // used to cache data load from column with url
+							// attribut
+            lastSearchParams: undefined, // used with pagination when length
+											// or page change
+            inc: 0, // used for unique column ids
             configColumnDefault: {
-                edit: false, //can be edited or not
-                hide: true, //can be hidden or not
-                order: true, //can be ordered or not
-                type: "text", //the column type
-                choiceInList: false, //when the column is in edit mode, the edition is a list of choices or not
+                edit: false, // can be edited or not
+                hide: true, // can be hidden or not
+                order: true, // can be ordered or not
+                type: "text", // the column type
+                choiceInList: false, // when the column is in edit mode, the
+										// edition is a list of choices or not
                 extraHeaders: {},
                 convertValue: {
                     active: false
                 }
             },
-            messages: udtI18n(navigator.languages || navigator.language || navigator.userLanguage), //i18n intern service instance
-            //errors functions
+            messages: udtI18n(navigator.languages || navigator.language || navigator.userLanguage), // i18n
+																									// intern
+																									// service
+																									// instance
+            // errors functions
             /**
-             * Reset the displayLimit
-             */
+			 * Reset the displayLimit
+			 */
             resetScrollCurrentLimitTo : function(maxLimitTo){
             	if(this.config.infiniteScroll.active)
             		this.config.infiniteScroll.currentLimitTo = this.config.infiniteScroll.defaultLimitTo;
@@ -279,34 +328,35 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
             	return (this.displayResult && this.config.infiniteScroll.currentLimitTo > this.displayResult.length);
             },
             /**
-             * Reset all the errors for a line
-             */
+			 * Reset all the errors for a line
+			 */
             resetErrors: function(index) {
                 this.displayResult[index].line.errors = {};
             },
             /**
-             * Add error data in the line index for the field key
-             */
+			 * Add error data in the line index for the field key
+			 */
             addErrorsForKey: function(index, data, key) {
                 if (this.displayResult[index].line.errors === undefined) {
                     this.displayResult[index].line.errors = {};
                 }
                 this.displayResult[index].line.errors[key] = "";
-                for (var i = 0; i < data[key].length; i++) {
+                for (var i = 0; angular.isArray(data[key]) && i < data[key].length; i++) {
                     this.displayResult[index].line.errors[key] += data[key][i] + " ";
                 }
             },
             /**
-             * Add errors data in the line index in the key of the data key error
-             */
+			 * Add errors data in the line index in the key of the data key
+			 * error
+			 */
             addErrors: function(index, data) {
                 for (var key in data) {
                     this.addErrorsForKey(index, data, key);
                 }
             },
             /**
-             * External search reinit pageNumber to 0
-             */
+			 * External search reinit pageNumber to 0
+			 */
             search: function(params) {
                 this.config.edit = angular.copy(this.configMaster.edit);
                 this.config.remove = angular.copy(this.configMaster.remove);
@@ -316,11 +366,12 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                 this._search(angular.copy(params));
             },
             /**
-             * local search
-             */
+			 * local search
+			 */
             searchLocal: function(searchTerms) {
                 if (this.config.filter.active === true) {
-                    //Set the properties "" or null to undefined because we don't want to filter this
+                    // Set the properties "" or null to undefined because we
+					// don't want to filter this
                     this.setSpinner(true);
                     for (var p in searchTerms) {
                         if (searchTerms[p] != undefined && (searchTerms[p] === undefined || searchTerms[p] === null || searchTerms[p] === "")) {
@@ -336,7 +387,7 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                     };
 
                     this.totalNumberRecords = _allResult.length;
-                    //this.sortAllResult();
+                    // this.sortAllResult();
                     this.computePaginationList();
                     this.computeDisplayResult();
                     var that = this;
@@ -348,10 +399,10 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
             _getAllResult: function() {
                 return this.allResult;
             },
-            //search functions
+            // search functions
             /**
-             * Internal Search function to populate the datatable
-             */
+			 * Internal Search function to populate the datatable
+			 */
             _search: function(params) {
                 if (this.config.search.active && this.isRemoteMode(this.config.search.mode)) {
                     this.lastSearchParams = params;
@@ -372,23 +423,24 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                                 that.setSpinner(false);
                             });
                         });
+
                     } else {
                         throw 'no url define for search ! ';
                     }
                 } else {
-                    //console.log("search is not active !!")
+                    // console.log("search is not active !!")
                 }
             },
             /**
-             * Search with the last parameters
-             */
+			 * Search with the last parameters
+			 */
             searchWithLastParams: function() {
                 this._search(this.lastSearchParams);
             },
 
             /**
-             * Set all data used by search method or directly when local data
-             */
+			 * Set all data used by search method or directly when local data
+			 */
             setData: function(data, recordsNumber) {
             	this.config.edit = angular.copy(this.configMaster.edit);
                 this.config.remove = angular.copy(this.configMaster.remove);
@@ -416,14 +468,20 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                 };               
             },
             /**
-             * Return all the data
-             */
+			 * Return if data
+			 */
+            isData: function() {
+                return (this.allResult !== null && this.allResult !== undefined && this.allResult.length > 0) ;
+            },
+            /**
+			 * Return all the data
+			 */
             getData: function() {
                 return this.allResult;
             },
             /**
-             * Add data
-             */
+			 * Add data
+			 */
             addData: function(data) {
                 if (!angular.isUndefined(data) && (angular.isArray(data) && data.length > 0)) {
                     var configPagination = this.config.pagination;
@@ -445,11 +503,11 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                 }
             },
             /**
-             * Add new line in edit mode
-             */
+			 * Add new line in edit mode
+			 */
             addBlankLine: function() {
                 if (this.config.add.active === true) {
-                    //call inti method for the new data
+                    // call inti method for the new data
                     var newData = this.config.add.init(this);
                     var line = {
                         "edit": true,
@@ -475,8 +533,8 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                 }
             },
             /**
-             * compute the group
-             */
+			 * compute the group
+			 */
             computeGroup: function() {
                 if (this.config.group.active && this.config.group.by) {
                 	var propertyGroupGetter = this.config.group.by.property;
@@ -520,7 +578,7 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                         var groupMethodColumns = this.getColumnsConfig().filter(function(column) {
                             return (column.groupMethod !== undefined && column.groupMethod !== null && column.property+that.getFilter(column) != propertyGroupGetterWithoutFormat);
                         });
-                        //compute for each number column the sum
+                        // compute for each number column the sum
                         groupMethodColumns.forEach(function(column) {
                             if(column.id != that.config.group.by.id){                        	
 	                        	var propertyGetter = column.property;
@@ -530,7 +588,7 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
 	                            var propertyGetterWithFormat = propertyGetterWithoutFormat + that.getFormatter(column);
 	                            var columnGetterWithFomat = $parse(propertyGetterWithFormat);
 	                            
-	                            //var columnGetter = $parse(propertyGetter);
+	                            // var columnGetter = $parse(propertyGetter);
 	                            var columnSetter = $parse("group." + column.id);
 	
 	                            var context = {"col":column};
@@ -539,9 +597,12 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
 	                            
 	                            if ('sum' === column.groupMethod || 'average' === column.groupMethod) {
 	                                var result = groupData.reduce(function(value, element) {
-	                                    element.col = column; //add in experimental feature
-	                                	value += columnGetterWithoutFomat(element, context);
-										element.col = undefined;
+	                                    element.col = column; // add in
+																// experimental
+																// feature
+	                                	var num = columnGetterWithoutFomat(element, context);
+	                                	value += (num !==  undefined)?num:0;
+	                                	element.col = undefined;
 										return value;
 	                                }, 0);
 	
@@ -579,9 +640,13 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
 	                            } else if (column.groupMethod.startsWith('collect')) {
 	                            	var params = column.groupMethod.split(":");
 	                            	var unique = (params.length === 2 && params[1] === 'true')?true:false;
-	                            	//collect all value but if unique this is apply on display value (after format) not on real value because for user a unique is a final result											  
+	                            	// collect all value but if unique this is
+									// apply on display value (after format) not
+									// on real value because for user a unique
+									// is a final result
 	                                var result = $filter('udtCollect')(groupData, propertyGetterWithoutFormat, unique, "this"+that.getFormatter(column), context);
-	                                //to optimize if collect as only one value so put directly the alone result
+	                                // to optimize if collect as only one value
+									// so put directly the alone result
 	                                if (angular.isArray(result) && result.length === 1) {
 	                                    result = result[0];
 	                                }
@@ -620,9 +685,11 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
             },
 
             /**
-             * set the order column name
-             * @param orderColumnName : column name
-             */
+			 * set the order column name
+			 * 
+			 * @param orderColumnName :
+			 *            column name
+			 */
             setGroupColumn: function(column) {
                 if (this.config.group.active) {
                     var columnId;
@@ -646,7 +713,7 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                                 this.config.group.columns[this.config.columns[i].id] = false;
                             }
                         }
-                    } else { //degroupe
+                    } else { // degroupe
                         this.config.group.columns[columnId] = !this.config.group.columns[columnId];
                         if (!this.config.group.columns[columnId] || this.config.group.columns["all"]) {
                             this.config.group.by = undefined;
@@ -656,15 +723,17 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                     }
 
                     if (this.config.edit.active && this.config.edit.start) {
-                        //TODO add a warning popup
+                        // TODO add a warning popup
                         console.log("edit is active, you lost all modification !!");
-                        this.config.edit = angular.copy(this.configMaster.edit); //reinit edit
+                        this.config.edit = angular.copy(this.configMaster.edit); // reinit
+																					// edit
                     }
 
                     this.computeGroup();
-                    this.sortAllResult(); //sort all the result                    
-                    this.computePaginationList(); //redefined pagination
-                    this.computeDisplayResult(); //redefined the result must be displayed
+                    this.sortAllResult(); // sort all the result
+                    this.computePaginationList(); // redefined pagination
+                    this.computeDisplayResult(); // redefined the result must
+													// be displayed
                     var that = this;
                     this.computeDisplayResultTimeOut.then(function() {
                         if (angular.isFunction(that.config.group.callback)) {
@@ -672,13 +741,14 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                         }
                     });
                 } else {
-                    //console.log("order is not active !!!");
+                    // console.log("order is not active !!!");
                 }
             },
             updateShowOnlyGroups: function() {
-                this.sortAllResult(); //sort all the result
-                this.computePaginationList(); //redefined pagination
-                this.computeDisplayResult(); //redefined the result must be displayed
+                this.sortAllResult(); // sort all the result
+                this.computePaginationList(); // redefined pagination
+                this.computeDisplayResult(); // redefined the result must be
+												// displayed
             },
             getGroupColumnClass: function(columnId) {
                 if (this.config.group.active) {
@@ -688,7 +758,7 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                         return 'fa fa-outdent';
                     }
                 } else {
-                    //console.log("order is not active !!!");
+                    // console.log("order is not active !!!");
                 }
             },
             addGroup: function(displayResultTmp) {
@@ -751,12 +821,13 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                 return displayResult;
             },
             /**
-             * compute for each <td> the row span if user whant to merge cell
-             */
+			 * compute for each
+			 * <td> the row span if user whant to merge cell
+			 */
             computeRowSpans: function() {
                 if (this.config.mergeCells.active === true) {
                     this.config.mergeCells.rowspans = undefined;
-                    //init rowspans values
+                    // init rowspans values
                     var rowspans = undefined;
                     rowspans = new Array(this.displayResult.length);
                     for (var i = 0; i < this.displayResult.length; i++) {
@@ -786,7 +857,7 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                                 if (currentColValue === previousColValue) {
                                     rowspans[i][j] = 0;
                                     nbRowEquals[j]++;
-                                    //last element
+                                    // last element
                                     if (i === (currentDisplayResult.length - 1)) {
                                         rowspans[i - (nbRowEquals[j])][j] = nbRowEquals[j] + 1;
                                     }
@@ -809,9 +880,9 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
             },
 
             /**
-             * Selected only the records will be displayed.
-             * Based on pagination configuration
-             */
+			 * Selected only the records will be displayed. Based on pagination
+			 * configuration
+			 */
             computeDisplayResult: function() {
             	var time = 100;
                 if (this.computeDisplayResultTimeOut !== undefined) {
@@ -822,7 +893,7 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
 
                 var that = this;
                 this.computeDisplayResultTimeOut = $timeout(function() {
-                    //to manage local pagination
+                    // to manage local pagination
                     var configPagination = that.config.pagination;
 
                     var _displayResult = [];
@@ -847,7 +918,7 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                         if(configPagination.active && !that.isRemoteMode(configPagination.mode)){
 							_displayResult = $.extend(true,[],that._getAllResult().slice((configPagination.pageNumber*configPagination.numberRecordsPerPage),
 								(configPagination.pageNumber*configPagination.numberRecordsPerPage+configPagination.numberRecordsPerPage)));
-						}else{ //to manage all records or server pagination
+						}else{ // to manage all records or server pagination
 							_displayResult = $.extend(true,[],that._getAllResult());
 						}
                         var displayResultTmp = [];
@@ -867,7 +938,7 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                             });
                         }, displayResultTmp);
 
-                        //group function
+                        // group function
                         that.config.mergeCells.rowspans = undefined;
                         if (that.isGroupActive()) {
                             that.displayResult = that.addGroup(displayResultTmp);
@@ -888,8 +959,8 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                 }, time);
             },
             /**
-             * Load all data for url column type
-             */
+			 * Load all data for url column type
+			 */
             loadUrlColumnProperty: function() {
 
                 var urlColumns = this.getColumnsConfig().filter(function(column) {
@@ -920,10 +991,10 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
 
             },
 
-            //pagination functions
+            // pagination functions
             /**
-             * compute the pagination item list
-             */
+			 * compute the pagination item list
+			 */
             computePaginationList: function() {
                 var configPagination = this.config.pagination;
                 if (configPagination.active) {
@@ -994,7 +1065,7 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                         });
                     }
                 } else {
-                    //console.log("pagination is not active !!!");
+                    // console.log("pagination is not active !!!");
                 }
             },
 
@@ -1002,8 +1073,8 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                 this.config.spinner.start = value;
             },
             /**
-             * Set the number of records by page
-             */
+			 * Set the number of records by page
+			 */
             setNumberRecordsPerPage: function(numberRecordsPerPageElement) {
                 if (this.config.pagination.active) {
                     if (angular.isObject(numberRecordsPerPageElement)) {
@@ -1015,11 +1086,12 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                             }
                         }
                         if (this.config.edit.active && this.config.edit.start) {
-                            //TODO add a warning popup
+                            // TODO add a warning popup
                             console.log("edit is active, you lost all modification !!");
-                            this.config.edit = angular.copy(this.configMaster.edit); //reinit edit
+                            this.config.edit = angular.copy(this.configMaster.edit); // reinit
+																						// edit
                         }
-                        //reinit to first page
+                        // reinit to first page
                         this.config.pagination.pageNumber = 0;
                         if (this.isRemoteMode(this.config.pagination.mode)) {
                             this.searchWithLastParams();
@@ -1029,19 +1101,20 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                         }
                     }
                 } else {
-                    //console.log("pagination is not active !!!");
+                    // console.log("pagination is not active !!!");
                 }
             },
             /**
-             * Change the page result
-             */
+			 * Change the page result
+			 */
             setPageNumber: function(page) {
                 if (this.config.pagination.active) {
                     if (angular.isObject(page) && page.clazz === '') {
                         if (this.config.edit.active && this.config.edit.start) {
-                            //TODO add a warning popup
+                            // TODO add a warning popup
                             console.log("edit is active, you lost all modification !!");
-                            this.config.edit = angular.copy(this.configMaster.edit); //reinit edit
+                            this.config.edit = angular.copy(this.configMaster.edit); // reinit
+																						// edit
                         }
 
                         this.config.pagination.pageNumber = page.number;
@@ -1053,14 +1126,14 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                         }
                     }
                 } else {
-                    //console.log("pagination is not active !!!");
+                    // console.log("pagination is not active !!!");
                 }
             },
 
-            //order functions
+            // order functions
             /**
-             * Sort all result
-             */
+			 * Sort all result
+			 */
             sortAllResult: function() {
                 if (this.config.order.active && !this.isRemoteMode(this.config.order.mode)) {
                     var orderBy = [];
@@ -1070,12 +1143,13 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                             var orderGroupSense = (this.config.order.groupReverse) ? '-' : '+';
                             orderBy.push(orderGroupSense + this.config.group.by.property);
                             if (angular.isDefined(this.config.order.by)) {
-                                var orderProperty = this.config.order.by.property;
-                                orderProperty += (this.config.order.by.filter) ? '|' + this.config.order.by.filter : '';
-                                var orderSense = (this.config.order.reverse) ? '-' : '+';
-                                orderBy.push(orderSense + orderProperty);
+                                    var orderProperty = this.config.order.by.property;
+                                    orderProperty += (this.config.order.by.filter) ? '|' + this.config.order.by.filter : '';
+                                    var orderSense = (this.config.order.reverse) ? '-' : '+';
+                                    orderBy.push(orderSense + orderProperty);
                             }
                             this.allResult = $filter('orderBy')(this.allResult, orderBy);
+                            
                         } else {
                             if (angular.isDefined(this.config.order.by)) {
                                 var orderProperty = "group." + this.config.order.by.id;
@@ -1085,21 +1159,32 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                             this.allGroupResult = $filter('orderBy')(this.allGroupResult, orderBy);
                         }
                     } else if (angular.isDefined(this.config.order.by)) {
-                    	
-                        if (angular.isDefined(this.config.order.by)) {
-                            var orderProperty = this.config.order.by.property;
-                            orderProperty += (this.config.order.by.filter) ? '|' + this.config.order.by.filter : '';
-                            var orderSense = (this.config.order.reverse) ? '-' : '+';
-                            orderBy.push(orderSense + orderProperty);
+                        if (angular.isDefined(this.config.order.by) &&  !Array.isArray(this.config.order.by)) {
+                        	//console.log("this.config.order.by  OLD" , this.config.order.by);
+                        	var orderProperty = this.config.order.by.property;
+                        	orderProperty += (this.config.order.by.filter) ? '|' + this.config.order.by.filter : '';
+                        	var orderSense = (this.config.order.reverse) ? '-' : '+';
+                        	orderBy.push(orderSense + orderProperty);
+                        } else if (angular.isDefined(this.config.order.by) && Array.isArray(this.config.order.by)) {  // Angular ou Array ??
+                        	// J.Charpentier NGL-2755 8 JANVIER 2020 (pouvoir trier un datable sur plusieurs colonnes)
+                        	//console.log("this.config.order.by (Array)" , this.config.order.by);
+                        	for (var i = 0; i < this.config.order.by.length; i++) {
+                        		var orderProperty = this.config.order.by[i].property;
+                            	orderProperty += (this.config.order.by[i].filter) ? '|' + this.config.order.by[i].filter : '';
+                            	var orderSense = (this.config.order.reverse) ? '-' : '+';
+                            	orderBy.push(orderSense + orderProperty);
+                        	}
                         }
                         this.allResult = $filter('orderBy')(this.allResult, orderBy);
                     }
                 }
             },
             /**
-             * set the order column name
-             * @param orderColumnName : column name
-             */
+			 * set the order column name
+			 * 
+			 * @param orderColumnName :
+			 *            column name
+			 */
             setOrderColumn: function(column) {
                 if (this.config.order.active) {
                     var columnId = column.id;
@@ -1122,15 +1207,17 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                             }
                         }
                         if (this.config.edit.active && this.config.edit.start) {
-                            //TODO add a warning popup
+                            // TODO add a warning popup
                             console.log("edit is active, you lost all modification !!");
-                            this.config.edit = angular.copy(this.configMaster.edit); //reinit edit
+                            this.config.edit = angular.copy(this.configMaster.edit); // reinit
+																						// edit
                         }
                     }
 
                     if (!this.isRemoteMode(this.config.order.mode)) {
-                        this.sortAllResult(); //sort all the result
-                        this.computeDisplayResult(); //redefined the result must be displayed
+                        this.sortAllResult(); // sort all the result
+                        this.computeDisplayResult(); // redefined the result
+														// must be displayed
                     } else if (this.config.order.active) {
                         this.searchWithLastParams();
                     }
@@ -1141,7 +1228,7 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                         }
                     });
                 } else {
-                    //console.log("order is not active !!!");
+                    // console.log("order is not active !!!");
                 }
             },
             getOrderColumnClass: function(columnId) {
@@ -1163,20 +1250,19 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                     }
 
                 } else {
-                    //console.log("order is not active !!!");
+                    // console.log("order is not active !!!");
                 }
             },
             /**
-             * indicate if we can order the table
-             */
+			 * indicate if we can order the table
+			 */
             canOrder: function() {
                 return (this.config.edit.active ? !this.config.edit.start : (this.config.order.active && !this.isEmpty()));
             },
-            //show
+            // show
             /**
-             * show one element
-             * work only with tab on the left
-             */
+			 * show one element work only with tab on the left
+			 */
             show: function() {
                 if (this.config.show.active && angular.isFunction(this.config.show.add)) {
                     angular.forEach(this.displayResult, function(value, key) {
@@ -1186,14 +1272,16 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                     }, this);
 
                 } else {
-                    //console.log("show is not active !");
+                    // console.log("show is not active !");
                 }
             },
-            //Hide a column
+            // Hide a column
             /**
-             * set the hide column
-             * @param hideColumnName : column name
-             */
+			 * set the hide column
+			 * 
+			 * @param hideColumnName :
+			 *            column name
+			 */
             setHideColumn: function(column) {
                 if (this.config.hide.active) {
                     var columnId = column.id;
@@ -1204,15 +1292,17 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                     }
                     this.newExtraHeaderConfig();
                 } else {
-                    //console.log("hide is not active !");
+                    // console.log("hide is not active !");
                 }
 
             },
 
             /**
-             * Test if a column must be grouped
-             * @param columnId : column id
-             */
+			 * Test if a column must be grouped
+			 * 
+			 * @param columnId :
+			 *            column id
+			 */
             isGroup: function(columnId) {
                 if (this.config.group.active && this.config.group.columns[columnId]) {
                     return this.config.group.columns[columnId];
@@ -1222,23 +1312,27 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
             },
 
             /**
-             * Test if a column must be hide
-             * @param columnId : column id
-             */
+			 * Test if a column must be hide
+			 * 
+			 * @param columnId :
+			 *            column id
+			 */
             isHide: function(columnId) {
                 if (this.config.hide.active && this.config.hide.columns[columnId]) {
                     return this.config.hide.columns[columnId];
                 } else {
-                    //console.log("hide is not active !");
+                    // console.log("hide is not active !");
                     return false;
                 }
             },
-            //edit
+            // edit
 
             /**
-             * set Edit all column or just one
-             * @param editColumnName : column name
-             */
+			 * set Edit all column or just one
+			 * 
+			 * @param editColumnName :
+			 *            column name
+			 */
             setEdit: function(column) {
                 if (this.config.edit.active) {
                     var that = this;
@@ -1275,14 +1369,17 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                         }
                     });
                 } else {
-                    //console.log("edit is not active !");
+                    // console.log("edit is not active !");
                 }
             },
             /**
-             * Test if a column must be in edition mode
-             * @param editColumnName : column name
-             * @param line : the line in the table
-             */
+			 * Test if a column must be in edition mode
+			 * 
+			 * @param editColumnName :
+			 *            column name
+			 * @param line :
+			 *            the line in the table
+			 */
             isEdit: function(columnId, line) {
                 var isEdit = false;
                 if (this.config.edit.active) {
@@ -1308,15 +1405,17 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                 return isEdit;
             },
             /**
-             * indicate if at least one line is selected
-             */
+			 * indicate if at least one line is selected
+			 */
             canEdit: function() {
                 return (this.config.edit.withoutSelect ? true : this.isSelect());
             },
             /**
-             * Update all line with the same value
-             * @param updateColumnName : column name
-             */
+			 * Update all line with the same value
+			 * 
+			 * @param updateColumnName :
+			 *            column name
+			 */
             updateColumn: function(columnPropertyName, columnId) {
                 if (this.config.edit.active && this.config.edit.columns[columnId].value !== undefined) {
                     var getter = $parse(columnPropertyName);
@@ -1326,13 +1425,13 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                         }
                     }
                 } else {
-                    //console.log("edit is not active !");
+                    // console.log("edit is not active !");
                 }
             },
-            //save
+            // save
             /**
-             * Save the selected table line
-             */
+			 * Save the selected table line
+			 */
             save: function() {
                 if (this.config.save.active && this.displayResult) {
                 	if(this.formController.$invalid){
@@ -1349,75 +1448,114 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                          var valueFunction = this.getValueFunction(this.config.save.value);
                          for (var i = 0; i < this.displayResult.length; i++) {
                              if (this.displayResult[i].line.edit || this.config.save.withoutEdit) {
-                                 //remove datatable properties to avoid this data are retrieve in the json
+                                 // remove datatable properties to avoid this
+									// data are retrieve in the json
+                            	 this.resetErrors(i);
                                  this.config.save.number++;
-                                 this.displayResult[i].line.trClass = undefined;
-                                 this.displayResult[i].line.selected = undefined;
-                                 this.resetErrors(i);
-                                 if (this.isRemoteMode(this.config.save.mode) && !this.config.save.batch) {
-                                     //add the url in table to used $q
-                                     data.push(this.getSaveRemoteRequest(this.displayResult[i].data, i));
-                                 } else if (this.isRemoteMode(this.config.save.mode) && this.config.save.batch) {
-                                     //add the data in table to send in once all the result
-                                     data.push({
-                                         index: i,
-                                         data: valueFunction(this.displayResult[i].data)
-                                     });
-                                 } else {
-                                     this.saveLocal(valueFunction(this.displayResult[i].data), i);
-                                 }
+                                 var dr = this.displayResult[i];
+                                 dr.line.trClass = undefined;
+                                 dr.line.selected = undefined;
+                                 data.push({
+                                     index: i,
+                                     data: dr.data
+                                 });
                              }
                          }
-                         if (!this.isRemoteMode(this.config.save.mode) || data.length === 0) {
-                             this.saveFinish();
+                         if(data.length === 0){
+                        	 return $q.when(this.saveFinish());
+                         }else if (!this.isRemoteMode(this.config.save.mode)) {
+                             return this.saveAllLocal(data);
                          } else if (this.isRemoteMode(this.config.save.mode) && !this.config.save.batch) {
-                             this.saveRemote(data);
+                        	 return this.saveAllRemote(data);
                          } else if (this.isRemoteMode(this.config.save.mode) && this.config.save.batch) {
-                             this.saveBatchRemote(data);
+                        	 return this.saveAllBatchRemote(data);
                          }
             		}                	
                 } else {
-                    //console.log("save is not active !");
+                    // console.log("save is not active !");
                 }
             },
-
-            saveBatchRemote: function(values) {
-                var nbElementByBatch = Math.ceil(values.length / 6); //6 because 6 request max in parrallel with firefox and chrome
+            
+            getBeforeSavePromise : function(){
+            	var beforeSavePromise = function(context){
+					if(context.datatable.config.save.beforeSave === undefined || context.datatable.config.save.beforeSave === null){
+						return context.value;
+					}else{
+						return context.datatable.config.save.beforeSave(context.value);
+					}
+				 };
+				 return beforeSavePromise;
+            },
+            
+            saveAllLocal: function(values) {
+            	// do not transform the value
+           	 	var queries = values.map(function(value){
+           	 		// to backward compatibility with synchrone local save
+					if(this.config.save.beforeSave === undefined || this.context.datatable.config.save.beforeSave === null){
+						this.saveLocal(value.data, value.index);
+						this.saveFinish();
+						return $q.when();						
+					}else{
+						var context = {datatable:this, value:value.data, index:value.index};
+						return $q.when(context, this.getBeforeSavePromise()).then(function(resp){
+							context.datatable.saveLocal(context.value, context.index);
+							context.datatable.saveFinish();
+						},function(resp){
+							// error
+							context.datatable.saveOnError(context.value, context.index);
+							context.datatable.saveFinish();
+						});
+					}
+           	 		
+           	 		
+				},this)
+				
+                return $q.all(queries).then(function(results) {
+                	console.log("save global ok");
+                },function(results){
+                	console.log("save global error");
+                });
+           	 	
+            },
+            
+            saveAllBatchRemote: function(values) {
+                var nbElementByBatch = Math.ceil(values.length / 6); // 6
+																		// because
+																		// 6
+																		// request
+																		// max
+																		// in
+																		// parrallel
+																		// with
+																		// firefox
+																		// and
+																		// chrome
                 var queries = [];
                 for (var i = 0; i < 6 && values.length > 0; i++) {
                     queries.push(this.getSaveRemoteRequest(values.splice(0, nbElementByBatch)));
                 }
-                $q.all(queries).then(function(results) {
-                    angular.forEach(results, function(result, key) {
-                        if (result.status !== 200) {
-                            console.log("Error for batch save");
-                        } else {
-                            angular.forEach(result.data, function(value, key) {
-                                this.datatable.saveRemoteOneElement(value.status, value.data, value.index);
-                            }, result.config);
-                        }
-
-                    });
+                return $q.all(queries).then(function(results) {
+                	console.log("save global ok");
+                },function(results){
+                	console.log("save global error");
                 });
             },
 
-            saveRemote: function(queries) {
-                $q.all(queries).then(function(results) {
-                    angular.forEach(results, function(value, key) {
-                        value.config.datatable.saveRemoteOneElement(value.status, value.data, value.config.index);
-                    });
-                });
+            saveAllRemote: function(values) {
+            	var queries = values.map(function(value){
+            		return this.getSaveRemoteRequest(value.data, value.index)
+            	},this);
+            	
+            	return $q.all(queries).then(function(results) {
+					console.log("save global ok");
+				},function(results){
+					console.log("save global error");
+				});
             },
 
             saveRemoteOneElement: function(status, value, index) {
                 if (status !== 200) {
-                    if (this.config.save.changeClass) {
-                        this.displayResult[index].line.trClass = "danger";
-                    }
-                    this.displayResult[index].line.edit = true;
-                    this.addErrors(index, value);
-                    this.config.save.error++;
-                    this.config.save.number--;
+                    this.saveOnError(value, index);
                     this.saveFinish();
                 } else {
                     this.resetErrors(index);
@@ -1425,9 +1563,12 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                     this.saveFinish();
                 }
             },
-
+            /**
+			 * value = one value or array in batch mode
+			 */
             getSaveRemoteRequest: function(value, i) {
                 var urlFunction = this.getUrlFunction(this.config.save.url);
+                if(urlFunction === null || urlFunction === undefined)  throw 'no url define for save !';
                 var method = this.config.save.method;
                 if (angular.isFunction(method)) {
                     method = method(value);
@@ -1438,37 +1579,78 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                 if (angular.isObject(this.config.save.httpConfig)) {
                     angular.merge(httpConfig, this.config.save.httpConfig);
                 }
-                if (urlFunction) {
-                    if (this.config.save.batch) {
-                        return $http[method](urlFunction(value), value, httpConfig);
-                    } else {
-                        var valueFunction = this.getValueFunction(this.config.save.value);
-                        httpConfig.index = i;
-                        return $http[method](urlFunction(value), valueFunction(value), httpConfig).
-                        then(function(resp) {
-                            resp.config.datatable.saveRemoteOneElement(resp.status, resp.data, resp.config.index);
-                            return resp;
-                        }, function(resp) {
-                            resp.config.datatable.saveRemoteOneElement(resp.status, resp.data, resp.config.index);
-                            return resp;
-                        });
-
-                    }
-                } else {
-                    throw 'no url define for save !';
-                }
+                
+				var valueFunction = this.getValueFunction(this.config.save.value);
+				if (this.config.save.batch) {
+					var context = {datatable:this, value:value};
+					return $q.when(context, this.getBeforeSavePromise())
+						.then(function(){
+							$http[method](urlFunction(value), value.map(function(v){return {index:v.index,data:valueFunction(v.data)};}), httpConfig).
+								then(function(resp) {
+						        	angular.forEach(resp.data, function(value, key) {
+						                this.datatable.saveRemoteOneElement(value.status, value.data, value.index);
+						            },resp.config);
+						        	return resp;
+						        }, function(resp) {
+						        	// resp.data must contain an array of map of
+									// errors
+						        	angular.forEach(resp.data, function(value, key) {
+						                this.datatable.saveRemoteOneElement(resp.status, value.data, value.index);
+						            },resp.config);
+						        	return resp;
+						        });
+						},function(resp){
+							angular.forEach(context.value, function(v, key) {
+								// can be improve because we don't have any
+								// error message
+								console.log("error on beforeSave");
+					    		this.saveRemoteOneElement("500", v.data, v.index);
+				            },context.datatable);
+				    	});
+				} else {
+				    httpConfig.index = i;
+				    var context = {datatable:this, value:value, index:i};
+				    return $q.when(context, this.getBeforeSavePromise())
+				    	.then(function(){
+					    	return $http[method](urlFunction(value), valueFunction(value), httpConfig).
+					    	 	then(function(resp) {
+						            resp.config.datatable.saveRemoteOneElement(resp.status, resp.data, resp.config.index);
+						            return resp;
+						        }, function(resp) {
+						            // resp.data must contain a map of errors
+						            resp.config.datatable.saveRemoteOneElement(resp.status, resp.data, resp.config.index);
+		                            return resp;
+						        });
+				    	},function(){
+				    		// can be improve because we don't have any error
+							// message
+				    		console.log("error on beforeSave");
+				    		context.datatable.saveRemoteOneElement("500", context.value, context.index);
+				    	});
+				       
+				
+				}    
+				
             },
-
+            saveOnError: function(value, index){
+            	 if (this.config.save.changeClass) {
+                     this.displayResult[index].line.trClass = "danger";
+                 }
+                 this.displayResult[index].line.edit = true;
+                 this.addErrors(index, value);
+                 this.config.save.error++;
+                 this.config.save.number--;
+            },
             /**
-             * Call after save to update the records property
-             */
+			 * Call after save to update the records property
+			 */
             saveLocal: function(data, i) {
                 if (this.config.save.active) {
                     if (data) {
                         this.displayResult[i].data = data;
                     }
 
-                    //update in the all result table
+                    // update in the all result table
                     if (!this.displayResult[i].line["new"]) {
                         var j = i;
                         if (this.config.pagination.active && !this.isRemoteMode(this.config.pagination.mode)) {
@@ -1492,12 +1674,12 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                     }
                     this.config.save.number--;
                 } else {
-                    //console.log("save is not active !");
+                    // console.log("save is not active !");
                 }
             },
             /**
-             * Call when a save local or remote is finish
-             */
+			 * Call when a save local or remote is finish
+			 */
             saveFinish: function() {
                 if (this.config.save.number === 0) {
                     if (this.config.save.error > 0) {
@@ -1516,7 +1698,7 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                     }
                     this.config.save.error = 0;
                     this.config.save.start = false;
-                    //insert new data create by addBlank in result
+                    // insert new data create by addBlank in result
                     if (this.config.save.newData.length > 0) {
                         this.addData(this.config.save.newData);
                     }
@@ -1527,8 +1709,8 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
 
             },
             /**
-             * Test if save mode can be enable
-             */
+			 * Test if save mode can be enable
+			 */
             canSave: function() {
                 if (this.config.edit.active && !this.config.save.withoutEdit && !this.config.save.start) {
                     return this.config.edit.start;
@@ -1538,14 +1720,15 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                     return false;
                 }
             },
-            //remove
+            // remove
             /**
-             *  Remove the selected table lines
-             */
+			 * Remove the selected table lines
+			 */
             remove: function() {
                 if (this.config.remove.active && !this.config.remove.start) {
-                    var r = $window.confirm(this.messages.Messages("datatable.remove.confirm"));
-                    if (r) {
+                	var r = $window.confirm(this.messages.Messages("datatable.remove.confirm"));
+                	
+                	if (r) {
                         this.setSpinner(true);
                         this.config.messages.text = undefined;
                         this.config.messages.clazz = undefined;
@@ -1574,16 +1757,16 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                         }
                     }
                 } else {
-                    //console.log("remove is not active !");
+                    // console.log("remove is not active !");
                 }
             },
 
             /**
-             * Call after save to update the records property
-             */
+			 * Call after save to update the records property
+			 */
             removeLocal: function(i) {
                 if (this.config.remove.active && this.config.remove.start) {
-                    //update in the all result table
+                    // update in the all result table
                     var j;
                     if (this.config.pagination.active && !this.isRemoteMode(this.config.pagination.mode)) {
                         j = (i + (this.config.pagination.pageNumber * this.config.pagination.numberRecordsPerPage)) - this.config.remove.counter;
@@ -1594,7 +1777,7 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                     this.config.remove.counter++;
                     this.totalNumberRecords--;
                 } else {
-                    //console.log("remove is not active !");
+                    // console.log("remove is not active !");
                 }
             },
 
@@ -1625,8 +1808,8 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
 
 
             /**
-             * Call when a remove is done
-             */
+			 * Call when a remove is done
+			 */
             removeFinish: function() {
                 if (this.config.remove.number === 0) {
 
@@ -1686,23 +1869,22 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
             },
 
             /**
-             * indicate if at least one line is selected and not in edit mode
-             */
+			 * indicate if at least one line is selected and not in edit mode
+			 */
             canRemove: function() {
                 if (this.config.remove.active && !this.config.remove.start) {
                     for (var i = 0; this.displayResult && i < this.displayResult.length; i++) {
                         if (this.displayResult[i].line.selected && (!this.displayResult[i].line.edit || this.config.remove.withEdit)) return true;
                     }
                 } else {
-                    //console.log("remove is not active !");
+                    // console.log("remove is not active !");
                     return false;
                 }
             },
-            //select
+            // select
             /**
-             * Select or unselect all line
-             * value = true or false
-             */
+			 * Select or unselect all line value = true or false
+			 */
             selectAll: function(value) {
                 if (this.config.select.active && this.displayResult) {
                     this.config.select.isSelectAll = value;
@@ -1727,29 +1909,32 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                             }
                         }
                         if (angular.isFunction(this.config.select.callback)) {
+							console.warning('select.callback is deprecated. Use mouseevents.clickCallback instead.');
                         	this.config.select.callback(this.displayResult[i].line, this.displayResult[i].data);
+                        } else if (angular.isFunction(this.config.mouseevents.clickCallback)) {
+	  		                this.config.mouseevents.clickCallback(this.displayResult[i].line, this.displayResult[i].data);
                         }
                     }
                 } else {
-                    //console.log("select is not active");
+                    // console.log("select is not active");
                 }
             },
 
             /**
-             * Return all selected element and unselect the data
-             */
+			 * Return all selected element and unselect the data
+			 */
             getSelection: function(unselect) {
                 var selection = [];
                 for (var i = 0; i < this.displayResult.length; i++) {
                     if (this.displayResult[i].line.selected) {
-                        //unselect selection
+                        // unselect selection
                         if (unselect) {
                             this.displayResult[i].line.selected = false;
                             this.displayResult[i].line.trClass = undefined;
                         }
                         selection.push($.extend(true,{},this.displayResult[i].data));
                     } else if (this.displayResult[i].line.groupSelected) {
-                        //unselect selection
+                        // unselect selection
                         if (unselect) {
                             this.displayResult[i].line.groupSelected = false;
                             this.displayResult[i].line.trClass = undefined;
@@ -1763,8 +1948,8 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                 return selection;
             },
             /**
-             * indicate if at least one line is selected
-             */
+			 * indicate if at least one line is selected
+			 */
             isSelect: function() {
                 for (var i = 0; this.displayResult && i < this.displayResult.length; i++) {
                     if (this.displayResult[i].line.selected) return true;
@@ -1778,13 +1963,14 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                 return false;
             },
             /**
-             * cancel edit, hide and selected lines only
-             */
+			 * cancel edit, hide and selected lines only
+			 */
             cancel: function() {
                 if (this.config.cancel.active) {
-                    /*cancel only edit and hide mode */
+                    /* cancel only edit and hide mode */
                     this.config.edit = angular.copy(this.configMaster.edit);
                     this.config.edit.byDefault = false;
+                    this.config.save = angular.copy(this.configMaster.save);
                     this.config.hide = angular.copy(this.configMaster.hide);
                     this.config.remove = angular.copy(this.configMaster.remove);
                     this.config.select = angular.copy(this.configMaster.select);
@@ -1798,7 +1984,7 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                 }
             },
 
-            //template helper functions
+            // template helper functions
             isShowToolbar: function() {
                 return (this.isShowToolbarButtons() || this.isShowToolbarPagination() || this.isShowToolbarResults());
             },
@@ -1854,8 +2040,8 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                   }
             },
             /**
-             * Function to show (or not) the "CSV Export" button
-             */
+			 * Function to show (or not) the "CSV Export" button
+			 */
             isShowExportCSVButton: function() {
                 return (this.config.exportCSV.active && this.config.exportCSV.showButton);
             },
@@ -1867,7 +2053,7 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                     return (this.config[configParam].active && this.config[configParam].showButton);
                 }
             },
-
+            
             isShowLineEditButton: function() {
                 return this.config.edit.active && this.config.edit.showLineButton;
             },
@@ -1879,8 +2065,8 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
             },
 
             /**
-             * Add pagination parameters if needed
-             */
+			 * Add pagination parameters if needed
+			 */
             getParams: function(params) {
                 if (angular.isUndefined(params)) {
                     params = {};
@@ -1901,8 +2087,8 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                 return params;
             },
             /**
-             * Return an url from play js object or string
-             */
+			 * Return an url from play js object or string
+			 */
             getUrlFunction: function(url) {
                 if (angular.isObject(url)) {
                     if (angular.isDefined(url.url)) {
@@ -1920,8 +2106,8 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                 return undefined;
             },
             /**
-             * Return a function to transform value if exist or the default mode
-             */
+			 * Return a function to transform value if exist or the default mode
+			 */
             getValueFunction: function(valueFunction) {
                 if (angular.isFunction(valueFunction)) {
                     return valueFunction;
@@ -1931,8 +2117,8 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                 };
             },
             /**
-             * test is remote mode
-             */
+			 * test is remote mode
+			 */
             isRemoteMode: function(mode) {
                 if (mode && mode === 'remote') {
                     return true;
@@ -1953,8 +2139,8 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                 }
             },
             /**
-             * Set columns configuration
-             */
+			 * Set columns configuration
+			 */
             setColumnsConfig: function(columns) {
                 if (angular.isDefined(columns)) {
                     var initPosition = 1000000;
@@ -1966,28 +2152,25 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                             columns[i].type = columns[i].type.toLowerCase();
                         }
 
-                        if (columns[i].type === "img" || columns[i].type === "image") {
+                        if (columns[i].type === "img" || columns[i].type === "imgzoom" || columns[i].type === "image") {
                             if (!columns[i].format) console.log("missing format for " + columns[i].property);
-                            if (!columns[i].width) columns[i].width = '100%';
+                            // NGL-1476
+                            if (!columns[i].width) columns[i].width = '0.1';
+                            if (!columns[i].height) columns[i].height = '0.1';
                         }
 
 
                         columns[i].id = this.generateColumnId();
                         /*
-				          if(columns[i].hide && !this.config.hide.active){
-				          columns[i].hide = false;
-				        }
-				        if(columns[i].order && !this.config.order.active){
-				        columns[i].order = false;
-				      }
-				      if(columns[i].edit && !this.config.edit.active){
-				      columns[i].edit = false;
-				    }
-				    if(columns[i].mergeCells && !this.config.mergeCells.active){
-				    columns[i].mergeCells = false;
-				  }
-                         */
-                        //TODO: else{Error here ?}
+						 * if(columns[i].hide && !this.config.hide.active){
+						 * columns[i].hide = false; } if(columns[i].order &&
+						 * !this.config.order.active){ columns[i].order = false; }
+						 * if(columns[i].edit && !this.config.edit.active){
+						 * columns[i].edit = false; } if(columns[i].mergeCells &&
+						 * !this.config.mergeCells.active){
+						 * columns[i].mergeCells = false; }
+						 */
+                        // TODO: else{Error here ?}
 
                         if (columns[i].choiceInList && !angular.isDefined(columns[i].listStyle)) {
                             columns[i].listStyle = "select";
@@ -2005,15 +2188,28 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                         } else {
                             this.config.group.columns[columns[i].id] = false;
                         }
+                        
                         if (this.config.order.active && angular.isDefined(this.config.order.by) && (columns[i].property === this.config.order.by || columns[i].property === this.config.order.by.property)) {
-                            this.config.order.by = columns[i];
+                        	this.config.order.by = columns[i];
                             this.config.order.columns[columns[i].id] = true;
                             columns[i].order = true;
+                        } else if (this.config.order.active && angular.isDefined(this.config.order.by) && Array.isArray (this.config.order.by )) {  // Angular ou Array ??
+                        	// J.Charpentier NGL-2755 08 Janvier 2020 (pouvoir trier un datable sur plusieurs colonnes)
+                        	var j;
+                        	for (j = 0; j < this.config.order.by.length; j++) {
+                        		if (columns[i].property === this.config.order.by[j]) {
+                        			this.config.order.by[j] = columns[i];
+                        			//FDS ajout !!!
+                        			this.config.order.columns[columns[i].id] = true;
+                        			columns[i].order = true;
+                        		}
+                        	//console.log("this.config.order.by is Array "+ this.config.order.by );
+                        	}
                         } else {
                             this.config.order.columns[columns[i].id] = false;
                         }
 
-                        //ack to keep the default order in chrome
+                        // ack to keep the default order in chrome
                         if (null === columns[i].position || undefined === columns[i].position) {
                             columns[i].position = initPosition++;
                         }
@@ -2103,8 +2299,8 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
             },
 
             /**
-             * Return column with hide
-             */
+			 * Return column with hide
+			 */
             getHideColumns: function() {
                 var c = [];
                 for (var i = 0; i < this.config.columns.length; i++) {
@@ -2116,8 +2312,8 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
             },
 
             /**
-             * Return column with group
-             */
+			 * Return column with group
+			 */
             getGroupColumns: function() {
                 var c = [];
                 for (var i = 0; i < this.config.columns.length; i++) {
@@ -2129,8 +2325,8 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
             },
 
             /**
-             * Return column with edit
-             */
+			 * Return column with edit
+			 */
             getEditColumns: function() {
                 var c = [];
                 for (var i = 0; i < this.config.columns.length; i++) {
@@ -2163,9 +2359,10 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                 return column;
             },
             /**
-             * Add a new column to the table with the <th>title</th>
-             * at position
-             */
+			 * Add a new column to the table with the
+			 * <th>title</th>
+			 * at position
+			 */
             addColumn: function(position, column) {
                 if (position >= 0) {
                     column.position = position;
@@ -2176,8 +2373,8 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                 this.newExtraHeaderConfig();
             },
             /**
-             * Remove a column at position
-             */
+			 * Remove a column at position
+			 */
             deleteColumn: function(position) {
                 this.config.columns.splice(position, 1);
                 this.newExtraHeaderConfig();
@@ -2194,44 +2391,51 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
             newExtraHeaderConfig: function() {
                 if (this.config.extraHeaders.dynamic === true) {
                     this.config.extraHeaders.list = {};
-                    var lineUsed = false; // If we don't have label in a line, we don't want to show the line
-                    var count = 0; //Number of undefined extraHeader column beetween two defined ones
-                    //Every level of header
+                    var lineUsed = false; // If we don't have label in a line,
+											// we don't want to show the line
+                    var count = 0; // Number of undefined extraHeader column
+									// beetween two defined ones
+                    // Every level of header
                     for (var i = 0; i < this.config.extraHeaders.number; i++) {
-                        lineUsed = false; //re-init because new line
+                        lineUsed = false; // re-init because new line
                         var header = undefined;
-                        //Every column
+                        // Every column
                         for (var j = 0; j < this.config.columns.length; j++) {
                             if (!this.isHide(this.config.columns[j].id)) {
-                                //if the column have a extra header for this level
+                                // if the column have a extra header for this
+								// level
                                 if (this.config.columns[j].extraHeaders !== undefined && this.config.columns[j].extraHeaders[i] !== undefined) {
                                     lineUsed = true;
                                     if (count > 0) {
-                                        //adding the empty header of undefined extraHeader columns
+                                        // adding the empty header of undefined
+										// extraHeader columns
                                         this.addToExtraHeaderConfig(i, {
                                             "label": "",
                                             "colspan": count
                                         });
-                                        count = 0; //Reset the count to 0
+                                        count = 0; // Reset the count to 0
                                     }
-                                    //The first time the header will be undefined
+                                    // The first time the header will be
+									// undefined
                                     if (header === undefined) {
-                                        //create the new header with colspan 0 (the current column will be counted)
+                                        // create the new header with colspan 0
+										// (the current column will be counted)
                                         header = {
                                             "label": this.config.columns[j].extraHeaders[i],
                                             "colspan": 0
                                         };
                                     }
 
-                                    //if two near columns have the same header
+                                    // if two near columns have the same header
                                     if (this.config.columns[j].extraHeaders[i] === header.label) {
                                         header.colspan += 1;
                                     } else {
-                                        //We have a new header
-                                        //adding the current one
+                                        // We have a new header
+                                        // adding the current one
                                         this.addToExtraHeaderConfig(i, header);
-                                        //and create the new one with colspan 1
-                                        //colspan = 1 because we're already on the first column who have this header
+                                        // and create the new one with colspan 1
+                                        // colspan = 1 because we're already on
+										// the first column who have this header
                                         header = {
                                             "label": this.config.columns[j].extraHeaders[i],
                                             "colspan": 1
@@ -2240,23 +2444,25 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
 
                                 } else if (header !== undefined) {
                                     lineUsed = true;
-                                    //If we find a undefined column, we add the old header
+                                    // If we find a undefined column, we add the
+									// old header
                                     this.addToExtraHeaderConfig(i, header);
-                                    //and increment the count var
+                                    // and increment the count var
                                     count++;
-                                    //The old header is added
+                                    // The old header is added
                                     header = undefined;
                                 } else {
-                                    //No header to add, the previous one was a undefined column
-                                    //increment the count var
+                                    // No header to add, the previous one was a
+									// undefined column
+                                    // increment the count var
                                     count++;
                                 }
                             }
                         }
 
-                        //At the end of the level loop
-                        //If we have undefined column left
-                        //And the line have at least one item
+                        // At the end of the level loop
+                        // If we have undefined column left
+                        // And the line have at least one item
                         if (count > 0 && (lineUsed === true || header !== undefined)) {
                             this.addToExtraHeaderConfig(i, {
                                 "label": "",
@@ -2265,14 +2471,13 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                             count = 0;
                         }
 
-                        //If we have defined column left
+                        // If we have defined column left
                         if (header !== undefined) {
                             this.addToExtraHeaderConfig(i, header);
                         }
                     }
                 }
             },
-            
             getFinalValue : function(column, result){
             	var filter = this.getFilter(column);
             	var formatter = this.getFormatter(column);
@@ -2282,18 +2487,22 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
             	if (!result.line.group && (column.url === undefined || column.url === null)) {
                 	var getter = $parse(column.property+filter);
             		var v = getter(result.data, context);
-    				if(!angular.isArray(v)){ //so work for sum, average, unique and collect if one element
+    				if(!angular.isArray(v)){ // so work for sum, average,
+												// unique and collect if one
+												// element
     					colValue =  $parse("this"+formatter)(v);
 					}else {
 						colValue = v.map(function(v){return $parse("this"+formatter)(v);});			    						
 					}		    				                                    	
                 } else if (result.line.group) {
                 	var v = $parse("group."+column.id)(result.data, context);
-    				//if error in group function
+    				// if error in group function
     				if(angular.isDefined(v) && angular.isString(v) && v.charAt(0) === "#"){
     					colValue = v;
     				}else if(angular.isDefined(v)){
-    					if(!angular.isArray(v)){ //so work for sum, average, unique and collect if one element
+    					if(!angular.isArray(v)){ // so work for sum, average,
+													// unique and collect if one
+													// element
     						colValue = $parse("this"+formatter)(v);
     					}else {
     						colValue = v.map(function(v){return $parse("this"+formatter)(v);});			    						
@@ -2302,7 +2511,9 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                 } else if (!result.line.group && column.url !== undefined && column.url !== null) {
                     var url = $parse(column.url)(result.data, context);
                     var v = $parse(column.property+filter)(this.urlCache[url]);
-    				if(!angular.isArray(v)){ //so work for sum, average, unique and collect if one element
+    				if(!angular.isArray(v)){ // so work for sum, average,
+												// unique and collect if one
+												// element
     					colValue =  $parse("this"+formatter)(v);
 					}else {
 						colValue = v.map(function(v){return $parse("this"+formatter)(v);});			    						
@@ -2310,7 +2521,7 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                 }
             	return colValue;
             },
-            //clean data before put in CSV
+            // clean data before put in CSV
             cleanColValue : function(column, colValue){
             	if(colValue === null)colValue = undefined;
 					
@@ -2318,27 +2529,32 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
 				    colValue = colValue.replace(/\u00a0/g, "");
 				}else if(column.type === "number" && angular.isArray(colValue)){
 					colValue = colValue.map(function(colValue){return colValue.replace(/\u00a0/g, "");});
-				}else if(column.type === "boolean" && colValue === undefined){
-					colValue = this.messages.Messages('datatable.export.no');
-				} else if (column.type === "boolean") {
-				    if (colValue) {
-				        colValue = this.messages.Messages('datatable.export.yes');
-				    } else {
-				        colValue = this.messages.Messages('datatable.export.no');
-				    }
+				}else if(column.type === "boolean" && (colValue === undefined || (angular.isArray(colValue) && colValue.length === 0))){
+					colValue = this.messages.Messages('datatable.export.no');					
+				} else if (column.type === "boolean" && colValue !== undefined) {
+					if(!angular.isArray(colValue)){
+						colValue = [colValue];
+					}
+					colValue = colValue.map(function(colValue){
+						if (colValue === true) {
+							return this.messages.Messages('datatable.export.yes');
+						} else {
+							return this.messages.Messages('datatable.export.no');
+						}},this);					
+					colValue = '"'+colValue.join()+'"';
 				}else if((column.type === "string" || column.type === "text"  || column.type === "textarea") && colValue !== undefined){
 					if(!angular.isArray(colValue)){
 						colValue = [colValue];
 					}
 					colValue = '"'+colValue.join()+'"';					                            	
-				}else if(column.type === "img" || column.type === "image"  || column.type === "file"){
+				}else if(column.type === "img" || column.type === "imgzoom" || column.type === "image"  || column.type === "file"){
 					colValue = undefined;
 				}
 				return colValue;
             },
             /**
-             * Function to export data in a CSV file
-             */
+			 * Function to export data in a CSV file
+			 */
             exportCSV: function(exportType) {
                 if (this.config.exportCSV.active) {
                     this.config.exportCSV.start = true;
@@ -2346,7 +2562,8 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                         lineValue = "",
                         that = this;
 
-                    //calcule results ( code extracted from method computeDisplayResult() )
+                    // calcule results ( code extracted from method
+					// computeDisplayResult() )
                     var displayResultTmp = [];
                     if (this.isGroupActive()) {
                     	var orderProperty = this.config.group.by.property;
@@ -2370,11 +2587,11 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                     if (this.isGroupActive()) {
                     	displayResultTmp = this.addGroup(displayResultTmp);
                     }
-                    //manage results
+                    // manage results
                     if (displayResultTmp) {
 
                         var columnsToPrint = this.config.columns;
-                        //header
+                        // header
                         columnsToPrint.forEach(function(column) {
                             if (!that.config.hide.columns[column.id]) {
 
@@ -2406,7 +2623,7 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                             }
                         }, this);
                         lineValue = lineValue.substr(0, lineValue.length - 1) + "\n";
-                        //data
+                        // data
                         displayResultTmp.forEach(function(result) {
                             columnsToPrint.forEach(function(column) {
                             	if (!that.config.hide.columns[column.id] &&
@@ -2422,10 +2639,11 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                         }, this);
                         displayResultTmp = undefined;
 
-                        //fix for the accents in Excel : add BOM (byte-order-mark)
+                        // fix for the accents in Excel : add BOM
+						// (byte-order-mark)
                         var fixedstring = "\ufeff" + lineValue;
 
-                        //save
+                        // save
                         var blob = new Blob([fixedstring], {
                             type: "text/plain;charset=utf-8"
                         });
@@ -2440,8 +2658,8 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
             },
 
             /**
-             * Sub-function use by (not only) exportCSV()
-             */
+			 * Sub-function use by (not only) exportCSV()
+			 */
             getFormatter: function(col) {
                 var format = "";
                 if (col && col.type)
@@ -2468,8 +2686,8 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
             },
 
             /**
-             * Function to enable/disable the "CSV Export" button
-             */
+			 * Function to enable/disable the "CSV Export" button
+			 */
             canExportCSV: function() {
                 if (this.config.exportCSV.active && !this.config.exportCSV.start && !this.isEmpty()) {
                     if (this.config.edit.active && this.config.edit.start) {
@@ -2514,8 +2732,10 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
     return constructor;
 }]);
 ;angular.module('ultimateDataTableServices').
-//If the select or multiple choices contain 1 element, this directive select it automaticaly
-//EXAMPLE: <select ng-model="x" ng-option="x as x for x in x" udtAutoselect>...</select>
+// If the select or multiple choices contain 1 element, this directive select it
+// automaticaly
+// EXAMPLE: <select ng-model="x" ng-option="x as x for x in x"
+// udtAutoselect>...</select>
 directive('udtAutoSelect',['$parse', function($parse) {
 		var OPTIONS_REGEXP = /^\s*(.*?)(?:\s+as\s+(.*?))?(?:\s+group\s+by\s+(.*))?\s+for\s+(?:([\$\w][\$\w\d]*)|(?:\(\s*([\$\w][\$\w\d]*)\s*,\s*([\$\w][\$\w\d]*)\s*\)))\s+in\s+(.*)$/;
 		return {
@@ -2536,10 +2756,9 @@ directive('udtAutoSelect',['$parse', function($parse) {
 				if(valOption != undefined){
 					var match = valOption.match(OPTIONS_REGEXP);
 					var getModelValue = $parse(match[1].replace(match[4]+'.',''));
-					var model = $parse(match[7]);
-					scope.$watch(model, function(value){
+					scope.$watch(match[7], function(value){
 						if(value){
-			                if(value.length === 1 && ngModel.$isEmpty(ngModel.$modelValue)){
+							if(value.length === 1  && (ngModel.$modelValue === undefined || ngModel.$modelValue === '' || ngModel.$modelValue === null)){
 								
 			                	var value = (multiple)?[getModelValue(value[0])]:getModelValue(value[0]);
 			                	
@@ -2567,16 +2786,18 @@ angular.module('ultimateDataTableServices')
     				  var udtBase64Img = {};
     				  udtBase64Img._type = "img";
     				  udtBase64Img.fullname = e.target.file.name;
-    				  //console.log("udtBase64Img.fullname "+udtBase64Img.fullname);
-    				  //Get the extension
+    				  // console.log("udtBase64Img.fullname
+						// "+udtBase64Img.fullname);
+    				  // Get the extension
     				  var matchExtension = e.target.file.type.match(/^image\/(.*)/);
         			  if(matchExtension && matchExtension.length > 1){
         				  udtBase64Img.extension = matchExtension[1];
         				  
-        				  //Get the base64 without the extension feature
+        				  // Get the base64 without the extension feature
         				  var matchBase64 = e.target.result.match(/^.*,(.*)/);
         				  udtBase64Img.value = matchBase64[1];
-        				  //Load image from the base64 to get the width and height
+        				  // Load image from the base64 to get the width and
+							// height
         				  var img = new Image();
         				  img.src =  e.target.result;
 
@@ -2618,7 +2839,7 @@ angular.module('ultimateDataTableServices')
 		    			  var reader = new FileReader();
 		    			  reader.file = inputFile;
 		    			  reader.onload = onload;	
-		    			  //reader.onloadend = onloadend;
+		    			  // reader.onloadend = onloadend;
 		    			  reader.readAsDataURL(inputFile);				    			  		        						    			  
 		    		  });
 		    	  }else{
@@ -2626,7 +2847,7 @@ angular.module('ultimateDataTableServices')
 		    		  nbFiles = elem[0].files.length
 		    		  reader.file = elem[0].files[0];
 		    		  reader.onload = onload;
-		    		  //reader.onloadend = onloadend;
+		    		  // reader.onloadend = onloadend;
 	    			  reader.readAsDataURL(elem[0].files[0]);				    			  		    	 
 		    	  }				    	  
 		      });
@@ -2649,8 +2870,8 @@ angular.module('ultimateDataTableServices')
 					  var udtBase64File = {};
 					  udtBase64File.fullname = e.target.file.name;
     				  
-    				  //Get the extension
-    				  //console.log("File type "+e.target.file.type);
+    				  // Get the extension
+    				  // console.log("File type "+e.target.file.type);
     				  var matchExtension = e.target.file.type.match(/^application\/(.*)/);
     				  var matchExtensionText = e.target.file.type.match(/^text\/(.*)/);
     				  if(matchExtension && matchExtension.length > 1){
@@ -2661,7 +2882,7 @@ angular.module('ultimateDataTableServices')
     				  if(udtBase64File.extension != undefined){
     					  udtBase64File._type = "file";
         				  
-        				  //Get the base64 without the extension feature
+        				  // Get the base64 without the extension feature
         				  var matchBase64 = e.target.result.match(/^.*,(.*)/);
         				  udtBase64File.value = matchBase64[1];
         				  files.push(udtBase64File);
@@ -2712,7 +2933,7 @@ angular.module('ultimateDataTableServices')
 		};
 }]);;angular.module('ultimateDataTableServices').
 directive('udtBtselect',  ['$parse', '$document', '$window', '$filter', function($parse,$document, $window, $filter)  {
-			//0000111110000000000022220000000000000000000000333300000000000000444444444444444000000000555555555555555000000066666666666666600000000000000007777000000000000000000088888
+			// 0000111110000000000022220000000000000000000000333300000000000000444444444444444000000000555555555555555000000066666666666666600000000000000007777000000000000000000088888
     		var BT_OPTIONS_REGEXP = /^\s*([\s\S]+?)(?:\s+as\s+([\s\S]+?))?(?:\s+group\s+by\s+([\s\S]+?))?\s+for\s+(?:([\$\w][\$\w]*))\s+in\s+([\s\S]+?)$/;                        
     		// jshint maxlen: 100
   		    return {
@@ -2752,12 +2973,13 @@ directive('udtBtselect',  ['$parse', '$document', '$window', '$filter', function
 		    	  		,
 	    	  		require: ['?ngModel'],
 	       		    link: function(scope, element, attr, ctrls) {
-					  //if ngModel is not defined, we don't need to do anything
+					  // if ngModel is not defined, we don't need to do
+						// anything
 	      		      if (!ctrls[0]) return;
 	      		      scope.inputClass = element.attr("class");
 	      		      scope.placeholder = attr.placeholder;
     		          
-	      		      element.attr("class",''); //remove custom class
+	      		      element.attr("class",''); // remove custom class
 	      		     
 	      		      var ngModelCtrl = ctrls[0],
 	      		          multiple = attr.multiple || false,
@@ -2821,7 +3043,7 @@ directive('udtBtselect',  ['$parse', '$document', '$window', '$filter', function
 	      		     };
 	      		    
 	      		    scope.groupBy = function(item, index){
-	      		    	if(index === 0){ //when several call
+	      		    	if(index === 0){ // when several call
 	      		    		groupByLabels = {};
 	      		    	}
 	      		    	
@@ -2924,212 +3146,15 @@ directive('udtBtselect',  ['$parse', '$document', '$window', '$filter', function
 	      		  
   		    };
     	}]);;angular.module('ultimateDataTableServices').
-directive("udtTbody", function(){
-	return {
-		restrict: 'A',    	
-    	link: function(scope, element, attr) {	    		
-    		var getEditProperty = function(col, header, filter){
-				if(header){
-		    		return  "udtTable.config.edit.columns."+col.id+".value";
-		    	} else if(filter){
-					return "udtTable.searchTerms."+col.property;
-				} else if(angular.isString(col.property)){
-		    		return "value.data."+col.property;
-		    	} else {
-		    		throw "Error property is not editable !";
-		    	}
-	    	};
-
-	    	var getConvertDirective = function(col, header){
-	    		if(col.convertValue !== undefined && col.convertValue !== null && col.convertValue.active === true && col.convertValue.saveMeasureValue !== col.convertValue.displayMeasureValue){
-	    			return 'udt-convertvalue="col.convertValue"';
-	    		}
-	    		return "";
-	    	}
-
-	    	
-	    	var getOptions = function(col){
-				if(angular.isString(col.possibleValues)){
-					return col.possibleValues;
-				}else{ //function
-					return 'col.possibleValues';
-				}
-			};
-
-			var getGroupBy = function(col){
-				if(angular.isString(col.groupBy)){
-					return 'group by opt.'+col.groupBy;
-				}else{
-					return '';
-				}
-
-			};
-			
-    		var udtTbodyHelpers = {
-    				getEditElement : function(col, header, filter){
-						var editElement = '';
-	    				var ngChange = '"';
-	    				var defaultValueDirective = "";
-    			    	if(header){
-    			    		//we need used udt-change when we used typehead directive
-    			    		ngChange = '" udt-change="udtTable.updateColumn(col.property, col.id)"';
-						}else if(filter){
-							ngChange = '" udt-change="udtTable.searchLocal(udtTable.searchTerms)"';
-    			    	}else if(col.defaultValues){
-    			    		defaultValueDirective = 'udt-default-value="col"';
-    			    	}else if(col.choiceInList){
-    			    		defaultValueDirective= " udt-auto-select";
-    			    	}
-    			    	
-						var userDirectives = "";
-						if(col.editDirectives !== undefined){
-							userDirectives = col.editDirectives;
-							if(angular.isFunction(userDirectives)){
-								userDirectives = userDirectives();
-							}
-						}
-						var requiredDirective = "";
-						if(col.required != undefined && col.required != null && !header){
-							if(angular.isFunction(col.required) && col.required() || col.required === true){
-								requiredDirective = 'name="'+col.id+'" ng-required=true';
-							}else if(angular.isString(col.required)){
-								requiredDirective = 'name="'+col.id+'" ng-required="'+col.required+'"';
-							}
-						}else{
-							requiredDirective = "name='"+col.id+"' ";
-						}
-						
-						if(col.editTemplate){
-							editElement = col.editTemplate.replace(/#ng-model/g, 'ng-model="'+getEditProperty(col, header, filter)+ngChange+' '+requiredDirective);														
-						}else if(col.type === "boolean"){
-	    					editElement = '<input class="form-control"' +defaultValueDirective+'type="checkbox" class="input-small" ng-model="'+getEditProperty(col, header, filter)+ngChange+'/>';	    					
-	    				}else if (col.type === "textarea") {
-                            editElement = '<textarea class="form-control"' + defaultValueDirective + userDirectives + 'ng-model="' + getEditProperty(col, header, filter) + ngChange + '></textarea>';
-	    				}else if(col.type === "img"){
-	    					editElement=
-	    						'<input type="file" class="form-control" udt-base64-img ng-model="'+getEditProperty(col, header, filter)+'" id="{{\''+col.id+'_\'+value.line.id}}" '+requiredDirective+' ng-if="'+getEditProperty(col, header, filter)+' === undefined" />'
-	    						+'<div  ng-click="udtTableHelpers.setImage('+getEditProperty(col, header, filter)+'.value,'
-	                        	+getEditProperty(col, header, filter)+'.fullname,'
-	                        	+getEditProperty(col, header, filter)+'.width,'
-	                        	+getEditProperty(col, header, filter)+'.height)" '
-	                        	+'  class="thumbnail" ng-if="'+getEditProperty(col, header, filter)+' !== undefined" >'
-	                            +'  <div data-target="#udtModalImage" role="button" data-toggle="modal" >'
-	                            +'     <a href="#">'
-	                            +'    <img  ng-src="data:image/{{'+getEditProperty(col, header, filter)+'.extension}};base64,{{'+getEditProperty(col, header, filter)+'.value}}" width="{{'+getEditProperty(col, header, filter)+'.width*0.1}}" height="{{'+getEditProperty(col, header, filter)+'.height*0.1}}" />'
-	                            +'     </a>'
-	                            +' </div>'
-	                            +' </div>'
-	    						+' <button ng-if="'+getEditProperty(col, header, filter)+' !== undefined" class="btn btn-default btn-xs" ng-click="'+getEditProperty(col, header, filter)+' = undefined" >'
-	    						+' <i class="fa fa-trash-o"></i>'
-                                +' </button>';
-
-	    					if(header){
-	    						editElement = '';
-	    					}
-	    				}
-	    				else if(col.type === "file"){
-	    					editElement=
-	    						'<input ng-if="'+getEditProperty(col, header, filter)+' === undefined"  type="file" class="form-control" udt-base64-file ng-model="'+getEditProperty(col, header, filter)+'" id="{{\''+col.id+'_\'+value.line.id}} '+requiredDirective+' />'
-	    						+'<div ng-if="'+getEditProperty(col, header, filter)+' !== undefined" >'
-                                +'<a target="_blank" ng-href="data:application/{{'+getEditProperty(col, header, filter)+'.extension}};base64,{{'+getEditProperty(col, header, filter)+'.value}}">'
-                                +'{{'+getEditProperty(col, header, filter)+'.fullname}}'
-                                +'</a>'
-                                +' </div>'
-	    						
-	    						+' <button ng-if="'+getEditProperty(col, header, filter)+' !== undefined" class="btn btn-default btn-xs" ng-click="'+getEditProperty(col, header, filter)+' = undefined" ><i class="fa fa-trash-o"></i>'
-                                +' </button>';
-	    					if(header){
-	    						editElement = '';
-	    					}
-	    				}else if(!col.choiceInList){
-							//TODO: type='text' because html5 autoformat return a string before that we can format the number ourself
-	    					editElement = '<input class="form-control" '+requiredDirective+' '+defaultValueDirective+' '+getConvertDirective(col, header)+' udt-html-filter="{{col.type}}" type="text" class="input-small" ng-model="'+getEditProperty(col,header,filter)+ngChange+userDirectives+'/>';
-	    				}else if(col.choiceInList){
-	    					switch (col.listStyle) {
-	    						case "radio":
-	    							editElement = '<label class="radio-inline" ng-repeat="opt in '+getOptions(col)+' track by $index" '+userDirectives+'>'
-	    										   +'<input udt-html-filter="{{col.type}}" type="radio" ng-model="'+getEditProperty(col,header,filter)+ngChange+' ng-value="{{opt.code}}"> {{opt.name}}'
-	    										   +'</label>';
-									break;
-	    						case "multiselect":
-	    							editElement = '<select class="form-control" multiple="true" '+requiredDirective+' '+defaultValueDirective+' ng-options="opt.code '+scope.udtTable.getFormatter(col)+' as opt.name '+getGroupBy(col)+' for opt in '+getOptions(col)+'" '+' ng-model="'+getEditProperty(col,header,filter)+ngChange+userDirectives+'></select>';
-		    						break;
-	    						case "bt-select":
-	    							editElement = '<div udt-html-filter="{{col.type}}" class="form-control" udt-btselect '+requiredDirective+' '+defaultValueDirective+' placeholder="" bt-dropdown-class="dropdown-menu-right" bt-options="opt.code as opt.name  '+getGroupBy(col)+' for opt in '+getOptions(col)+'" '+' ng-model="'+getEditProperty(col,header,filter)+ngChange+userDirectives+'></div>';
-	    							break;
-								case "bt-select-filter":
-	    							editElement = '<div udt-html-filter="{{col.type}}" class="form-control" filter="true" udt-btselect '+requiredDirective+' '+defaultValueDirective+' placeholder="" bt-dropdown-class="dropdown-menu-right" bt-options="opt.code as opt.name  '+getGroupBy(col)+' for opt in '+getOptions(col)+'" '+' ng-model="'+getEditProperty(col,header,filter)+ngChange+userDirectives+'></div>';
-	    							break;
-	    						case "bt-select-multiple":
-	    							editElement = '<div class="form-control" '+requiredDirective+' '+defaultValueDirective+' udt-btselect multiple="true" bt-dropdown-class="dropdown-menu-right" placeholder="" bt-options="opt.code as opt.name  '+getGroupBy(col)+' for opt in '+getOptions(col)+'" '+' ng-model="'+getEditProperty(col,header,filter)+ngChange+userDirectives+'></div>';
-	    							break;
-	    						default:
-	    							editElement = '<select udt-html-filter="{{col.type}}" class="form-control" '+requiredDirective+' '+defaultValueDirective+' ng-options="opt.code '+scope.udtTable.getFormatter(col)+' as opt.name '+getGroupBy(col)+' for opt in '+getOptions(col)+'" '+' ng-model="'+getEditProperty(col,header,filter)+ngChange+userDirectives+'>'
-	    										  + '<option></option>'
-	    										  + '</select>';
-		    						break;
-		  	    			}
-	    				}else{
-	    					editElement = "Edit Not Defined for col.type !";
-	    				}
-	    				//return '<div class="form-group"  ng-class="{\'has-error\': value.line.errors[\''+col.property+'\'] !== undefined}">'+editElement+'<span class="help-block" ng-if="value.line.errors[\''+col.property+'\'] !== undefined">{{value.line.errors["'+col.property+'"]}}<br></span></div>';
-	    				return '<div class="form-group"  ng-class="udtTbodyHelpers.getValidationClass(\'subForm\'+value.line.id, col)">'+editElement+'<span class="help-block" ng-if="value.line.errors[\''+col.property+'\'] !== undefined">{{value.line.errors["'+col.property+'"]}}<br></span></div>';
-		    			
-	    			},
-	    			getValidationClass : function(formName, col){
-	    				
-	    				if(scope.udtTable.config.save.enableValidation
-	    					&& scope.datatableForm[formName] 
-	    					&& scope.datatableForm[formName][col.id] 
-	    					&& scope.datatableForm[formName][col.id].$invalid){
-	    					return 'has-error';
-	    				}else{
-	    					return undefined;
-	    				}
-	    				    				
-	    			},
-	    			getDisplayElement : function(col){
-	    				if(angular.isDefined(col.render) && col.render !== null){
-    						if(angular.isFunction(col.render)){
-    							return '<span udt-compile="udtTable.config.columns[$index].render(value.data, value.line)"></span>';
-    						}else if(angular.isString(col.render)){
-    							return '<span udt-compile="udtTable.config.columns[$index].render"></span>';
-    						}
-	    				}else{
-	    					if(col.type !== "boolean" && col.type !== "img" && col.type !=="file"){
-	    						//return '<span udt-highlight="cellValue" keywords="udtTable.searchTerms.$" active="udtTable.config.filter.highlight"></span>';
-								return '<span ng-bind="cellValue"></span>'
-	    					}else if(col.type === "boolean"){
-	    						return '<div ng-switch on="cellValue"><i ng-switch-when="true" class="fa fa-check-square-o"></i><i ng-switch-default class="fa fa-square-o"></i></div>';
-	    					}else if(col.type==="img"){	    						
-	    						return '<div  ng-click="udtTableHelpers.setImage(cellValue.value,cellValue.fullname,cellValue.width,cellValue.height)" class="thumbnail" ng-if="cellValue !== undefined" >' 
-	    						+'<div data-target="#udtModalImage" role="button" data-toggle="modal" ><a href="#"><img ng-src="data:image/{{cellValue.extension}};base64,{{cellValue.value}}" width="{{cellValue.width*0.1}}" height="{{cellValue.height*0.1}}"/></a></div></div>';		    					    
-	    					}else if(col.type==="file"){
-	    						return  '<a ng-href="data:application/{{cellValue.extension}};base64,{{cellValue.value}}" download="{{cellValue.fullname}}">'
-                                +'{{cellValue.fullname}}'
-                                +'</a>';
-	    					} else{
-	    						return ''
-	    					}
-	    				}
-	    			}
-    		};
-    		
-    		scope.udtTbodyHelpers = udtTbodyHelpers;
-    	}
-
-	};
-})
-.directive("udtCell", function(){
+directive("udtCell", function(){
     		return {
     			restrict: 'A',
   		    	replace:true,
   		    	templateUrl:'udt-cell.html',
 	    		link: function(scope, element, attr) {
-	    			
   		    	}
     		};
-    	}).directive("udtEditableCell", function(){
+}).directive("udtEditableCell", function(){
     		return {
     			restrict: 'A',
   		    	replace:true,
@@ -3137,7 +3162,7 @@ directive("udtTbody", function(){
 	    		link: function(scope, element, attr) {	    			
   		    	}
     		};
-    	}).directive("udtCellHeader", function(){
+}).directive("udtCellHeader", function(){
     		return {
     			restrict: 'A',
   		    	replace:true,
@@ -3145,8 +3170,8 @@ directive("udtTbody", function(){
   		    	link: function(scope, element, attr) {
   	  		    }
     		};
-    	})
-		.directive("udtCellFilter", function(){
+})
+.directive("udtCellFilter", function(){
     		return {
     			restrict: 'A',
   		    	replace:true,
@@ -3154,8 +3179,8 @@ directive("udtTbody", function(){
   		    	link: function(scope, element, attr) {
   	  		    }
     		};
-    	})
-		.directive("udtCellEdit", function(){
+})
+.directive("udtCellEdit", function(){
     		return {
     			restrict: 'A',
   		    	replace:true,
@@ -3164,15 +3189,13 @@ directive("udtTbody", function(){
   		    	}
 
     		};
-    	}).directive("udtCellRead", ["$parse", function($parse){
+}).directive("udtCellRead", ["$parse", function($parse){
     		return {
     			restrict: 'A',
   		    	replace:true,
   		    	templateUrl:'udt-cellRead.html' ,
   		    	link: function(scope, element, attr) {
-  		    		
 			    	var getDisplayValue = function(column, value, currentScope){
-			    		
 		    			if(column.watch === true && !value.line.group && (column.url === undefined || column.url === null)){
 		    				var filter  = currentScope.udtTable.getFilter(column);
 			    			var formatter = currentScope.udtTable.getFormatter(column);
@@ -3207,12 +3230,11 @@ directive("udtTbody", function(){
 	    			
   		    	}
     		};
-    	}]);;angular.module('ultimateDataTableServices').
+}]);;angular.module('ultimateDataTableServices').
 directive('udtChange', function() {
 	return {
 	  require: 'ngModel',
 		link: function(scope, element, attr, ngModelController) {
-			
 			scope.$watch(attr.ngModel, function(newValue, oldValue){
 				if(newValue !== oldValue){
 					scope.$evalAsync(attr.udtChange);						
@@ -3226,46 +3248,23 @@ directive('udtCompile', ['$compile', function($compile) {
 			return {
 				restrict: 'A',
   		    	link: function(scope, element, attrs) {
-  		    		/*
-  		    		 * Normaly no need to watch because the attribute udtCompile not change during the life of UDT
-  		    		scope.$watch(
-  				        function(scope) {
-  				             // watch the 'compile' expression for changes
-  				            return scope.$eval(attrs.udtCompile);
-  				        },
-  				        function(newValue, oldValue) {
-  				        	//if(newValue !== oldValue){
-  				        		console.log("watch udtCompile");
-  	  				            // when the 'compile' expression changes
-  	  				            // assign it into the current DOM
-  	  				            element.html(newValue);
-
-  	  				            // compile the new DOM and link it to the current
-  	  				            // scope.
-  	  				            // NOTE: we only compile .childNodes so that
-  	  				            // we don't get into infinite loop compiling ourselves
-  	  				            $compile(element.contents())(scope);
-  				        	//}
-  				        	
-  				        }
-  				    );
-  		    		*/
   		    		var value = scope.$eval(attrs.udtCompile);
   		    		element.html(value);
   		    		$compile(element.contents())(scope);
-  		    		
   				}
 			};
 						
 		}]);;angular.module('ultimateDataTableServices').
-//This directive convert the ngModel value to a view value and then the view value to the ngModel unit value
-//The value passed to the directive must be an object with displayMeasureValue and saveMeasureValue
+// This directive convert the ngModel value to a view value and then the view
+// value to the ngModel unit value
+// The value passed to the directive must be an object with displayMeasureValue
+// and saveMeasureValue
 directive('udtConvertvalue',['udtConvertValueServices','$filter', '$parse', function(udtConvertValueServices, $filter, $parse) {
 	return {
 				priority:1100,
 		 		require: 'ngModel',
                 link: function(scope, element, attrs, ngModelController) {
-                	//init service
+                	// init service
                 	var convertValues = udtConvertValueServices();
                 	var property = undefined;
                 	
@@ -3278,7 +3277,7 @@ directive('udtConvertvalue',['udtConvertValueServices','$filter', '$parse', func
         			    return convertedValue;
         			}); 
                 	
-                	//view to model
+                	// view to model
                 	ngModelController.$parsers.push(function(value) {
                     	value = convertValues.parse(value);
                     	if(property != undefined){
@@ -3286,58 +3285,10 @@ directive('udtConvertvalue',['udtConvertValueServices','$filter', '$parse', func
                     	}
                     	return value;
                     });
-                    
-                	/*
-					var watchModelValue = function(){
-						return scope.$watch(
-									function(){
-										return ngModel.$modelValue;
-									}, function(newValue, oldValue){
-										if(property != undefined){
-											var convertedValue = convertValues.convertValue(newValue, property.saveMeasureValue, property.displayMeasureValue);
-											ngModel.$setViewValue($filter('number')(convertedValue));
-											ngModel.$render();
-										}
-								});
-					};
-					
-                	scope.$watch(attr.udtConvertvalue, function(value){
-    					if(value.saveMeasureValue != undefined && value.displayMeasureValue != undefined){
-    						property = value;
-    					}
-    				});
-                	
-                	//model to view when the user go out of the input
-                	element.bind('blur', function () {
-                		var convertedValue = convertValues.convertValue(ngModel.$modelValue, property.saveMeasureValue, property.displayMeasureValue);
-                		ngModel.$setViewValue($filter('number')(convertedValue));
-						ngModel.$render();
-						//We restart the watcher when the user is out of the inputs
-						scope.currentWatcher = watchModelValue();
-                	});
-                	
-					//when the user go into the input
-					element.bind('focus', function () {
-						//We need to disable the watcher when the user is typing
-						scope.currentWatcher();
-                	});
-					
-                	//model to view whatcher
-                	scope.currentWatcher = watchModelValue();
-                	
-                    //view to model
-                    ngModel.$parsers.push(function(value) {
-                    	value = convertValues.parse(value);
-                    	if(property != undefined){
-	                    	value = convertValues.convertValue(value, property.displayMeasureValue, property.saveMeasureValue);
-                    	}
-                    	return value;
-                    });
-                    */
                 }
             };
 }]);;angular.module('ultimateDataTableServices').
- //Convert the date in format(view) to a timestamp date(model)
+ // Convert the date in format(view) to a timestamp date(model)
 directive('udtDateTimestamp', ['$filter', function($filter) {
     return {
         require: 'ngModel',
@@ -3364,8 +3315,9 @@ directive('udtDateTimestamp', ['$filter', function($filter) {
         }
     }
 }]);;angular.module('ultimateDataTableServices').
-//Write in an input or select in a list element the value passed to the directive when the list or the input ngModel is undefined or empty
-//EXAMPLE: <input type="text" default-value="test" ng-model="x">
+// Write in an input or select in a list element the value passed to the
+// directive when the list or the input ngModel is undefined or empty
+// EXAMPLE: <input type="text" default-value="test" ng-model="x">
 directive('udtDefaultValue',['$parse', function($parse) {
 	    		return {
 	    			priority:1200,					 
@@ -3376,15 +3328,26 @@ directive('udtDefaultValue',['$parse', function($parse) {
 	    				var _col = $parse(attrs.udtDefaultValue)(scope);
 	    				
 	    				var currentValue = $parse(attrs.ngModel)(scope);
+	    				// inspire by ngModel.NgModelController.$isEmpty.
+	    				// not used directly this function because not work in
+						// case of inputCheckBox
+	    				// see ngModel.NgModelController.$isEmpty documentation
+	    				var isEmpty = function(value) {
+	    				   return (angular.isUndefined(value) || value === '' || value === null);
+	    				};
 	    				
 	    				var setDefaultValue = function(){
-	    					if(_col != null && ngModelController.$isEmpty(currentValue)){
+	    					if(_col != null && isEmpty(currentValue)){
 								if(_col.type === "boolean"){
 									if(_col.defaultValues === "true" || _col.defaultValues === true){
 										ngModelController.$setViewValue(true);
 										ngModelController.$render();
 									}else if(_col.defaultValues === "false" || _col.defaultValues === false){
-										ngModelController.$setViewValue(true); // hack to insert false value 
+										ngModelController.$setViewValue(true); // hack
+																				// to
+																				// insert
+																				// false
+																				// value
 										ngModelController.$setViewValue(false);
 										ngModelController.$render();
 									}											
@@ -3402,7 +3365,13 @@ directive('udtDefaultValue',['$parse', function($parse) {
 	    				
 	    				if(_col){
 	    					setDefaultValue();	    					
-	    					if(angular.isFunction(_col.defaultValues)){ //only watch when function to limit watching
+	    					if(angular.isFunction(_col.defaultValues)){ // only
+																		// watch
+																		// when
+																		// function
+																		// to
+																		// limit
+																		// watching
     							scope.$watch(attrs.udtDefaultValue+".defaultValues(value.data,col)", function(newValue, oldValue){
     								if(newValue !== oldValue){
     									setDefaultValue();
@@ -3410,28 +3379,6 @@ directive('udtDefaultValue',['$parse', function($parse) {
 	    						});
     						}    						
 	    				}
-	    				
-	    				/*
-	    				scope.$watch(attrs.udtDefaultValue, function(col){
-	    					if(col !== null && col !== undefined && col.defaultValues !== undefined && col.defaultValues !== null ){
-	    						_col = col;	
-	    						if(angular.isFunction(_col.defaultValues)){ //only watch when function to limit watching
-	    							setDefaultValue();
-	    							scope.$watch(attrs.udtDefaultValue+".defaultValues(value.data,col)", function(value){
-	    								setDefaultValue();
-		    						});
-	    						}
-	    					}
-	    				});
-	    				*/
-	    				
-	    				//TODO GA ?? better way with formatter
-						/*
-	    				scope.$watch(ngModelController, function(value){
-							setDefaultValue();
-					    });
-					    */
-					    
 	    			}
 	    		};	    	
 	    	}]);;angular.module('ultimateDataTableServices').
@@ -3496,7 +3443,7 @@ directive('udtForm', function(){
 		}
 	};
 });;angular.module('ultimateDataTableServices').
-directive("udtHtmlFilter", function($filter, udtI18n) {
+directive("udtHtmlFilter", ['$filter', 'udtI18n', function($filter, udtI18n) {
 				return {
 					  priority:1000,
 					  require: 'ngModel',
@@ -3534,12 +3481,13 @@ directive("udtHtmlFilter", function($filter, udtI18n) {
 					    			   console.log("mission moment library to convert string to date");
 					    		   }
 					    	   }
-					    	   //TODO GA date and datetime quiz about timestamps
+					    	   // TODO GA date and datetime quiz about
+								// timestamps
 					    	  return convertedData;
 					    }); 
 					  }
 					};
-			});;angular.module('ultimateDataTableServices').
+			}]);;angular.module('ultimateDataTableServices').
 directive('udtMessages', function(){
     		return {
     			restrict: 'A',
@@ -3567,7 +3515,7 @@ directive('udtTable', function(){
 		            });
 					
   		    		var udtTableHelpers = {
-  		    				//todo in udtCell
+  		    				// todo in udtCell
   		    				setImage : function(imageData, imageName, imageFullSizeWidth, imageFullSizeHeight) {
   		  		    			scope.udtModalImage = {};
   		  		    			scope.udtModalImage.modalImage = imageData;
@@ -3577,10 +3525,16 @@ directive('udtTable', function(){
   		  		    			var zoom = Math.min((document.body.clientWidth - margin) / imageFullSizeWidth, 1);
 
   		  		    			scope.udtModalImage.modalWidth = imageFullSizeWidth * zoom;
-  		  		    			scope.udtModalImage.modalHeight = imageFullSizeHeight * zoom; // in order to
+  		  		    			scope.udtModalImage.modalHeight = imageFullSizeHeight * zoom; // in
+																								// order
+																								// to
   		  		    			scope.udtModalImage.modalLeft = (document.body.clientWidth - scope.udtModalImage.modalWidth)/2;
   		  		    			scope.udtModalImage.modalTop = (window.innerHeight - scope.udtModalImage.modalHeight)/2;
-  		  		    			scope.udtModalImage.modalTop = scope.udtModalImage.modalTop - 50; // height of header and footer
+  		  		    			scope.udtModalImage.modalTop = scope.udtModalImage.modalTop - 50; // height
+																									// of
+																									// header
+																									// and
+																									// footer
   		  		    		},
   		  		    		getTrClass : function(data, line, currentScope){
   		  		    			var udtTable = scope.udtTable;
@@ -3610,7 +3564,8 @@ directive('udtTable', function(){
   			    				if(col && angular.isFunction(col.thClass)){
   			    					clazz = col.thClass(col);
   			    				} else if(col && angular.isString(col.thClass)){
-  			    					//we try to evaluation the string against the scope
+  			    					// we try to evaluation the string against
+									// the scope
   			    					clazz =  currentScope.$eval(col.thClass) || col.thClass;
   			    				}
   			    				if((col && col.required != undefined && col.required != null)
@@ -3624,33 +3579,36 @@ directive('udtTable', function(){
   			    			select : function(data, line){
   								var udtTable = scope.udtTable;
   		                        if(line){
-  								if(udtTable.config.select.active){
-  				    					//separation of line type group and normal to simplify backward compatibility and avoid bugs
-  				    					//selected is used with edit, remove, save and show button
-  				    					if(!line.group){
-  					    					if(!line.selected){
-  					    						line.selected=true;
-  					    						line.trClass="info";
-  					    					} else{
-  												line.selected=false;
-  					    						line.trClass=undefined;
-  											}
-  				    					}else if(line.group && udtTable.config.group.enableLineSelection){
-  				    						if(!line.groupSelected){
-  					    						line.groupSelected=true;
-  					    						line.trClass="info";
-  					    					} else{
-  												line.groupSelected=false;
-  					    						line.trClass=undefined;
-  											}
-  				    					}
-  				    				}
-  		                            if (udtTable.config.select.active && angular.isFunction(udtTable.config.select.callback)) {
-  		                                console.warning('select.callback is deprecated. Use mouseevents.clickCallback instead.');
-  				    						udtTable.config.select.callback(line, data);
-  		                            } else if (udtTable.config.mouseevents.active && angular.isFunction(udtTable.config.mouseevents.clickCallback)) {
-  		                                udtTable.config.mouseevents.clickCallback(line, data);
-  				                        }
+	  								if(udtTable.config.select.active){
+	  				    					// separation of line type group and
+											// normal to simplify backward
+											// compatibility and avoid bugs
+	  				    					// selected is used with edit,
+											// remove, save and show button
+	  				    					if(!line.group){
+	  					    					if(!line.selected){
+	  					    						line.selected=true;
+	  					    						line.trClass="info";
+	  					    					} else{
+	  												line.selected=false;
+	  					    						line.trClass=undefined;
+	  											}
+	  				    					}else if(line.group && udtTable.config.group.enableLineSelection){
+	  				    						if(!line.groupSelected){
+	  					    						line.groupSelected=true;
+	  					    						line.trClass="info";
+	  					    					} else{
+	  												line.groupSelected=false;
+	  					    						line.trClass=undefined;
+	  											}
+	  				    					}
+	  				    				}
+	  		                            if (udtTable.config.select.active && angular.isFunction(udtTable.config.select.callback)) {
+	  		                                console.warning('select.callback is deprecated. Use mouseevents.clickCallback instead.');
+	  				    						udtTable.config.select.callback(line, data);
+	  		                            } else if (udtTable.config.mouseevents.active && angular.isFunction(udtTable.config.mouseevents.clickCallback)) {
+	  		                                udtTable.config.mouseevents.clickCallback(line, data);
+	  				                    }
   				    				}
   			    			},
   			    			mouseover : function(data, line){
@@ -3692,7 +3650,239 @@ directive('udtTable', function(){
 					scope.udtTableHelpers = udtTableHelpers;
   		    	}
     		};
-    	});;angular.module('ultimateDataTableServices').
+});;angular.module('ultimateDataTableServices').
+directive("udtTbody", function(){
+	return {
+		restrict: 'A',    	
+    	link: function(scope, element, attr) {	    		
+    		var getEditProperty = function(col, header, filter){
+				if(header){
+		    		return  "udtTable.config.edit.columns."+col.id+".value";
+		    	} else if(filter){
+					return "udtTable.searchTerms."+col.property;
+				} else if(angular.isString(col.property)){
+		    		return "value.data."+col.property;
+		    	} else {
+		    		throw "Error property is not editable !";
+		    	}
+	    	};
+
+	    	var getConvertDirective = function(col, header){
+	    		if(col.convertValue !== undefined && col.convertValue !== null && col.convertValue.active === true && col.convertValue.saveMeasureValue !== col.convertValue.displayMeasureValue){
+	    			return 'udt-convertvalue="col.convertValue"';
+	    		}
+	    		return "";
+	    	}
+
+	    	
+	    	var getOptions = function(col){
+				if(angular.isString(col.possibleValues)){
+					return col.possibleValues;
+				}else{ // function
+					return 'col.possibleValues';
+				}
+			};
+
+			var getGroupBy = function(col){
+				if(angular.isString(col.groupBy)){
+					return 'group by opt.'+col.groupBy;
+				}else{
+					return '';
+				}
+
+			};
+			
+    		var udtTbodyHelpers = {
+    				getEditElement : function(col, header, filter){
+						var editElement = '';
+	    				var ngChange = '"';
+	    				var defaultValueDirective = "";
+    			    	if(header){
+    			    		// we need used udt-change when we used typehead
+							// directive
+    			    		ngChange = '" udt-change="udtTable.updateColumn(col.property, col.id)"';
+						}else if(filter){
+							ngChange = '" udt-change="udtTable.searchLocal(udtTable.searchTerms)"';
+    			    	}else if(col.defaultValues){
+    			    		defaultValueDirective = 'udt-default-value="col"';
+    			    	}else if(col.choiceInList){
+    			    		defaultValueDirective= " udt-auto-select";
+    			    	}
+    			    	
+						var userDirectives = "";
+						if(col.editDirectives !== undefined){
+							userDirectives = col.editDirectives;
+							if(angular.isFunction(userDirectives)){
+								userDirectives = userDirectives();
+							}
+						}
+						var requiredDirective = "";
+						if(col.required != undefined && col.required != null && !header){
+							if(angular.isFunction(col.required) && col.required() || col.required === true){
+								requiredDirective = 'name="'+col.id+'" ng-required=true';
+							}else if(angular.isString(col.required)){
+								requiredDirective = 'name="'+col.id+'" ng-required="'+col.required+'"';
+							}
+						}else{
+							requiredDirective = "name='"+col.id+"' ";
+						}
+						
+						if(col.editTemplate){
+							editElement = col.editTemplate.replace(/#ng-model/g, 'ng-model="'+getEditProperty(col, header, filter)+ngChange+' '+requiredDirective);														
+						}else if(col.type === "boolean"){
+	    					editElement = '<input class="form-control"' +defaultValueDirective+'type="checkbox" class="input-small" ng-model="'+getEditProperty(col, header, filter)+ngChange+'/>';	    					
+	    				}else if (col.type === "textarea") {
+                            editElement = '<textarea class="form-control"' + defaultValueDirective + userDirectives + 'ng-model="' + getEditProperty(col, header, filter) + ngChange + '></textarea>';
+	    				}else if(col.type === "img"){
+                            console.log("img");
+	    					editElement=
+	    						'<input type="file" class="form-control" udt-base64-img ng-model="'+getEditProperty(col, header, filter)+'" id="{{\''+col.id+'_\'+value.line.id}}" '+requiredDirective+' ng-if="'+getEditProperty(col, header, filter)+' === undefined" />'
+	    						+'<div  ng-click="udtTableHelpers.setImage('+getEditProperty(col, header, filter)+'.value,'
+	                        	+getEditProperty(col, header, filter)+'.fullname,'
+	                        	+getEditProperty(col, header, filter)+'.width,'
+	                        	+getEditProperty(col, header, filter)+'.height)" '
+	                        	+'  class="thumbnail" ng-if="'+getEditProperty(col, header, filter)+' !== undefined" >'
+	                            +'  <div data-target="#udtModalImage" role="button" data-toggle="modal" >'
+	                            +'     <a href="#">'
+	                            +'    <img  ng-src="data:image/{{'+getEditProperty(col, header, filter)+'.extension}};base64,{{'+getEditProperty(col, header, filter)+'.value}}" width="{{'+getEditProperty(col, header, filter)+'.width*0.1}}" height="{{'+getEditProperty(col, header, filter)+'.height*0.1}}" />'
+	                            +'     </a>'
+	                            +' </div>'
+	                            +' </div>'
+	    						+' <button ng-if="'+getEditProperty(col, header, filter)+' !== undefined" class="btn btn-default btn-xs" ng-click="'+getEditProperty(col, header, filter)+' = undefined" >'
+	    						+' <i class="fa fa-trash-o"></i>'
+                                +' </button>';
+
+	    					if(header){
+	    						editElement = '';
+	    					}
+                        }
+                        else if(col.type === "imgzoom"){
+	    					editElement=
+	    						'<input type="file" class="form-control" udt-base64-img ng-model="'+getEditProperty(col, header, filter)+'" id="{{\''+col.id+'_\'+value.line.id}}" '+requiredDirective+' ng-if="'+getEditProperty(col, header, filter)+' === undefined" />'
+	    						+'<div  ng-click="udtTableHelpers.setImage('+getEditProperty(col, header, filter)+'.value,'
+	                        	+getEditProperty(col, header, filter)+'.fullname,'
+	                        	+getEditProperty(col, header, filter)+'.width,'
+	                        	+getEditProperty(col, header, filter)+'.height)" '
+	                        	+'  class="thumbnail" ng-if="'+getEditProperty(col, header, filter)+' !== undefined" >'
+	                            +'  <div data-target="#udtModalImage" role="button" data-toggle="modal" >'
+	                            +'     <a href="#">'
+	                            +'    <img  ng-src="data:image/{{'+getEditProperty(col, header, filter)+'.extension}};base64,{{'+getEditProperty(col, header, filter)+'.value}}" width="{{'+getEditProperty(col, header, filter)+'.width*0.5}}" height="{{'+getEditProperty(col, header, filter)+'.height*0.5}}" />'
+	                            +'     </a>'
+	                            +' </div>'
+	                            +' </div>'
+	    						+' <button ng-if="'+getEditProperty(col, header, filter)+' !== undefined" class="btn btn-default btn-xs" ng-click="'+getEditProperty(col, header, filter)+' = undefined" >'
+	    						+' <i class="fa fa-trash-o"></i>'
+                                +' </button>';
+
+	    					if(header){
+	    						editElement = '';
+	    					}
+	    				}
+	    				else if(col.type === "file"){
+	    					editElement=
+	    						'<input ng-if="'+getEditProperty(col, header, filter)+' === undefined"  type="file" class="form-control" udt-base64-file ng-model="'+getEditProperty(col, header, filter)+'" id="{{\''+col.id+'_\'+value.line.id}} '+requiredDirective+' />'
+	    						+'<div ng-if="'+getEditProperty(col, header, filter)+' !== undefined" >'
+                                +'<a target="_blank" ng-href="data:application/{{'+getEditProperty(col, header, filter)+'.extension}};base64,{{'+getEditProperty(col, header, filter)+'.value}}">'
+                                +'{{'+getEditProperty(col, header, filter)+'.fullname}}'
+                                +'</a>'
+                                +' </div>'
+	    						
+	    						+' <button ng-if="'+getEditProperty(col, header, filter)+' !== undefined" class="btn btn-default btn-xs" ng-click="'+getEditProperty(col, header, filter)+' = undefined" ><i class="fa fa-trash-o"></i>'
+                                +' </button>';
+	    					if(header){
+	    						editElement = '';
+	    					}
+	    				}else if(!col.choiceInList){
+							// TODO: type='text' because html5 autoformat return
+							// a string before that we can format the number
+							// ourself
+	    					editElement = '<input class="form-control" '+requiredDirective+' '+defaultValueDirective+' '+getConvertDirective(col, header)+' udt-html-filter="{{col.type}}" type="text" class="input-small" ng-model="'+getEditProperty(col,header,filter)+ngChange+userDirectives+'/>';
+	    				}else if(col.choiceInList){
+	    					switch (col.listStyle) {
+	    						case "radio":
+	    							editElement = '<label class="radio-inline" ng-repeat="opt in '+getOptions(col)+' track by $index" '+userDirectives+'>'
+	    										   +'<input udt-html-filter="{{col.type}}" type="radio" ng-model="'+getEditProperty(col,header,filter)+ngChange+' ng-value="{{opt.code}}"> {{opt.name}}'
+	    										   +'</label>';
+									break;
+	    						case "multiselect":
+	    							editElement = '<select class="form-control" multiple="true" '+requiredDirective+' '+defaultValueDirective+' ng-options="opt.code '+scope.udtTable.getFormatter(col)+' as opt.name '+getGroupBy(col)+' for opt in '+getOptions(col)+'" '+' ng-model="'+getEditProperty(col,header,filter)+ngChange+userDirectives+'></select>';
+		    						break;
+	    						case "bt-select":
+	    							editElement = '<div udt-html-filter="{{col.type}}" class="form-control" udt-btselect '+requiredDirective+' '+defaultValueDirective+' placeholder="" bt-dropdown-class="dropdown-menu-right" bt-options="opt.code as opt.name  '+getGroupBy(col)+' for opt in '+getOptions(col)+'" '+' ng-model="'+getEditProperty(col,header,filter)+ngChange+userDirectives+'></div>';
+	    							break;
+								case "bt-select-filter":
+	    							editElement = '<div udt-html-filter="{{col.type}}" class="form-control" filter="true" udt-btselect '+requiredDirective+' '+defaultValueDirective+' placeholder="" bt-dropdown-class="dropdown-menu-right" bt-options="opt.code as opt.name  '+getGroupBy(col)+' for opt in '+getOptions(col)+'" '+' ng-model="'+getEditProperty(col,header,filter)+ngChange+userDirectives+'></div>';
+	    							break;
+	    						case "bt-select-multiple":
+	    							editElement = '<div class="form-control" '+requiredDirective+' '+defaultValueDirective+' udt-btselect multiple="true" bt-dropdown-class="dropdown-menu-right" placeholder="" bt-options="opt.code as opt.name  '+getGroupBy(col)+' for opt in '+getOptions(col)+'" '+' ng-model="'+getEditProperty(col,header,filter)+ngChange+userDirectives+'></div>';
+	    							break;
+	    						default:
+	    							editElement = '<select udt-html-filter="{{col.type}}" class="form-control" '+requiredDirective+' '+defaultValueDirective+' ng-options="opt.code '+scope.udtTable.getFormatter(col)+' as opt.name '+getGroupBy(col)+' for opt in '+getOptions(col)+'" '+' ng-model="'+getEditProperty(col,header,filter)+ngChange+userDirectives+'>'
+	    										  + '<option></option>'
+	    										  + '</select>';
+		    						break;
+		  	    			}
+	    				}else{
+	    					editElement = "Edit Not Defined for col.type !";
+	    				}
+	    				// return '<div class="form-group"
+						// ng-class="{\'has-error\':
+						// value.line.errors[\''+col.property+'\'] !==
+						// undefined}">'+editElement+'<span class="help-block"
+						// ng-if="value.line.errors[\''+col.property+'\'] !==
+						// undefined">{{value.line.errors["'+col.property+'"]}}<br></span></div>';
+	    				return '<div class="form-group"  ng-class="udtTbodyHelpers.getValidationClass(\'subForm\'+value.line.id, col)">'+editElement+'<span class="help-block" ng-if="value.line.errors[\''+col.property+'\'] !== undefined">{{value.line.errors["'+col.property+'"]}}<br></span></div>';
+		    			
+	    			},
+	    			getValidationClass : function(formName, col){
+	    				
+	    				if(scope.udtTable.config.save.enableValidation
+	    					&& scope.datatableForm[formName] 
+	    					&& scope.datatableForm[formName][col.id] 
+	    					&& scope.datatableForm[formName][col.id].$invalid){
+	    					return 'has-error';
+	    				}else{
+	    					return undefined;
+	    				}
+	    				    				
+	    			},
+	    			getDisplayElement : function(col){
+	    				if(angular.isDefined(col.render) && col.render !== null){
+    						if(angular.isFunction(col.render)){
+    							return '<span udt-compile="udtTable.config.columns[$index].render(value.data, value.line)"></span>';
+    						}else if(angular.isString(col.render)){
+    							return '<span udt-compile="udtTable.config.columns[$index].render"></span>';
+    						}
+	    				}else{
+	    					if(col.type !== "boolean" && col.type !== "img" && col.type !== "imgzoom" && col.type !=="file"){
+	    						// return '<span udt-highlight="cellValue"
+								// keywords="udtTable.searchTerms.$"
+								// active="udtTable.config.filter.highlight"></span>';
+								return '<span ng-bind="cellValue"></span>'
+	    					}else if(col.type === "boolean"){
+	    						return '<div ng-switch on="cellValue"><i ng-switch-when="true" class="fa fa-check-square-o"></i><i ng-switch-default class="fa fa-square-o"></i></div>';
+	    					}else if(col.type==="img"){	                                 
+	    						return '<div  ng-click="udtTableHelpers.setImage(cellValue.value,cellValue.fullname,cellValue.width,cellValue.height)" class="thumbnail" ng-if="cellValue !== undefined" >' 
+	    						+'<div data-target="#udtModalImage" role="button" data-toggle="modal" ><a href="#"><img ng-src="data:image/{{cellValue.extension}};base64,{{cellValue.value}}" width="{{cellValue.width*' + col.width + '}}" height="{{cellValue.height*' + col.height + '}}"/></a></div></div>';		    					    
+	    					}else if(col.type==="imgzoom"){	                                 
+	    						return '<div  ng-click="udtTableHelpers.setImage(cellValue.value,cellValue.fullname,cellValue.width,cellValue.height)" class="thumbnail" ng-if="cellValue !== undefined" >' 
+	    						+'<div data-target="#udtModalImage" role="button" data-toggle="modal" ><a href="#"><img ng-src="data:image/{{cellValue.extension}};base64,{{cellValue.value}}" width="{{cellValue.width*0.7}}" height="{{cellValue.height*0.7}}"/></a></div></div>';		    					    
+	    					}else if(col.type==="file"){
+	    						return  '<a ng-href="data:application/{{cellValue.extension}};base64,{{cellValue.value}}" download="{{cellValue.fullname}}">'
+                                +'{{cellValue.fullname}}'
+                                +'</a>';
+	    					} else{
+	    						return ''
+	    					}
+	    				}
+	    			}
+    		};
+    		
+    		scope.udtTbodyHelpers = udtTbodyHelpers;
+    	}
+
+	};
+});;angular.module('ultimateDataTableServices').
 directive('udtTextareaResize', function(){
     		return {
     			restrict: 'A',
@@ -3739,9 +3929,7 @@ directive('udtToolbar', function(){
   		    	link: function(scope, element, attr) {
   		    	}
     		};
-    	});;"use strict";
-
-angular.module('ultimateDataTableServices').
+		});;angular.module('ultimateDataTableServices').
 directive('ultimateDatatable', ['$parse', '$q', '$timeout','$templateCache', function($parse, $q, $timeout, $templateCache){
     		return {
   		    	restrict: 'A',
@@ -3891,7 +4079,7 @@ filter('udtCollect', ['$parse','$filter',function($parse,$filter) {
     	    		if (angular.isObject(element)) {
     	    			var currentValue = $parse(key)(element, context);
     	    			if(undefined !== currentValue && null !== currentValue){
-    	    				//Array.prototype.push.apply take only arrays
+    	    				// Array.prototype.push.apply take only arrays
     	    				if(angular.isArray(currentValue)){
     	    					possibleValues = possibleValues.concat(currentValue);
     	    				}else{
@@ -3965,10 +4153,11 @@ filter('udtUnique', ['$parse', function($parse) {
 				}
 	
 				/**
-	    		* get an object and return array of values
-	    		* @param object
-	    		* @returns {Array}
-	    		*/
+				 * get an object and return array of values
+				 * 
+				 * @param object
+				 * @returns {Array}
+				 */
 	    		function toArray(object) {
 	    		    var i = -1,
 	    		        props = Object.keys(object),
@@ -3987,7 +4176,7 @@ filter('udtUnique', ['$parse', function($parse) {
 						  return self.indexOf(elm) === pos;
 					  })
     		      }
-    		      //store all unique members
+    		      // store all unique members
     		      var uniqueItems = [],
     		          get = $parse(property);
 
@@ -4000,13 +4189,11 @@ filter('udtUnique', ['$parse', function($parse) {
 					return true;
 				  });
 					  
-    		      //checked if the unique identifier is already exist
+    		      // checked if the unique identifier is already exist
     		      function some(array, member) {
     		        /*
-    		    	if(isUndefined(member)) {
-    		          return false;
-    		        }
-    		        */
+					 * if(isUndefined(member)) { return false; }
+					 */
     		        return array.some(function(el) {
     		          return equals(el, member);
     		        });
@@ -4016,7 +4203,8 @@ filter('udtUnique', ['$parse', function($parse) {
 factory('udtConvertValueServices', [function() {
     		var constructor = function($scope){
 				var udtConvertValueServices = {
-				    //Convert the value in inputUnit to outputUnit if the units are different
+				    // Convert the value in inputUnit to outputUnit if the units
+					// are different
 					convertValue : function(value, inputUnit, outputUnit, precision){
 							if(inputUnit !== outputUnit && !isNaN(value) && null !== value){
 								var convert = this.getConversion(inputUnit,outputUnit);
@@ -4033,7 +4221,7 @@ factory('udtConvertValueServices', [function() {
 							
 							return value;
 					},
-					//Get the multiplier to convert the value
+					// Get the multiplier to convert the value
 					getConversion : function(inputUnit, outputUnit){
 						if((inputUnit === '\u00B5g' && outputUnit === 'ng') || (inputUnit === 'ml' && outputUnit === '\u00B5l') || (inputUnit === 'pM' && outputUnit === 'nM')){
 							return (1/1000);
@@ -4043,6 +4231,10 @@ factory('udtConvertValueServices', [function() {
 							return 1000000;
 						}else if ((inputUnit === 'nM' && outputUnit === 'mM')){
 							return 1/1000000;
+						}else if((inputUnit === 'pmol' && outputUnit === 'fmol')){
+							return 1000;
+						}else if((inputUnit === 'fmol' && outputUnit === 'pmol')){
+							return 1/1000;
 						}
 						return undefined;
 					},
@@ -4051,7 +4243,6 @@ factory('udtConvertValueServices', [function() {
 						if(valueToConvert !== null && valueToConvert !== undefined && !angular.isNumber(valueToConvert)){
 							var valueConverted = value.replace(/\s+/g,"").replace(',','.');
 							valueConverted = parseFloat(valueConverted);
-							
 							return valueConverted;
 						}
 						return value;
@@ -4061,11 +4252,12 @@ factory('udtConvertValueServices', [function() {
 			};
     		return constructor;
 }]);;angular.module('ultimateDataTableServices').
-/* A I18n service, that manage internal translation in udtI18n
-* follow the http://tools.ietf.org/html/rfc4646#section-2.2.4 spec
-* preferedLanguageVar can be a string or an array of string
-* https://developer.mozilla.org/en-US/docs/Web/API/NavigatorLanguage
-*/
+/*
+ * A I18n service, that manage internal translation in udtI18n follow the
+ * http://tools.ietf.org/html/rfc4646#section-2.2.4 spec preferedLanguageVar can
+ * be a string or an array of string
+ * https://developer.mozilla.org/en-US/docs/Web/API/NavigatorLanguage
+ */
 factory('udtI18n', [function() {
     	var constructor = function(preferedLanguageVar) {
 				var udtI18n = {
@@ -4228,7 +4420,7 @@ factory('udtI18n', [function() {
 						}
 					},
 
-					//Translate the key with the correct language
+					// Translate the key with the correct language
 					Messages : function(key) {
 						  var translatedString = this.translateTable[this.preferedLanguage][key];
 						  if(translatedString === undefined) {
@@ -4290,7 +4482,9 @@ run(['$templateCache', function($templateCache) {
    +                        '</th>'
    +                    '</tr>'
    +                '</thead>'
-//   +                '<tbody infinite-scroll="udtTable.addScrollCurrentLimitTo()" infinite-scroll-distance="1" infinite-scroll-disabled="udtTable.disabledScroll()" udt-tbody>'
+// + '<tbody infinite-scroll="udtTable.addScrollCurrentLimitTo()"
+// infinite-scroll-distance="1"
+// infinite-scroll-disabled="udtTable.disabledScroll()" udt-tbody>'
    +                '<tbody udt-tbody>'
    +                    '<tr ng-if="udtTable.config.filter.columnMode && !udtTable.config.edit.start" class="filter">'
    +                        '<td ng-repeat="col in udtTable.config.columns" ng-if="!udtTable.isHide(col.id)">'
@@ -4302,7 +4496,12 @@ run(['$templateCache', function($templateCache) {
    +                            '<div udt-cell-header/>'
    +                        '</td>'
    +                    '</tr>'
-//   +                    '<tr ng-form name="subForm{{value.line.id}}" ng-repeat="value in udtTable.displayResult | limitTo:udtTable.getScrollCurrentLimitTo()" ng-click="udtTableHelpers.select(value.data, value.line)" ng-mouseover="udtTableHelpers.mouseover(value.data, value.line)" ng-mouseleave="udtTableHelpers.mouseleave(value.data, value.line)" ng-class="udtTableHelpers.getTrClass(value.data, value.line, this)">'
+// + '<tr ng-form name="subForm{{value.line.id}}" ng-repeat="value in
+// udtTable.displayResult | limitTo:udtTable.getScrollCurrentLimitTo()"
+// ng-click="udtTableHelpers.select(value.data, value.line)"
+// ng-mouseover="udtTableHelpers.mouseover(value.data, value.line)"
+// ng-mouseleave="udtTableHelpers.mouseleave(value.data, value.line)"
+// ng-class="udtTableHelpers.getTrClass(value.data, value.line, this)">'
    +                    '<tr ng-form name="subForm{{value.line.id}}" ng-repeat="value in udtTable.displayResult" ng-click="udtTableHelpers.select(value.data, value.line)" ng-mouseover="udtTableHelpers.mouseover(value.data, value.line)" ng-mouseleave="udtTableHelpers.mouseleave(value.data, value.line)" ng-class="udtTableHelpers.getTrClass(value.data, value.line, this)">'
    +                        '<td ng-if="udtTable.isShowLineEditButton()">'
    +                            '<button class="btn btn-default ng-scope" ng-click="udtTable.setEdit()" ng-show="!udtTable.isEdit(null, value.line)" ng-disabled="!udtTable.canEdit()" data-toggle="tooltip" title="Edit"><i class="fa fa-edit"></i></button>'
@@ -4374,7 +4573,7 @@ run(['$templateCache', function($templateCache) {
     '<div name="udt-messages" class="row">'
    +    '<div class="col-md-12 col-lg-12">'
    +        '<div ng-class="udtTable.config.messages.clazz" ng-if="udtTable.config.messages.text !== undefined">'
-   +            '<strong>{{udtTable.config.messages.text}}</strong>'
+   +                '<strong>{{ udtTable.config.messages.text }}</strong>'
    +        '</div>'
    +    '</div>'
    +'</div>');
@@ -4570,4 +4769,14 @@ run(['$templateCache', function($templateCache) {
 			   +'</div>');
 }]);
 /* ng-infinite-scroll - v1.0.0 - 2013-02-23 */
-//var mod;mod=angular.module("infinite-scroll",[]),mod.directive("infiniteScroll",["$rootScope","$window","$timeout",function(i,n,e){return{link:function(t,l,o){var r,c,f,a;return n=angular.element(n),f=0,null!=o.infiniteScrollDistance&&t.$watch(o.infiniteScrollDistance,function(i){return f=parseInt(i,10)}),a=!0,r=!1,null!=o.infiniteScrollDisabled&&t.$watch(o.infiniteScrollDisabled,function(i){return a=!i,a&&r?(r=!1,c()):void 0}),c=function(){var e,c,u,d;return d=n.height()+n.scrollTop(),e=l.offset().top+l.height(),c=e-d,u=n.height()*f>=c,u&&a?i.$$phase?t.$eval(o.infiniteScroll):t.$apply(o.infiniteScroll):u?r=!0:void 0},n.on("scroll",c),t.$on("$destroy",function(){return n.off("scroll",c)}),e(function(){return o.infiniteScrollImmediateCheck?t.$eval(o.infiniteScrollImmediateCheck)?c():void 0:c()},0)}}}]);
+// var
+// mod;mod=angular.module("infinite-scroll",[]),mod.directive("infiniteScroll",["$rootScope","$window","$timeout",function(i,n,e){return{link:function(t,l,o){var
+// r,c,f,a;return
+// n=angular.element(n),f=0,null!=o.infiniteScrollDistance&&t.$watch(o.infiniteScrollDistance,function(i){return
+// f=parseInt(i,10)}),a=!0,r=!1,null!=o.infiniteScrollDisabled&&t.$watch(o.infiniteScrollDisabled,function(i){return
+// a=!i,a&&r?(r=!1,c()):void 0}),c=function(){var e,c,u,d;return
+// d=n.height()+n.scrollTop(),e=l.offset().top+l.height(),c=e-d,u=n.height()*f>=c,u&&a?i.$$phase?t.$eval(o.infiniteScroll):t.$apply(o.infiniteScroll):u?r=!0:void
+// 0},n.on("scroll",c),t.$on("$destroy",function(){return
+// n.off("scroll",c)}),e(function(){return
+// o.infiniteScrollImmediateCheck?t.$eval(o.infiniteScrollImmediateCheck)?c():void
+// 0:c()},0)}}}]);

@@ -1,8 +1,5 @@
 package controllers.resolutions.api;
 
-// import static play.data.Form.form;
-//import static fr.cea.ig.play.IGGlobals.form;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -19,7 +16,7 @@ import org.mongojack.DBQuery.Query;
 import controllers.DocumentController;
 import fr.cea.ig.MongoDBResult;
 import fr.cea.ig.mongo.DBQueryBuilder;
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import models.laboratory.resolutions.instance.Resolution;
 import models.laboratory.resolutions.instance.ResolutionConfiguration;
 import models.utils.InstanceConstants;
@@ -31,17 +28,21 @@ import play.mvc.Result;
  * Controller around ResolutionConfigurations object
  *
  */
-//@Controller
 public class Resolutions extends DocumentController<ResolutionConfiguration> {
 
-	private final /*static*/ Form<ResolutionConfigurationsSearchForm> searchForm;// = form(ResolutionConfigurationsSearchForm.class); 
-//	private final /*static*/ Form<ResolutionConfiguration> resolutionConfigurationsForm;// = form(ResolutionConfiguration.class);
+	private final Form<ResolutionConfigurationsSearchForm> searchForm; 
+
+//	@Inject
+//	public Resolutions(NGLContext ctx) {
+//		super(ctx,InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class);	
+//		searchForm = ctx.form(ResolutionConfigurationsSearchForm.class);
+////		resolutionConfigurationsForm = ctx.form(ResolutionConfiguration.class);
+//	}
 
 	@Inject
-	public Resolutions(NGLContext ctx) {
+	public Resolutions(NGLApplication ctx) {
 		super(ctx,InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class);	
 		searchForm = ctx.form(ResolutionConfigurationsSearchForm.class);
-//		resolutionConfigurationsForm = ctx.form(ResolutionConfiguration.class);
 	}
 
 	public Result list() {

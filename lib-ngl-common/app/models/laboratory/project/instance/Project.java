@@ -1,14 +1,14 @@
 package models.laboratory.project.instance;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.mongojack.MongoCollection;
+import java.util.function.Supplier;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import fr.cea.ig.DBObject;
+import fr.cea.ig.ngl.dao.projects.ProjectsDAO;
+import fr.cea.ig.ngl.utils.GuiceSupplier;
 import models.laboratory.common.instance.Comment;
 import models.laboratory.common.instance.PropertyValue;
 import models.laboratory.common.instance.State;
@@ -16,9 +16,8 @@ import models.laboratory.common.instance.TraceInformation;
 import models.utils.InstanceConstants;
 import validation.ContextValidation;
 import validation.IValidation;
+import validation.common.instance.CommonValidationHelper;
 import validation.project.instance.ProjectValidationHelper;
-
-
 
 /**
  * Instance Project is stocked in Collection mongodb Project
@@ -27,39 +26,42 @@ import validation.project.instance.ProjectValidationHelper;
  * @author mhaquell
  *
  */
-@MongoCollection(name="Project")
 public class Project extends DBObject implements IValidation {
 
-	public String name;
-	public String typeCode;
-	public String categoryCode;
-	public State state;
-    public String description;
-    public List<Comment> comments;
-	public TraceInformation traceInformation;
-	public Map<String, PropertyValue> properties;
-	public String umbrellaProjectCode;
-	public BioinformaticParameters bioinformaticParameters;
-	public String lastSampleCode;
-	public Integer nbCharactersInSampleCode = 4;
-	public List<String> authorizedUsers;
+	public static final Supplier<ProjectsDAO> find = new GuiceSupplier<>(ProjectsDAO.class);
 	
-	public Boolean archive;
+	public String                     name;
+	public String                     typeCode;
+	public String                     categoryCode;
+	public State                      state;
+    public String                     description;
+    public List<Comment>              comments;
+	public TraceInformation           traceInformation;
+	public Map<String, PropertyValue> properties;
+	public String                     umbrellaProjectCode;
+	public BioinformaticParameters    bioinformaticParameters;
+	public String                     lastSampleCode;
+	public Integer                    nbCharactersInSampleCode = 4;
+	public List<String>               authorizedUsers;
+	public List<String> 			  projectManagers;
+
+	public Project() {}
+	
+	public Project(Map<String, PropertyValue> properties) {
+		this.properties = properties;
+	}
 	
 	@Override
 	@JsonIgnore
 	public void validate(ContextValidation contextValidation) {				
-		ProjectValidationHelper.validateId(this, contextValidation);
-		ProjectValidationHelper.validateCode(this, InstanceConstants.PROJECT_COLL_NAME, contextValidation);
-		ProjectValidationHelper.validateTraceInformation(traceInformation, contextValidation);
-		ProjectValidationHelper.validateProjectType(typeCode,properties, contextValidation);
-		ProjectValidationHelper.validateProjectCategoryCode(categoryCode,contextValidation);
-		ProjectValidationHelper.validateState(typeCode,state, contextValidation);
-		ProjectValidationHelper.validateUmbrellaProjectCode(umbrellaProjectCode, contextValidation);
-		ProjectValidationHelper.validateBioformaticParameters(bioinformaticParameters,contextValidation);
-	}
-
-	public Project() {
-		this.properties = new HashMap<>();
+		CommonValidationHelper .validateIdPrimary                    (contextValidation, this);
+		CommonValidationHelper .validateCodePrimary                  (contextValidation, this, InstanceConstants.PROJECT_COLL_NAME);
+		CommonValidationHelper .validateTraceInformationRequired     (contextValidation, traceInformation);
+		ProjectValidationHelper.validateProjectTypeCodeRequired      (contextValidation, typeCode, properties);
+		ProjectValidationHelper.validateProjectCategoryCodeRequired  (contextValidation, categoryCode);
+		CommonValidationHelper .validateStateRequired                (contextValidation, typeCode, state);
+		ProjectValidationHelper.validateUmbrellaProjectCodeOptional  (contextValidation, umbrellaProjectCode);
+		ProjectValidationHelper.validateBioformaticParametersRequired(contextValidation, bioinformaticParameters);
+		ProjectValidationHelper.validateArchiveProperties			 (contextValidation, code, typeCode, properties, true);
 	}
 }

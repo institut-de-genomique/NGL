@@ -1,5 +1,6 @@
-angular.module('home').controller('BionanoDepotCtrl',['$scope', '$parse','atmToSingleDatatable',
-                                                             function($scope,$parse, atmToSingleDatatable) {
+// FDS 13/10/2020 NGL-3000 ajout dateServices
+angular.module('home').controller('BionanoDepotCtrl',['$scope', '$parse','atmToSingleDatatable', 'dateServices',
+                                                             function($scope,$parse, atmToSingleDatatable, dateServices) {
 	
 	 // NGL-1055: name explicite pour fichier CSV exporté: typeCode experience
 	 // NGL-1055: mettre getArray et codes:'' dans filter et pas dans render
@@ -132,13 +133,33 @@ angular.module('home').controller('BionanoDepotCtrl',['$scope', '$parse','atmToS
 				dynamic:true,
 			}
 	};
-
-		$scope.$on('save', function(e, callbackFunction) {	
-			console.log("call event save on one-to-void");
-			$scope.atmService.data.save();
-			$scope.atmService.viewToExperimentOneToVoid($scope.experiment);
-			$scope.$emit('childSaved', callbackFunction);
-		});
+	 
+	// NGL-3000 ajouter une vérification de la date saisie + controle date n'est pas dans le futur
+	// 21/10/2020 isValidDateFormat ne controle pas une date entrée sur 2 digits...la retirer pour l'instant
+	$scope.$on('save', function(e, callbackFunction) {
+		console.log("call event save");
+		// tester si la propriété existe (existe pas a l'etat new???)
+		if ( ! $scope.experiment.experimentProperties.starRunDate ) {
+		   save(callbackFunction);
+		} else {
+			// une valeur definie existe ( elle est force a undefined a l'etat new...) => la controler
+			// avec l'utilisation d'un calendrier cette verification est superflue...
+			/*if ( ! dateService.isValidDateFormat($scope.experiment.experimentProperties.runStartDate.value, Messages("date.format"))){
+				$scope.messages.setError(Messages("experiment.msg.badformat", "Date réelle de dépôt", Messages("date.format")));
+				$scope.$emit('childSavedError', callbackFunction);
+			} else {*/
+				//tout OK sauvegarder !!!
+				save(callbackFunction);
+			//}
+		}
+	});
+	
+	// ancien contenu de $scope.$on('save', ......
+	function save(callbackFunction){
+		$scope.atmService.data.save();
+		$scope.atmService.viewToExperimentOneToVoid($scope.experiment);
+		$scope.$emit('childSaved', callbackFunction);
+	}
 		
 		$scope.$on('refresh', function(e) {
 			console.log("call event refresh on one-to-void");		
@@ -177,5 +198,14 @@ angular.module('home').controller('BionanoDepotCtrl',['$scope', '$parse','atmToS
 		
 		$scope.atmService = atmService;
 		
-
+		// ajouté pour NGL-3000
+		var dateService=dateServices($scope);
+		
+		//en mode creation initialiser experimentProperties.runStartDate sinon pb avec NGL-3000
+		if($scope.isCreationMode()){
+			if(!$parse("experimentProperties.runStartDate.value")($scope.experiment)){
+				console.log('initialiser experimentProperties.runStartDate.value');
+				$parse("experimentProperties.runStartDate.value").assign($scope.experiment, undefined); 
+			}
+		}
 }]);

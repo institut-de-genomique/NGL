@@ -43,9 +43,9 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 	
 	var units = {
 		 "volume":[{"code":"µL","name":"µL"}],	
-		 "concentration":[{"code":"ng/µl","name":"ng/µl"},{"code":"nM","name":"nM"}],	
+		 "concentration":[{"code":"ng/µl","name":"ng/µl"},{"code":"nM","name":"nM"},{"code":"fmol/µl","name":"fmol/µl"}],	
 		 "quantity":[{"code":"ng","name":"ng"},{"code":"nmol","name":"nmol"}],
-		 "size":[{"code":"pb","name":"pb"}]			
+		 "size":[{"code":"pb","name":"pb"},{"code":"nt","name":"nt"}]			
 	};
 	
 	
@@ -78,6 +78,7 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 	/* buttons section */
 	$scope.save = function(){
 		saveInProgress = true;	
+		$scope.messages.clear();
 		$http.put(jsRoutes.controllers.containers.api.Containers.update($scope.container.code).url, $scope.container)
 		.success(function(data, status, headers, config) {
 			$scope.container = data;
@@ -364,7 +365,8 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 
 		var promises = [];
 		//promises.push($http.get(jsRoutes.controllers.containers.api.Containers.list().url, {params : {treeOfLifePathRegex:','+currentContainer.code+'$|,'+currentContainer.code+','}}));
-		promises.push($http.get(jsRoutes.controllers.containers.api.Containers.list().url, {params : {treeOfLifePathRegex:treeOfLifePathRegex}}));
+		promises.push($http.get(jsRoutes.controllers.containers.api.Containers.list().url, {params : {treeOfLifePathRegex:treeOfLifePathRegex+'$'}}));
+		promises.push($http.get(jsRoutes.controllers.containers.api.Containers.list().url, {params : {treeOfLifePathRegex:treeOfLifePathRegex+','}}));
 		
 		if(codes.parentContainerCodes.length > 0){ // Case no paths
 			var nbElementByBatch = Math.ceil(codes.parentContainerCodes.length / 6); //6 because 6 request max in parrallel with firefox and chrome

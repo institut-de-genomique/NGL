@@ -4,48 +4,6 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
                                                   function($http, $scope, $routeParams, mainService, lists, tabService, messages, datatable) { 
 
 
-	var studiesDTConfig = {
-			name:'studiesDT',
-			order :{by:'code',mode:'local', reverse:true},
-			search:{
-				url:jsRoutes.controllers.sra.studies.api.Studies.list()
-			},
-			pagination:{
-				active:true,
-				mode:'local'
-			},
-			select:{active:true},
-			showTotalNumberRecords:true,
-			edit : {
-				active:false, // permettre edition des champs editables
-				showButton : false,// bouton d'edition visible
-				withoutSelect : true,
-				columnMode : true,
-				lineMode : function(line){
-					return true;
-				}
-			},
-			
-			cancel : {
-				showButton:true
-			},
-			hide:{
-				active:true,
-				showButton:true
-			},
-			exportCSV:{
-				active:false
-			},
-			show:{                   // bouton pour epingler si on passe par details-ctrl.js 
-				active:true,
-				add :function(line){
-					tabService.addTabs({label:line.code,href:jsRoutes.controllers.sra.studies.tpl.Studies.get(line.code).url,remove:true});
-				}
-			},
-			
-
-	};
-	
 
 	
 	var experimentsDTConfig = {
@@ -56,7 +14,7 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 				active:true,
 				mode:'local'
 			},
-			select:{active:true},
+			select:{active:false, showButton:false},
 			showTotalNumberRecords:true,
 			edit:{
 				active:true,
@@ -80,24 +38,29 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 					return line;
 				},
 			},
-			/*cancel : {
-				showButton:true
+			cancel : {
+				showButton:false
 			},
 			hide:{
-				active:true,
-				showButton:true
+				active:false,
+				showButton:false
 			},
 			exportCSV:{
-				active:false
+				active:true
 			},
-			*/
+		
 			columns : [
-			        {property:"code",
+			        {property:"traceInformation.creationDate",
+			        	header: Messages("experiment.traceInformation.creationDate"),
+			        	type :"date",		    	  	
+			        	order:false
+			        },
+ 					{property:"code",
 			        	header: Messages("experiment.code"),
 			        	type :"text",		    	  	
 			        	order:false
-			        },
-			         {property:"accession",
+			        },			        
+			        {property:"accession",
 			        	header: Messages("experiment.accession"),
 			        	type :"text",		    	  	
 			        	order:false
@@ -123,7 +86,7 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 			        	edit:true,
 						order:false,
 				    	choiceInList:true,
-				    	//listStyle:'bt-select-multiple',
+				    	//listStyle:'bt-select',
 				    	possibleValues:'sraVariables.librarySelection',
 				    },
 				    {property:"libraryStrategy",
@@ -133,7 +96,7 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 						edit:true,
 						order:false,
 						choiceInList:true,
-						//listStyle:'bt-select-multiple',
+						//listStyle:'bt-select',
 						possibleValues:'sraVariables.libraryStrategy',
 				    },
 					{property:"librarySource",
@@ -143,7 +106,7 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 						edit:true,
 						order:false,
 						choiceInList:true,
-						//listStyle:'bt-select-multiple',
+						//listStyle:'bt-select',
 						possibleValues:'sraVariables.librarySource',
 					},
 					{property:"libraryLayout",
@@ -153,7 +116,7 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 						edit:false,
 						order:false,
 						choiceInList:true,
-						//listStyle:'bt-select-multiple',
+						//listStyle:'bt-select',
 						possibleValues:'sraVariables.libraryLayout',
 					},	
 					{property:"libraryLayoutNominalLength",
@@ -167,11 +130,11 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 						header: Messages("experiment.libraryLayoutOrientation"),
 						type :"String",
 						hide:true,
-						edit:true,
-						order:false,
-						choiceInList:true,
-						//listStyle:'bt-select-multiple',
-						possibleValues:'sraVariables.libraryLayoutOrientation',
+//						edit:false,
+//						order:false,
+//						choiceInList:true,
+//						//listStyle:'bt-select',
+//						possibleValues:'sraVariables.libraryLayoutOrientation',
 					},	
 					{property:"libraryName",
 						header: Messages("experiment.libraryName"),
@@ -248,13 +211,29 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 				mode:'local'
 			},			
 			showTotalNumberRecords:true,
+			select:{active:false, showButton:false},
 			edit : {
-				active:true,
+				active:false,
 				showButton : false,
 				withoutSelect : true,
 				columnMode : true
 			},
-			columns : [
+			cancel : {
+				showButton:false
+			},
+			hide:{
+				active:false,
+				showButton:false
+			},
+			exportCSV:{
+				active:true
+			},
+			columns : [ 
+					  {property:"traceInformation.creationDate",
+			        	header: Messages("run.traceInformation.creationDate"),
+			        	type :"date",		    	  	
+			        	order:false
+			           },
 			           {property:"run.code",
 			        	header: Messages("run.code"),
 			        	type :"text",		    	  	
@@ -287,22 +266,27 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 				active:true,
 				mode:'local'
 			},
-			select:{active:true},
+			select:{active:false, showButton:false},
+			cancel : {
+				active:false, showButton:false
+			},
+			hide:{
+				active:false,
+				showButton:false
+			},
+			select:{active:false},
 			showTotalNumberRecords:true,
 			edit : {
-				active:true,
+				active:false,
 				showButton : false,
 				withoutSelect : true,
 				columnMode : true
 			},
-			cancel : {
-				showButton:true
-			},
-			hide:{
-				active:true
+			cancel:{
+				showButton:false
 			},
 			exportCSV:{
-				active:false
+				active:true
 			},
 			columns : [
 			           {property:"relatifName",
@@ -310,7 +294,7 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 			        	type :"text",		    	  	
 			        	order:true
 			           }
-		    ]	        
+		    		  ]	        
 		};	
 
 	
@@ -328,6 +312,9 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 		$scope.mainService = mainService;
 		$scope.messages = messages();
 
+		
+		$scope.isPublic=false;
+		$scope.visibility="undefined";
 		$scope.isReleasable = function(userName) { return false; }; // fonction qui renvoie toujours false
 		// si on souhaite affichage bouton si on vient du menu release :
 		//$scope.release=$scope.mainService.get("release");
@@ -341,8 +328,15 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 		// Recuperer le study en passant par get :		
 		$http.get(jsRoutes.controllers.sra.studies.api.Studies.get($routeParams.code).url).success(function(data){
 		//console.log("nbre de study:"+data.length);
-		
+	
 		$scope.study = data;
+		
+		// Ajout des onglets à gauche si rafraichissement page
+		if(tabService.getTabs().length == 0){			
+			//tabService.addTabs({label:Messages('studies.menu.consultation'),href:jsRoutes.controllers.sra.studies.tpl.Studies.home("consultation").url,remove:true});
+			tabService.addTabs({label:$scope.study.code,href:jsRoutes.controllers.sra.studies.tpl.Studies.get($scope.study.code).url,remove:true});
+			tabService.activeTab($scope.getTabs(0)); // active l'onglet indiqué, le met en bleu.
+		}
 		
 		// On compare les date :
 		// $scope.study.releaseDate correspond à la date de release exprimée en milliseconde ecoulées depuis 01/01/1970 (Date Epoch) 
@@ -350,26 +344,30 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 		/*if ($scope.study.traceInformation.createUser!=userName) {
 			$scope.isReleasable = false;
 			console.log("utilisateur" + userName + "!= createur" + $scope.study.traceInformation.createUser);
-		} else */if ( !$scope.study.releaseDate) {
+		} else */
+
+		
+		
+		if ( !$scope.study.releaseDate) {
 			//$scope.isReleasable = function(userName){return false;}; // isReleasable est une fonction
 			console.log("study.releaseDate non renseigné");
+			$scope.visibility="undefined";
 		} else {		
-			if ( $scope.study.state.code != "F-SUB"){
-				console.log("study.state.code avec status different de F-SUB : "+$scope.study.state.code);
-				//$scope.isReleasable = function(userName){return false;};
+			console.log("study.releaseDate" + $scope.study.releaseDate);
+			console.log("Date.now" + Date.now());
+			if (($scope.study.releaseDate > Date.now()) && $scope.study.state.code == "SUB-F") {
+				$scope.isReleasable = function(userName){return $scope.study.traceInformation.createUser==userName;};
+				console.log("donnée confidentielle");
+				console.log("isReleasable: " + $scope.isReleasable);
+				$scope.visibility="private";
 			} else {
-				console.log("study.releaseDate" + $scope.study.releaseDate);
-				console.log("Date.now" + Date.now());
-				if ($scope.study.releaseDate > Date.now()){
-					$scope.isReleasable = function(userName){return $scope.study.traceInformation.createUser==userName;};
-					console.log("donnée confidentielle");
-				} else {
-					//$scope.isReleasable = function(userName){return false;};// return false && $scope.study.traceInformation.createUser==userName;
-					console.log("donnée publique");
-				}
+				//$scope.isReleasable = function(userName){return false;};// return false && $scope.study.traceInformation.createUser==userName;
+				console.log("donnée publique");
+				$scope.isPublic=true;
+				$scope.visibility="public";	
 			}
 		}
-		
+		console.log("scope.visibility " + $scope.visibility);
 		
 		/* Interressant pour le formatage :
 		console.log("releaseDate="+$scope.study.releaseDate);
@@ -424,9 +422,9 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 		$scope.messages.clear();
 		console.log("je suis dans le bouton studies.details-ctrl.js.userRelease");
 		
-		/*Partie faites maintenant en passant par createFromStudy
+		/*Partie faites maintenant en passant par createFromStudyRelease
 		var state = angular.copy($scope.study.state);
-		state.code = "IW-SUB-R";
+		state.code = "SUBR-SMD-IW";
 		$http.put(jsRoutes.controllers.sra.studies.api.Studies.updateState($scope.study.code).url, state)
 			.success(function(data){
 		   		$scope.messages.clazz="alert alert-success";
@@ -438,18 +436,31 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 				$scope.messages.setError("release");	
 			});	
 		  */                    
-		 $http.put(jsRoutes.controllers.sra.submissions.api.Submissions.createFromStudy($scope.study.code).url)
+		 $http.put(jsRoutes.controllers.sra.submissions.api.Submissions.createFromStudyRelease($scope.study.code).url)
 			.success(function(data){
-		   		$scope.messages.clazz="alert alert-success";
-				$scope.messages.text=Messages('studies.msg.release.success');
-				$scope.messages.open();
+//		   		$scope.messages.clazz="alert alert-success";
+//				$scope.messages.text=Messages('studies.msg.release.success');
+//				$scope.messages.open();
+				console.log("code de la soumission crée " + data.code);
+				var submissionCode = data.code;
+				var submissionState = angular.copy(data.state);
+				submissionState.code = "SUBR-SMD-IW";
+				$http.put(jsRoutes.controllers.sra.submissions.api.Submissions.updateState(submissionCode).url, submissionState)
+					.success(function(data){
+				   		$scope.messages.clazz="alert alert-success";
+						$scope.messages.text=Messages('studies.msg.release.success');
+						$scope.messages.open();
+					})				
+					.error(function(data){
+						$scope.messages.addDetails(data);
+						$scope.messages.setError("Probleme pour la release du study");	
+				});		
 			})
 			.error(function(data){
 				$scope.messages.addDetails(data);
-				$scope.messages.setError("release");	
+				$scope.messages.setError("Probleme pour la release");	
 			});	
-		 
-		 
+	 
 		 
 		 
 	};

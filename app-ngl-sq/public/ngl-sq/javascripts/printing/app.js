@@ -1,12 +1,11 @@
 "use strict";
  
-angular.module('home', ['ngRoute','ultimateDataTableServices', 'commonsServices'], function($routeProvider, $locationProvider) {
+angular.module('home', ['ngRoute','ultimateDataTableServices', 'commonsServices']).config(['$routeProvider, $locationProvider', function($routeProvider, $locationProvider) {
 	
 	$routeProvider.when('/printing/tags/home', {
 		templateUrl : jsRoutes.controllers.printing.tpl.Tags.display().url,
 		controller : 'TagsCtrl'
 	});
-	
 	
 	$routeProvider.otherwise({redirectTo: '/printing/tags/home'});
 
@@ -15,4 +14,4 @@ angular.module('home', ['ngRoute','ultimateDataTableServices', 'commonsServices'
 		  enabled: true,
 		  requireBase: false
 		});
-});
+}]);

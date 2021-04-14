@@ -283,23 +283,35 @@ angular.module('home').controller('SearchContainersCtrl', ['$scope','$routeParam
 			$scope.searchService.lists.refresh.processTypes({"categoryCode":$scope.searchService.form.processCategory});
 	};
 	
-	$scope.changeProcessType = function(){
-		//lists.refresh.filterConfigs({pageCodes:["process-"+$scope.searchService.form.processTypeCode]}, "process-"+$scope.searchService.form.processTypeCode);
-		if(angular.isDefined($scope.searchService.form.processCategory)){						
-			$scope.searchService.lists.refresh.filterConfigs({pageCodes:["process-"+$scope.searchService.form.processTypeCode]}, "process-"+$scope.searchService.form.processTypeCode);			                                    		 
-		} else{
-			$scope.searchService.form.processTypeCode = undefined;			                                    		
-		}		
+	$scope.changeProcessType = function() {
+		// NGL-2908 - On ne veut plus chercher des filtres additionnels dynamiques.
 
-		$scope.searchService.initAdditionalFilters();
-		$scope.searchService.initAdditionalProcessFilters();
+		/* lists.refresh.filterConfigs({pageCodes:["process-"+$scope.searchService.form.processTypeCode]}, "process-"+$scope.searchService.form.processTypeCode);
+		if (angular.isDefined($scope.searchService.form.processCategory)){						
+			$scope.searchService.lists.refresh.filterConfigs({pageCodes:["process-"+$scope.searchService.form.processTypeCode]}, "process-"+$scope.searchService.form.processTypeCode);			                                    		 
+		} else{ 
+			$scope.searchService.form.processTypeCode = undefined;			                                    		
+		} */
+		
+		// On ne cherche plus de filtres additionnels donc on n'a plus besoin d'initialiser des filtres additionnels.
+
+		/* $scope.searchService.initAdditionalFilters();
+		$scope.searchService.initAdditionalProcessFilters(); */
 	};
 	
 	$scope.reset = function(){
 		$scope.searchService.form = {};
 		$scope.searchService.additionalProcessFilters=[];
 		$scope.searchService.isProcessFiltered=false;
-		
+		// resetTextareas
+		(function(){
+			Array.from(document.getElementsByTagName('textarea')).forEach(function(element) {
+				var elementScope = angular.element(element).scope();
+				if(elementScope.textareaValue){
+					elementScope.textareaValue = null;
+				}
+			});
+		})();
 	};
 	
 	$scope.resetSampleCodes = function(){
@@ -648,15 +660,15 @@ angular.module('home').controller('SearchContainersCtrl', ['$scope','$routeParam
 	$scope.searchService.selectedAddColumns=[];
 	$scope.searchService.getColumns=$scope.datatableConfig.columns;
 	
-	$http.get(jsRoutes.controllers.processes.api.ProcessTypes.list().url,{params:{"list":true}})
+	// NGL-2908 - On ne veut plus chercher des filtres additionnels dynamiques.
+	/* $http.get(jsRoutes.controllers.processes.api.ProcessTypes.list().url,{params:{"list":true}})
 		.success(function(data, status, headers, config) {
 			var processesTypes = data;
 			angular.forEach(processesTypes, function(processType) {
 				$scope.searchService.lists.refresh.filterConfigs({pageCodes:["process-"+processType.code]}, "process-"+processType.code);
 			})       	 			
 	 
-		});
-	
+	}); */
 	
 	if(angular.isUndefined(mainService.getForm())){
 		$scope.searchService.form = {};

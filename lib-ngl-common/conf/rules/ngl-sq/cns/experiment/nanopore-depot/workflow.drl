@@ -1,6 +1,6 @@
 package rules
 
-rule "Create Run and ReadSets Nanopore"
+rule "Create Run"
 	@nglSQ( workflow )
 	dialect "java"
 	salience 1000
@@ -37,14 +37,19 @@ rule "Create Run and ReadSets Nanopore"
 		run.treatments.put("minknowBasecalling",treatment);
 		
 		//Add properties
-		if($instrumentUsed.typeCode.equals("promethION")){
+		if($instrumentUsed.typeCode.equals("promethION") || $instrumentUsed.typeCode.equals("gridION")){
 			run.properties.put("flowcellChemistry",$outputContainerUsed.instrumentProperties.get("flowcellChemistry"));
 		}else{
 			run.properties.put("flowcellChemistry",$experiment.instrumentProperties.get("flowcellChemistry"));
 		}
 		
-		
-		insert(run);			
+		Run runInDb = MongoDBDAO.findOne(InstanceConstants.RUN_ILLUMINA_COLL_NAME, Run.class, DBQuery.is("code", run.code));
+
+ 		if (runInDb == null) { // Si le run n'existe pas déjà, on continue. Sinon, on s'arrête.
+			insert(run);	
+		} else {
+			Logger.error("Run with code '" + run.code + "' already exists with state '" + runInDb.state.code + "', aborting rule 'Create Run'.");
+		}		
 end
 
 
@@ -92,6 +97,20 @@ rule "Update type Run RMKIB"
 		update($run);
 end
 
+rule "Update type Run RMKIC"
+	@nglSQ( workflow )
+	dialect "java"
+	salience 900
+	no-loop
+	when 
+	$run:Run(typeCode==null,$instrumentTypeCode:instrumentUsed.typeCode,$instrumentTypeCode=="mk1c")
+	then
+		Logger.debug("typeCode RMKIC");
+		$run.typeCode="RMKIC";	
+		$run.categoryCode="nanopore";
+		update($run);
+end
+
 rule "Update type Run PROMETHION"
 	@nglSQ( workflow )
 	dialect "java"
@@ -102,6 +121,20 @@ rule "Update type Run PROMETHION"
 	then
 		Logger.debug("typeCode RPROMETHION");
 		$run.typeCode="RPROMETHION";	
+		$run.categoryCode="nanopore";
+		update($run);
+end
+
+rule "Update type Run GRIDION"
+	@nglSQ( workflow )
+	dialect "java"
+	salience 900
+	no-loop
+	when 
+	$run:Run(typeCode==null,$instrumentTypeCode:instrumentUsed.typeCode,$instrumentTypeCode=="gridION")
+	then
+		Logger.debug("typeCode RGRIDION");
+		$run.typeCode="RGRIDION";	
 		$run.categoryCode="nanopore";
 		update($run);
 end
@@ -121,52 +154,7 @@ rule "Save Run Nanopore"
 		update($run);			
 end
 
-rule "Create ReadSet"
-@nglSQ( workflow )
-	dialect "java"
-	salience 700
-	no-loop
-	when  
-		$experiment:Experiment($atomic:atomicTransfertMethods,$state:state.code,$typeCode:typeCode,$typeCode=="nanopore-depot",$state=="F")
-		AtomicTransfertMethod($inputContainerUseds :inputContainerUseds,$laneNumber:line) from $atomic
-		InputContainerUsed($code:code,$contents:contents) from $inputContainerUseds
-		$content:Content() from $contents 
-		$run:Run(categoryCode=="nanopore")
-		$contextError:ContextValidation()
-	then
-		Logger.debug("ReadSet Creation for run "+$run.code);
-		//Creation des readsets
-		Date runStartDate = (Date)$experiment.experimentProperties.get("runStartDate").value;
- 		 
-		ReadSet readSet=new ReadSet();
-		readSet.typeCode="rsnanopore";
-		readSet.code=$content.sampleCode+"_ONT_"+$laneNumber+"_"+$run.containerSupportCode;
-		if($content.properties.containsKey("tag")){
-			readSet.code=readSet.code+"."+$content.properties.get("tag").value;
-		}
-		
-		
-		readSet.state=new State("N","ngsrg");
-		readSet.submissionState = new State("NONE", "ngsrg");
-		
-		readSet.runCode=$run.code;
-		readSet.runTypeCode=$run.typeCode;
-		readSet.runSequencingStartDate=runStartDate;
-		readSet.laneNumber=1;
-		readSet.sampleCode=$content.sampleCode;
-		readSet.projectCode=$content.projectCode;
-		//TO DO
-		readSet.path="A_RENSEIGNER";
-     	readSet.location="CNS";	
-		readSet.traceInformation=new TraceInformation();
-		readSet.traceInformation.setTraceInformation("ngsrg");
-	    $contextError.setCreationMode();
-	    InstanceHelpers.save(InstanceConstants.READSET_ILLUMINA_COLL_NAME,readSet,$contextError,true);
-	    MongoDBDAO.update(InstanceConstants.RUN_ILLUMINA_COLL_NAME, Run.class
-				,DBQuery.is("code",$run.code)
-				,DBUpdate.addToSet("sampleCodes", $content.sampleCode).addToSet("projectCodes",$content.projectCode));
-	    
-end
+
 
 //!!!!! NEED TO CALL IN LAST BECAUSE THE Workflows.setRunState() call DROOLS AND INACTIVE OTHER RULES EXECUTION!!!!!!
 rule "Update Workflow Run Nanopore"

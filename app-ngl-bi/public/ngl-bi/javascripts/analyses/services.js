@@ -8,32 +8,41 @@
 			columns.push({	"property":"code",
 							"header":Messages("analyses.code"),
 							"type":"text",		    	  	
-				    	  	"order":true
+							  "order":true,
+							  "position":1
 			});
 			columns.push({	"property":"typeCode",
 							"filter":"codes:'type'",
 							"header":Messages("analyses.typeCode"),
 							"type":"text",
-							"order":true
+							"order":true,
+							"position":2
 			});
 			columns.push({	"property":"masterReadSetCodes",
 							"header":Messages("analyses.masterReadSetCodes"),
 							"type":"text",
+							"render":"<div list-resize='cellValue' list-resize-min-size='3'vertical>",
+							"position":3
 			});					
 			columns.push({	"property":"projectCodes",
 							"header":Messages("analyses.projectCodes"),
 							"type":"text",
+							"render":"<div list-resize='cellValue' list-resize-min-size='3'vertical>",
+							"position":4
 			});
 			columns.push({	"property":"sampleCodes",
 							"header":Messages("analyses.sampleCodes"),
 							"type":"text",
+							"render":"<div list-resize='cellValue' list-resize-min-size='3'vertical>",
+							"position":5
 			});
 			if(!mainService.isHomePage('state')){
 				columns.push({	"property":"state.code",
 								"filter":"codes:'state'",
 								"header":Messages("analyses.state.code"),
 								"type":"text",
-								"order":true
+								"order":true,
+								"position":6
 				});
 			}else{
 				columns.push({	"property":"state.code",
@@ -44,7 +53,8 @@
 								"order":true,
 						    	"choiceInList":true,
 						    	"listStyle":'bt-select',
-						    	"possibleValues":'searchService.lists.getStates()'
+								"possibleValues":'searchService.lists.getStates()',
+								"position":6
 				});
 			}
 			if(!mainService.isHomePage('valuation')){
@@ -52,13 +62,22 @@
 								"filter":"codes:'valuation'",
 								"header":Messages("analyses.valuation.valid"),
 								"type":"text",
-								"order":true
+								"order":true,
+								"position":7
 				});
 				columns.push({	"property":"valuation.resolutionCodes",
 								"header":Messages("analyses.valuation.resolutions"),
 								"render":'<div bt-select ng-model="value.data.valuation.resolutionCodes" bt-options="valid.code as valid.name group by valid.category.name for valid in searchService.lists.getResolutions()" ng-edit="false"></div>',
 								"type":"text",
-								"hide":true
+								"hide":true,
+								"position":8
+				});
+				columns.push({	"property":"traceInformation.creationDate",
+								"header":Messages("analyses.valuation.creationDate"),
+								"type":"date",
+								"order":true,
+								"hide":true,
+								"position":9
 				});
 			}else{
 				columns.push({	"property":"valuation.valid",
@@ -69,7 +88,8 @@
 								"edit":true,
 								"choiceInList":true,
 								"listStyle":'bt-select',
-								"possibleValues":'searchService.lists.getValuations()'
+								"possibleValues":'searchService.lists.getValuations()',
+								"position":7
 				});
 				columns.push({	"property":"valuation.criteriaCode",
 								"filter":"codes:'valuation_criteria'",
@@ -78,7 +98,8 @@
 								"edit":true,
 								"choiceInList":true,
 								"listStyle":'bt-select',
-								"possibleValues":'searchService.lists.getValuationCriterias()'
+								"possibleValues":'searchService.lists.getValuationCriterias()',
+								"position":8
 				});
 				columns.push({	"property":"valuation.resolutionCodes",
 								"header":Messages("analyses.valuation.resolutions"),
@@ -88,7 +109,8 @@
 								"choiceInList":true,
 						    	"listStyle":'bt-select-multiple',
 						    	"possibleValues":'searchService.lists.getResolutions()',
-						    	"groupBy":'category.name'
+								"groupBy":'category.name',
+								"position":9
 				});
 			}					
 			return columns;
@@ -108,6 +130,8 @@
 				lists.refresh.valuationCriterias({objectTypeCode:"Analysis"});
 				
 				searchService.lists.refresh.reportConfigs({pageCodes:["analysis"+"-"+mainService.getHomePage()]});
+				searchService.lists.refresh.filterConfigs({pageCodes:["analysis-addfilters"]}, "analysis-addfilters");
+				searchService.lists.refresh.reportConfigs({pageCodes:["analysis-addcolumns"]}, "analysis-addcolumns");
 				searchService.lists.refresh.users();
 				isInit=true;
 			}
@@ -122,8 +146,9 @@
 				form : undefined,
 				reportingConfigurationCode:undefined,
 				reportingConfiguration:undefined,
-				//additionalsColumns:[],
-				//selectedAddColumns:[],
+				additionalFilters:[],
+				additionalColumns:[],
+				selectedAddColumns:[],
 				setRouteParams:function($routeParams){
 					var count = 0;
 					for(var p in $routeParams){
@@ -156,6 +181,15 @@
 				
 				resetForm : function(){
 					this.form = {};									
+				},
+
+				resetTextareas : function(){
+					Array.from(document.getElementsByTagName('textarea')).forEach(function(element) {
+						var elementScope = angular.element(element).scope();
+						if(elementScope.textareaValue){
+							elementScope.textareaValue = null;
+						}
+					}); 
 				},
 				
 				resetSampleCodes : function(){
@@ -202,54 +236,90 @@
 					
 				},
 				
-				/*
 				initAdditionalColumns:function(){
-					if(lists.get("readsets-addcolumns") && lists.get("readsets-addcolumns").length === 1){
+					this.additionalColumns=[];
+					this.selectedAddColumns=[];
+					
+					if(lists.get("analysis-addcolumns") && lists.get("analysis-addcolumns").length === 1){
 						var formColumns = [];
-						var allColumns = angular.copy(lists.get("readsets-addcolumns")[0].columns);
+						var allColumns = angular.copy(lists.get("analysis-addcolumns")[0].columns);
+						
 						var nbElementByColumn = Math.ceil(allColumns.length / 5); //5 columns
 						for(var i = 0; i  < 5 && allColumns.length > 0 ; i++){
 							formColumns.push(allColumns.splice(0, nbElementByColumn));	    								
 						}
-						this.additionalsColumns = formColumns;
+						//complete to 5 five element to have a great design 
+						while(formColumns.length < 5){
+							formColumns.push([]);
+						}
+						this.additionalColumns = formColumns;
 					}
 				},
 				
 				getAddColumnsToForm : function(){
-					if(this.additionalsColumns.length === 0){
+					if(this.additionalColumns.length === 0){
 						this.initAdditionalColumns();
 					}
-					return this.additionalsColumns;									
-				},				
+					return this.additionalColumns;									
+				},
+				
 				addColumnsToDatatable:function(){
-					this.reportingConfiguration = undefined;
-					this.reportingConfigurationCode = undefined;
+					//this.reportingConfiguration = undefined;
+					//this.reportingConfigurationCode = undefined;
+					
 					this.selectedAddColumns = [];
-					for(var i = 0 ; i < this.additionalsColumns.length ; i++){
-						for(var j = 0; j < this.additionalsColumns[i].length; j++){
-							if(this.additionalsColumns[i][j].select){
-								this.selectedAddColumns.push(this.additionalsColumns[i][j]);
+					for(var i = 0 ; i < this.additionalColumns.length ; i++){
+						for(var j = 0; j < this.additionalColumns[i].length; j++){
+							if(this.additionalColumns[i][j].select){
+								this.selectedAddColumns.push(this.additionalColumns[i][j]);
 							}
 						}
 					}
-					this.datatable.setColumnsConfig(this.getColumns().concat(this.selectedAddColumns));
+					if(this.reportingConfigurationCode){
+						this.datatable.setColumnsConfig(this.reportingConfiguration.columns.concat(this.selectedAddColumns));
+					}else{
+						this.datatable.setColumnsConfig(this.getColumns().concat(this.selectedAddColumns));						
+					}
 					this.search();
-					
-				},	
+				},
 				resetDatatableColumns:function(){
-					this.additionalsColumns=[];
-					this.selectedAddColumns=[];
 					this.initAdditionalColumns();
 					this.datatable.setColumnsConfig(this.getColumns());
 					this.search();
 				},
-				 */
 				
-				resetDatatableColumns:function(){
-					this.datatable.setColumnsConfig(this.getColumns());
-					this.search();
+				
+				
+				initAdditionalFilters:function(){
+					this.additionalFilters=[];
+					
+					if(lists.get("analysis-addfilters") && lists.get("analysis-addfilters").length === 1){
+						var formFilters = [];
+						var allFilters = angular.copy(lists.get("analysis-addfilters")[0].filters);
+						
+						
+						var nbElementByColumn = Math.ceil(allFilters.length / 5); //5 columns
+						for(var i = 0; i  < 5 && allFilters.length > 0 ; i++){
+							formFilters.push(allFilters.splice(0, nbElementByColumn));	    								
+						}
+						//complete to 5 five element to have a great design 
+						while(formFilters.length < 5){
+							formFilters.push([]);
+						}
+							
+						this.additionalFilters = formFilters;
+					}
 				},
-			
+				
+				getAddFiltersToForm : function(){
+					console.log("additionalFilters", this.additionalFilters)
+					if(this.additionalFilters.length === 0){
+						this.initAdditionalFilters();
+					}
+					return this.additionalFilters;									
+				},	
+				
+				
 				/**
 				 * initialization of the service
 				 */

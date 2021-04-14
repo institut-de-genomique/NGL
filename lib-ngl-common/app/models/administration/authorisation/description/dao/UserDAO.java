@@ -16,18 +16,12 @@ import models.administration.authorisation.Role;
 import models.administration.authorisation.User;
 import models.utils.dao.AbstractDAOMapping;
 import models.utils.dao.DAOException;
-// import play.Logger;
 
 @Repository
 public class UserDAO extends AbstractDAOMapping<User> { 
 
 	private static final play.Logger.ALogger logger = play.Logger.of(UserDAO.class);
 	
-//	protected UserDAO() {
-//		super("user", User.class, UserMappingQuery.class,
-//				"SELECT t.id, t.login, t.firstname, t.lastname, t.email, t.technicaluser " +
-//				"FROM user as t ", true);
-//	}
 	protected UserDAO() {
 		super("user", User.class, UserMappingQuery.factory,
 				"SELECT t.id, t.login, t.firstname, t.lastname, t.email, t.technicaluser " +
@@ -54,25 +48,15 @@ public class UserDAO extends AbstractDAOMapping<User> {
 		parameters.put("password", password);
 		
 		BeanPropertyRowMapper<User> mapper = new BeanPropertyRowMapper<>(User.class);
-//		List<User> us =  this.jdbcTemplate.query(sql, mapper);
-//		List<User> us = jdbcTemplate.query(sql, mapper);
 		// Would have expected == 1
 		return this.jdbcTemplate.query(sql, mapper).size() > 0;
 	}
 
 	public String  getUserPassword(String login) throws DAOException {
 		String sql = "SELECT login , password FROM user WHERE login='" + login + "'";
-//		Map<String, Object> parameters = new HashMap<String, Object>();
-//		parameters.put("login", login);	
 		BeanPropertyRowMapper<User> mapper = new BeanPropertyRowMapper<>(User.class);
-//		List<User> users =  this.jdbcTemplate.query(sql, mapper);
 		@SuppressWarnings("deprecation")
 		List<User> users = jdbcTemplate.query(sql, mapper);
-//		if (users != null && users.size() == 1 && users.get(0).password != null) {
-//			return users.get(0).password.toString();
-//		} else {
-//			return null;
-//		}
 		if (users == null || users.size() != 1)
 			return null;
 		return users.get(0).password;
@@ -80,18 +64,10 @@ public class UserDAO extends AbstractDAOMapping<User> {
 	
 	public boolean isUserActive(String login) throws DAOException {
 		String sql = "SELECT active " + "FROM user WHERE login = '" + login + "' ";
-//		Map<String, Object> parameters = new HashMap<String, Object>();
-//		parameters.put("login", login);
 		BeanPropertyRowMapper<User> mapper = new BeanPropertyRowMapper<>(User.class);
 		logger.debug("UserDAO - isUserActive : requête SQL : " + sql + " for " + login);
-//		List<User> users =  this.jdbcTemplate.query(sql, mapper, parameters);
-//		List<User> users = jdbcTemplate.query(sql, mapper, parameters);
 		@SuppressWarnings("deprecation")
 		List<User> users = jdbcTemplate.query(sql, mapper);
-		/*if (users != null && users.size() == 1 ) {
-			return users.get(0).active;
-		}
-		return false;*/
 		return users != null && users.size() == 1 && users.get(0).active;
 	}
 	
@@ -214,8 +190,6 @@ public class UserDAO extends AbstractDAOMapping<User> {
 		jdbcTemplate.update(sql, userId);
 		logger.debug("--> Suppression des donnees concernant le UserID : " + userId);
 	}
-	
-	// TODO: remove NotImplementedException ?
 	
 	@Override
 	public long save(User user) throws NotImplementedException {

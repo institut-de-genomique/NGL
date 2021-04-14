@@ -54,6 +54,8 @@ angular.module('home').controller('OneToVoidChipMigrationCNSCtrl',['$scope', '$p
 						var concentration1 = $parse("experimentProperties.concentration1")(inputContainerUsed);
 						if(concentration1){
 							inputContainerUsed.newConcentration = concentration1;
+						} else {
+							inputContainerUsed.newConcentration = null;
 						}
 						inputContainerUsed.newQuantity = $scope.computeQuantity(
 								(concentration1)?inputContainerUsed.newConcentration:inputContainerUsed.concentration, 
@@ -83,14 +85,34 @@ angular.module('home').controller('OneToVoidChipMigrationCNSCtrl',['$scope', '$p
 	$scope.updatePropertyFromUDT = function(value, col){
 		console.log("update from property : "+col.property);
 		
-		if($scope.experiment.typeCode === "chip-migration" && col.property === 'inputContainerUsed.experimentProperties.volume1.value'){
+		if ($scope.experiment.typeCode === "chip-migration" && col.property === 'inputContainerUsed.experimentProperties.volume1.value'){
 			computeQuantity1(value.data);
-		}else if (col.property === 'inputContainerUsed.experimentProperties.measuredSize.value' 
-		     || col.property === 'inputContainerUsed.experimentProperties.concentration.value' 
-			){
+		} else if (col.property === 'inputContainerUsed.experimentProperties.measuredSize.value' 
+				|| col.property === 'inputContainerUsed.experimentProperties.concentration.value'){
 			computeConcNm(value.data);	
-		}	
-		
+		} else if ($scope.experiment.typeCode === "chip-migration" 
+				&& col.property === 'inputContainerUsed.experimentProperties.inputVolume.value') {
+			computeVolume1(value.data);
+		}
+	}
+	
+	var computeVolume1 = function(udtData){
+		var getter = $parse("inputContainerUsed.experimentProperties.volume1");
+		var volume1 = getter(udtData);
+		var compute = {
+				totalVol : $parse("inputContainerUsed.volume")(udtData),
+				inputVol : $parse("inputContainerUsed.experimentProperties.inputVolume")(udtData),
+				isReady:function(){
+					return (this.totalVol && this.totalVol.value && this.inputVol && this.inputVol.value);
+				}
+			};
+		if(compute.isReady()){
+			getter.assign(udtData, $scope.computeVolume(compute.totalVol, compute.inputVol));
+			computeQuantity1(udtData)
+		}else{
+			getter.assign(udtData, undefined);
+			console.log("not ready to computeVolume1");
+		}
 	}
 	
 	var computeQuantity1 = function(udtData){

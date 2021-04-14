@@ -1,8 +1,5 @@
 package controllers.reporting.api;
 
-// import static play.data.Form.form;
-//import static fr.cea.ig.play.IGGlobals.form;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -16,7 +13,7 @@ import org.mongojack.DBQuery.Query;
 
 import controllers.DocumentController;
 import fr.cea.ig.MongoDBResult;
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import models.laboratory.reporting.instance.FilteringConfiguration;
 import models.utils.InstanceConstants;
 import play.data.Form;
@@ -28,19 +25,14 @@ import validation.ContextValidation;
  * Controller around ResolutionConfigurations object
  *
  */
-// @Controller
 public class FilteringConfigurations extends DocumentController<FilteringConfiguration> {
 	
-//	private static final play.Logger.ALogger logger = play.Logger.of(FilteringConfigurations.class);
-	
-	private final /*static*/ Form<ConfigurationsSearchForm> searchForm; // = form(ConfigurationsSearchForm.class); 
-//	private final /*static*/ Form<FilteringConfiguration> filteringConfigurationsForm;// = form(FilteringConfiguration.class);
+	private final Form<ConfigurationsSearchForm> searchForm; 
 	
 	@Inject
-	public FilteringConfigurations(NGLContext ctx) {
+	public FilteringConfigurations(NGLApplication ctx) {
 		super(ctx,InstanceConstants.FILTERING_CONFIG_COLL_NAME, FilteringConfiguration.class);
 		searchForm = ctx.form(ConfigurationsSearchForm.class);
-//		filteringConfigurationsForm = ctx.form(FilteringConfiguration.class);
 	}
 
 	public Result list() {
@@ -70,24 +62,18 @@ public class FilteringConfigurations extends DocumentController<FilteringConfigu
 	public Result save() {
 		Form<FilteringConfiguration> filledForm = getMainFilledForm();
 		FilteringConfiguration configuration = filledForm.get();
-		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm);
+		ContextValidation ctxVal = ContextValidation.createCreationContext(getCurrentUser(), filledForm);
 		if (configuration._id == null) {
-//			configuration.traceInformation = new TraceInformation();
-//			configuration.traceInformation.setTraceInformation(getCurrentUser());
 			configuration.setTraceCreationStamp(ctxVal, getCurrentUser());
 			configuration.code = generateConfigurationCode();
 		} else {
 			return badRequest("use PUT method to update the filtering config");
 		}
-
-//		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm.errors());
-		ctxVal.setCreationMode();
 		configuration.validate(ctxVal);
 		if (!ctxVal.hasErrors()) {
 			configuration = saveObject(configuration);
 			return ok(Json.toJson(configuration));
 		} else {
-			// return badRequest(filledForm.errors-AsJson());
 			return badRequest(errorsAsJson(ctxVal.getErrors()));
 		}
 	}
@@ -95,26 +81,18 @@ public class FilteringConfigurations extends DocumentController<FilteringConfigu
 	public Result update(String code) {
 		FilteringConfiguration configuration = getObject(code);
 		if (configuration == null)
-			return badRequest("FilteringConfiguration with code " + code + " does not exist"); // TODO: probably a not found
+			return badRequest("FilteringConfiguration with code " + code + " does not exist");
 		Form<FilteringConfiguration> filledForm = getMainFilledForm();
 		FilteringConfiguration configurationInput = filledForm.get();
 
 		if (configurationInput.code.equals(code)) {
-//			if (configurationInput.traceInformation != null) {
-//				configurationInput.traceInformation = getUpdateTraceInformation(configurationInput.traceInformation);
-//			} else {
-//				logger.error("traceInformation is null !!");
-//			}
-//			ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm.errors());
-			ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm);
-			configurationInput.setTraceUpdateStamp(ctxVal,getCurrentUser());
-			ctxVal.setCreationMode();
+			ContextValidation ctxVal = ContextValidation.createCreationContext(getCurrentUser(), filledForm);
+			configurationInput.setTraceModificationStamp(ctxVal,getCurrentUser());
 			configurationInput.validate(ctxVal);
 			if (!ctxVal.hasErrors()) {
 				updateObject(configurationInput);
 				return ok(Json.toJson(configurationInput));
 			} else {
-				// return badRequest(filledForm.errors-AsJson());
 				return badRequest(errorsAsJson(ctxVal.getErrors()));
 			}
 		} else {

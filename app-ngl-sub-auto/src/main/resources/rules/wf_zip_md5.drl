@@ -28,7 +28,7 @@ rule "select resources from nglsub for workflow zip md5"
 		JSONDevice jsonDevice = new JSONDevice();
 		
 		//Get code submission IP-SUB
-		Set<ResourceProperties> rpSubmissions = $device.httpGetJSON(ProjectProperties.getProperty("server")+"/api/sra/submissions?stateCode=IP-SUB", "bot");
+		Set<ResourceProperties> rpSubmissions = $device.httpGetJSON(ProjectProperties.getProperty("server")+"/api/sra/submissions?stateCode=SUB-SRD-IP", "bot");
 		for(ResourceProperties rpSub : rpSubmissions){
 			//Get submission code
 			String codeSubmission = rpSub.getProperty("code");
@@ -37,7 +37,8 @@ rule "select resources from nglsub for workflow zip md5"
 			String experimentCodes = rpSub.getProperty("experimentCodes");
 			Set<ResourceProperties> rpsRawData = jsonDevice.httpGetJSON(ProjectProperties.getProperty("server")+"/api/sra/experiments/rawDatas?submissionCode="+codeSubmission,"bot");
 			boolean gzipForSubmission = SRAFilesUtil.checkGzipForSubmission(rpsRawData);
-			boolean checkDataCCRT = SRAFilesUtil.checkDataCCRT(rpsRawData,submissionDirectory);
+			//verifie que les données du CCRT ont bien été rapatriées
+			boolean checkDataCCRT = SRAFilesUtil.checkDataCCRT(rpsRawData,codeSubmission);
 			log.debug("gzip for submission "+gzipForSubmission);
 			log.debug("checkDataCCRT for submission "+checkDataCCRT);
 			if(gzipForSubmission && checkDataCCRT){

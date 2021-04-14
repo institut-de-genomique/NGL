@@ -206,6 +206,15 @@ factory('containerSupportsSearchService', ['$http', 'mainService', 'lists', 'dat
 				this.form = {};									
 			},
 
+			resetTextareas : function(){
+				Array.from(document.getElementsByTagName('textarea')).forEach(function(element) {
+					var elementScope = angular.element(element).scope();
+					if(elementScope.textareaValue){
+						elementScope.textareaValue = null;
+					}
+				}); 
+			},
+
 			resetSampleCodes : function(){
 				this.form.sampleCodes = [];									
 			},

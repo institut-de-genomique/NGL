@@ -1,4 +1,4 @@
-@this(ctx : fr.cea.ig.play.migration.NGLContext, menu_ : menu)
+@this(ctx : fr.cea.ig.ngl.NGLApplication, menu_ : menu)
 
 @()
 
@@ -6,20 +6,35 @@
 @import views.html._
 @import views.html.imports._
 
-@user            = @{ ctx.currentUser() }
-
+@user = @{ ctx.currentUser() }
+@minifyEnabled = @{ true == ctx.nglConfig().isMinified() }
 
 @scripts() = {
 	 <script src="@controllers.runs.tpl.routes.Runs.javascriptRoutes" type="text/javascript" charset="utf-8"></script>
 	 <script src="@controllers.main.tpl.routes.Main.jsPermissions" type="text/javascript" charset="utf-8"></script>
-     <script src="@controllers.main.tpl.routes.Main.jsCodes" type="text/javascript" charset="utf-8"></script> 
-     <script src="@routes.Assets.at("lib/datatable/datatable/javascripts/services/ultimate-datatable.js")" type="text/javascript" charset="utf-8"></script>                           
-     <script src="@routes.Assets.at("ngl-bi/javascripts/home/app.js")" type="text/javascript" charset="utf-8"></script>
-     <script src="@routes.Assets.at("ngl-bi/javascripts/home/search-ctrl.js")" type="text/javascript" charset="utf-8"></script>
-     <script src="@routes.Assets.at("ngl-bi/javascripts/commons/commons.js")" type="text/javascript" charset="utf-8"></script>             
-	 <script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/commons.js")" type="text/javascript" charset="utf-8"></script> 	 
-	 <script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/list-resize.js")" type="text/javascript" charset="utf-8"></script> 
-	 <script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/property-value.js")" type="text/javascript" charset="utf-8"></script>	
+	 <script src="@controllers.main.tpl.routes.Main.jsCodes" type="text/javascript" charset="utf-8"></script> 
+	 
+	 <script src="@routes.Assets.at("ngl-bi/javascripts/home/app.js")" type="text/javascript" charset="utf-8"></script>
+
+	 @if(!minifyEnabled) {
+		<script src="@routes.Assets.at("lib/datatable/datatable/javascripts/services/ultimate-datatable.js")" type="text/javascript" charset="utf-8"></script>                           
+		
+		<script src="@routes.Assets.at("ngl-bi/javascripts/home/search-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+		<script src="@routes.Assets.at("ngl-bi/javascripts/commons/commons.js")" type="text/javascript" charset="utf-8"></script>      
+
+		<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/commons.js")" type="text/javascript" charset="utf-8"></script> 	 
+		<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/list-resize.js")" type="text/javascript" charset="utf-8"></script> 
+		<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/property-value.js")" type="text/javascript" charset="utf-8"></script>	
+	 } else {
+		<script src="@routes.Assets.at("lib/datatable/datatable/javascripts/services/ultimate-datatable.min.js")" type="text/javascript" charset="utf-8"></script>                           
+		
+		<script src="@routes.Assets.at("ngl-bi/javascripts/home/search-ctrl.min.js")" type="text/javascript" charset="utf-8"></script>
+		<script src="@routes.Assets.at("ngl-bi/javascripts/commons/commons.min.js")" type="text/javascript" charset="utf-8"></script>   
+
+		<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/commons.min.js")" type="text/javascript" charset="utf-8"></script> 	 
+		<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/list-resize.min.js")" type="text/javascript" charset="utf-8"></script> 
+		<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/property-value.min.js")" type="text/javascript" charset="utf-8"></script>	
+	 }
 }
 
 @views.html.main("home.title.name", menu_("home"), scripts) {

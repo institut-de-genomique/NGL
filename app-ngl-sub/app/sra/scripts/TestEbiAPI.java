@@ -2,10 +2,12 @@ package sra.scripts;
 
 import javax.inject.Inject;
 
-import fr.cea.ig.lfw.controllers.AbstractScript;
-import sra.scripts.utils.EbiAPI;
+import fr.cea.ig.lfw.controllers.scripts.buffered.ScriptNoArgs;
+import services.EbiAPI;
 
-public class TestEbiAPI extends AbstractScript {
+
+//http://localhost:9000/sra/scripts/run/sra.scripts.TestEbiAPI
+public class TestEbiAPI extends ScriptNoArgs {
 	private final EbiAPI ebiAPI;	
 
 	@Inject
@@ -21,10 +23,19 @@ public class TestEbiAPI extends AbstractScript {
 			printfln("ERS487755 absent de l'EBI");
 		}	
 		if (ebiAPI.ebiSampleExists("ERXjdflksjqdskjf")) {
-			printfln("ERXjdflksjqdskjf");
+			printfln("ERXjdflksjqdskjf present à l'EBI");
 		} else {
 			printfln("ERXjdflksjqdskjf absent de l'EBI");
 		}
+		if (ebiAPI.ebiSubmissionExists("ERA972018")) {
+			printfln("ERA972018 present à l'EBI");
+			String xmlString = ebiAPI.ebiSubmissionXml("ERA972018");
+			printfln("xml pour ERA972018  = '%s'", xmlString);
+		} else {
+			printfln("ERA972018 absent de l'EBI");
+		}	
+		// Pas de numeros d'accession pour les soumissions de type update et 
+		// pas de stockage sur notre site de l'EBI
 	}
 	
 }

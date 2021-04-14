@@ -30,6 +30,11 @@ angular.module('home').controller('BalanceSheetsGeneralCtrl', ['$scope', '$http'
 			        	   "header": Messages("balanceSheets.nbBases"),
 			        	   "type" :"number",
 			        	   "position":2
+					   },
+					   {"property":"nbReadsets",
+			        	   "header": Messages("balanceSheets.nbReadsets"),
+			        	   "type" :"number",
+			        	   "position":3
 			           }
 			           ]
 	};
@@ -71,6 +76,7 @@ angular.module('home').controller('BalanceSheetsGeneralCtrl', ['$scope', '$http'
 
 
 	$scope.balanceSheetsGeneralService = balanceSheetsGeneralSrv;
+	$scope.headerText = Messages("balanceSheets.menu." + $routeParams.typeCode);
 
 	mainService.put('activeYear', 'general');
 
@@ -81,93 +87,91 @@ angular.module('home').controller('BalanceSheetsGeneralCtrl', ['$scope', '$http'
 
 	var loadData = function()
 	{
-		//loadData();
-		
-		var actualYear = new Date().getFullYear();
-		$scope.startYear = 2008;
-		if($routeParams.typeCode=='rsnanopore'){
-			$scope.startYear=2014;
-		}
-		$scope.dataByYear = [];
-		 var queries = [];
-		 for (var i = $scope.startYear; i <= actualYear; i++){
-			 $scope.dataByYear[i-$scope.startYear] = {
-					 nbBases : 0,
-					 year : i
-			 };
-			 var formQuery = {};
-			 formQuery.includes = [];
-			 formQuery.includes.push("default");
-			 formQuery.includes.push("runSequencingStartDate");
-			 formQuery.includes.push("typeCode");
-			 formQuery.typeCode=$routeParams.typeCode;
-			//For rsillumina
-			 formQuery.includes.push("treatments.ngsrg.default.nbBases");
-			//for rsnanopore
-			 formQuery.includes.push("treatments.ngsrg.default.1DReverse");
-			 formQuery.includes.push("treatments.ngsrg.default.1DForward");
-			 formQuery.includes.push("treatments.readQuality.default.1DReverse");
-			 formQuery.includes.push("treatments.readQuality.default.1DForward");
-			 formQuery.limit = 100000;
-			 formQuery.fromDate = moment("01/01/"+i, Messages("date.format").toUpperCase()).valueOf();
-			 formQuery.toDate = moment("31/12/"+i, Messages("date.format").toUpperCase()).valueOf();
-			 queries.push( $http.get(jsRoutes.controllers.readsets.api.ReadSets.list().url, {params : formQuery}) );
-		 }
-		 
-		 $q.all(queries).then(function(results) {
-				results.forEach(function(result){
-					$scope.dataByYear = $scope.balanceSheetsGeneralService.computeDataByYear(result.data,$scope.startYear,$scope.dataByYear);
-				});
-				mainService.put($routeParams.typeCode+'-general',$scope.dataByYear);
-				calculateData($scope.dataByYear);
-         });		
+		var balanceSheetForm = {}
+		balanceSheetForm.type = $routeParams.typeCode.replace("rs", "bi-");
+		$http.get(jsRoutes.controllers.balancesheets.api.BalanceSheets.list().url, {params : balanceSheetForm})
+		.success(function(balanceSheets) {
+			$http.get(jsRoutes.controllers.sampletypes.api.SampleTypes.list().url, {params : {includes : ["code", "category"]}})
+			.success(function(sampleTypes){
+				$scope.dataByYear = $scope.balanceSheetsGeneralService.computeYearlyData(balanceSheets, sampleTypes);
+				mainService.put($routeParams.typeCode+'-general', $scope.dataByYear);
+				calculateData();
+			});
+		});
 	}
 
-	var calculateData = function(dataByYear)
+	var calculateData = function()
 	{
 		$scope.dtYearlyBalanceSheets = datatable(configYearlyDT);
-		$scope.dtYearlyBalanceSheets.setData(dataByYear, dataByYear.length);
+		$scope.dtYearlyBalanceSheets.setData($scope.dataByYear, $scope.dataByYear.length);
 
-		var sumData = $scope.balanceSheetsGeneralService.computeSumData(dataByYear);
+		var sumData = $scope.balanceSheetsGeneralService.computeSumData($scope.dataByYear);
 		$scope.dtSumYearlyBalanceSheets = datatable(configYearlySumDT);
 		$scope.dtSumYearlyBalanceSheets.setData(sumData, 1);
 
-		$scope.chartYearlyBalanceSheets = $scope.balanceSheetsGeneralService.computeChartYearlyBalanceSheets(dataByYear);
+		$scope.ChartYearlyNbBases = $scope.balanceSheetsGeneralService.computeChartYearlyNbBases($scope.dataByYear, $routeParams.typeCode);
+		$scope.ChartYearlyNbReadsets = $scope.balanceSheetsGeneralService.computeChartYearlyNbReadsets($scope.dataByYear, $routeParams.typeCode);
 
 		$scope.loading = false;
 	}
 
+	$scope.computeExcelExport = function() {
+		var output = "Bilan-General-" + $routeParams.typeCode + ".xlsx";
+		var sheets = [
+			{
+				name: Messages("balanceSheets.export.excel.table.general"),
+				tables: Array.from(document.getElementsByTagName("table"))
+				.map(function(table) {
+					return {
+						rows: Array.from(table.rows)
+						.map(function(row) {
+							return {
+								values: Array.from(row.children)
+								.map(function(child) { return child.innerText; })
+							}
+						})
+					}
+				})
+			}
+		];
+		$scope.balanceSheetsGeneralService.computeExcelExport(output, sheets);
+	};
+
+	$scope.computePdfExport = function() {
+		var output = "Bilan-General-" + $routeParams.typeCode + ".pdf";
+		$scope.balanceSheetsGeneralService.computePdfExport(output, [
+			{"name": Messages("balanceSheets.tab.generalBalanceSheets")}
+		]);
+	};
 
 var init = function(){
 	// Tabs
-	var actualYear = new Date().getFullYear();
 	tabService.addTabs({label:Messages("balanceSheets.tab.generalBalanceSheets"), href:jsRoutes.controllers.balancesheets.tpl.BalanceSheets.home($routeParams.typeCode, "general").url});
-	var startYear = 2008;
-	if($routeParams.typeCode=='rsnanopore'){
-		startYear=2014;
+	var form = {
+		includes: ["year"],
+		type: $routeParams.typeCode.replace("rs", "bi-")
 	}
-	for(var i = actualYear; i >= startYear ; i--){
-		tabService.addTabs({label:Messages("balanceSheets.tab.year") +" "+ i,href:jsRoutes.controllers.balancesheets.tpl.BalanceSheets.home($routeParams.typeCode, i).url});
-	}
-
-	tabService.activeTab(0);
-
-	$scope.loading=true;
-
-	if(angular.isDefined(mainService.get($routeParams.typeCode+'-general'))){
-		var dataByYear = mainService.get($routeParams.typeCode+'-general');
-		calculateData(dataByYear);
-	}else{
-		loadData();
-		
-	}
-	
+	$http.get(jsRoutes.controllers.balancesheets.api.BalanceSheets.list().url, {params : form})
+	.success(function(data) {
+		var years = Array.from(new Set(data.map(function(bs) { return bs.year }))).sort(function(a, b) { return b - a });
+		years.forEach(function(year) {
+			tabService.addTabs({label:Messages("balanceSheets.tab.year") +" "+ year,href:jsRoutes.controllers.balancesheets.tpl.BalanceSheets.home($routeParams.typeCode, year).url});
+		});
+		tabService.activeTab(0);
+		$scope.loading=true;
+		if(angular.isDefined(mainService.get($routeParams.typeCode+'-general'))){
+			$scope.dataByYear = mainService.get($routeParams.typeCode+'-general');
+			calculateData();
+		}else{
+			loadData();
+		}
+	})
 };
 init();	
 }]);
 
-angular.module('home').controller('BalanceSheetsYearCtrl', ['$scope', '$http','mainService', 'tabService', 'lists', 'datatable', 'balanceSheetsGeneralSrv', '$routeParams', 
-                                                            function($scope, $http, mainService, tabService, lists, datatable, balanceSheetsGeneralSrv, $routeParams){
+angular.module('home').controller('BalanceSheetsYearCtrl', ['$scope', '$http','mainService', 'tabService', 'lists', 'datatable', 'balanceSheetsGeneralSrv', '$routeParams','$q', 
+                                                            function($scope, $http, mainService, tabService, lists, datatable, balanceSheetsGeneralSrv, $routeParams,$q){
 
 	var configQuarterDT = {
 			name:'quarterDT',
@@ -434,10 +438,115 @@ angular.module('home').controller('BalanceSheetsYearCtrl', ['$scope', '$http','m
 			        	   "type":"text",
 			        	   "order" : true,
 			        	   "position":4
-			           }
+					   },
+					   {
+						"property":"nbRS",
+						"header": Messages("balanceSheets.nbReadsets"),
+						"type":"Number",
+						"order" : true,
+						"position":5
+						}
 			           ]
 	}; 
 
+	var configSampleSumDT = {
+		name:'sampleSumDT',
+		showTotalNumberRecords : false,
+		search : {
+			active:false
+		},
+		pagination:{
+			active : false
+		},
+		hide:{
+			active:false
+		},
+		select : {
+			active : false
+		},
+		callbackEndDisplayResult : function(){
+			colorBlue($scope.dtSequencingSum, 0);
+			colorBlue($scope.dtSampleSum, 0);
+		},
+		columns : [
+				   {	"property":"property",
+					   "header": Messages("balanceSheets.property"),
+					   "type" :"text",
+					   "position":1
+				   },
+				   {	"property":"value",
+					   "header": Messages("balanceSheets.nbBases"),
+					   "type" :"number",
+					   "position":2
+				   },
+				   {	"property":"nbReadsets",
+					   "header": Messages("balanceSheets.nbReadsets"),
+					   "type" :"number",
+					   "position":3
+				   }
+				   ]
+	};
+	
+	var configRunDT = {
+			name:'runDT',
+			order : {
+				active : false
+			},
+			search : {
+				active:false
+			},
+			pagination:{
+				active : false
+			},
+			hide:{
+				active:false
+			},
+			select : {
+				active : false
+			},
+			callbackEndDisplayResult : function(){
+				colorBlue($scope.dtRun, 12);
+				colorRed($scope.dtRun, 13);
+			}
+	}; 
+
+	var configRunSumDT = {
+		name:'runSumDT',
+		showTotalNumberRecords : false,
+		search : {
+			active:false
+		},
+		pagination:{
+			active : false
+		},
+		hide:{
+			active:false
+		},
+		select : {
+			active : false
+		},
+		callbackEndDisplayResult : function(){
+			colorBlue($scope.dtRunSum, 0);
+		},
+		columns : [
+				   {	"property":"property",
+					   "header": Messages("balanceSheets.total.runs"),
+					   "type" :"text",
+					   "render":function(obj, line){
+							return "<strong>"+obj.property+"</strong>";
+						},
+					   "position":1
+				   },
+				   {	"property":"value",
+					   "header": Messages("balanceSheets.value"),
+					   "type" :"number",
+					   "render":function(obj, line){
+							return "<strong>"+obj.value+"</strong>";
+						},
+					   "position":2
+				   }			           
+				   ]
+	}; 
 
 	var colorBlue = function(datatable, pos){
 		if(datatable.displayResult != undefined){
@@ -445,8 +554,15 @@ angular.module('home').controller('BalanceSheetsYearCtrl', ['$scope', '$http','m
 		}
 	}
 
+	var colorRed = function(datatable, pos){
+		if(datatable.displayResult != undefined){
+			datatable.displayResult[pos].line.trClass="text-danger";
+		}
+	}
+
 	// Service
 	$scope.balanceSheetsGeneralService = balanceSheetsGeneralSrv;
+	$scope.headerText = Messages("balanceSheets.menu." + $routeParams.typeCode);
 
 	$scope.isLoading = function(){
 		return $scope.loading;
@@ -463,66 +579,119 @@ angular.module('home').controller('BalanceSheetsYearCtrl', ['$scope', '$http','m
 			return 'active';
 		}
 	};
-	var actualYear = new Date().getFullYear();
 
 	var loadData = function(activeYear)
 	{
-		var form = {includes : [], typeCodes : []};
-		form.includes.push("default");
-		//For rsillumina
-		form.includes.push("treatments.ngsrg.default.nbBases");
-		//for rsnanopore
-		form.includes.push("treatments.ngsrg.default.1DReverse");
-		form.includes.push("treatments.ngsrg.default.1DForward");
-		form.includes.push("treatments.readQuality.default.1DReverse");
-		form.includes.push("treatments.readQuality.default.1DForward");
-		form.includes.push("projectCode");
-		form.includes.push("runTypeCode");
-		form.includes.push("runSequencingStartDate");
-		form.includes.push("sampleOnContainer.sampleTypeCode");
-		form.includes.push("sampleOnContainer.sampleCategoryCode");
-		form.fromDate = moment("01/01/"+activeYear, Messages("date.format").toUpperCase()).valueOf();
-		form.toDate = moment("31/12/"+activeYear, Messages("date.format").toUpperCase()).valueOf();
-		form.typeCode=$routeParams.typeCode;
-		form.limit = 20000;
+		var balanceSheetForm = {}
+		balanceSheetForm.year = activeYear;
+		balanceSheetForm.type = $routeParams.typeCode.replace("rs", "bi-")
+
+		var typeForm = {includes : []};
+		typeForm.objectTypeCode="Run";
+		typeForm.includes.push("code");
+		typeForm.includes.push("name");
 
 		var projectForm = {includes : []};
 		projectForm.includes.push("code");
 		projectForm.includes.push("name");
-		projectForm.includes.push("traceInformation.creationDate");
 
-		$http.get(jsRoutes.controllers.readsets.api.ReadSets.list().url, {params : form})
-		.success(function(data, status, headers, config) {
-			$http.get(jsRoutes.controllers.commons.api.CommonInfoTypes.list().url,{params:{objectTypeCode:"Run"},key:"runTypes"})
-			.success(function(results, status, headers, config) {
+		var sampleForm = {includes : []};
+		sampleForm.includes.push("code");
+		sampleForm.includes.push("name");
+		sampleForm.includes.push("category");
+
+		$scope.dataForYear = {
+			year: activeYear,
+			total : 0,
+			totalProject : 0,
+			quarters : [],
+			dataQuarterDT: [],
+			lineToColorQuarter: [3, 7, 11, 15, 16],
+			dataSequencingDT: [],
+			dataProjectDT: [],
+			dataSampleDT: [],
+			totalRun: 0,
+			listSeq: [],
+			dataRunDT:[]
+		};
+		mainService.put($routeParams.typeCode + '-' + activeYear, $scope.dataForYear);
+
+		$http.get(jsRoutes.controllers.balancesheets.api.BalanceSheets.list().url, {params : balanceSheetForm})
+		.success(function(balanceSheets){
+			$http.get(jsRoutes.controllers.commons.api.CommonInfoTypes.list().url, {params : typeForm})
+			.success(function(runTypes){		
 				$http.get(jsRoutes.controllers.projects.api.Projects.list().url, {params : projectForm})
-				.success(function(projectData, status, headers, config) {
-					$scope.dataForYear = $scope.balanceSheetsGeneralService.computeDataForYear(data,results,projectData,activeYear);
-					mainService.put($routeParams.typeCode+'-'+activeYear,$scope.dataForYear );
-					calculateData();
+				.success(function(projects){
+					$http.get(jsRoutes.controllers.sampletypes.api.SampleTypes.list().url, {params : sampleForm})
+					.success(function(sampleTypes){
+						/* Readsets Data  */
+						var readsetProperties = [
+							"treatments.ngsrg.default.nbBases.value", 
+							"treatments.ngsrg.default.1DForward.value.nbBases", 
+							"treatments.ngsrg.default.1DReverse.value.nbBases",
+							"treatments.readQuality.default.1DForward.value.nbBases",
+							"treatments.readQuality.default.1DReverse.value.nbBases"
+						];
+						var readsetStats = $scope.balanceSheetsGeneralService.mergeReadSetComputations(
+							balanceSheets[0].computations.filter(function(computation) {
+								return computation.collection === "readsets" && computation.method === "sum" && readsetProperties.includes(computation.property)
+							})
+						);
+						var total = readsetStats.result.value || 0;
+						$scope.dataForYear.total = total;
+						$scope.dataForYear.totalRs = readsetStats.result.nbElements || 0;
+						/* by-Month Readsets Data */
+						var accumulator = $scope.balanceSheetsGeneralService.computeMonthlyData(readsetStats, total);
+						$scope.dataForYear.dataQuarterDT = accumulator.results;
+						$scope.dataForYear.quarters = accumulator.quarters;
+						/* by-SequencingType Readsets Data */
+						$scope.dataForYear.dataSequencingDT = $scope.balanceSheetsGeneralService.computeSequencingData(readsetStats, runTypes, total);
+						/* by-Project Readsets Data */
+						var projectTen = $scope.balanceSheetsGeneralService.getTenBiggestProjects(readsetStats);
+						var totalProject = projectTen.map(function(project) { return project.result.value; }).reduce(function(a, b) { return a + b; }, 0);
+						$scope.dataForYear.totalProject = totalProject;
+						$scope.dataForYear.dataProjectDT = $scope.balanceSheetsGeneralService.computeProjectData(projectTen, projects, totalProject, total);
+						/* by-SampleType Readsets Data */
+						$scope.dataForYear.dataSampleDT = $scope.balanceSheetsGeneralService.computeSampleData(readsetStats, sampleTypes, total);
+						/* by-SequencingType Runs Data */
+						var runStats = balanceSheets[0].computations.find(function(computation) {
+							return computation.collection === "runs" && computation.method === "count" && computation.matches.length === 0
+						});
+						var runFailedStats = balanceSheets[0].computations.find(function(computation) {
+							return computation.collection === "runs" && computation.method === "count" && computation.matches.includes("state.code=FE-S")
+						});
+						var runExtStats = balanceSheets[0].computations.find(function(computation) {
+							return computation.collection === "runs" && computation.method === "count" && computation.matches.includes("instrumentUsed.code=^EXT.+")
+						});
+						$scope.dataForYear.totalRun = runStats.result.nbElements || 0;
+						$scope.dataForYear.listSeq = $scope.balanceSheetsGeneralService.computeRunSequencingTypes(runStats, runTypes);
+						$scope.dataForYear.dataRunDT = $scope.balanceSheetsGeneralService.computeRunSequencingData(runStats, runFailedStats, runExtStats);
+
+						calculateData();
+					});
 				});
 			});
 		});
-
 	};
 	
 	var calculateData = function(){
 		$scope.dtQuarters = datatable(configQuarterDT);
 		$scope.dtQuarters.setData($scope.dataForYear.dataQuarterDT, $scope.dataForYear.dataQuarterDT.length);
 
-		$scope.chartQuarter = $scope.balanceSheetsGeneralService.computeChartQuarters($scope.dataForYear);
+		$scope.chartQuarter = $scope.balanceSheetsGeneralService.computeChartQuarters($scope.dataForYear, $routeParams.typeCode, $scope.dataForYear.year);
 
 		$scope.dtSequencing = datatable(configSequencingDT);
 		$scope.dtSequencing.setData($scope.dataForYear.dataSequencingDT, $scope.dataForYear.dataSequencingDT.length);
 
 		var sumData = [{
 			"property" : Messages('balanceSheets.sum'),
-			"value" : $scope.dataForYear.total
+			"value" : $scope.dataForYear.total,
+			"nbReadsets": $scope.dataForYear.totalRs
 		}];
 
 		$scope.dtSequencingSum = datatable(configSumDT);
 		$scope.dtSequencingSum.setData(sumData, 1);
-		$scope.chartSequencing = $scope.balanceSheetsGeneralService.computeChartSequencing($scope.dataForYear.dataSequencingDT);
+		$scope.chartSequencing = $scope.balanceSheetsGeneralService.computeChartSequencing($scope.dataForYear.dataSequencingDT, $routeParams.typeCode, $scope.dataForYear.year);
 
 		$scope.dtProject = datatable(configProjectDT);
 		$scope.dtProject.setData($scope.dataForYear.dataProjectDT, $scope.dataForYear.dataProjectDT.length);
@@ -532,60 +701,196 @@ angular.module('home').controller('BalanceSheetsYearCtrl', ['$scope', '$http','m
 		                             {
 		                            	 "property" : Messages('balanceSheets.totalTen'),
 		                            	 "value" : $scope.dataForYear.totalProject,
-		                            	 "percentage" : (parseFloat(($scope.dataForYear.totalProject * 100 / $scope.dataForYear.total).toFixed(2))).toLocaleString() + " %"
+		                            	 "percentage" : $scope.dataForYear.total ? ($scope.dataForYear.totalProject * 100 / $scope.dataForYear.total).toFixed(2) + " %" : "100%" 
 		                             },
 		                             {
 		                            	 "property" : Messages('balanceSheets.totalSum'),
 		                            	 "value" : $scope.dataForYear.total,
 		                            	 percentage : "100 %"
 		                             }], 2);
-		$scope.chartProject = $scope.balanceSheetsGeneralService.computeChartProject($scope.dataForYear.dataProjectDT,$scope.dataForYear.totalProject);
+		$scope.chartProject = $scope.balanceSheetsGeneralService.computeChartProject($scope.dataForYear.dataProjectDT,$scope.dataForYear.totalProject, $routeParams.typeCode, $scope.dataForYear.year);
 
 		$scope.dtSample = datatable(configSampleDT);
 		$scope.dtSample.setData($scope.dataForYear.dataSampleDT, $scope.dataForYear.dataSampleDT.length);
 
-		$scope.dtSampleSum = datatable(configSumDT);
+		$scope.dtSampleSum = datatable(configSampleSumDT);
 		$scope.dtSampleSum.setData(sumData, 1);
 
-		$scope.chartSample = $scope.balanceSheetsGeneralService.computeChartSample($scope.dataForYear.dataSampleDT,$scope.dataForYear.total);
+		$scope.chartSample = $scope.balanceSheetsGeneralService.computeChartSample($scope.dataForYear.dataSampleDT, $scope.dataForYear.total, $routeParams.typeCode, $scope.dataForYear.year);
 
+		
+		//run Datatable
+		configRunDT.columns=[];
+		configRunDT.columns.push({
+     	   "property" : "month",
+    	   "header" : Messages("balanceSheets.monthRun"),
+    	   //filter: "codes:'sample_cat'",
+    	   "render":function(value, line){
+	    		return "<strong>"+value.month+"</strong>";
+	    	},
+    	   "type" : "text",
+    	   "position" : 1
+		});
+		
+		var position=1;
+		for(var i = 0; i < $scope.dataForYear.listSeq.length; i++){
+			var sequencingType = $scope.dataForYear.listSeq[i];
+			position++;
+			configRunDT.columns.push({
+		     	   "property" : sequencingType.code,
+		    	   "header" : sequencingType.name,
+				   "type" : "text",
+				   "render": (function(sequencingTypeCode) {
+						return function(obj, line){
+							var runInfo = obj[sequencingTypeCode]
+							var display = runInfo.nbRuns || runInfo.nbRuns === 0 ? runInfo.nbRuns : '';
+							if(runInfo.nbFailed){
+								display += ' <span class="text-danger">(+' + runInfo.nbFailed + ' en echec)</span>'
+							}
+							if(runInfo.nbExternal){
+								display += ' [+' + runInfo.nbExternal + ' ' + (runInfo.nbExternal > 1 ? 'externes' : 'externe') + ']'
+							}
+						return display;
+						}
+					})(sequencingType.code),
+		    	   "position" : position
+				});
+		}
+		position++;
+		configRunDT.columns.push(
+					{	"property":"nbAborted",
+		        	   "header": Messages("balanceSheets.nbAborted"),
+					   "type" :"Number",
+					   "render":function(obj, line){
+							return obj.nbAborted || obj.nbAborted === 0 ? '<div class="text-danger">' + obj.nbAborted + '</div>' : '';
+						},
+		        	   "position":position
+		           });
+		position++;
+		configRunDT.columns.push(
+		           {
+		        	   "property":"total",
+		        	   "header": Messages("balanceSheets.sumNoAborting"),
+					   "type":"Number",
+					   "render":function(obj, line){
+							return obj.total || obj.total === 0 ? '<div class="text-primary">' + obj.total + '</div>' : '';
+						},
+		        	   "position":position
+		           }
+		);
+		
+		$scope.dtRun = datatable(configRunDT);
+		$scope.dtRun.setData($scope.dataForYear.dataRunDT, $scope.dataForYear.dataRunDT.length);
+		
+		var sumData = [{
+			"property" : Messages('balanceSheets.sum'),
+			"value" : $scope.dataForYear.totalRun 
+		}];
+		$scope.dtRunSum = datatable(configRunSumDT);
+		$scope.dtRunSum.setData(sumData, 1);
+		
 		$scope.loading=false;
 	};
+
+	$scope.computeExcelExport = function() {
+		var formatTables = function(tabPane) {
+			return Array.from(document.getElementById(tabPane).getElementsByTagName("table"))
+			.map(function(table) {
+				return {
+					rows: Array.from(table.rows)
+					.map(function(row) {
+						return {
+							values: Array.from(row.children)
+							.map(function(child) { return child.innerText; })
+						}
+					})
+				}
+			})
+		}
+		var output = "Bilan-" + $routeParams.year + "-" + $routeParams.typeCode + ".xlsx";
+		var sheets = [
+			{
+				name: Messages("balanceSheets.export.excel.table.quarters"),
+				tables: formatTables("quarter")
+			},
+			{
+				name: Messages("balanceSheets.export.excel.table.sequencingType"),
+				tables: formatTables("sequencingType")
+			},
+			{
+				name: Messages("balanceSheets.export.excel.table.firstTen"),
+				tables: formatTables("firstTen")
+			},
+			{
+				name: Messages("balanceSheets.export.excel.table.projectType"),
+				tables: formatTables("sampleType")
+			},
+			{
+				name: Messages("balanceSheets.export.excel.table.runType"),
+				tables: formatTables("runType")
+			}
+		];
+		$scope.balanceSheetsGeneralService.computeExcelExport(output, sheets);
+	};
+
+	$scope.computePdfExport = function() {
+		var output = "Bilan-" + $routeParams.year + "-" + $routeParams.typeCode + ".pdf";
+		$scope.balanceSheetsGeneralService.computePdfExport(output, [
+			{
+				"name": Messages("balanceSheets.tab.quarters"),
+				"id": "quarter"
+			},
+			{
+				"name": Messages("balanceSheets.tab.sequencingType"),
+				"id": "sequencingType"
+			},
+			{
+				"name": Messages("balanceSheets.tab.firstTen"),
+				"id": "firstTen",
+				"crop": 25
+			},
+			{
+				"name": Messages("balanceSheets.tab.projectType"),
+				"id": "sampleType",
+				"crop": 20
+			},
+			{
+				"name": Messages("balanceSheets.tab.runType"),
+				"id": "runType"
+			},
+		]);
+	};
+
+	$scope.balanceSheetsGeneralService = balanceSheetsGeneralSrv;
 	
 	
 	var init = function(){
-		$scope.loading=true;
-		// Year managing
-		var actualYear = new Date().getFullYear();
 		var activeYear = $routeParams.year;
-
-		// Tabs
-		var startYear = 2008;
-		if($routeParams.typeCode=='rsnanopore'){
-			startYear=2014;
-		}
 		tabService.addTabs({label:Messages("balanceSheets.tab.generalBalanceSheets"), href:jsRoutes.controllers.balancesheets.tpl.BalanceSheets.home($routeParams.typeCode, "general").url});
-		for(var i = actualYear; i >= startYear ; i--){
-			tabService.addTabs({label:Messages("balanceSheets.tab.year") +" "+ i,href:jsRoutes.controllers.balancesheets.tpl.BalanceSheets.home($routeParams.typeCode, i).url});
+		var form = {
+			includes: ["year"],
+			type: $routeParams.typeCode.replace("rs", "bi-")
 		}
-		// Activate the tab corresponding to the selected year
-		tabService.activeTab(actualYear - activeYear + 1);
-
-		if(mainService.get('balanceSheetActiveTab') == undefined){
-			mainService.put('balanceSheetActiveTab', 'quarter');
-		}
-
-
-		if(angular.isDefined(mainService.get($routeParams.typeCode+'-'+activeYear))){
-			$scope.dataForYear = mainService.get($routeParams.typeCode+'-'+activeYear);
-			calculateData();
-		}else{
-			loadData(activeYear);
-		}
-	
+		$http.get(jsRoutes.controllers.balancesheets.api.BalanceSheets.list().url, {params : form})
+		.success(function(data) {
+			var years = Array.from(new Set(data.map(function (bs) { return bs.year; }))).sort(function(a, b) { return b - a; });
+			years.forEach(function(year) {
+				tabService.addTabs({label:Messages("balanceSheets.tab.year") + " " + year,href:jsRoutes.controllers.balancesheets.tpl.BalanceSheets.home($routeParams.typeCode, year).url});
+			});
+			tabService.activeTab(years.indexOf(activeYear) + 1);
+			$scope.loading=true;
+			if(mainService.get('balanceSheetActiveTab') == undefined) {
+				mainService.put('balanceSheetActiveTab', 'quarter');
+			}
+			if(angular.isDefined(mainService.get($routeParams.typeCode + '-' + activeYear))) {
+				$scope.dataForYear = mainService.get($routeParams.typeCode + '-' + activeYear);
+				calculateData();
+			} else {
+				loadData(activeYear);
+			}
+		})
 	}
 	init();
-
 }]);
 
 

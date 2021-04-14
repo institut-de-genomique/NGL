@@ -35,3 +35,9 @@ import java.text.DecimalFormat;
 import org.mongojack.DBQuery;
 import org.mongojack.DBUpdate;
 import org.apache.commons.lang3.StringUtils;
+
+import validation.ContextValidation;
+import play.data.validation.ValidationError;
+import models.laboratory.common.instance.TraceInformation;
+import models.utils.InstanceHelpers;
+import models.utils.InstanceConstants;

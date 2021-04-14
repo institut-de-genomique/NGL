@@ -111,6 +111,7 @@ angular.module('home').controller('cDNASynthesisCtrl',['$scope', '$parse', 'atmT
 					        	 "position":500,
 					        	 "extraHeaders":{0:Messages("experiments.outputs")}
 					         },
+					        
 					         {
 					        	 "header":Messages("containers.table.storageCode"),
 					        	 "property":"outputContainerUsed.locationOnContainerSupport.storageCode",

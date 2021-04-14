@@ -2,11 +2,11 @@ package controllers.sra.submissions.tpl;
 
 import javax.inject.Inject;
 
+import controllers.NGLController;
 //import controllers.NGLBaseController;
 import fr.cea.ig.authentication.Authenticated;
 import fr.cea.ig.lfw.Historized;
 import fr.cea.ig.ngl.NGLApplication;
-import fr.cea.ig.ngl.NGLController;
 import fr.cea.ig.ngl.support.NGLJavascript;
 import play.mvc.Result;
 import views.html.submissions.activate;
@@ -15,6 +15,7 @@ import views.html.submissions.create;
 import views.html.submissions.details;
 import views.html.submissions.home;
 import views.html.submissions.validation;
+import play.twirl.api.Html;
 
 // import controllers.CommonController;                  // done
 //public class Submissions extends -CommonController {   // done
@@ -95,6 +96,8 @@ public class Submissions extends NGLController implements NGLJavascript  { // NG
 	public Result javascriptRoutes() {
 		return jsRoutes(controllers.sra.submissions.tpl.routes.javascript.Submissions.home(),
 						controllers.projects.api.routes.javascript.Projects.list(),
+						controllers.sra.projects.api.routes.javascript.Projects.get(),
+
 						controllers.sra.api.routes.javascript.Variables.get(),
 						controllers.sra.api.routes.javascript.Variables.list(),
 						controllers.commons.api.routes.javascript.States.list(),
@@ -109,14 +112,14 @@ public class Submissions extends NGLController implements NGLJavascript  { // NG
 						controllers.sra.submissions.api.routes.javascript.Submissions.get(),
 						controllers.sra.submissions.api.routes.javascript.Submissions.update(),
 						controllers.sra.submissions.api.routes.javascript.Submissions.updateState(),
-						controllers.sra.submissions.api.routes.javascript.Submissions.activate(),
 						controllers.sra.submissions.tpl.routes.javascript.Submissions.get(),
 						controllers.sra.samples.api.routes.javascript.Samples.list(),
 						controllers.sra.samples.api.routes.javascript.Samples.get(),
 						controllers.sra.samples.api.routes.javascript.Samples.update(),
 						controllers.sra.experiments.api.routes.javascript.Experiments.list(),
 						controllers.sra.experiments.api.routes.javascript.Experiments.get(),
-						controllers.sra.experiments.api.routes.javascript.Experiments.update());
+						controllers.sra.experiments.api.routes.javascript.Experiments.update(),
+	    				controllers.sra.experiments.api.routes.javascript.ExperimentsRawDatas.delete());
 	}
 
 	/*

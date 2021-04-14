@@ -13,12 +13,13 @@ import validation.utils.ValidationHelper;
 
 /**
  * Class used to stock information from sample on the last container
+ * 
  * @author galbini
  *
  */
-public class SampleOnContainer implements IValidation{
+public class SampleOnContainer implements IValidation {
 	
-	//last update date
+	// last update date
 	public Date lastUpdateDate;
 	// Reference Sample code
 	public String projectCode;
@@ -34,14 +35,14 @@ public class SampleOnContainer implements IValidation{
 	public String containerCode;
 	// Properties of the content in the container
 	public Map<String,PropertyValue> properties;
-	//Percentage of content on the container
+	// Percentage of content on the container
 	public Double percentage;
-	//Collaborator's reference
+	// Collaborator's reference
 	public String referenceCollab;
-	//NCBI information from Sample
+	// NCBI information from Sample
 	public String taxonCode;
 	public String ncbiScientificName;
-	//Measured concentration from Container
+	// Measured concentration from Container
 	public PropertySingleValue containerConcentration;
 	
 	@Override
@@ -55,14 +56,14 @@ public class SampleOnContainer implements IValidation{
 	
 	@Override
 	public void validate(ContextValidation contextValidation) {
-		//TODO GA 09/11/2016 : projecCode validation after MEP 
-		//SampleOnContainerValidationHelper.validateProjectCode(projectCode, contextValidation);
+		// GA 09/11/2016 : projecCode validation after MEP 
+		// SampleOnContainerValidationHelper.validateProjectCode(projectCode, contextValidation);
 		SampleOnContainerValidationHelper.validateSampleCode(sampleCode, contextValidation);
 		SampleType sampleType = SampleOnContainerValidationHelper.validateSampleTypeCode(sampleTypeCode, contextValidation);
 		SampleOnContainerValidationHelper.validateSampleCategoryCode(sampleCategoryCode, sampleType, contextValidation);
-		ValidationHelper.required(contextValidation, containerSupportCode, "containerSupportCode");
-		ValidationHelper.required(contextValidation, containerCode, "containerCode");
-		ValidationHelper.required(contextValidation, referenceCollab, "referenceCollab");
+		ValidationHelper                 .validateNotEmpty          (contextValidation, containerSupportCode, "containerSupportCode");
+		ValidationHelper                 .validateNotEmpty          (contextValidation, containerCode, "containerCode");
+		ValidationHelper                 .validateNotEmpty          (contextValidation, referenceCollab, "referenceCollab");
 	}
 
 }

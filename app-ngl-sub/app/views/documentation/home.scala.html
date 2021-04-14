@@ -14,7 +14,9 @@
 			<li><a href="http://www.ebi.ac.uk/ena/submit/read-submission">@Messages("documentation.sra.url")</a></li>																				
 			<li><a href="http://www.ebi.ac.uk/ena/submit/metadata-model">@Messages("documentation.metatdata.url")</a></li>																				
 		</ul>
+		<xmp>
 	
+		</xmp>	
 	</div>
 	
 	<div class="panel-heading">
@@ -22,14 +24,27 @@
 	</div>
 	<div class="panel-body">
 		<ul>
+			<li><h4>Strategy study: @Messages("documentation.mandatory").  @Messages("documentation.possible.values") :</h4> 
+				<ul>
+					<li><strong>STRATEGY_CODE_STUDY</strong> : Utilisation d'un code_study réferancant un study crée dans NGL-SUB. (study ayant deja été soumis à l'EBI ou non).</li>
+					<li><strong>STRATEGY_AC_STUDY</strong>   : Utilisation d'un numéros d'accession de study (de la forme ERP...), cad d'un study soumis  à l'EBI (par le genoscope ou des collaborateurs).</li>
+                </ul>
+           	</li>		
 			<li><h4>Strategy sample : @Messages("documentation.mandatory").  @Messages("documentation.possible.values") :</h4> 
 				<ul>
-					<li><strong>STRATEGY_SAMPLE_TAXON</strong> : building sample object per project (LIMS project code) and taxon (LIMS taxon).</li>
-					<li><strong>STRATEGY_SAMPLE_CLONE</strong> : building sample object per project and per clone.</li>
-					<li><strong>STRATEGY_NO_SAMPLE</strong> : tag FILE_USER_CLONE_TO_ACSAMPLE_ACSTUDY used.</li>
+					<li><strong>STRATEGY_CODE_SAMPLE_TAXON</strong>     : Construction d'un objet sample par code projet et par taxon.</li>
+					<li><strong>STRATEGY_CODE_SAMPLE_REFCOLLAB</strong> : Construction d'un objet sample par code projet, taxon et par referenceCollaborateur.</li>
+					<li><strong>STRATEGY_CODE_SAMPLE_BANK</strong>      : Construction d'un objet sample par code projet, par taxon et par banque (libProcessTypeCodeVal dans NGL).</li>
+					<li><strong>STRATEGY_AC_SAMPLE</strong>             : Pas de construction de sample pour la soumission. Utilisation d'un fichier de correspondance 'FILE_USER_REFCOLLAB_TO_AC' <br/>
+					qui indique pour chaque referenceCollaborateur, le numeros d'accession du sample et/ou le numeros d'accession du study à utiliser pour la soumission. <br>
+					Pour cette strategie, le champ reference collaborateur de NGL doit obligatoirement etre renseigné pour tous les readsets à soumettre et doit correspondre <br> 
+					à la reference collaborateur indiquée dans le fichier FILE_USER_REFCOLLAB_TO_AC</li>
                 </ul>
            	</li>
-			<li><h4>Library strategy : @Messages("documentation.mandatory"). @Messages("documentation.possible.values") :</h4> 
+           	
+           	
+           	<li><h4><a id="libraryStrategy"></a></h4>
+				<h4>Library strategy : @Messages("documentation.mandatory"). @Messages("documentation.possible.values") :</h4> 
 				<ul>
 					<li><strong>WGS</strong> : Random sequencing of the whole genome</li>
 					<li><strong>WXS</strong> : Random sequencing of exonic regions selected from the genome</li>
@@ -53,7 +68,8 @@
 					<li><strong>OTHER</strong> : Library strategy not listed</li>
 				</ul>
 			</li>
-			<li><h4>Library source : @Messages("documentation.mandatory"). @Messages("documentation.possible.values") :</h4> 
+			<li><h4><a id="librarySource"></a></h4>
+				<h4>Library source : @Messages("documentation.mandatory"). @Messages("documentation.possible.values") : </h4> 
 				<ul>
 					<li><strong>GENOMIC</strong> : Genomic DNA (includes PCR products from genomic DNA)</li>
 					<li><strong>TRANSCRIPTOMIC</strong> : Transcription products or non genomic DNA (EST, cDNA, RT-PCR,screened libraries)</li>
@@ -64,7 +80,8 @@
 					<li><strong>OTHER</strong> : Other, unspecified, or unknown library source material</li>
 				</ul>
 			</li>
-			<li><h4>Library selection : @Messages("documentation.mandatory"). @Messages("documentation.possible.values") :</h4> 
+			<li><h4><a id="librarySelection"></a></h4>
+				<h4>Library selection : @Messages("documentation.mandatory"). @Messages("documentation.possible.values") :</h4> 
 				<ul>
 					<li><strong>RANDOM</strong>: No selection or random</li> 
 					<li><strong>PCR</strong> : Target selection and enrichment via PCR</li>
@@ -112,19 +129,23 @@
 				</ul> 
 			</li>
 		</ul>
-	</div>
+		<xmp>
 	
+		</xmp>	
+	</div>
+		
 	<div class="panel-heading">
 		<h3>@Messages("documentation.userFileReadSet")</h3>
 	</div>
-	<div class="panel-body">
+	<div class="panel-body">	
 		<ul>
 		<li><h4>utilité du fichier :</h4>
 		Il permet d'indiquer une liste predefinie de ReadSetCode à soumettre.
 		<li><h4>Format du fichier :</h4>
-		En colonnes délimitées par le caractère '|'. La premiere ligne du fichier permet de definir la legende (type-information de chaque colonne) tandis que les lignes suivantes du fichier correspondent aux valeurs. <br>
+		En colonnes délimitées par le caractère '|'. La premiere ligne du fichier permet de definir la legende (type-information de chaque colonne) <br> 
+		tandis que les lignes suivantes du fichier correspondent aux valeurs. <br>
 		Les lignes commencant par le caractère '#' sont ignorées (commentaires).<br> 
-		La legende doit obligatoirement comporter le champs "readSetCode".<br>
+		La legende doit obligatoirement comporter le champ "readSetCode".<br>
 		<li><h4>Type d'informations pouvant apparaitre dans le fichier :</h4>
 		<ul>
 			<li><strong>readSetCode</strong> :        Code du readSet.
@@ -136,106 +157,284 @@
 		BAT_AAQOSW_1_C37T3ACXX.IND25<br>
 		BAT_ABAOSW_2_C39B2ACXX.IND30<br>
 		
-		
-	</div>	
 	
-	<div class="panel-heading">
-		<h3>@Messages("documentation.userFileExperiments")</h3>
-	</div>
-	<div class="panel-body">
-		<ul>
-		<li><h4>utilité du fichier :</h4>
-		Il permet de surcharger certaines informations de NGL ou de la configuration de soumission pour construire les objets 'experiment'.
-		<li><h4>Format du fichier :</h4>
-		En colonnes délimitées par le caractère '|'. La premiere ligne du fichier permet de definir la legende (type-information de chaque colonne) tandis que les lignes suivantes du fichier correspondent aux valeurs. <br>
-		Les lignes commencant par le caractère '#' sont ignorées (commentaires).<br> 
-		La legende doit obligatoirement comporter le champs "experiment_alias".<br>
-		<li><h4>Type d'informations pouvant apparaitre dans le fichier :</h4>
-		<ul>
-			<li><strong>experiment_alias</strong> :   Valeur de la forme exp_readsetCode.
-			<li><strong>nominal_length</strong> :     Valeur correspondant à un entier.
-			<li><strong>library_strategy</strong> :   Voir valeurs autorisées ci-dessus. 
-			<li><strong>library_source</strong> :     Voir valeurs autorisées ci-dessus. 
-			<li><strong>library_selection</strong> :  Voir valeurs autorisées ci-dessus. 
-			<li><strong>library_name</strong> :       Valeur correspondant à une chaine de caractères sans éspaces. 
-			<li><strong>title </strong> :             Courte chaine de caractères.	
-		</ul>		
-		<li><h4>Exemple de fichier :</h4>
-        #--------------------------------------------- <br>
-        experiment_alias	|	nominal_length         <br>  
-        #--------------------------------------------- <br>
-        exp_AWP_AOSF_1_D0HW7ACXX.IND12	|	297 <br>
-        exp_AWP_AOSF_4_D0HW7ACXX.IND12	|	297 <br>
-        exp_AWP_AOSA_7_D0HW7ACXX	|	2852 <br>
-        exp_AWP_AOSA_8_D0HW7ACXX	|	3292 <br>
-		
-		
 	</div>	
+
 	<div class="panel-heading">
-		<h3>@Messages("documentation.userFileSamples")</h3>
-	</div>
-	<div class="panel-body">
-		<ul>
-		<li><h4>utilité du fichier :</h4>
-		Il permet de surcharger certaines informations de NGL ou de la configuration de soumission pour construire les objets 'experiment'.
-		<li><h4>Format du fichier :</h4>
-		En colonnes délimitées par le caractère '|'. La premiere ligne du fichier permet de definir la legende (type-information de chaque colonne) tandis que les lignes suivantes du fichier correspondent aux valeurs. <br>
-		Les lignes commencant par le caractère '#' sont ignorées (commentaires).<br> 
-		La legende doit obligatoirement comporter le champs "sample_alias".<br>
-		<li><h4>Type d'informations pouvant apparaitre dans le fichier :</h4>
-		<ul>
-			<li><strong>sample_alias</strong> :       Valeur obligatoire de la forme 
-					'sample_codeProjet_taxonId' si STRATEGY_SAMPLE= strategy_sample_taxon 
-   					'sample_codeProjet_clone' si STRATEGY_SAMPLE= strategy_sample_clone    
-			<li><strong>scientific_name</strong> : Valeur de type chaine de caracteres sans accents ni caracteres speciaux (ex de caracteres à proscrire '&'). 
-			<li><strong>common_name</strong> :  Valeur de type chaine de caracteres sans accents ni caracteres speciaux (ex de caracteres à proscrire '&').  
-			<li><strong>title</strong> :  Valeur de type chaine de caracteres sans accents ni caracteres speciaux (ex de caracteres à proscrire '&').  
-			<li><strong>description</strong> : Valeur de type chaine de caracteres sans accents ni caracteres speciaux (ex de caracteres à proscrire '&'). 
-		</ul>		
-		<li><h4>Exemple de fichier :</h4>
-		#---------------------------------------------------------<br>
-        sample_alias|title|scientific_name|description<br>
-        #---------------------------------------------------------<br>
-        sample_ARI_408172_23DCM1CCII43|16S rDNA Gene Sequencing of Tara Oceans DNA samples corresponding to size fractions for prokaryotes|Marine metagenome|Station23 - Deep Chlorophyl Maximum - 0.2-1.6 µm - DNA <br>
-		sample_ARI_408172_23SUR1CCII43|16S rDNA Gene Sequencing of Tara Oceans DNA samples corresponding to size fractions for prokaryotes|Marine metagenome|Station23 - Surface - 0.2-1.6 µm - DNA <br>
-        sample_ARI_408172_30SUR2CCII43|16S rDNA Gene Sequencing of Tara Oceans DNA samples corresponding to size fractions for prokaryotes|Marine metagenome|Station30 - Surface - 0.2-1.6 µm - DNA <br>
-		
-	</div>		
-	<div class="panel-heading">
-		<h3>@Messages("documentation.userFileCloneToAc")</h3>
+		<h3>@Messages("documentation.userFileRefCollabToAc")</h3>
 	</div>
 	<div class="panel-body">		
 		<ul>
 		<li><h4>utilité du fichier :</h4>	
-		Il permet de donner les correspondance entre les noms de clones et les numéros d'accession des objets 'sample' et/ou 'study' soumis par des collaborateurs. 
+		Il permet de donner les correspondance entre les references collaborateur(champ qui doit etre renseigne dans NGL pour les readsets à soumettre, <br>
+		dans le cas d'une strategie 'STRATEGY_AC_SAMPLE') 
+		et les numéros d'accession des objets 'sample' et/ou 'study' deja soumis.  
 		<li><h4>Format du fichier :</h4>
-		En colonnes délimitées par le caractère '|'. La premiere ligne du fichier permet de definir la legende (type-information de chaque colonne) tandis que les lignes suivantes du fichier correspondent aux valeurs.<br> 
+		En colonnes délimitées par le caractère '|'. La premiere ligne du fichier permet de definir la legende (type-information de chaque colonne) <br>
+		tandis que les lignes suivantes du fichier correspondent aux valeurs.<br> 
 		Les lignes commencant par le caractère '#' sont ignorées (commentaires).<br> 
-		La legende doit obligatoirement comporter le champs "clone_alias"
+		La legende doit obligatoirement comporter le champ "refCollab"
 		<li><h4>Type d'informations pouvant apparaitre dans le fichier :</h4>
 		<ul>
-			<li><strong>clone_alias</strong> : Nom du clone dans NGL.
-			<li><strong>sample_ac</strong> :   Numéros d'accession du sample à l'EBI.
-			<li><strong>study_ac</strong> :    Numéros d'accession du study à l'EBI.
+			<li><strong>refCollab</strong> : Reference Collaborateur dans NGL (clone dans ancien lims).
+			<li><strong>sample_ac</strong> : Numéros d'accession du sample à l'EBI (de la forme ERS...)
+			<li><strong>study_ac</strong>  : Numéros d'accession du study à l'EBI (de la forme ERP...)
 		</ul>	
 
 		
 		<li><h4>Exemple de fichier :</h4>
 
-		#-------------------------------------------<br>
-		clone_alias|sample_ac|study_ac <br>
-		#--------------------------------------------<br>
-		"IROO-C3-0001"|"ERS154526"|"ERP001583"<br>
-		"IROO-D6-0002"|"ERS154527"|"ERP001583"<br>
-		"IROO-D6-0003"|"ERS154528"|"ERP001583"<br>
-		"IROO-D6-0004"|"ERS154529"|"ERP001583"<br>
-		"IROO-D6-0005"|"ERS154530"|"ERP001583"<br>
-		"IROO-E5-5146"|"ERS154531"|"ERP001583"<br>
-		"IROO-F5-5079"|"ERS154532"|"ERP001583"<br>		
+		#------------------------------------<br>
+		refCollab|sample_ac|study_ac         <br>
+		#------------------------------------<br>
+		IROO-C3-0001|ERS154526|ERP001583<br>
+		IROO-D6-0002|ERS154527|ERP001583<br>
+		IROO-D6-0003|ERS154528|ERP001583<br>
+		IROO-D6-0004|ERS154529|ERP001583<br>
+		IROO-D6-0005|ERS154530|ERP001583<br>
+		IROO-E5-5146|ERS154531|ERP001583<br>
+		IROO-F5-5079|ERS154532|ERP001583<br>		
+	<br/>
+	
+	<li><h4>Autre exemple de fichier :</h4>
+
+		#--------------------------<br>
+		refCollab|sample_ac        <br>
+		#--------------------------<br>
+		IROO-C3-0001|ERS154526<br>
+		IROO-D6-0002|ERS154527<br>
+		IROO-D6-0003|ERS154528<br>
+		IROO-D6-0004|ERS154529<br>
+	
+	<br/>	
+	</div>		
+	
+	
+	<div class="panel-heading">
+		<h3>@Messages("documentation.userFileExperiment")</h3>
+	</div>
+	<div class="panel-body">		
+		<ul>
+		<li><h4>utilité du fichier :</h4>	
+		Il permet à l'utilisateur de surcharger les champs editables des experiments.
+		<li><h4>Format du fichier :</h4>
+		En colonnes délimitées par le caractère '|'. La premiere ligne du fichier permet de definir la legende (type-information de chaque colonne) <br>
+		tandis que les lignes suivantes du fichier correspondent aux valeurs.<br> 
+		Les lignes commencant par le caractère '#' sont ignorées (commentaires).<br> 
+		La legende doit obligatoirement comporter le champ "experiment_code"
 		
+		Attention, les champs study_ac et sample_ac sont autorisées dans le fichier userFileExperiment uniquement pour une mise à jour des experiments à l'EBI
+		dans le menu 'Modidier à l'EBI'. Ces champs ne sont pas autorisées dans le menu 'consultation'
+	
+		
+		<li><h4>Type d'informations pouvant apparaitre dans le fichier :</h4>
+		<ul>
+			<li><strong>experiment_code</strong>  : code de l'experiment (champ obligatoire)
+			<li><strong>library_strategy</strong> : champ contraint voir <a href="#libraryStrategy">valeurs possibles de library strategy</a>			 		
+			<li><strong>library_source</strong>   : champ contraint voir <a href="#librarySource">valeurs possibles de library source</a>
+			<li><strong>library_selection</strong>: champ contraint voir <a href="#librarySelection">valeurs possibles de library selection</a>
+			<li><strong>title</strong>  : champ libre  ( en Anglais et sans accents ! )
+			<li><strong>library_construction_protocol</strong>  : champ libre ( en Anglais et sans accents ! )
+			<li><strong>library_layout_nominal_length</strong>  : entier
+			<li><strong>spot_length</strong>  : entier
+			<li><strong>last_base_coordonnee</strong>  : entier
+			<li><strong>study_ac</strong> : champ contraint : String commencant par ERP. (autorisée uniquement dans 'Modidier à l'EBI')
+			<li><strong>sample_ac</strong> : champ contraint : String commencant par ERS. (autorisée uniquement dans 'Modidier à l'EBI')
+		</ul>	
+
+		
+		<li><h4>Exemple de fichier :</h4>
+<xmp>
+#--------------------------------------------------------------------------------------------------
+experiment_code|library_strategy|library_source|library_selection|library_construction_protocol    
+#--------------------------------------------------------------------------------------------------
+exp_BIL_AABOSW_1_C4VJ6ACXX.IND2|cloneend   |genomic |cage|my protocol
+exp_AKL_SOSA_3_624Y1AAXX       |wga        |genomic |cage|my protocol 2  
+		
+</xmp>
+	
+		<li><h4>Autre exemple de fichier :</h4>
+<xmp>
+#----------------------------------------------------------------------------------------
+experiment_code|library_layout_nominal_length|title|spot_length|last_base_coordonnee     
+#----------------------------------------------------------------------------------------
+exp_AKL_VOSA_5_624Y1AAXX     |45| my title |55|103
+exp_AKL_SOSW_8_D14FJACXX.IND6|48|          |58|110
+
+
+</xmp>
+	</div>		
+	
+	<div class="panel-heading">
+		<h3>@Messages("documentation.userFileSample")</h3>
+	</div>
+	<div class="panel-body">		
+		<ul>
+		<li><h4>utilité du fichier :</h4>	
+		Il permet à l'utilisateur de surcharger les champs editables des samples.
+		<li><h4>Format du fichier :</h4>
+		En colonnes délimitées par le caractère '|'. La premiere ligne du fichier permet de definir la legende (type-information de chaque colonne) <br>
+		tandis que les lignes suivantes du fichier correspondent aux valeurs.<br> 
+		Les lignes commencant par le caractère '#' sont ignorées (commentaires).<br> 
+		La legende doit obligatoirement comporter le champ "sample_code"
+		<li><h4>Type d'informations pouvant apparaitre dans le fichier :</h4>
+		<ul>
+			<li><strong>sample_code</strong>  : code du sample (champ obligatoire)
+			<li><strong>titre</strong>  : champ libre ( en Anglais et sans accents ! )
+			<li><strong>description</strong>  : champ libre ( en Anglais et sans accents ! )
+			<li><strong>anonymized_name</strong>  : champ libre ( en Anglais et sans accents ! )
+			<li><strong>attributes</strong>  : champ avec syntaxe contrainte : voir <a href="#attributes">syntaxe pour le champ attributes</a>
+		</ul>	
+
+		
+		<li><h4>Exemple de fichier :</h4>
+<xmp>
+#----------------------------------------------------------
+sample_code|title|description|anonymized_name|attributes
+#----------------------------------------------------------
+sample_AKL_3702_epiRiL_99 | my title to replace that of the database  | my description| my anonymized name | "<SAMPLE_ATTRIBUTE><TAG>Strain</TAG><VALUE>myStrain</VALUE></SAMPLE_ATTRIBUTE>"
+sample_AKL_3702_MEJ07| | my title 2 | "my description 2"| my anonymized name 2 | 
+
+
+</xmp>
+	</div>
+	
+	<div class="panel-heading">
+		<h4><a id="attributes"></a></h4>
+		<h3>@Messages("documentation.sampleAttributes")</h3>
+	</div>
+		<div class="panel-body">
+		<ul>		
+		<li><h4>utilité du champ :</h4>	
+		
+		L'EBI reconnait un ensemble fini de caracteristiques pour le sample (ex: title, description, code, taxonId, ...).<br>
+		Si le sample doit etre decrit plus precisement (a l'aide de propriétés qui n'apparaissent pas dans les differents champs du sample),<br>
+		il est possible de definir ses propres attributs (ex Strain, Clone, Note, altitude...) dans 
+		le champ attributes, en utilisant les balises autorisées.<br>
+		On peut definir plusieurs "attributes" dans ce champ.<br>
+		
+		<li><h4>Balises autorisées dans le champ attributes :</h4>
+		- SAMPLE_ATTRIBUTE <br>
+		- TAG              <br>
+		- VALUE            <br>
+		- UNITS            <br>
+		
+	
+		<li><h4>Exemple d'un champ attributes :</h4>
+		</ul>
+		<xmp>
+	   "<SAMPLE_ATTRIBUTE><TAG>Strain</TAG><VALUE>ABBA</VALUE></SAMPLE_ATTRIBUTE>
+	    <SAMPLE_ATTRIBUTE><TAG>Depth</TAG><VALUE>200</VALUE><UNITS>m</UNITS></SAMPLE_ATTRIBUTE>
+	    <SAMPLE_ATTRIBUTE><TAG>Sample Collection Device</TAG><VALUE>high volume peristaltic pump [HVP-PUMP]</VALUE></SAMPLE_ATTRIBUTE>"
+ 
+ 
+  		</xmp>		
+    </div>	
+    
+    
+    
+    
+ 	<div class="panel-heading">
+		<h3>Corrections et validation des données de soumission avant de demarrer la soumission :</h3>
+	</div>
+	<div class="panel-body">
+		<ul>	
+ 		<xmp>
+Il est important de vérifier les taxonId des samples avant chaque soumission. 
+Le taxonId indiqué dans le sample a été renseigné dans NGL à la reception du projet. 
+Il est possible qu'au moment de la soumission, on souhaite soumettre avec un autre taxonId, ou un taxonId plus précis.
+L'EBI autorise la soumission d'un sample uniquement si son taxonId correspond à une feuille, et non un noeud, de l'arbre taxonomique. 
+La vérification de cette contrainte peut etre réalisée à l'url </xmp> <a href="https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi"> NCBI taxonomy</a>  
+<xmp>Si le taxonId du sample est erroné, l'utilisateur ne peut pas le modifier. Il devra 
+- faire un ticket JIRA avec le project "Support Sequençage CNS" et le composant "NGL-SQ", en indiquant le materiel qui doit etre modifié pour son taxonId
+- faire un ticket JIRA avec le project "Support Sequençage CNS" et le composant "NGL-SUB", en indiquant le code de la soumission à supprimer.
+- recréer sa soumission.
+
+
+		</xmp>
+		</ul>
 	</div>	
+			
+	<div class="panel-heading">
+		<h3>Modifier des données à l'EBI (update des données) :</h3>
+	</div>
+	<div class="panel-body">
+		<ul>	
+ 		<xmp>
+Après une première soumission des données brutes à l'EBI, on peut avoir besoin de mettre à  jour les métadonnées pour corriger un titre d'experience ou de sample, 
+un résumé de study ou sa description, ou encore ajouter ou modifier des locus_tag dans le project.
+L'interface de NGL-SUB propose les sous-menus "Modifier à l'EBI" et "Ajouter ou modifier un locus_tag" qui permettent de modifier les champs autorisés des métadonnées 
+et de les mettre   à jour sur le serveur de l'EBI.
+Attention un objet study, project, experiment ou sample n'est modifiable a l'EBI, que par le proprietaire de l'objet et si l'objet n'est pas en cours de soumission (soumission pour update ou release).
+Les champs date des métadonnées ne sont pas des champs autorisés pour une modification à  l'EBI. 
+		</xmp>
+		</ul>
+	</div>		  
+    
+	<div class="panel-heading">
+		<h3>Mettre les données dans le domaine public (Release) :</h3>
+	</div>
+	<div class="panel-body">
+		<ul>	
+ 		<xmp>
+Les soumissions sont réalisées en mode confidentiel. C'est le status du study, privé ou public, qui determine la visibilité de tous les experiments et runs rattachés à ce study.
+Le study soumis par defaut en confidentiel sera mis dans le domaine public par l'EBI au bout de 2 ans. 
+L'utilisateur peut toutefois mettre ses données dans le domaine public avant cette échéance; Il lui suffit d'aller sur la vue 
+détaillée du study (menu consultation des study puis épingler le study pour accédér à la vue détaillée), et de cliquer sur le bouton release.
+Le bouton release est visible en haut  à droite de la page, si le study est privé, s'il n'est pas en cours de soumission (update ou release en cours) et 
+si l'utilisateur est le propriétaire du study.
+Attention  à bien verifier que toutes les donnés liées au study (affichées en bas de la page detail) peuvent bien etre mises dans le domaine public, avant de releaser le study.
+		</xmp>
+		</ul>
+	</div>		  
+  
+  		<h3>Contact pour les questions, problemes, ou évolutions dans NGL-SUB :</h3>
+	</div>
+	<div class="panel-body">
+		<ul>	
+ 		<xmp>
+Les questions ou problemes relatifs à NGL-SUB doivent faire l'objet d'un ticket JIRA en indiquant le projet "Support Sequençage CNS" et le composant "NGL-SUB". 
+		</xmp>
+		</ul>
+	</div>		    			
+	<div class="panel-heading">
+		<h3>@Messages("documentation.visibiliteEBI_study")</h3>
+	</div>
+	<br/>
+	<div class="panel-body">		
+		<img src="/assets/images/visibiliteEbi_study.png" />
+	<xmp>
+	
+	
+	</xmp>
+	</div>
+	
 
-</div>
 
-
+	
+	<div class="panel-heading">
+		<h3>@Messages("documentation.visibiliteEBI_sample")</h3>
+	</div>
+	<br/>
+	<div class="panel-body">
+		<img src="/assets/images/visibiliteEbi_sample.png" />
+		<xmp>
+	
+	
+		</xmp>	
+	</div>
+	
+	<div></div>
+	
+	<div class="panel-heading">
+		<h3>@Messages("documentation.modeleSRA")</h3>
+	</div>
+	
+	<div class="panel-body">
+		<img src="/assets/images/sra_model_umbrella.png" />
+		<xmp>
+	
+	
+		</xmp>		
+	</div>
 }

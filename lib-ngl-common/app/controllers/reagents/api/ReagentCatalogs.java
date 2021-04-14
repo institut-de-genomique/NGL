@@ -1,7 +1,5 @@
 package controllers.reagents.api;
 
-// import static play.data.Form.form;
-//import static fr.cea.ig.play.IGGlobals.form;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,8 +15,10 @@ import com.mongodb.BasicDBObject;
 import controllers.DocumentController;
 import fr.cea.ig.MongoDBDAO;
 import fr.cea.ig.MongoDBResult;
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
+import fr.cea.ig.ngl.dao.reagents.ReceptionsAPI;
 import models.laboratory.reagent.description.AbstractCatalog;
+import models.laboratory.reagent.description.KitCatalog;
 import models.laboratory.reagent.description.ReagentCatalog;
 import models.laboratory.reagent.utils.ReagentCodeHelper;
 import models.utils.InstanceConstants;
@@ -33,14 +33,23 @@ import views.components.datatable.DatatableResponse;
 
 public class ReagentCatalogs extends DocumentController<ReagentCatalog> {
 	
-	private final /*static*/ Form<ReagentCatalogSearchForm> ReagentCatalogSearchForm; // = form(ReagentCatalogSearchForm.class);
+	private final Form<ReagentCatalogSearchForm> ReagentCatalogSearchForm;
+	
+//	@Inject
+//	public ReagentCatalogs(NGLContext ctx) {
+//		super(ctx,InstanceConstants.REAGENT_CATALOG_COLL_NAME, ReagentCatalog.class);
+//		ReagentCatalogSearchForm = ctx.form(ReagentCatalogSearchForm.class);
+//	}
+	
+	private final ReceptionsAPI receptionApi;
 	
 	@Inject
-	public ReagentCatalogs(NGLContext ctx) {
-		super(ctx,InstanceConstants.REAGENT_CATALOG_COLL_NAME, ReagentCatalog.class);
-		ReagentCatalogSearchForm = ctx.form(ReagentCatalogSearchForm.class);
+	public ReagentCatalogs(NGLApplication app, ReceptionsAPI receptionApi) {
+		super(app,InstanceConstants.REAGENT_CATALOG_COLL_NAME, ReagentCatalog.class);
+		ReagentCatalogSearchForm = app.form(ReagentCatalogSearchForm.class);
+		this.receptionApi = receptionApi;
 	}
-	
+
 	public Result save() {
 		Form<ReagentCatalog> ReagentCatalogFilledForm = getMainFilledForm();
 		
@@ -48,9 +57,9 @@ public class ReagentCatalogs extends DocumentController<ReagentCatalog> {
 		reagentCatalog.code = ReagentCodeHelper.getInstance().generateReagentCatalogCode(reagentCatalog.name);
 		
 //		ContextValidation contextValidation = new ContextValidation(getCurrentUser(), ReagentCatalogFilledForm.errors());
-		ContextValidation contextValidation = new ContextValidation(getCurrentUser(), ReagentCatalogFilledForm);
-		contextValidation.setCreationMode();
-		
+//		ContextValidation contextValidation = new ContextValidation(getCurrentUser(), ReagentCatalogFilledForm);
+//		contextValidation.setCreationMode();
+		ContextValidation contextValidation = ContextValidation.createCreationContext(getCurrentUser(), ReagentCatalogFilledForm);
 //		reagentCatalog = (ReagentCatalog)InstanceHelpers.save(InstanceConstants.REAGENT_CATALOG_COLL_NAME, reagentCatalog, contextValidation);
 		reagentCatalog = InstanceHelpers.save(InstanceConstants.REAGENT_CATALOG_COLL_NAME, reagentCatalog, contextValidation);
 		if (contextValidation.hasErrors())
@@ -64,9 +73,19 @@ public class ReagentCatalogs extends DocumentController<ReagentCatalog> {
 		ReagentCatalog reagentCatalog = reagentCatalogFilledForm.get();
 		
 //		ContextValidation contextValidation = new ContextValidation(getCurrentUser(), reagentCatalogFilledForm.errors());
-		ContextValidation contextValidation = new ContextValidation(getCurrentUser(), reagentCatalogFilledForm);
-		contextValidation.setUpdateMode();
-
+//		ContextValidation contextValidation = new ContextValidation(getCurrentUser(), reagentCatalogFilledForm);
+//		contextValidation.setUpdateMode();
+		ContextValidation contextValidation = ContextValidation.createUpdateContext(getCurrentUser(), reagentCatalogFilledForm);
+		
+		ReagentCatalog reagentCatalogInBase = getObject(code);
+		if(!reagentCatalogInBase.catalogRefCode.equals(reagentCatalog.catalogRefCode) && receptionApi.isAnyCatalogReferenceInReceptions(reagentCatalogInBase.catalogRefCode)) {
+			contextValidation.addError("catalogRefCode", "error.reagent.reception.modify.kit");
+		}
+		
+		if (contextValidation.hasErrors()) {
+			return badRequest(errorsAsJson(contextValidation.getErrors()));
+		}
+		
 //		reagentCatalog = (ReagentCatalog)InstanceHelpers.save(InstanceConstants.REAGENT_CATALOG_COLL_NAME, reagentCatalog, contextValidation);
 		reagentCatalog = InstanceHelpers.save(InstanceConstants.REAGENT_CATALOG_COLL_NAME, reagentCatalog, contextValidation);
 		if (contextValidation.hasErrors())

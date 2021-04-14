@@ -1,5 +1,5 @@
-
-@this(ctx : fr.cea.ig.play.migration.NGLContext)
+@this(ctx : fr.cea.ig.ngl.NGLApplication)
+@* @this(ctx : fr.cea.ig.play.migration.NGLContext) *@
 
 @(nav: String = "")
 
@@ -19,7 +19,8 @@
 @writePermission = @{ PermissionHelper.checkPermission(user, "writing") }
 @adminPermission = @{ PermissionHelper.checkPermission(user, "admin") }
 @always          = @{ true }
-@version         = @{ ctx.config().getApplicationVersion() }
+@* @version         = @{ ctx.config().getApplicationVersion() } *@
+@version         = @{ ctx.nglConfig().getApplicationVersion() }
 
   <!-- Navbar
     ================================================== -->
@@ -67,8 +68,8 @@
 				</li>
 					
 				@ddmenu(nav, "balance","balanceSheets.menu") {
-				  @ddentry(nav, "balanceSheets.illumina", BalanceSheets.home("rsillumina",new Date().format("yyyy")), "balanceSheets.menu.illumina")
-				  @ddentry(nav, "balanceSheets.nanopore", BalanceSheets.home("rsnanopore",new Date().format("yyyy")), "balanceSheets.menu.nanopore")
+				  @ddentry(nav, "balanceSheets.illumina", BalanceSheets.home("rsillumina","general"), "balanceSheets.menu.rsillumina")
+				  @ddentry(nav, "balanceSheets.nanopore", BalanceSheets.home("rsnanopore","general"), "balanceSheets.menu.rsnanopore")
 				}
 							
 				<li class="@("active".when(nav.startsWith("help")))">

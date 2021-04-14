@@ -1,0 +1,54 @@
+@this()
+@()
+@import views.html.helper._
+
+@form() = {
+	@columnSearchForm{
+		@formGroup{	
+			<div bt-select placeholder='@Messages("descriptions.select.protocols.experiment.types")' class="form-control" ng-model="searchService.form.experimentTypeCodes" textarea="true" filter="true" multiple="true" bt-options="experimentType.code for experimentType in searchService.getExperimentTypes()">
+			</div>
+		}
+	}
+	@columnSearchForm{
+		@formGroup{	
+			<div bt-select textarea="true" multiple=true filter=true placeholder='@Messages("experiments.select.protocols")' class='form-control' ng-model='searchService.form.codes' bt-options='protocol.code as protocol.name for protocol in searchService.lists.getProtocols()'>
+			</div>
+		}
+	}
+	@columnSearchForm{
+		@formGroup{	
+			<div bt-select placeholder='@Messages("descriptions.select.protocols.active")' class="form-control" ng-model="searchService.form.isActive" bt-options="bool.code as bool.name for bool in searchService.lists.get('booleans')">
+			</div>
+		}
+	}
+}
+
+<div class="row">
+	<div class="col-md-12 col-lg-12"  messages="messages"></div>
+</div>
+<div class="row"> 
+<div class="col-md-12 col-lg-12" ultimate-datatable="searchService.datatable">
+	<div udt-form>
+
+	<div class="tab-content">
+			<div class="tab-pane active" id="filters">
+				<form class="well well-small">
+				<div class="row">
+				@form
+				@columnSearchForm{
+					@formGroup{
+					<div class="btn-toolbar">
+						<button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="search()" class="btn btn-primary" >
+							<i class="fa fa-search"></i>
+						</button>
+						<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="reset()"  class="btn btn-default">
+							<i class="fa fa-undo"></i>
+						</button>
+														
+					</div>	
+					}
+				}
+				</div>		
+			</form>	
+		</div>
+</div>

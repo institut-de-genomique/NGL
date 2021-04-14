@@ -1,9 +1,6 @@
 "use strict";
-angular.module('home', ['ngRoute', 'ultimateDataTableServices','valuationServices','commonsServices','biCommonsServices', 'biWorkflowChartServices', 'ui.bootstrap','ngl-bi.ReadSetsServices'], 
-	function($routeProvider, $locationProvider) {
-	
-	
-	
+angular.module('home', ['ngRoute', 'ultimateDataTableServices','valuationServices','commonsServices','biCommonsServices', 'biWorkflowChartServices',
+						'ui.bootstrap','ngl-bi.ReadSetsServices']).config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
 	
 	$routeProvider.when('/readsets/search/home', {
 		templateUrl : '/tpl/readsets/search',
@@ -41,11 +38,8 @@ angular.module('home', ['ngRoute', 'ultimateDataTableServices','valuationService
 		controller : 'DetailsCtrl'
 	});
 	
-
-	
 	$routeProvider.otherwise({redirectTo: '/readsets/search/home'});
 
 	// configure html5 to get links working with bookmarked
 	$locationProvider.html5Mode({enabled: true, requireBase: false});
-});
-
+}]);

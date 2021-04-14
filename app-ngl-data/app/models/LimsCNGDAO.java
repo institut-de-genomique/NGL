@@ -26,6 +26,7 @@ import models.laboratory.common.instance.State;
 import models.laboratory.common.instance.TBoolean;
 import models.laboratory.common.instance.TraceInformation;
 import models.laboratory.common.instance.Valuation;
+import models.laboratory.common.instance.property.PropertyObjectValue;
 import models.laboratory.common.instance.property.PropertySingleValue;
 import models.laboratory.container.instance.Container;
 import models.laboratory.container.instance.ContainerSupport;
@@ -42,16 +43,18 @@ import models.utils.InstanceHelpers;
 import models.utils.dao.DAOException;
 import models.utils.instance.ContainerHelper;
 import models.utils.instance.ContainerSupportHelper;
-//import play.Logger;
 import services.instance.experiment.ExperimentImport;
 import validation.ContextValidation;
 
+// CTX: clean validation context uses
 /**
- * @author dnoisett
  * Import data from CNG's LIMS to NGL 
  * Functions to get projects, samples,  containers ( lanes, tubes), indexes
  * Sub-functions to map data (between Solexa and NGL)
  * Sub-functions to update dates (in order to know what data has been imported)
+ * 
+ * @author dnoisett
+ * 
  */
 @Repository
 public class LimsCNGDAO {
@@ -65,8 +68,8 @@ public class LimsCNGDAO {
 	
 	protected static final String PROJECT_TYPE_CODE_DEFAULT  = "default-project";
 	protected static final String PROJECT_STATE_CODE_DEFAULT = "IP";
-	protected static final String PROJECT_PROPERTIES_UNIX_GROUP = "unixGroup";
-	protected static final String UNIX_GROUP_DEFAULT = "solexa";
+	protected static final String PROJECT_PROPERTIES_SYNCHRO_PROJ = "synchroProj";
+	protected static final String QTREE_QUOTA = "qtreeQuota";
 	
 	protected static final String IMPORT_CATEGORY_CODE     = "sample-import";  // inutilisé...
 	protected static final String IMPORT_TYPE_CODE_DEFAULT = "default-import";
@@ -93,25 +96,25 @@ public class LimsCNGDAO {
 		
 		project.code = rs.getString("code");
 		project.name = rs.getString("name").trim();
-		//Logger.debug("project code=" + project.code);		
+		logger.error("project code=" + project.code);		
 		
 		project.typeCode=PROJECT_TYPE_CODE_DEFAULT;
 		ProjectType projectType=null;
 		try {
-			projectType = ProjectType.find.findByCode(project.typeCode);
+			projectType = ProjectType.find.get().findByCode(project.typeCode);
 		} catch (DAOException e) {
 			logger.error("",e);
 			return null;
 		}
 		if (projectType == null) {
-			ctxErr.addErrors("code", "error.codeNotExist", project.typeCode, project.code);
+			ctxErr.addError("code", "error.codeNotExist", project.typeCode, project.code);
 			return null;
 		}
 		
 		project.categoryCode=projectType.category.code;
 		
 		project.properties = new HashMap<>();
-		project.properties.put(PROJECT_PROPERTIES_UNIX_GROUP, new PropertySingleValue(UNIX_GROUP_DEFAULT));
+		project.properties.put(PROJECT_PROPERTIES_SYNCHRO_PROJ, new PropertySingleValue(Boolean.TRUE));
 		
 		project.state = new State(); 
 		project.state.code=PROJECT_STATE_CODE_DEFAULT;
@@ -124,7 +127,7 @@ public class LimsCNGDAO {
 		// just one comment for one project
 		if (rs.getString("comments") != null ) {
 			project.comments = new ArrayList<>(); 
-			InstanceHelpers.addComment(rs.getString("comments"), project.comments, Constants.NGL_DATA_USER);
+			InstanceHelpers.addComment(project.comments, rs.getString("comments"), Constants.NGL_DATA_USER);
 		}
 		
 		//specific to CNG
@@ -156,13 +159,13 @@ public class LimsCNGDAO {
 			
 			SampleType sampleType=null;
 			try {
-				sampleType = SampleType.find.findByCode(sampleTypeCode);
+				sampleType = SampleType.find.get().findByCode(sampleTypeCode);
 			} catch (DAOException e) {
 				logger.error("",e);
 				return null;
 			}
 			if ( sampleType==null ) {
-				ctxErr.addErrors("code", "error.codeNotExist", sampleTypeCode, sample.code);
+				ctxErr.addError("code", "error.codeNotExist", sampleTypeCode, sample.code);
 				return null;
 			}
 			
@@ -312,13 +315,13 @@ public class LimsCNGDAO {
 			
 			SampleType sampleType=null;
 			try {
-				sampleType = SampleType.find.findByCode(sampleTypeCode);
+				sampleType = SampleType.find.get().findByCode(sampleTypeCode);
 			} catch (DAOException e) {
 				logger.error("",e);
 				return null;
 			}
 			if (sampleType == null) {
-				ctxErr.addErrors("sample code", "error.codeNotExist", sampleTypeCode, content.sampleCode);
+				ctxErr.addError("sample code", "error.codeNotExist", sampleTypeCode, content.sampleCode);
 				return null;
 			}	
 			
@@ -406,6 +409,14 @@ public class LimsCNGDAO {
 					int rowNum0 = rowNum;
 					ContextValidation ctxErr = contextError; 
 					Project p =  commonProjectMapRow(rs0, rowNum0, ctxErr); 
+					
+					Map<String, Object> map = new HashMap<>();
+					map.put("proj", 0);
+					map.put("rawdata", 0);
+					map.put("scratch", 100);
+
+					p.properties.put(QTREE_QUOTA, new PropertyObjectValue(map));
+					
 					return p;
 				}	
 		});
@@ -474,7 +485,7 @@ public class LimsCNGDAO {
 		int x = 1;
 		int listSize = results.size(); 
 		while (pos < listSize-1) {
-			// meme recodage a faire que pour les containers...TODO
+			// _FDS_: meme recodage a faire que pour les containers...
 			while (pos < listSize-1 && results.get(pos).code.equals(results.get(pos+x).code)) {
 				// difference between the two project codes
 				if (! results.get(pos).projectCodes.toArray(new String[0])[0].equals(results.get(pos+x).projectCodes.toArray(new String[0])[0])) {

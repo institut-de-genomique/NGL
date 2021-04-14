@@ -13,7 +13,7 @@ import models.laboratory.reception.instance.ReceptionConfiguration.Action;
 import validation.ContextValidation;
 
 
-@SuppressWarnings("unused") // TODO: T seems to only be informative, check for removal
+@SuppressWarnings("unused") // LOGIC: T seems to only be informative, check for removal
 public class ObjectFieldConfiguration<T> extends AbstractFieldConfiguration {
 	
 	@JsonIgnore
@@ -54,6 +54,12 @@ public class ObjectFieldConfiguration<T> extends AbstractFieldConfiguration {
 			}			
 		});
 	}
+	
+	//26-04-2019 Remove BUG PROD 2.7.0 Ne pas utiliser ou tester avant de remettre cette implementation
+	/*protected void populateSubFields(Object object, Map<Integer, String> rowMap, ContextValidation contextValidation, Action action) throws Exception {
+		for (Map.Entry<String, AbstractFieldConfiguration> e : configs.entrySet()) 
+			populateField(object.getClass().getField(e.getKey()), object, rowMap, contextValidation, action);
+	}*/
 
 	@Override
 	public void populateField(Field field, Object dbObject,	Map<Integer, String> rowMap, ContextValidation contextValidation, Action action) throws Exception {
@@ -64,6 +70,12 @@ public class ObjectFieldConfiguration<T> extends AbstractFieldConfiguration {
 		
 		populateSubFields(object, rowMap, contextValidation, action);
 		populateField(field, dbObject, object);	
+	}
+
+	@Override
+	public void updateFromHeader(ContextValidation vc, Map<Integer, String> header) {
+		for (AbstractFieldConfiguration c : configs.values()) 
+			c.updateFromHeader(vc, header);
 	}
 
 }

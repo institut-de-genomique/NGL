@@ -1,5 +1,6 @@
-angular.module('home').controller('NanoporeDepotCtrl',['$scope', '$parse', '$http','$window','atmToSingleDatatable', 'datatable',
-                                                               function($scope, $parse,  $http, $window, atmToSingleDatatable, datatable) {
+// FDS 07/10/2020 NGL-3000 ajout dateServices
+angular.module('home').controller('NanoporeDepotCtrl',['$scope', '$parse', '$http','$window','atmToSingleDatatable', 'datatable', 'dateServices',
+                                                               function($scope, $parse,  $http, $window, atmToSingleDatatable, datatable, dateServices) {
 	
 	// NGL-1055: name explicite pour fichier CSV exporté: typeCode experience
 	// NGL-1055: mettre getArray et codes:'' dans filter et pas dans render
@@ -319,21 +320,29 @@ angular.module('home').controller('NanoporeDepotCtrl',['$scope', '$parse', '$htt
 		//datatable.setData(dataMain);
 	}
 	
+	// NGL-3000 ajouter une vérification de la date saisie 
+	// 21/10/2020 isValidDateFormat ne controle pas une date entrée sur 2 digits...la retirer pour l'instant
 	$scope.$on('save', function(e, callbackFunction) {	
-		$scope.datatableQcFlowcell.save();
-		$scope.datatableLoadingReport.save();
-		
-		//save entraine appel copyOtherDTToMainDatatable
-		$scope.atmService.data.save();	
+		console.log("call event save");
+			// une valeur existe toujours => la controler
+			// avec l'utilisation d'un calendrier cette verification est superflue...
+			/*if ( ! dateService.isValidDateFormat($scope.experiment.experimentProperties.runStartDate.value, Messages("date.format"))){
+				$scope.messages.setError(Messages("experiment.msg.badformat", "Date réelle de dépôt", Messages("date.format")));
+				$scope.$emit('childSavedError', callbackFunction);
+			} else {*/
+				//tout OK sauvegarder !!!
+				$scope.datatableQcFlowcell.save();
+				$scope.datatableLoadingReport.save();
 				
-		$scope.atmService.viewToExperimentOneToOne($scope.experiment);
-		$scope.$emit('childSaved', callbackFunction);
-		
-		
+				//save entraine appel copyOtherDTToMainDatatable
+				$scope.atmService.data.save();	
+						
+				$scope.atmService.viewToExperimentOneToOne($scope.experiment);
+				$scope.$emit('childSaved', callbackFunction);
+			//}
 	});
 	
-	
-	
+	// ancien contenu de $scope.$on('save', ......
 	$scope.$on('refresh', function(e) {
 		console.log("call event refresh");		
 		var dtConfig = $scope.atmService.data.getConfig();
@@ -417,6 +426,9 @@ angular.module('home').controller('NanoporeDepotCtrl',['$scope', '$parse', '$htt
 			quantity : "ng"
 	}
 	
+	// ajouté pour NGL-3000
+	var dateService=dateServices($scope);
+	
 	//overide defaut method
 	atmService.convertOutputPropertiesToDatatableColumn = function(property, pName){
 		if(property.propertyValueType === "single"){
@@ -478,12 +490,25 @@ angular.module('home').controller('NanoporeDepotCtrl',['$scope', '$parse', '$htt
 		$window.open(value+"/runs/"+code, 'bi');
 	};
 
+	// en mode creation positionner la date courante par defaut
 	if($scope.isCreationMode()){
 		if(!$parse("experimentProperties.runStartDate.value")($scope.experiment)){
+			console.log('setting current date as default');
+			// dans le javascript positionner une valeur en millisecondes en utilisant la librairie moment.js
+			// le rendu au format date est executé par la directive date-timestamp (dateTimestamp) ou date-timestamp2 (dateTimestamp2) 
+			/* !!!!!!!!!    SUPSQCNG-902 le timestamp doit etre arrondi pour que NGSRG retrouve le fichier du run
+			   garder le code ci-dessous qui effectue l'arrondi !!!!!!! */
 			var format = Messages("date.format").toUpperCase();
-			var date = moment().format(format);
-			date = moment(date, format).valueOf();
-			$parse("experimentProperties.runStartDate.value").assign($scope.experiment, date); 
+			var curdateMS_round = moment().format(format);
+			curdateMS_round = moment(curdateMS_round, format).valueOf();
+			console.log('timestamp arrondi='+curdateMS_round);
+			//var curdateMS_exact= moment().valueOf();
+			//console.log('timestamp exact  ='+curdateMS_exact);
+			
+			$parse("experimentProperties.runStartDate.value").assign($scope.experiment, curdateMS_round); 
 		}
 	}
+	
+	//NGL-3203 ajout information masquable; commencer affiché
+	$scope.setIsShowInformation (true);
 }]);

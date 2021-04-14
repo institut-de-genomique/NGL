@@ -35,7 +35,7 @@
 <!--debut-->
 
 @standard_header("study", "TRUE"){ 
-  <!-- affichage uniquement si donnee releasable : study avec state.code=F-SUB et date relase > date du jour : voir details.ctrl.js.$scope.isReleasable--> 
+  <!-- affichage uniquement si donnee releasable : study avec state.code=SUB_F et date relase > date du jour : voir details.ctrl.js.$scope.isReleasable--> 
   <button class="btn btn-default"  ng-if="isReleasable('@user')"  ng-click="userRelease()" data-toggle="tooltip" title="@Messages("button.release")" ><i class="fa fa-save"></i> @Messages("button.release")</button>
   @*<button class="btn btn-default"   ng-click="userRelease()" data-toggle="tooltip" title="@Messages("button.release")" ><i class="fa fa-save"></i> @Messages("button.release")</button>*@
 }
@@ -45,10 +45,20 @@
 
 <div class="row">
 	@column(){
-		@* Ecriture de la ligne status :*@
-  		<div ng-if="isReleasable"> @simpleLine(Messages("study.status"),Messages("study.private"))</div>
-  		<div ng-if="!isReleasable"> @simpleLine(Messages("study.status"),Messages("study.public"))</div>
+		@* Ecriture de la ligne status :
+  		<div ng-if="!isPublic"> @simpleLine(Messages("study.status"),Messages("study.private"))</div>
+  		<div ng-if="isPublic"> @simpleLine(Messages("study.status"),Messages("study.public"))</div>
+        
+*@        
+        
+ 		<div ng-if="visibility=='private'"> @simpleLine(Messages("study.visibility"),Messages("study.private"))</div>
+ 		<div ng-if="visibility=='public'"> @simpleLine(Messages("study.visibility"),Messages("study.public"))</div>
+ 		<div ng-if="visibility=='undefined'"> @simpleLine(Messages("study.visibility"),Messages("study.undefined"))</div>
+
 	    @* Ecriture des autres lignes code, state, title, abstract et description :*@
+	    @line("study.createUser", "study.traceInformation.createUser")
+	    @lineDate("study.traceInformation.creationDate")
+	    @lineDate("study.releaseDate")
 		@line("study.code")
 		@line("study.accession")
 		@line("study.externalId")

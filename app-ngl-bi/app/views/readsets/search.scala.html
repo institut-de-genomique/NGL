@@ -56,7 +56,7 @@
 	}
 	@columnSearchForm{
 		@formGroup{
-			<input type="text" class="form-control" ng-model="searchService.form.fromDate" placeholder='@Messages("search.placeholder.fromDate")'>
+			<input type="text" class="form-control" ng-model="searchService.form.fromDate" placeholder='@Messages("search.placeholder.fromDate")' date-timestamp>
 		}	
 		
 		@formGroup{					
@@ -70,12 +70,19 @@
 	}
 	@columnSearchForm{
 		@formGroup{
-			<input type="text" class="form-control" ng-model="searchService.form.toDate" placeholder='@Messages("search.placeholder.toDate")'>
+			<input type="text" class="form-control" ng-model="searchService.form.toDate" placeholder='@Messages("search.placeholder.toDate")'  date-timestamp>
 		}
 		
-		@formGroup{					
+	    <!-- @formGroup{					
 			<input type="text" class="form-control" ng-model="searchService.form.runCode" typeahead="run.code as run.name for run in searchService.lists.getRuns() | filter:$viewValue | limitTo:20"  placeholder='@Messages("search.placeholder.run")'>
-		}
+	
+	2	<bt-input  class="form-control" input-ng-model="searchService.form.code" textarea-ng-model="searchService.form.runCodes" placeholder='@Messages("search.placeholder.run")' ></bt-input>												
+			
+		} -->
+		
+		@formGroup{
+				<div class="form-control" bt-select ng-model="searchService.form.runCodes" multiple="true" textarea="true" filter="true" placeholder='@Messages("search.placeholder.run")' bt-options="run.code as run.name for run in searchService.lists.getRuns()  |orderBy:'name':true"  ></div>			
+	}
 		@formGroup{	
 			<input type="text" class="form-control" ng-model="searchService.form.productionValuationUser" typeahead="productionValuationUser.name as productionValuationUser.name for productionValuationUser in searchService.lists.getUsers() | filter:$viewValue | limitTo:20"  placeholder='@Messages("search.placeholder.valuationReadSetUser")' title='@Messages("search.placeholder.valuationReadSetUser")'>
 		}
@@ -105,8 +112,8 @@
 			
 		<div class="tab-content">
 		<div class="tab-pane active" id="filters">
-			<form class="well well-small">
-			<div class="row">
+			<form class="well well-small" ng-switch="searchService.getMainFiltersToForm().length">
+			<div class="row" ng-switch-when="0">
 			@form
 			@columnSearchForm{
 				@formGroup{
@@ -124,6 +131,28 @@
 					@buttons
 				}
 			}
+			</div>
+			<div class="row" ng-switch-default>
+				<div class="col-md-2 col-lg-2" ng-repeat="filters in searchService.getMainFiltersToForm()">
+					<div class="form-group" ng-repeat="filter in filters">
+						<div udt-compile="filter.html"></div> <!-- used directive from datatable to compile html -->
+					</div>
+				</div>
+				@columnSearchForm{
+					@formGroup{
+					<div class="btn-toolbar">
+						<button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="search()" class="btn btn-primary" >
+							<i class="fa fa-search"></i>
+						</button>
+						<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="searchService.aggregateForm = {}"  class="btn btn-default">
+							<i class="fa fa-undo"></i>
+						</button>						 	
+					</div>
+					}
+					@formGroup{
+						@buttons
+					}
+				}
 			</div>		
 		</form>	
 	</div>
@@ -163,14 +192,14 @@
 			<div class="col-md-2 col-lg-2" ng-repeat="columns in searchService.getAddColumnsToForm()">
 			  		<div class="checkbox" ng-repeat="column in columns | filter:{header:regexColumn}">
 				    <label>
-				      <input type="checkbox" ng-model="column.select"> {{column.header}}
+				      <input type="checkbox" ng-model="column.select"> {{column.groupHeader!=null?column.groupHeader:column.header}}
 				    </label>
 				  </div>			
 			 </div>
 			 @columnSearchForm{
 				@formGroup{
 				<div class="btn-toolbar">
-					<button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="searchService.addColumnsToDatatable()" class="btn btn-primary" >
+					<button type="submit" title='@Messages("button.add.columns")' data-toggle="tooltip" ng-click="searchService.addColumnsToDatatable()" class="btn btn-primary" >
 						<i class="fa fa-plus"></i>
 					</button>
 					<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="searchService.resetDatatableColumns()"  class="btn btn-default">

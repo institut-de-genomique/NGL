@@ -27,5 +27,9 @@ public class DAOException extends RuntimeException {
 		if (value == null)
 			throw new DAOIllegalArgumentException(name);
 	}
+
+	public static DAOException wrap(Exception e) {
+		return new DAOException(e);
+	}
 	
 }

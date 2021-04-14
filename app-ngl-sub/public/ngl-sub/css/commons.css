@@ -1,0 +1,23 @@
+/*custom bootrap for NGL-SUB*/
+
+/* MAIN */
+
+/* Little buttons */
+
+.inProgressSpinner {
+	padding-left:40%;
+    background-color: #428BCA;
+    bottom: 0;
+    /*height: 100%;*/
+    left: 0;
+    opacity: 0.5;
+    position: absolute;
+    right: 0;
+    top: 0;
+    /*width: 100%;*/
+    z-index: 1040;
+}
+
+.label-perso {
+  background-color: #CC0099;
+}

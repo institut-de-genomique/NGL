@@ -82,7 +82,7 @@
 			    <form class="form-horizontal" name="instrumentForm">
 			    
 			   <div class="form-group required {{getHasErrorClass('instrumentForm', 'instrumentTypeCode')}}">
-				    <label class="col-md-6 col-lg-6 control-label">@Messages("experiments.intrumentUsedType")</label>
+				    <label class="col-md-6 col-lg-6 control-label">@Messages("experiments.instrumentUsedType")</label>
 				    <div class="col-md-6 col-lg-6">
 			    	<div ng-switch on="mainService.isEditMode()">						
 						<p class="form-control-static" ng-switch-when="false" ng-bind="experiment.instrument.typeCode | codes:'type'" />						 
@@ -92,16 +92,16 @@
 								ng-model="experiment.instrument.typeCode"							
 								bt-options="instrumentUsedType.code as instrumentUsedType.name for instrumentUsedType in lists.get('instrumentUsedTypes')"
 								ng-change="changeInstrumentType()"	
-								placeholder='@Messages("experiments.select.intrumentUsedType")'						
+								placeholder='@Messages("experiments.select.instrumentUsedType")'
 								auto-select>								
 							</div>
 						</div>
 					</div>	
 					</div>
 				</div>		    			    					
-				
+				<!-- FDS correction label  -->
 			    <div class="form-group required {{getHasErrorClass('instrumentForm', 'instrumentCode')}}">
-				    <label class="col-md-6 col-lg-6 control-label">@Messages("experiments.intrument")</label>
+				    <label class="col-md-6 col-lg-6 control-label">@Messages("experiments.instrument")</label>
 				    <div class="col-md-6 col-lg-6">
 				     <div ng-switch on="mainService.isEditMode()">						
 						<p class="form-control-static" ng-switch-when="false" ng-bind="experiment.instrument.code| codes:'instrument'" />						 
@@ -119,9 +119,9 @@
 					</div>	
 				    </div>
 				</div>
-			    
+			    <!-- FDS correction label  -->
 				<div class="form-group required  {{getHasErrorClass('instrumentForm', 'instrumentCode')}}" ng-if="(experiment.instrument.typeCode !== undefined &&  experiment.instrument.typeCode !== null && !isOutputATMVoid())">
-					<label class="col-md-6 col-lg-6 control-label">@Messages("experiments.intrumentCategory")</label>
+					<label class="col-md-6 col-lg-6 control-label">@Messages("experiments.outContainerSupportCategoryCode")</label>
 					<div class="col-md-6 col-lg-6">
 					<div ng-switch on="mainService.isEditMode()">						
 						<p class="form-control-static" ng-switch-when="false" ng-bind="experiment.instrument.outContainerSupportCategoryCode | codes:'container_support_cat'" />						 
@@ -171,7 +171,9 @@
 				    @columnLabelValue(Messages("experiments.modifyBy")){
 						<p class="form-control-static" ng-bind="experiment.traceInformation.modifyUser"></p>
 					}
-				   			    								
+				   	 @columnLabelValue(Messages("experiments.finishDate")){
+				   		<p class="form-control-static"  ng-if="(experiment.state.code === 'F')" ng-bind="experiment.state.date | date:'@Messages("datetime.format")' " ></p>
+				   	 }	    								
 					</form>
 				  </div>
 				</div>

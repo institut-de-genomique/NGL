@@ -1,41 +1,41 @@
 angular.module('home').controller('NormalisationCtrl',['$scope' ,'$http','$parse', 'atmToSingleDatatable',
-                                                       function($scope, $http,$parse,atmToSingleDatatable) {
+	function($scope, $http,$parse,atmToSingleDatatable) {
 	var datatableConfig = {
 			name:$scope.experiment.typeCode.toUpperCase(),
 			columns:[			  
-					{
-						"header":Messages("containers.table.projectCodes"),
-							"property": "inputContainer.projectCodes",
-							"order":true,
-							"hide":true,
-							"type":"text",
-							"position":2,
-							"render":"<div list-resize='cellValue' list-resize-min-size='3'>",
-						 "extraHeaders":{0:Messages("experiments.inputs")}
-					 },
-				     {
-			        	"header":Messages("containers.table.sampleCodes"),
-			 			"property": "inputContainer.sampleCodes",
-			 			"order":true,
-			 			"hide":true,
-			 			"type":"text",
-			 			"position":3,
-			 			"render":"<div list-resize='cellValue' list-resize-min-size='3'>",
-			        	 "extraHeaders":{0:Messages("experiments.inputs")}
-				     },
-				     {
-			        	 "header":Messages("containers.table.fromTransformationTypeCodes"),
-			        	 "property":"inputContainer.fromTransformationTypeCodes",
-			        	 "order":true,
-						 "edit":false,
-						 "hide":true,
-						 "filter":"unique | codes:'type'",
-			        	 "type":"text",
-			 			"render":"<div list-resize='cellValue' list-resize-min-size='3'>",
-			        	 "position":4,
-			        	 "extraHeaders":{0:Messages("experiments.inputs")}
-			         },
-			         /*
+				{
+					"header":Messages("containers.table.projectCodes"),
+					"property": "inputContainer.projectCodes",
+					"order":true,
+					"hide":true,
+					"type":"text",
+					"position":2,
+					"render":"<div list-resize='cellValue' list-resize-min-size='3'>",
+					"extraHeaders":{0:Messages("experiments.inputs")}
+				},
+				{
+					"header":Messages("containers.table.sampleCodes"),
+					"property": "inputContainer.sampleCodes",
+					"order":true,
+					"hide":true,
+					"type":"text",
+					"position":3,
+					"render":"<div list-resize='cellValue' list-resize-min-size='3'>",
+					"extraHeaders":{0:Messages("experiments.inputs")}
+				},
+				{
+					"header":Messages("containers.table.fromTransformationTypeCodes"),
+					"property":"inputContainer.fromTransformationTypeCodes",
+					"order":true,
+					"edit":false,
+					"hide":true,
+					"filter":"unique | codes:'type'",
+					"type":"text",
+					"render":"<div list-resize='cellValue' list-resize-min-size='3'>",
+					"position":4,
+					"extraHeaders":{0:Messages("experiments.inputs")}
+				},
+				/*
 			         {
 			        	"header":Messages("containers.table.tags"),
 			 			"property": "inputContainer.contents",
@@ -47,42 +47,42 @@ angular.module('home').controller('NormalisationCtrl',['$scope' ,'$http','$parse
 			 			"render":"<div list-resize='cellValue | unique' ' list-resize-min-size='3'>",
 			        	 "extraHeaders":{0:Messages("experiments.inputs")}
 			         },
-					*/			 
-					 {
-			        	 "header" : Messages("containers.table.concentration"),
-			 			 "property": "inputContainerUsed.concentration.value",
-			 			 "order":true,
-			 			 "editDirectives":" udt-change='updatePropertyFromUDT(value,col)' ",
-			 			"tdClass":"valuationService.valuationCriteriaClass(value.data, experiment.status.criteriaCode, col.property)",			        	
-						 "edit":false,
-						 "hide":true,
-			        	 "type":"number",
-			        	 "position":5,
-			        	 "extraHeaders":{0:Messages("experiments.inputs")}
-			         },
-			        
-					 {
-			        	 "header":Messages("containers.table.concentration.unit"),
-			        	 "property":"inputContainerUsed.concentration.unit",
-			        	 "order":true,
-						 "edit":false,
-						 "hide":true,
-			        	 "type":"text",
-			        	 "position":5.1,
-			        	 "extraHeaders":{0:Messages("experiments.inputs")}
-			         },
-			        
-			         {
-			        	 "header":function(){return Messages("containers.table.volume") + " (µL)"},
-			        	 "property":"inputContainerUsed.volume.value",
-			        	 "order":true,
-						 "edit":false,
-						 "hide":true,
-			        	 "type":"number",
-			        	 "position":6,
-			        	 "extraHeaders":{0:Messages("experiments.inputs")}
-			         },
-			        /*
+				 */			 
+				{
+					"header" : Messages("containers.table.concentration"),
+					"property": "inputContainerUsed.concentration.value",
+					"order":true,
+					"editDirectives":" udt-change='updatePropertyFromUDT(value,col)' ",
+					"tdClass":"valuationService.valuationCriteriaClass(value.data, experiment.status.criteriaCode, col.property)",			        	
+					"edit":false,
+					"hide":true,
+					"type":"number",
+					"position":5,
+					"extraHeaders":{0:Messages("experiments.inputs")}
+				},
+
+				{
+					"header":Messages("containers.table.concentration.unit"),
+					"property":"inputContainerUsed.concentration.unit",
+					"order":true,
+					"edit":false,
+					"hide":true,
+					"type":"text",
+					"position":5.1,
+					"extraHeaders":{0:Messages("experiments.inputs")}
+				},
+
+				{
+					"header":function(){return Messages("containers.table.volume") + " (µL)"},
+					"property":"inputContainerUsed.volume.value",
+					"order":true,
+					"edit":false,
+					"hide":true,
+					"type":"number",
+					"position":6,
+					"extraHeaders":{0:Messages("experiments.inputs")}
+				},
+				/*
 			         {
 				 			"header":Messages("containers.table.size"),
 				 			"property": "inputContainerUsed.size.value",
@@ -92,154 +92,154 @@ angular.module('home').controller('NormalisationCtrl',['$scope' ,'$http','$parse
 				 			"position":6.5,
 				 			"extraHeaders":{0:Messages("experiments.inputs")}			 						 			
 				 	 },
-				 	 */
-			         {
-			        	 "header":Messages("containers.table.state.code"),
-			        	 "property":"inputContainer.state.code",
-			        	 "order":true,
-						 "edit":false,
-						 "hide":true,
-			        	 "type":"text",
-						 "filter":"codes:'state'",
-			        	 "position":7,
-			        	 "extraHeaders":{0:Messages("experiments.inputs")}
-			         },		
-			         {
-			        	 "header":Messages("containers.table.concentration"),
-			        	 "property":"outputContainerUsed.concentration.value",
-			        	 "editDirectives":" udt-change='updatePropertyFromUDT(value,col)' ",
-			        	 "tdClass":"valuationService.valuationCriteriaClass(value.data, experiment.status.criteriaCode, col.property)",
-			        	 "order":true,
-						 "edit":true,
-						 "hide":true,
-			        	 "type":"number",
-			        	 "position":50,
-			        	 "extraHeaders":{0:Messages("experiments.outputs")}
-			         },
-			         {
-			        	 "header":Messages("containers.table.concentration.unit") ,
-			        	 "property":"outputContainerUsed.concentration.unit",
-			        	 "order":true,
-						 "edit":false,
-						 "hide":true,
-						 "watch":true,
-			        	 "type":"text",
-			        	 "defaultValues":"nM",
-			        	 "position":51,
-			        	 "extraHeaders":{0:Messages("experiments.outputs")}
-			         },
-			         {
-			        	 "header":Messages("containers.table.volume")+ " (µL)",
-			        	 "property":"outputContainerUsed.volume.value",
-			        	 //utilisation de la directive utd-change car elle capture les modifications du header puis déclenche la function calculVolume 
-			        	 // Si ng-change seul l'evenement utilisateur est capturé, la valeur de la cellule est modifiée mais le calcul non executé
-			        	 "editDirectives":" udt-change='updatePropertyFromUDT(value,col)' ",
-			        	 "tdClass":"valuationService.valuationCriteriaClass(value.data, experiment.status.criteriaCode, col.property)",
-			        	 "order":true,
-						 "edit":true,
-						 "hide":true,
-			        	 "type":"number",
-			        	 "position":52,
-			        	 "extraHeaders":{0:Messages("experiments.outputs")}
-			         },
-			         {
-			        	 "header":Messages("containers.table.quantity"),
-			        	 "property":'outputContainerUsed.quantity.value',
-			        	 "order":true,
-						 "edit":false,
-						 "hide":true,
-			        	 "type":"number",
-			        	 "position":53,
-			        	 "watch":true,
-			        	 "extraHeaders":{0:Messages("experiments.outputs")}
-			         },
-			         {
-			        	 "header":Messages("containers.table.quantity.unit"),
-			        	 "property":"outputContainerUsed.quantity.unit",
-			        	 "order":true,
-						 "edit":false,
-						 "hide":true,
-			        	 "type":"text",
-			        	 "position":54,
-			        	 "watch":true,
-			        	 "extraHeaders":{0:Messages("experiments.outputs")}
-			         },
-			         {
-			        	 "header":Messages("containers.table.stateCode"),
-			        	 "property":"outputContainer.state.code | codes:'state'",
-			        	 "order":true,
-						 "edit":false,
-						 "hide":true,
-			        	 "type":"text",
-			        	 "position":500,
-			        	 "extraHeaders":{0:Messages("experiments.outputs")}
-			         },
-			         {
-			        	 "header":Messages("containers.table.storageCode"),
-			        	 "property":"outputContainerUsed.locationOnContainerSupport.storageCode",
-			        	 "order":true,
-						 "edit":true,
-						 "hide":true,
-			        	 "type":"text",
-			        	 "position":600,
-			        	 "extraHeaders":{0:Messages("experiments.outputs")}
-				     }
-			         ],
-			compact:true,
-			pagination:{
-				active:false
-			},		
-			search:{
-				active:false
-			},
-			order:{
-				mode:'local', //or 
-				active:true
-			},
-			remove:{
-				active: ($scope.isEditModeAvailable() && $scope.isNewState()),
-				showButton: ($scope.isEditModeAvailable() && $scope.isNewState()),
-				mode:'local'
-			},
-			save:{
-				active:true,
-	        	withoutEdit: true,
-	        	showButton:false,
-	        	changeClass:false,
-	        	mode:'local'
-			},
-			hide:{
-				active:true
-			},
-			edit:{
-				active: ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F')),
-				showButton: ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F')),
-				byDefault:($scope.isCreationMode()),
-				columnMode:true
-			},
-			messages:{
-				active:false,
-				columnMode:true
-			},
-			exportCSV:{
-				active:true,
-				showButton:true,
-				delimiter:";",
-				start:false
-			},
-			extraHeaders:{
-				number:2,
-				dynamic:true,
-			},
-			otherButtons: {
-                active: ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F')),
-                complex:true,
-                template:  ''
-                	+$scope.plateUtils.templates.buttonLineMode()
-                	+$scope.plateUtils.templates.buttonColumnMode()     
-                	+$scope.plateUtils.templates.buttonCopyPosition()
-            }
-			
+				 */
+				{
+					"header":Messages("containers.table.state.code"),
+					"property":"inputContainer.state.code",
+					"order":true,
+					"edit":false,
+					"hide":true,
+					"type":"text",
+					"filter":"codes:'state'",
+					"position":7,
+					"extraHeaders":{0:Messages("experiments.inputs")}
+				},		
+				{
+					"header":Messages("containers.table.concentration"),
+					"property":"outputContainerUsed.concentration.value",
+					"editDirectives":" udt-change='updatePropertyFromUDT(value,col)' ",
+					"tdClass":"valuationService.valuationCriteriaClass(value.data, experiment.status.criteriaCode, col.property)",
+					"order":true,
+					"edit":true,
+					"hide":true,
+					"type":"number",
+					"position":50,
+					"extraHeaders":{0:Messages("experiments.outputs")}
+				},
+				{
+					"header":Messages("containers.table.concentration.unit") ,
+					"property":"outputContainerUsed.concentration.unit",
+					"order":true,
+					"edit":false,
+					"hide":true,
+					"watch":true,
+					"type":"text",
+					"defaultValues":"nM",
+					"position":51,
+					"extraHeaders":{0:Messages("experiments.outputs")}
+				},
+				{
+					"header":Messages("containers.table.volume")+ " (µL)",
+					"property":"outputContainerUsed.volume.value",
+					//utilisation de la directive utd-change car elle capture les modifications du header puis déclenche la function calculVolume 
+					// Si ng-change seul l'evenement utilisateur est capturé, la valeur de la cellule est modifiée mais le calcul non executé
+					"editDirectives":" udt-change='updatePropertyFromUDT(value,col)' ",
+					"tdClass":"valuationService.valuationCriteriaClass(value.data, experiment.status.criteriaCode, col.property)",
+					"order":true,
+					"edit":true,
+					"hide":true,
+					"type":"number",
+					"position":52,
+					"extraHeaders":{0:Messages("experiments.outputs")}
+				},
+				{
+					"header":Messages("containers.table.quantity"),
+					"property":'outputContainerUsed.quantity.value',
+					"order":true,
+					"edit":false,
+					"hide":true,
+					"type":"number",
+					"position":53,
+					"watch":true,
+					"extraHeaders":{0:Messages("experiments.outputs")}
+				},
+				{
+					"header":Messages("containers.table.quantity.unit"),
+					"property":"outputContainerUsed.quantity.unit",
+					"order":true,
+					"edit":false,
+					"hide":true,
+					"type":"text",
+					"position":54,
+					"watch":true,
+					"extraHeaders":{0:Messages("experiments.outputs")}
+				},
+				{
+					"header":Messages("containers.table.stateCode"),
+					"property":"outputContainer.state.code | codes:'state'",
+					"order":true,
+					"edit":false,
+					"hide":true,
+					"type":"text",
+					"position":500,
+					"extraHeaders":{0:Messages("experiments.outputs")}
+				},
+				{
+					"header":Messages("containers.table.storageCode"),
+					"property":"outputContainerUsed.locationOnContainerSupport.storageCode",
+					"order":true,
+					"edit":true,
+					"hide":true,
+					"type":"text",
+					"position":600,
+					"extraHeaders":{0:Messages("experiments.outputs")}
+				}
+				],
+				compact:true,
+				pagination:{
+					active:false
+				},		
+				search:{
+					active:false
+				},
+				order:{
+					mode:'local', //or 
+					active:true
+				},
+				remove:{
+					active: ($scope.isEditModeAvailable() && $scope.isNewState()),
+					showButton: ($scope.isEditModeAvailable() && $scope.isNewState()),
+					mode:'local'
+				},
+				save:{
+					active:true,
+					withoutEdit: true,
+					showButton:false,
+					changeClass:false,
+					mode:'local'
+				},
+				hide:{
+					active:true
+				},
+				edit:{
+					active: ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F')),
+					showButton: ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F')),
+					byDefault:($scope.isCreationMode()),
+					columnMode:true
+				},
+				messages:{
+					active:false,
+					columnMode:true
+				},
+				exportCSV:{
+					active:true,
+					showButton:true,
+					delimiter:";",
+					start:false
+				},
+				extraHeaders:{
+					number:2,
+					dynamic:true,
+				},
+				otherButtons: {
+					active: ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F')),
+					complex:true,
+					template:  ''
+						+$scope.plateUtils.templates.buttonLineMode()
+						+$scope.plateUtils.templates.buttonColumnMode()     
+						+$scope.plateUtils.templates.buttonCopyPosition()
+				}
+
 	};
 
 	var updateATM = function(experiment){
@@ -250,7 +250,7 @@ angular.module('home').controller('NormalisationCtrl',['$scope' ,'$http','$parse
 			});
 		}		
 	}
-	
+
 	$scope.$on('save', function(e, callbackFunction) {	
 		console.log("call event save");
 		$scope.atmService.data.save();
@@ -259,7 +259,7 @@ angular.module('home').controller('NormalisationCtrl',['$scope' ,'$http','$parse
 		updateATM($scope.experiment);
 		$scope.$emit('childSaved', callbackFunction);
 	});
-	
+
 	$scope.$on('refresh', function(e) {
 		console.log("call event refresh");		
 		var dtConfig = $scope.atmService.data.getConfig();
@@ -271,25 +271,25 @@ angular.module('home').controller('NormalisationCtrl',['$scope' ,'$http','$parse
 		$scope.atmService.refreshViewFromExperiment($scope.experiment);
 		$scope.$emit('viewRefeshed');
 	});
-	
+
 	$scope.$on('cancel', function(e) {
 		console.log("call event cancel");
 		$scope.atmService.data.cancel();
-		
+
 		if($scope.isCreationMode()){
 			var dtConfig = $scope.atmService.data.getConfig();
 			dtConfig.edit.byDefault = false;
 			$scope.atmService.data.setConfig(dtConfig);
 		}
-		
+
 	});
-	
+
 	$scope.$on('activeEditMode', function(e) {
 		console.log("call event activeEditMode");
 		$scope.atmService.data.selectAll(true);
 		$scope.atmService.data.setEdit();
 	});
-	
+
 	//Init	
 	if($scope.experiment.instrument.inContainerSupportCategoryCode!=="tube"){
 		datatableConfig.columns.push({
@@ -342,7 +342,7 @@ angular.module('home').controller('NormalisationCtrl',['$scope' ,'$http','$parse
 				0 : Messages("experiments.inputs")
 			}
 		});
-		
+
 		datatableConfig.columns.push({
 			"header" : Messages("containers.table.workName"),
 			"property" : "inputContainer.properties.workName.value",
@@ -354,10 +354,10 @@ angular.module('home').controller('NormalisationCtrl',['$scope' ,'$http','$parse
 			"extraHeaders" : {0 : Messages("experiments.inputs")}
 		});
 
-		
+
 		datatableConfig.order.by = 'inputContainer.sampleCodes';
 	}
-	
+
 
 
 	if($scope.experiment.instrument.outContainerSupportCategoryCode !== "tube") {
@@ -379,14 +379,14 @@ angular.module('home').controller('NormalisationCtrl',['$scope' ,'$http','$parse
 			"edit" : true,
 			"choiceInList":true,
 			"possibleValues":[{"name":'A',"code":"A"},{"name":'B',"code":"B"},{"name":'C',"code":"C"},{"name":'D',"code":"D"},
-			                  {"name":'E',"code":"E"},{"name":'F',"code":"F"},{"name":'G',"code":"G"},{"name":'H',"code":"H"}],
-			"order" : true,
-			"hide" : true,
-			"type" : "text",
-			"position" : 401,
-			"extraHeaders" : {
-				0 : Messages("experiments.outputs")
-			}
+				{"name":'E',"code":"E"},{"name":'F',"code":"F"},{"name":'G',"code":"G"},{"name":'H',"code":"H"}],
+				"order" : true,
+				"hide" : true,
+				"type" : "text",
+				"position" : 401,
+				"extraHeaders" : {
+					0 : Messages("experiments.outputs")
+				}
 		});
 		datatableConfig.columns.push({// colonne
 			"header" : Messages("containers.table.support.column"),
@@ -396,15 +396,15 @@ angular.module('home').controller('NormalisationCtrl',['$scope' ,'$http','$parse
 			"edit" : true,
 			"choiceInList":true,
 			"possibleValues":[{"name":'1',"code":"1"},{"name":'2',"code":"2"},{"name":'3',"code":"3"},{"name":'4',"code":"4"},
-			                  {"name":'5',"code":"5"},{"name":'6',"code":"6"},{"name":'7',"code":"7"},{"name":'8',"code":"8"},
-			                  {"name":'9',"code":"9"},{"name":'10',"code":"10"},{"name":'11',"code":"11"},{"name":'12',"code":"12"}], 
-			"order" : true,
-			"hide" : true,
-			"type" : "number",
-			"position" : 402,
-			"extraHeaders" : {
-				0 : Messages("experiments.outputs")
-			}
+				{"name":'5',"code":"5"},{"name":'6',"code":"6"},{"name":'7',"code":"7"},{"name":'8',"code":"8"},
+				{"name":'9',"code":"9"},{"name":'10',"code":"10"},{"name":'11',"code":"11"},{"name":'12',"code":"12"}], 
+				"order" : true,
+				"hide" : true,
+				"type" : "number",
+				"position" : 402,
+				"extraHeaders" : {
+					0 : Messages("experiments.outputs")
+				}
 		});
 
 	} else {
@@ -421,25 +421,30 @@ angular.module('home').controller('NormalisationCtrl',['$scope' ,'$http','$parse
 			}
 		});
 	}
-	
-	
+
+
 	var atmService = atmToSingleDatatable($scope, datatableConfig);
 	// defined new atomictransfertMethod
 	atmService.newAtomicTransfertMethod =  function(line, column){
 		var getLine = function(line){
+			//In et OUT sont de même catégorie
 			if($scope.experiment.instrument.outContainerSupportCategoryCode 
 					=== $scope.experiment.instrument.inContainerSupportCategoryCode){
 				return line;
-			}else if($scope.experiment.instrument.outContainerSupportCategoryCode !== "tube" 
-				&& $scope.experiment.instrument.inContainerSupportCategoryCode === "tube") {
-				return undefined;
-			}else if($scope.experiment.instrument.outContainerSupportCategoryCode === "tube"){
-				return "1";
-			}
-			
+			}else 
+				//In tube et OUT différent de tube
+				if($scope.experiment.instrument.outContainerSupportCategoryCode !== "tube" 
+					&& $scope.experiment.instrument.inContainerSupportCategoryCode === "tube") {
+					return undefined;
+				}else 
+					//IN tube
+					if($scope.experiment.instrument.outContainerSupportCategoryCode === "tube"){
+						return "1";
+					}
+
 		}
 		var getColumn=getLine;
-		
+
 		return {
 			class:"OneToOne",
 			line:getLine(line), 
@@ -448,7 +453,7 @@ angular.module('home').controller('NormalisationCtrl',['$scope' ,'$http','$parse
 			outputContainerUseds:new Array(0)
 		};
 	};
-	
+
 	//defined default output unit
 	atmService.defaultOutputUnit = {
 			volume : "µL"
@@ -456,21 +461,21 @@ angular.module('home').controller('NormalisationCtrl',['$scope' ,'$http','$parse
 	atmService.defaultOutputValue = {
 			size : {copyInputContainer:true}
 	};
-	
+
 	atmService.convertInputPropertiesToDatatableColumn = function(property, pName){
-        var column = atmService.$commonATM.convertTypePropertyToDatatableColumn(property,"inputContainerUsed."+pName+".",{"0":Messages("experiments.inputs")});
-        if(property.code=="maximumConcentration"){
-        //    column.property="(inputContainerUsed.maximumConcentration.value|number).concat(' '+inputContainerUsed.concentration.unit)";
-        }else{
-            
-        console.log("test "+property.code);
-        }
-        return column;
-    };
-	
+		var column = atmService.$commonATM.convertTypePropertyToDatatableColumn(property,"inputContainerUsed."+pName+".",{"0":Messages("experiments.inputs")});
+		if(property.code=="maximumConcentration"){
+			//    column.property="(inputContainerUsed.maximumConcentration.value|number).concat(' '+inputContainerUsed.concentration.unit)";
+		}else{
+
+			console.log("test "+property.code);
+		}
+		return column;
+	};
+
 	atmService.experimentToView($scope.experiment, $scope.experimentType);
 	$scope.atmService = atmService;
-	
+
 	$scope.updatePropertyFromUDT = function(value, col){
 		console.log("update from property : "+col.property);
 
@@ -507,20 +512,20 @@ angular.module('home').controller('NormalisationCtrl',['$scope' ,'$http','$parse
 
 		}
 	}
-	
+
 	var resetAll = function(udtData){
 		$parse("inputContainerUsed.experimentProperties.inputVolume.value").assign(udtData,null);
 		$parse("inputContainerUsed.experimentProperties.bufferVolume.value").assign(udtData,null);
 		$parse("outputContainerUsed.volume.value").assign(udtData,null);
 		$parse("outputContainerUsed.concentration.value").assign(udtData,null);
-		
+
 	};
-	
+
 	//si le volume engagé est > au volume en entrée => on entre dans une boucle de mise à jour sans fin
 	// => on bloque donc la valeur max de vol en entrée
 	var checkInputVolume = function(udtData){
 		var volumeEngage = $parse("inputContainerUsed.experimentProperties.inputVolume.value");
-				
+
 		var compute = {
 				inputVol : $parse("inputContainerUsed.volume.value")(udtData),
 				volEngage : $parse("inputContainerUsed.experimentProperties.inputVolume.value")(udtData),
@@ -534,17 +539,17 @@ angular.module('home').controller('NormalisationCtrl',['$scope' ,'$http','$parse
 				volumeEngage.assign(udtData,compute.inputVol);
 			}
 		}
-		
+
 	};
-	
+
 	var computeMaxConc = function(udtData){
-		
+
 		var getter = $parse("inputContainerUsed.experimentProperties.maximumConcentration");
 		var maxConc = getter(udtData);
 		var getter2 = $parse("outputContainerUsed.concentration");
 		var outputConc = getter2(udtData);
-		
-		
+
+
 		var compute = {
 				inputConc : $parse("inputContainerUsed.concentration.value")(udtData),
 				inputConcUnit : $parse("inputContainerUsed.concentration.unit")(udtData),
@@ -564,7 +569,7 @@ angular.module('home').controller('NormalisationCtrl',['$scope' ,'$http','$parse
 				if(result > compute.inputConc){
 					maxConc.value =  compute.inputConc;						
 				}else{
-					maxConc.value = Math.round(result*100)/100;						
+					maxConc.value = result;						
 				}
 				if (outputConc){
 					if (outputConc.value > maxConc.value){
@@ -577,14 +582,14 @@ angular.module('home').controller('NormalisationCtrl',['$scope' ,'$http','$parse
 				maxConc =undefined;				
 			}	
 			getter.assign(udtData, maxConc);				
-				
+
 		}
 	};
-	
+
 	//cOut * vOut / cIn : 
 	//outputContainerUsed.concentration.value * outputContainerUsed.volume.value / inputContainerUsed.concentration.value
 	var computeInputVolumeWithConc = function(udtData){
-		
+
 		var getter = $parse("inputContainerUsed.experimentProperties.inputVolume.value");
 		var oldInputVolume = getter(udtData);
 		var getter2 = $parse("outputContainerUsed.concentration.value");
@@ -593,7 +598,7 @@ angular.module('home').controller('NormalisationCtrl',['$scope' ,'$http','$parse
 		var inputConcentration = getter3(udtData);
 		var getter4 = $parse("inputContainerUsed.volume.value");
 		var inVolume = getter4(udtData);
-		
+
 		var newInputVolume;
 		var compute = {
 				outputConc : $parse("outputContainerUsed.concentration.value")(udtData),
@@ -634,7 +639,7 @@ angular.module('home').controller('NormalisationCtrl',['$scope' ,'$http','$parse
 				}else{
 					newInputVolume=$parse("outputVol")(compute2);
 				}
-				
+
 			}else{
 				newInputVolume=undefined;		
 				console.log("not ready to computeInputVolume");
@@ -650,8 +655,8 @@ angular.module('home').controller('NormalisationCtrl',['$scope' ,'$http','$parse
 			getter.assign(udtData, null);
 		}
 	};
-	
-	
+
+
 	//cIn * inputVolume / cOut : 
 	//inputContainerUsed.concentration.value * inputContainerUsed.experimentProperties.inputVolume.value / outputContainerUsed.concentration.value
 	var computeFinalVolumeWithConc = function(udtData){
@@ -694,12 +699,12 @@ angular.module('home').controller('NormalisationCtrl',['$scope' ,'$http','$parse
 				newOutputVolume = $parse("inputVol")(compute);
 				getter.assign(udtData, newOutputVolume);
 			}
-			
+
 			if(oldConcentration){
 				$scope.messages.setError(Messages('experiments.output.error.must-have-inputConc'));		
 			}
-		getter2.assign(udtData,undefined);
-			
+			getter2.assign(udtData,undefined);
+
 		}else{ 
 			getter.assign(udtData, null);
 			console.log("not ready to computeFinalVolume");
@@ -711,15 +716,15 @@ angular.module('home').controller('NormalisationCtrl',['$scope' ,'$http','$parse
 		var getter = $parse("outputContainerUsed.volume.value");
 		var oldOutputVolume = getter(udtData);
 		var newOutputVolume;
-		
+
 		var compute = {
 				bufferVol : $parse("inputContainerUsed.experimentProperties.bufferVolume.value")(udtData),
 				inputVol : $parse("inputContainerUsed.experimentProperties.inputVolume.value")(udtData),			
 				isReady:function(){
 					return (this.bufferVol && this.inputVol);
 				}
-			};
-		
+		};
+
 		if(compute.isReady()){
 			var result = $parse("inputVol + bufferVol")(compute);
 			console.log("result = "+result);
@@ -735,7 +740,7 @@ angular.module('home').controller('NormalisationCtrl',['$scope' ,'$http','$parse
 			getter.assign(udtData, null);
 			console.log("not ready to computeFinalVolume");
 		}
-		
+
 	};
 	//vOut - inputVolume
 	//outputContainerUsed.volume.value - inputContainerUsed.experimentProperties.inputVolume.value
@@ -749,8 +754,8 @@ angular.module('home').controller('NormalisationCtrl',['$scope' ,'$http','$parse
 				isReady:function(){
 					return (this.outputVol && this.inputVol);
 				}
-			};
-		
+		};
+
 		if(compute.isReady()){
 			var result = $parse("(outputVol - inputVol)")(compute);
 			console.log("result = "+result);
@@ -767,13 +772,13 @@ angular.module('home').controller('NormalisationCtrl',['$scope' ,'$http','$parse
 			console.log("not ready to computeBufferVolume");
 		}
 	};
-	
-	
+
+
 	var computeOutputQuantity = function(udtData){
 		var getter = $parse("outputContainerUsed.quantity");
 		var outputQuantity = getter(udtData);
-		
-		
+
+
 		var compute = {
 				outputConc : $parse("outputContainerUsed.concentration.value")(udtData),
 				outputConcUnit : $parse("outputContainerUsed.concentration.unit")(udtData),
@@ -781,8 +786,8 @@ angular.module('home').controller('NormalisationCtrl',['$scope' ,'$http','$parse
 				isReady:function(){
 					return (this.outputConc && this.outputConcUnit && this.outputVol);
 				}
-			};
-		
+		};
+
 		if(compute.isReady()){
 			var result = $parse("outputConc * outputVol")(compute);
 			console.log("result = "+result);
@@ -799,12 +804,15 @@ angular.module('home').controller('NormalisationCtrl',['$scope' ,'$http','$parse
 			getter.assign(udtData, outputQuantity);
 			console.log("not ready to computeOutputQuantity");
 		}
-		
+
 	}
-	
+
 	var generateSampleSheetNormalisation = function(){
 		$scope.fileUtils.generateSampleSheet({"type":"normalisation"});
 	};
+	var generateHelpSampleSheet = function(){
+		$scope.fileUtils.generateSampleSheet({"type":"help"});
+	}
 	var generateSampleSheetNormalisationHighVol = function(){
 		$scope.fileUtils.generateSampleSheet({"type":"normalisation-highVol"});
 	};
@@ -814,56 +822,106 @@ angular.module('home').controller('NormalisationCtrl',['$scope' ,'$http','$parse
 	var generateSampleSheetNormalisationBufferHighVol = function(){
 		$scope.fileUtils.generateSampleSheet({"type":"normalisation-buffer-highVol"});
 	};
-	
+
 	var generateSampleSheetNormalisationPostPCR = function(){
 		$scope.fileUtils.generateSampleSheet({"type":"normalisation-post-pcr"});
 	};
-	
-	if($scope.experiment.instrument.outContainerSupportCategoryCode !== "tube" 
-		|| $scope.experiment.instrument.inContainerSupportCategoryCode !== "tube"){
 
-	if($scope.experiment.instrument.typeCode === "brand-lhs"){
-			$scope.setAdditionnalButtons([{
-				isDisabled : function(){return $scope.isNewState();} ,
-				isShow:function(){return !$scope.isNewState();},
-				click:generateSampleSheetNormalisation,
-				label:Messages("experiments.sampleSheet")+" normalisation ADN_pipette_P50"
-			},{
-                isDisabled : function(){return $scope.isNewState();} ,
-                isShow:function(){return !$scope.isNewState();},
-                click:generateSampleSheetNormalisationHighVol,
-                label:Messages("experiments.sampleSheet")+" normalisation ADN_pipette_P200"
-            },{
-				isDisabled : function(){return $scope.isNewState();} ,
-				isShow:function(){return !$scope.isNewState();},
-				click:generateSampleSheetNormalisationBuffer,
-				label:Messages("experiments.sampleSheet")+" normalisation Tampon_pipette_P50"
-			},{
-                isDisabled : function(){return $scope.isNewState();} ,
-                isShow:function(){return !$scope.isNewState();},
-                click:generateSampleSheetNormalisationBufferHighVol,
-                label:Messages("experiments.sampleSheet")+" normalisation Tampon_pipette_P200"
-            }]);	
-		}else if ($scope.experiment.instrument.typeCode === "hand"){
+	console.log("Instrument: "+$scope.experiment.instrument.typeCode+", type de container en entrée "+$scope.experiment.instrument.inContainerSupportCategoryCode+", en sortie: "+$scope.experiment.instrument.outContainerSupportCategoryCode);
 
+	if ($scope.experiment.instrument.typeCode !== "gilson-pipetmax"){
+		if($scope.experiment.instrument.outContainerSupportCategoryCode !== "tube" 
+			|| $scope.experiment.instrument.inContainerSupportCategoryCode !== "tube"){
 
-		}else{		
-			$scope.setAdditionnalButtons([{
-				isDisabled : function(){return $scope.isNewState();} ,
-				isShow:function(){return !$scope.isNewState();},
-				click:generateSampleSheetNormalisation,
-				label:Messages("experiments.sampleSheet")+" normalisation"
-			},{
-				isDisabled : function(){return $scope.isNewState();} ,
-				isShow:function(){return !$scope.isNewState();},
-				click:generateSampleSheetNormalisationPostPCR,
-				label:Messages("experiments.sampleSheet")+" normalisation post PCR"
-			}]);
+			if($scope.experiment.instrument.typeCode === "brand-lhs"){
+				$scope.setAdditionnalButtons([{
+					isDisabled : function(){return $scope.isNewState();} ,
+					isShow:function(){return !$scope.isNewState();},
+					click:generateSampleSheetNormalisation,
+					label:Messages("experiments.sampleSheet")+" normalisation ADN_pipette_P50"
+				},{
+					isDisabled : function(){return $scope.isNewState();} ,
+					isShow:function(){return !$scope.isNewState();},
+					click:generateSampleSheetNormalisationHighVol,
+					label:Messages("experiments.sampleSheet")+" normalisation ADN_pipette_P200"
+				},{
+					isDisabled : function(){return $scope.isNewState();} ,
+					isShow:function(){return !$scope.isNewState();},
+					click:generateSampleSheetNormalisationBuffer,
+					label:Messages("experiments.sampleSheet")+" normalisation Tampon_pipette_P50"
+				},{
+					isDisabled : function(){return $scope.isNewState();} ,
+					isShow:function(){return !$scope.isNewState();},
+					click:generateSampleSheetNormalisationBufferHighVol,
+					label:Messages("experiments.sampleSheet")+" normalisation Tampon_pipette_P200"
+				}]);	
+			}else if ($scope.experiment.instrument.typeCode === "hand"){
+
+			}else {		
+				$scope.setAdditionnalButtons([{
+					isDisabled : function(){return $scope.isNewState();} ,
+					isShow:function(){return !$scope.isNewState();},
+					click:generateSampleSheetNormalisation,
+					label:Messages("experiments.sampleSheet")+" normalisation"
+				},{
+					isDisabled : function(){return $scope.isNewState();} ,
+					isShow:function(){return !$scope.isNewState();},
+					click:generateSampleSheetNormalisationPostPCR,
+					label:Messages("experiments.sampleSheet")+" normalisation post PCR"
+				}]);
+			}
 		}
-
 	}
-	
-	
+	//Cas du Gilson
+	else {
+		// Sortie en plaque
+		if($scope.experiment.instrument.outContainerSupportCategoryCode === "96-well-plate"){
+			if($scope.experiment.instrument.inContainerSupportCategoryCode === "tube" ){
+				$scope.setAdditionnalButtons([{
+					isDisabled : function(){return $scope.isNewState();} ,
+					isShow:function(){return !$scope.isNewState();},
+					click:generateSampleSheetNormalisation,
+					label:"Feuille de route"
+				},
+				{
+					isDisabled : function(){return $scope.isNewState();} ,
+					isShow:function(){return !$scope.isNewState();},
+					click:generateHelpSampleSheet,
+					label:"FDR utilisateurs - aide au placement des tubes"
+				}]);
+			//	$scope.messages.setError(Messages('experiments.input.error.notExpected'));	
+			}else if ($scope.experiment.instrument.inContainerSupportCategoryCode === "96-well-plate"){
+				$scope.setAdditionnalButtons([{
+					isDisabled : function(){return $scope.isNewState();} ,
+					isShow:function(){return !$scope.isNewState();},
+					click:generateSampleSheetNormalisation,
+					label:"Feuille de route"
+				}]);
+
+			}
+		}else if($scope.experiment.instrument.outContainerSupportCategoryCode === "tube"){
+			/* if($scope.experiment.instrument.inContainerSupportCategoryCode === "tube" ){
+				$scope.setAdditionnalButtons([{
+					isDisabled : function(){return $scope.isNewState();} ,
+					isShow:function(){return !$scope.isNewState();},
+					click:generateSampleSheetNormalisation,
+					label:"Feuille de route"
+				}]);
+			}else if ($scope.experiment.instrument.inContainerSupportCategoryCode === "96-well-plate"){
+				$scope.setAdditionnalButtons([{
+					isDisabled : function(){return $scope.isNewState();} ,
+					isShow:function(){return !$scope.isNewState();},
+					click:generateSampleSheetNormalisation,
+					label:"Feuille de route"
+				}]);
+			} */
+			$scope.messages.setError(Messages('experiments.input.error.notExpected'));	
+		}
+	}
+
+
+
+
 	var checkControlConc = function(experiment){
 
 		/* Plus utile??? GS
@@ -872,7 +930,7 @@ angular.module('home').controller('NormalisationCtrl',['$scope' ,'$http','$parse
 			//Si CONC en IN est null alors conc out doit etre null			
 			if (atm.inputContainerUseds[0].concentration == undefined){				
 				atm.outputContainerUseds[0].concentration=undefined;
-				
+
 				atm.inputContainerUseds[0].experimentProperties.bufferVolume.value =0;
 
 				if (atm.outputContainerUseds[0].volume && atm.outputContainerUseds[0].volume.value  ){

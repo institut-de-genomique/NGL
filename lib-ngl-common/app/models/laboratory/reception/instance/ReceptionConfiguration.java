@@ -42,11 +42,8 @@ public class ReceptionConfiguration extends DBObject implements IValidation {
     	configs.put(name, value);
     }
 	
-	
 	@Override
 	public void validate(ContextValidation contextValidation) {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

@@ -16,3 +16,4 @@ HEAD	/api/supports/:code							controllers.containers.api.ContainerSupports.head
 #experiment api
 GET		/api/experiments							controllers.experiments.api.Experiments.list()
 GET		/api/experiments/:code						controllers.experiments.api.Experiments.get(code:java.lang.String)
+PUT		/api/experiments/:code/apply-rules/:codeRules					controllers.experiments.api.Experiments.applyRules(code: java.lang.String, codeRules: java.lang.String)

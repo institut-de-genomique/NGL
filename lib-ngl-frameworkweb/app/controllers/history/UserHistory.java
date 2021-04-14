@@ -33,8 +33,6 @@ import javax.inject.Inject;
  * @author ydeshayes
  * 
  */
-
-// TODO: clean 
 public class UserHistory extends Action.Simple {
 
 	/**

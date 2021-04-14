@@ -138,6 +138,7 @@ angular.module('home').controller('CNSTubesToPlateCtrl',['$scope' ,'$http','$par
 						 "edit":true,
 						 "hide":true,
 			        	 "type":"number",
+			        	 "required":true,
 			        	 "position":52,
 			        	 "extraHeaders":{0:Messages("experiments.outputs")}
 			         },
@@ -341,7 +342,9 @@ angular.module('home').controller('CNSTubesToPlateCtrl',['$scope' ,'$http','$par
 	$scope.copyVolumeInToOut = function(){
 		var data = $scope.atmService.data.displayResult;		
 		data.forEach(function(value){
-			value.data.outputContainerUsed.volume = value.data.inputContainerUsed.volume;
+			if ( null !==value.data.inputContainerUsed.volume) { 
+				value.data.outputContainerUsed.volume = value.data.inputContainerUsed.volume;
+			}
 		})		
 	};
 	

@@ -1,8 +1,21 @@
-@this(ctx : fr.cea.ig.play.migration.NGLContext)
+@this(ctx : fr.cea.ig.ngl.NGLApplication)
 
 @(nav: String = "")
 
 @import play.mvc.Http.Context
+@import play.api.Play
+@import controllers.authorisation.PermissionHelper
+
+@import views.html.ddmenu._
+
+@import controllers.reagents.tpl.routes.Receptions
+
+@writePermission = @{ PermissionHelper.checkPermission(user, "writing") }
+@adminPermission = @{ PermissionHelper.checkPermission(user, "admin") }
+@always          = @{ true }
+@version         = @{ ctx.nglConfig().getApplicationVersion() }
+@isCNSInstitute  = @{ "CNS" == ctx.nglConfig().getInstitute() }
+@isCNGInstitute  = @{ "CNG" == ctx.nglConfig().getInstitute() }
 
 @user = @{ ctx.currentUser() }  
 <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -18,17 +31,14 @@
 								<li class="@("active".when(nav == "reagentCatalogs.search"))"><a href="@controllers.reagents.tpl.routes.KitCatalogs.home("search")">@Messages("reagentCatalogs.menu.search")</a></li>
 								<li class="@("active".when(nav == "reagentCatalogs.create"))"><a href="@controllers.reagents.tpl.routes.KitCatalogs.home("create")">@Messages("reagentCatalogs.menu.create")</a></li>																			
 							</ul>
-  						</li>
-    			<!--li class="dropdown @("active".when(nav.startsWith("reagents")))">
-  							<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" id="reagent">@Messages("reagentDeclarations.menu")<b class="caret"></b></a>
-							<ul class="dropdown-menu" role="menu" aria-labelledby="reagents">
-								<li class="@("active".when(nav == "reagents.search.kits"))"><a href="@controllers.reagents.tpl.routes.Kits.home("search")">@Messages("kits.search")</a></li>		
-								<li class="@("active".when(nav == "reagents.search.boxes"))"><a href="@controllers.reagents.tpl.routes.Boxes.home("search")">@Messages("boxes.search")</a></li>		
-								<li class="@("active".when(nav == "reagents.create"))"><a href="@controllers.reagents.tpl.routes.Kits.home("create")">@Messages("kits.create")</a></li>
-								<li class="@("active".when(nav == "reagents.create.order"))"><a href="@controllers.reagents.tpl.routes.Orders.home("create")">@Messages("kits.create-batch")</a></li>																	
-							</ul>
-				</li-->  
-									
+						  </li>	
+				@if(isCNSInstitute) {
+					@ddmenu(nav,"receptions","reagent.receptions.menu") {
+						@ddme(nav, always,          "receptions.search",   Receptions.home("search"),   "reagent.receptions.menu.search")
+						@** @ddme(nav, writePermission, "receptions.create",   Receptions.home("create"),   "reagent.receptions.menu.create") *@
+						@ddme(nav, writePermission, "receptions.new",		 Receptions.home("new"),	  "reagent.receptions.menu.new_from_file")
+					  }
+				}
 			</ul>
 
 			<ul class="nav navbar-nav navbar-right">

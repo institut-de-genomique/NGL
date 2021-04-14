@@ -21,7 +21,8 @@
 <div class="row">
 	@column(){
 	    @* Ecriture des differentes lignes code, state, title, abstract et description :*@
-		@line("experiment.code")
+	    @lineDate("experiment.traceInformation.creationDate")
+	  	@line("experiment.code")
 		@labelLine("experiment.state")
 		@line("experiment.projectCode")
 		@line("experiment.accession")
@@ -30,10 +31,10 @@
 		@line("experiment.libraryStrategy")
 		@line("experiment.librarySource")
 		@line("experiment.libraryLayout")
-		@line("experiment.libraryLayoutNominalLength")
-		@line("experiment.libraryLayoutOrientation")
+		@line("Library Layout Nominal Length", "experiment.libraryLayoutNominalLength")
+		@line("Library Layout Orientation", "experiment.libraryLayoutOrientation")
 		@line("experiment.libraryName")
-		@line("experiment.libraryConstructionProtocol")
+		@line("Library Construction Protocol", "experiment.libraryConstructionProtocol")
 		@line("experiment.typePlatform")
 		@line("experiment.instrumentModel")
 		@line("experiment.lastBaseCoord")
@@ -46,14 +47,14 @@
 
 </form>		
 
-<form class="form-horizontal" name="studyForm2">
+<form class="form-horizontal" name="experimentForm2">
 	
 <div class="page-header"/>	
 					
 <div class="row">
 	@column(){	
-		@views.html.helper.columnLabelValue(Messages("studies.msg.details-release")){
-			<p class="form-control-static">{{study.code}}</p>
+		@views.html.helper.columnLabelValue(Messages("experiment.msg.details")){
+			<p class="form-control-static">{{experiment.code}}</p>
 		}	
 	}	
 </div>	

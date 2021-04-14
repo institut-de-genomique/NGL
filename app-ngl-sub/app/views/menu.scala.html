@@ -1,4 +1,5 @@
-@this(ctx : fr.cea.ig.play.migration.NGLContext) 
+@this(ctx : fr.cea.ig.ngl.NGLApplication)
+@* @this(ctx : fr.cea.ig.play.migration.NGLContext) *@ 
 @* constructeur de la classe *@
 
 @* signature de la methode render: *@
@@ -12,6 +13,9 @@
 @import controllers.sra.documentation.tpl.routes.Documentation
 @import controllers.sra.samples.tpl.routes.Samples
 @import controllers.sra.experiments.tpl.routes.Experiments
+@import controllers.sra.bilans.tpl.routes.Bilans
+@import controllers.sra.projects.tpl.routes.Projects
+
 
 @* variable de la methode render: *@
 @user = @{ ctx.currentUser() }
@@ -23,7 +27,11 @@
     	</div>
     	<div class="collapse navbar-collapse">
     		<ul class="nav navbar-nav">
-    			@ddmenu(nav, "studies","studies.menu") {
+    			@ddmenu(nav, "configurations","configurations.menu") {
+				  @ddentry(nav, "configurations.consultation",Configurations.home("consultation"),"configurations.menu.consultation")
+				  @ddentry(nav, "configurations.create",      Configurations.home("create"),      "configurations.menu.create")					  		  
+				}
+				@ddmenu(nav, "studies","studies.menu") {
     			  @* arg 1 : nav = reperage dans page navigation
     			     arg 2 : identifiant du sous-menu qui doit commencer par meme nom que menu
     			     arg 3 : url destination
@@ -31,13 +39,11 @@
     			  *@
 				  @ddentry(nav, "studies.consultation", Studies.home("consultation"), "studies.menu.consultation")
 				  @ddentry(nav, "studies.create"      , Studies.home("create")      , "studies.menu.create")	
+				  @ddentry(nav, "studies.update"      , Studies.home("update")      , "studies.menu.update")	
 				  @* ddentry(nav, "studies.release"   , Studies.home("release")     , "studies.menu.release") *@	
 				  		  
 				}
-    			@ddmenu(nav, "configurations","configurations.menu") {
-				  @ddentry(nav, "configurations.consultation",Configurations.home("consultation"),"configurations.menu.consultation")
-				  @ddentry(nav, "configurations.create",      Configurations.home("create"),      "configurations.menu.create")					  		  
-				}
+ 
     			@ddmenu(nav, "submissions","submissions.menu") {
 				  @ddentry(nav, "submissions.consultation", Submissions.home("consultation"), "submissions.menu.consultation")
 				  @ddentry(nav, "submissions.create"      , Submissions.home("create")      , "submissions.menu.create")					  		  
@@ -46,10 +52,19 @@
 				}  
     			@ddmenu(nav, "samples","samples.menu") {
 				  @ddentry(nav, "samples.consultation", Samples.home("consultation"), "samples.menu.consultation")
+				  @ddentry(nav, "samples.update"      , Samples.home("update")      , "samples.menu.update")	
 				} 	  			
     			@ddmenu(nav, "experiments","experiments.menu") {
 				  @ddentry(nav, "experiments.consultation", Experiments.home("consultation"), "experiments.menu.consultation")
+				  @ddentry(nav, "experiments.update", Experiments.home("update"), "experiments.menu.update")
 				} 	
+   				@ddmenu(nav, "bilans","bilans.menu") {
+				  @ddentry(nav, "bilans.consultation", Bilans.home("consultation"), "bilans.menu.consultation")
+				} 
+				@ddmenu(nav, "projects","projects.menu") {
+				  @ddentry(nav, "projects.consultation", Projects.home("consultation"), "projects.menu.consultation")
+				  @ddentry(nav, "projects.update", Projects.home("update"), "projects.menu.update")
+				}					
 				<li class="@("active".when(nav == "documentation"))">
 					<a href="@Documentation.home()">@Messages("documentation.menu")</a>
 				</li>	

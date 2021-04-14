@@ -1,6 +1,6 @@
 package fr.cea.ig.play.test;
 
-import static fr.cea.ig.play.test.WSHelper.get;
+//import static fr.cea.ig.play.test.WSHelper.get;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -14,7 +14,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import play.libs.ws.WSClient;
+//import play.libs.ws.WSClient;
 import play.mvc.Http.Status;
 
 
@@ -43,7 +43,8 @@ public class RoutesTest {
 		return this;
 	}
 	
-	public void run(WSClient ws) {
+//	public void run(WSClient ws) {
+	public void run(NGLWSClient ws) {
 		for (Routes routes : routesList) {
 			for (Routes.Entry e : routes.entries) {
 				String url = e.url;
@@ -59,7 +60,8 @@ public class RoutesTest {
 				}
 				if (rUrl != null) 
 					if (!ignore.contains(rUrl))
-						get(ws,url,Status.OK);
+						// get(ws,url,Status.OK);
+						ws.get(url,Status.OK);
 			}
 		}
 	}
@@ -126,7 +128,7 @@ public class RoutesTest {
 		}
 	}
 		
-	public static void checkRoutes(WSClient ws) {
+	public static void checkRoutes(NGLWSClient ws) {
 		/*
 		Routes routes = loadRoutes();
 		for (Routes.Entry e : routes.entries) {
@@ -152,3 +154,4 @@ public class RoutesTest {
 	}
 
 }
+

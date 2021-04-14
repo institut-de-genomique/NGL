@@ -1,12 +1,13 @@
 package models.laboratory.common.description;
 
-import models.laboratory.common.description.dao.StateCategoryDAO;
-import models.utils.dao.AbstractDAO;
+import java.util.function.Supplier;
 
-public class StateCategory extends AbstractCategory<StateCategory> {
+import fr.cea.ig.ngl.utils.SpringSupplier;
+import models.laboratory.common.description.dao.StateCategoryDAO;
+
+public class StateCategory extends AbstractCategory {
 	
-//	public static Finder<StateCategory> find = new Finder<StateCategory>(StateCategoryDAO.class.getName()); 
-	public static final Finder<StateCategory,StateCategoryDAO> find = new Finder<>(StateCategoryDAO.class); 
+	public static final Supplier<StateCategoryDAO> find = new SpringSupplier<>(StateCategoryDAO.class); 
 	
 	public enum CODE {
 		F,
@@ -15,13 +16,19 @@ public class StateCategory extends AbstractCategory<StateCategory> {
 		N
 	} 
 	
-	public StateCategory() {
-		super(StateCategoryDAO.class.getName());
+	// Serialization constructor
+	public StateCategory() {}
+	
+	public StateCategory(String code, String name) {
+		super(code,name);
 	}
-
-	@Override
-	protected Class<? extends AbstractDAO<StateCategory>> daoClass() {
-		return StateCategoryDAO.class;
+	
+	public StateCategory(CODE code, String name) {
+		this(code.name(),name);
 	}
-
+	
+	public StateCategory(CODE code) {
+		this(code.name(), code.name());
+	}
+	
 }

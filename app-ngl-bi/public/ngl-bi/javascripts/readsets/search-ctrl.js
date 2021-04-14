@@ -31,12 +31,13 @@ angular.module('home').controller('SearchCtrl',[ '$scope', '$routeParams', 'main
 	
 	$scope.reset = function(){
 		$scope.searchService.resetForm();
+		$scope.searchService.resetTextareas();
 	};
 	
 	if(angular.isUndefined(mainService.getHomePage())){
 		mainService.setHomePage('search');
 		tabService.addTabs({label:Messages('readsets.page.tab.search'),href:jsRoutes.controllers.readsets.tpl.ReadSets.home("search").url,remove:true});
-		tabService.activeTab(0); // desactive le lien !
+		tabService.activeTab(0); // active l'onglet, le met en bleu
 	}
 	
 	$scope.searchService = readSetsSearchService;
@@ -93,12 +94,13 @@ angular.module('home').controller('SearchValuationCtrl', ['$scope', '$routeParam
 	
 	$scope.reset = function(){
 		$scope.searchService.resetForm();
+		$scope.searchService.resetTextareas();
 	};
 	
 	if(angular.isUndefined(mainService.getHomePage())){
 		mainService.setHomePage('valuation');
 		tabService.addTabs({label:Messages('readsets.page.tab.validate'),href:jsRoutes.controllers.readsets.tpl.ReadSets.home("valuation").url,remove:true});
-		tabService.activeTab(0); // desactive le lien !
+		tabService.activeTab(0); // active l'onglet, le met en bleu
 	}
 	
 	$scope.searchService = readSetsSearchService;
@@ -126,7 +128,7 @@ angular.module('home').controller('SearchStateCtrl', ['$scope', '$routeParams', 
 			},
 			save : {
 				active:Permissions.check("writing")?true:false,
-				url: jsRoutes.controllers.readsets.api.ReadSets.stateBatch().url,				
+				url: jsRoutes.controllers.readsets.api.ReadSets.updateStateBatch().url,				
 				batch:true,
 				method:'put',
 				value:function(line){return {code:line.code,state:line.state};}				
@@ -146,12 +148,13 @@ angular.module('home').controller('SearchStateCtrl', ['$scope', '$routeParams', 
 	
 	$scope.reset = function(){
 		$scope.searchService.resetForm();
+		$scope.searchService.resetTextareas();
 	};
 	
 	if(angular.isUndefined(mainService.getHomePage())){
 		mainService.setHomePage('state');
 		tabService.addTabs({label:Messages('readsets.page.tab.state'),href:jsRoutes.controllers.readsets.tpl.ReadSets.home("state").url,remove:true});
-		tabService.activeTab(0); // desactive le lien !
+		tabService.activeTab(0); // active l'onglet, le met en bleu
 	}
 	
 	$scope.searchService = readSetsSearchService;
@@ -201,12 +204,13 @@ angular.module('home').controller('SearchBatchCtrl', ['$scope', '$routeParams', 
 	
 	$scope.reset = function(){
 		$scope.searchService.resetForm();
+		$scope.searchService.resetTextareas();
 	};
 		
 	if(angular.isUndefined(mainService.getHomePage())){
 		mainService.setHomePage('batch');
 		tabService.addTabs({label:Messages('readsets.page.tab.batch'),href:jsRoutes.controllers.readsets.tpl.ReadSets.home("batch").url,remove:true});
-		tabService.activeTab(0); // desactive le lien !
+		tabService.activeTab(0); // active l'onglet, le met en bleu
 	}
 	
 	$scope.searchService = readSetsSearchService;

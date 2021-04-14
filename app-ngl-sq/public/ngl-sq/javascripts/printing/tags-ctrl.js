@@ -66,6 +66,15 @@ angular.module('home').controller('TagsCtrl', ['$scope', '$http', '$routeParams'
 	
 	$scope.reset = function(){
 		$scope.form = {};
+		// resetTextareas
+		(function(){
+			Array.from(document.getElementsByTagName('textarea')).forEach(function(element) {
+				var elementScope = angular.element(element).scope();
+				if(elementScope.textareaValue){
+					elementScope.textareaValue = null;
+				}
+			}); 
+		})();
 	};
 	
 	$scope.changePrinter = function(){

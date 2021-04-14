@@ -1,16 +1,10 @@
 package fr.cea.ig.play;
 
 import java.util.ArrayList;
-// import java.util.HashMap;
-// import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-// import java.util.concurrent.Callable;
-
-// import play.Application;
-// TODO: use something like:
 import com.typesafe.config.Config;
 
 import akka.actor.ActorSystem;
@@ -24,7 +18,6 @@ import play.i18n.Lang;
 import play.i18n.Messages;
 import play.i18n.MessagesApi;
 import play.inject.Injector;
-// import play.libs.Akka;
 import play.libs.ws.WSClient;
 
 /**
@@ -45,28 +38,9 @@ import play.libs.ws.WSClient;
  */
 @Singleton
 public class IGGlobals {
-// class UNUSED_IGGlobals {
 	
 	private static final play.Logger.ALogger logger = play.Logger.of(IGGlobals.class);
 	
-//	// This is started as a component and before any other that requires 
-//	// access to globals. This component or part of this component should
-//	// be injected when needed but this sets up globals as static component
-//	// require that.
-//	@Inject
-//	public IGGlobals(Configuration conf, Environment env, Injector inj, SyncCacheApi cac) {
-//		configuration = conf; // app.configuration();
-//		environment   = env;  // app.environment();
-//		injector      = inj;  // app.injector();
-//		cache         = cac;
-//		logger.debug("setup globals");
-//	}
-//	
-//	/**
-//	 * Play configuration.
-//	 */
-//	private static Configuration configuration;
-
 	// This is started as a component and before any other that requires 
 	// access to globals. This component or part of this component should
 	// be injected when needed but this sets up globals as static component
@@ -139,11 +113,7 @@ public class IGGlobals {
 	 * @return synchronized cache instance
 	 */
 	public static SyncCacheApi cache() {
-		// return injector().instanceOf(SyncCacheApi.class);
-		// NoCache or HashCache resolve the security exception problem.
-		// return NoCache.instance();
-		// return HashCache.instance();
-		return assertInitialized("cache",cache);
+		return assertInitialized("cache", cache);
 	}
 
 	/**
@@ -162,7 +132,6 @@ public class IGGlobals {
 	// Implementation of methods that are removed from play but still needed by 
 	// NGL static methods.
 	
-	// TODO: inject
 	public static FormFactory formFactory() {
 		return injector().instanceOf(FormFactory.class);
 	}
@@ -171,7 +140,6 @@ public class IGGlobals {
 		return formFactory().form(clazz);
 	}
 
-	// TODO: inject
 	public static DynamicForm form() {
 		return formFactory().form();
 	}
@@ -180,86 +148,16 @@ public class IGGlobals {
 		return injector().instanceOf(MessagesApi.class);
 	}
 	
-	// TODO: possibly use httpcontext, maybe some lang at least
-	// TODO: inject
 	public static Messages messages() {
 		return messagesApi().preferred(new ArrayList<Lang>());
 	}
 	
-	// TODO:inject
 	public static ActorSystem akkaSystem() {
 		return injector().instanceOf(ActorSystem.class);
 	}
 	
-	// TODO: inject
 	public static WSClient ws() {
 		return injector().instanceOf(WSClient.class);
 	}
-	
-	/*
-	static class NoCache implements SyncCacheApi {
-		private  static NoCache instance;
-		public static NoCache instance() {
-			if (instance == null)
-				instance = new NoCache();
-			return instance;
-		}
-		public <T> T get(String key) { 
-			return null; 
-		}
-		public <T> T getOrElseUpdate(String key, Callable<T> block) { 
-			try {
-				return block.call();
-			} catch (Exception e) {
-				throw new RuntimeException("block call failed",e);
-			}
-		}
-		public <T> T getOrElseUpdate(String key, Callable<T> block, int expiration) { 
-			return getOrElseUpdate(key,block);
-		}
-		public void remove(String key) {
-		}
-		public void set(String key, Object value) {
-		}
-		public void set(String key, Object value, int expiration) {
-		}
-	}
-	
-	static class HashCache implements SyncCacheApi {
-		private  static HashCache instance;
-		public static HashCache instance() {
-			if (instance == null)
-				instance = new HashCache();
-			return instance;
-		}
-		private Map<String,Object> cache = new HashMap<String,Object>();
-		public <T> T get(String key) { 
-			return (T)cache.get(key); 
-		}
-		public <T> T getOrElseUpdate(String key, Callable<T> block) {
-			T t = get(key);
-			if (t != null)
-				return t;
-			try {
-				t = block.call();
-				cache.put(key,t);
-				return t;
-			} catch (Exception e) {
-				throw new RuntimeException("block call failed",e);
-			}
-		}
-		public <T> T getOrElseUpdate(String key, Callable<T> block, int expiration) { 
-			return getOrElseUpdate(key,block);
-		}
-		public void remove(String key) {
-			cache.remove(key);
-		}
-		public void set(String key, Object value) {
-			cache.put(key,value);
-		}
-		public void set(String key, Object value, int expiration) {
-			set(key,value);
-		}
-	}*/
 	
 }

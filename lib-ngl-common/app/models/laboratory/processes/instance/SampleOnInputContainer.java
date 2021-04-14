@@ -5,7 +5,7 @@ import models.laboratory.run.instance.SampleOnContainer;
 import validation.ContextValidation;
 import validation.processes.instance.SampleOnInputContainerValidationHelper;
 
-public class SampleOnInputContainer extends SampleOnContainer  { // implements IValidation {
+public class SampleOnInputContainer extends SampleOnContainer { // implements IValidation {
 	
 	public PropertySingleValue containerVolume;
 //	public PropertySingleValue containerConcentration;

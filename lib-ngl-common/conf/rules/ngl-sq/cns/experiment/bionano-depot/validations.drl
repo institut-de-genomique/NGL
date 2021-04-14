@@ -1,0 +1,40 @@
+//created on: 25/06/2020
+// NGL-2956: Ajout de la propriété itération dans l'expérience
+//  => controler qu'il n'existe pas deja une autre experience de depot avec la meme chip et le meme chipIteration
+package rules
+
+rule "Validation chipIteration"
+	@nglSQ( validations )
+	dialect "java"
+	salience 1000
+	no-loop
+when
+	Experiment($typeCode:typeCode, $typeCode=="bionano-depot", $experimentCode:code, $experimentProperties: experimentProperties, $atomics:atomicTransfertMethods)
+	Experiment($expStateCode: state.code)
+	//pb => code null !!! probleme vien du contextValidation passé a ExperimentValidationhelper.java
+	//State($stateCode:code=="IP") finallement c'est aussi a l'etat New qu'il faut executer cette regle 
+	
+	//getValue() pas utilisable ici!!!!!
+	//$chipIteration : PropertySingleValue() from $experimentProperties.get("chipIteration").getValue()
+	$chipIteration : PropertySingleValue() from $experimentProperties.get("chipIteration")
+	
+	//utiliser le premier ATM pour recuperer le code de la chip
+	AtomicTransfertMethod($inputContainerUseds:inputContainerUseds) from $atomics.get(0)
+	InputContainerUsed($support:locationOnContainerSupport.code,$categoryCode:locationOnContainerSupport.categoryCode) from $inputContainerUseds
+	
+    $contextValidation:ContextValidation($errors : errors)
+then
+	Logger.debug("Bionano-depot rule: "+ $experimentCode +" / "+ $chipIteration.getValue()+ " / "+ $support);
+
+	// !! il faut aussi exclure l'experience courante
+	// !! on peut en trouver plusieurs si chipIteration a été modifié à la main ou par script !!!
+	List<Experiment> expMatch=MongoDBDAO.find(InstanceConstants.EXPERIMENT_COLL_NAME, Experiment.class, 
+			                             DBQuery.and( DBQuery.is("typeCode","bionano-depot"),
+		                                              DBQuery.in("inputContainerSupportCodes", $support),
+		                                              DBQuery.is("experimentProperties.chipIteration.value", $chipIteration.getValue()),
+		                                              DBQuery.notEquals("code",$experimentCode))).toList();
+	// si on en trouve c'est qu'on essaye de créer un doublon !!
+	if (expMatch.size() > 0 ) {	
+		$contextValidation.addErrors("chipIteration","error.validationexp.sameChipIteration", $chipIteration.getValue(), $support);
+	}
+end

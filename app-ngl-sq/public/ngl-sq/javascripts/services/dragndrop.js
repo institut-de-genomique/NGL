@@ -1,8 +1,8 @@
 //This service and directive are a complete system of drag'n drop. This system drag and drop not only the html element
 //but also the data of the ngModel where the draggable directive is added in the droppable ngModel
 //The service is use to share the data between the two directives (draggable, droppable)
-angular.module('dragndropServices', []).factory('dragndropService', function($rootScope) {
-	dragndropService = {
+angular.module('dragndropServices', []).factory('dragndropService', function() {
+	var dragndropService = {
 			draggedData : {},
 			dragModel:undefined,
 			setDraggedData : function(data){
@@ -17,11 +17,11 @@ angular.module('dragndropServices', []).factory('dragndropService', function($ro
 			getDragModel :function(){
 				return this.dragModel;
 			}
-	}
+	};
 
 	return dragndropService;
 }).directive('draggable',['dragndropService', '$parse', function(dragndropService, $parse) {
-	return{ 
+	return { 
 		scope:{
 			drag:'&',
 			ngModel:'='
@@ -185,5 +185,5 @@ angular.module('dragndropServices', []).factory('dragndropService', function($ro
 						false
 				);
 			}
-		}
+		};
 	}]);

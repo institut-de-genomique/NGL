@@ -1,0 +1,503 @@
+// remplacé par MappingLightcyclerQPCR.java qui utilise un mapping variable stocké dans Mongo, au lieu d'un mapping harcodé
+package controllers.instruments.io.cng.qpcrlightcycler480iiAlone;
+
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
+import controllers.instruments.io.utils.AbstractInput;
+import controllers.instruments.io.utils.InputHelper;
+import models.laboratory.common.description.PropertyDefinition;
+import models.laboratory.common.instance.property.PropertyFileValue;
+import models.laboratory.common.instance.property.PropertySingleValue;
+import models.laboratory.experiment.description.ExperimentType;
+import models.laboratory.experiment.instance.Experiment;
+import models.laboratory.experiment.instance.InputContainerUsed;
+import validation.ContextValidation;
+
+// 24/01/2019 renommer le package en qpcrlightcycler480iiAlone et le constructeur en  Input=>Qpcrlightcycler480iiInput
+public class Qpcrlightcycler480iiAloneInput extends AbstractInput {
+	
+//	private static final play.Logger.ALogger logger = play.Logger.of(Input.class);
+	
+   /* Description du fichier a traiter: TXT TAB délimité généré par LightCycler
+	*
+	*Experiment: 150929_KAPA-Lib-Quant_PCRFREE_P17  Selected Filter: SYBR Green I / HRM Dye (465-510)
+	*Include	Color	Pos		Name		Cp		Concentration	Standard	Status
+	*True		255		A1		Sample 1	9.66	4.71E0			0	
+	*True		255		A2		Sample 2	9.86	4.12E0			0	
+	*True		255		A3		Sample 3	10.01	3.73E0			0	
+	*.....    	
+	*	 
+	*   !!!! si les operateurs cochent/decochent des puits dans le logiciel qui genere le fichier 
+	*  l'ordre des puits n'est plus assuré...
+	*   Pour les puits en erreur, il n'y a rien dans les colonnes "Cp" et "Concentration"
+	*   Ignorer les lignes dont la colonne est > 20, ce sont des controles ( voir aussi remapPosition() )
+	*/
+	
+   /* 21/09/2018 NGL-2237 :ajout d'un parametre "mode" pour effectuer les calculs avec 2 gammes de concentration DEV ou PROD
+	* 
+	*/
+	
+	@Override
+	public Experiment importFile(Experiment experiment, PropertyFileValue pfv, ContextValidation contextValidation) throws Exception {	
+
+		// 21/09/2018: NGL-2237 ajout d'un parametre "mode" ajouté dans l'URL appellée
+//		String mode = null;	
+//		if (contextValidation.getObject("mode") != null) {
+//			mode = contextValidation.getObject("mode").toString();
+//			logger.info("mode:{}", mode);
+//			if ( ! mode.equals("Prod") && ! mode.equals("Dev")){ 
+////				contextValidation.addErrors("Erreur","mode '"+mode+"'non supporté");
+//				contextValidation.addError("Erreur","mode '" + mode + "'non supporté");
+//				return experiment;
+//			}
+//		} else {
+////			contextValidation.addErrors("Erreur","mode non défini");
+//			contextValidation.addError("Erreur","mode non défini");
+//			return experiment;
+//		}
+		// Assertions des preconditions
+		if (contextValidation.getObject("mode") == null) {
+			contextValidation.addError("Erreur", "mode non défini");
+			return experiment;			
+		}
+		String mode = contextValidation.getObject("mode").toString();
+		logger.info("mode:{}", mode);
+		if (! mode.equals("Prod") && ! mode.equals("Dev")) {
+			contextValidation.addError("Erreur", "mode '" + mode + "'non supporté");
+			return experiment;
+		}
+
+		//-1- tableau des facteurs de dilution et leur répétition sur la plaque 384
+		// avant ajout du parametre mode...
+		//double fDilution[]={ 5000,5000,5000, 50000,50000,50000 }; 
+		
+		// 24/09/2018 utiliser un HashMap  permet d'etre plus flexible...on peut imaginer une valeur -medium ou un mode "Test"...
+		// Vu que la clé n'est pas verifiée, c'est flexible mais mais pas tres verifié, il faudrait utiliser les cles
+		// du dictionaire pour voir si c'est un mode autorise.
+//		Map<String,Double> dilution = new HashMap<>(0);
+//		dilution.put("Prod-low",   5000d);
+//		dilution.put("Prod-high", 50000d);
+//		
+//		dilution.put("Dev-low",   10000d);
+//		dilution.put("Dev-high", 100000d);
+//		
+//		double fDilution[] = new double[6];
+//		
+//		fDilution[0] = dilution.get(mode + "-low");
+//		fDilution[1] = dilution.get(mode + "-low");
+//		fDilution[2] = dilution.get(mode + "-low");
+//			
+//		fDilution[3] = dilution.get(mode + "-high");
+//		fDilution[4] = dilution.get(mode + "-high");
+//		fDilution[5] = dilution.get(mode + "-high");
+		
+		double dilLow, dilHigh;
+		switch (mode) {
+		case "Prod" : dilLow =  5_000; dilHigh =  50_000; break;
+		case "Dev"  : dilLow = 10_000; dilHigh = 100_000; break;
+		default     : throw new RuntimeException("unsupported mode " + mode);
+		}		
+		
+		double fDilution[] = {
+				dilLow,
+				dilLow,
+				dilLow,
+				dilHigh,
+				dilHigh,
+				dilHigh
+		};
+		
+		//-2- définition du secteur a traiter demandé par l'utilisateur
+		// 24/09/2018 code deporté dans une fonction     ... pas bo...il faudrait utiliser des exceptions ???
+//		int sector;
+//		if ( getSector(experiment, contextValidation) > 1 ) {
+//			return experiment;
+//		} else {
+//			sector = getSector(experiment, contextValidation);
+//		}
+		int sector = getSector(experiment, contextValidation);
+		if (sector > 1) 
+			return experiment;
+		
+		//-3- traitement du fichier => stocker les concentrations dans un hash
+		
+		/* 07/04/201? question : ne vaut-il pas mieux avoir un facteur de correction constant pour tout le fichier 
+		 * plutot qu'une valeur par ligne ???
+		 * ==> int correctionFactorLibrarySize= parametre choisi par l'utilisateur dans l'interface ???
+		 */
+        
+		// hashMap  pour stocker les concentrations du fichier
+		Map<String,Double> data = new HashMap<>(0);
+		
+		// ajout 03/08/2017 charset detection (N. Wiart)
+		byte[] ibuf = pfv.byteValue();
+		String charset = "UTF-8"; //par defaut, convient aussi pour de l'ASCII pur
+		
+		// si le fichier commence par les 2 bytes ff/fe  alors le fichier est encodé en UTF-16 little endian
+		if (ibuf.length >= 2 && (0xff & ibuf[0]) == 0xff && (ibuf[1] & 0xff) == 0xfe) {
+			charset = "UTF-16LE";
+		}
+		
+		InputStream is = new ByteArrayInputStream(ibuf);
+		
+		// Ce n'est pas un fichier MS-Excel mais un fichier TXT TAB delimité a lire ligne a ligne. 
+		// utiliser un bufferReader...Merci Nicolas	!! 03/08/2017 ajout charset
+		// Si on affirme qu'il y a 2 lignes d'entete dont seulement une utile autant utiliser
+		// cela et ne pas autoriser un fichier vide. Utiliser la deuxieme ligne pour valider
+		// les entetes et eventuellement definir un mapping par nom de collone pourrait
+		// ameliorer la fiabilité du tout.
+//		try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, charset))) {
+//			String line;
+//			if ((line = reader.readLine()) == null) {
+//				contextValidation.addError("Erreur fichier", "missing first line (header)");
+//				return experiment;
+//			}
+//			if (! line.matches("Experiment:(.*)")) {
+//				contextValidation.addError("Erreurs fichier","experiments.msg.import.header-label.missing","2", "Experiment:");
+//				return experiment;
+//			}
+//			if ((line = reader.readLine()) == null) {
+//				contextValidation.addError("Erreur fichier", "missing second line (header)");
+//				return experiment;
+//			}
+//			while ((line = reader.readLine()) != null) {
+//				// process lines
+//			}			
+//		}
+//		BufferedReader reader = new BufferedReader(new InputStreamReader(is, charset));
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, charset))) {
+			int n = 0;
+			String line;
+
+			while ((line = reader.readLine()) != null) {
+				// attention si le fichier vient d'une machine avec LOCALE = FR les décimaux utilisent la virgule!!!
+				String[] cols = line.replace (",", ".").split("\t");
+
+				// verifier la premiere ligne d'entete
+				if ((n == 0) && ( ! line.matches("Experiment:(.*)") ) ){
+					contextValidation.addError("Erreurs fichier","experiments.msg.import.header-label.missing","2", "Experiment:");
+					return experiment;
+				}
+				// commencer le traitement en sautant la 2eme ligne d'entete
+				if (n > 1 ) {
+					// description d'une ligne de donnees:
+					//  0         1      2       3          4            5             6          7
+					//Include	Color	Pos		Name		Cp		Concentration	Standard	Status
+					// status est optionnel ????
+					//Logger.info ("ligne "+n+": lg="+cols.length );
+					if ( cols.length < 7 || cols.length > 8 ) {
+						contextValidation.addError("Erreurs fichier", "experiments.msg.import.linefields.unexpected", n+1);
+						continue;
+					}
+
+					String pos384 = cols[2];
+					// verifier que c'est une position 384 valide ???
+					if ( !InputHelper.isPlatePosition(contextValidation, pos384 , 384, n)) {
+						continue;
+					} else {
+						// !!! il faut une position sur 3 caracteres pour pouvoir par la suite trier dans l'ordre reel !!!
+						String pos0384 = InputHelper.add02pos(pos384);
+
+						int col384 = Integer.parseInt(pos384.substring(1));
+						// ignorer les lignes correspondant aux temoins (colonnes 22,23,24)
+						if (col384 > 20) { continue; }
+
+						/* Amelioration 17/05/2016: N'inclure un puit pour le calcul de moyenne ulterieur que si
+				     la colonne include est égale a 'True' ET la colonne color=255
+				      sinon =>forcer a 0 ici (sera ainsi exclu du calcul)
+						 */	  
+						double concentration;
+						if (cols[0].equals("True") && cols[1].equals("255")) { 
+							concentration=Double.parseDouble(cols[5]);   
+							data.put(pos0384, concentration);
+						} else { 
+							logger.info("excluding well "+pos0384);
+							data.put(pos0384, 0d);
+						}
+					}
+				}
+				++n;
+			}
+		}
+		
+		if (contextValidation.hasErrors()) { 
+			return experiment;
+		}
+		logger.info("file parsing Ok");
+		
+		//-4- Calculs 
+		// nouveau HashMap pour les concentrations calculees en nM
+		Map<String,Double> results = new HashMap<>(0);
+				
+		/* traiter dans l'ordre des positions; 
+		 * 6 lignes successives (1 block) doivent correspondre au meme echantillon avec 3 repetions de 2 dilutions
+		 * chaque puit 96 initial est traité 6 fois dans la plaque 384
+		 */
+		int nbRep=6; 
+		
+		SortedSet<String> pos0384 = new TreeSet<>(data.keySet());
+		int nbblock = 0;
+		int rep = 0;
+		double[] listConc = new double[nbRep];
+		
+		for (String key : pos0384) { 
+			// transformer la concentration du fichier (pM) en nM [ formule donné par Roche ]
+			// conc_nM= conc_pM * ( fact_dilution/1000 ) * ( 452 / correctionFactorLibrarySize ) 
+			// 07/04/2016 PB on n'a correctionFactorLibrarySize que plus tard car c'est un parametre de l'experience (pour chaque puit en input)
+			// double concentration_nM =  data.get(key) * ( fDilution[rep] / 1000 ) * rocheFactor;
+			double concentration_nM =  data.get(key) * ( fDilution[rep] / 1000 );
+					
+			// stocker concentration pour faire moyenne plus tard...
+			listConc[rep] = concentration_nM;
+			//logger.info ("pos0384="+key+" CONC (pM)="+  data.get(key) );
+			nbblock++;
+			rep++;
+			if ((nbblock % nbRep ) == 0) {	
+				//nbblock est multiple de 6 => fin d'un block de lignes
+				//17/05/2016 calcul de la moyenne des 6 concentrations en ne tenant pas compte des concentrations a 0
+				double moyConc_nM = meanNo0(listConc) ;
+
+				// remapper en 96
+				String pos96 = remapPosition (key, sector, contextValidation );
+				results.put(pos96,moyConc_nM );
+				
+				//Logger.info ("FIN DE BLOCK...pos384="+key+" > pos96="+ pos96+"| MOY CONC="+moyConc_nM);
+				//Logger.info (pos96 + " belong to sector "+sector+" ?? "+ belongToSector96(contextValidation, pos96, sector));
+
+				//reinitialiser le tableau 
+				listConc= new double[nbRep];
+				// reinitialiser le compteur de repetitions
+				rep=0;
+			}
+		}
+		logger.info("conc nM Ok");
+		
+		/* -5- Vérifier que tous les puits du secteur concerné par l'import ont tous une concentration
+		 *  ( verification minimale pour éviter une erreur de choix du fichier initial...)
+		 *  27/04/2017 ATTENTION !!! ceci suppose que les inputContainers en entrée sont des puits de plaque. Avec des strip-8 ca ne marche plus !!!
+		 *    => belongToSector96=>isPlatePosition --> "ligne 0: La position 'x' ne correspond pas à un format de plaque connu"
+		 */
+		if (!contextValidation.hasErrors()) {
+			final int sector_arg = sector;  // si pas final erreur de compil !!
+			experiment.atomicTransfertMethods
+				.stream()
+				.map(atm -> atm.inputContainerUseds.get(0))
+				.forEach(icu -> {
+					// NGL-2399 remplacement getCodePosition(icu.code) => getIcuPosition(icu)
+					String icupos=InputHelper.getIcuPosition(icu);
+					if ( belongToSector96(contextValidation, icupos, sector_arg)) {
+						if (!results.containsKey(icupos) ) {
+							contextValidation.addError("Erreurs fichier", "experiments.msg.import.concentration.missing",icupos);
+						} 
+					}
+				});
+		}
+		
+		// -6- positionner les valeurs finales dans l'experience (en tenant compte du facteur correctif spécifique demandé par l'utilisateur)
+		//  NOTE 24/09/2018 actuellement c'est le meme pour tout les puits !!!!!
+		//  deplus on applique le facteur correctif sur la moyenne obtenue pour un puit au lieu d'affecter le facteur correctif sur chaque valeur et ensuite d'en faire la moyenne
+		
+		if (!contextValidation.hasErrors()) {
+			
+			ExperimentType experimentType = ExperimentType.find.get().findByCode(experiment.typeCode);
+			PropertyDefinition correctionFactorLibrarySizeDefault = experimentType.getMapPropertyDefinition().get("correctionFactorLibrarySize"); 
+			
+			final int sector_arg = sector;  // si pas final erreur de compil !!
+			experiment.atomicTransfertMethods
+				.stream()
+				.map(atm -> atm.inputContainerUseds.get(0))
+				.forEach(icu -> {
+					// NGL-2399 remplacement getCodePosition(icu.code) => getIcuPosition(icu)
+					String icupos=InputHelper.getIcuPosition(icu);
+					if ( belongToSector96(contextValidation, icupos, sector_arg)) {	
+						PropertySingleValue concentration = getPSV(icu, "concentration1");
+						//Logger.debug ("set concentration for icu "+ icu.code+" ="+ concentration);
+						// effectuer la correction en utilisant ce que l'utilisateur a defini pour l'input container en cours de traitement
+						// 24/09/2018 est global pour l'experiences, c'est le meme pour tout les puits !!!!! pourrait etre calculé 1 seule fois bien avant !!
+						PropertySingleValue cFLSize = getCorrectionFactorLibraySize(icu, correctionFactorLibrarySizeDefault);
+						
+						if (cFLSize.value != null) {
+							//Logger.info ("cFLSize.value="+cFLSize.value);
+							double corFactor = 452.0d / ((double) (Integer) cFLSize.value);
+							concentration.value = results.get(icupos) * corFactor;
+							concentration.unit = "nM";
+							//logger.info ("corFactor="+ corFactor+"; pos="+icupos+" concentration finale="+ results.get(icupos) * corFactor);
+						} else {
+							concentration.value = null;
+							concentration.unit = "nM";
+						}
+					}
+				});
+		}
+		return experiment;
+	}
+	
+	
+	/* description de la tranformation effectué sur le robot:
+	 * 
+	 *  contient les mesures sur une plaque 384 puits d'une demi plaque 96 ( 6 premieres ou 6 dernieres colonnes)
+	 *  il faut donc remaper les resutats trouves dans le fichier vers les puits concernes
+	 *  1 parametre necessaire: de quelle demi plaque s'agit-il ? colonne 1-6 ou 7-12 ? 
+	 *  
+   	 *plaque 96 :
+   	 *
+   	 *   1.......6 7.......12
+  	 *  +-------------------+
+	 * A|         |         |
+ 	 * B|         |         |
+ 	 * ....
+ 	 * H|         |         |
+  	 * +-------------------+
+     *      ||       ||
+     *      ||        ==>  sector 1 ( samples 49 a 96 )
+     *       ==>  sector 0 ( samples 1 a 48)
+     *
+	 *
+ 	 * chaque plaque 384 est composé de 4 zones :
+  	 *  3 zones pour les echantillons venant d'une demi plaque 96
+  	 *  1 zone  pour les temoins
+  	 *
+  	 *   1...6.8...13.14...20.22..24
+  	 * A|     |      |       |     |
+  	 * ....
+  	 * P|     |      |       |     |
+  	 *  +--------------------------+
+  	 *
+  	 * les 2 premieres colonnes d'un secteur 96 sont distribuées en colonnes 1 a 6
+  	 * les 2 colonnes centrales sont distribuées en colonnes 8 a 13 
+  	 * les 2 dernieres colonnes sont distribuées en colonnes 14 a 20
+  	 * les colonnes 22 a 24 contiennent des controles (pas des échantillons venant de la plaque 96)=> a ignorer !! 
+  	 *
+  	 * chaque puit de la plaque initiale 96 est déposé 6 fois sur la plaque 384:
+  	 *    - 3 en dilution  1/5000 (Prod)     1/10000 (Dev)
+  	 *    - 3 en dilution  1/50000  (Prod)   1/100000 (Dev)
+  	 *    
+	 */
+	public String remapPosition(String pos384, int sector, ContextValidation contextValidation) {
+		int asciiRow96=0;
+		int col96=0;
+		
+		//recuperer le code ASCII du premier caractere de la position
+		int asciiRow384 = pos384.charAt(0);
+		//recuper la colonne
+		int col384 = Integer.parseInt(pos384.substring(1));
+		
+		//ascii A=65, ascii P=80
+		if ( asciiRow384 < 65 || asciiRow384 > 80 ) { 
+			contextValidation.addError("Erreurs fichier", "experiments.msg.import.illegalRowPosition",pos384); 
+			return "ERR-ROW384";
+		}
+		else
+		{
+			// transformer le code ascii du row384 en rank (A=1 .... P=16)
+			// ne garder que la valeur entiere de la division par 2
+			int map=  (asciiRow384 - 65 )/2 ;
+
+			// determiner si c'est une ligne paire ou impaire via l'operateur modulo 2... 
+			if ( (asciiRow384 % 2) == 1 ){ 
+				//pair		
+				asciiRow96=asciiRow384 -map;
+				if      ( col384 > 0  && col384 < 7)  { col96= 1 +(sector*6); }
+			    else if ( col384 > 7  && col384 < 14) { col96= 3 +(sector*6); }
+			    else if ( col384 > 14 && col384 < 21) { col96= 5 +(sector*6); }
+			    else { 
+			    	// 11/09/2019 cette classe va etre supprimee inutile de surcharger le ficchier des messages....
+			    	//contextValidation.addError("Erreurs fichier", "experiments.msg.import.illegalColumnPosition",pos384);
+			    	contextValidation.addError("Erreurs fichier",pos384+": colonne incorrecte pour ce mapping");
+			    	return "ERR-COL384";
+			    }
+			} else  {  
+				//impair
+				asciiRow96=asciiRow384 -map -1 ;
+				if      ( col384 > 0  && col384 < 7)  { col96= 2 +(sector*6); }
+			    else if ( col384 > 7  && col384 < 14) { col96= 4 +(sector*6); }
+			    else if ( col384 > 14 && col384 < 21) { col96= 6 +(sector*6); }
+			    else { 
+			    	// 11/09/2019 cette classe va etre supprimee inutile de surcharger le ficchier des messages....
+			    	//contextValidation.addError("Erreurs fichier", "experiments.msg.import.illegalColumnPosition",pos384);
+			    	contextValidation.addError("Erreurs fichier",pos384+": colonne incorrecte pour ce mapping");
+			    	return "ERR-COL384";
+			    }
+			}
+		}
+
+		//retransformer asciiRow96  et col96 en string
+		String pos96=Character.toString((char)asciiRow96) + col96;
+		return pos96;		
+	}
+	
+	/*Calcul de moyenne; source: https://openclassrooms.com
+	public static double mean(double[] m) {
+	    double sum = 0;
+	    for (int i = 0; i < m.length; i++) {
+	        sum += m[i];
+	    }
+	    return sum / m.length;
+	}*/
+	// 17/05/2016 modification demandee par la production: ne pas compter les 0 dans la moyenne
+	private double meanNo0(double[] m) {
+		 double sum = 0;
+		 int nb=0;
+		 for (int i = 0; i < m.length; i++) {
+		 if ( m[i] > 0 ){ sum += m[i];  nb++; }
+		 }
+		 
+		 //attention cas ou m[] est vide => /0 !!
+		 if (nb > 0 ) { 
+			 double mean=sum / nb ;
+			 //logger.info("nb="+nb+"moy="+ mean);
+			 return mean ;
+		} else { return 0; }
+	}
+	
+	//specifique...ne pas mettre dans InputHelper
+	private Boolean belongToSector96( ContextValidation contextValidation, String pos96, int sector) {
+		// verifier si valide ??  on n'a pas de numero de ligne pour le message...
+		if ( ! InputHelper.isPlatePosition(contextValidation, pos96, 96, 0)){
+			return false;
+		}
+		
+		// les secteurs sont uniquement defini par les colonnes		
+		int col96 = Integer.parseInt(pos96.substring(1));
+		
+		if ( col96 > 0 && col96 < 7   && sector == 0 ){ return true; }
+		if ( col96 > 6 && col96 < 13  && sector == 1 ){ return true; }
+		
+		return false;
+	}
+	
+	private PropertySingleValue getCorrectionFactorLibraySize(
+			InputContainerUsed icu, PropertyDefinition correctionFactorLibrarySizeDefault) {
+		
+		PropertySingleValue cFLSize =  getPSV(icu, "correctionFactorLibrarySize");
+		if (cFLSize.value == null){ 
+			//get defaultValue
+			cFLSize.value = Integer.valueOf(correctionFactorLibrarySizeDefault.defaultValue);
+		}
+		return cFLSize;
+	}
+	
+	// 24/09/2018 individualiser ce code
+	private int getSector(Experiment experiment, ContextValidation contextValidation) {	
+		if (! experiment.instrumentProperties.containsKey("sector96")) {
+			contextValidation.addError("Erreur","propriété 'sector96' non définie dans l'expérience");
+			return 3;
+		}
+		PropertySingleValue psv = (PropertySingleValue) experiment.instrumentProperties.get("sector96");
+		switch (psv.value.toString()) {
+		case  "1-48" : return 0;
+		case "49-96" : return 1; 
+		default:
+		   contextValidation.addError("Erreur","sector96 '"+ psv.value.toString()+"' non supporté");
+		   return 2;
+		}
+	}
+
+}

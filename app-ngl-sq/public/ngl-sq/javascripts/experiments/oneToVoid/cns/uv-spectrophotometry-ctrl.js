@@ -22,6 +22,8 @@ angular.module('home').controller('OneToVoidUvSpectrophotometryCNSCtrl',['$scope
 				
 					if(concentration1){
 						inputContainerUsed.newConcentration = concentration1;
+					} else {
+						inputContainerUsed.newConcentration = null;
 					}
 					inputContainerUsed.newQuantity =  $scope.computeQuantity(
 							(concentration1)?inputContainerUsed.newConcentration:inputContainerUsed.concentration, 

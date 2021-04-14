@@ -1,30 +1,36 @@
 package models.sra.submit.common.instance;
 
+import models.sra.submit.util.VariableSRA;
+import play.Logger;
+import validation.ContextValidation;
+import validation.sra.SraValidationHelper;
+import validation.utils.ValidationHelper;
 
 public class UserExperimentType {
-	private String alias = null;
-	private String libraryStrategy = null;
-	private String librarySource = null;
+	private String code = null;
+	private String libraryStrategy  = null;
+	private String librarySource    = null;
 	private String librarySelection = null;
-	private String libraryProtocol = null;
-	private String libraryName = null;
-	private String nominalLength = null;
-	private String title = null;
+	private String libraryProtocol  = null;
+	private String nominalLength    = null;
+	private String title            = null;
+	private String spotLength       = null;
+	private String lastBaseCoordonnee = null;
 
 
 	public UserExperimentType() {
 	}
 	
-	public UserExperimentType(String alias) {
-		this.setAlias(alias);
+	public UserExperimentType(String code) {
+		this.setCode(code);
 	}
 
-	public String getAlias() {
-		return alias;
+	public String getCode() {
+		return code;
 	}
 
-	public void setAlias(String alias) {
-		this.alias = alias;
+	public void setCode(String code) {
+		this.code = code;
 	}
 
 	public String getLibraryStrategy() {
@@ -32,14 +38,14 @@ public class UserExperimentType {
 	}
 
 	public void setLibraryStrategy(String libraryStrategy) {
-		//verifier que libraryStrategy est bien autorise => Controle deporté dans validation
-		/*String lcLibraryStrategy = libraryStrategy.toLowerCase();
-		if (! VariableSRA.mapLibraryStrategy.containsKey(lcLibraryStrategy)) {
-			throw new SraException("La library strategy indiquee '" + libraryStrategy +
-					"' n'appartient pas a la liste des valeurs autorisees :\n" +
-					VariableSRA.mapLibraryStrategy.keySet().toString());
-		}*/
-		this.libraryStrategy = libraryStrategy;
+		//verifier que libraryStrategy est  autorisee 
+//		String lcLibraryStrategy = libraryStrategy.toLowerCase();
+//		if (! VariableSRA.mapLibraryStrategy().containsKey(lcLibraryStrategy)) {
+//			throw new SraException("La library strategy indiquee '" + libraryStrategy +
+//					"' n'appartient pas a la liste des valeurs autorisees :\n" +
+//					VariableSRA.mapLibraryStrategy().keySet().toString());
+//		}
+		this.libraryStrategy = libraryStrategy.toLowerCase();
 	}
 
 	public String getLibrarySource() {
@@ -47,14 +53,14 @@ public class UserExperimentType {
 	}
 
 	public void setLibrarySource(String librarySource) {
-		//verifier que librarySource est  autorisee => Controle deporté dans validation
-		/*String lcLibrarySource = librarySource.toLowerCase();
-		if (! VariableSRA.mapLibrarySource.containsKey(lcLibrarySource)) {
-			throw new SraException("La library source indiquee '" + librarySource +
-					"' n'appartient pas a la liste des valeurs autorisees :\n" +
-					VariableSRA.mapLibrarySource.keySet().toString());
-		}*/
-		this.librarySource = librarySource;
+		//verifier que librarySource est  autorisee 
+//		String lcLibrarySource = librarySource.toLowerCase();
+//		if (! VariableSRA.mapLibrarySource().containsKey(lcLibrarySource)) {
+//			throw new SraException("La library source indiquee '" + librarySource +
+//					"' n'appartient pas a la liste des valeurs autorisees :\n" +
+//					VariableSRA.mapLibrarySource().keySet().toString());
+//		}
+		this.librarySource = librarySource.toLowerCase();
 	}
 
 	public String getLibrarySelection() {
@@ -62,14 +68,14 @@ public class UserExperimentType {
 	}
 
 	public void setLibrarySelection(String librarySelection) {
-		//verifier que librarySelection est  autorisee => Controle deporté dans validation
-/*		String lcLibrarySelection = librarySelection.toLowerCase();
-		if (! VariableSRA.mapLibrarySelection.containsKey(lcLibrarySelection)) {
-			throw new SraException("La library selection indiquee '" + librarySelection +
-					"' n'appartient pas a la liste des valeurs autorisees :\n" +
-					VariableSRA.mapLibrarySelection.keySet().toString());
-		}*/
-		this.librarySelection = librarySelection;
+//		//verifier que librarySelection est  autorisee 
+//		String lcLibrarySelection = librarySelection.toLowerCase();
+//		if (! VariableSRA.mapLibrarySelection().containsKey(lcLibrarySelection)) {
+//			throw new SraException("La library selection indiquee '" + librarySelection +
+//					"' n'appartient pas a la liste des valeurs autorisees :\n" +
+//					VariableSRA.mapLibrarySelection().keySet().toString());
+//		}
+		this.librarySelection = librarySelection.toLowerCase();
 	}
 	public String getLibraryProtocol() {
 		return libraryProtocol;
@@ -79,21 +85,6 @@ public class UserExperimentType {
 		//verifier que librarySelection est  autorisee => Controle deporté dans validation
 		this.libraryProtocol = libraryProtocol;
 	}
-	public String getLibraryName() {
-		return libraryName;
-	}
-
-	public void setLibraryName(String libraryName) {
-		this.libraryName = libraryName;
-	}
-
-	public String getNominalLength() {
-		return nominalLength;
-	}
-
-	public void setNominalLength(String nominalLength) {
-		this.nominalLength = nominalLength;
-	}
 	
 	public String getTitle() {
 		return title;
@@ -102,6 +93,42 @@ public class UserExperimentType {
 	public void setTitle(String title) {
 		this.title = title;
 	}
+	
+	public String getSpotLength() {
+		return spotLength;
+	}
 
+	public void setSpotLength(String spotLength) {
+		this.spotLength = spotLength;
+	}
+	
+	public String getLastBaseCoordonnee() {
+		return lastBaseCoordonnee;
+	}
 
+	public void setLastBaseCoordonnee(String lastBaseCoordonnee) {
+		this.lastBaseCoordonnee = lastBaseCoordonnee;
+	}
+	
+	public String getNominalLength() {
+		return nominalLength;
+	}
+
+	public void setNominalLength(String nominalLength) {
+		this.nominalLength = nominalLength;
+	}
+	
+	public void validate(ContextValidation contextValidation) {
+		Logger.debug("Dans UserExperimentType.validate: ");
+		contextValidation = contextValidation.appendPath("experiment");
+		if (ValidationHelper.validateNotEmpty(contextValidation, code, "code")) 
+			contextValidation = contextValidation.appendPath(code);				
+		//verifier contraintes des differents champs:
+		SraValidationHelper.noRequiredButConstraint(contextValidation, this.getLibrarySelection(), VariableSRA.mapLibrarySelection(), "librarySelection");
+		SraValidationHelper.noRequiredButConstraint(contextValidation, this.getLibraryStrategy(), VariableSRA.mapLibraryStrategy(), "libraryStrategy");
+		SraValidationHelper.noRequiredButConstraint(contextValidation, this.getLibrarySource(), VariableSRA.mapLibrarySource(), "librarySource");
+		SraValidationHelper.noRequiredInt(contextValidation, this.getLastBaseCoordonnee(), "lastBaseCoordonnee"); 
+		SraValidationHelper.noRequiredInt(contextValidation, this.getNominalLength(), "nominalLength"); 
+		SraValidationHelper.noRequiredInt(contextValidation, this.getSpotLength(), "spotLength"); 
+	}
 }

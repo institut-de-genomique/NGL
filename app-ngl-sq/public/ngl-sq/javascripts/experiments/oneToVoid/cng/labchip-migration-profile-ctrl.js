@@ -6,24 +6,62 @@ angular.module('home').controller('OneToVoidLabChipMigrationProfileCNGCtrl',['$s
 	config.name = $scope.experiment.typeCode.toUpperCase();
 	$scope.atmService.data.setConfig(config);
 
-	//FDS 30/08/2016 concentration et size de l'expérience doivent etres copiées dans le container
+	// FDS 30/08/2016 concentration et size de l'expérience doivent etres copiées dans le container
+	// NGL-3247 ajout du calcul de quantité meme si elle n'est pas affichée
 	$scope.$parent.copyPropertiesToInputContainer = function(experiment){
 		
 		experiment.atomicTransfertMethods.forEach(function(atm){
 			var inputContainerUsed =$parse("inputContainerUseds[0]")(atm);
 			if(inputContainerUsed){
-				
+				//-1-
+				//concentration1 est un objet avec value et unit !!!
 				var concentration1 = $parse("experimentProperties.concentration1")(inputContainerUsed);
 				// 07/03/2018: NGL-1859 la copie de la concentration ne doit etre faite que si l'utilisateur le demande explicitement !!!
 				if (concentration1  &&  $scope.experiment.experimentProperties.copyConcentration.value){
-					inputContainerUsed.newConcentration = concentration1;
+					
+					// ATTENTION ne pas lier assignation de concentration et calcul quantité !!!
+					$parse("newConcentration").assign(inputContainerUsed, concentration1);
+					
+					// pour NGL-3247 utiliser la structure compute/if(compute.isReady()
+					var computeQty = {
+						inputVol :    $parse("volume.value")(inputContainerUsed), //NGL-3247 pour le calcul de la qté il faut avoir un volume!!
+						inputVolUnit :$parse("volume.unit")(inputContainerUsed),  //NGL-3247 pour le calcul de la qté il faut avoir un volume!!
+						isReady:function(){
+							return (
+									this.inputVol  && (this.inputVol != undefined) && 
+									this.inputVolUnit  && (this.inputVolUnit === "µL" || this.inputVolUnit === "µl")); // si autre unité pas géré ??
+						}
+					};
+					
+					if(computeQty.isReady()){
+						// NGL-3247 calculer la quantité: qté=concentration * volume
+						var calcQuantity= $parse("value")(concentration1) * $parse("inputVol")(computeQty);
+						calcQuantity=Math.round(calcQuantity*100)/100;
+						$parse("newQuantity.value").assign(inputContainerUsed, calcQuantity);
+						
+						// pour l'unité  il faut connaire l'unité de conc choisie par l'utilisateur:
+						// =>  ng/µl ou nM par (seules ces 2 valeurs sont proposées)
+						var concUnit=$parse("unit")(concentration1);
+						var qtyUnit=null;
+						if ( concUnit === "ng/µl"){ qtyUnit= "ng";} else if ( concUnit === "nM"){ qtyUnit= "fmol";}
+						$parse("newQuantity.unit").assign(inputContainerUsed, qtyUnit);
+						
+						console.log("calcQuantity="+calcQuantity + " "+ qtyUnit);
+					} else {
+						console.log("valeur manquante pour calculer calcQuantity OU unité volume non gérée");
+					}
 				} else {
+					// nécessaire à cause de la possibilité de décocher le bouton 'copyToContainer' uniquement avant 'terminer'
+					console.log( "set newConcentration et newQuantity =null")
+					//Attention si volume1 renseigné alors calcul newQuantity
 					inputContainerUsed.newConcentration = null;
+					inputContainerUsed.newQuantity = null;
 				}
-				
+				//-2- copie automatique pour la size 
 				var size1 = $parse("experimentProperties.size1")(inputContainerUsed);
 				if(size1){
-					inputContainerUsed.newSize = size1;
+					//inputContainerUsed.newSize = size1;
+					$parse("newSize").assign(inputContainerUsed, size1);// avec notation $parse
 				}
 			}	
 		});	

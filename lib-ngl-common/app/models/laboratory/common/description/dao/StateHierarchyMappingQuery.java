@@ -46,7 +46,7 @@ public class StateHierarchyMappingQuery extends NGLMappingSqlQuery<StateHierarch
 		long id = rs.getLong("fk_child_state");
 		State state = null;
 		try {
-			state = State.find.findById(id);
+			state = State.find.get().findById(id);
 		} catch (DAOException e) {
 			throw new SQLException(e);
 		}
@@ -59,7 +59,7 @@ public class StateHierarchyMappingQuery extends NGLMappingSqlQuery<StateHierarch
 		id = rs.getLong("fk_parent_state");
 		state = null;
 		try {
-			state = State.find.findById(id);
+			state = State.find.get().findById(id);
 		} catch (DAOException e) {
 			throw new SQLException(e);
 		}
@@ -68,7 +68,7 @@ public class StateHierarchyMappingQuery extends NGLMappingSqlQuery<StateHierarch
 		id = rs.getLong("fk_object_type");
 		ObjectType ot = null;
 		try {
-			ot = ObjectType.find.findById(id);
+			ot = ObjectType.find.get().findById(id);
 		} catch (DAOException e) {
 			throw new SQLException(e);
 		}

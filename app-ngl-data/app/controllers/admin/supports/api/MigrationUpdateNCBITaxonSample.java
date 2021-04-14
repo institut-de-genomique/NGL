@@ -9,8 +9,8 @@ import org.mongojack.DBUpdate;
 
 import controllers.DocumentController;
 import fr.cea.ig.MongoDBDAO;
+import fr.cea.ig.ngl.NGLApplication;
 import fr.cea.ig.ngl.NGLConfig;
-import fr.cea.ig.play.migration.NGLContext;
 import models.laboratory.sample.instance.Sample;
 import models.utils.InstanceConstants;
 import play.mvc.Result;
@@ -18,26 +18,38 @@ import services.ncbi.TaxonomyServices;
 
 /**
  * Update SampleOnContainer on ReadSet
+ * 
  * @author galbini
  *
  */
-// import controllers.CommonController;
-public class MigrationUpdateNCBITaxonSample extends DocumentController<Sample> { //CommonController {
+public class MigrationUpdateNCBITaxonSample extends DocumentController<Sample> {
 	
 	private static final play.Logger.ALogger logger = play.Logger.of(MigrationUpdateNCBITaxonSample.class);
 	
-//	private static SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmm");
-	private TaxonomyServices taxonomyServices;
-	private final NGLConfig config;
+	private final TaxonomyServices taxonomyServices;
+//	private final NGLConfig config;
 	
+//	@Inject
+//	public MigrationUpdateNCBITaxonSample(NGLContext ctx, TaxonomyServices taxonomyServices, NGLConfig config) {
+//		super(ctx, InstanceConstants.SAMPLE_COLL_NAME, Sample.class);
+//		this.taxonomyServices = taxonomyServices;
+//		this.config = config;
+//	}
+
+//	@Inject
+//	public MigrationUpdateNCBITaxonSample(NGLApplication ctx, TaxonomyServices taxonomyServices, NGLConfig config) {
+//		super(ctx, InstanceConstants.SAMPLE_COLL_NAME, Sample.class);
+//		this.taxonomyServices = taxonomyServices;
+//		this.config = config;
+//	}
+
 	@Inject
-	public MigrationUpdateNCBITaxonSample(NGLContext ctx, TaxonomyServices taxonomyServices, NGLConfig config) {
+	public MigrationUpdateNCBITaxonSample(NGLApplication ctx, TaxonomyServices taxonomyServices, NGLConfig config) {
 		super(ctx, InstanceConstants.SAMPLE_COLL_NAME, Sample.class);
 		this.taxonomyServices = taxonomyServices;
-		this.config = config;
 	}
 
-	public /*static*/ Result migration(String code, Boolean onlyNull) {
+	public Result migration(String code, Boolean onlyNull) {
 		logger.info("Migration sample start");
 		//backupSample(code);
 		List<Sample> samples = null;
@@ -61,23 +73,37 @@ public class MigrationUpdateNCBITaxonSample extends DocumentController<Sample> {
 		return ok("Migration Finish");
 	}
 
-	private /*static*/ void migreSample(Sample sample) {
-		String ncbiScientificName=null;
-		String ncbiLineage=null;
+//	private void migreSample(Sample sample) {
+//		String ncbiScientificName = null;
+//		String ncbiLineage        = null;
+//		
+////		if(play.Play.application().configuration().getString("institute").equals("CNS")){
+//		if(config.getInstitute().equals("CNS")) {
+//			ncbiScientificName = taxonomyServices.getScientificName(sample.taxonCode);
+//			ncbiLineage        = taxonomyServices.getLineage(sample.taxonCode);
+//		} else {
+//			ncbiScientificName = taxonomyServices.getScientificName(sample.taxonCode);
+//			ncbiLineage        = taxonomyServices.getLineage(sample.taxonCode);
+//		}
+//		MongoDBDAO.update(InstanceConstants.SAMPLE_COLL_NAME,  
+//				          Sample.class, 
+//				          DBQuery.is("code", sample.code), 
+//				          DBUpdate.set("ncbiScientificName", ncbiScientificName).set("ncbiLineage", ncbiLineage));
+//		if (ncbiScientificName == null) {
+//			logger.error("no scientific name {}",ncbiScientificName);
+//		}
+//	}
+	
+	private void migreSample(Sample sample) {
+		String ncbiScientificName = taxonomyServices.getScientificName(sample.taxonCode);
+		String ncbiLineage        = taxonomyServices.getLineage(sample.taxonCode);
 		
-//		if(play.Play.application().configuration().getString("institute").equals("CNS")){
-		if(config.getInstitute().equals("CNS")) {
-			ncbiScientificName = taxonomyServices.getScientificName(sample.taxonCode);
-			ncbiLineage = taxonomyServices.getLineage(sample.taxonCode);
-		} else {
-			ncbiScientificName = taxonomyServices.getScientificName(sample.taxonCode);
-			ncbiLineage = taxonomyServices.getLineage(sample.taxonCode);
-		}
-		MongoDBDAO.update(InstanceConstants.SAMPLE_COLL_NAME,  Sample.class, 
-				DBQuery.is("code", sample.code), DBUpdate.set("ncbiScientificName", ncbiScientificName).set("ncbiLineage", ncbiLineage));
-		if (ncbiScientificName == null) {
+		MongoDBDAO.update(InstanceConstants.SAMPLE_COLL_NAME,  
+				          Sample.class, 
+				          DBQuery.is("code", sample.code), 
+				          DBUpdate.set("ncbiScientificName", ncbiScientificName).set("ncbiLineage", ncbiLineage));
+		if (ncbiScientificName == null) 
 			logger.error("no scientific name {}",ncbiScientificName);
-		}
 	}
 
 //	private /*static*/ void backupSample(String code) {

@@ -1,18 +1,20 @@
 package models.laboratory.common.description;
 
+import java.util.function.Supplier;
+
+import fr.cea.ig.ngl.utils.SpringSupplier;
 import models.laboratory.common.description.dao.ObjectTypeDAO;
 import models.utils.Model;
-import models.utils.dao.AbstractDAO;
 
 /**
  * Type definition
+ * 
  * @author ejacoby
  *
  */
-public class ObjectType extends Model<ObjectType> {
+public class ObjectType extends Model {
 	
-//	public static Finder<ObjectType> find = new Finder<ObjectType>(ObjectTypeDAO.class.getName()); 
-	public static final Finder<ObjectType,ObjectTypeDAO> find = new Finder<>(ObjectTypeDAO.class); 
+	public static final Supplier<ObjectTypeDAO> find = new SpringSupplier<>(ObjectTypeDAO.class); 
 
 	public enum CODE {
 		Project, 
@@ -31,20 +33,24 @@ public class ObjectType extends Model<ObjectType> {
 		SRAConfiguration, 
 		SRAStudy, 
 		SRASample, 
-		SRAExperiment 
+		SRAExperiment,
+		ReagentReception
 	} 
 
-	//Set true if type has additional attributes compared to commonInfoType
+	// Set true if type has additional attributes compared to commonInfoType
 	public Boolean generic;
 		
-	public ObjectType() {
-		super(ObjectTypeDAO.class.getName());
+	// Serialization constructor
+	public ObjectType() {}
+	
+	public ObjectType(CODE code, boolean generic) {
+		super(code.name());
+		this.generic = generic;
 	}
-
-	@Override
-	protected Class<? extends AbstractDAO<ObjectType>> daoClass() {
-		return ObjectTypeDAO.class;
+	
+	public ObjectType(CODE code) {
+		this(code, false);
 	}
-
+	
 }
 

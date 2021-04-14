@@ -10,11 +10,11 @@ import views.html.runs.search;
 
 import javax.inject.Inject;
 
+import controllers.NGLController;
 import fr.cea.ig.authentication.Authenticated;
 import fr.cea.ig.authorization.Authorized;
 import fr.cea.ig.lfw.Historized;
 import fr.cea.ig.ngl.NGLApplication;
-import fr.cea.ig.ngl.NGLController;
 import fr.cea.ig.ngl.support.NGLJavascript;
 
 
@@ -91,10 +91,11 @@ public class Runs extends NGLController
   	    				controllers.readsets.tpl.routes.javascript.ReadSets.get(),
   	    				controllers.readsets.tpl.routes.javascript.ReadSets.home(),
   	    				controllers.runs.api.routes.javascript.Runs.list(),
-  	    				controllers.runs.api.routes.javascript.State.update(),
-  	    				controllers.runs.api.routes.javascript.State.updateBatch(),
+  	    				controllers.runs.api.routes.javascript.States.updateState(),
+  	    				controllers.runs.api.routes.javascript.States.updateStateBatch(),
   	    				controllers.runs.api.routes.javascript.Runs.valuation(),  	    		
-  	    				controllers.runs.api.routes.javascript.Lanes.valuation(),  	    		
+					    controllers.runs.api.routes.javascript.Lanes.valuation(),  	  
+						controllers.runs.api.routes.javascript.LaneTreatments.update(), 		
   	    				controllers.valuation.api.routes.javascript.ValuationCriterias.list(),
   	    				controllers.valuation.api.routes.javascript.ValuationCriterias.get(),
   	    				controllers.projects.api.routes.javascript.Projects.list(),

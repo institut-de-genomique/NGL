@@ -1,10 +1,5 @@
 package controllers.valuation.api;
 
-
-// import static play.data.Form.form;
-//import static fr.cea.ig.play.IGGlobals.form;
-
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -22,60 +17,58 @@ import com.mongodb.BasicDBObject;
 import controllers.DocumentController;
 import fr.cea.ig.MongoDBDAO;
 import fr.cea.ig.MongoDBResult;
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import models.laboratory.common.instance.TraceInformation;
 import models.laboratory.valuation.instance.ValuationCriteria;
 import models.utils.InstanceConstants;
-//import play.Logger;
 import play.data.Form;
 import play.libs.Json;
 import play.mvc.Result;
 import validation.ContextValidation;
 import views.components.datatable.DatatableResponse;
 
-public class ValuationCriterias extends DocumentController<ValuationCriteria> {//CommonController {
-	
+
+public class ValuationCriterias extends DocumentController<ValuationCriteria> {
+
 	private static final play.Logger.ALogger logger = play.Logger.of(ValuationCriterias.class);
 	
-	private final /*static*/ Form<ValuationCriteria> valuationCriteriaForm;// = form(ValuationCriteria.class);
-	private final /*static*/ Form<ValuationCriteriasSearchForm> searchForm;// = form(ValuationCriteriasSearchForm.class);
+	private final Form<ValuationCriteria>            valuationCriteriaForm;
+	private final Form<ValuationCriteriasSearchForm> searchForm;
+
 	
 	@Inject
-	public ValuationCriterias(NGLContext ctx) {
-		super(ctx, InstanceConstants.VALUATION_CRITERIA_COLL_NAME, ValuationCriteria.class);
-		searchForm = ctx.form(ValuationCriteriasSearchForm.class);
-		valuationCriteriaForm = ctx.form(ValuationCriteria.class);
+	public ValuationCriterias(NGLApplication app) {
+		super(app, InstanceConstants.VALUATION_CRITERIA_COLL_NAME, ValuationCriteria.class);
+		searchForm = app.form(ValuationCriteriasSearchForm.class);
+		valuationCriteriaForm = app.form(ValuationCriteria.class);
 	}
-	
-	public /*static*/ Result list() {
+
+	public Result list() {
 		Form<ValuationCriteriasSearchForm> filledForm = filledFormQueryString(searchForm, ValuationCriteriasSearchForm.class);
 		ValuationCriteriasSearchForm form = filledForm.get();
 		
 		Query q = getQuery(form);
 		BasicDBObject keys = getKeys(form);
-		if(form.datatable){			
+		if (form.datatable) {			
 			MongoDBResult<ValuationCriteria> results = mongoDBFinder(form, q, keys);
-//			MongoDBResult<ValuationCriteria> results = mongoDBFinder(InstanceConstants.VALUATION_CRITERIA_COLL_NAME, form, ValuationCriteria.class, q, keys);
 			List<ValuationCriteria> list = results.toList();
 			return ok(Json.toJson(new DatatableResponse<>(list, results.count())));
-		}else if(form.list){
+		} else if(form.list) {
 			MongoDBResult<ValuationCriteria> results = mongoDBFinder(form, q, keys);
-//			MongoDBResult<ValuationCriteria> results = mongoDBFinder(InstanceConstants.VALUATION_CRITERIA_COLL_NAME, form, ValuationCriteria.class, q, keys);
 			List<ValuationCriteria> criterias = results.toList();
 			return ok(Json.toJson(criterias));
-		}else {
+		} else {
 			MongoDBResult<ValuationCriteria> results = mongoDBFinder(form, q, keys);
-//			MongoDBResult<ValuationCriteria> results = mongoDBFinder(InstanceConstants.VALUATION_CRITERIA_COLL_NAME, form, ValuationCriteria.class, q, keys);							
 			List<ValuationCriteria> criterias = results.toList();
 			return ok(Json.toJson(criterias));
 		}
 	}
 	
-	private /*static*/ Query getQuery(ValuationCriteriasSearchForm form) {
+	private Query getQuery(ValuationCriteriasSearchForm form) {
 		List<Query> queries = new ArrayList<>();
 		Query query = null;
 		
-		if (null != form.objectTypeCode) { //all
+		if (form.objectTypeCode != null) { //all
 			queries.add(DBQuery.is("objectTypeCode", form.objectTypeCode.toString()));
 		}
 		
@@ -87,8 +80,6 @@ public class ValuationCriterias extends DocumentController<ValuationCriteria> {/
 		
 		//Filter by active property
 		//queries.add(DBQuery.is("active", Boolean.TRUE));
-		
-		
 		if(queries.size() > 0){
 			query = DBQuery.and(queries.toArray(new Query[queries.size()]));
 		}
@@ -97,7 +88,7 @@ public class ValuationCriterias extends DocumentController<ValuationCriteria> {/
 	}
 
 	@Override
-	public /*static*/ Result get(String code) {
+	public Result get(String code) {
 		ValuationCriteria reportingConfiguration =  getByCode(code);		
 		if (reportingConfiguration != null) {
 			return ok(Json.toJson(reportingConfiguration));	
@@ -106,66 +97,119 @@ public class ValuationCriterias extends DocumentController<ValuationCriteria> {/
 		}			
 	}
 	
-	public /*static*/ Result save() {
+	public Result save() {
 		Form<ValuationCriteria> filledForm = getFilledForm(valuationCriteriaForm, ValuationCriteria.class);
 		ValuationCriteria objectInput = filledForm.get();
+		ValuationCriteriasUrlParamForm valuationCriteriasUrlParamForm = filledFormQueryString(this.app.formFactory()
+				.form(ValuationCriteriasUrlParamForm.class), 
+				ValuationCriteriasUrlParamForm.class).get();
 
-		if (objectInput._id == null) {
-			objectInput.traceInformation = new TraceInformation();
-			objectInput.traceInformation
-					.setTraceInformation(getCurrentUser());
-			objectInput.code = generateCode();
-		} else {
+		ContextValidation ctxVal = ContextValidation.createCreationContext(getCurrentUser(), filledForm);
+
+		boolean copy = false;
+		if (valuationCriteriasUrlParamForm != null && valuationCriteriasUrlParamForm.copy != null && valuationCriteriasUrlParamForm.copy) {
+			copy = true;
+		}
+		if (objectInput._id != null) {
 			return badRequest("use PUT method to update the run");
+		}	
+
+
+		if (StringUtils.isNotBlank(objectInput.code)) {		// autoriser code existant dans inputObject uniquement en mode copy :
+			if (! valuationCriteriasUrlParamForm.copy) {
+				return badRequest("valuation criteria avec code='" + objectInput.code + "' qui peut etre renseigné uniquement en mode copy"); 
+			}
+		} else { // generer le code uniquement si on n'est pas en mode copy
+			if (! valuationCriteriasUrlParamForm.copy) {
+				objectInput.code = generateCode();
+				while (MongoDBDAO.checkObjectExist(InstanceConstants.VALUATION_CRITERIA_COLL_NAME, ValuationCriteria.class, DBQuery.and(DBQuery.is("code",objectInput.code)))) {
+					objectInput.code = generateCode();
+				}	
+			}
 		}
-//		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm.errors());
-		ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm);
-		ctxVal.setCreationMode();
+		if (!copy) { //generer traceInformation si on n'est pas en mode copy
+			objectInput.traceInformation = new TraceInformation();
+			objectInput.traceInformation.creationStamp(ctxVal, getCurrentUser());
+		}
+		
+		// test de l'unicité du code ou du name dans methode validate de l'object vc
 		objectInput.validate(ctxVal);
+		logger.debug("Dans controllers.valuation.api.update, dans objectInput, traceInformation. =" + objectInput.traceInformation.createUser);
+		logger.info("Dans controllers.valuation.api.update, dans objectInput, active =" + objectInput.active);
 		if (!ctxVal.hasErrors()) {
-			objectInput = MongoDBDAO.save(InstanceConstants.VALUATION_CRITERIA_COLL_NAME, objectInput);
-			return ok(Json.toJson(objectInput));
+			ValuationCriteria objectFromDb = MongoDBDAO.save(InstanceConstants.VALUATION_CRITERIA_COLL_NAME, objectInput);
+			logger.info("Dans controllers.valuation.api.update, dans objectFromDB apres update, active =" + objectFromDb.active);
+			logger.info("Dans controllers.valuation.api.update, dans objectFromDB, traceInformation. =" + objectFromDb.traceInformation.createUser);
+			return ok(Json.toJson(objectFromDb));
 		} else {
-			// return badRequest(filledForm.errors-AsJson());
-			return badRequest(NGLContext._errorsAsJson(ctxVal.getErrors()));
+			return badRequest(app.errorsAsJson(ctxVal.getErrors()));
 		}
+
 	}
-	
-	public /*static*/ Result update(String code) {
+
+	public Result update(String code) {
 		ValuationCriteria objectFromDB = getByCode(code);
-		if(objectFromDB == null) {
-			return badRequest("ValuationCriteria with code "+objectFromDB+" does not exist");
+		if (objectFromDB == null) {
+			return badRequest("ValuationCriteria avec code " + code + " qui n'existe pas dans la base");
 		}
 		Form<ValuationCriteria> filledForm = getFilledForm(valuationCriteriaForm, ValuationCriteria.class);
 		ValuationCriteria objectInput = filledForm.get();
+		ValuationCriteriasUrlParamForm valuationCriteriasUrlParamForm = filledFormQueryString(this.app.formFactory()
+				.form(ValuationCriteriasUrlParamForm.class), 
+				ValuationCriteriasUrlParamForm.class).get();
+		
+		boolean copy = false;
+		
+		if (valuationCriteriasUrlParamForm != null && valuationCriteriasUrlParamForm.copy != null && valuationCriteriasUrlParamForm.copy) {
+			copy = true;
+		}
+		logger.info("Dans controllers.valuation.api.update, copy=" + copy);
+		
+		ContextValidation ctxVal = ContextValidation.createUpdateContext(getCurrentUser(), filledForm);
+		ctxVal.putObject("copy", copy);
+		
+		if ( ! objectInput.code.equals(code) ) {
+			return badRequest("valuationCriteria avec code '" + objectInput.code + "' qui n'est pas celui indiqué dans l'url " + code);
+		}	
 
-		if (objectFromDB.code.equals(code)) {
-			if (objectInput.traceInformation != null) {
-				objectInput.traceInformation.setTraceInformation(getCurrentUser());
-			} else {
-				logger.error("traceInformation is null !!");
-			}
-//			ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm.errors());
-			ContextValidation ctxVal = new ContextValidation(getCurrentUser(), filledForm);
-			ctxVal.setCreationMode();
-			objectFromDB.validate(ctxVal);
-			if (!ctxVal.hasErrors()) {
-				MongoDBDAO.update(InstanceConstants.VALUATION_CRITERIA_COLL_NAME, objectInput);
-				return ok(Json.toJson(objectInput));
-			} else {
-				// return badRequest(filledForm.errors-AsJson());
-				return badRequest(NGLContext._errorsAsJson(ctxVal.getErrors()));
-			}
+
+		// En mode copy, l'id de l'objet qui provient d'une autre collection a ete mis à null, ou bien ne correspond pas à l'id de l'objet dans la collection visée :			
+		if ( copy) {
+			objectInput._id = objectFromDB._id;
 		} else {
-			return badRequest("readset code are not the same");
-		}				
+			if (objectInput._id == null) {
+				return badRequest("valuation criteria '" + objectInput.code + "' sans id");
+			}
+			if ( ! objectInput._id.equals(objectFromDB._id)) {
+				return badRequest("valuation criteria '" + objectInput.code + "' avec id " + objectInput._id + " different de l'id en base " + objectFromDB._id);
+			}
+		}
+
+		// Si on n'estpas en mode copy, alors modifyUser et modifyDate imposés :
+		if ( ! copy ) {
+			objectInput.traceInformation.forceModificationStamp(getCurrentUser());
+		}
+		
+		objectInput.validate(ctxVal);
+		if (ctxVal.hasErrors()) {
+			return badRequest(app.errorsAsJson(ctxVal.getErrors()));
+		}
+		logger.debug("Dans controllers.valuation.api.update, dans objectInput, traceInformation. =" + objectInput.traceInformation.createUser);
+		logger.info("Dans controllers.valuation.api.update, dans objectInput, active =" + objectInput.active);
+		MongoDBDAO.update(InstanceConstants.VALUATION_CRITERIA_COLL_NAME, objectInput);
+		objectFromDB = getByCode(code);
+		logger.info("Dans controllers.valuation.api.update, dans objectFromDB apres update, active =" + objectFromDB.active);
+		logger.info("Dans controllers.valuation.api.update, dans objectFromDB, traceInformation. =" + objectFromDB.traceInformation.createUser);
+
+		return ok(Json.toJson(objectInput));			
 	}
+
 	
 	@Override
-	public /*static*/ Result delete(String code) {
+	public Result delete(String code) {
 		ValuationCriteria objectFromDB =  getByCode(code);
 		if(objectFromDB == null) {
-			return badRequest("ValuationCriteria with code "+objectFromDB+" does not exist");
+			return badRequest("ValuationCriteria with code " + code + " does not exist");
 		}
 		MongoDBDAO.deleteByCode(InstanceConstants.VALUATION_CRITERIA_COLL_NAME,  ValuationCriteria.class, objectFromDB.code);
 		return ok();
@@ -176,7 +220,8 @@ public class ValuationCriterias extends DocumentController<ValuationCriteria> {/
 	}
 	
 	private static ValuationCriteria getByCode(String code) {
-		ValuationCriteria reportingConfiguration = MongoDBDAO.findByCode(InstanceConstants.VALUATION_CRITERIA_COLL_NAME, ValuationCriteria.class, code);
-    	return reportingConfiguration;
+		ValuationCriteria valuationCriteria = MongoDBDAO.findByCode(InstanceConstants.VALUATION_CRITERIA_COLL_NAME, ValuationCriteria.class, code);
+    	return valuationCriteria;
 	}
+	
 }

@@ -11,9 +11,12 @@ import models.laboratory.common.instance.PropertyValue;
 import models.laboratory.common.instance.State;
 import models.laboratory.common.instance.TraceInformation;
 import models.laboratory.common.instance.Valuation;
+import models.laboratory.project.instance.Project;
+import models.laboratory.run.description.ReadSetType;
 import models.utils.InstanceConstants;
 import validation.ContextValidation;
 import validation.IValidation;
+import validation.common.instance.CommonValidationHelper;
 import validation.run.instance.FileValidationHelper;
 import validation.run.instance.ReadSetValidationHelper;
 import validation.run.instance.TreatmentValidationHelper;
@@ -21,6 +24,9 @@ import validation.utils.ValidationHelper;
 
 public class ReadSet extends DBObject implements IValidation {
 
+	/**
+	 * Read set type code (required {@link #validate(ContextValidation)}, references {@link ReadSetType}).
+	 */
 	public String typeCode;
 	
 	public State state;
@@ -32,35 +38,38 @@ public class ReadSet extends DBObject implements IValidation {
 	
 	public Boolean dispatch = Boolean.FALSE;
 	public String sampleCode; //nom de l'ind / ech //used for search
+	
+	/**
+	 * Project code (required {@link #validate(ContextValidation)}, references {@link Project}).
+	 */
 	public String projectCode;
 	
-	public Valuation productionValuation = new Valuation();    //TODO rename to QCValuation
-	public Valuation bioinformaticValuation = new Valuation(); //TODO rename to bioinformaticUsable
+	public Valuation productionValuation    = new Valuation(); // GA: rename to QCValuation
+	public Valuation bioinformaticValuation = new Valuation(); // GA: rename to bioinformaticUsable
 	
-    public String location; //CCRT or CNS or CNG
+    public String location; // CCRT or CNS or CNG
     public State submissionState; 
     public String path;
 	public String archiveId;
 	public Date archiveDate;
 	public TraceInformation traceInformation;
-	public Map<String,Treatment> treatments = new HashMap<>();
+	public Map<String, Treatment> treatments = new HashMap<>();
 	public Map<String, PropertyValue> properties = new HashMap<>(); // <String, PropertyValue>();
 	
 	public List<File> files;
 	
-	//insert after ngsrg
+	// insert after ngsrg
 	public SampleOnContainer sampleOnContainer;
+	@Deprecated
 	public Date releaseDate; 
-	public Date submissionDate; 
-
+	public Date submissionDate;   // renseigné à la reception du rapport de soumission
+	public String submissionUser; // renseigné à la creation d'une soumission
 	
-	//TODO BA Ref !!!!
-	
+	// GA: BA Ref !!!!
 	/*
 	 * for "archives" optimization purpose (query links)
 	 */
 	
-
 	/*
 	indexSequence 			tag lié au ls
 	nbRead 					nombre de read de sequencage du ls
@@ -76,37 +85,37 @@ public class ReadSet extends DBObject implements IValidation {
 	score					score qualite moyen du ls
 	 */
 
+	/**
+	 * Validate a ReadSet (context parameter "external"). 
+	 */
+	// _CTX_PARAM: 'external'
 	@Override
 	public void validate(ContextValidation contextValidation) {
-		ReadSetValidationHelper.validateId(this, contextValidation);
-		ReadSetValidationHelper.validateCode(this, InstanceConstants.READSET_ILLUMINA_COLL_NAME, contextValidation);
-		ReadSetValidationHelper.validateReadSetType(this.typeCode, this.properties, contextValidation);
-		ReadSetValidationHelper.validateState(this.typeCode, this.state, contextValidation);
-		//TODO validation runTypeCode et runSequencingStartDate
-		//TODO passage de la mauvaise cle dans le message d'erreur
-		ReadSetValidationHelper.validateValuation(this.typeCode, this.bioinformaticValuation, contextValidation);
-		ReadSetValidationHelper.validateValuation(this.typeCode, this.productionValuation, contextValidation);
-		ReadSetValidationHelper.validateTraceInformation(this.traceInformation, contextValidation);
-		ReadSetValidationHelper.validateReadSetRunCode(this.runCode ,contextValidation);
+		CommonValidationHelper   .validateIdPrimary               (contextValidation, this);
+		CommonValidationHelper   .validateCodePrimary             (contextValidation, this, InstanceConstants.READSET_ILLUMINA_COLL_NAME);
+		ReadSetValidationHelper  .validateReadSetTypeRequired     (contextValidation, typeCode, properties);
+		CommonValidationHelper   .validateStateRequired           (contextValidation, typeCode, state);
+		// GA: validation runTypeCode et runSequencingStartDate
+		// GA: passage de la mauvaise cle dans le message d'erreur
+		CommonValidationHelper   .validateValuationRequired       (contextValidation, typeCode, bioinformaticValuation);
+		CommonValidationHelper   .validateValuationRequired       (contextValidation, typeCode, productionValuation);
+		CommonValidationHelper   .validateTraceInformationRequired(contextValidation, traceInformation);
+		ReadSetValidationHelper  .validateReadSetRunCodeRequired  (contextValidation, runCode);
 		
-		if("default-readset".equals(typeCode) || "rsillumina".equals(typeCode)){
-			ReadSetValidationHelper.validateReadSetLaneNumber(this.runCode, this.laneNumber ,contextValidation);
-			ReadSetValidationHelper.validateReadSetCodeInRunLane(this.code, this.runCode, this.laneNumber, contextValidation);			
+		if ("default-readset".equals(typeCode) || "rsillumina".equals(typeCode)) {
+			ReadSetValidationHelper.validateReadSetLaneNumber   (runCode, laneNumber ,contextValidation);
+			ReadSetValidationHelper.validateReadSetCodeInRunLane(code, runCode, laneNumber, contextValidation);			
 		}
-		ReadSetValidationHelper.validateProjectCode(this.projectCode, contextValidation);
+		CommonValidationHelper   .validateProjectCodeRequired     (contextValidation, projectCode);
+		CommonValidationHelper   .validateSampleCodeRequired      (contextValidation, sampleCode, projectCode);
+		ValidationHelper         .validateNotEmpty                (contextValidation, path,     "path");
+		ValidationHelper         .validateNotEmpty                (contextValidation, location, "location");
 		
-		ReadSetValidationHelper.validateSampleCode(this.sampleCode, this.projectCode, contextValidation);
-		
-		ValidationHelper.required(contextValidation, this.path, "path");
-		ValidationHelper.required(contextValidation, this.location, "location");
-		contextValidation.putObject("readSet", this);
-		contextValidation.putObject("objectClass", this.getClass());
-		contextValidation.putObject("level", Level.CODE.ReadSet);
-		TreatmentValidationHelper.validationTreatments(this.treatments, contextValidation);
-		FileValidationHelper.validationFiles(this.files, contextValidation);
-		if (contextValidation.getContextObjects().containsKey("external") && (Boolean)contextValidation.getContextObjects().get("external")) {
-			ReadSetValidationHelper.validateSampleOnContainer(sampleOnContainer, contextValidation);
-		}
+		contextValidation.putObject("readSet",     this);
+		contextValidation.putObject("objectClass", getClass());
+		contextValidation.putObject("level",       Level.CODE.ReadSet);
+		TreatmentValidationHelper.validateTreatments              (contextValidation, treatments, this);
+		FileValidationHelper     .validateFiles                   (contextValidation, this, files);
 	}
 	
 }

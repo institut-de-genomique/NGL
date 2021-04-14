@@ -1,6 +1,6 @@
 "use strict";
 
-angular.module('home', ['commonsServices','ngRoute','ultimateDataTableServices','ui.bootstrap','ngl-sq.containerSupportsServices'], function($routeProvider, $locationProvider) {
+angular.module('home', ['commonsServices','ngRoute','ultimateDataTableServices','ui.bootstrap','ngl-sq.containerSupportsServices']).config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
 
 	$routeProvider.when('/supports/search/home', {
 		templateUrl : jsRoutes.controllers.containers.tpl.ContainerSupports.search().url,
@@ -12,8 +12,6 @@ angular.module('home', ['commonsServices','ngRoute','ultimateDataTableServices',
 		controller : 'SearchStateCtrl'
 	});
 	
-	
-	
 	$routeProvider.when('/supports/:code', {
 		templateUrl : jsRoutes.controllers.containers.tpl.ContainerSupports.details().url,
 		controller : 'DetailsCtrl'
@@ -23,4 +21,4 @@ angular.module('home', ['commonsServices','ngRoute','ultimateDataTableServices',
 
 	// configure html5 to get links working with bookmarked
 	$locationProvider.html5Mode({enabled: true, requireBase: false});
-});
+}]);

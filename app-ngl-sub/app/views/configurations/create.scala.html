@@ -21,11 +21,6 @@
 		@formGroup{
 			<div class="form-control" bt-select ng-model="createService.form.strategyStudy" placeholder='@Messages("create.placeholder.strategyStudy")' bt-options="strategyStudy.code as strategyStudy.name for strategyStudy in createService.sraVariables.strategyStudy" required></div>			
 		}												
-	}
-	
-		
-		
-	@columnSearchForm{
 	
 		@formGroup{
 			<div class="form-control" bt-select ng-model="createService.form.librarySelection" placeholder='@Messages("create.placeholder.librarySelection")' bt-options="librarySelection.code as librarySelection.name for librarySelection in createService.sraVariables.librarySelection" required></div>			
@@ -37,10 +32,11 @@
 			<div class="form-control" bt-select ng-model="createService.form.librarySource" placeholder='@Messages("create.placeholder.librarySource")' bt-options="librarySource.code as librarySource.name for librarySource in createService.sraVariables.librarySource" required></div>			
 		}	
 		@formGroup{
-			<textarea rows="2" ng-model="createService.form.libraryConstructionProtocol" placeholder='@Messages("create.placeholder.libraryConstructionProtocol")' ></textarea>
+			<textarea class="form-control" rows="2" ng-model="createService.form.libraryConstructionProtocol" placeholder='@Messages("create.placeholder.libraryConstructionProtocol")' ></textarea>
 		}	
-
 	}
+
+	
 }
 
 <div class="row">

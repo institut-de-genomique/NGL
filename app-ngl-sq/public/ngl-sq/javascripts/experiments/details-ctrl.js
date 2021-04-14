@@ -1,6 +1,6 @@
-angular.module('home').controller('DetailsCtrl',['$scope','$sce', '$window','$http','$parse','$q','$position','$routeParams','$location','$filter',
+angular.module('home').controller('DetailsCtrl',['$rootScope', '$scope','$sce', '$window','$http','$parse','$q','$position','$routeParams','$location','$filter',
                                                  'mainService','tabService','lists','datatable', 'messages','valuationService',
-                                                  function($scope,$sce,$window, $http,$parse,$q,$position,$routeParams,$location,$filter,
+                                                  function($rootScope, $scope,$sce,$window, $http,$parse,$q,$position,$routeParams,$location,$filter,
                                                 		  mainService,tabService,lists,datatable, messages,valuationService) {
 	var enableValidation = false;
 	$scope.getHasErrorClass = function(formName, property){
@@ -71,7 +71,18 @@ angular.module('home').controller('DetailsCtrl',['$scope','$sce', '$window','$ht
 		  }
 		  return supportCode.length;
 	};
-
+	
+	// FDS 27/07/2018 NGL-2164
+	// verifier que l'instrument en cours d'utilisation a une propriété
+	$scope.instrumentHasProperty = function(propertyCode ){
+		var itype = mainService.get("instrumentType");
+	
+		for (i=0 ;i < itype.propertiesDefinitions.length; i++ ){	
+			//console.log("...."+ itype.propertiesDefinitions[i].code);
+			if ( itype.propertiesDefinitions[i].code === propertyCode) { return true;}
+		}
+		return false;
+	}
 	
 	
 	$scope.isCreationMode=function(){
@@ -94,6 +105,16 @@ angular.module('home').controller('DetailsCtrl',['$scope','$sce', '$window','$ht
 	$scope.setAdditionnalButtons = function(buttons){
 		additionnalButtons = buttons;
 	};
+
+	$scope.getAdditionnalButtonsLabel= function(){
+		// default label is :experiments.additionnalButtons
+		if ($scope.mainButtonLabel === undefined){ $scope.mainButtonLabel=Messages("experiments.additionnalButtons"); }
+		return $scope.mainButtonLabel ;
+	};
+	$scope.setAdditionnalButtonsLabel= function(buttonLabel){
+		$scope.mainButtonLabel = buttonLabel;
+	};
+	
 	/* move to a directive */
 	$scope.setImage = function(imageData, imageName, imageFullSizeWidth, imageFullSizeHeight) {
 		$scope.modalImage = imageData;
@@ -366,7 +387,7 @@ angular.module('home').controller('DetailsCtrl',['$scope','$sce', '$window','$ht
 	
 	$scope.finishExperiment = function(){
 		var endSaveChildCallbackFunction = $scope.finishExperimentModals;
-		
+		$scope.$broadcast('finishExperiment'); 
 		$scope.save(null, endSaveChildCallbackFunction);					
 	};
 	
@@ -671,6 +692,9 @@ angular.module('home').controller('DetailsCtrl',['$scope','$sce', '$window','$ht
 							if(content.properties && content.properties.tag){
 								value = value +" / "+content.properties.tag.value;
 							}
+							if(content.properties && content.properties.secondaryTag){
+								value = value +" / "+content.properties.secondaryTag.value;
+							}
 							
 							sampleCodeAndTags.push(value);
 						});
@@ -693,12 +717,12 @@ angular.module('home').controller('DetailsCtrl',['$scope','$sce', '$window','$ht
 			},
 			getPlateCode:function(){
 				if($scope.experimentType.atomicTransfertMethod === 'OneToVoid'){
-					return $scope.experiment.inputContainerSupportCodes[0];
+					if ($scope.experiment.inputContainerSupportCodes)
+						return $scope.experiment.inputContainerSupportCodes[0];
 				}else if($scope.experiment.outputContainerSupportCodes){
 					return $scope.experiment.outputContainerSupportCodes[0];
 				}
-				
-								
+
 			},
 			/**
 			 * Info on plate design
@@ -769,6 +793,175 @@ angular.module('home').controller('DetailsCtrl',['$scope','$sce', '$window','$ht
 			}
 	};
 	
+	$scope.plateFluoUtils = {
+			
+			getSupportCategoryCode:function(){
+				var tmp = [];
+				if(!$scope.isCreationMode()){
+					tmp = $scope.$eval("atomicTransfertMethods|flatArray:'inputContainerUseds'|getArray:'locationOnContainerSupport.categoryCode'|unique",$scope.experiment);			
+				}else{
+					tmp = $scope.$eval("getBasket().get()|getArray:'support.categoryCode'|unique",mainService);
+				}
+				var supportCategoryCode = undefined;
+				if(tmp.length === 1){
+					this.supportCategoryCode=tmp[0];
+				}else{
+					this.supportCategoryCode="mixte";
+				}
+				return this.supportCategoryCode;
+				
+			},
+			isPlate:function(){
+				category = this.getSupportCategoryCode();
+				return (category === '96-well-plate')
+										
+			},
+			/**
+			 * Compute A1, B1, C1, etc.
+			 */
+			computeColumnMode : function(atmService, udt, maxLine){
+				var wells = udt.displayResult;
+				var nbCol = 12;
+				var nbLine = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+				var x = 0;
+				for(var i = 0; i < nbCol ; i++){
+					for(var j = 0; j < nbLine.length && j <= maxLine; j++){
+						if(x < wells.length && x < 96){
+							//init instrumentProperties if undefined
+							if(wells[x].data.inputContainerUsed.instrumentProperties==undefined)
+								wells[x].data.inputContainerUsed.instrumentProperties={};
+							if(wells[x].data.inputContainerUsed.instrumentProperties.fluoroskanLine==undefined)
+								wells[x].data.inputContainerUsed.instrumentProperties.fluoroskanLine={};
+							if(wells[x].data.inputContainerUsed.instrumentProperties.fluoroskanColumn==undefined)
+								wells[x].data.inputContainerUsed.instrumentProperties.fluoroskanColumn={};
+							
+							wells[x].data.inputContainerUsed.instrumentProperties.fluoroskanLine.value = nbLine[j]+'';
+							wells[x].data.inputContainerUsed.instrumentProperties.fluoroskanColumn.value = i+1;					
+						}
+						x++;
+					}
+				}		
+			},
+			
+			/**
+			 * Compute A1, A2, A3, etc.
+			 */
+			computeLineMode : function(atmService, udt, maxColumn){
+				var wells = udt.displayResult;
+				var nbCol = 12;
+				var nbLine = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+				var x = 0;
+				for(var j = 0; j < nbLine.length; j++){
+					for(var i = 0; i < nbCol && i <= maxColumn; i++){
+						if(x < wells.length && x < 96){
+							if(wells[x].data.inputContainerUsed.instrumentProperties==undefined)
+								wells[x].data.inputContainerUsed.instrumentProperties={};
+							if(wells[x].data.inputContainerUsed.instrumentProperties.fluoroskanLine==undefined)
+								wells[x].data.inputContainerUsed.instrumentProperties.fluoroskanLine={};
+							if(wells[x].data.inputContainerUsed.instrumentProperties.fluoroskanColumn==undefined)
+								wells[x].data.inputContainerUsed.instrumentProperties.fluoroskanColumn={};
+							
+							wells[x].data.inputContainerUsed.instrumentProperties.fluoroskanLine.value = nbLine[j]+'';
+							wells[x].data.inputContainerUsed.instrumentProperties.fluoroskanColumn.value = i+1;					
+						}
+						x++;
+					}
+				}		
+			},
+			
+	        plateCells : undefined,
+			computePlateCells : function(atmService){
+					var plateCells = [];
+					var wells = atmService.data.displayResult;
+					angular.forEach(wells, function(well){
+						var containerUsed = well.data.inputContainerUsed;
+						
+						if(containerUsed.instrumentProperties!=undefined && containerUsed.instrumentProperties.fluoroskanLine!=undefined && containerUsed.instrumentProperties.fluoroskanColumn!=undefined){
+							var line = containerUsed.instrumentProperties.fluoroskanLine.value;
+							var column = containerUsed.instrumentProperties.fluoroskanColumn.value;
+							if(line && column){
+								if(plateCells[line] == undefined){
+									plateCells[line] = [];
+								}
+								var sampleCodeAndTags = [];
+								angular.forEach(containerUsed.contents, function(content){
+									var value = content.projectCode+" / "+content.sampleCode;
+								
+									if(content.properties && content.properties.libProcessTypeCode){
+										value = value +" / "+content.properties.libProcessTypeCode.value;
+									}
+								
+									if(content.properties && content.properties.tag){
+										value = value +" / "+content.properties.tag.value;
+									}
+								
+									sampleCodeAndTags.push(value);
+								});
+								plateCells[line][column] = sampleCodeAndTags;
+							
+							}
+						}
+					});	
+					this.plateCells = plateCells;
+			},
+			getCellPlateData : function(line, column){
+				if(this.plateCells && this.plateCells[line] && this.plateCells[line][column]){
+					return this.plateCells[line][column];
+				}
+			},
+			templates : {
+				buttonLineMode : function(udtName){
+					if(!udtName)udtName='atmService.data';
+					return ''
+					+'<div class="btn-group" style="margin-left:5px">'
+	            	+'<button class="btn btn-default" ng-click="plateFluoUtils.computeLineMode(atmService, '+udtName+', 11)" data-toggle="tooltip" title="'+Messages("experiments.button.plate.computeLineMode")+'"  ng-disabled="!isEditMode()"><i class="fa fa-magic"></i><i class="fa fa-arrow-right"></i></button>'
+	            	+'<div class="btn-group" role="group">'
+	            	+'<button type="button" title="'+Messages("experiments.button.plate.computeLineMode.advanced")+'" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ng-disabled="!isEditMode()">'
+	            	+'  <span class="caret"></span>'
+	            	+'</button>'
+	            	+' <ul class="dropdown-menu">'
+	            	+'  <li><a href="#" ng-click="plateFluoUtils.computeLineMode(atmService, '+udtName+', 0)" >1</a></li>'
+	            	+'  <li><a href="#" ng-click="plateFluoUtils.computeLineMode(atmService, '+udtName+', 1)" >2</a></li>'
+	            	+'  <li><a href="#" ng-click="plateFluoUtils.computeLineMode(atmService, '+udtName+', 2)" >3</a></li>'
+	            	+'  <li><a href="#" ng-click="plateFluoUtils.computeLineMode(atmService, '+udtName+', 3)" >4</a></li>'
+	            	+'  <li><a href="#" ng-click="plateFluoUtils.computeLineMode(atmService, '+udtName+', 4)" >5</a></li>'
+	            	+'  <li><a href="#" ng-click="plateFluoUtils.computeLineMode(atmService, '+udtName+', 5)" >6</a></li>'
+	            	+'  <li><a href="#" ng-click="plateFluoUtils.computeLineMode(atmService, '+udtName+', 6)" >7</a></li>'
+	            	+'  <li><a href="#" ng-click="plateFluoUtils.computeLineMode(atmService, '+udtName+', 7)" >8</a></li>'
+	            	+'  <li><a href="#" ng-click="plateFluoUtils.computeLineMode(atmService, '+udtName+', 8)" >9</a></li>'
+	            	+'  <li><a href="#" ng-click="plateFluoUtils.computeLineMode(atmService, '+udtName+', 9)" >10</a></li>'
+	            	+'  <li><a href="#" ng-click="plateFluoUtils.computeLineMode(atmService, '+udtName+', 10)" >11</a></li>'
+	            	+'  <li><a href="#" ng-click="plateFluoUtils.computeLineMode(atmService, '+udtName+', 11)" >12</a></li>'
+	            	+'</ul>'
+	            	+'</div>'
+	            	+'</div>'
+	            },
+				buttonColumnMode : function(udtName){
+					if(!udtName)udtName='atmService.data';
+					return ''
+					+'<div class="btn-group">'
+	            	+'<button class="btn btn-default" ng-click="plateFluoUtils.computeColumnMode(atmService, '+udtName+', 7)" data-toggle="tooltip" title="'+Messages("experiments.button.plate.computeColumnMode")+'" ng-disabled="!isEditMode()"><i class="fa fa-magic"></i><i class="fa fa-arrow-down"></i></button>'
+	            	+'<div class="btn-group" role="group">'
+	            	+'<button type="button"  title="'+Messages("experiments.button.plate.computeColumnMode.advanced")+'" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ng-disabled="!isEditMode()">'
+	            	+'  <span class="caret"></span>'
+	            	+'</button>'
+	            	+' <ul class="dropdown-menu">'
+	            	+'  <li><a href="#" ng-click="plateFluoUtils.computeColumnMode(atmService, '+udtName+', 0)" >A</a></li>'
+	            	+'  <li><a href="#" ng-click="plateFluoUtils.computeColumnMode(atmService, '+udtName+', 1)" >B</a></li>'
+	            	+'  <li><a href="#" ng-click="plateFluoUtils.computeColumnMode(atmService, '+udtName+', 2)" >C</a></li>'
+	            	+'  <li><a href="#" ng-click="plateFluoUtils.computeColumnMode(atmService, '+udtName+', 3)" >D</a></li>'
+	            	+'  <li><a href="#" ng-click="plateFluoUtils.computeColumnMode(atmService, '+udtName+', 4)" >E</a></li>'
+	            	+'  <li><a href="#" ng-click="plateFluoUtils.computeColumnMode(atmService, '+udtName+', 5)" >F</a></li>'
+	            	+'  <li><a href="#" ng-click="plateFluoUtils.computeColumnMode(atmService, '+udtName+', 6)" >G</a></li>'
+	            	+'  <li><a href="#" ng-click="plateFluoUtils.computeColumnMode(atmService, '+udtName+', 7)" >H</a></li>'
+	            	+'</ul>'
+	            	+'</div>'
+	            	+'</div>'
+	            }
+			}
+	            
+		};
+	
 	var updatePropertyUnit = function(experiment){
 		$scope.experimentType.propertiesDefinitions.forEach(function(propertyDef){
 			if(propertyDef.saveMeasureValue){
@@ -801,8 +994,11 @@ angular.module('home').controller('DetailsCtrl',['$scope','$sce', '$window','$ht
 	var loadInstrumentType = function(code){
 		$http.get(jsRoutes.controllers.instruments.api.InstrumentUsedTypes.get(code).url)
 			.success(function(data, status, headers, config) {
+				if ($parse('experiment.state.code')($scope) !== "F" || !Permissions.check("admin")){
+					data.instruments = $filter("filter")(data.instruments,{active:true},true);
+				}
 				$scope.instrumentType = data;
-				updateInstrumentIfNeeded();				
+				updateInstrumentIfNeeded();			
 				mainService.put("instrumentType",$scope.instrumentType);				
 				
 			})
@@ -868,14 +1064,16 @@ angular.module('home').controller('DetailsCtrl',['$scope','$sce', '$window','$ht
 		$scope.lists.clear("experimentCategories");
 		$scope.lists.refresh.valuationCriterias({typeCode:$scope.experiment.typeCode,objectTypeCode:"Experiment"});
 		$scope.lists.refresh.experimentTypes({categoryCode:$scope.experimentType.category.code},$scope.experimentType.category.code);
-		$scope.lists.refresh.instrumentUsedTypes({"experimentTypeCode":$scope.experimentType.code});
 		
-		if($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F')){
-			$scope.lists.refresh.protocols({"experimentTypeCode":$scope.experimentType.code,"isActive":true});
-		}else {
-			$scope.lists.refresh.protocols({"experimentTypeCode":$scope.experimentType.code});
-
-		}
+		
+		 if ($parse('experiment.state.code')($scope) === "F" && Permissions.check("admin")){
+			 $scope.lists.refresh.protocols({"experimentTypeCode":$scope.experimentType.code});
+			 $scope.lists.refresh.instrumentUsedTypes({"experimentTypeCode":$scope.experimentType.code});
+		 } else {
+			 $scope.lists.refresh.protocols({"experimentTypeCode":$scope.experimentType.code,"isActive":true});
+			 $scope.lists.refresh.instrumentUsedTypes({"experimentTypeCode":$scope.experimentType.code, "isActive":true});
+		 }
+		
 		$scope.lists.refresh.resolutions({"typeCode":$scope.experimentType.code});
 		$scope.lists.refresh.states({"objectTypeCode":"Experiment"});
 		$scope.lists.refresh.kitCatalogs({"experimentTypeCodes":$scope.experiment.typeCode});
@@ -955,6 +1153,7 @@ angular.module('home').controller('DetailsCtrl',['$scope','$sce', '$window','$ht
 				$scope.messages.setError("get");
 			}).then(function(result) {
 				$scope.experiment = experiment;
+				$rootScope.$broadcast("ExperimentTypeCode", experiment.typeCode)
 				$scope.experimentType = result.data;
 				
 				$scope.experiment.typeCode =  $scope.experimentType.code;
@@ -976,17 +1175,30 @@ angular.module('home').controller('DetailsCtrl',['$scope','$sce', '$window','$ht
 		
 	};
 	
+	/* TESTS FDS */
+	
+	$scope.setIsShowInformation=function(bool){
+		$scope.isShowInformation=bool;
+	}
+	// FDS 1 show/hide div information
+	$scope.toggleIsShowInformation=function(){
+		console.log ('toggleIsShowInformation');
+		if ( $scope.isShowInformation===false) { $scope.isShowInformation=true; }
+		else {$scope.isShowInformation=false}
+	}
+	
 	init();
 	
-}]).controller('ReagentsCtrl',['$scope','$http','lists','$parse','$filter','datatable', 
-                                                   function($scope,$http,lists,$parse,$filter,datatable) {
+}]).controller('ReagentsCtrl',['$rootScope', '$scope','$http','lists','$parse','$filter','datatable', 
+                                                   function($rootScope,$scope,$http,lists,$parse,$filter,datatable) {
 	
 	var datatableConfigReagents = {
 			name:"reagents",
 			columns:[
 			         {
 			        	 "header":Messages("reagents.table.kitname"),
-			        	 "property":"kitCatalogCode",
+						 "property":"kitCatalogCode",
+						 "filter":"codes:'reagentKit'",
 			        	 "order":true,
 			        	 "type":"text",
 			        	 "listStyle":"bt-select-filter",
@@ -1158,69 +1370,6 @@ angular.module('home').controller('DetailsCtrl',['$scope','$sce', '$window','$ht
 		}				
 	}
 
-	$scope.searchReagents = function(){
-		
-		//$http.get(jsRoutes.controllers.reagents.api.Reagents.list().url, {params:{"barCode":$scope.searchBarCode, "boxBarCode":$scope.searchBarCode}})
-		$http.get(jsRoutes.controllers.reagents.api.KitCatalogs.list().url, {params:{"providerID":$scope.searchBarCode, "boxBarCode":$scope.searchBarCode}})
-		.success(function(data, status,headers,config){
-			
-			var datatableData = $scope.datatableReagent.getData();
-			for(var i=0;i<data.length;i++){
-				var closureData = data[i];
-				$http.get(jsRoutes.controllers.reagents.api.Boxes.list().url, {params:{"code":data[i].boxCode}})
-				.success(function(dataBox, status,headers,config){
-					var r = {"boxCode":dataBox[0].catalogRefCode+"_"+dataBox[0].bundleBarCode+"_"+dataBox[0].barCode,
-							"code":closureData.catalogRefCode+"_"+closureData.bundleBarCode+"_"+closureData.barCode,
-							"kitCatalogCode":closureData.catalogCode};
-					if($scope.isReagentAdded(r.code) === false){
-						datatableData.push(r);
-						
-						$scope.datatableReagent.setData(datatableData);
-					}
-				});
-			}
-		}).error(function(data, status, headers, config) {
-			$scope.message.clazz = "alert alert-danger";
-			$scope.message.text = Messages('experiments.msg.save.error');
-			$scope.message.details = data;
-			$scope.message.isDetails = true;
-		});
-		$scope.reagentCodeErrorClass = ""
-		$scope.reagentCodeError = "";
-		if($scope.searchBarCode !== undefined && $scope.searchBarCode !== ""){
-			
-			$http.get(jsRoutes.controllers.reagents.api.Reagents.list().url, {params:{"barCode":$scope.searchBarCode, "boxBarCode":$scope.searchBarCode}})
-			.success(function(data, status,headers,config){
-				var datatableData = $scope.datatableReagent.getData();
-				if(data.length > 0){
-				for(var i=0;i<data.length;i++){
-					var closureData = data[i];
-					$http.get(jsRoutes.controllers.reagents.api.Boxes.list().url, {params:{"code":data[i].boxCode}})
-					.success(function(dataBox, status,headers,config){
-						if(data.length>0){
-							var r = {"boxCode":dataBox[0].catalogRefCode+"_"+dataBox[0].bundleBarCode+"_"+dataBox[0].barCode,
-									"code":closureData.catalogRefCode+"_"+closureData.bundleBarCode+"_"+closureData.barCode,
-									"kitCatalogCode":closureData.catalogCode};
-							if($scope.isReagentAdded(r.code) === false){
-								datatableData.push(r);								
-								$scope.datatableReagent.setData(datatableData);
-							}
-						}
-					});
-				}
-				}else{
-					$scope.reagentCodeErrorClass = "has-error"
-					$scope.reagentCodeError = "Code non reconnu";
-				}
-			}).error(function(data, status, headers, config) {
-				$scope.message.clazz = "alert alert-danger";
-				$scope.message.text = Messages('experiments.msg.save.error');
-				$scope.message.details = data;
-				$scope.message.isDetails = true;
-			});
-		}
-	};
-
 	$scope.isReagentAdded = function(code){
 		var datatableData = $scope.datatableReagent.getData();
 		for(var i=0;i<datatableData.length;i++){
@@ -1279,7 +1428,61 @@ angular.module('home').controller('DetailsCtrl',['$scope','$sce', '$window','$ht
 		$scope.datatableReagent.setEdit();
 	});
 	
-	
+	$scope.setWorkLabel = function(workLabel) {
+		$scope.workLabelSelected = workLabel;
+	};
+
+	$scope.loadWorkLabel = function() {
+		if($scope.workLabelSelected) {
+			$scope.datatableReagent.addData($scope.reagentReceptions[$scope.workLabelSelected]);
+		}
+	};
+
+	$scope.initInstitute = function(isCNSInstitute) {
+		if(isCNSInstitute) {
+			$rootScope.$on("ExperimentTypeCode", function(e, experimentTypeCode) {
+				var receptionToLine = function(reception) {
+					var line = {
+						kitCatalogCode: reception.catalogKit.code,
+						description: reception.comments ? reception.comments.map(function(c){return c.comment}).join(", ") : null
+					}
+					var concatCodes = function(codes) {
+						return codes.filter(function(code){return code}).join("_") + "_";
+					}
+					switch(reception.category) {
+						case "Box": 
+						line.boxCatalogCode = reception.catalog.code;
+						line.boxCode = concatCodes([reception.catalogRefCode, reception.batchNumber, reception.fromProviderId]);
+						break;
+						case "Reagent": 
+						line.boxCatalogCode = reception.catalogBox.code;
+						line.reagentCatalogCode = reception.catalog.code;
+						line.code = concatCodes([reception.catalogRefCode, reception.batchNumber, reception.fromProviderId]);
+						break;
+						default: throw "Invalid reception category!";
+					} return line;
+				};
+				$http.get(jsRoutes.controllers.reagents.api.Receptions.list().url, {params: {"experimentTypeCode":experimentTypeCode, "stateCode":"IP"}})
+				.then(function(result) {
+					workLabels = [];
+					$scope.reagentReceptions = result.data
+					.filter(function(reception){return reception.workLabel})
+					.reduce(function(mapper, reception) {
+						if(mapper[reception.workLabel]) {
+							mapper[reception.workLabel].push(receptionToLine(reception));
+						} else {
+							mapper[reception.workLabel] = [receptionToLine(reception)];
+							workLabels.push({name: reception.workLabel});
+						} return mapper;
+					}, {});
+					workLabels.sort(function(wlabelA, wlabelB) {
+						return wlabelA.name ? wlabelA.name.localeCompare(wlabelB.name) : 1;
+					});
+					$scope.WorkLabels = workLabels;
+				});
+			});
+		}
+	};
 	
 }]).controller('CommentsCtrl',['$scope','$sce', '$http','lists','$parse','$filter','datatable', 
                                function($scope,$sce,$http,lists,$parse,$filter,datatable) {
@@ -1531,17 +1734,17 @@ angular.module('home').controller('DetailsCtrl',['$scope','$sce', '$window','$ht
 		    "position":10
 		});		
 		
-		
 		if($scope.experiment.categoryCode === 'qualitycontrol'){
 			columns.push({
 				 "header":Messages("containers.table.valuationqc.valid"),
-	        	 "property":"container.valuation.valid",
+	        	 "property":"container.valuation.valid", //NGL-2457 => ca c'est la validite du container, ce qu'on veut c'est la validite donnee dans l'experience
+				 //"property": "inputContainerUseds[0].valuation.valid", NON NE CORRIGE PAS...TODO !!!
 	        	 "filter":"codes:'valuation'",
 	        	 "order":true,
 				 "edit":false,
 				 "hide":false,
 	        	 "type":"text",
-	        	 "position":7.5				
+	        	 "position":7.5
 			});	
 		}
 		

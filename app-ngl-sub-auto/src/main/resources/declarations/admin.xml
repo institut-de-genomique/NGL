@@ -52,12 +52,14 @@
 		<RequiredProperty propertyName="directory" keyProperty="true"/>
 		<RequiredProperty propertyName="submissionDirectory" keyProperty="true"/>
 		<RequiredProperty propertyName="experimentCode"/>
+		<RequiredProperty propertyName="code"/>
 	</ResourceType>
 
 	<!-- Referential -->
 
 	<Referential name="nglSubRef" device="jsonDevice">
 		<ResourceType name="submission" />
+		<ResourceType name="submissionXML" />
 	</Referential>
 	
 	<Referential name="nglSubRef_processZip" device="jsonDevice">
@@ -71,6 +73,10 @@
 	
 	<Referential name="nglSubRef_processCCRT" device="jsonDevice">
 		<ResourceType name="submissionCCRT" />
+	</Referential>
+	
+	<Referential name="nglSubRefMd5" device="jsonDevice">
+		<ResourceType name="rawDataZip" />
 	</Referential>
 	
 	<Referential name="internalRefSubmission" device="birdsDevice" readOnly="false">

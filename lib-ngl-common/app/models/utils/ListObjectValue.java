@@ -11,7 +11,7 @@ import models.laboratory.sample.instance.Sample;
 public class ListObjectValue<T> {
 
 	public String name;
-	public T code;
+	public T      code;
 	
 	public ListObjectValue() {
 		this.name = "";

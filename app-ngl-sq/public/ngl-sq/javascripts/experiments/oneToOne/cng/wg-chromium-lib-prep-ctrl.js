@@ -1,41 +1,55 @@
 /* FDS 02/03/2017 -- JIRA NGL-1167 : processus Chromium
-   code copié depuis library-prep-ctrl......==> utiliser plaque d'index Chromium????? Pas encore specifie...
-   
-   2 fonctionnements  -main     : strip-8       => tubes         ( Julie demande de bloquer  96-well-plate pour l'instant...)
-                      -sciclone : 96-well-plate => 96-well-plate
+   2 fonctionnements  -main     : strip-8 => tubes ou strip ( Julie demande de bloquer 96-well-plate pour l'instant...)
+                      //NON ....- sciclone : 96-well-plate => 96-well-plate
 */
-angular.module('home').controller('WgChromiumLibraryPrepCtrl',['$scope', '$parse',  '$filter', 'atmToSingleDatatable','$http',
-                                                     function($scope, $parse, $filter, atmToSingleDatatable, $http){
-	
+angular.module('home').controller('WgChromiumLibraryPrepCtrl',['$scope', '$parse', '$filter', 'atmToSingleDatatable','$http','tagPlates',
+                                                     function( $scope,   $parse,    $filter,   atmToSingleDatatable,  $http,  tagPlates){
+
 	var inputExtraHeaders=Messages("experiments.inputs");
-	var outputExtraHeaders=Messages("experiments.outputs");	
+	var outputExtraHeaders=Messages("experiments.outputs");
 	
 	var datatableConfig = {
 			name: $scope.experiment.typeCode.toUpperCase(),
-
-			"columns":[
-			         //--------------------- INPUT containers section -----------------------
-			         		        
-			          { // barcode support entree
+			columns:[
+			        //--------------------- INPUT containers section -----------------------
+			        { // barcode support entree
 			        	 "header":Messages("containers.table.support.name"),
 			        	 "property":"inputContainer.support.code",
 						 "hide":true,
 			        	 "type":"text",
 			        	 "position":1,
 			        	 "extraHeaders":{0: inputExtraHeaders}
-			         },    
-			         // Ligne:  seulement pour plaques voir + loin
-			         
-			         { // colonne:  strip-8 ou plaque
-			        	 "header":Messages("containers.table.support.column"),
-			        	 // astuce GA: pour pouvoir trier les colonnesCode Container dans l'ordre naturel forcer a numerique.=> type:number,   property:  *1
-			        	 "property":"inputContainer.support.column*1",
+			        },
+					{   // colonne
+						"header":Messages("containers.table.support.column"),
+						// astuce GA: pour pouvoir trier les colonnes dans l'ordre naturel forcer a numerique.=> type:number,   property:  *1
+						"property":"inputContainer.support.column*1",
+						"order":true,
+						"hide":true,
+						"type":"number",
+						"position":3,
+						"extraHeaders":{0: inputExtraHeaders}
+					},
+					{ // ajout NGL-3941
+			        	 "header":Messages("containers.table.concentration") + " (ng/µL)",
+			        	 "property":"inputContainerUsed.concentration.value",
 			        	 "order":true,
+						 "edit":false,
 						 "hide":true,
 			        	 "type":"number",
-			        	 "position":3,
+			        	 "position":5,
 			        	 "extraHeaders":{0: inputExtraHeaders}
-			         },	
+			         },
+			         {
+			        	 "header":Messages("containers.table.volume") + " (µL)",
+			        	 "property":"inputContainerUsed.volume.value",
+			        	 "order":true,
+						 "edit":false,
+						 "hide":true,
+			        	 "type":"number",
+			        	 "position":6,
+			        	 "extraHeaders":{0: inputExtraHeaders}
+			         },
 			         
 			         //--->  colonnes specifiques experience s'inserent ici  (inputUsed ??)     
 			         
@@ -53,7 +67,7 @@ angular.module('home').controller('WgChromiumLibraryPrepCtrl',['$scope', '$parse
 			        	 "type":"text",
 			        	 "position":500,
 			        	 "extraHeaders":{0: outputExtraHeaders}
-			         },	 */	     
+			         },*/
 			         { // Volume avec valeur par defaut
 			        	 "header":Messages("containers.table.volume") + " (µL)",
 			        	 "property":"outputContainerUsed.volume.value",
@@ -86,10 +100,7 @@ angular.module('home').controller('WgChromiumLibraryPrepCtrl',['$scope', '$parse
 	        	"withoutEdit": true,
 	        	"changeClass":false,
 	        	"showButton":false,
-	        	"mode":"local",
-	        	"callback":function(datatable){
-	        		copyContainerSupportCodeAndStorageCodeToDT(datatable);
-	        	}
+	        	"mode":"local"
 			},
 			"hide":{
 				"active":true
@@ -127,7 +138,6 @@ angular.module('home').controller('WgChromiumLibraryPrepCtrl',['$scope', '$parse
 			}*/
 	}; // fin struct datatableConfig
 	
-	
 	// probleme de rafraichissement de la vue en cas de mauvais choix inital de l'utilisateur
 	// dans le watch  "$scope.experiment.instrument.categoryCode"   => forcer la vue ici...
 	if ( $scope.experiment.instrument.categoryCode === "hand") {
@@ -141,11 +151,8 @@ angular.module('home').controller('WgChromiumLibraryPrepCtrl',['$scope', '$parse
 				"hide" : true,
 				"type" : "text",
 				"position" : 400,
-				"extraHeaders" : {
-					0 : Messages("experiments.outputs")
-				}
-			});			
-			
+				"extraHeaders" : {0: outputExtraHeaders}
+			});
 			datatableConfig.columns.push({
 				//storage pour tubes
 				"header" : Messages("containers.table.storageCode"),
@@ -155,44 +162,36 @@ angular.module('home').controller('WgChromiumLibraryPrepCtrl',['$scope', '$parse
 				"hide" : true,
 				"type" : "text",
 				"position" : 401,
-				"extraHeaders" : {
-					0 : Messages("experiments.outputs")
-				}
+				"extraHeaders" : {0: outputExtraHeaders}
 			});
 		} else {
 		//strip-8
 			datatableConfig.columns.push({
-				// barcode plaque sortie == support Container used code
+				// barcode support sortie == support Container used code
 				"header" : Messages("containers.table.support.name"),
 				"property" : "outputContainerUsed.locationOnContainerSupport.code",
 				"order" : true,
-				"edit" : true,
+				"edit" : true,  // Est-ce normal de pouvoir editer le code du strip ??? permet de creer plusieurs strips en sortie !!
 				"hide" : true,
 				"type" : "text",
 				"position" : 400,
-				"extraHeaders" : {
-					0 : Messages("experiments.outputs")
-				}
+				"extraHeaders" : {0: outputExtraHeaders}
 			});
-			
 			datatableConfig.columns.push({
-				// Ligne
+				// colonne
 				"header" : Messages("containers.table.support.column"),
 				"property" : "outputContainerUsed.locationOnContainerSupport.column",
-				"edit" : true,
+				"edit" : false, // la position sur un strip n'est pas editable !!! NGL-2491
 				"order" : true,
 				"hide" : true,
-				"type" : "text",
+				"type" : "text",// pas number ( lignes et colonnes sont en text)
 				"position" : 401,
-				"extraHeaders" : {
-					0 : Messages("experiments.outputs")
-				}
-			});			
-			
+				"extraHeaders" : {0: outputExtraHeaders}
+			});
 		}
-	} else {
-		// l'autre cas pour l'instant est le sciclone qui n'a que des plaques-96 en sortie
-	
+	} 
+	/* l'autre cas est le sciclone qui n'a que des plaques-96 en sortie    ==> pas pour l'instant 
+	else {
 		datatableConfig.columns.push({
 			// barcode plaque sortie == support Container used code
 			"header" : Messages("containers.table.support.name"),
@@ -200,12 +199,9 @@ angular.module('home').controller('WgChromiumLibraryPrepCtrl',['$scope', '$parse
 			"hide" : true,
 			"type" : "text",
 			"position" : 400,
-			"extraHeaders" : {
-				0 : Messages("experiments.outputs")
-			}
+			"extraHeaders" : {0: outputExtraHeaders}
 		});
 		
-
 		datatableConfig.columns.push({
 			// Ligne
 			"header" : Messages("containers.table.support.line"),
@@ -215,9 +211,7 @@ angular.module('home').controller('WgChromiumLibraryPrepCtrl',['$scope', '$parse
 			"hide" : true,
 			"type" : "text",
 			"position" : 401,
-			"extraHeaders" : {
-				0 : Messages("experiments.outputs")
-			}
+			"extraHeaders" : {0: outputExtraHeaders}
 		});
 		
 		datatableConfig.columns.push({
@@ -231,53 +225,36 @@ angular.module('home').controller('WgChromiumLibraryPrepCtrl',['$scope', '$parse
 			"hide" : true,
 			"type" : "number",
 			"position" : 402,
-			"extraHeaders" : {
-				0 : Messages("experiments.outputs")
-			}
+			"extraHeaders" : {0: outputExtraHeaders}
 		});
 	} 
+	*/
 	
-	// en mode plaque ou strip uniquement !!!!!!
-	var copyContainerSupportCodeAndStorageCodeToDT = function(datatable){		
-		if($scope.experiment.instrument.outContainerSupportCategoryCode !== "tube") {
-			var dataMain = datatable.getData();
-		
-			var outputContainerSupportCode = $scope.outputContainerSupport.code;
-		
-			if ( null != outputContainerSupportCode && undefined != outputContainerSupportCode){
-				for(var i = 0; i < dataMain.length; i++){
-				
-					var atm = dataMain[i].atomicTransfertMethod;
-					var newContainerCode = outputContainerSupportCode+"_"+atm.line + atm.column;
-
-					$parse('outputContainerUsed.code').assign(dataMain[i],newContainerCode);
-					$parse('outputContainerUsed.locationOnContainerSupport.code').assign(dataMain[i],outputContainerSupportCode);
-				
-					// Historique mais continuer a renseigner car effets de bord possible ????
-					$parse('line').assign(atm, atm.line);
-					$parse('column').assign(atm,atm.column );
-					//console.log("atm.line="+ atm.line + " atm.column="+atm.column);	
-				
-					var outputContainerSupportStorageCode = $scope.outputContainerSupport.storageCode;
-					if( null != outputContainerSupportStorageCode && undefined != outputContainerSupportStorageCode){
-						$parse('outputContainerUsed.locationOnContainerSupport.storageCode').assign(dataMain[i],outputContainerSupportStorageCode);
-					}
-				}
-			}		
-		}
-		// Ne plus faire ... datatable.setData(dataMain);
-	}
+	// ajout 16/12 pour remplacer copyContainerSupportCodeAndStorageCodeToDT  ???????
+	//pour gestion des plaques/strips en sortie
+	var updateATM = function(experiment){
+		if(experiment.instrument.outContainerSupportCategoryCode !== "tube"){
+			experiment.atomicTransfertMethods.forEach(function(atm){
+				atm.line = atm.outputContainerUseds[0].locationOnContainerSupport.line;
+				atm.column = atm.outputContainerUseds[0].locationOnContainerSupport.column;
+			});
+		}		
+	};
 	
-	
-	$scope.$on('save', function(e, callbackFunction) {	
+	// correction NGL-2371: attente correction traitement correct strip ? NGL-2491
+	$scope.$on('save', function(e, callbackFunction) {
 		console.log("call event save");
 		$scope.atmService.data.save();
 		$scope.atmService.viewToExperimentOneToOne($scope.experiment);
+		// ajout 16/12 pour gestion des strip ou plaques puisque suppression du callback dans save...
+		updateATM($scope.experiment);
+		
 		$scope.$emit('childSaved', callbackFunction);
 	});
 	
+	// correction NGL-2371: attente correction traitement correct strip ? NGL-2491
 	$scope.$on('refresh', function(e) {
-		console.log("call event refresh");		
+		console.log("call event refresh");
 		var dtConfig = $scope.atmService.data.getConfig();
 		dtConfig.edit.active = ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F'));
 		
@@ -300,7 +277,6 @@ angular.module('home').controller('WgChromiumLibraryPrepCtrl',['$scope', '$parse
 			dtConfig.edit.byDefault = false;
 			$scope.atmService.data.setConfig(dtConfig);
 		}
-		
 	});
 	
 	$scope.$on('activeEditMode', function(e) {
@@ -308,18 +284,18 @@ angular.module('home').controller('WgChromiumLibraryPrepCtrl',['$scope', '$parse
 		$scope.atmService.data.selectAll(true);
 		$scope.atmService.data.setEdit();
 	});
-	
 
 	//Init
 	
 	var atmService = atmToSingleDatatable($scope, datatableConfig);
+	
 	//defined new atomictransfertMethod
 	atmService.newAtomicTransfertMethod = function(l, c){
 		return {
 			class:"OneToOne",
 			line: l, 
 			column: c, 				
-			inputContainerUseds:new Array(0), 
+			inputContainerUseds:new Array(0),
 			outputContainerUseds:new Array(0)
 		};
 	};
@@ -328,58 +304,30 @@ angular.module('home').controller('WgChromiumLibraryPrepCtrl',['$scope', '$parse
 	atmService.defaultOutputUnit = {
 			volume : "µL"
 	};
+	
+	// aide a la saisie des index/tag
+	// !! les surcharges doivent etre faites avant experimentToView 
+	atmService.convertOutputPropertiesToDatatableColumn = function(property, pName){
+		var column = atmService.$commonATM.convertTypePropertyToDatatableColumn(property,"outputContainerUsed."+pName+".",{"0":Messages("experiments.outputs")});
+		if(property.code=="tag"){
+			// avec drop down
+			column.editTemplate='<div class="form-control" bt-select  #ng-model filter="true" bt-options="tag.code as tag.name for tag in lists.getTags()" udt-change="updatePropertyFromUDT(value,col)" /></div>';
+		}
+		return column;
+	};
+	
 	atmService.experimentToView($scope.experiment, $scope.experimentType);
 	
 	// le sciclone ne traite que des plaques (le type de container de sortie est deja restreint)
-	if ( ( $scope.experiment.instrument.categoryCode !== 'hand') && ($scope.experiment.instrument.inContainerSupportCategoryCode !== $scope.experiment.instrument.outContainerSupportCategoryCode) ) {
-		$scope.messages.setError(Messages('experiments.input.error.must-be-same-out'));
+	if ( ( $scope.experiment.instrument.categoryCode !== 'hand') && 
+		 ($scope.experiment.instrument.inContainerSupportCategoryCode !== $scope.experiment.instrument.outContainerSupportCategoryCode) ) {
+		     $scope.messages.setError(Messages('experiments.input.error.must-be-same-out'));
 	} else {
 		$scope.messages.clear();
 		$scope.atmService = atmService;
 	}
 	
-    // recuperer les tags existants
-	$http.get(jsRoutes.controllers.commons.api.Parameters.list().url,{params:{typeCode:"index-illumina-sequencing"}})
-	.success(function(data, status, headers, config) {
-			$scope.tags = data;		
-	})
-	
-	// Calculs 
-	$scope.updatePropertyFromUDT = function(value, col){
-		console.log("update from property : "+col.property);
-		
-		if(col.property === 'outputContainerUsed.experimentProperties.tag.value'){
-			computeTagCategory(value.data);			
-		}
-	}
-	
-	// determination  automatique de TagCategory
-	var computeTagCategory = function(udtData){
-		var getter = $parse("outputContainerUsed.experimentProperties.tagCategory.value");
-		var tagCategory = getter(udtData);
-		
-		var compute = {
-				tagValue : $parse("outputContainerUsed.experimentProperties.tag.value")(udtData),
-				tag : $filter("filter")($scope.tags,{code:$parse("outputContainerUsed.experimentProperties.tag.value")(udtData)},true),
-				isReady:function(){
-					return (this.tagValue && this.tag && this.tag.length === 1);
-				}
-		};
-		
-		if(compute.isReady()){
-			var result = compute.tag[0].categoryCode;
-			console.log("result = "+result);
-			if(result){
-				tagCategory = result;				
-			}else{
-				tagCategory = undefined;
-			}	
-			getter.assign(udtData, tagCategory);
-		}else if(compute.tagValue){
-			getter.assign(udtData, undefined);
-		}
-	}
-	
+	/* pour support en output a taper en tete de datatable.. pas demandé ici...
 	$scope.outputContainerSupport = { code : null , storageCode : null};	
 		
 	if ( undefined !== $scope.experiment.atomicTransfertMethods[0]) { 
@@ -390,61 +338,52 @@ angular.module('home').controller('WgChromiumLibraryPrepCtrl',['$scope', '$parse
 		$scope.outputContainerSupport.storageCode=$scope.experiment.atomicTransfertMethods[0].outputContainerUseds[0].locationOnContainerSupport.storageCode;
 		//console.log("previous storageCode: "+ $scope.outputContainerSupport.storageCode);
 	}
+	*/
 	
-	/* FORCER A STRIP si instrument= main  et  sortie=plaque  */
+	// FORCER A STRIP si instrument= main et sortie=plaque
 	$scope.$watch("$scope.experiment.instrument.categoryCode", function(){
-			if (($scope.experiment.instrument.categoryCode === "hand") && ($scope.experiment.instrument.outContainerSupportCategoryCode === "96-well-plate"))
+			if (($scope.experiment.instrument.categoryCode === "hand") && 
+				($scope.experiment.instrument.outContainerSupportCategoryCode === "96-well-plate")) {
 				$scope.experiment.instrument.outContainerSupportCategoryCode = "strip-8";
+			}
 	});	
-		
 	
-/* pas specifié, voir plus tard..................?????????????????????//
- 
-	var importData = function(){
-		$scope.messages.clear();
-
-		$http.post(jsRoutes.controllers.instruments.io.IO.importFile($scope.experiment.code).url, $scope.file)
-		.success(function(data, status, headers, config) {
-			
-			$scope.messages.clazz="alert alert-success";
-			$scope.messages.text=Messages('experiments.msg.import.success');
-			$scope.messages.showDetails = false;
-			$scope.messages.open();	
-			//only atm because we cannot override directly experiment on scope.parent
-			$scope.experiment.atomicTransfertMethods = data.atomicTransfertMethods;
-			$scope.file = undefined;
-			// reinit select File...
-			angular.element('#importFile')[0].value = null;
-			$scope.$emit('refresh');
-			
-		})
-		.error(function(data, status, headers, config) {
-			
-			$scope.messages.clazz = "alert alert-danger";
-			$scope.messages.text = Messages('experiments.msg.import.error');
-			$scope.messages.setDetails(data);
-			$scope.messages.open();	
-			$scope.file = undefined;
-			// reinit select File...
-			angular.element('#importFile')[0].value = null;
-		});		
-	};
+	// NGL-3142 15/12/2020 selection de groupe d'index
+	// aide a la saisie des index/tag 
+	// l'appel a tagPlates.initTags() est maintenant obligatoire pour l'assignation automatique de tagCategory
+	if ( $scope.isNewState() || $scope.isInProgressState() || Permissions.check("admin") ){
+		// 08/01/2021 ajouter parametres pour initTags OK !!!
+		// 14/01/2021 essai avec un tableau OK
+		//tagPlates.initTags('index-illumina-sequencing','POOL-INDEX');
+		tagPlates.initTags(['index-illumina-sequencing'],['DUAL-INDEX','POOL-INDEX']);
+	   
+	   $scope.getTagGroups= function(){return tagPlates.getAllTagGroups()};
+	   $scope.selectedTagGroup= $scope.getTagGroups()[0]; // valeur defaut du select
+	}
 	
-	// importer un fichier definissant quels index sont déposés dans quels containers
-	$scope.button = {
+	$scope.selectGroup = {
 		isShow:function(){
-			return ( $scope.isInProgressState() && !$scope.mainService.isEditMode())
-			},
-		isFileSet:function(){
-			return ($scope.file === undefined)?"disabled":"";
+			return ( $scope.isNewState() || $scope.isInProgressState() || Permissions.check("admin") );
 		},
-		click:importData,		
+		// recuperer ici l'objet groupName
+	    select:function(groupName){
+	        console.log( 'groupe choisi :'+  groupName.value );
+	         // 08/01/2021 ajout passage paramètre categoryCodes (voir  ... common.js  ?????) OK 
+	        if (groupName.value === undefined ){
+	        	//$scope.lists.refresh.tags({typeCodes:['index-illumina-sequencing']});
+        		$scope.lists.refresh.tags({typeCodes:['index-illumina-sequencing'], categoryCodes:['DUAL-INDEX','POOL-INDEX']});
+        	} else { 
+        		//$scope.lists.refresh.tags({typeCodes:['index-illumina-sequencing'], groupNames:[groupName.value]});
+        		$scope.lists.refresh.tags({typeCodes:['index-illumina-sequencing'], categoryCodes:['DUAL-INDEX','POOL-INDEX'], groupNames:[groupName.value]});
+        	}
+	    }
 	};
 	
-	// Autre mode possible : utiliser une plaque d'index prédéfinis, l'utilisateur a juste a indiquer a partir de quelle colonne
-	// de cette plaque le robot doit prelever les index
-	//  voir pcr-and-indexing-ctrl.js; prep-pcr-free-tcrl.js   
-
-*/
-	
+	// pour selection manuelle d'index/tag
+	$scope.updatePropertyFromUDT = function(value, col){
+		//console.log("update from property : "+col.property);
+		if(col.property === 'outputContainerUsed.experimentProperties.tag.value'){
+			tagPlates.computeTagCategory(value.data);
+		}
+	};
 }]);

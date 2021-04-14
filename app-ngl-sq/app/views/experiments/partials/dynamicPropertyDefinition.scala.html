@@ -1,18 +1,24 @@
 @(name:java.lang.String, updateFunctionName:java.lang.String)
 <label  class="col-md-6 col-lg-6 control-label" ng-bind="propertyDef.displayMeasureValue ? propertyDef.name+' ('+propertyDef.displayMeasureValue.value+')' : propertyDef.name"></label>													
-						
+						<!--  NGL-3000 remplacement    date-timestamp  par date-timestamp2 OK -->
+						<!--  NGL-3138 utiliser type="date" + calendar-timestamp  OK 
+						               calendar-timestamp: attribut possible: 'max-today' , 'max-tomorrow', 'min-today' 
+						               exemple calendar-timestamp="max-tomorrow" pour bloquer le calendrier à J+1
+						-->
+						<!-- TEMPORAIRE URGENCE CHROMIUM: repasser a type="text" date-timestamp -->
 						<div ng-switch-when="java.util.Date" class="col-md-6 col-lg-6">
 						  	<div ng-switch on="mainService.isEditMode()">
-						  		<p class="form-control-static" ng-switch-when="false" ng-bind="experiment.@{name}[propertyDef.code].value | date:'@Messages("date.format")'" />
-						  		<input class="form-control" ng-switch-when="true" type="text" class="input-small"									
+						  		<p class="form-control-static"                  ng-switch-when="false" ng-bind="experiment.@{name}[propertyDef.code].value | date:'@Messages("date.format")'" />
+						  		<input class="form-control" class="input-small" ng-switch-when="true" 
 									name="@{name}{{propertyDef.code}}" ng-required="propertyDef.required"
 									placeholder="@Messages("date.format")" 
-									ng-model="experiment.@{name}[propertyDef.code].value" date-timestamp />
-						  	</div>
+									ng-model="experiment.@{name}[propertyDef.code].value" 
+									type="text" date-timestamp >
+						  	</div> 
 						</div>
 						<div ng-switch-when="java.io.File" class="col-md-6 col-lg-6">
 							<div ng-switch on="mainService.isEditMode()">
-								<input 
+								<inp
 									name="@{name}{{propertyDef.code}}" ng-required="propertyDef.required" 
 									type="file" ng-switch-when="true" base64-file="experiment.@{name}[propertyDef.code]" />
 								<div ng-switch-when="false" ng-if="experiment.@{name}[propertyDef.code] !== undefined">

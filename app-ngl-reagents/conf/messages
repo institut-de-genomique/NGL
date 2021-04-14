@@ -5,6 +5,9 @@ catalogs.title = Catalogue
 boolean.value.TRUE = Oui
 boolean.value.FALSE = Non
 
+reagent.category-box = Boîte
+reagent.category-reagent = Réactif
+
 catalogs.kit.creation = Création d'un nouveau kit dans le catalogue
 catalogs.kit.edit = Modification dans le catalogue du kit
 catalogs.kit.creation.edit = Editer le kit
@@ -112,7 +115,7 @@ declarations.kit.creation = Déclaration
 declarations.kit.creation.placeholder.kitCatalogCode = Kit catalogue
 declarations.kit.creation.placeholder.state = Etat du kit
 declarations.box.empty = Aucune boîte dans ce kit
-declarations.box.list =  Boîte(s) contenue(s) dans le kit
+declarations.box.list = Boîte(s) contenue(s) dans le kit
 declarations.reagent.list = Réactifs
 declarations.kit.edit = Modification du kit
 declarations.kit.creation.edit = Editer le kit
@@ -123,7 +126,7 @@ declarations.kit.creation.placeholder.catalogRefCode = Ref. catalogue (fournisse
 
 experiments.name = Type d''expérience
 
-kit.catalogCode =  Nom kit (usuel)
+kit.catalogCode = Nom kit (usuel)
 reagents.table.catalogName = Nom kit catalogue
 kits.providerID = ID Fournisseur
 kits.expirationDate = Date de péremption
@@ -157,3 +160,69 @@ reagents.table.stopToUseDate = Date fin utilisation
 reagents.table.catalogCode = Code catalogue
 reagents.table.stockNumber = Numéro de stockage
 reagents.table.stateCode = Etat
+
+# Reagent receptions
+
+import.tooltip = Choisir un fichier réception réactif de type dépot illumina
+
+reagent.receptions.menu = Réception réactifs
+reagent.receptions.menu.search = Recherche
+reagent.receptions.menu.create = Création (manuelle)
+reagent.receptions.menu.new_from_file = Création (via un import fichier)
+
+reagent.receptions.page.tab.search = Rechercher une réception de boite ou réactif
+reagent.receptions.page.tab.create = Déclarer une réception de boîte ou réactif
+reagent.receptions.page.tab.new = Importer un fichier réception
+
+reagents.msg.reception.success = Import fichier réussi
+reagents.msg.reception.error = L'Import a échoué
+reagents.msg.error.providerId = Identifiant chez le fournisseur obligatoire.
+
+search.placeholder.reception.category = Catégorie reagent
+search.placeholder.reception.batchNumber = Numéro de lot du reagent reçu
+search.placeholder.reception.parentBatchNumber = Numéro de lot (reagent parent)
+search.placeholder.reception.code = Code reagent reçu
+search.placeholder.reception.catalogRefCode = Ref. catalogue (fournisseur) du reagent reçu
+search.placeholder.reception.catalogKit.name = Nom kit (usuel) (regex)
+search.placeholder.reception.workLabel = Label de travail (regex)
+search.placeholder.reception.providerCode = Fournisseur
+search.placeholder.reception.fromProviderId = Identifiant unique du reagent chez le fournisseur
+search.placeholder.reception.state = Etat Reagent
+search.placeholder.reception.fromReceptionDate = Réception depuis le (jj/mm/aaaa)
+search.placeholder.reception.toReceptionDate = Réception jusqu''au (jj/mm/aaaa)
+search.placeholder.reception.fromExpirationDate = Date de Péremption depuis le (jj/mm/aaaa)
+search.placeholder.reception.toExpirationDate = Date de Péremption jusqu''au (jj/mm/aaaa)
+search.placeholder.reception.fromCreationDate = Création depuis le (jj/mm/aaaa)
+search.placeholder.reception.toCreationDate = Création jusqu''au (jj/mm/aaaa)
+search.placeholder.reception.createUser = Créé par
+
+reagent.receptions.code = Code reagent reçu
+reagent.receptions.category = Catégorie reagent
+reagent.receptions.batchNumber = Numéro de lot du reagent reçu
+reagent.receptions.parentBatchNumber = Numéro de lot (reagent parent)
+reagent.receptions.receptionDate = Date de réception
+reagent.receptions.catalogKit.name = Nom kit (usuel) 
+reagent.receptions.catalogKit.catalogRefCode = Ref. catalogue (fournisseur) kit 
+reagent.receptions.catalogKit.experimentTypeCodes = Expérience(s) associées au kit
+reagent.receptions.catalogBox.name = Nom reagent parent (nom fournisseur) 
+reagent.receptions.catalogBox.catalogRefCode = Ref. catalogue (fournisseur) du reagent parent
+reagent.receptions.providerCode = Fournisseur
+reagent.receptions.catalogBox.storageConditions = Conditions de stockage (°C)
+reagent.receptions.catalog.name = Nom (fournisseur) du reagent reçu
+reagent.receptions.catalog.catalogRefCode = Ref. catalogue (fournisseur) du reagent reçu
+reagent.receptions.fromProviderId = Identifiant unique du reagent chez le fournisseur
+reagent.receptions.expirationDate = Date de péremption
+reagent.receptions.workLabel = Label de travail
+reagent.receptions.comments = Commentaires (liste)
+reagent.receptions.newComment = Nouveau Commentaire
+reagent.receptions.startUseDate = Date de début d'utilisation
+reagent.receptions.endUseDate = Date de fin d'utilisation
+reagent.receptions.state = Etat Reagent
+reagent.receptions.createUser = Créé par
+reagent.receptions.creationDate = Date de création
+reagent.receptions.modifyUser = Modifié par
+reagent.receptions.modifyDate = Date de modification
+
+error.notnull = Le champ devrait être vide, valeur obtenue: {0}
+error.reagent.reception.create.kit = Création impossible. Des réceptions de réactifs utilisent un autre catalogue avec le même nom.
+error.reagent.reception.modify.kit = Modification impossible. Des réceptions de réactifs utilisent la valeur de ce champ.

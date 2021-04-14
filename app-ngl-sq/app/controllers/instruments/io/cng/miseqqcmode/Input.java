@@ -26,75 +26,72 @@ public class Input extends AbstractInput {
 	@Override
 	public Experiment importFile(Experiment experiment,PropertyFileValue pfv, ContextValidation contextValidation) throws Exception {	
 			
-//		InputStream is = new ByteArrayInputStream(pfv.value);
-		InputStream is = new ByteArrayInputStream(pfv.byteValue());
-		
-		CSVReader reader = new CSVReader(new InputStreamReader(is));
-		
-		List<String[]> all = reader.readAll();
 		Map<String, String[]> allMap = new HashMap<>();
-		
-		all.forEach(array -> {
-			//Logger.debug(Arrays.asList(array).toString());
-			allMap.put(array[2], array);   //colonne 2 de la ligne=>clé du hash, toute ligne=> value du hash
-		});
-		reader.close();
+		try (InputStream is = new ByteArrayInputStream(pfv.byteValue());
+		     CSVReader reader = new CSVReader(new InputStreamReader(is))) {
+
+			List<String[]> all = reader.readAll();
+
+			all.forEach(array -> {
+				//Logger.debug(Arrays.asList(array).toString());
+				allMap.put(array[2], array);   //colonne 2 de la ligne=>clé du hash, toute ligne=> value du hash
+			});
+		}
 		
 		// reinitialiser le compteur a chaque import
 		icuCodeFound=0;
 		
-		experiment.atomicTransfertMethods.forEach(atm ->{
+		experiment.atomicTransfertMethods.forEach(atm -> {
 			InputContainerUsed icu = atm.inputContainerUseds.get(0);
 			
-			if(allMap.containsKey(icu.code)){
+			if (allMap.containsKey(icu.code)) {
 				String[] data = allMap.get(icu.code);
 				
-				PropertySingleValue clusterDensity = getPSV(icu, "clusterDensity");
+				PropertySingleValue clusterDensity = getOrCreatePSV(icu, "clusterDensity");
 				clusterDensity.value = Integer.parseInt(data[3]);
 				
-				PropertySingleValue measuredInsertSize = getPSV(icu, "measuredInsertSize");
+				PropertySingleValue measuredInsertSize = getOrCreatePSV(icu, "measuredInsertSize");
 				measuredInsertSize.value = Integer.parseInt(data[8]);
 				
 				//FDS 26/08/2016 ajout des autres colonnes; !! cas des decimaux francais...
-				PropertySingleValue clusterPercentage = getPSV(icu, "clusterPercentage");
+				PropertySingleValue clusterPercentage = getOrCreatePSV(icu, "clusterPercentage");
 				clusterPercentage.value = Double.parseDouble(data[4].replace (",", "."));
 				
-				PropertySingleValue passingFilter = getPSV(icu, "passingFilter");
+				PropertySingleValue passingFilter = getOrCreatePSV(icu, "passingFilter");
 				passingFilter.value = Double.parseDouble(data[5].replace (",", "."));
 				
-
 				String[] alignedPercentage =data[6].split("/");	
-				PropertySingleValue R1AlignedPercentage = getPSV(icu, "R1AlignedPercentage");
+				PropertySingleValue R1AlignedPercentage = getOrCreatePSV(icu, "R1AlignedPercentage");
 				R1AlignedPercentage.value = Double.parseDouble(alignedPercentage[0].replace (",", "."));
 				
-				PropertySingleValue R2AlignedPercentage = getPSV(icu, "R2AlignedPercentage");
+				PropertySingleValue R2AlignedPercentage = getOrCreatePSV(icu, "R2AlignedPercentage");
 				R2AlignedPercentage.value = Double.parseDouble(alignedPercentage[1].replace (",", "."));
 				
 				String[] mismatchPercentage =data[7].split("/");
-				PropertySingleValue R1MismatchPercentage = getPSV(icu, "R1MismatchPercentage");
+				PropertySingleValue R1MismatchPercentage = getOrCreatePSV(icu, "R1MismatchPercentage");
 				R1MismatchPercentage.value = Double.parseDouble(mismatchPercentage[0].replace (",", "."));
 				
-				PropertySingleValue R2MismatchPercentage = getPSV(icu, "R2MismatchPercentage");
+				PropertySingleValue R2MismatchPercentage = getOrCreatePSV(icu, "R2MismatchPercentage");
 				R2MismatchPercentage.value = Double.parseDouble(mismatchPercentage[1].replace (",", "."));
 				
-				PropertySingleValue minInsertSize = getPSV(icu, "minInsertSize");
+				PropertySingleValue minInsertSize = getOrCreatePSV(icu, "minInsertSize");
 				minInsertSize.value = Integer.parseInt(data[9]);
 				
-				PropertySingleValue maxInsertSize = getPSV(icu, "maxInsertSize");
+				PropertySingleValue maxInsertSize = getOrCreatePSV(icu, "maxInsertSize");
 				maxInsertSize.value = Integer.parseInt(data[10]);
 				
 				// FDS 22/09/2016 !! NGL-1046 et SUPSQCNG-413 dans certains la valeur necessite un double
-				PropertySingleValue observedDiversity = getPSV(icu, "observedDiversity");
+				PropertySingleValue observedDiversity = getOrCreatePSV(icu, "observedDiversity");
 				observedDiversity.value = Double.parseDouble(data[11]);
 				
-				PropertySingleValue estimatedDiversity = getPSV(icu, "estimatedDiversity");
+				PropertySingleValue estimatedDiversity = getOrCreatePSV(icu, "estimatedDiversity");
 				estimatedDiversity.value = Double.parseDouble(data[12]);
 				
 				icuCodeFound ++;
 			}
 		});
 
-		if (icuCodeFound == 0){ contextValidation.addErrors("Erreurs fichier","experiments.msg.import.data.notmatching");}
+		if (icuCodeFound == 0){ contextValidation.addError("Erreurs fichier","experiments.msg.import.data.notmatching");}
 
 		return experiment;
 	}

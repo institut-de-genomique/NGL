@@ -1,0 +1,86 @@
+@this(xtoxbatch_ : xtoxbatch) @()
+
+<!--  FDS 21/06/2016  -->
+<div ng-controller="BatchPoolCtrl">
+	<div ng-if=isNewState()>@xtoxbatch_()</div>
+	<div ng-if="!isNewState()">
+		<ul class="nav nav-tabs margin-bottom-5" role="tablist">
+			<li class="active"><a href="" role="tab" data-target="#roadmap"
+				data-toggle="tab">@Messages("experiments.calculation.sheet")</a></li>
+			<li><a href="" role="tab" data-target="#src_dest"
+				data-toggle="tab">@Messages("experiments.src_dest.sheet")</a></li>
+		</ul>
+		<div class="tab-content">
+			
+			<div class="tab-pane active" id="roadmap">
+				<div class="col-md-12 col-lg-12" ultimate-datatable="batchdatatable">
+				</div>
+			</div>
+
+			<div class="tab-pane" id="src_dest">
+				<div class="row roadmap">
+					<div class="col-md-4 col-lg-4">
+						<table class="table table-bordered">
+							<thead>
+								<tr>
+									<th>
+										@Messages("experiments.src_dest.inputContainerSupportCode")</th>
+									<th>@Messages("experiments.src_dest.source")</th>
+								</tr>
+							</thead>
+							<!--  containerSupport et pas container -->
+							<tr ng-model="containerSupport"
+								ng-repeat="containerSupport in getInputContainerSupports() | orderBy track by $index">
+								<td>{{containerSupport}}</td>
+								<td>{{$index+1}}</td>
+							</tr>
+						</table>
+					</div>
+					<!--  ajout ng-switch car il faut un label dans le cas des tubes en sortie -->
+					<div class="col-md-4 col-lg-4"
+						ng-switch="outputContainerSupportCategoryCode">
+						<div ng-switch-when="96-well-plate">
+							<table class="table table-bordered">
+								<thead>
+									<tr>
+										<th>
+											@Messages("experiments.src_dest.outputContainerSupportCode")
+										</th>
+										<th>@Messages("experiments.src_dest.dest")</th>
+									</tr>
+								</thead>
+								<tr ng-model="containerSupport"
+									ng-repeat="containerSupport in getDistinctOutputContainerSupports()  | orderBy track by $index">
+									<td>{{containerSupport.code}}</td>
+									<td>{{$index+1}}</td>
+								</tr>
+							</table>
+						</div>
+						<div ng-switch-when="tube">
+							<table class="table table-bordered">
+								<thead>
+									<tr>
+										<th>
+											@Messages("experiments.src_dest.outputContainerSupportCode")
+										</th>
+										<th>@Messages("experiments.src_dest.dest")</th>
+										<th>@Messages("experiments.src_dest.label")</th>
+									</tr>
+								</thead>
+								<tr ng-model="container"
+									ng-repeat="container in getOutputContainers() | orderBy:'locationOnContainerSupport.code' track by $index">
+
+									<td>{{container.locationOnContainerSupport.code}}</td>
+									<td>{{$index+1}}</td>
+									<td>{{container.experimentProperties.workName.value}}</td>
+								</tr>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+</div>
+

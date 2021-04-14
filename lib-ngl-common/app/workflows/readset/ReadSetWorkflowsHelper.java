@@ -11,7 +11,7 @@ import org.mongojack.DBQuery;
 import org.mongojack.DBUpdate;
 
 import fr.cea.ig.MongoDBDAO;
-import fr.cea.ig.play.migration.NGLContext;
+import fr.cea.ig.ngl.NGLApplication;
 import models.laboratory.common.instance.State;
 import models.laboratory.common.instance.TBoolean;
 import models.laboratory.project.instance.Project;
@@ -21,6 +21,7 @@ import models.laboratory.run.instance.SampleOnContainer;
 import models.laboratory.sample.instance.Sample;
 import models.utils.InstanceConstants;
 import models.utils.InstanceHelpers;
+import play.Logger;
 import validation.ContextValidation;
 
 @Singleton
@@ -28,19 +29,17 @@ public class ReadSetWorkflowsHelper {
 
 	private static final play.Logger.ALogger logger = play.Logger.of(ReadSetWorkflowsHelper.class);
 	
-	private final NGLContext ctx;
+	private final NGLApplication app;
 	
 	@Inject
-	public ReadSetWorkflowsHelper(NGLContext ctx) {
-		this.ctx = ctx;
-	}
-	
-	
+	public ReadSetWorkflowsHelper(NGLApplication app) {
+		this.app = app;
+	}	
 	
 	public void updateContainer(ReadSet readSet) {
 		//insert sample container properties at the end of the ngsrg
 		SampleOnContainer sampleOnContainer = InstanceHelpers.getSampleOnContainer(readSet);
-		if(null != sampleOnContainer){
+		if (sampleOnContainer != null) {
 			MongoDBDAO.update(InstanceConstants.READSET_ILLUMINA_COLL_NAME,  ReadSet.class, 
 					DBQuery.is("code", readSet.code), DBUpdate.set("sampleOnContainer", sampleOnContainer));
 		} else {
@@ -65,7 +64,7 @@ public class ReadSetWorkflowsHelper {
 	
 	public void updateFiles(ReadSet readSet, ContextValidation contextValidation) {
 		//met les fichiers dipo ou non d
-		State state = cloneState(readSet.state, contextValidation.getUser());
+		State state = State.cloneState(readSet.state, contextValidation.getUser());
 		if (readSet.files != null) {
 			for (File f : readSet.files) {
 //				WriteResult<ReadSet, String> r = 
@@ -79,35 +78,12 @@ public class ReadSetWorkflowsHelper {
 		}
 	}
 	
-	public void createSampleReadSetExternal(ReadSet readSet, ContextValidation contextValidation, String rules)	{
-		//Create sample if doesn't exist (for external data)
-		Sample sample = MongoDBDAO.findByCode(InstanceConstants.SAMPLE_COLL_NAME, Sample.class, readSet.sampleCode);
-		if (sample == null && contextValidation.getObject("external") != null && (Boolean)contextValidation.getObject("external")) {
-			//Call rules
-			ArrayList<Object> facts = new ArrayList<>();
-			facts.add(readSet);
-			facts.add(contextValidation);
-			ctx.callRulesWithGettingFacts(rules, facts);
-		}
-	}
-	
-	/**
-	 * Clone State without historical
-	 * @param state
-	 * @return
-	 */
-	private static State cloneState(State state, String user) {
-		State nextState = new State();
-		nextState.code = state.code;
-		nextState.date = new Date();
-		nextState.user = user;
-		return nextState;
-	}
-
 	public boolean isHasBA(ReadSet readSet) {
 		Project p = MongoDBDAO.findByCode(InstanceConstants.PROJECT_COLL_NAME, Project.class, readSet.projectCode);
 		if (p.bioinformaticParameters.biologicalAnalysis) {  //"^.+_.+F_.+_.+$" pour BFY
-			return (StringUtils.isNotBlank(p.bioinformaticParameters.regexBiologicalAnalysis))?readSet.code.matches(p.bioinformaticParameters.regexBiologicalAnalysis):p.bioinformaticParameters.biologicalAnalysis; //TODO matche PE of type F
+			return StringUtils.isNotBlank(p.bioinformaticParameters.regexBiologicalAnalysis)
+					 ? readSet.code.matches(p.bioinformaticParameters.regexBiologicalAnalysis)
+					 : p.bioinformaticParameters.biologicalAnalysis; // GA: matche PE of type F
 		}
 		return false;
 	}

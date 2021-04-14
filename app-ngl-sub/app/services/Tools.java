@@ -1,6 +1,7 @@
 package services;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 //import java.io.FileNotFoundException;
@@ -10,20 +11,29 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.xerces.impl.dv.util.Base64;
 
+import models.sra.submit.common.instance.Submission;
+import models.sra.submit.common.instance.UserRefCollabType;
 import models.sra.submit.util.SraException;
+import play.Logger;
 
 public class Tools {
 	
-	public List<String> loadReadSet(InputStream inputStream) throws SraException {	
+	// constructeur privé => les ulisateurs ne pourront pas faire d'instance de cette classe
+	// complement statique.
+	private Tools() {}
+	
+	public static List<String> loadReadSet(InputStream inputStream) throws SraException {	
 		List<String> listReadSet = new ArrayList<>();
-		if (inputStream==null) {
+		if (inputStream == null) {
 			return listReadSet;
 		}
 		try {
@@ -36,11 +46,11 @@ public class Tools {
 			Pattern p_c = Pattern.compile(pattern_string_c);
 //			boolean legend = false;	
 			while ((ligne = input_buffer.readLine()) != null) {					
-				if (this.clean(ligne).equalsIgnoreCase("readSetCode")) {
+				if (clean(ligne).equalsIgnoreCase("readSetCode")) {
 //					legend = true;
 					continue;
 				}
-				if (this.clean(ligne).equalsIgnoreCase("lotseqname")) {
+				if (clean(ligne).equalsIgnoreCase("lotseqname")) {
 //					legend = true;
 					continue;
 				}
@@ -61,7 +71,7 @@ public class Tools {
 				String readSetCode = m.group(1); //readSetCode
 				readSetCode = clean(readSetCode);
 				//System.out.println("readSetCode = '"+ readSetCode +"'");
-				if (! listReadSet.contains(readSetCode)){
+				if (! listReadSet.contains(readSetCode)) {
 					listReadSet.add(readSetCode);
 				}
 			} 
@@ -121,7 +131,7 @@ public class Tools {
 		return mapLotSeqName;
 	}
 */
-	public Map<String, String> loadMd5File(File md5File) throws SraException {
+	public static Map<String, String> loadMd5File(File md5File) throws SraException {
 		Map<String, String> mapMd5 = new HashMap<>();
 
 		// Recuperation des signature md5 si le fichier 'md5.txt' existe dans le repertoire courant de soumission :
@@ -160,6 +170,7 @@ public class Tools {
 					}
 					ebi_md5Hex = m.group(1);
 					ebiRelatifName = m.group(2);
+					ebiRelatifName = ebiRelatifName.replaceAll(".*/", "");
 					mapMd5.put(ebiRelatifName, ebi_md5Hex);
 				}
 			} catch (IOException e) {
@@ -171,7 +182,7 @@ public class Tools {
 
 	// Renvoie une copie de la chaine d'entree debarrassee des espaces en debut et fin de chaine:
 	// et debarassee des guillements en debut et fin
-	public String clean(String chaine) {
+	public static String clean(String chaine) {
 		String cleanChaine = chaine;
 
 		String pattern = "^\\s*\"*\\s*([^\\s\"]+.*)"; // si chaine ne contient aucun caractere visible
@@ -200,9 +211,59 @@ public class Tools {
 		return cleanChaine;	
 	}
 
-	public static InputStream decodeBase64(String inputBase64){
+	public static InputStream decodeBase64(String inputBase64) {
+		Logger.debug("Dans Tools.decodeBase64");
 		byte[] dataBytes = Base64.decode(inputBase64);
 		return  new ByteArrayInputStream(dataBytes);
 	}
+	
+	
+	// Ecrit dans le fichier indiqué, la map submission.userRefCollab dans le format des 
+	// des fichiers userRefCollabToAC
+	public static void writeUserRefCollabToAc(Map<String,UserRefCollabType> mapUserRefCollab, File outputFile) throws SraException {
+		if(mapUserRefCollab.isEmpty()) {
+			throw new SraException("parametre map vide");
+		}
 
+		try (BufferedWriter output_buffer = new BufferedWriter(new java.io.FileWriter(outputFile))) {
+			// Ecriture de la legende du fichier :
+			output_buffer.write(String.format("%s\n", "#-----------------------------------"));
+			output_buffer.write(String.format("%15s|%10s|%10s\n", "refCollab", "study_ac", "sample_ac"));
+			output_buffer.write(String.format("%s\n", "#-----------------------------------"));
+			for (Iterator<Entry<String, UserRefCollabType>> iterator = mapUserRefCollab.entrySet().iterator(); iterator.hasNext();) {
+			  Entry<String, UserRefCollabType> entry = iterator.next();
+			  String refCollab = entry.getKey();
+			  String studyAc = entry.getValue().getStudyAc();
+			  String sampleAc = entry.getValue().getSampleAc();
+			  // Ecriture des valeurs :
+			  output_buffer.write(String.format("%15s|%10s|%10s\n", refCollab, studyAc, sampleAc));
+			}
+		} catch (IOException e) {
+			e.printStackTrace();	
+			throw new SraException("Probleme avec le fichier " + e.getMessage());
+		}
+		
+	}
+	// Ecrit dans le fichier indiqué, la liste des readsets dans le format des 
+	// des fichiers readsetCodes
+	public static void writeReadSet(List<String> readsetCodes, File outputFile) throws SraException {
+		if(readsetCodes.isEmpty()) {
+			throw new SraException("parametre readsetCodes vide");
+		}
+
+		try (BufferedWriter output_buffer = new BufferedWriter(new java.io.FileWriter(outputFile))) {
+			// Ecriture de la legende du fichier :
+			output_buffer.write(String.format("%s\n", "#-----------------------------------"));
+			output_buffer.write(String.format("%s\n", "readSetCode"));
+			output_buffer.write(String.format("%s\n", "#-----------------------------------"));
+			for (String readsetCode : readsetCodes) {
+			  // Ecriture des valeurs :
+			  output_buffer.write(String.format("%s\n", readsetCode));
+			}
+		} catch (IOException e) {
+			e.printStackTrace();	
+			throw new SraException("Probleme avec le fichier " + e.getMessage());
+		}
+		
+	}
 }

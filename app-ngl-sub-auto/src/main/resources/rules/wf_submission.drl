@@ -19,7 +19,7 @@ rule "select resources from nglsub"
 	then
 		Logger log = Logger.getLogger("ngl.sub.rules");
 		$rps.initialize();
-		Set<ResourceProperties> resourcePropertiesSet = $device.httpGetJSON(ProjectProperties.getProperty("server")+"/api/sra/submissions?stateCode=IW-SUB", "bot");
+		Set<ResourceProperties> resourcePropertiesSet = $device.httpGetJSON(ProjectProperties.getProperty("server")+"/api/sra/submissions?stateCode=SUB-SRD-IW", "bot");
 		log.debug("size resources "+resourcePropertiesSet.size());
 		$rps.addResourcePropertiesSet(resourcePropertiesSet);
 		modify($rps){};
@@ -42,11 +42,8 @@ rule "add resources submission to internal referential internalRefSubmission for
 	  	//Get submission code
 	  	String codeSubmission = $j.getUniqueJobResource("subData").getProperty("code");
 	  	JSONDevice jsonDevice = new JSONDevice();
-	  	//Get submission
-	  	//String JSONSubmission = jsonDevice.httpGet(ProjectProperties.getProperty("server")+"/api/sra/submissions/"+codeSubmission);
-	  	//String newJSONSubmission = jsonDevice.modifyJSON(JSONSubmission, "state.code", "IP-SUB");
 	  	//Set new State
-	  	String newState = "{\"code\":\"IP-SUB\"}";
+	  	String newState = "{\"code\":\"SUB-SRD-IP\"}";
 	  	//Call PUT update with submission modified
 	  	log.debug("Call PUT "+ProjectProperties.getProperty("server")+"/sra/submissions/"+codeSubmission+"/state");
 	  	log.debug("With JSON "+newState);

@@ -1,0 +1,53 @@
+@(experiment: models.laboratory.experiment.instance.Experiment, containers: List[models.laboratory.container.instance.Container])
+
+@import controllers.instruments.io.utils._;
+@import java.text.SimpleDateFormat
+@import java.util.Locale
+@import java.lang.String; var well_pos=""; var index1_name=""; var index2_name=""; var index1_seq=""; var index2_seq="";var perc="";
+
+@***
+NGL-3185: nouveau format pour LRM
+Date: format "yyyy-MM-dd"
+Library Prep Kit : IDT-ILMN TruSeq DNA-RNA UD Indexes 96 Indexes
+Description: <vide>
+ReverseComplement: NON
+Laisser colonne I7_Index_ID et I5_Index_ID vides
+adapter au lieu de Adapter
+***@
+
+[Header]\u000D\u000A
+Experiment Name,@experiment.code\u000D\u000A
+Date,@(new SimpleDateFormat("yyyy-MM-dd").format(experiment.traceInformation.creationDate))\u000D\u000A
+Module,Library QC - 1.0.0\u000D\u000A
+Workflow,LibraryQC\u000D\u000A
+Library Prep Kit,IDT-ILMN TruSeq DNA-RNA UD Indexes 96 Indexes\u000D\u000A
+Description,\u000D\u000A
+Chemistry,Amplicon\u000D\u000A
+[Reads]\u000D\u000A
+@experiment.instrumentProperties.get("nbCyclesRead1").value\u000D\u000A
+@experiment.instrumentProperties.get("nbCyclesRead2").value\u000D\u000A
+[Settings]\u000D\u000A
+FlagPCRDuplicates,1\u000D\u000A
+adapter,AGATCGGAAGAGCACACGTCTGAACTCCAGTCA\u000D\u000A
+adapterRead2,AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT\u000D\u000A
+[Data]\u000D\u000A
+
+Sample_ID,Description,Index_Plate_Well,I7_Index_ID,index,I5_Index_ID,index2,GenomeFolder,Sample_Project,\u000D\u000A
+@for(c <- containers.sortWith((a,b) => a.support.column+a.support.line<b.support.column+b.support.line)){  
+	@for(co <- c.contents){
+		@{index1_seq=OutputHelper.getSequence(OutputHelper.getIndex("index-illumina-sequencing",OutputHelper.getContentProperty(co,"tag"))).split("-")(0)}
+		@{index2_seq=OutputHelper.getSequence(OutputHelper.getIndex("index-illumina-sequencing",OutputHelper.getContentProperty(co,"tag"))).split("-")(1)}
+		@*** tous les nom d'index dual ne sont pas du type xxx-yyy 
+		     kanban 08/12/2020 specs pas claires: obligatoire/pas obligatoire ?? ;si nom pas splitable mettre 2 fois le meme nom ??; "_" pas supporté par LRM ??
+		     => pour l'instant ne rien faire: laisser index1_name et index2_name vides !!!
+		     @if( OutputHelper.getContentProperty(co,"tag").indexOf("-") > -1 ){ @{index1_name=OutputHelper.getContentProperty(co,"tag").split("-")(0)} @{index2_name=OutputHelper.getContentProperty(co,"tag").split("-")(1)} }
+		***@
+		@{perc=Double.toString(co.percentage).replace(".","_")}
+		@{well_pos=c.code.split("_")(1)}
+		@*** !! transformer A1 en A01, A2 en A02 etc...***@
+		@if( well_pos.length() == 2 ) { @{well_pos=well_pos.substring(0,1)+"0"+well_pos.substring(1)} }
+		
+		@(c.code),@(OutputHelper.getContentProperty(co,"tag"))_@(perc),@(well_pos),@(index1_name),@(index1_seq),@(index2_name),@(index2_seq),@experiment.instrumentProperties.get("genomeFolder").value,,\u000D\u000A
+	}
+} 
+

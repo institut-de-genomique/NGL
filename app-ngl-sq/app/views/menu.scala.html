@@ -1,24 +1,27 @@
-@this(ctx : fr.cea.ig.play.migration.NGLContext)
-
+@this(ctx : fr.cea.ig.ngl.NGLApplication)
 @(nav: String = "")
 
-@import controllers.authorisation.PermissionHelper
+@** NGL-3271 ajout liens directs vers les templates d'import CNRGH dans alfresco **@
+@CnrghTemplatesUrl=@{"https://intra.institut-genomique.fr/share/page/site/ngl/document-details?nodeRef=workspace://SpacesStore/"}
+
 @import play.mvc.Http.Context
+@import controllers.authorisation.PermissionHelper
 @import controllers.samples.tpl.routes.Samples
 @import controllers.containers.tpl.routes.ContainerSupports
 @import controllers.containers.tpl.routes.Containers
 @import controllers.processes.tpl.routes.Processes
 @import controllers.experiments.tpl.routes.Experiments
+@import controllers.indexes.tpl.routes.Indexes 
+@import controllers.descriptions.tpl.routes.Descriptions 
 
 @import views.html.helper.formGroup
-
 @import views.html.ddmenu._
 
 @user            = @{ ctx.currentUser() }
 @writePermission = @{ PermissionHelper.checkPermission(user, "writing") }
 @adminPermission = @{ PermissionHelper.checkPermission(user, "admin") }
-@isCNSInstitute  = @{ "CNS" == ctx.getInstitute() }
-@isCNGInstitute  = @{ "CNG" == ctx.getInstitute() }
+@isCNSInstitute  = @{ "CNS" == ctx.nglConfig().getInstitute() }
+@isCNGInstitute  = @{ "CNG" == ctx.nglConfig().getInstitute() }
 @always          = @{ true }
 
 
@@ -31,79 +34,148 @@
     	<div class="collapse navbar-collapse">
     		<ul class="nav navbar-nav">
 				@ddmenu(nav,"samples","samples.menu") {
-				  @ddentry(nav,"samples.search",Samples.home("search"),"samples.menu.search")
+				  @ddentry(nav,					"samples.search",				Samples.home("search"),					"samples.menu.search")
 				}
+				
 				@ddmenu(nav,"containerSupports","containerSupports.menu") {
-				  @ddme(nav, always,          "containerSupports.search",  ContainerSupports.home("search"), "containerSupports.menu.search")
-				  @ddme(nav, writePermission, "containerSupports.state",   ContainerSupports.home("state"),  "containerSupports.menu.state") 
-			      @ddme(nav, adminPermission, "containerSupports.scanner", ContainerSupports.homeScanner(),  "containerSupports.menu.scanner")
+				  @ddme(nav, always,          "containerSupports.search",		ContainerSupports.home("search"),		"containerSupports.menu.search")
+				  @ddme(nav, writePermission, "containerSupports.state",		ContainerSupports.home("state"),		"containerSupports.menu.state") 
+			      @ddme(nav, adminPermission, "containerSupports.scanner",		ContainerSupports.homeScanner(),		"containerSupports.menu.scanner")
 				}
+				
   				@ddmenu(nav,"containers","containers.menu")	{
-  				  @ddme(nav, always,          "containers.search", Containers.home("search"), "containers.menu.search")
-				  @ddme(nav, writePermission, "containers.state",  Containers.home("state"),  "containers.menu.state")
-				  @ddme(nav, writePermission, "container.new",     Containers.home("new"),    "containers.menu.new_from_file")
+  				  @ddme(nav, always,          "containers.search",				Containers.home("search"),				"containers.menu.search")
+				  @ddme(nav, writePermission, "containers.state",				Containers.home("state"),				"containers.menu.state")
+				  @ddme(nav, writePermission, "container.new",					Containers.home("new"),					"containers.menu.new_from_file")
   				}	
   					
   				@ddmenu(nav,"processes","processes.menu") {
-				  @ddme(nav, always,          "processes.search", Processes.home("search"), "processes.menu.search")
-				  @ddme(nav, writePermission, "processes.new-from-containers",    Processes.home("new-from-containers"),    "processes.menu.new-from-containers")
-				  @****
-				  * @ddme(nav, writePermission, "new-from-samples",    Processes.home("new-from-samples"),    "processes.menu.new-from-samples")
-				  * @ddme(nav, writePermission, "assign-to-container",    Processes.home("assign-to-container"),    "processes.menu.assign-to-container")
-				  *****@
-				  @ddme(nav, writePermission, "processes.remove", Processes.home("remove"), "processes.menu.remove")
-				  @ddme(nav, adminPermission, "processes.state",  Processes.home("state"),  "processes.menu.state")				  
+				  @ddme(nav, always,          "processes.search", 				Processes.home("search"),				"processes.menu.search")
+				  @ddme(nav, writePermission, "processes.new-from-containers",	Processes.home("new-from-containers"),	"processes.menu.new-from-containers")
+				  @ddme(nav, writePermission, "new-from-samples",				Processes.home("new-from-samples"),		"processes.menu.new-from-samples")
+				  @ddme(nav, writePermission, "assign-to-container",			Processes.home("assign-to-container"),	"processes.menu.assign-to-container")
+				  @ddme(nav, writePermission, "processes.remove",				Processes.home("remove"),				"processes.menu.remove")
+				  @ddme(nav, adminPermission, "processes.state",				Processes.home("state"),				"processes.menu.state")
 				}
 				
   				@ddmenu(nav,"experiments","experiments.menu") {
-  				  @ddme(nav, always,          "experiments.search",   Experiments.home("search"),   "experiments.menu.search")
-				  @ddme(nav, writePermission, "experiments.new",      Experiments.home("new"),      "experiments.menu.creation")
-				  @ddme(nav, always,          "experiments.reagents", Experiments.home("reagents"), "experiments.menu.reagents")
+  				  @ddme(nav, always,          "experiments.search",				Experiments.home("search"),				"experiments.menu.search")
+				  @ddme(nav, writePermission, "experiments.new",				Experiments.home("new"),				"experiments.menu.creation")
+				  @ddme(nav, always,          "experiments.reagents",			Experiments.home("reagents"),			"experiments.menu.reagents")
 				}			
+				
+				@ddmenu(nav,"index","indexes.menu") {
+  				  @ddentry(nav,				  "indexes.search",					Indexes.home("search"),					"indexes.menu.search")
+  				  <!-- attention aux modifications de structure du wiki ... -->
+  				   @if(isCNGInstitute){   
+  				  <li><a href="http://wiki.cnrgh.fr/wiki/ngldocumentation/download/NGL-SQ/Fichiers%20%C3%A0%20t%C3%A9l%C3%A9charger%20CNRGH/Fichier%20de%20d%C3%A9claration%20d%27index/WebHome/Declaration_Index_v1.xlsx"
+  				         target="_blank">@Messages("file.import-index")</a></li>
+  				   
+  				  <!-- ajouter ici les liens vers autres fichiers index a telecharger... 
+  				  <li><a href="http://wiki.cnrgh.fr/wiki/ngldocumentation/download/NGL-SQ/Fichiers%20%C3%A0%20t%C3%A9l%C3%A9charger%20CNRGH/Fichier%20de%20d%C3%A9claration%20d%27index/WebHome/xxxxxxxxxx.xlsx"
+  				         target="_blank">@Messages("xxxxxxx")</a></li>
+  				  --> 
+  				  }
+  				  
+  				  @if(isCNSInstitute){
+  				  <li><a href="http://wiki.cnrgh.fr/wiki/ngldocumentation/download/NGL-SQ/Fichiers%20%C3%A0%20t%C3%A9l%C3%A9charger%20CNS/Fichier%20de%20d%C3%A9claration%20d%27index/WebHome/Declaration_Index_v1.xlsx"
+  				         target="_blank">@Messages("file.import-index")</a></li>
+  				   
+  				  <!-- ajouter ici les liens vers autres fichiers index a telecharger...
+  				  <li><a href="http://wiki.cnrgh.fr/wiki/ngldocumentation/download/NGL-SQ/Fichiers%20%C3%A0%20t%C3%A9l%C3%A9charger%20CNS/Fichier%20de%20d%C3%A9claration%20d%27index/WebHome/xxxxxxxxxx.xlsx"
+  				         target="_blank">@Messages("xxxxxxxx")</a></li>
+  				  --> 
+  				  }
+  				}
   						
   				@if(isCNSInstitute){
 	  				<li class="dropdown @("active".when(nav.startsWith("help")))">
 	  					<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" id="help">@Messages("docs.menu")<b class="caret"></b></a>
 						<ul class="dropdown-menu" role="menu" aria-labelledby="help">
-							<li><a href="@routes.Assets.at("ngl-sq/documentation/cns/NGL-SQ_Illumina.pdf")" target="doc">@Messages("docs.illumina")</a></li>
-							<li><a href="@routes.Assets.at("ngl-sq/documentation/cns/NGL-SQ_Schéma_Processus_Extraction_ADN-ARN.pdf")" target="doc">@Messages("docs.sample_prep")</a></li>
-							<li><a href="@routes.Assets.at("ngl-sq/documentation/cns/NGL-SQ_Schéma_Processus_MetaBarcoding.pdf")" target="doc">@Messages("docs.bank.metabarcoding")</a></li>
-							<li><a href="@routes.Assets.at("ngl-sq/documentation/cns/NGL-SQ_Schéma_Processus_MetaTranscriptomique.pdf")" target="doc">@Messages("docs.bank.metatranscriptomique")</a></li>
-							<li><a href="@routes.Assets.at("ngl-sq/documentation/cns/NGL-SQ_Schéma_Processus_MetaGenomique.pdf")" target="doc">@Messages("docs.bank.metabargenomique")</a></li>
-							<li><a href="@routes.Assets.at("ngl-sq/documentation/cns/NGL-SQ_Nanopore.pdf")" target="doc">@Messages("docs.nanopore")</a></li>
-							<li><a href="@routes.Assets.at("ngl-sq/documentation/cns/NGL-SQ_Opgen.pdf")" target="doc">@Messages("docs.opticalmapping.opgen")</a></li>
-							<li><a href="@routes.Assets.at("ngl-sq/documentation/cns/NGL-SQ_Bionano.pdf")" target="doc">@Messages("docs.opticalmapping.bionano")</a></li>
-							<li><a href="@routes.Assets.at("ngl-sq/documentation/cns/Schemas_Processus_existants_nov17.pdf")" target="doc">@Messages("docs.processes.schema")</a></li>																		
+							<li><a href="@routes.Assets.at("ngl-sq/documentation/cns/NGL-SQ_Workflows.pdf")" 							 target="_blank">@Messages("docs.workflows")</a></li>
+							<li><a href="@routes.Assets.at("ngl-sq/documentation/cns/NGL-SQ_Illumina.pdf")" 							 target="_blank">@Messages("docs.illumina")</a></li>
+							<li><a href="@routes.Assets.at("ngl-sq/documentation/cns/NGL-SQ_Schéma_Processus_Extraction_ADN-ARN.pdf")"	 target="_blank">@Messages("docs.sample_prep")</a></li>
+							<li><a href="@routes.Assets.at("ngl-sq/documentation/cns/NGL-SQ_Schéma_Processus_MetaBarcoding.pdf")"		 target="_blank">@Messages("docs.bank.metabarcoding")</a></li>
+							<li><a href="@routes.Assets.at("ngl-sq/documentation/cns/NESTED-Schéma processus_MetaB double PCR (NESTED).pdf")"	 target="_blank">@Messages("docs.processes.metabarcoding")</a></li>
+							<li><a href="@routes.Assets.at("ngl-sq/documentation/cns/NGL-SQ_Schéma_Processus_MetaTranscriptomique.pdf")" target="_blank">@Messages("docs.bank.metatranscriptomique")</a></li>
+							<li><a href="@routes.Assets.at("ngl-sq/documentation/cns/NGL-SQ_Schéma_Processus_MetaGenomique.pdf")"		 target="_blank">@Messages("docs.bank.metabargenomique")</a></li>
+							<li><a href="@routes.Assets.at("ngl-sq/documentation/cns/NGL-SQ_Nanopore.pdf")"								 target="_blank">@Messages("docs.nanopore")</a></li>
+							<li><a href="@routes.Assets.at("ngl-sq/documentation/cns/Processus_Nanopore_schemas_resume.pdf")"			 target="_blank">@Messages("docs.processes.nanopore")</a></li>
+							<li><a href="@routes.Assets.at("ngl-sq/documentation/cns/NGL-SQ_Opgen.pdf")"								 target="_blank">@Messages("docs.opticalmapping.opgen")</a></li>
+							<li><a href="@routes.Assets.at("ngl-sq/documentation/cns/NGL-SQ_Bionano.pdf")"								 target="_blank">@Messages("docs.opticalmapping.bionano")</a></li>
+							<li><a href="@routes.Assets.at("ngl-sq/documentation/cns/Schemas_Processus_existants_nov17.pdf")"			 target="_blank">@Messages("docs.processes.schema")</a></li>
 						</ul>
 					</li>
 				}
 				@if(isCNGInstitute){
-	  						<li class="dropdown @("active".when(nav.startsWith("help")))">
-	  							<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" id="help">@Messages("docs.menu")<b class="caret"></b></a>
-								<ul class="dropdown-menu" role="menu" aria-labelledby="help">
-								 	<!-- Guide d'utilisation NGL-SQ-Séquençage.pdf Modifié par Julie Guy le Mar 27 Oct 2015 12:29:19 -->
-									<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/NGL_SQ_Illumina-CNG.pdf")" target="doc">@Messages("docs.illumina")</a></li>
-									
-								 	<!-- Schemas Processus 16/11/2017  -->
-								 	<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schéma processus Chromium WG.pdf")" target="doc">@Messages("docs.schema-processus.chromiumWG")</a></li>
-								 	<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schéma processus Exp satellites uniquement.pdf")" target="doc">@Messages("docs.schema-processus.ExpSatellites")</a></li>
-								 	<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schéma processus RNAseq.pdf")" target="doc">@Messages("docs.schema-processus.RNAseq")</a></li>
-								 	<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schéma processus WG NANO.pdf")" target="doc">@Messages("docs.schema-processus.WGNANO")</a></li>
-								 	<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schéma processus WG PCR free.pdf")" target="doc">@Messages("docs.schema-processus.WGPCRfree")</a></li>
-								 	<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schémas processus CAPTURE.pdf")" target="doc">@Messages("docs.schema-processus.Capture")</a></li>
-								 	<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schémas processus Librairies pour séquençage Illumina.pdf")" target="doc">@Messages("docs.schema-processus.LibSeqIllumina")</a></li>
-								 	<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schémas processus reprise débutant par Normalisation.pdf")" target="doc">@Messages("docs.schema-processus.repriseNorm")</a></li>
-								 	<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schémas processus Séquençage.pdf")" target="doc">@Messages("docs.schema-processus.sequencing")</a></li>
-								</ul>
+					<!-- NGL-3272 utilisation de sub-menu => ajout CSS dédié dans ngl.css , class fa-align-right pas reconnue ? mal utilisée ? -->
+	  				<li class="dropdown @("active".when(nav.startsWith("help")))">
+	  					<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" id="help"></i> @Messages("docs.menu")<b class="caret"></b></a>
+						<ul class="dropdown-menu" role="menu" aria-labelledby="help">
+								
+							<li class="dropdown-submenu">
+								<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> <span class="nav-label">Guides d'utilisation &nbsp; &nbsp;</span><span class="fa fa-caret-right"></span></a>
+									<ul class="dropdown-menu">
+										<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/NGL_SQ_Illumina-CNG.pdf")" target="_blank">@Messages("docs.illumina")</a></li>
+									</ul>
 							</li>
+							
+							<li class="dropdown-submenu">
+								<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> <span class="nav-label">Schémas Processus </span><span class="fa fa-caret-right"></span></a>
+									<ul class="dropdown-menu">
+										<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schéma processus Chromium.pdf")"								target="_blank">@Messages("docs.schema-processus.chromium")</a></li>
+										<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schéma processus Exp satellites uniquement.pdf")" 				target="_blank">@Messages("docs.schema-processus.ExpSatellites")</a></li>
+										<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schéma processus RNAseq.pdf")"									target="_blank">@Messages("docs.schema-processus.RNAseq")</a></li>
+										<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schéma processus RNAseq (équipe de DEV).pdf")"					target="_blank">@Messages("docs.schema-processus.RNAseq-Dev")</a></li>
+										<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schéma processus WG NANO.pdf")"								target="_blank">@Messages("docs.schema-processus.WGNANO")</a></li>
+										<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schéma processus WG PCR free.pdf")"							target="_blank">@Messages("docs.schema-processus.WGPCRfree")</a></li>
+										<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schémas processus CAPTURE.pdf")"								target="_blank">@Messages("docs.schema-processus.Capture")</a></li>
+										<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schéma processus NANOPORE et règles SQ-BI.pdf")"				target="_blank">@Messages("docs.schema-processus.Nanopore")</a></li>
+										<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schéma processus -Ox-Bis-Seq.pdf")"              				target="_blank">@Messages("docs.schema-processus.Ox-Bis-Seq")</a></li>
+										<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schéma processus small RNA-seq et Bis-Seq.pdf")"				target="_blank">@Messages("docs.schema-processus.smallRNAseq-Bis-Seq")</a></li>
+										<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schéma processus ATAC-Seq.pdf")"								target="_blank">@Messages("docs.schema-processus.ATAC-Seq")</a></li>
+										<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schémas-processus-QMPseq-OxQMPseq-doc-utilisateur.pdf")" 		target="_blank">@Messages("docs.schema-processus.QMPSeq-OxQMPSeq")</a></li>
+										<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schémas processus Librairies pour séquençage Illumina.pdf")"	target="_blank">@Messages("docs.schema-processus.LibSeqIllumina")</a></li>
+										<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schémas processus reprise débutant par Normalisation.pdf")"	target="_blank">@Messages("docs.schema-processus.repriseNorm")</a></li>
+										<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schémas processus Séquençage.pdf")" 							target="_blank">@Messages("docs.schema-processus.sequencing")</a></li>
+									</ul>
+							</li>
+							
+							<li class="dropdown-submenu">
+								<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> <span class="nav-label">Templates d'import &nbsp; &nbsp;</span><span class="fa fa-caret-right"></span></a>
+									<ul class="dropdown-menu">
+										<li><a href='@{CnrghTemplatesUrl+"a56dcf82-f7f6-4984-9cb3-a94e359108f5"}' target="_blank">Import Aliquots en plaques</a></li>
+										<li><a href='@{CnrghTemplatesUrl+"1705e5cb-96f5-457d-8d38-295420da8ea1"}' target="_blank">Import Aliquots en tubes</a></li>
+										<li><a href='@{CnrghTemplatesUrl+"4b28c03d-afbe-4daa-8ff2-b04d17c3ff82"}' target="_blank">Import Librairie indexées non poolées (équipes internes)</a></li>
+										<li><a href='@{CnrghTemplatesUrl+"409a3b69-dd7e-43e2-84e6-780f3200cde6"}' target="_blank">Import Librairie indexées non poolées</a></li>
+										<li><a href='@{CnrghTemplatesUrl+"7cf29609-3d08-453f-a043-10ce838d8448"}' target="_blank">Import Librairie indexées poolées</a></li>
+										<li><a href='@{CnrghTemplatesUrl+"4b6572a9-6af6-45e0-aaca-e6f92185e005"}' target="_blank">Import Librairie indexées poolées (SANS démultiplexage)</a></li>
+									</ul>
+							</li>
+
+							<!-- liste des Code Processus Libairies  02/12/2019 basculer vers version wiki -->
+							<li><a style="color:#0099cc" href="http://wiki.cnrgh.fr/wiki/ngldocumentation/view/Main/Liste%20des%20types%20de%20processus%20Banque/" 
+							target="_blank">@Messages("docs.list-libraryProcessTypeCodes")</a></li>
+						</ul>
+					</li>
 				}
-						
+
+				@ddmenu(nav,"descriptions","descriptions.menu") {
+					@ddentry(nav,	"descriptions.instruments",	Descriptions.home("instruments"),	"descriptions.menu.instruments")
+					@ddentry(nav,	"descriptions.property.definitions",	Descriptions.home("propertydefinitions"),	"descriptions.menu.property.definitions")
+					@ddentry(nav,	"descriptions.protocols",	Descriptions.home("protocols"),	"descriptions.menu.protocols")
+					@ddentry(nav,	"descriptions.experiments",	Descriptions.home("experiments"),	"descriptions.menu.experiments")
+					@if(isCNSInstitute){
+						@ddentry(nav,	"descriptions.mapping.projects",	Descriptions.home("mappingprojects"),	"descriptions.menu.mapping.projects")
+					}
+				}
+				
 				@if(adminPermission){
 					<li class="dropdown @("active".when(nav.startsWith("admin")))">
 						<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" id="admin"><i class="fa fa-users"></i> @Messages("admin.menu")<b class="caret"></b></a>
 						<ul class="dropdown-menu" role="menu" aria-labelledby="users">
-							<li class="@("active".when(nav == "admin.supports.switch-index"))"><a href="@controllers.admin.supports.tpl.routes.Supports.home("switch-index")">@Messages("admin.supports.menu.switchindex")</a></li>
-							<li class="@("active".when(nav == "admin.supports.content-update"))"><a href="@controllers.admin.supports.tpl.routes.Supports.home("content-update")">@Messages("admin.supports.menu.contentupdate")</a></li>
+							<li class="@("active".when(nav == "admin.supports.switch-index"))"><a href="@controllers.admin.supports.tpl.routes.Supports.home("switch-index")">@Messages("admin.supports.menu.switch-index")</a></li>
+							<li class="@("active".when(nav == "admin.supports.content-update"))"><a href="@controllers.admin.supports.tpl.routes.Supports.home("content-update")">@Messages("admin.supports.menu.content-update")</a></li>
 						</ul>
 					</li>
 				} 								
@@ -116,7 +188,7 @@
 				<ul class="dropdown-menu" role="menu" aria-labelledby="user">
 						<li><a href="/authentication/logout">@Messages("authentification.dropdown_list.signout")</a></li>
 				</ul>
-				</li>				
+				</li>
 			</ul>
 		</div>
 	</div>		

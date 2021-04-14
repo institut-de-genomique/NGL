@@ -27,24 +27,20 @@ public abstract class TPLCommonController extends Controller {
 		return filledForm;
 	}
 	
-	
 	protected void fillDataWith(Map<String, Object> data, Map<String, String[]> urlFormEncoded) {
-	        urlFormEncoded.forEach((key, values) -> {
-	            if (key.endsWith("[]")) {
-	                String k = key.substring(0, key.length() - 2);
-	                for (int i = 0; i < values.length; i++) {
-	                    data.put(k + "[" + i + "]", values[i]);
-	                }
-	            } else if (values.length > 0) {
-	                data.put(key, values[0]);
-	            }
-	        });
-	    }
+		urlFormEncoded.forEach((key, values) -> {
+			if (key.endsWith("[]")) {
+				String k = key.substring(0, key.length() - 2);
+				for (int i = 0; i < values.length; i++) {
+					data.put(k + "[" + i + "]", values[i]);
+				}
+			} else if (values.length > 0) {
+				data.put(key, values[0]);
+			}
+		});
+	}
 	
 	protected String getCurrentUser() {
-		// return Context.current().request().username();
-		// return fr.cea.ig.authentication.Helper.username(Context.current().request());
-		// return fr.cea.ig.authentication.Helper.username(Context.current().session());
 		return fr.cea.ig.authentication.Authentication.getUser(Context.current().session());
 	}
 	

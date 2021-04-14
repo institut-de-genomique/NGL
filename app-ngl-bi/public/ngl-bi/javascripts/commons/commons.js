@@ -72,7 +72,7 @@ angular.module('biCommonsServices', []).
     						var result = results[i];
     						
     						_allTreatments[result.config.key+"-"+result.data.code]={code:result.config.key, name:Messages(msgkey+".treatments."+result.config.key), url:url(result.data.code).url, order:displayOrder(result, key), show:true, propDefinitions:result.data.propertiesDefinitions};
-    					}
+						}
     					prepareCurrentTreatments();    					
     				});
     			}else{

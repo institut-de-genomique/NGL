@@ -22,11 +22,28 @@ dialect 'java'
         Set<ResourceProperties> resourceProperties = new HashSet<ResourceProperties>();
         
         JobResource groupJobResource = $groupJob.getUniqueJobResource("subData");
-        
+       //TODO add to project properties nbMaxPack
+        int nbMaxPack=250;
         JSONDevice jsonDevice = new JSONDevice();
 		Set<ResourceProperties> rpsRawData = jsonDevice.httpGetJSON(ProjectProperties.getProperty("server")+"/api/sra/experiments/rawDatas?submissionCode="+groupJobResource.getProperty("code"),"bot");
+		if($groupJob.getProperty("nbPackRawData")==null){
+		
+			//Add group property nbPackRawData
+			
+			Integer nbPackRawData = (rpsRawData.size()/nbMaxPack)+1;
+			$groupJob.setProperty("nbPackRawData",""+nbPackRawData);
+			log.debug("nb Pack Raw data "+$groupJob.getProperty("nbPackRawData"));
+			//Initialize group property nbPackRawDataSuccess
+			$groupJob.setProperty("nbPackRawDataSuccess",""+0);
+		}
+		
+		//Create submission bigTmp directory if needed (at least one rawDat with gzip=true or location=CCRT
+		SRAFilesUtil.createBigTmpDirectory(rpsRawData,groupJobResource.getProperty("code"));
 		boolean gzipForSubmission = SRAFilesUtil.checkGzipForSubmission(rpsRawData);
-		if(!gzipForSubmission){
+		//Check if rawDatas with location=CCRT are present in tmp directory 
+		boolean checkDataCCRT = SRAFilesUtil.checkDataCCRT(rpsRawData,groupJobResource.getProperty("code"));
+		boolean checkMD5 = SRAFilesUtil.checkMD5(rpsRawData);
+		if(!gzipForSubmission && checkDataCCRT && checkMD5){
 			ResourceProperties newRp = new ResourceProperties();
 			newRp.setProperty("code",groupJobResource.getProperty("code"));
 			newRp.setProperty("gzipForSubmission","false");
@@ -34,15 +51,27 @@ dialect 'java'
 			newRp.setProperty("experimentCodes",groupJobResource.getProperty("experimentCodes").replaceAll("\"",""));
 			newRp.setProperty("idGroupJob",""+$groupJob.getId());
 			resourceProperties.add(newRp);
-		}else{
+		}else if(gzipForSubmission){
 			Set<ResourceProperties> rpZips = $referentialDevice.getResourcesWithType($rps.getResourceType().getName(), $resourcesReferential);
-        	//Check submissionCode
-        	for(ResourceProperties rpZip : rpZips){
-        		if(rpZip.getProperty("code").equals(groupJobResource.getProperty("code")))
-        			resourceProperties.add(rpZip);
-        	}
+       		//Check submissionCode
+       		for(ResourceProperties rpZip : rpZips){
+       			if(rpZip.getProperty("code").equals(groupJobResource.getProperty("code")))
+       				resourceProperties.add(rpZip);
+       		}
 		}
-		$rps.setResourcePropertiesSet(resourceProperties);
+		//Check size resourceProperties only one
+		//if(resourceProperties.size()==1){
+		if(resourceProperties.size()>0){
+			//Create pack resource
+			Set<ResourceProperties> newRP = SRAFilesUtil.createPackRawData(resourceProperties.iterator().next(), rpsRawData, "list_aspera", nbMaxPack);
+			log.debug("Size of new RP "+newRP.size());
+			$rps.setResourcePropertiesSet(newRP);
+		}
+		//}else{
+		//	log.debug("For submission code "+groupJobResource.getProperty("code"));
+		//	throw new BirdsException("Size resourceProperties transfertRawData more than one result");
+		//}
+	
 		modify($rps) {};
 end
 
@@ -60,12 +89,10 @@ rule "update localDirectoryPath parameter"
 			Logger log = Logger.getLogger("ngl.sub.rules");
 			log.debug("Get rawData");
 			//Get rawData
-			JSONDevice jsonDevice = new JSONDevice();
-			Set<ResourceProperties> rps = jsonDevice.httpGetJSON(ProjectProperties.getProperty("server")+"/api/sra/experiments/rawDatas?submissionCode="+$job.getUniqueJobResource("rawDataDir").getProperty("code"),"bot");
-			log.debug("Size of rawData : "+rps.size());
 			String directoryPath = $job.getUniqueJobResource("rawDataDir").getProperty("submissionDirectory");
 			String filePath = $job.getParameterValue("fileList").getValue().replace("%directoryPath%",directoryPath);
-			SRAFilesUtil.createWGSFile(directoryPath, filePath, rps);
+			String fileNamePack = $job.getUniqueJobResource("inputTransfertSubZip").getProperty("fileNamePack");
+			filePath=filePath.replace("list_aspera",fileNamePack);
 			log.debug("set parameter value");
 			//Get input resource
 			$job.setParameterValue("fileList", filePath);
@@ -98,6 +125,26 @@ rule "unix syntax ncftpput for EBI"
 			modify($strategy) {}
 end
 
+
+rule "Set submission to SUB-SRD-IP "
+@BirdsRule( ExecutionService )
+	dialect 'java'
+	salience 500
+	no-loop
+	when
+		$executionService : ExecutionService( status == ExecutionService.PRE_JOB_EXECUTION_STATUS)
+		$job : Job( treatmentSpecification.specificationGroup == false,  treatmentSpecification.name != null , treatmentSpecification.name == "transfertRawData")
+	then
+		JobResource jobResource = $job.getUniqueJobResource("rawDataDir");
+		String codeSubmission = jobResource.getProperty("code");
+		JSONDevice jsonDevice = new JSONDevice();
+		ResourceProperties rpSubmission = jsonDevice.httpGetJSON(ProjectProperties.getProperty("server")+"/api/sra/submissions/"+codeSubmission, "bot").iterator().next();
+		String state = rpSubmission.getProperty("state.code");
+		if(!state.equals("SUB-SRD-IP") && (state.equals("SUB-SRD-IW") || state.equals("SUB-SRD-FE"))){
+			jsonDevice.httpPut(ProjectProperties.getProperty("server")+"/sra/submissions/"+codeSubmission+"/state", "{\"code\":\"SUB-SRD-IP\"}", "bot");
+		}
+end
+
 rule "add rawData resources in internalRefSubmission_xml to fire sendXML"
 	@BirdsRule( addResources ) 
 	dialect 'java'
@@ -111,10 +158,77 @@ rule "add rawData resources in internalRefSubmission_xml to fire sendXML"
 	then
 		Logger log = Logger.getLogger("ngl.sub.rules");
 		log.debug("Add rawData resources rules for sendXML");
-		JobResource outputResource = $resourceSet.createJobResource($output.getResourceType(),$referential.getName());
-		ResourceProperties resourceProperties = outputResource.getResourceProperties();
-		resourceProperties.setProperty("fileList", $job.getParameterValue("fileList").getValue());
-		$flag.setDone(true);
-		modify($flag){};
-		modify($resourceSet){};
+		//Only if all pack success
+		//Get groupJob resource property
+		Job groupJob = $job.getSpecificationGroupJob();
+		//Incrementation nbPackRawDataSuccess dans le postJob execution
+		int nbPackRawDataSuccess = Integer.parseInt(groupJob.getProperty("nbPackRawDataSuccess"));
+		int nbPackRawData = Integer.parseInt(groupJob.getProperty("nbPackRawData"))-1;
+		log.debug("addRessource : nbPacRawDataSuccess=nbPackRawData"+nbPackRawDataSuccess+"="+nbPackRawData);
+		if(nbPackRawDataSuccess==nbPackRawData){
+			JobResource outputResource = $resourceSet.createJobResource($output.getResourceType(),$referential.getName());
+			ResourceProperties resourceProperties = outputResource.getResourceProperties();
+			resourceProperties.setProperty("fileList", $job.getParameterValue("fileList").getValue());
+			$flag.setDone(true);
+			modify($flag){};
+			modify($resourceSet){};
+		}
 end
+
+rule "POST DONE EXECUTION of transfertRawData"
+	@BirdsRule( ExecutionService )
+	dialect 'java'
+	salience 200
+	when
+		$executionService : ExecutionService( status == ExecutionService.POST_JOB_EXECUTION_STATUS)
+		$job : Job( treatmentSpecification!=null, treatmentSpecification.name == "transfertRawData", treatmentSpecification.project.name == "SRA", executionState == Job.DONE_STATUS )
+		
+	then
+		Logger log = Logger.getLogger("ngl.sub.rules");
+		//Call service treatment AC files results 
+		JobResource jobResource = $job.getUniqueJobResource("rawDataDir");
+		String codeSubmission = jobResource.getProperty("code");
+		
+		//Increment group job property nbPackRawDataSuccess
+		Job groupJob = $job.getSpecificationGroupJob();
+		int nbPackRawDataSuccess = Integer.parseInt(groupJob.getProperty("nbPackRawDataSuccess"))+1;
+		groupJob.setProperty("nbPackRawDataSuccess",""+nbPackRawDataSuccess);
+		log.debug("Get nbPackRawDataSuccess"+groupJob.getProperty("nbPackRawDataSuccess"));
+		int nbPackRawData = Integer.parseInt(groupJob.getProperty("nbPackRawData"));
+		
+		if(nbPackRawDataSuccess==nbPackRawData){
+			JSONDevice jsonDevice = new JSONDevice();
+			jsonDevice.httpPut(ProjectProperties.getProperty("server")+"/sra/submissions/"+codeSubmission+"/state", "{\"code\":\"SUB-SRD-F\"}", "bot");
+		}
+end
+
+rule "POST ERROR EXECUTION of transfertRawData"
+	@BirdsRule( ExecutionService )
+	dialect 'java'
+	salience 200
+	when
+		$executionService : ExecutionService( status == ExecutionService.POST_JOB_EXECUTION_STATUS)
+		$job : Job( treatmentSpecification!=null, treatmentSpecification.name == "transfertRawData", treatmentSpecification.project.name == "SRA", executionState == Job.ERROR_STATUS )
+	then
+		Logger log = Logger.getLogger("ngl.sub.rules");
+		//Call service treatment AC files results 
+		JobResource jobResource = $job.getUniqueJobResource("rawDataDir");
+		String codeSubmission = jobResource.getProperty("code");
+		
+		JSONDevice jsonDevice = new JSONDevice();
+		jsonDevice.httpPut(ProjectProperties.getProperty("server")+"/sra/submissions/"+codeSubmission+"/state", "{\"code\":\"SUB-SRD-FE\"}", "bot");
+		
+		//Send mail error
+		String errorMessage = "Error during executing job for sending raw data : "+codeSubmission+".\n"+
+			"Command line "+$job.getUnixCommand()+"\n"+
+			"Check outputFile and log \n"+
+			"STDOUT "+$job.getProperty(Job.STDOUT)+"\n"+
+			"STDERR "+$job.getProperty(Job.STDERR)+"\n"+
+			"SCHEDULER STDOUT "+$job.getProperty(JobScheduler.JOB_SCHEDULER_STD_OUTPUT_PATH+JobScheduler.JOB_SCHEDULER_STD_OUTPUT_FILE)+"\n"+
+			"SCHEDULER STDERR "+$job.getProperty(JobScheduler.JOB_SCHEDULER_STD_ERROR_PATH+JobScheduler.JOB_SCHEDULER_STD_ERROR_FILE)+"\n"+
+			"Exception "+$job.getProperty("Exception");
+		
+			SubmissionServicesFactory.getInstance().sendMail("william","ERROR Sending Raw Data Submission="+codeSubmission+" JobID="+$job.getId(),errorMessage);
+end
+
+

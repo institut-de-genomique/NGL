@@ -11,7 +11,8 @@
 -->
 <change-set xmlns='http://drools.org/drools-5.0/change-set'
 	xmlns:xs='http://www.w3.org/2001/XMLSchema-instance'
-	xs:schemaLocation='http://drools.org/drools-5.0/change-set http://anonsvn.jboss.org/repos/labs/labs/jbossrules/trunk/drools-api/src/main/resources/change-set-1.0.0.xsd'>
+	xs:schemaLocation='/changesets/change-set-1.0.0.xsd'>
+
 	<add>
 		<resource source='classpath:rules/default/import.drl'
 			type='DRL' />
@@ -28,7 +29,6 @@
 		
 		<resource source='classpath:rules/client/Birds.rf' type='DRF' />
 		
-		
 		<!-- Project Rules -->
 		
 		<resource type="DRL" source="classpath:rules/commons.drl" />
@@ -39,6 +39,9 @@
 		<resource type="DRF" source="classpath:rules/wf_zip_md5.rf" />
 		<resource type="DRL" source="classpath:rules/wf_zip_md5.drl" />
 		
+		<resource type="DRF" source="classpath:rules/wf_CCRT.rf" />
+		<resource type="DRL" source="classpath:rules/wf_CCRT.drl" />
+		
 		<resource type="DRF" source="classpath:rules/wf_submission_dev.rf" />
 		
 		
@@ -48,16 +51,19 @@
 			
 		<resource source='classpath:rules/zip.drl' type='DRL' />
 		<resource source='classpath:rules/md5.drl' type='DRL' />
+		<resource source='classpath:rules/md5Out.drl' type='DRL' />
+		<resource source='classpath:rules/linkFile.drl' type='DRL' />
 		
-		
-		<resource type="DRF" source="classpath:rules/wf_release.rf" />
+		<!-- <resource type="DRF" source="classpath:rules/wf_release.rf" />-->
 		<resource type="DRL" source="classpath:rules/wf_release.drl" />
 		
 		<resource type="DRL" source="classpath:rules/createReleaseXML.drl" />
 		<resource type="DRL" source="classpath:rules/sendReleaseXML.drl" />
+		<resource type="DRL" source="classpath:rules/sendUpdateXML.drl" />
 		<!--  resource source='classpath:example/ResourceSplitting.drl' type='DRL' / -->
 		<resource type="DRL" source="classpath:rules/getCCRTFiles.drl" />
-		<resource type="DRL" source="classpath:rules/removeCCRTFiles.drl" />
+		<resource type="DRL" source="classpath:rules/touchFileCCRT.drl" />
+		<!-- <resource type="DRL" source="classpath:rules/removeCCRTFiles.drl" />-->
 		<!--
 			resource
 			source='http://etna15.genoscope.cns.fr:8280/drools-guvnor/org.drools.guvnor.Guvnor/package/sbwh6.test/LATEST'

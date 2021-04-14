@@ -1,7 +1,7 @@
 "use strict";
  
 angular.module('home', ['ngRoute', 'ultimateDataTableServices','commonsServices', 'ui.bootstrap', 
-                        'ngl-bi.BalanceSheetsService'], function($routeProvider, $locationProvider) {
+                        'ngl-bi.BalanceSheetsService']).config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
 	
 	$routeProvider.when('/balance-sheets/:typeCode/general/home',{
 		templateUrl : '/tpl/balance-sheets/general',
@@ -13,10 +13,8 @@ angular.module('home', ['ngRoute', 'ultimateDataTableServices','commonsServices'
 		controller : 'BalanceSheetsYearCtrl'
 	});
 	
-	
-	
 	$routeProvider.otherwise({redirectTo: '/balance-sheets/general/home'});
 
 	// configure html5 to get links working with bookmarked
 	$locationProvider.html5Mode({enabled: true, requireBase: false});
-});
+}]);

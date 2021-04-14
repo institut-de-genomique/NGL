@@ -1,5 +1,7 @@
 package models.laboratory.instrument.description.dao;
 
+import static models.utils.dao.DAOException.daoAssertNotNull;
+
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.List;
@@ -70,16 +72,19 @@ public class InstrumentDAO extends AbstractDAOMapping<Instrument> {
 	
 	@SuppressWarnings("deprecation")
 	private void insertInstitutes(List<Institute> institutes, Long instrumentId, boolean deleteBefore) throws DAOException {
-		if(deleteBefore){
+		if (deleteBefore) {
 			removeInstitutes(instrumentId);
 		}
-		//Add institutes list		
-		if(institutes!=null && institutes.size()>0){
+		if (institutes == null)
+			throw new DAOException("no institutes list");
+		if (institutes.size() == 0)
+			throw new DAOException("empty institute list");
+		//Add institutes list
+		if (/*institutes != null &&*/ institutes.size() > 0) {
 			String sql = "INSERT INTO instrument_institute (fk_instrument, fk_institute) VALUES (?,?)";
-			for(Institute institute : institutes){
-				if(institute == null || institute.id == null ){
+			for (Institute institute : institutes) {
+				if (institute == null || institute.id == null )
 					throw new DAOException("institute is mandatory");
-				}
 				jdbcTemplate.update(sql, instrumentId, institute.id);
 			}
 		}
@@ -94,9 +99,8 @@ public class InstrumentDAO extends AbstractDAOMapping<Instrument> {
 	
 	@Override
 	public void remove(Instrument instrument) throws DAOException {
-		if (instrument == null) {
+		if (instrument == null)
 			throw new IllegalArgumentException("instrument is null");
-		}
 		
 		//remove institute
 		removeInstitutes(instrument.id);
@@ -104,31 +108,44 @@ public class InstrumentDAO extends AbstractDAOMapping<Instrument> {
 		super.remove(instrument);
 	}
 	
-	@Override //because code is not unique for Instrument
-	public Boolean isCodeExist(String code) throws DAOException {
-		if (null == code) {
-			throw new DAOException("code is mandatory");
-		}
+	@Override // because code is not unique for Instrument
+//	public boolean isCodeExist(String code) throws DAOException {
+//		if (code == null)
+//			throw new DAOException("code is mandatory");
+//		try {
+//			try {
+//				String sql = "select distinct(t.code) as code FROM instrument as t "+DAOHelpers.getInstrumentSQLForInstitute("t")+" WHERE t.code=?";
+//				@SuppressWarnings("deprecation")
+//				String returnCode =  this.jdbcTemplate.queryForObject(sql, String.class, code);
+////				if (returnCode != null) {
+////					return Boolean.TRUE;
+////				} else {
+////					return Boolean.FALSE;
+////				}
+//				return returnCode != null;
+//			} catch (EmptyResultDataAccessException e) {
+//				return Boolean.FALSE;
+//			}
+//		} catch (DataAccessException e) {
+//			throw new RuntimeException(e);
+//		}
+//	}
+	public boolean isCodeExist(String code) throws DAOException {
+		daoAssertNotNull("code",code);
 		try {
-			try {
-				String sql = "select distinct(t.code) as code FROM instrument as t "+DAOHelpers.getInstrumentSQLForInstitute("t")+" WHERE t.code=?";
-				@SuppressWarnings("deprecation")
-				String returnCode =  this.jdbcTemplate.queryForObject(sql, String.class, code);
-				if (returnCode != null) {
-					return Boolean.TRUE;
-				} else {
-					return Boolean.FALSE;
-				}
-			} catch (EmptyResultDataAccessException e) {
-				return Boolean.FALSE;
-			}
+			String sql = "select distinct(t.code) as code FROM instrument as t "+DAOHelpers.getInstrumentSQLForInstitute("t")+" WHERE t.code=?";
+			@SuppressWarnings("deprecation")
+			String returnCode =  this.jdbcTemplate.queryForObject(sql, String.class, code);
+			return returnCode != null;
+		} catch (EmptyResultDataAccessException e) {
+			return Boolean.FALSE;
 		} catch (DataAccessException e) {
-			throw new RuntimeException(e);
+			throw new DAOException(e);
 		}
 	}
 	
 	public List<Instrument> findByInstrumentUsedType(long idInstrumentUsedType) throws DAOException {
-		String sql = sqlCommon + " WHERE t.fk_instrument_used_type=? and t.active=1 order by t.name";
+		String sql = sqlCommon + " WHERE t.fk_instrument_used_type=? order by t.name";
 		return initializeMapping(sql, new SqlParameter("t.fk_instrument_used_type", Types.INTEGER)).execute(idInstrumentUsedType);
 	}
 	
@@ -142,11 +159,11 @@ public class InstrumentDAO extends AbstractDAOMapping<Instrument> {
 				+" inner join common_info_type cit on cit.id = et.fk_common_info_type"					
 				+" where 1=1 ";		
 		
-		if(instumentQueryParams.experimentTypes != null){
+		if (instumentQueryParams.experimentTypes != null) {
 			parameters = ArrayUtils.addAll(parameters, instumentQueryParams.experimentTypes.toArray());
 			sqlParameters = ArrayUtils.addAll(sqlParameters, listToSqlParameters(instumentQueryParams.experimentTypes,"cit.code", Types.VARCHAR));			
 			sql += " and cit.code in ("+listToParameters(instumentQueryParams.experimentTypes)+") ";
-		}else if(instumentQueryParams.experimentType != null){
+		} else if(instumentQueryParams.experimentType != null) {
 			Object[] args = new Object[]{instumentQueryParams.experimentType};
 			parameters = ArrayUtils.addAll(parameters,args);
 			sqlParameters = ArrayUtils.add(sqlParameters, new SqlParameter("cit.code", Types.VARCHAR));			
@@ -155,8 +172,6 @@ public class InstrumentDAO extends AbstractDAOMapping<Instrument> {
 	
 		sql += " ORDER BY t.code";		
 		return initializeMapping(sql, (SqlParameter[])sqlParameters).execute(parameters);	
-		
-		
 	}
 	
 	public List<Instrument> findByQueryParams(InstrumentQueryParams instumentQueryParams) throws DAOException {

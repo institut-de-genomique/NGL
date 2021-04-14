@@ -1,7 +1,7 @@
 "use strict";
 
 angular.module('ngl-sq.containersServices', []).
-factory('containersSearchService', ['$http', 'mainService', 'lists', 'datatable', function($http, mainService, lists, datatable){
+factory('containersSearchService', ['$rootScope', '$http', 'mainService', 'lists', 'datatable', function($rootScope, $http, mainService, lists, datatable){
 	//var tags = [];
 	var getColumnsDefault = function(){
 		var columns = [];
@@ -12,7 +12,8 @@ factory('containersSearchService', ['$http', 'mainService', 'lists', 'datatable'
 			"hide":true,
 			"position":1,
 			"type":"text",
-			"group":true
+			"group":true,
+			"groupMethod": "count:true"
 		});
 		columns.push({
 			"header":Messages("containers.table.supportCategoryCode"),
@@ -204,6 +205,7 @@ factory('containersSearchService', ['$http', 'mainService', 'lists', 'datatable'
 			"listStyle":"bt-select",
 			"possibleValues":"searchService.getStates(value)", 
 			"filter":"codes:'state'",
+			"group": true,
 			"groupMethod":"unique"					
 		});
 		
@@ -219,7 +221,8 @@ factory('containersSearchService', ['$http', 'mainService', 'lists', 'datatable'
 			"choiceInList":true,
 		    "listStyle":"bt-select-multiple",
 		    "possibleValues":"searchService.lists.get('containerResolutions')",
-			"type" : "text"
+			"type" : "text",
+			"group": true
 		});
 		
 		columns.push({
@@ -227,7 +230,7 @@ factory('containersSearchService', ['$http', 'mainService', 'lists', 'datatable'
 			"property":"valuation.valid",
 			"order":true,
 			"type":"text",
-			"edit":(mainService.getHomePage() === 'search')?true:false,
+			"edit":true,
 			"hide":true,
 			"position":13,
 			"choiceInList": true,
@@ -258,6 +261,7 @@ factory('containersSearchService', ['$http', 'mainService', 'lists', 'datatable'
 			lists.refresh.reportConfigs({pageCodes:["containers-addcolumns"]}, "containers-addcolumns");
 			lists.refresh.filterConfigs({pageCodes:["containers-search-addfilters"]}, "containers-search-addfilters");
 			lists.refresh.resolutions({"objectTypeCode":"Container"}, "containerResolutions");
+			lists.refresh.values({propertyDefinitionCode:'rnaEvaluation'},"rnaEvaluation");
 			isInit=true;
 		}
 	};
@@ -269,6 +273,7 @@ factory('containersSearchService', ['$http', 'mainService', 'lists', 'datatable'
 			isRouteParam:false,
 			lists : lists,
 			form:undefined,
+			mainFilters:[],
 			additionalFilters:[],
 			additionalColumns:[],
 			selectedAddColumns:[],
@@ -289,6 +294,54 @@ factory('containersSearchService', ['$http', 'mainService', 'lists', 'datatable'
 					this.isRouteParam = true;
 					this.form = $routeParams;
 				}
+			},
+			getRIN: function(cellValue) { 
+				if (cellValue) {	 				
+					var latestExp = cellValue.filter(function (a) {
+						return a.typeCode == "chip-migration-rna-evaluation";
+					}).reduce(function (a, b) {
+						return a.index > b.index ? a : b;
+					}, "");
+
+					if (latestExp && latestExp["properties"]["rin"]) {
+						return latestExp["properties"]["rin"]["value"];
+					} 
+			    }
+			},
+			getColor: function(cellValue) { 
+				if (cellValue) {	 				
+					var latestExp = cellValue.filter(function (a) {
+						return a.typeCode == "chip-migration-rna-evaluation";
+					}).reduce(function (a, b) {
+						return a.index > b.index ? a : b;
+					}, "");
+
+					if (latestExp) {
+						if (latestExp["properties"]["rnaEvaluation"]) {
+							return latestExp["properties"]["rnaEvaluation"]["value"];
+						} 
+					} else {
+						// return "Mise à jour non possible car aucun QC de type \"chip-migration-rna-evaluation\" n'existe.";
+					}
+			    }
+			},
+			// Si ce n'était pas un tableau la couleur choisie se propagerait sur toutes les lignes du datatable.
+			colorChoosed: [],
+			/**
+			 * Méthode exécutée lorsqu'une couleur sur une ligne est sélectionnée dans le datatable.
+			 * @param cellValue La valeur de la ligne du datatable.
+			 */
+			updateContainerEvalARN:function(cellValue) {
+				if (cellValue == undefined) {
+					var that = this;
+						
+					// On met à jour notre tableau de couleurs. Sans cette mise à jour, les données sont mises à jour mais pas l'interface.
+					this.datatable.displayResult.filter(function (cont) {
+						return cont.line.edit;
+					}).forEach(function (r) {
+						that.colorChoosed[r.data.code] = that.colorChoosed[undefined];
+					});
+				} 
 			},
 			initAuthorizedStates:function(){
 				if(null === this.authorizedStates){
@@ -375,7 +428,25 @@ factory('containersSearchService', ['$http', 'mainService', 'lists', 'datatable'
 					
 				}
 				
-				if(this.form.reportingQuery){
+				//override with reportingConfiguration
+				if(this.reportingConfiguration && this.reportingConfiguration.queryConfiguration 
+						&& this.reportingConfiguration.queryConfiguration.query){
+					this.form.reportingQuery = this.reportingConfiguration.queryConfiguration.query;
+					this.form.reporting=true;
+					this.form.aggregate=false;
+					if(this.reportingConfiguration.queryConfiguration.type === 'aggregate'){
+						this.form.aggregate=true;
+					}
+					
+					for(var key in this.aggregateForm){
+						//replace "#someThing" by "somethingValue" but in case of number does not work because number cannot be inside a double quote
+						this.form.reportingQuery = this.form.reportingQuery.replace(new RegExp("#"+key,"g"),this.aggregateForm[key]);
+					}
+					
+					//replace form value;
+					console.log(this.aggregateForm);
+					
+				}else if(this.form.reportingQuery){
 					this.form.reportingQuery.trim();
 					if(this.form.reportingQuery.length > 0){
 						this.form.reporting=true;
@@ -388,14 +459,23 @@ factory('containersSearchService', ['$http', 'mainService', 'lists', 'datatable'
 			},
 			convertForm : function(){
 				var _form = angular.copy(this.form);
-				if(_form.fromDate)_form.fromDate = moment(_form.fromDate, Messages("date.format").toUpperCase()).valueOf();
-				if(_form.toDate)_form.toDate = moment(_form.toDate, Messages("date.format").toUpperCase()).valueOf();		
+				//if(_form.fromDate)_form.fromDate = moment(_form.fromDate, Messages("date.format").toUpperCase()).valueOf();
+				//if(_form.toDate)_form.toDate = moment(_form.toDate, Messages("date.format").toUpperCase()).valueOf();		
 				return _form
 
 			},
 
 			resetForm : function(){
 				this.form = {};									
+			},
+
+			resetTextareas : function(){
+				Array.from(document.getElementsByTagName('textarea')).forEach(function(element) { 
+					var elementScope = angular.element(element).scope();
+					if(elementScope.textareaValue){
+						elementScope.textareaValue = null;
+					}
+				});
 			},
 			
 			resetSampleCodes : function(){
@@ -422,10 +502,10 @@ factory('containersSearchService', ['$http', 'mainService', 'lists', 'datatable'
 				}
 			},
 			
-			search : function(){
+			search : function(callback){
 				this.updateForm();
 				mainService.setForm(this.form);				
-				this.datatable.search(this.convertForm());
+				this.datatable.search(this.convertForm(), callback);
 				
 			},
 			refreshSamples : function(){
@@ -503,12 +583,17 @@ factory('containersSearchService', ['$http', 'mainService', 'lists', 'datatable'
 				}else{
 					this.datatable.setColumnsConfig(this.getDefaultColumns().concat(this.selectedAddColumns));						
 				}
-				this.search();
+				if(this.datatable.isData()){
+					this.search();
+				}
 			},	
 			resetDatatableColumns:function(){
-				this.initAdditionalColumns();
-				this.datatable.setColumnsConfig(this.getDefaultColumns());
-				this.search();
+				this.updateColumn();
+				//this.initAdditionalColumns();
+				//this.datatable.setColumnsConfig(this.getDefaultColumns());
+				if(this.datatable.isData()){
+					this.search();
+				}
 			},
 			/**
 			 * Update column when change reportingConfiguration
@@ -519,15 +604,20 @@ factory('containersSearchService', ['$http', 'mainService', 'lists', 'datatable'
 					$http.get(jsRoutes.controllers.reporting.api.ReportingConfigurations.get(this.reportingConfigurationCode).url,{searchService:this, datatable:this.datatable})
 							.success(function(data, status, headers, config) {
 								config.searchService.reportingConfiguration = data;
-								if(config.searchService.lists.get('reportConfigs').length > 1){
+								if(config.searchService.lists.get('reportConfigs').length > 1 && config.datatable.isData()){
 									config.searchService.search();
 								}
-								config.datatable.setColumnsConfig(data.columns);																								
+								config.datatable.setColumnsConfig(data.columns);
+								config.searchService.mainFilters = config.searchService.organizeFilters(data.filters);								
 					});
 				}else{
 					this.reportingConfiguration = undefined;
+					this.initAdditionalFilters();
+					this.mainFilters = [];							
 					this.datatable.setColumnsConfig(this.getDefaultColumns());
-					this.search();
+					if(this.datatable.isData()){
+						this.search();
+					}
 				}
 				
 			},
@@ -535,13 +625,18 @@ factory('containersSearchService', ['$http', 'mainService', 'lists', 'datatable'
 				this.additionalFilters=[];
 				
 				if(lists.get("containers-search-addfilters") && lists.get("containers-search-addfilters").length === 1){
-					var formFilters = [];
 					var allFilters = angular.copy(lists.get("containers-search-addfilters")[0].filters);
 					
 					/* add static filters here*/
 					allFilters.push({property:"comments.comment",html:"<textarea class='form-control' ng-model='searchService.form.commentRegex' placeholder='"+Messages("search.placeholder.commentRegex")+"' title='"+Messages("search.placeholder.commentRegex")+"'></textarea>",position:allFilters.length+1});
 					
-					
+					this.additionalFilters = this.organizeFilters(allFilters);					
+				}
+			},
+			organizeFilters : function(allFilters){
+				if(allFilters !== undefined && allFilters !== null && allFilters.length > 0){
+				
+					var formFilters = [];
 					var nbElementByColumn = Math.ceil(allFilters.length / 5); //5 columns
 					for(var i = 0; i  < 5 && allFilters.length > 0 ; i++){
 						formFilters.push(allFilters.splice(0, nbElementByColumn));	    								
@@ -551,10 +646,11 @@ factory('containersSearchService', ['$http', 'mainService', 'lists', 'datatable'
 						formFilters.push([]);
 					}
 						
-					this.additionalFilters = formFilters;
+					return formFilters;
+				}else{
+					return [];
 				}
 			},
-			
 			getAddFiltersToForm : function(){
 				if(this.additionalFilters.length === 0){
 					this.initAdditionalFilters();
@@ -562,7 +658,9 @@ factory('containersSearchService', ['$http', 'mainService', 'lists', 'datatable'
 				return this.additionalFilters;									
 			},	
 			
-			
+			getMainFiltersToForm:function(){
+				return this.mainFilters;	
+			},
 			/**
 			 * initialise the service
 			 */

@@ -1,6 +1,6 @@
 "use strict";
  
-angular.module('home', ['commonsServices','ngRoute','ultimateDataTableServices','basketServices','ui.bootstrap','propertyDefServices','ngl-sq.processesServices','ngl-sq.samplesServices','ngl-sq.containersServices'], function($routeProvider, $locationProvider) {
+angular.module('home', ['commonsServices','ngRoute','ultimateDataTableServices','basketServices','ui.bootstrap','propertyDefServices','ngl-sq.processesServices','ngl-sq.samplesServices','ngl-sq.containersServices']).config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
 	$routeProvider.when('/processes/new-from-containers/home', {
 		templateUrl : jsRoutes.controllers.processes.tpl.Processes.searchContainers().url,
 		controller : 'SearchContainersCtrl'
@@ -28,7 +28,7 @@ angular.module('home', ['commonsServices','ngRoute','ultimateDataTableServices',
 		templateUrl : function(params){return jsRoutes.controllers.processes.tpl.Processes.newProcesses(params.processTypeCode).url},
 		controller : 'NewFromContainersCtrl'
 	});
-	$routeProvider.when('/processes/new-from-samples/:processTypeCode', {
+	$routeProvider.when('/processes/new-from-samples/:processTypeCode/:tabid', {
 		templateUrl : function(params){return jsRoutes.controllers.processes.tpl.Processes.newProcesses(params.processTypeCode).url},
 		controller : 'NewFromSamplesCtrl'
 	});
@@ -51,4 +51,4 @@ angular.module('home', ['commonsServices','ngRoute','ultimateDataTableServices',
 
 	// configure html5 to get links working with bookmarked
 	$locationProvider.html5Mode({enabled: true, requireBase: false});
-});
+}]);

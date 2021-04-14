@@ -1,0 +1,130 @@
+@this()
+@()
+@import views.html.helper._
+
+@formStart() = {
+
+	@columnSearchForm{
+		@formGroup{
+			@** ceci est un commentaire
+			**@
+			<div class="form-control" bt-select  ng-model="createService.form.projCodes" filter="true" multiple = "true" placeholder='@Messages("create.placeholder.projectCodes")' bt-options="project.code as project|formatProjectListLabel for project in createService.lists.getProjects()" required ng-change="createService.refreshSubmissions()"></div>	
+		}
+		@** 
+		bt-options = createService.lists.getSraConfigurations() defini dans ngl-common/common.js
+		ng-focus = appelle refreshSraConfigurations de createService
+		**@
+		@formGroup{
+			<div class="form-control" bt-select ng-model="createService.form.configurationCode" placeholder='@Messages("create.placeholder.submissions.configuration")' bt-options="configuration.code as configuration.code for configuration in createService.lists.getSraConfigurations()" required ng-focus="createService.refreshSraConfigurations()" ng-click="createService.displayStudies()"></div>			
+		}
+		
+		@** 
+		bt-options = createService.lists.getSraStudies() defini dans ngl-common/common.js
+		ng-focus = appelle refreshSraStudies de createService
+		**@
+		@formGroup{
+			<div class="form-control" bt-select ng-if="createService.internalStudies" ng-model="createService.form.studyCode" placeholder='@Messages("create.placeholder.submissions.study")' bt-options="study.code as study.code for study in createService.lists.getSraStudies()" ng-focus="createService.refreshSraStudies()"></div>			
+		}
+		
+		@** 
+		bt-options = createService.lists.getReadSets() defini dans ngl-common/common.js
+		ng-focus = appelle refreshReadSets de createService
+		**@
+		
+		@formGroup{
+			<div class="form-control" bt-select ng-model="createService.form.readSetCodes" filter="true" multiple="true" textarea="true" placeholder='@Messages("create.placeholder.submissions.readSet")' bt-options="readSet.code as readSet.code for readSet in createService.readSets"></div>			
+		}	
+		
+		
+		<div>
+			<!--  <label>@Messages("acStudy")</label> -->
+			<input type="text" class="form-control" ng-model="createService.form.acStudy" placeholder='@Messages("create.placeholder.acStudy")' >
+		</div>
+		<br/>	
+		<div>
+			<label>@Messages("userFileReadSet")</label> 
+			<input type="file"  id="idUserFileReadSet" base64-file="createService.userFileReadSet"/>
+		</div>
+		<br/>
+
+		<div>
+			<label>@Messages("userFileRefCollabToAc")</label> 
+			<input type="file"  id="idUserFileRefCollabToAc" base64-file="createService.userFileRefCollabToAc"/>
+		</div>
+		<br/>
+
+
+
+		<!--div>	
+			<label>@Messages("AcSample")</label> 
+			<input type="text" class="form-control" ng-model="createService.form.acSample" placeholder='@Messages("create.placeholder.acSample")' >
+		</div-->					
+		@** utilisation d'une directive base-64 (Yann): nom , type et contenu en base 64 du fichier recupere en javascritp**@
+		@**<input type="file" base64-file="createService.file", ng-if="createService.externalStudies"/>**@
+		
+		@formGroup{
+			<div class="html"  placeholder='@Messages("userFileRefCollabToAc")' ></div>			
+		}
+		<!--div>
+			<label>@Messages("userFileExperiments")</label> 
+			<input type="file" id="file" base64-file="createService.userFileExperiments"/>
+			<BR><BR>
+		</div>	
+		<div>
+			<label>@Messages("userFileSamples")</label> 
+			<input type="file" id="file" base64-file="createService.userFileSamples"/>
+			<BR><BR>
+		</div-->		
+		@**<div ng-if="createService.externalStudies">**@
+			@**<label>@Messages("userFileRefCollabToAc")</label> **@
+			@**<input type="file" base64-file="createService.userFileRefCollabToAc" ng-if="createService.externalStudies"/>**@
+		@**</div>	**@
+		
+		
+								
+	}
+	
+}
+
+<div class="row">
+<div class="col-md-12 col-lg-12"  messages="messages"></div>
+</div>
+
+<!--Pour affichage d'un spinner-->
+<div class="inProgressSpinner" ng-if="createService.treeLoadInProgress">
+<button class="btn btn-primary btn-lg">
+<i class="fa fa-spinner fa-spin fa-5x"></i>
+</button>
+</div>
+
+
+
+<div class="row"> 
+	<!--  <div class="col-md-12 col-lg-12" ultimate-datatable="createService.datatable"> -->
+	<div class="col-md-12 col-lg-12" > 
+		<div dt-form>	
+			<div class="tab-content">
+				<div class="tab-pane active" id="filters">
+					<form name="submissionForm" class="well well-small">
+						<div class="row">
+						@formStart
+						@columnSearchForm{
+							@formGroup{
+							<div class="btn-toolbar">
+								<button type="submit" title='@Messages("button.save")' ng-disabled="submissionForm.$invalid" ng-click="save()" data-toggle="tooltip" class="btn btn-primary" >
+									<i class="fa fa-save"></i>
+								</button> 
+								<button title='@Messages("button.reset")' ng-click="reset()" data-toggle="tooltip"  class="btn btn-default">
+									<i class="fa fa-undo"></i>
+								</button>						 	
+							</div>	
+							}	
+						}
+						</div>		
+					</form>	
+				</div>
+			</div>
+		</div>
+	</div> 
+</div> 
+
