@@ -1,0 +1,121 @@
+@this(ctx : fr.cea.ig.ngl.NGLApplication, menu_ : menu)
+@()
+
+@minifyEnabled = @{ true == ctx.nglConfig().isMinified() }
+
+@scripts() = {
+		<script src="@controllers.main.tpl.routes.Main.jsCodes" type="text/javascript" charset="utf-8"></script>
+		
+		<script src="@routes.Assets.at("ngl-sq/javascripts/containerSupports/scanner/app.js")" type="text/javascript" charset="utf-8"></script>
+
+		@if(!minifyEnabled) {
+			<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/commons.js")" type="text/javascript" charset="utf-8"></script>
+			<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/list-resize.js")" type="text/javascript" charset="utf-8"></script>
+			<script src="@routes.Assets.at("ngl-sq/javascripts/containerSupports/scanner/search-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+			<script src="@routes.Assets.at("ngl-sq/javascripts/containerSupports/scanner/services.js")" type="text/javascript" charset="utf-8"></script> 
+		} else {
+			<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/commons.min.js")" type="text/javascript" charset="utf-8"></script>
+			<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/list-resize.min.js")" type="text/javascript" charset="utf-8"></script>
+			<script src="@routes.Assets.at("ngl-sq/javascripts/containerSupports/scanner/search-ctrl.min.js")" type="text/javascript" charset="utf-8"></script>
+			<script src="@routes.Assets.at("ngl-sq/javascripts/containerSupports/scanner/services.min.js")" type="text/javascript" charset="utf-8"></script> 
+		}
+
+		<script src="@controllers.containers.tpl.routes.ContainerSupports.javascriptRoutes" type="text/javascript" charset="utf-8"></script>
+}
+
+@css() = {
+	<link rel="preload" href="@routes.Assets.at("ngl-sq/css/commons/commons.css")" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="@routes.Assets.at("ngl-sq/css/commons/commons.css")"></noscript> 
+}
+
+
+@views.html.main("containerSupports.scanner.title", menu_("containerSupports.scanner"), scripts,css){
+<div class="row scanner"  ng-controller="SearchScan" ng-app="home">
+	<div class="col-xs-12">
+	
+		<div class="row">	
+			<div class="col-xs-12">
+				<form class="form-inline">
+					<input id="scan" type="text" class="form-control input-sm" ng-model="searchService.form.code" ng-keydown="intercept($event)" placeholder='@Messages("search.placeholder.barCodes")' title='@Messages("search.placeholder.barCodes")'>										
+				</form>
+			</div>
+		</div>
+		
+		<div class="row" ng-if="searchService.response.support">
+			<div class="col-xs-12">
+				<form class="form-horizontal">
+				
+					<legend ng-switch on="searchService.response.support.valuation.valid">	
+						<h4>
+							<label class="control-label" ng-switch-when="FALSE" class="text-danger" ng-bind="searchService.response.support.code"></label>
+							<label class="control-label" ng-switch-when="TRUE" class="text-success" ng-bind="searchService.response.support.code"></label>
+							<label class="control-label" ng-switch-default class="mute" ng-bind="searchService.response.support.code"></label>
+							<small ng-bind="searchService.response.support.state.code|codes:'state'"></small>
+						</h4>
+					</legend>
+					
+					<div class="form-group">
+						<label class="col-xs-5 control-label">@Messages("containerSupports.scanner.categoryCode")</label>
+						<div class="col-xs-7">
+							<p ng-bind="searchService.response.support.categoryCode|codes:'container_support_cat'"></p>
+						</div>
+					</div>
+					
+					<div class="form-group">
+						<label class="col-xs-5 control-label">@Messages("containerSupports.scanner.fromTransformationTypeCodes")</label>
+						<div class="col-xs-7">
+							<div list-resize="searchService.response.support.fromTransformationTypeCodes|unique|codes:'type'" list-resize-min-size='1' vertical></div>
+						</div>
+					</div>
+					
+					<div class="form-group">
+						<label class="col-xs-5 control-label">@Messages("containerSupports.scanner.creationDate")</label>
+						<div class="col-xs-7">
+							<p ng-bind="searchService.response.support.traceInformation.creationDate|date:'@Messages("date.format")'"></p>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label class="col-xs-5 control-label">@Messages("containerSupports.scanner.projectCodes")</label>
+						<div class="col-xs-7">
+							<div list-resize="searchService.response.support.projectCodes" list-resize-min-size='2' horizontal></div>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label class="col-xs-5 control-label">@Messages("containerSupports.scanner.sampleCodes")</label>
+						<div class="col-xs-7">
+							<div list-resize='searchService.response.support.sampleCodes' list-resize-min-size='2' horizontal></div>
+						</div>
+					</div>
+					
+					<div ng-if="searchService.response.containers">
+						<div class="form-group">
+							<label class="col-xs-5 control-label">@Messages("containerSupports.scanner.contents.length")</label>
+							<div class="col-xs-7">
+								<p ng-bind="searchService.response.containers[0].contents.length"></p>
+							</div>
+						</div>
+						
+						<div class="form-group">
+							<label class="col-xs-5 control-label">@Messages("containerSupports.scanner.tags")</label>
+							<div class="col-xs-7">
+								<div list-resize="searchService.response.containers[0].contents|getArray:'properties.tag.value'" list-resize-min-size='2' horizontal></div>
+							</div>
+						</div>
+						
+						<div class="form-group">
+							<label class="col-xs-5 control-label">@Messages("containerSupports.scanner.libProcessType")</label>
+							<div class="col-xs-7">
+								<p list-resize="searchService.response.containers[0].contents|getArray:'properties.libProcessTypeCode.value'|unique"></p>
+							</div>
+						</div>
+					</div>
+					
+				</form>
+			</div>
+		</div>
+				
+	</div>
+</div>
+}

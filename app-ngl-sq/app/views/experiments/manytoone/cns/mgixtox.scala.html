@@ -1,0 +1,53 @@
+@this(mgiinputtubes_ : mgiinputtubes, mgioutputtubes_ : mgioutputtubes)
+
+@()
+
+<!--- NGL-3145 Pool MGI-->
+
+<div class="col-md-12 col-lg-12" ng-switch="supportCategoryCode">
+<div ng-switch-when="tube">
+	<ul class="nav nav-tabs margin-bottom-5" role="tablist">
+	  <li class="active"><a href="" role="tab" data-target="#tube" data-toggle="tab">@Messages("experiments.pools.design")</a></li>
+	  <li><a href="" role="tab"  data-target="#roadmap" data-toggle="tab" ng-click="atmService.data.updateDatatable()">@Messages("experiments.calculation.sheet")</a></li>  
+	</ul>
+	
+	<div class="tab-content"  >
+		<div class="tab-pane active" id="tube">
+			<div class="row">
+				<div class="col-md-12 col-lg-12">
+					<div class="row">
+						<div class="col-md-10 col-lg-10" ng-if="mainService.isEditMode() && isNewState()">
+						<!-- InputContainers table -->
+						@mgiinputtubes_()
+						</div>
+						</div>
+						<div class="row">
+						<div class="col-md-2 col-lg-2" ng-if="mainService.isEditMode() && isNewState()">
+						<!-- Drop buttons -->	
+			  				<div class="page-header">
+				 				<button class="btn btn-default btn-lg btn-block" ng-click="atmService.data.dropInSelectInputContainer()" 
+				                                                  ng-disabled="!atmService.data.isSelectInputContainers()">
+				 				<i class="fa fa-sign-in fa-2x"></i>
+				 				</button>
+			 				</div>
+						</div>
+					</div>
+					<!-- OutputContainers table -->
+					<div class="row">
+						
+						<div class="col-md-10 col-lg-10 flowcellTable">
+				   		@mgioutputtubes_()
+				   		</div>
+					</div>
+				</div>
+			</div>
+		</div>		
+		<div class="tab-pane" id="roadmap">
+		<div class="row roadmap">
+			<div class="col-md-12 col-lg-12" ultimate-datatable="atmService.data.datatable"></div>
+		</div>
+		</div>
+	</div>
+</div>
+
+</div>

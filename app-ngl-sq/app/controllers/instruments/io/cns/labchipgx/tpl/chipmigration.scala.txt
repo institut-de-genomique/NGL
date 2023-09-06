@@ -1,0 +1,14 @@
+@(experiment:models.laboratory.experiment.instance.Experiment)
+
+@import controllers.instruments.io.utils._;
+
+@import java.lang.String; var label=""; var name=""; var comment=""; 
+
+Label,Name,Comment
+@for((atm, index) <- experiment.atomicTransfertMethods.sortWith(OutputHelper.sortBylocationSupportOneToOne).zipWithIndex){
+	@{label=atm.line+atm.column}
+	@{name=atm.inputContainerUseds.get(0).contents.get(0).sampleCode}
+	@{comment=atm.inputContainerUseds.get(0).code}
+	
+	@(label),@(name),@(comment)\u000D\u000A
+}

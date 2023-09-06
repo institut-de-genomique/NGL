@@ -1,0 +1,19 @@
+#samples
+GET		/api/samples								controllers.samples.api.Samples.list()
+GET		/api/samples/:code							controllers.samples.api.Samples.get(code: java.lang.String)
+
+
+#containers api
+GET		/api/containers								controllers.containers.api.Containers.list()
+GET		/api/containers/:code						controllers.containers.api.Containers.get(code:java.lang.String)
+HEAD	/api/containers/:code						controllers.containers.api.Containers.head(code:java.lang.String)
+
+#supports api
+GET		/api/supports								controllers.containers.api.ContainerSupports.list()
+GET		/api/supports/:code							controllers.containers.api.ContainerSupports.get(code:java.lang.String)
+HEAD	/api/supports/:code							controllers.containers.api.ContainerSupports.head(code:java.lang.String)
+
+#experiment api
+GET		/api/experiments							controllers.experiments.api.Experiments.list()
+GET		/api/experiments/:code						controllers.experiments.api.Experiments.get(code:java.lang.String)
+PUT		/api/experiments/:code/apply-rules/:codeRules					controllers.experiments.api.Experiments.applyRules(code: java.lang.String, codeRules: java.lang.String)

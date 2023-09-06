@@ -1,0 +1,35 @@
+@()
+<div class="row">
+	<div class="col-md-10 col-lg-10 col-xs-12">
+		<table class="table table-condensed table-hover table-bordered">
+	 		<thead>
+				<tr>
+                    <th>@Messages("readsets.treatments.ngsrg_mgi.nbCycle")</th>
+					<th>@Messages("readsets.treatments.ngsrg_mgi.nbCycleRead1")</th>
+					<th>@Messages("readsets.treatments.ngsrg_mgi.nbCycleReadIndex1")</th>
+					<th>@Messages("readsets.treatments.ngsrg_mgi.nbCycleRead2")</th>
+					<th>@Messages("readsets.treatments.ngsrg_mgi.nbCycleReadIndex2")</th>
+                    <th>@Messages("readsets.treatments.ngsrg_mgi.flowcellPosition")</th>
+                    <th>@Messages("readsets.treatments.ngsrg_mgi.recipeVersion")</th>
+                    <th>@Messages("readsets.treatments.ngsrg_mgi.basecallerVersion")</th>
+                    <th>@Messages("readsets.treatments.ngsrg_mgi.nbReads")</th>
+                    <th>@Messages("readsets.treatments.ngsrg_mgi.nbBases")</th>
+	 			</tr>
+	 		</thead>
+	 		<tbody>
+	 			<tr>
+                    <td ng-bind="readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.nbCycle|number:3"></td>
+					<td ng-bind="readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.nbCycleRead1|number:3"></td>
+					<td ng-bind="readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.nbCycleReadIndex1|number:2"></td>
+					<td ng-bind="readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.nbCycleRead2|number:3"></td>
+					<td ng-bind="readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.nbCycleReadIndex2|number:2"></td>
+                    <td ng-bind="readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.flowcellPosition"></td>
+                    <td ng-bind="readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.recipeVersion"></td>
+                    <td ng-bind="readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.basecallerVersion"></td>
+                    <td ng-bind="readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.nbReads|number"></td>
+                    <td ng-bind="readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.nbBases|number"></td>
+				</tr>
+	 		</tbody>
+	 	</table>
+	</div>
+</div>

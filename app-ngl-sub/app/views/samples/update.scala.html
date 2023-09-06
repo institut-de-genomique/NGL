@@ -1,0 +1,135 @@
+@this()
+@()
+@import views.html.helper._
+@import views.html.tools.attributesInstructions
+@**Definition d'une variable user :**@
+@user            = @{ fr.cea.ig.authentication.Authentication.getUser() }
+
+@formUpdate() = {
+
+	@columnSearchForm{
+		@formGroup{
+			<div class="form-control" bt-select  ng-model="form.projCodes" filter="true" multiple="true" placeholder='@Messages("consultation.placeholder.projectCodes")' bt-options="project.code as project|formatProjectListLabel for project in lists.getProjects()"></div>	
+		}	
+														
+	}
+
+	@columnSearchForm{
+		@formGroup{			
+			<bt-input  class="form-control"  input-ng-model="form.codeRegex" textarea-ng-model="form.codes" 
+			title='@Messages("consultation.textarea-placeholder.sampleCodes")' 
+			textarea-placeholder-ng-model='@Messages("consultation.textarea-placeholder.sampleCodes")' 
+			placeholder='@Messages("consultation.placeholder.sampleCodes")' >
+			</bt-input>												
+		}
+		@formGroup{
+			<bt-input  class="form-control"  input-ng-model="form.accessionRegex" textarea-ng-model="form.accessions" 
+			title='@Messages("consultation.textarea-placeholder.sampleAccessions")'
+			textarea-placeholder-ng-model='@Messages("consultation.textarea-placeholder.sampleAccessions")'
+			placeholder='@Messages("consultation.placeholder.sampleAccessions")' >
+			</bt-input>										
+		}
+		@formGroup{			
+			<bt-input  class="form-control"  input-ng-model="form.externalIdRegex" textarea-ng-model="form.externalIds" 
+			title='@Messages("consultation.textarea-placeholder.sampleExternalIds")' 
+			textarea-placeholder-ng-model='@Messages("consultation.textarea-placeholder.sampleExternalIds")' 
+			placeholder='@Messages("consultation.placeholder.sampleExternalIds")' >
+			</bt-input>										
+		}
+	}
+	
+	@columnSearchForm{
+		@formGroup{
+			<label>@Messages("userFileSample")</label> 
+			<input type="file"  id="idUserFileSample" base64-file="form2.userFileSample"/>
+		}
+	}	
+	
+	
+@*	@columnSearchForm{
+	}
+	@columnSearchForm{
+	}	
+*@
+		
+	@columnSearchForm{
+		@formGroup{
+			<div class="tab-pane active" id="filters">
+				<form class="well well-small">
+				<div class="row">
+					<div class="btn-toolbar">
+						<button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="search('@user')" class="btn btn-primary" >
+							<i class="fa fa-search"></i>
+						</button>	
+						<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="reset()"  class="btn btn-default">
+							<i class="fa fa-undo"></i>
+						</button>				 	
+					</div>		
+				</div>		
+			</form>	
+		</div>
+	
+		}													
+	}
+	
+
+	@columnSearchForm{
+	}	
+	@columnSearchForm{
+	}
+	@columnSearchForm{
+	}
+
+
+
+
+	@formGroup{
+		<div class="btn-toolbar">
+			<button type="submit" title='@Messages("button.submitUpdate")'  ng-click="submit()" data-toggle="tooltip" class="btn btn-primary" >
+				<i class="fa fa-save"></i>
+			</button>	
+		</div>				
+	}	
+	@attributesInstructions()
+
+}
+
+
+<div class="row">
+<div class="col-md-12 col-lg-12"  messages="messages"></div>
+</div>
+
+	
+@** XXXXXXXX UPDATE SAMPLE XXXXXXXXXXXXXX **@
+
+<!--La directive ng-init est appel� au chargement de la page et dans le controlleur javascript on definit la methode
+qui permet d'installer $user dans le scope-->
+
+<span ng-init="setUserInScope('@user')"></span>
+
+@**
+Inutile car spinner qui peut etre geré directement dans le datatable
+<!--Pour affichage d'un spinner-->
+<div class="inProgressSpinner" ng-if="treeLoadInProgress">
+<button class="btn btn-primary btn-lg">
+<i class="fa fa-spinner fa-spin fa-5x"></i>
+</button>
+</div>	
+**@
+
+<div class="row"> 
+	<div class="col-md-12 col-lg-12" ultimate-datatable="samplesDT">
+		<div dt-form>	
+			<div class="tab-content">
+				<div class="tab-pane active" id="filters">
+					<form name="sampleForm" class="well well-small">
+						<div class="row">
+						@formUpdate
+						</div>		
+					</form>	
+				</div>
+			</div>
+		</div>
+	</div>
+</div> 
+

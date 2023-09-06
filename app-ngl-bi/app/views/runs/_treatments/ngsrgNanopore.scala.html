@@ -1,0 +1,155 @@
+@()
+
+	<div class="row">
+	<div class="col-md-10 col-lg-10">
+		<table class="table table-condensed table-hover table-bordered">
+			<thead>
+				<tr>
+					<th>@Messages("runs.ngsrg_nanopore.activePorePercentage")</th>
+					<th>@Messages("runs.ngsrg_nanopore.poreActivityTimePercentAvg")</th>
+					<th>@Messages("runs.ngsrg_nanopore.passReadsPercentage")</th>
+					<th>@Messages("runs.ngsrg_nanopore.twoBarcodesReadsPercentage")</th>
+					<th>@Messages("runs.ngsrg_nanopore.lostReadsPercentage")</th>
+					<th>@Messages("runs.ngsrg_nanopore.poreSpeedDistribAvg")</th>
+					<th>@Messages("runs.ngsrg_nanopore.sequencingTime")</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>{{run.treatments.ngsrg.default.activePorePercentage.value | number:2}}</td>
+					<td>{{run.treatments.ngsrg.default.poreActivityTimePercentAvg.value | number:2}}</td>
+					<td>{{run.treatments.ngsrg.default.passReadsPercentage.value | number:2}}</td>
+					<td>{{run.treatments.ngsrg.default.twoBarcodesReadsPercentage.value | number:2}}</td>
+					<td>{{run.treatments.ngsrg.default.lostReadsPercentage.value | number:2}}</td>
+					<td>{{run.treatments.ngsrg.default.poreSpeedDistribAvg.value | number:2}}</td>
+					<td>{{run.treatments.ngsrg.default.sequencingTime.value | number:2}}</td>
+				</tr>		
+			</tbody>
+		</table>			
+	</div>
+	</div>
+	
+	<div class="row">
+	<div class="col-md-6 col-lg-6">	
+		 <table class="table table-condensed table-hover table-bordered">
+			<thead>
+				<tr>
+					<th></th>
+					<th>@Messages("treatments.ngsrg_nanopore.nbBases")</th>
+					<th>@Messages("treatments.ngsrg_nanopore.basesPercent")</th>
+					<th>@Messages("treatments.ngsrg_nanopore.nbReads")</th>
+					<th>@Messages("treatments.ngsrg_nanopore.readsPercent")</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<th>@Messages("treatments.nanopore.1DForward")</th>
+					<td>{{run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DForward'].value.nbBases | number}}</td>
+					<td>{{run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DForward'].value.basesPercent | number:2}}</td>
+					<td>{{run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DForward'].value.nbReads | number}}</td>
+					<td>{{run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DForward'].value.readsPercent | number:2}}</td>
+				</tr>	
+				
+				<tr>
+					<th>@Messages("treatments.nanopore.1DReverse")</th>
+					<td>{{run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DReverse'].value.nbBases | number}}</td>
+					<td>{{run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DReverse'].value.basesPercent | number:2}}</td>
+					<td>{{run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DReverse'].value.nbReads | number}}</td>
+					<td>{{run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['1DReverse'].value.readsPercent | number:2}}</td>
+				</tr>						
+				<tr>
+					<th>@Messages("treatments.nanopore.2DAll")</th>
+					<td>{{run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DAll'].value.nbBases | number}}</td>
+					<td>{{run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DAll'].value.basesPercent | number:2}}</td>
+					<td>{{run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DAll'].value.nbReads | number}}</td>
+					<td>{{run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DAll'].value.readsPercent | number:2}}</td>
+				</tr>	
+				<tr>
+					<th>@Messages("treatments.nanopore.2DPass")</th>
+					<td>{{run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DPass'].value.nbBases | number}}</td>
+					<td>{{run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DPass'].value.basesPercent | number:2}}</td>
+					<td>{{run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DPass'].value.nbReads | number}}</td>
+					<td>{{run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['2DPass'].value.readsPercent | number:2}}</td>
+				</tr>
+				<tr>
+					<th>@Messages("treatments.ngsrg_nanopore.useful")</th>
+					<td>{{run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['useful'].value.nbBases | number}}</td>
+					<td>{{run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['useful'].value.basesPercent | number:2}}</td>
+					<td>{{run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['useful'].value.nbReads | number}}</td>
+					<td>{{run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['useful'].value.readsPercent | number:2}}</td>
+				</tr>					
+			</tbody>
+		 </table>
+	</div>
+</div>
+
+  	<!-- Add images -->
+  	<div class="row">
+	<div class="col-md-10 col-lg-10">
+	<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+		ng-click="setImage(run.treatments.ngsrg.default.poreMetrics.value,'poreMetrics','','ngsrg',
+		run.treatments.ngsrg.default.poreMetrics.width,
+		run.treatments.ngsrg.default.poreMetrics.height)">
+		 <a href="#">
+		    <img id="default_poreMetrics" ng-src="data:image/png;base64,{{run.treatments.ngsrg.default.poreMetrics.value}}" />
+		 </a> 
+	    </div>
+	    </div>
+	</div>
+  	<div class="row">
+  	<div class="col-md-5 col-lg-5">
+	<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+		ng-click="setImage(run.treatments.ngsrg.default.poreOccupancy.value,'poreOccupancy','','ngsrg',
+		run.treatments.ngsrg.default.poreOccupancy.width,
+		run.treatments.ngsrg.default.poreOccupancy.height)">
+		 <a href="#">
+		    <img id="default_poreOccupancy" ng-src="data:image/png;base64,{{run.treatments.ngsrg.default.poreOccupancy.value}}" />
+		 </a> 
+	    </div>
+	 </div>
+	 <div class="col-md-5 col-lg-5">
+	<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+		ng-click="setImage(run.treatments.ngsrg.default.poreOccupancyTime.value,'poreOccupancyTime','','ngsrg',
+		run.treatments.ngsrg.default.poreOccupancyTime.width,
+		run.treatments.ngsrg.default.poreOccupancyTime.height)">
+		 <a href="#">
+		    <img id="default_poreOccupancyTime" ng-src="data:image/png;base64,{{run.treatments.ngsrg.default.poreOccupancyTime.value}}" />
+		 </a> 
+	    </div>
+	</div>
+	</div>
+	<div class="row">
+	<div class="col-md-5 col-lg-5">
+	<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+		ng-click="setImage(run.treatments.ngsrg.default.yieldBasePairs.value,'yieldBasePairs','','ngsrg',
+		run.treatments.ngsrg.default.yieldBasePairs.width,
+		run.treatments.ngsrg.default.yieldBasePairs.height)">
+		 <a href="#">
+		    <img id="default_yieldBasePairs" ng-src="data:image/png;base64,{{run.treatments.ngsrg.default.yieldBasePairs.value}}" />
+		 </a> 
+	    </div>
+	</div>
+	</div>
+	<div class="row">
+	<div class="col-md-5 col-lg-5">
+	<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+		ng-click="setImage(run.treatments.ngsrg.default.timeAvgQuality.value,'timeAvgQuality','','ngsrg',
+		run.treatments.ngsrg.default.timeAvgQuality.width,
+		run.treatments.ngsrg.default.timeAvgQuality.height)">
+		 <a href="#">
+		    <img id="default_timeAvgQuality" ng-src="data:image/png;base64,{{run.treatments.ngsrg.default.timeAvgQuality.value}}" />
+		 </a> 
+	    </div>
+	   </div>
+	 <div class="col-md-5 col-lg-5">
+	<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+		ng-click="setImage(run.treatments.ngsrg.default.timeAvgSpeed.value,'timeAvgSpeed','','ngsrg',
+		run.treatments.ngsrg.default.timeAvgSpeed.width,
+		run.treatments.ngsrg.default.timeAvgSpeed.height)">
+		 <a href="#">
+		    <img id="default_timeAvgSpeed" ng-src="data:image/png;base64,{{run.treatments.ngsrg.default.timeAvgSpeed.value}}" />
+		 </a> 
+	    </div>
+	   </div>
+	</div>
+	

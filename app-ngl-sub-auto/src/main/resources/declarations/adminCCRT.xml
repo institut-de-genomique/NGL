@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Declaration xmlns="http://www.genoscope.cns.fr/specification"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.genoscope.cns.fr/specification H:\birdsAdmin.xsd">
+
+	<!-- ResourceType -->
+
+	
+	<ResourceType name="submissionCCRT">
+		<RequiredProperty propertyName="code" keyProperty="true"/>
+		<RequiredProperty propertyName="submissionDirectory"/>
+		<RequiredProperty propertyName="relatifName" keyProperty="true"/>
+		<RequiredProperty propertyName="directory"/>
+	</ResourceType>
+	
+	<ResourceType name="linkCCRT">
+		<RequiredProperty propertyName="code" keyProperty="true"/>
+		<RequiredProperty propertyName="submissionDirectory"/>
+		<RequiredProperty propertyName="fileName" keyProperty="true"/>
+		<RequiredProperty propertyName="directory"/>
+	</ResourceType>
+	
+	<ResourceType name="rawDataZip">
+		<RequiredProperty propertyName="fileName" keyProperty="true"/>
+		<RequiredProperty propertyName="directory" keyProperty="true"/>
+		<RequiredProperty propertyName="submissionDirectory" keyProperty="true"/>
+	</ResourceType>
+
+	<!-- Referential -->
+
+	
+	<Referential name="nglSubRef_processCCRT" device="jsonDevice">
+		<ResourceType name="submissionCCRT" />
+	</Referential>
+	
+	<Referential name="internal_nglSubRef_processCCRT" device="birdsDevice" readOnly="false">
+		<ResourceType name="submissionCCRT" />
+	</Referential>
+	
+	<Referential name="internalRefTouchCCRT" device="birdsDevice" readOnly="false">
+		<ResourceType name="submissionCCRT" />
+	</Referential>
+	
+	<Referential name="internalRefLinkCCRT" device="birdsDevice" readOnly="false">
+		<ResourceType name="linkCCRT" />
+	</Referential>
+	
+	
+	
+	<!-- Project by submission type -->
+	<Project name="SRA" workspace="/env/cns/submit_traces/SRA/SNTS_output_xml/autoFtp/log" >
+		<ProjectProperty name="ccrt_user" value="scarpelc" />
+	</Project>
+</Declaration>

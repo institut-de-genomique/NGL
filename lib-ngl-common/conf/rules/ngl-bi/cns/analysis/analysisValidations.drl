@@ -1,0 +1,31 @@
+//created on: Nov 21, 2013
+package rules
+
+
+rule "Validate type in project analysisType"
+	@nglBI( validations )
+	dialect "java"
+	salience 900
+	no-loop
+	when
+		$analysis : Analysis ($typeCode:typeCode)
+		$contextValidation:ContextValidation()	
+	then
+		Logger.debug("Validate type in project analysisType");
+		Logger.debug("liste projet : "+$analysis.getProjectCodes());
+		//Get projects
+		for(String projectCode : $analysis.getProjectCodes()){
+			Project project = MongoDBDAO.findByCode(InstanceConstants.PROJECT_COLL_NAME, Project.class, projectCode);
+			if(project.properties.containsKey("analysisTypes") && ((PropertyListValue)project.properties.get("analysisTypes")).listValue().size()>0) {
+				List<String> listTypes = new ArrayList<String>();
+				for(Object obj : ((PropertyListValue)project.properties.get("analysisTypes")).listValue()){
+					listTypes.add(Objects.toString(obj,null));
+				}
+				if(!listTypes.contains($typeCode))
+					$contextValidation.addErrors("Projet "+projectCode, "error.project.noanalysis", $typeCode);
+			}
+		}
+		
+end
+
+

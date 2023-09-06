@@ -1,0 +1,48 @@
+@this(ctx : fr.cea.ig.ngl.NGLApplication, menu_ : menu)
+@(code: String, year: String)
+
+@minifyEnabled = @{ true == ctx.nglConfig().isMinified() }
+
+@scripts() = {
+		<script src="@controllers.balancesheets.tpl.routes.BalanceSheets.javascriptRoutes" type="text/javascript" charset="utf-8"></script>  
+		<script src="@controllers.main.tpl.routes.Main.jsCodes" type="text/javascript" charset="utf-8"></script> 
+		
+		@if(!minifyEnabled) {
+			<script src="@routes.Assets.at("ngl-bi/javascripts/balancesheets/app.js")" type="text/javascript" charset="utf-8"></script>
+			<script src="@routes.Assets.at("ngl-bi/javascripts/balancesheets/controllers.js")" type="text/javascript" charset="utf-8"></script>
+			<script src="@routes.Assets.at("ngl-bi/javascripts/balancesheets/services.js")" type="text/javascript" charset="utf-8"></script>
+
+			<script src="@routes.Assets.at("lib/datatable/datatable/javascripts/services/ultimate-datatable.js")" type="text/javascript" charset="utf-8"></script>
+
+			<script src="@routes.Assets.at("lib/lib-frameworkweb/ngl-common/javascripts/controllers/mainctrl.js")" type="text/javascript" charset="utf-8"></script> 
+
+			<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/commons.js")" type="text/javascript" charset="utf-8"></script> 
+			<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/list-resize.js")" type="text/javascript" charset="utf-8"></script> 		 	
+		} else {
+			<script src="@routes.Assets.at("ngl-bi/javascripts/balancesheets/app.min.js")" type="text/javascript" charset="utf-8"></script>
+			<script src="@routes.Assets.at("ngl-bi/javascripts/balancesheets/controllers.min.js")" type="text/javascript" charset="utf-8"></script>
+			<script src="@routes.Assets.at("ngl-bi/javascripts/balancesheets/services.min.js")" type="text/javascript" charset="utf-8"></script>
+
+			<script src="@routes.Assets.at("lib/datatable/datatable/javascripts/services/ultimate-datatable.min.js")" type="text/javascript" charset="utf-8"></script>
+
+			<script src="@routes.Assets.at("lib/lib-frameworkweb/ngl-common/javascripts/controllers/mainctrl.min.js")" type="text/javascript" charset="utf-8"></script> 
+
+			<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/commons.min.js")" type="text/javascript" charset="utf-8"></script> 
+			<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/list-resize.min.js")" type="text/javascript" charset="utf-8"></script>
+		}
+
+		<script src="@helper.getAsset("javascripts","simple-statistics","140513","simple_statistics.min.js")" type="text/javascript" charset="utf-8"></script>
+		<script src="@helper.getAsset("javascripts","highcharts","4.1.4","highcharts_4.1.4.js")" type="text/javascript" charset="utf-8"></script>	 		 	
+		<script src="@helper.getAsset("javascripts","highcharts","4.1.4","highcharts-3d_4.1.4.js")" type="text/javascript" charset="utf-8"></script>
+		<script src="@helper.getAsset("javascripts","highcharts","4.1.4","exporting_4.1.4.js")" type="text/javascript" charset="utf-8"></script>
+		<script src="@helper.getAsset("javascripts","jspdf","2.1.1","jspdf.min.js")" type="text/javascript" charset="utf-8"></script>	
+		<script src="@helper.getAsset("javascripts","jspdf-autotable","3.2.11","jspdf.plugin.autotable.min.js")" type="text/javascript" charset="utf-8"></script>
+		<script src="@helper.getAsset("javascripts","svg2pdf","1.5.0","svg2pdf.min.js")" type="text/javascript" charset="utf-8"></script>	
+}
+
+@css() = {
+	<link rel="preload" href="@routes.Assets.at("ngl-bi/css/balancesheets/balancesheets.css")" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="@routes.Assets.at("ngl-bi/css/balancesheets/balancesheets.css")"></noscript> 
+}
+
+@views.html.main("balanceSheets.page.title", menu_("balanceSheets." + code), scripts, css)(views.html.contents.lefttabs())

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright CEA, DSV/IG/GEN/LABGEM, 91000 Evry, France. contributor(s) : Dr. Ludovic FLEURY (Jan 1, 2011)
+  e-mail of the contributor(s) lfleury@genoscope.cns.fr
+  
+  This software is an API and components of a platform dedicated to the automatic execution of bioniformatics modules (Bio Informatics Rules Driven System)  
+  This software is governed by the CeCILL license under French law and abiding by the rules of distribution of free software. You can use, modify and/ or redistribute the software under the terms of the CeCILL license as circulated by CEA, CNRS and INRIA at the following URL "http://www.cecill.info".
+  As a counterpart to the access to the source code and rights to copy, modify and redistribute granted by the license, users are provided only with a limited warranty and the software's author, the holder of the economic rights, and the successive licensors have only limited liability.
+   
+  In this respect, the user's attention is drawn to the risks associated with loading, using, modifying and/or developing or reproducing the software by the user in light of its specific status of free software, that may mean that it is complicated to manipulate, and that also therefore means that it is reserved for developers and experienced professionals having in-depth computer knowledge. Users are therefore encouraged to load and test the software's suitability as regards their requirements in conditions enabling the security of their systems and/or data to be ensured and, more generally, to use and operate it in the same conditions as regards security.
+  The fact that you are presently reading this means that you have had knowledge of the CeCILL license and that you accept its terms. 
+-->
+<!-- Persistence deployment descriptor for dev profile -->
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd"
+	version="1.0">
+
+
+	<persistence-unit name="birdsPersistence"
+		transaction-type="RESOURCE_LOCAL">
+		<provider>org.hibernate.ejb.HibernatePersistence</provider>
+		
+		<mapping-file>META-INF/ormBirds.xml</mapping-file>
+		
+		<class>fr.genoscope.lis.devsi.birds.api.entity.BagJob</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.BagJobProperties</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.DatabaseProperties</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.EnvironmentVariables</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.Executable</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.ExecutableProperties</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.ExecutableSpecification</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.InputSpecification</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.InputSpecificationElement</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.InputValue</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.IOSpecificationElement</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.Job</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.KeyValueParameterSpecificationElement</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.LineParametersSpecificationElement</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.OutputSpecification</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.OutputSpecificationElement</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.OutputValue</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.ParameterSpecification</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.ParameterSpecificationElement</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.ParameterValue</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.Project</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.ProjectProperties</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.JobProperties</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.Properties</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.ReferentialDeviceProperties</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.ReferentialDeviceProxy</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.RequiredResourceProperty</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.InternalResource</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.ResourceProperties</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.JobResourceSet</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.ResourcesReferential</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.InternalReferential</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.ResourceType</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.ResourceTypeProperties</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.JobResource</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.JobResourceValue</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.IdReference</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.JobResourceValueProperties</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.TreatmentSpecification</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.TreatmentSpecificationGroup</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.TreatmentSpecificationProperties</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.Format</class>
+		<class>fr.genoscope.lis.devsi.birds.api.entity.ResourceConsumed</class>
+
+		<class>fr.genoscope.lis.devsi.birds.api.client.request.ClientRequest</class>
+
+		
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+
+		<properties>
+			<property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5InnoDBDialect" />
+			<property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5Dialect" />
+			<property name="hibernate.connection.driver_class" value="com.mysql.jdbc.Driver" />
+			<property name="hibernate.max_fetch_depth" value="3" />
+			<property name="hibernate.hbm2ddl.auto" value="update" />
+			<property name="hibernate.show_sql" value="false" />
+			<property name="hibernate.connection.autocommit" value="false" />
+			<property name="hibernate.connection.pool_size" value="0" />
+		</properties>
+
+	</persistence-unit>
+
+</persistence>

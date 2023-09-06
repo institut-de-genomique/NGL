@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<process xmlns="http://drools.org/drools-5.0/process"
+         xmlns:xs="http://www.w3.org/2001/XMLSchema-instance"
+         xs:schemaLocation="http://drools.org/drools-5.0/process drools-processes-5.0.xsd"
+         type="RuleFlow" name="fr.cea.ig.auto.submission.CCRT" id="fr.cea.ig.auto.submission.CCRT" package-name="birds" >
+
+  <header>
+    <imports>
+      <import name="fr.genoscope.lis.devsi.birds.impl.model.Birds" />
+    </imports>
+  </header>
+
+  <nodes>
+    <start id="1" name="Start" x="377" y="22" width="48" height="48" />
+    <end id="2" name="End" x="399" y="526" width="48" height="48" />
+    <actionNode id="5" name="getCCRTFile" x="323" y="151" width="162" height="55" >
+        <action type="expression" dialect="java" >Birds.generateJobs("getCCRTFile", "SRA", (org.drools.spi.ProcessContext)kcontext);</action>
+    </actionNode>
+    <actionNode id="6" name="touchFileCCRT" x="330" y="290" width="160" height="48" >
+        <action type="expression" dialect="java" >Birds.generateJobs("touchFileCCRT", "SRA", (org.drools.spi.ProcessContext)kcontext);</action>
+    </actionNode>
+    <actionNode id="7" name="linkFileCCRT" x="338" y="414" width="165" height="48" >
+        <action type="expression" dialect="java" >Birds.generateJobs("linkFileCCRT", "SRA", (org.drools.spi.ProcessContext)kcontext);</action>
+    </actionNode>
+  </nodes>
+
+  <connections>
+    <connection from="7" to="2" />
+    <connection from="1" to="5" />
+    <connection from="5" to="6" />
+    <connection from="6" to="7" />
+  </connections>
+
+</process>

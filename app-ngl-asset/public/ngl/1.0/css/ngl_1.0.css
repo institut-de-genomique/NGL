@@ -1,0 +1,22 @@
+body {
+	padding-top:50px;
+}
+
+.row_selected {
+	background-color: #f1f1f1;
+}
+
+.nav-pills > li > a > .close,
+.nav-tabs > li > a > .close{
+   margin-left: 5px;
+}
+
+
+.control-group-datatable{
+	margin-bottom: 0px;
+}
+
+.table-hover tbody tr:hover td,
+.table-hover tbody tr:hover th {
+  background-color: #f1f1f1;
+}

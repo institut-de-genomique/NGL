@@ -1,0 +1,78 @@
+@this()
+@()
+
+<div class="row" ng-if="!isManual()">
+	<div class="col-md-3 col-lg-3">
+		<div class="alert alert-info" ng-if="chartsReadSetsService.lists.get('statsConfigs').length > 0">
+			<div class="form-control" 
+				 bt-select 
+				 ng-model="chartsReadSetsService.reportingConfigurationCode" 
+				 ng-change="chartsReadSetsService.changeConfig()" 
+				 placeholder="@Messages("search.placeholder.stats.configuration")" 
+				 bt-options="valid.code as valid.name for valid in chartsReadSetsService.lists.get('statsConfigs')">
+			</div>
+		</div>
+	</div>	
+</div>
+<div class="row">
+<div class="col-md-12 col-lg-12">
+<div ng-switch on="chartsReadSetsService.queries().length > 0 ">	
+		<div ng-switch-when="true">
+			<ul class="nav nav-tabs margin-bottom-5">
+			<li class="active"><a href="#" data-target="#chart" data-toggle="tab">@Messages("stats.tabs.charts")</a></li>
+			<li><a href="#" data-target="#query" data-toggle="tab">@Messages("stats.tabs.query")</a></li>
+			<li ng-if="chartsReadSetsService.excludeValues().length > 0"><a href="#" data-target="#exclude" data-toggle="tab">@Messages("stats.tabs.exclude")</a></li>
+			</ul>
+			<div class="tab-content">
+				<div class="tab-pane active" id="chart">
+				<div class="row">
+					<div class="col-md-12 col-lg-12" ultimate-datatable="chartsReadSetsService.datatable()"></div>
+				</div>
+				<div class="row" ng-repeat="chart in chartsReadSetsService.charts()">
+					<div class="col-md-12 col-lg-12">
+						<chart value="chart"></chart>
+					</div>
+				</div>
+				</div>
+				<div class="tab-pane" id="query">
+				<div class="row" ng-repeat="query in chartsReadSetsService.queries()">
+					<div class="col-md-4 col-lg-4">
+						<ul class="list-unstyled">
+					  		<li ng-repeat="(key, value) in query.form">{{key}} : {{value}}</li>	
+					  	</ul>						
+					</div>
+				</div>
+				
+				
+				</div>
+				<div class="tab-pane" id="exclude">
+					<div class="row">
+					<div class="col-md-4 col-lg-4">
+					<div class="panel panel-danger" ng-repeat="exclude in chartsReadSetsService.excludeValues()">
+					  <div class="panel-heading"><h3 class="panel-title">{{exclude.title}}</h3></div>
+					  <div class="panel-body">
+					  	<ul>
+					  		<li ng-repeat="d in exclude.data|orderBy:'code'">{{d.code}}</li>	
+					  	</ul>
+					    
+					  </div>
+					  </div>
+					</div>
+					</div>
+				</div>
+				
+			</div>
+		</div>
+		<div ng-switch-when="false" ng-if="isManual()">
+		<div class="row">
+			<div class="col-md-3 col-lg-3">
+				<div class="alert alert-danger">
+					<strong>@Messages("error.query.empty")</strong>
+				</div>
+			</div>
+		</div>
+		</div>
+</div>
+</div>
+</div>
+

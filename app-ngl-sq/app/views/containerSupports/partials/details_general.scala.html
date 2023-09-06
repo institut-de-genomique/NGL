@@ -1,0 +1,71 @@
+@()
+@import views.html.helper._
+
+@column()(value: Html) = {
+	<div class="col-md-4 col-lg-4 col-xs-4">
+		@value
+	</div>
+}
+@columnForProjectsOrSamples(msg: String)(length: xml.Elem)(data: Html) = {
+	<label class="col-md-6 col-lg-6 control-label" ng-if="@data">@msg (@length)</label>
+	<div class="col-md-6 col-lg-6" ng-if="@data">
+		<p class="form-control-static" list-resize="@data" list-resize-min-size='2' wertical />
+	</div>
+}
+
+<form class="form-horizontal">
+	<div class="row">
+	
+		@column(){
+			@columnLabelValue(Messages("containerSupports.table.codeSupport")){
+				<p class="form-control-static" ng-bind="support.code" />
+			}
+			@columnLabelValue(Messages("containerSupports.table.categoryCode")){
+				<p class="form-control-static" ng-bind="support.categoryCode|codes:'container_support_cat'" />
+			}
+			@columnLabelValue(Messages("containerSupports.table.fromTransformationTypeCodes")){
+					<div class="form-control-static" list-resize="support.fromTransformationTypeCodes|unique|codes:'type'" list-resize-min-size='3' vertical />
+			}
+		}
+
+		@column(){
+			@columnForProjectsOrSamples(Messages("containerSupports.table.projectCodes"))(<span ng-bind="support.projectCodes.length" />){
+				support.projectCodes
+			}
+			@columnForProjectsOrSamples(Messages("containerSupports.table.sampleCodes"))(<span ng-bind="support.sampleCodes.length" />){
+				support.sampleCodes
+			}
+			@columnLabelValue(Messages("containerSupports.table.createUser")){
+				<p class="form-control-static">{{support.traceInformation.createUser}}
+				 ({{support.traceInformation.creationDate|date:'@Messages("date.format")'}})</p>
+			}
+		}
+		
+		@column(){
+			@columnLabelValue(Messages("containerSupports.table.modifyUser")){
+				<p class="form-control-static" ng-if="support.traceInformation.modifyUser">{{support.traceInformation.modifyUser}}
+				 ({{support.traceInformation.modifyDate|date:'@Messages("date.format")'}})</p>
+			}
+			@columnLabelValue(Messages("containerSupports.table.storageCode")){
+				<p class="form-control-static" ng-bind="support.storageCode" />
+			}
+		}
+
+	</div>
+</form>
+
+
+<ul class="nav nav-pills margin-bottom-7 hidden-print">
+	<li ng-class="getViewClass('udt')"><a href="#" href="#" data-target="#udt" data-toggle="tab"  ng-click="setActiveView('udt')">@Messages("containerSupports.button.table")</a></li>
+	<li ng-class="getViewClass('other')" ng-if="target !== 'tube'"><a href="#" href="#" data-target="#other" data-toggle="tab"  ng-click="setActiveView('other')" ng-bind="dynamicMessage"></a></li>		   		
+</ul>
+
+<div class="tab-content break">
+		<div class="tab-pane {{getViewClass('udt')}}" id="udt">
+			<div class="datatable" ultimate-datatable="datatable"></div>
+		</div>
+		<div class="tab-pane {{getViewClass('other')}}" id="other">
+			@details_supportCategory()
+		</div>
+		
+</div>

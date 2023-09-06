@@ -1,0 +1,86 @@
+@()
+
+<div ng-controller="OneToVoidQCCtrl" class="col-md-12 col-lg-12">	
+<div ng-controller="OneToVoidLabChipMigrationProfileCNGCtrl">
+
+	<!---- NGL-3801 : rendre message alerte visible si profils manquants... ---->
+	<div class="col-md-12 col-lg-12" >
+		<!-- NE PAS METTRE $scope!!!!-->
+		<div  ng-show="expHasMissingMigrationProfiles && ( isInProgressState() || isFinishState() )">
+		    <!-- changement du message -->
+			<p><a class="fa fa-info-circle" style="color:red" title="Information"> Attention, {{missingMigrationProfiles}} profil(s) de migration manquants!</a></p>
+		</div>
+	</div>
+
+	<ul class="nav nav-tabs margin-bottom-5" role="tablist">
+  	<li class="active"><a href="" role="tab" data-target="#table""  data-toggle="tab" >Tableau</a></li>
+  	<li>               <a href="" role="tab" data-target="#profils" data-toggle="tab" >Profils</a></li>
+	</ul>
+	
+	
+<div class="tab-content"  >
+	<div class="tab-pane active" id="table">	
+	<div class="row margin-bottom-7" ng-show="importButton.isShow()">
+	<div class="col-md-6 col-lg-6">
+	<form class="form-horizontal">
+  	<div class="form-group">
+   		<label  class="col-md-4 col-lg-4 control-label">Welltable LabChip_GX : </label>
+		<div class="input-group col-md-8 col-lg-8" >
+		<input id="importFile" type="file" class="form-control" base64-file="file"/>
+		<span class="input-group-btn">
+			<button class="btn btn-primary" ng-click="importButton.click()" ng-disabled="importButton.isFileSet()" title='@Messages("button.import.file")' ><i class="fa fa-upload"></i></button>
+		</span>
+		</div>
+	</div>
+	</form>
+	</div>
+	</div>
+	<div class="row">
+		<div class="col-md-12 col-lg-12" ultimate-datatable="atmService.data"></div>
+	</div>
+	</div>
+	
+	<div class="tab-pane" id="profils">	
+	<div class="row margin-bottom-7" ng-show="profilsButton.isShow()">
+	<div class="col-md-6 col-lg-6">
+	<form class="form-horizontal">
+  	<div class="form-group">
+   		<label  class="col-md-4 col-lg-4 control-label">Profils : </label>
+		<div class="input-group col-md-8 col-lg-8" >
+		<input id="importProfils" type="file" class="form-control" base64-img="selectedProfiles" multiple=true />
+		</div>
+	</div>
+	</form>
+	</div>
+	</div>
+	
+	<table class="table table-bordered table-condensed datatable">
+	<thead>
+	     <tr>
+	         <th></th>
+	         <th ng-repeat="i in [1,2,3,4,5,6,7,8,9,10,11,12]">{{i}}</th>
+	     </tr>
+	</thead>
+	<tbody>
+	    <tr ng-repeat="line in ['A','B','C','D','E','F','G','H']">
+	        <td><strong>{{line}}</strong></td>
+	        
+	        <td ng-repeat="column in [1,2,3,4,5,6,7,8,9,10,11,12] track by $index">
+	        
+	        <div  ng-click="setImage(getProfile(line,column).value,getProfile(line,column).fullname,getProfile(line,column).width,getProfile(line,column).height)"  
+	        	 ng-show="getProfile(line,column) !== undefined" > 
+	        	<div data-target="#modalImage" role="button" data-toggle="modal" >
+	        		<a href="#">
+	        		<img ng-src="data:image/{{getProfile(line,column).extension}};base64,{{getProfile(line,column).value}}"width="{{getProfile(line,column).width*0.15}}" height="{{getProfile(line,column).height*0.15}}"  class="center-block"/>
+	        		</a>
+	        		</div>
+	        	</div>
+	        </td>
+	    </tr>
+	</tbody>
+	</table>
+	</div>
+</div>
+
+</div>
+</div>

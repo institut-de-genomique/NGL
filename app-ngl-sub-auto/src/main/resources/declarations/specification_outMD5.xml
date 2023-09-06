@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+	
+<Specification xmlns="http://www.genoscope.cns.fr/specification"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.genoscope.cns.fr/specification
+H:\birdsSpec.xsd">
+
+	
+	<Treatment name="Md5FileOut" useJobScheduler="true" checkIfNewTreatmentAlreadyPerformed="true">
+	
+		<ExecutableSpecification commandSyntaxStrategyName="default">
+			<Executable path="md5sum" user="cnsnglapps" host="kon.cnrgh.fr"/>
+			<Slurm job="md5sum" part="normal"/>
+		</ExecutableSpecification>
+		
+		<ParametersSpecification>
+			<LineElement line="%fileZipped%" parameterName="fileZipped" />
+			<!-- <LineElement line=">%md5%" parameterName="endArg" /> -->
+		</ParametersSpecification>
+		
+		<InputsSpecification>
+			<InputElement name="inputRawDataMd5Out" count="1" resourceType="rawDataZip">
+				<Referential name="nglSubRefMd5"/>
+			</InputElement>
+		</InputsSpecification>		
+	</Treatment>
+</Specification>

@@ -1,0 +1,31 @@
+@()
+<div class="row">
+ <div class="col-md-7 col-lg-7">
+	 <table class="table table-condensed table-hover table-bordered">
+		<thead>
+		<tr>
+			<th>@Messages("analyses.treatments.gapClosing_ba.actualGapSum")</th> 
+			<th>@Messages("analyses.treatments.gapClosing_ba.extendGapSum")</th> 
+			<th>@Messages("analyses.treatments.gapClosing_ba.actualGapCount")</th> 
+			<th>@Messages("analyses.treatments.gapClosing_ba.finishGapCount")</th> 
+			<th>@Messages("analyses.treatments.gapClosing_ba.GCpercent")</th>
+			<th>@Messages("analyses.treatments.gapClosing_ba.numberOfN")</th>
+			<th>@Messages("analyses.treatments.gapClosing_ba.percentOfN")</th>						
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.actualGapSum.value | number}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.extendGapSum.value | number}}</td>	
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.actualGapCount.value | number}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.finishGapCount.value | number}}</td>	
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.GCpercent.value | number:2}}</td>
+			<td ng-class="highLight('treatments.'+treatments.getTreatment().code+'.pairs.numberOfN.value')">
+			{{analysis.treatments[treatments.getTreatment().code].pairs.numberOfN.value | number}}</td>	
+			<td ng-class="highLight('treatments.'+treatments.getTreatment().code+'.pairs.percentOfN.value')">
+			{{analysis.treatments[treatments.getTreatment().code].pairs.percentOfN.value | number}}</td>					
+		</tr>						
+	</tbody>
+	 </table>
+ </div>	 
+</div>

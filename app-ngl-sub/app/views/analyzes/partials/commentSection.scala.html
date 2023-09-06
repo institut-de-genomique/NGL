@@ -1,0 +1,60 @@
+@(currentUser:java.lang.String)
+@import play.mvc.Http.Context
+@import controllers.authorisation.PermissionHelper
+<div class="row" ng-controller="CommentsCtrl">
+	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+		<div class="panel panel-default">
+		  <!-- Default panel contents -->
+		  <div class="panel-heading">@Messages("analysis.comments") ({{analysis.comments.length}})</div>		 
+			   <ul class="list-group">
+				   <li class="list-group-item" ng-repeat="com in analysis.comments track by $index">
+					   <div class="row">
+						   <div class="col-lg-1 col-md-1" style="text-align:center">
+						  		<div><i class="fa fa-user fa-4x"></i></div>						  		
+						   		<div><b>{{com.createUser}}</b></div>
+						   		<div>{{com.creationDate | date:'@Messages("datetime.format")'}}</div>
+						   	</div>
+						    <div class="col-lg-9 col-md-9"  ng-bind-html="convertToBr(com.comment)">			     	
+						    </div>
+						    <div class="col-lg-2 col-md-2" >
+						    <div class="btn-group-vertical pull-right">
+						    	<button class="btn btn-default" ng-show="com.createUser == '@currentUser' || isCreationMode()" data-toggle="modal" data-target="#commentModal" ng-click="setUpdate(com, $index)"><i class="fa fa-edit"></i></button>
+						   	 	<button class="btn btn-default" ng-show="com.createUser == '@currentUser' || isCreationMode()" ng-click="remove(com, $index)"><i class="fa fa-trash-o"></i></button>						    	
+						    </div>
+						    </div>
+						    </div>					   
+				   </li>   
+			  </ul>
+		  </div>
+		
+	</div>
+	<!-- Modal -->
+	<div class="modal fade" id="commentModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	  <div class="modal-dialog">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+	        <h4 class="modal-title">@Messages("analysis.comment.title")</h4>
+	      </div>
+	      <div class="modal-body">
+	      	<form>
+	        	<label>@Messages("analysis.comment.textarea")</label>
+				<textarea  class="form-control" ng-model="currentComment.comment"  rows="5" ng-keydown="analyseText($event)"></textarea>
+			
+			</form>
+	      </div>
+	      
+	      @* @if(PermissionHelper.checkPermission(fr.cea.ig.authentication.Helper.username(Context.current().session()), "writing")){ *@
+	      @if(PermissionHelper.checkPermission(currentUser,"writing")){
+		     <div class="modal-footer">
+		       	<button class="btn btn-default" data-dismiss="modal" aria-hidden="true" ng-click="cancel();">@Messages("analysis.comment.button.cancel")</button>
+				<button data-dismiss="modal" class="btn btn-primary" ng-show="!isUpdate()"  ng-click="save();">@Messages("analysis.comment.button.save")</button>
+		      	<button data-dismiss="modal" class="btn btn-primary" ng-show="isUpdate()" ng-click="update();">@Messages("analysis.comment.button.update")</button>
+		     </div>
+		   }
+	    </div><!-- /.modal-content -->
+	  </div><!-- /.modal-dialog -->
+	</div><!-- /.modal -->
+</div>
+
+	

@@ -1,0 +1,116 @@
+@this()
+@()
+@import views.html.helper._
+
+@formTypes() = {
+    <form class="well well-small">
+        <div class="row">
+            @columnSearchForm{
+                @formGroup{
+                <div bt-select placeholder='@Messages("descriptions.select.processes.category")' class="form-control" filter="true" multiple="true"
+                    ng-model="searchService.tabs.types.form.categoryCodes"
+                    bt-options="category.code as category.name for category in searchService.tabs.types.lists.categories()"
+                    ng-change="searchService.tabs.types.form.codes=null">
+                </div>
+                }
+            }
+            @columnSearchForm{
+                @formGroup{
+                <div bt-select placeholder='@Messages("descriptions.select.processes.type")' class="form-control" filter="true" multiple="true"
+                    ng-model="searchService.tabs.types.form.codes"
+                    bt-options="type.code as type.name for type in searchService.tabs.types.lists.types()">
+                </div>
+                }
+            }
+            @columnSearchForm{
+                @formGroup{
+                <div class="btn-toolbar">
+                    <button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="searchService.searchTypes()" class="btn btn-primary" >
+                        <i class="fa fa-search"></i>
+                    </button>
+                    <button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="resetTypesForm()"  class="btn btn-default">
+                        <i class="fa fa-undo"></i>
+                    </button>
+                                                    
+                </div>	
+                }
+            }
+        </div>
+    </form>
+}
+
+@formProperties() = {
+    <form class="well well-small">
+        <div class="row">
+            @columnSearchForm{
+                @formGroup{
+                <div bt-select placeholder='@Messages("descriptions.select.processes.category")' class="form-control" filter="true" multiple="true"
+                    ng-model="searchService.tabs.properties.form.categoryCodes"
+                    bt-options="category.code as category.name for category in searchService.tabs.properties.lists.categories()"
+                    ng-change="searchService.tabs.properties.form.codes=null">
+                </div>
+                }
+            }
+            @columnSearchForm{
+                @formGroup{
+                <div bt-select placeholder='@Messages("descriptions.select.processes.type")' class="form-control" filter="true" multiple="true"
+                    ng-model="searchService.tabs.properties.form.codes"
+                    bt-options="type.code as type.name for type in searchService.tabs.properties.lists.types()">
+                </div>
+                }
+            }
+            @columnSearchForm{
+                @formGroup{
+                <div bt-select placeholder='@Messages("descriptions.select.processes.property.definition")' class="form-control" filter="true" multiple="true"
+                    ng-model="searchService.tabs.properties.form.propertyDefinitionCodes"
+                    bt-options="propertyDefinition.code as propertyDefinition.name for propertyDefinition in searchService.tabs.properties.lists.properties({objectTypeCode: 'Process'})">
+                </div>
+                }
+            }
+            @columnSearchForm{
+                @formGroup{
+                <div class="btn-toolbar">
+                    <button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="searchService.searchProperties()" class="btn btn-primary" >
+                        <i class="fa fa-search"></i>
+                    </button>
+                    <button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="resetPropertiesForm()"  class="btn btn-default">
+                        <i class="fa fa-undo"></i>
+                    </button>
+                                                    
+                </div>	
+                }
+            }
+        </div>
+    </form>
+}
+
+<div class="row">
+    <div class="col-md-12 col-lg-12" messages="messages"></div>
+</div>
+<div class="row"> 
+
+<div class="col-md-12 col-lg-12">
+    <ul class="nav nav-tabs" role="tablist">
+        <li role="presentation" class="active">
+            <a href="#" data-target="#types" data-toggle="tab" role="tab">@Messages("descriptions.processes.tab.types")</a>
+        </li>
+        <li role="presentation">
+            <a href="#" data-target="#properties" data-toggle="tab" role="tab">@Messages("descriptions.processes.tab.properties")</a>
+        </li>   
+    </ul>	
+    <div class="tab-content">
+        <div class="tab-pane fade in active" id="types">
+            @formTypes
+            <div  ultimate-datatable="searchService.tabs.types.datatable">
+                <div udt-form></div>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="properties">
+            <div class="alert alert-warning">@Messages("descriptions.info.export.properties.definitions.value.possibles")</div>
+            @formProperties
+            <div ultimate-datatable="searchService.tabs.properties.datatable">
+                <div udt-form></div>
+            </div>
+        </div>
+      </div>
+</div>

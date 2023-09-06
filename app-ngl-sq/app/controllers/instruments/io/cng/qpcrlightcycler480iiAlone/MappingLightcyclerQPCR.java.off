@@ -1,0 +1,266 @@
+package controllers.instruments.io.cng.qpcrlightcycler480iiAlone;
+
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.mongojack.DBQuery;
+
+import controllers.instruments.io.utils.AbstractInput;
+import controllers.instruments.io.utils.InputHelper;
+import fr.cea.ig.MongoDBDAO;
+import models.laboratory.common.instance.property.PropertyFileValue;
+import models.laboratory.common.instance.property.PropertySingleValue;
+import models.laboratory.experiment.instance.Experiment;
+import models.laboratory.parameter.map.MapQPCR;
+import models.utils.InstanceConstants;
+import validation.ContextValidation;
+
+/**
+ * 
+ * @author fdsantos
+ * Charge un fichier de resultats QPCR sur Lightcycler, effectue des calculs de moyenne de concentration et les affecte a une experience QC
+ */
+public class MappingLightcyclerQPCR extends AbstractInput{
+
+	@Override
+	public Experiment importFile(Experiment experiment, PropertyFileValue pfv, ContextValidation contextValidation)
+			throws Exception {
+
+		String mode =null;
+		String parameterName=null;
+		// Assertions des preconditions
+		if (contextValidation.getObject("mode") == null) {
+			contextValidation.addError("Erreur", "mode manquant.");
+			return experiment;			
+		} else {
+			mode = contextValidation.getObject("mode").toString();
+			logger.info("mode:{}", mode);
+		}
+		
+		// 30/03/2020 NGL-2897 il n'y a pas de Prod Tecan  c'est du dev !!! Renommer 
+		switch (mode) {
+		case "ProdBravo" : parameterName="bravo_5_50";
+				break;
+		case "DevBravo"  : parameterName="bravo_10_100";
+				break;
+		case "DevTecan" : parameterName="tecan_10_100";
+				break;
+		default          : contextValidation.addError("Erreur", "mode '" + mode + "' non supporté.");
+						return experiment;
+		}
+		
+		MapQPCR mapQPCR= MongoDBDAO.findOne(InstanceConstants.PARAMETER_COLL_NAME, MapQPCR.class, DBQuery.is("typeCode", "map-qpcr-parameter").is("name", parameterName));
+		if ( null == mapQPCR ){
+			contextValidation.addError("Erreur", "map-qpcr :'"+ parameterName+"' n'existe pas.");
+			return experiment;
+		}
+		
+		// pour stocker le fichier
+		Map<String, Double> mapFile384ToConc= loadFile( pfv, contextValidation);
+		
+		int sector = getSector(experiment, contextValidation);
+		final MapQPCR mapQPCRFinal =  mapQPCR;
+		
+		if ( null == mapQPCRFinal.defaultSize ) {
+			contextValidation.addError("Erreur", "Pas de valeur par défaut pour la taille de librairie dans la qpcr-map");
+		}
+		//logger.info("default size :"+mapQPCRFinal.defaultSize);
+		
+		if (!contextValidation.hasErrors()) {
+
+			experiment.atomicTransfertMethods
+			.stream()
+			.map(atm -> atm.inputContainerUseds.get(0))
+			.forEach(icu -> {
+				// FDS 11/02/2019 NGL-2399  puisqu'il est corrigé, utiliser InputHelper.getIcuPosition
+				//String pos96 = icu.locationOnContainerSupport.line+""+icu.locationOnContainerSupport.column;
+				String pos96 =InputHelper.getIcuPosition(icu);
+				// verifier qd meme que les positions dans l'experience correspondent au secteur demandé
+				if(belongToSector96(contextValidation, pos96, sector)){
+					List<String> listPos384 = mapQPCRFinal.map96To384.get(pos96);
+					Double sommeConc = new Double(0);
+					int nb=0;
+					
+					Integer cflz= (Integer)getOrCreatePSV(icu, "correctionFactorLibrarySize").getValue();
+					if ( null == cflz || 0 == cflz) {
+						// prendre defaultSize.
+						cflz=mapQPCRFinal.defaultSize;
+					}
+					//logger.info("cflz:"+cflz);
+					
+					for(String pos384 : listPos384){
+						//logger.info(">>pos384:"+pos384);
+						
+						Double conc384 = mapFile384ToConc.get(pos384);
+						// et si rien trouvé dans le fichier pour cette position ???
+						if ( null == conc384) {
+							contextValidation.addError("Erreur","Aucune concentration trouvée dans le fichier pour la position :"+ pos384);
+							continue;
+						}
+						//logger.info(">>> conc384 in file:"+conc384);
+						
+						Integer dil384 = mapQPCRFinal.map384ToDil.get(pos384);
+						// et si rien trouvé le qpcr-mapping pour cette position ??
+						if ( null == dil384 ) {
+							contextValidation.addError("Erreur","Aucune dilution dans la qpcr-map pour la position: "+ pos384);
+							continue;
+						}
+						//logger.info(">>> dil384 in map:"+dil384);
+						
+						// !! tout caster en double pour avoir un calcul correct 
+						// formule de calcul:
+						//          concFinale =conc384*dil384/1000*(refFrag/cflz)
+						Double concFinale = conc384*(double)dil384/1000d*((double)mapQPCRFinal.refFrag/(double)cflz);
+						//logger.info(">>>calcul concFinal :"+conc384+"*"+ dil384+ "/ 1000 *("+ mapQPCRFinal.refFrag +"/"+cflz+") =" +concFinal);
+						
+						/* ne pas conmpter les puits de conc nulle dans la moyenne */
+						if (concFinale > 0){
+							sommeConc+=concFinale;
+							nb++;
+						}
+					}
+					// attention au cas nb=0 !!
+					Double concMoyenne = (nb > 0 ) ? sommeConc/nb : 0d;
+					//logger.info("nb="+ nb+";  concMoyenne="+concMoyenne);
+					
+					PropertySingleValue concentration = getOrCreatePSV(icu, "concentration1");
+					concentration.value=concMoyenne;
+					concentration.unit = "nM";
+					
+					// mettre aussi dans l'experience la taille de librairie !
+					PropertySingleValue LibrarySize = getOrCreatePSV(icu, "correctionFactorLibrarySize");
+					LibrarySize.value=cflz;
+				} 
+				// else => la methode belongTosector96 emmet une erreur dans contextValidation
+					
+			});
+		}
+		
+		return experiment;
+	}
+	
+	private int getSector(Experiment experiment, ContextValidation contextValidation) {	
+		if (! experiment.instrumentProperties.containsKey("sector96")) {
+			contextValidation.addError("Erreur","propriété 'sector96' non définie dans l'expérience.");
+			return 3;
+		}
+		PropertySingleValue psv = (PropertySingleValue) experiment.instrumentProperties.get("sector96");
+		switch (psv.value.toString()) {
+		case  "1-48" : return 0;
+		case "49-96" : return 1; 
+		default:
+		   contextValidation.addError("Erreur","sector96 '"+ psv.value.toString()+"' non supporté.");
+		   return 2;
+		}
+	}
+	
+	private Boolean belongToSector96( ContextValidation contextValidation, String pos96, int sector) {
+		// verifier si valide ??  on n'a pas de numero de ligne pour le message...=>0
+		if ( ! InputHelper.isPlatePosition(contextValidation, pos96, 96, 0)){
+			return false;
+		}
+		
+		// les secteurs sont uniquement defini par les colonnes		
+		int col96 = Integer.parseInt(pos96.substring(1));
+		
+		if ( col96 > 0 && col96 < 7   && sector == 0 ){ return true; }
+		if ( col96 > 6 && col96 < 13  && sector == 1 ){ return true; }
+		
+		return false;
+	}
+	
+	/* Description du fichier a traiter: TXT TAB délimité généré par LightCycler
+	*
+	*Experiment: 150929_KAPA-Lib-Quant_PCRFREE_P17  Selected Filter: SYBR Green I / HRM Dye (465-510)
+	*Include	Color	Pos		Name		Cp		Concentration	Standard	Status
+	*True		255		A1		Sample 1	9.66	4.71E0			0	
+	*True		255		A2		Sample 2	9.86	4.12E0			0	
+	*True		255		A3		Sample 3	10.01	3.73E0			0	
+	*.....    	
+	*	 
+	*   !!!! si les operateurs cochent/decochent des puits dans le logiciel qui genere le fichier 
+	*  l'ordre des puits n'est plus assuré...
+	*   Pour les puits en erreur, il n'y a rien dans les colonnes "Cp" et "Concentration"
+	*/
+	private Map<String, Double> loadFile (PropertyFileValue pfv, ContextValidation contextValidation) {
+		// hashMap  pour stocker les concentrations du fichier
+		Map<String,Double> data =new HashMap<>(0);
+			
+		// charset detection (N. Wiart)
+		byte[] ibuf = pfv.byteValue();
+		String charset = "UTF-8"; //par defaut, convient aussi pour de l'ASCII pur
+			
+		// si le fichier commence par les 2 bytes ff/fe  alors le fichier est encodé en UTF-16 little endian
+		if (ibuf.length >= 2 && (0xff & ibuf[0]) == 0xff && (ibuf[1] & 0xff) == 0xfe) {
+			charset = "UTF-16LE";
+		}
+			
+		InputStream is = new ByteArrayInputStream(ibuf);
+		// Ce n'est pas un fichier MS-Excel mais un fichier TXT TAB delimité a lire ligne a ligne. 
+		// utiliser un bufferReader...Merci Nicolas	!! 03/08/2017 ajout charset
+			//commentaire de Jean pour ameliorer la fiabilité du tout.:
+			// Si on affirme qu'il y a 2 lignes d'entete dont seulement une utile autant utiliser
+			// cela et ne pas autoriser un fichier vide. Utiliser la deuxieme ligne pour valider
+			// les entetes et eventuellement definir un mapping par nom de colonne
+
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, charset))) {
+			int n = 0;
+			String line;
+
+			while ((line = reader.readLine()) != null) {
+				// attention si le fichier vient d'une machine avec LOCALE = FR les décimaux utilisent la virgule!!!
+				String[] cols = line.replace (",", ".").split("\t");
+
+				// verifier la premiere ligne d'entete
+				if ((n == 0) && ( ! line.matches("Experiment:(.*)") ) ){
+					contextValidation.addError("Erreurs fichier","experiments.msg.import.header-label.missing","1","Experiment:");
+					return data;
+				}
+				// commencer le traitement en sautant la 2eme ligne d'entete
+				if (n > 1 ) {
+					// description d'une ligne de donnees:
+					//  0         1      2       3          4            5             6          7
+					//Include	Color	Pos		Name		Cp		Concentration	Standard	Status
+					// status est optionnel ????
+					//Logger.info ("ligne "+n+": lg="+cols.length );
+					if ( cols.length < 7 || cols.length > 8 ) {
+						contextValidation.addError("Erreurs fichier", "experiments.msg.import.linefields.unexpected", n+1);
+						continue;
+					}
+					
+					String pos384 = cols[2];
+					// verifier que c'est une position 384 valide ???
+					if ( !InputHelper.isPlatePosition(contextValidation, pos384 , 384, n)) {
+						// isPlatePosition emmet deja l'erreur.......contextValidation.addError("Erreurs fichier", "erreur line",pos384);
+						return data;
+					} else {
+						/*  N'inclure un puit pour le calcul de moyenne ulterieur que si
+					      la colonne include est égale a 'True' ET la colonne color=255
+					      sinon =>forcer a 0 ici (sera ainsi exclue du calcul)
+						*/	  
+						double concentration;
+						if (cols[0].equals("True") && cols[1].equals("255")) { 
+							concentration=Double.parseDouble(cols[5]);   
+							data.put(pos384, concentration);
+						} else { 
+							//logger.info("excluding well "+pos384);
+							data.put(pos384, 0d);
+						}
+					}
+				}
+				++n; 
+			}
+		}catch (IOException e) {
+	    	 contextValidation.addError("Erreurs interne", e.getMessage());
+		}
+		
+		//	reader.close();
+		return data;	
+	}
+}

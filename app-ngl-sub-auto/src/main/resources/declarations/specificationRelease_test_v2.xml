@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+	
+<Specification xmlns="http://www.genoscope.cns.fr/specification"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.genoscope.cns.fr/specification
+H:\birdsSpec.xsd">
+
+	
+	<!-- Treatment : call EBI services to send xml files -->
+	<Treatment name="sendReleaseXML" useJobScheduler="false" checkIfNewTreatmentAlreadyPerformed="true">
+		<ExecutableSpecification commandSyntaxStrategyName="sendXMLSyntax">
+			<Executable path="/env/cns/submit_traces/SRA/NGL_test/script/test.sh" />
+		</ExecutableSpecification>
+		<ParametersSpecification>
+			<KeyValueElement key="-F" value="&quot;SUBMISSION=@%xmlSubmission%&quot;" parameterName="xmlSubmission"/>
+			<LineElement line="-k" parameterName="optK" />
+			<LineElement line="%ebiResult%" parameterName="listAC"/>
+			<LineElement line="cd %submissionDirectory%" parameterName="OptionCD"/>
+			
+		</ParametersSpecification>
+		<InputsSpecification>
+			<InputElement name="releaseToSend" count="1" resourceType="submission">
+				<Referential name="nglSubRef" />
+			</InputElement>
+		</InputsSpecification>
+	</Treatment>
+</Specification>

@@ -1,0 +1,33 @@
+@()
+<div class="row">
+	<div class="col-md-10 col-lg-10 col-xs-12">
+		<table class="table table-condensed table-hover table-bordered">
+	 		<thead>
+				<tr>
+					<th>@Messages("readsets.treatments.chromium.softwareVersion")</th>
+					<th>@Messages("readsets.treatments.chromium.barcodeExactMatchRatio")</th>
+					<th>@Messages("readsets.treatments.chromium.barcodeQ30BaseRatio")</th>
+					<th>@Messages("readsets.treatments.chromium.bcOnWhitelist")</th>
+					<th>@Messages("readsets.treatments.chromium.gemCountEstimate")</th>
+					<th>@Messages("readsets.treatments.chromium.meanBarcodeQscore")</th>
+					<th>@Messages("readsets.treatments.chromium.numberReads")</th>
+					<th>@Messages("readsets.treatments.chromium.read1Q30BaseRatio")</th>
+					<th>@Messages("readsets.treatments.chromium.read2Q30BaseRatio")</th>
+	 			</tr>
+	 		</thead>
+	 		<tbody>
+	 			<tr>
+	 				<td ng-bind="readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.softwareVersion.value"></td>
+					<td ng-bind="readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.barcodeExactMatchRatio.value|number:2"></td>
+					<td ng-bind="readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.barcodeQ30BaseRatio.value|number:2"></td>
+					<td ng-bind="readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.bcOnWhitelist.value|number:2"></td>
+					<td ng-bind="readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.gemCountEstimate.value | number"></td>
+					<td ng-bind="readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.meanBarcodeQscore.value|number:2"></td>
+					<td ng-bind="readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.numberReads.value | number"></td>
+					<td ng-bind="readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.read1Q30BaseRatio.value|number:2"></td>
+					<td ng-bind="readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.read2Q30BaseRatio.value|number:2"></td>
+				</tr>
+	 		</tbody>
+	 	</table>
+	</div>
+</div>

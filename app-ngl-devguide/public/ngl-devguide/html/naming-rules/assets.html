@@ -1,0 +1,265 @@
+<section id="views">
+<div class="page-header">
+<h1>Assets</h1>
+</div>
+<p>
+Les assets correspondent à l'ensemble des <b>fichiers "statiques"</b> d'une application web (image, css, javascript, font, etc.). Dans une application play, les assets peuvent être à 2 endroits :
+</p>
+<ul>
+<li>Dans un package <code>assets</code> si l'on utilise les technologies LESS et CoffeeScript pour les parties javascripts et css.</li>
+<li>Dans le dossier <code>public</code> si l'on utilise directement des fichiers js ou css et pour les images.</li>
+</ul>
+
+<p>
+Actuellement nous utilisons uniquement le dossier <code>public</code>. il y a deux types d'assets :
+</p>
+<ol>
+<li>Les assets externes qui sont récupèrés sur internet (AngularJS, JQuery, Twitter Bootstrap, etc.)</li>
+<li>Les assets internes qui sont développés dans le cadre de l'application</li>
+</ol>
+
+<hr>
+<h3>1. Les assets externes</h3>
+<p>
+Pour utiliser des assets externes, il y a 2 contextes :
+</p>
+<ul>
+<li>Dans le contexte de NGL, il faut charger les assets depuis l'application ngl-assets en utilisant le plugin AssetPlugin.</li>
+<li>Hors contexte NGL, il est préférable de mettre les assets au sein de son application.</li>
+</ul>
+
+<p>Mais que ce soit dans ngl-assets ou au sein de votre application, l'organisation des assets externe est la même et dois suivre l'arborescence suivante :</p>
+<pre class="prettyprint">
+
+public/nom_projet/
+		numéro_version/
+			css/
+				&lt;nom_fichier&gt;_&lt;numéro_version&gt;.css
+				&lt;nom_fichier&gt;_&lt;numéro_version&gt;.min.css
+			javascripts/
+				&lt;nom_fichier&gt;_&lt;numéro_version&gt;.js
+				&lt;nom_fichier&gt;_&lt;numéro_version&gt;.min.js
+			img/
+				*.png
+				*.jpg
+			font/
+
+</pre>
+
+<ul>
+<li>css : doit contenir l'ensemble des feuilles de style.</li>
+<li>javascripts : doit contenir l'ensemble des fichiers javascripts.</li>
+<li>img : doit contenir l'ensemble des images.</li>
+<li>font : doit contenir l'ensemble des fonts.</li>
+</ul>
+<div class="alert alert-info">
+<strong>Remarque : </strong>
+Ses quatres répertoires ne sont pas obligatoires et il peut y en avoir d'autre en fonction des projets.
+</div>
+
+<div class="alert alert-error">
+<strong>Important : </strong>
+<p>Il est rare que cette organisation soit déjà présente dans les fichiers récupérés sur internet.</p> 
+<p>Il est donc important de reclasser l'ensemble des fichiers et d'ajouter le numéro de version au fichiers javascripts et css séparé par un "_".</p>
+</div>
+<div class="example">
+   <div id="accordion" class="accordion">
+                <div class="accordion-group">
+                  <div class="accordion-heading">
+                    <a data-target="#collapse1" data-parent="#accordion" data-toggle="collapse" class="accordion-toggle collapsed">
+                     Twitter Boostsrap
+                    </a>
+                  </div>
+                  <div class="accordion-body collapse" id="collapse1" >
+                    <div class="accordion-inner">
+<pre class="prettyprint">
+public/bootstrap
+		2.3.1/
+			css/
+				bootstrap_2.3.1.css
+				bootstrap_2.3.1.min.css
+				bootstrap-responsive_2.3.1.css
+				bootstrap-responsive_2.3.1.min.css
+			img/
+				glyphicons-halflings-white.png
+				glyphicons-halflings.png
+			javascripts/
+				bootstrap_2.3.1.js
+				bootstrap_2.3.1.min.js
+</pre>
+
+                  
+                    </div>
+                  </div>
+                </div>
+                <div class="accordion-group">
+                  <div class="accordion-heading">
+                    <a data-target="#collapse2" data-parent="#accordion" data-toggle="collapse" class="accordion-toggle collapsed">
+					AngularJS
+	                </a>
+                  </div>
+                  <div class="accordion-body collapse" id="collapse2" >
+                    <div class="accordion-inner">
+<pre class="prettyprint">
+public/angular/
+		1.1.4/
+			javascripts/
+				angular_1.1.4.js
+				angular_1.1.4.min.js
+				angular-resource_1.1.4.js
+				angular-resource_1.1.4.min.js
+</pre>                  
+                         
+                    </div>
+                  </div>
+                </div>                
+</div>
+</div>
+<hr>
+<h3>2. Les assets internes</h3>
+<p>
+L'organisation pour les assets internes va être a peut près la même que pour les externe, on va juste découper un peu plus les fichiers javascripts par ressource primaire.
+</p>
+<p>
+Il faut donc sous public ajouter un répertoire au nom de l'application : <code>public/&lt;app_name&gt;</code>.<br/>
+Ensuite il faut mettre les répertoires pour les css, les javascripts et les images si besoin.
+</p>
+
+<pre class="prettyprint">
+public/&lt;app_name&gt;
+		css/
+		javascripts/
+		img/
+</pre>
+
+<h4>2.1. Les css</h4>
+<p>Généralement pour une application web un seul fichier css est utile donc il faut juste le nommer au nom de l'application : <code>&lt;app_name&gt;.css</code></p>
+
+<pre class="prettyprint">
+public/&lt;app_name&gt;
+		css/
+			&lt;app_name&gt;.css
+		javascripts/
+		img/
+</pre>
+
+<h4>2.2. Les javascripts</h4>
+<p>Les javascripts c'est un peu plus compliqué. Nous utilisons AngularJS qui découpe les javascripts en application, controlleurs, services, directives et filtres.</p> 
+<p>
+Notre application s'appuie sur l'architecture REST et donc se focalise sur les ressources. 
+nous mettons également en place une page d'accueil par ressource primaire qui permet de charger la configuration AngularJS. 
+Ces 2 points font que nous devons créer sous le répertoire javascripts un répertoire au nom de la <b>ressource primaire</b> au pluriel et en minuscule : <code>&lt;resource-names&gt;</code>. 
+Nous appliquons la nomenclature des URL pour le nom de la ressource.
+</p>
+<pre class="prettyprint">
+public/&lt;app_name&gt;
+		css/
+		javascripts/
+			&lt;resource-names&gt;/				
+		img/
+</pre>
+
+<p>
+Sous le répertoire de la ressource primaire il y a 2 catégories de fichiers :
+</p>
+
+<ul>
+<li>Le fichier de configuration AngularJS pour la partie application (app.js).</li>
+<li>Les controlleurs AngularJS qui sont nécessaires pour toutes les vues chargées par app.js avec un fichier par controlleur.<br/>
+Le nom des fichiers controlleur doit se terminer par <code>-ctrl.js</code>. On distingue les controlleurs car il est envisageable de mettre d'autre type de fichiers (services, filtres) spécifique à la ressource.
+</li>
+</ul>
+
+<pre class="prettyprint">
+public/&lt;app_name&gt;
+		css/
+		javascripts/
+			&lt;resource-names&gt;/	
+				app.js
+				&lt;controller-name-1&gt;-ctrl.js
+				&lt;controller-name-2&gt;-ctrl.js
+				&lt;controller-name-3&gt;-ctrl.js			
+		img/
+</pre>
+
+<div class="alert">
+<strong>Attention : </strong>
+Pour le nom de la ressource et des fichiers, on applique les normes pour les URL. C'est à dire, en minuscule et séparé par un "-" si il y a plusieurs mots.
+</div>
+
+<div class="alert alert-info">
+<strong>Remarque : </strong>
+Si les controlleurs sont petits, on peut tous les mettres dans un seul fichiers controllers.js (au pluriel).
+</div>
+
+<p>
+Différentes ressources primaires peuvent utiliser les mêmes services, filtres ou directives.
+Pour tout ce qui est en commun, on créé un répertoire par type technique. 
+</p>
+
+<pre class="prettyprint">
+public/&lt;app_name&gt;
+		css/
+		javascripts/
+			&lt;resource-names&gt;-1/	
+			&lt;resource-names&gt;-2/
+			directives/
+			filters/
+			services/					
+		img/
+</pre>
+<div class="alert alert-info">
+<strong>Remarque : </strong>
+Certains controlleurs de haut niveau peuvent être commun à plusieurs ressources donc dans ce cas on peut également ajouter un répertoire <code>controllers</code>.
+</div>
+
+<div class="alert alert-info">
+<strong>Remarque : </strong>
+Le nom des fichiers sous les répertoires techniques correspondent au nom du service, de la directive ou du filtre. De même si le code n'est pas compliqué un seul fichier par type peut être envisageable.
+</div>
+
+<div class="example">
+Comme exemple nous allons uniquement présenter ce qui a été fait dans NGL. L'exemple regroupe différente module de NGL en une seule fois
+   <div id="accordion1" class="accordion">
+                <div class="accordion-group">
+                  <div class="accordion-heading">
+                    <a data-target="#collapse4" data-parent="#accordion1" data-toggle="collapse" class="accordion-toggle collapsed">
+                     NGL
+                    </a>
+                  </div>
+                  <div class="accordion-body collapse" id="collapse4" >
+                    <div class="accordion-inner">
+<pre class="prettyprint">
+public/
+	ngl-common/
+		css/
+			ngl.css
+		javascripts/
+			services/
+				basket.js
+	ngl-bi/
+		javascripts/
+			archives/
+				app.js
+				controllers.js
+			runs/
+				app.js
+				controllers.js
+	ngl-plates/
+		javascripts/
+			plates/
+				app.js
+				details-ctrl.js
+				search-ctrl.js
+				search-manips-ctrl.js
+
+</pre>
+
+                  
+                    </div>
+                  </div>
+                </div>    
+</div>
+</div>
+
+</section>

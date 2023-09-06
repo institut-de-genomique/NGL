@@ -1,0 +1,69 @@
+@this()
+@()
+@import views.html.helper._
+
+@formStart() = {
+
+	@columnSearchForm{	
+		<div>
+		<label class="radio-inline">
+    	<input type="radio" ng-model="choixCheck" value="defaultCheck" ng-change="updateCheck('defaultCheck')"> soumission de données brutes illumina, nanopore ou mgi    	
+	    </label></div><br/>
+	    <div><label class="radio-inline">
+	    	<input type="radio" ng-model="choixCheck" value="bionanoCheck" ng-change="updateCheck('bionanoCheck')"> soumission de données brutes bionano
+	    </label></div><br/>
+	    <div><label class="radio-inline">
+	   	 <input type="radio" ng-model="choixCheck" value="metadataCheck" ng-change="updateCheck('metadataCheck')"> soumission d'un study ou d'un sample sans données brutes
+	    </label></div><br/>
+
+		<br/>	
+		@partials.create_general()		
+	}
+	
+}	
+    
+
+
+
+<div class="row">
+<div class="col-md-12 col-lg-12"  messages="messages"></div>
+</div>
+
+<!--Pour affichage d'un spinner-->
+<div class="inProgressSpinner" ng-if="treeLoadInProgress">
+<button class="btn btn-primary btn-lg">
+<i class="fa fa-spinner fa-spin fa-5x"></i>
+</button>
+</div>
+
+
+<div class="row"> 
+	<!--  <div class="col-md-12 col-lg-12" ultimate-datatable="datatable"> -->
+	<div class="col-md-12 col-lg-12" > 
+		<div dt-form>	
+			<div class="tab-content">
+				<div class="tab-pane active" id="filters">
+					<form name="submissionForm" class="well well-small">
+						<div class="row">
+						@formStart
+						@columnSearchForm{
+							@formGroup{
+							<div class="btn-toolbar">
+								<button type="submit" title='@Messages("button.save")'  ng-click="save()" ng-disabled="!isBuilding()" data-toggle="tooltip" class="btn btn-primary" >
+									<i class="fa fa-save"></i>
+								</button> 
+								<button title='@Messages("button.reset")' ng-click="reset()" data-toggle="tooltip"  class="btn btn-default">
+									<i class="fa fa-undo"></i>
+								</button>						 	
+							</div>	
+							}	
+						}
+						</div>		
+					</form>	
+				</div>
+			</div>
+		</div>
+	</div> 
+</div> 
+
+

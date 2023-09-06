@@ -1,0 +1,84 @@
+@()
+@import views.html.helper._
+
+@column()(value: Html) = {
+	<div class="col-md-4 col-lg-4 col-xs-4">
+		@value
+	</div>
+}
+@sortableColumn(msg: String)() = {}
+
+<form class="form-horizontal">
+	<div class="row">
+		@column(){
+			@columnLabelValue(Messages("samples.table.code")){
+				<p class="form-control-static" ng-bind="sample.code" />
+			}
+			@columnLabelValue(Messages("samples.table.typeCode")){
+				<div class="form-control-static" ng-bind="sample.typeCode|codes:'type'" />
+			}
+			@columnLabelValue(Messages("samples.table.categoryCode")){
+				<div class="form-control-static" ng-bind="sample.categoryCode|codes:'sample_cat'" />
+			}
+			@columnLabelValue(Messages("samples.table.projectCodes")){	
+			<div  class="form-control-static" ng-if="sample.projectCodes !== null"   ng-repeat="project in sample.projectCodes|unique">
+				{{project}} ({{project|codes:'project'}})
+			</div>				
+			}
+			@columnLabelValue(Messages("samples.table.taxonCode")){	
+				<div class="form-control-static" ng-bind='sample.taxonCode' />
+			}			
+			@columnLabelValue(Messages("samples.table.ncbiScientifiName")){	
+				<div class="form-control-static" ng-bind='sample.ncbiScientificName' />
+			}
+			@columnLabelValue(Messages("samples.table.ncbiLineage")){	
+				<div class="form-control-static" ng-bind='sample.ncbiLineage' />
+			}
+		}
+		@column(){				
+			@columnLabelValue(Messages("samples.table.referenceCollab")){	
+				<div class="form-control-static" ng-bind='sample.referenceCollab'/>
+			}
+			@columnLabelValue(Messages("samples.table.creationDate")){	
+				<p  class="form-control-static" ng-bind="sample.traceInformation.creationDate|date:'@Messages("date.format")'" />
+			}
+			@columnLabelValue(Messages("samples.table.createUser")){	
+				<div class="form-control-static" ng-bind='sample.traceInformation.createUser' />
+				}
+			@columnLabelValue(Messages("samples.table.modifyDate")){	
+				<p  class="form-control-static" ng-bind="sample.traceInformation.modifyDate|date:'@Messages("date.format")'" />
+			}
+			@columnLabelValue(Messages("samples.table.modifyUser")){	
+				<div class="form-control-static" ng-bind='sample.traceInformation.modifyUser' />
+				}
+			@columnLabelValue(Messages("samples.table.importTypeCode")){	
+				<div class="form-control-static" ng-bind="sample.importTypeCode|codes:'type'" />
+			}
+			@columnLabelValue(Messages("samples.table.comments")){
+				<div ng-switch on="isEditMode()">
+					<p ng-switch-when="false"  class="form-control-static" ng-bind-html="convertToBr(sample.comments)" />	 
+					<textarea ng-switch-when="true" class="form-control" ng-model="sample.comments[0].comment" rows="3"></textarea>
+				</div>	
+			}
+			@columnLabelValue(Messages("samples.table.technicalComments")){
+				<p class="form-control-static" list-resize='techComSample' list-resize-min-size='3' vertical></p>	 
+			}			
+		}
+		
+		@column(){				
+		<div class="row">
+			
+					<div  class="col-md-12 col-lg-12" ng-repeat="(key, value) in sample.properties">
+							<property-value key-ng-model="key" value-ng-model="value"/>						
+					</div>
+				
+			</div>
+		}
+		
+		@column(){
+		}
+	</div>
+
+	
+
+</form>

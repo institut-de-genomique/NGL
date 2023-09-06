@@ -1,0 +1,457 @@
+application.name = NGL-SUB
+index.title = Bienvenue dans NGL-SUB
+#generic
+AbsenceSearchParameter = Indiquez au moins un parametre pour votre recherche
+AbsenceDonneePourUpdate = Absence de donnée à mettre à jour
+button.saveDatatable = Sauvegarde des données du tableau 
+
+firstSubmissionDate = Date de première soumission
+#NGL-4291
+search.textarea.placeholder.codesList = Liste exacte de codes
+search.textarea.placeholder.labelsList = Liste exacte de labels
+
+#Analyse
+analyzes.menu = Analyse
+analyzes.menu.consultation = Recherche 
+analyzes.menu.create = Création
+analyzes.page.title=Analyzes
+create.analyzes.placeholder.description = * Déscription
+create.analyzes.placeholder.title = * Titre
+create.analyzes.placeholder.studyAccession = * ERP ou PRJ (identifiant du study)
+create.analyzes.placeholder.sampleAccession = * ERS ou SAM (identifiant du sample)
+analyzes.code = code
+analyzes.projectCodes =CNS project codes
+analyzes.title = Titre
+analyzes.description = Déscription
+analyzes.accession = AC
+analyzes.studyAccession = AC du study
+analyzes.sampleAccession = AC du sample
+analyzes.state = Etat
+
+consultation.placeholder.analysisAccessions = RegEx AC Analysis
+consultation.textarea-placeholder.analysisAccessions = Liste exacte des AC d''analyse
+consultation.placeholder.analysisCodes = RegEx code Analysis
+consultation.textarea-placeholder.analysisCodes = Liste exacte des codes d''analyse
+consultation.placeholder.studyIdentifier = ERP ou PRJ du study
+consultation.placeholder.sampleIdentifier = ERS ou SAM du sample
+
+analysis.msg.details=Objets liés à l''analyse 
+
+analysis.comment.button.save = Envoyer
+analysis.comment.button.cancel = Annuler
+analysis.comment.button.update = Ajouter
+analysis.comments=Commentaires
+analysis.comment.title=Commentaire
+analysis.comment.textarea=Laissez votre commentaire
+analysis.listRawData=Données brutes de l''analyse : 
+analysis.noListRawData= Aucune données brutes pour : 
+
+#Study
+studies.menu = Study ou Project
+studies.menu.create  =  Création
+studies.menu.release = Release
+studies.menu.update  =  Modifier à l''EBI
+studies.page.title=Study
+study.create.success= Sauvegarde du study (project) reussie
+studies.msg.save.success=Study (project) crée
+create.placeholder.studiesTitle= * Titre 
+create.placeholder.projectCodes= * CNS project codes
+release.placeholder.projectCodes= CNS project codes
+consultation.placeholder.projectCodes= * CNS project codes
+
+consultation.placeholder.studyCodes=Regex code study
+consultation.textarea-placeholder.studyCodes=Liste exacte des codes de study 
+
+consultation.placeholder.studyAccessions= Regex ERP study
+consultation.textarea-placeholder.studyAccessions= Liste exacte des ERP de study
+
+consultation.placeholder.studyExternalIds=Regex PRJ study
+consultation.textarea-placeholder.studyExternalIds=Liste exacte des PRJ de study
+update.placeholder.studyAccession=ERP...
+update.placeholder.studyExternalId=PRJEB...
+
+
+create.placeholder.abstractDescription= * Donner un résumé ou Description
+create.placeholder.description= * Donner une description
+create.placeholder.existingStudyType= * Choisir un type de study
+create.placeholder.centerProjectName= * Nom du projet
+create.placeholder.abstractDescription= * Résumé ou déscription
+studies.menu.consultation = Recherche
+study.code=Code
+study.projectCode=ProjectCode
+study.state.code=Etat
+study.accession=ERP
+study.releaseDate=Date de release à l'EBI
+study.createUser=Crée par
+study.centerName=CenterName
+study.centerProjectName= * Nom du projet
+study.title=*Titre
+#study.studyAbstract=*Abstract
+#study.description=*Description
+study.AbstractDescription= * Résumé ou déscription
+study.bioProjectId=BioProjectId
+study.externalId=PRJEB
+study.existingStudyType=*ExistingStudyType
+studies.tabs.analysis=Analysis
+studies.tabs.sample=Sample
+studies.tabs.experiment=Experiment
+studies.tabs.run=Run
+studies.tabs.rawData=RawData
+#studies.msg.details-release=Objets liés au study 
+studies.msg.links = Objets lié au study
+studies.msg.noLinks = Aucun objets lié au study 
+studies.msg.details-release-1=Study 
+studies.msg.details.states=Etat 
+studies.msg.release.success=Demande de release du study à l'EBI enregistrée
+study.state=Etat
+study.abstract=*Résumé/*Description 
+study.description=*Déscription 
+study.projectCodes=CNS project codes
+study.public=Public
+study.private=Privé
+study.undefined=Non defini
+study.visibility=Visibilité à l'EBI 
+study.comment.button.save = Envoyer
+study.comment.button.cancel = Annuler
+study.comment.button.update = Ajouter
+study.comments=Commentaires
+study.comment.title=Commentaire
+study.comment.textarea=Laissez votre commentaire
+
+#Project
+projects.menu=Umbrella Project
+projects.page.title=Project
+projects.menu.update=Modifier à l''EBI
+projects.menu.create=Créer un project UMBRELLA à l''EBI
+projects.menu.consultation=Recherche
+update.placeholder.projectAccession=PRJEB
+update.placeholder.projectExternalId=ERP
+consultation.placeholder.umbrellaProjectAccessions=Regex PRJ umbrella
+consultation.textarea-placeholder.umbrellaProjectAccessions=Liste exacte des PRJ de umbrella
+consultation.placeholder.umbrellaProjectCodes=Regex code umbrella
+consultation.textarea-placeholder.umbrellaProjectCodes=Liste exacte des codes de umbrella
+project.code=Code
+project.projectCode=ProjectCode
+project.state.code=Etat
+project.accession=PRJEB
+project.externalId=Identifiant 
+project.createUser=Crée par
+project.title=* Titre
+project.description= * Description
+project.state.code=Etat
+project.state=Etat
+study.locusTagPrefixs=locus_tag_prefixs
+study.idsPubmed= identifiants PUBMED 
+project.idsPubmed= identifiants PUBMED 
+project.submissionProjectType=Type de projet
+project.childrenProjectAccessions= * Projets enfants
+create.placeholder.umbrellaName= * Name
+create.placeholder.umbrellaTitle= * Titre
+create.placeholder.umbrellaDescription= * Description
+create.placeholder.stringUmbrellaChild= * Projects enfants (liste de PRJEB separée par virgule)
+create.placeholder.strIdsPubmed= identifiant Pubmed
+create.placeholder.strTaxonId=taxonId
+project.menu.create=Creation d'un project umbrella à l'EBI
+project.msg.save.success=Creation du project umbrella : 
+update.placeholder.umbrellaAccession=PRJEB...
+project.childrenProjectAccessions=study (ou project) enfants
+project.comment.button.save = Envoyer
+project.comment.button.cancel = Annuler
+project.comment.button.update = Ajouter
+project.comments=Commentaires
+project.comment.title=Commentaire
+project.comment.textarea=Laissez votre commentaire
+project.taxonId=taxonId
+project.scientificName=Nom Scientifique
+
+#Configuration
+configurations.menu = Configuration
+configurations.menu.create = Création
+configurations.page.title=Configurations
+configurations.menu.consultation=Recherche
+configuration.create.success= Sauvegarde de la configuration réussie
+configurations.msg.save.success=Configuration crée
+create.placeholder.studiesTypes=Type de study
+
+create.placeholder.librarySelection= * librarySelection
+create.placeholder.librarySource= * librarySource
+create.placeholder.libraryStrategy= * libraryStrategy
+create.placeholder.libraryConstructionProtocol=libraryConstructionProtocol
+create.placeholder.strategySample= * strategySample
+create.placeholder.strategyStudy= * strategyStudy
+configurations.msg.consultation=Recherche des configurations
+configuration.code=Code
+configuration.projectCode=ProjectCode
+configuration.projectCodes=ProjectCodes
+configuration.state.code=Etat
+configuration.librarySource=LibrarySource
+configuration.libraryConstructionProtocol=LibraryConstructionProtocol
+configuration.ebiStudiesSamplesFileName=EbiSampleOrStudyACFileName
+configuration.libraryStrategy=LibraryStrategy
+configuration.librarySelection=LibrarySelection
+configuration.strategySample=strategySample
+configuration.strategyStudy=strategyStudy
+consultation.placeholder.configurationCodes= Regex code configuration
+consultation.textarea-placeholder.configurationCodes= Liste exacte des codes de configuration
+#Submission
+submissions.menu=Soumission
+submissions.menu.create=Création
+submissions.menu.consultation=Recherche
+submissions.menu.validation=Validation
+submissions.menu.activate=Démarrer la soumission.
+submissions.page.title=Soumission
+consultation.placeholder.submissionAccessions= Regex AC submission
+consultation.textarea-placeholder.submissionAccessions= Liste exacte des AC de submission
+consultation.placeholder.stateCodes= Choisir un etat
+consultation.placeholder.pseudoStateCodes= Choisir un etat
+consultation.placeholder.submissionCodes= Regex code submission
+consultation.textarea-placeholder.submissionCodes= Liste exacte des codes de submission
+create.placeholder.submissions.study= * Choisir un study
+create.placeholder.submissions.sample=  Choisir un sample
+create.placeholder.submissions.configuration= * Choisir une configuration
+create.placeholder.submissions.readSet= * Choisir les readSets
+activate.placeholder.projectCodes= * Choisir un code projet
+validation.placeholder.projectCode= * Choisir un code projet
+submissions.tabs.study=Study
+submissions.tabs.project=Project
+submissions.tabs.analysis=Analysis
+
+submissions.tabs.sample=Sample
+submissions.tabs.experiment=Experiment
+submissions.tabs.run=Run
+submissions.tabs.rawData=RawData
+createService.placeholder.submissions.file=Charger le fichier refCollabToAc
+create.placeholder.acStudy=ERP ou PRJ du study
+create.placeholder.acSample=ERS ou SAM du sample
+
+submissions.msg.save.success=Sauvegarde réussie de la soumission
+submissions.msg.validate.success=Soumission validée
+submissions.msg.details=Détail de la soumission
+submissions.msg.consultation=Recherche des soumission
+submissions.code=Code
+submissions.type=Type de soumission
+submissions.state=Etat
+submissions.accession=Numéros d'accession
+submissions.creationDate=Date de création
+submissions.creationUser=Crée par
+submissions.projectCodes=ProjectCodes
+
+button.addComment = Ajouter un commentaire
+comments.remove.confirm = Voulez vous vraiment supprimer ce commentaire ?
+submission.comment.button.save = Envoyer
+submission.comment.button.cancel = Annuler
+submission.comment.button.update = Ajouter
+submission.comments=Commentaires
+submission.comment.title=Commentaire
+submission.comment.textarea=Laissez votre commentaire
+
+ReadSet=Fichier des readsets :
+userFileExperiments=Fichier des experiments :
+#userFileClonesToAC=Fichier userRefCollabToAc :
+userFileRefCollabToAc=userFileRefCollabToAc
+userFilePathcmap=userFilePathcmap
+create.placeholder.analysisCode=Code de l''analyse
+consultation.placeholder.state= Choisir l'état 
+consultation.placeholder.simplifiedStateCodes= Choisir l'état
+analysis.code=Code
+analysis.accession=ERA (numéros d''accession)
+analysis.projectCodes=Codes projet CNS
+analysis.title=Titre
+analysis.description=Déscription
+analysis.studyAccession=AC du study (ERP) 
+analysis.sampleAccession=AC du sample (ERS)
+analysis.state.code=Etat
+analysis.traceInformation.creationDate=Date de création
+analysis.state=Etat
+
+
+
+#RUN
+
+run.experiment.code=Code experiment
+run.code=Code 
+run.accession=ERR (Numéros d'accession Run)
+run.date=Date
+
+#RAW DATA
+rawData.relatifName=Nom du fichier au CNS
+rawData.collabFileName=Nom du fichier à l'EBI
+rawData.readsetCode=readsetCode
+#SAMPLE 
+samples.menu.update  =  Modifier à l''EBI
+samples.menu.create  =  Création (Menu à utiliser uniquement en prévision d''une soumission bionano)
+samples.menuEnBref.create = Création (Pour soumission bionano)
+sample.code=Code
+sample.accession=ERS (Numéros d'accession du Sample)
+sample.externalId=identifiant de type SAME
+sample.projectCode=Code projet
+sample.anonymizedName=Nom anonyme
+sample.state=Etat
+#sample.state.code=Etat
+sample.title=Titre
+sample.description=Déscription
+sample.anonymizedName=anonymized_name
+#sample.clone=RefCollab
+sample.attributes=* Attributes
+sample.taxonId= *identifiant du taxon
+#consultation.sample.taxonId= identifiant du taxon
+sample.commonName=Nom commun
+sample.scientificName=*Nom scientifique
+#consultation.sample.scientificName=Nom scientifique
+sample.classification=Classification
+samples.menu=Sample
+samples.menu.consultation=Recherche
+samples.page.title=Sample
+consultation.placeholder.sampleCodes= Regex code sample
+consultation.textarea-placeholder.sampleCodes= Liste exacte des codes de sample
+consultation.placeholder.sampleAccessions= Regex ERS sample
+consultation.textarea-placeholder.sampleAccessions= Liste exacte des ERS de sample
+consultation.placeholder.sampleExternalIds=Regex SAME sample
+consultation.textarea-placeholder.sampleExternalIds=Liste exacte des identifiants SAME de sample
+update.placeholder.sampleAccession= ERS...
+update.placeholder.sampleExternalId=SAME...
+create.samples.placeholder.taxonId= * TaxonId (integer)
+create.samples.placeholder.refCollab= RefCollab
+create.samples.placeholder.title= Titre
+create.samples.placeholder.anonymizedName= Anonymized Name
+create.samples.placeholder.attributes= * Attributes
+sample.comment.button.save = Envoyer
+sample.comment.button.cancel = Annuler
+sample.comment.button.update = Ajouter
+sample.comments=Commentaires
+sample.comment.title=Commentaire
+sample.comment.textarea=Laissez votre commentaire
+samples.tabs.experiment = Experiment
+samples.tabs.run = Run
+samples.tabs.rawData = RawData
+samples.tabs.analysis = Analysis
+samples.msg.details = Objets lié au sample 
+samples.msg.links = Objets lié au sample 
+samples.msg.noLinks = Aucun objets lié au sample 
+#EXPERIMENT
+experiments.menu.update  =  Modifier à l''EBI
+experiment.code=Code
+experiment.accession=ERX (Numéros d'accession)
+experiment.projectCode=Code projet
+experiment.state=Etat
+experiment.sampleCode=Code Sample
+experiment.studyCode=Code Study
+experiment.studyAccession=Study accession(ERP...)
+experiment.sampleAccession=Sample accession (ERS...)
+experiment.title=Titre
+#EBI label
+experiment.librarySelection= *Library_Selection
+experiment.libraryStrategy= *Library_Strategy
+experiment.librarySource= *Library_Source
+experiment.libraryLayout= *Library_Layout
+experiment.libraryLayoutNominalLength=Library_Layout_Nominal_Length
+experiment.libraryLayoutOrientation=Library_Layout_Orientation
+experiment.libraryName= *Library_Name
+experiment.libraryConstructionProtocol=Library_Construction_Protocol
+experiment.typePlatform= *Type Platform
+experiment.instrumentModel= *Instrument_Model
+experiment.lastBaseCoord=Last Base Coordonée
+experiment.spotLength=SpotLength
+experiments.menu=Experiment
+experiments.menu.consultation=Recherche
+experiments.page.title=Experiments
+consultation.placeholder.experimentCodes= Regex code experiment
+consultation.textarea-placeholder.experimentCodes= Liste exacte des codes d''experiment
+consultation.placeholder.experimentAccessions= Regex ERX experiment
+consultation.textarea-placeholder.experimentAccessions= Liste exacte des ERX d''experiment
+experiment.msg.details=Objets liés à l''experiment 
+
+experiment.comment.button.save = Envoyer
+experiment.comment.button.cancel = Annuler
+experiment.comment.button.update = Ajouter
+experiment.comments=Commentaires
+experiment.comment.title=Commentaire
+experiment.comment.textarea=Laissez votre commentaire
+
+documentation.menu=Aide
+documentation.page.title=Documentation
+documentation.ebi.title=Documentation EBI
+documentation.sra.url=Documentation soumission SRA
+documentation.metatadata.url=Documentation méta données
+documentation.configuration=Configuration d''une soumission de données brutes Illumina, nanopore ou mgi
+documentation.creationSubmission=Creer une soumission primaire de données à l''EBI (soumission de type Creation)
+documentation.mandatory=Information obligatoire
+documentation.optionnal=Information facultative
+documentation.possible.values=Valeurs possibles
+documentation.userFileReadSet=Fichier userFileReadSet
+documentation.userFileExperiments=Fichier userFileExperiments
+documentation.userFileSamples=Fichier userFileSamples
+documentation.userFileExperiment=Fichier UserFileExperiment
+documentation.userFileSample=Fichier userFileSample
+documentation.userFileRefCollabToAc=Fichier userFileRefCollabToAc
+documentation.sampleAttributes=Champs attributes du sample. Attention, il est obligatoire depuis le 01/06/2023 !
+documentation.visibiliteEBI_study=Visibilité des informations du study au NCBI
+documentation.visibiliteEBI_sample=Visibilité des informations du sample au NCBI
+documentation.modeleSRA=SRA(Sequence Read Archive): Le modele des données de soumission
+bilans.menu=Bilan
+bilans.menu.consultation=consultation
+bilans.page.title=Bilan
+
+bilans.submissionDate=date creation
+bilans.rawData=Nom du fichier au CNS
+bilans.collabFileName=Nom du fichier à l'EBI
+bilans.readSetCode=readSetCode
+bilans.typePlatform=plateforme
+bilans.instrumentModel=instrumentModel
+bilans.refCollabSub=refCollab(Sub)
+bilans.echantillon=echantillon
+bilans.experimentAC=exp_AC
+bilans.runAC=run_AC
+bilans.studyAC=study_AC
+bilans.studyExternalId=bioProjectId
+bilans.analysisAC=analysis_AC
+bilans.sampleAC=sample_AC
+bilans.sampleExternalId=SAME
+
+consultation.placeholder.studyCode=studyCode
+consultation.placeholder.studyAccession=ERP...(studyAccession)
+consultation.placeholder.studyIdentifier=ERP ou PRJ du study
+consultation.placeholder.studyExternalId=PRJEB...(studyExternalId)
+consultation.placeholder.sampleCode=sampleCode
+consultation.placeholder.sampleAccession=ERS...(sampleAccession)
+consultation.placeholder.sampleIdentifier=ERS ou SAM du sample
+
+consultation.placeholder.sampleExternalId=SAME...(sampleExternalId)
+
+
+
+button.save=Save
+button.reset=Reset
+button.cancel=Cancel
+button.edit=Edit
+button.shortValidate=Valider
+button.validate=Validation de toutes les données du tableau
+button.activate=Demarrer les soumissions selectionnées
+button.release=Release du study et des objets liés
+#Containers
+#containers.title = Containers
+#containers.menu = Containers
+
+msg.success.activate=Activation réussie
+msg.error.activate=Erreur activation
+
+authentification.dropdown_list.username=Utilisateur
+authentification.dropdown_list.profile=Profil
+authentification.dropdown_list.signout=Deconnexion
+
+date.format=dd/MM/yyyy
+firstSubmissionDate=Date de première soumission
+traceInformation.creationDate=Date création (NGL-SUB)
+traceInformation.creationUser=Crée par
+study.traceInformation.creationDate=Date création (NGL-SUB)
+experiment.traceInformation.creationDate=Date création (NGL-SUB)
+run.traceInformation.creationDate=Date création (NGL-SUB)
+sample.traceInformation.creationDate=Date création (NGL-SUB)
+submission.traceInformation.creationDate=Date création (NGL-SUB)
+project.traceInformation.creationDate=Date création (NGL-SUB)
+
+state.NONE=Non associé à une soumission.
+
+button.submitUpdate=Mise a jour à l'EBI de toutes les données du tableau
+
+comments=Commentaires

@@ -1,0 +1,272 @@
+application.name = NGL-Reagents
+index.title = Welcome to NGL-Reagents
+catalogs.title = Catalogue
+
+boolean.value.TRUE = Oui
+boolean.value.FALSE = Non
+
+reagent.category-box = Boîte
+reagent.category-reagent = Réactif
+
+date.format= dd/MM/yyyy
+date.format.french= jj/mm/aaaa
+
+catalogs.kit.creation = Création d'un nouveau kit dans le catalogue
+catalogs.kit.edit = Modification dans le catalogue du kit
+catalogs.kit.creation.edit = Editer le kit
+catalogs.kit.creation.save = Sauvegarder le kit
+catalogs.kit.creation.remove = Supprimer le kit
+catalogs.kit.creation.unedit = Annuler
+catalogs.kit.creation.placeholder.experimentTypes = Select. le ou les type(s) d'exp.
+
+catalogs.box.list = Boîte(s) contenue(s) dans le kit
+catalogs.box.empty = Aucune boîte dans ce kit
+catalogs.box.add = Ajouter une boîte
+catalogs.box.creation.remove = Supprimer cette boîte et ses réactifs ?
+
+kits.search = Recherche kits
+kits.create = Creation kits
+kits.create = Création individuelle
+kits.create-batch = Création en masse
+
+kits.name = Nom kit (usuel)
+kits.boxName = Nom boîte
+kits.reagentName = Nom réactif
+kits.experimentTypes = Expérience(s)
+kits.provider = Fournisseur
+kits.providerFiltre = Regex fournisseur
+kits.code = Code
+kits.providerRefName = Nom kit (fournisseur)
+kits.providerRefNameFiltre = Regex nom kit (fournisseur)
+kits.active = En cours d'utilisation
+kits.active = En cours d''utilisation
+kits.state = Utilisé
+kits.select.experimentTypeCodes = Type expériences
+kits.select.catalogCodes = Nom de kits
+kits.possibleUseNumber = Nombre d''utilisation
+kits.catalogRefCode = Ref. catalogue (fournisseur)
+kits.comment = Commentaire
+kits.placeholder.fromReceptionDate = Réception depuis le (jj/mm/aaaa)
+kits.placeholder.toReceptionDate = Réception jusqu'au (jj/mm/aaaa)
+
+kits.createUser = Créé par
+
+kits.creationDate = Date de création
+kits.createUser = Créé par
+kits.modifyDate = Date de modification
+kits.modifyUser = Modifié par
+
+kit.code.label = Code
+
+boxes.search = Recherche boîtes
+boxes.tabs.search = Recherche Boîtes
+
+boxes.name = Nom boîte
+boxes.storageConditions = Conditions de stockage (°C)
+boxes.catalogRefCode = Ref. catalogue (fournisseur)
+boxes.comment = Commentaire
+boxes.toExpirationDate = Date péremption jusqu''au
+boxes.code.label = Code
+boxes.active = En cours d''utilisation
+boxes.createUser = Créé par
+boxes.creationDate = Date de création
+boxes.modifyUser = Modifié par
+boxes.modifyDate = Date de modification
+
+catalogRefCode = REF. catalogue
+lotNumber = Lot
+providerID = ID Fournisseur
+numberOfCopy = Nombre de copie
+
+kitCatalogs.tabs.create = Création d'un kit dans le catalogue
+kitCatalogs.tabs.search = Rechercher un kit dans le catalogue
+kitDeclarations.tabs.create = Déclaration
+kitDeclarations.tabs.search = Rechercher un kit
+
+reagents.add = Ajouter un réactif
+
+reagents.msg.save.sucess = Sauvegarde réussie
+reagents.msg.save.error = Sauvegarde echouée
+reagents.msg.details = [détails]
+reagents.msg.empty.save.error = Incomplet - Sauvegarde echouée
+reagents.msg.load.error = Ce kit n''est pas dans le catalogue
+reagents.msg.delete.sucess = Suppression réussie
+reagents.msg.delete.error = Suppression echouée
+reagents.msg.catalogCode.error = Mauvais code catalogue
+reagents.msg.boxes.unknown.error = Erreur sur l''une des boîtes
+
+reagents.table.code = Code
+reagents.table.name = Nom du réactif
+reagents.table.storageConditions = Conditions de stockage (°C)
+reagents.table.catalogRefCode = Ref. catalogue (fournisseur)
+reagents.table.comment = Commentaire
+reagents.table.stockInformation = Stockage
+reagents.table.lotNumber = Lot
+reagents.table.category = Type
+reagents.table.creationDate = Date de création
+reagents.table.createUser = Expérience Créée par
+reagents.table.modifyDate = Date de modification
+reagents.table.modifyUser = Modifié par
+
+reagentCatalogs.menu = Catalogue réactifs
+reagentCatalogs.menu.create = Création ref. catalogue
+reagentCatalogs.menu.search = Recherche ref. catalogue
+
+reagentDeclarations.menu = Réception réactifs
+
+declarations.title = Réception réactifs
+
+declarations.kit = Kit
+declarations.reagent = Réactif
+declarations.box = Boîte
+declarations.kit.creation = Déclaration
+declarations.kit.creation.placeholder.kitCatalogCode = Kit catalogue
+declarations.kit.creation.placeholder.state = Etat du kit
+declarations.box.empty = Aucune boîte dans ce kit
+declarations.box.list = Boîte(s) contenue(s) dans le kit
+declarations.reagent.list = Réactifs
+declarations.kit.edit = Modification du kit
+declarations.kit.creation.edit = Editer le kit
+declarations.kit.creation.save = Sauvegarder le kit
+declarations.kit.creation.remove = Supprimer le kit
+declarations.kit.creation.unedit = Annuler
+declarations.kit.creation.placeholder.catalogRefCode = Ref. catalogue (fournisseur)
+
+experiments.name = Type d''expérience
+
+kit.catalogCode = Nom kit (usuel)
+reagents.table.catalogName = Nom kit catalogue
+kits.providerID = ID Fournisseur
+kits.expirationDate = Date de péremption
+kits.receptionDate = Date de réception	
+order.providerCode = Ref. commande (fournisseur)
+order.code = N° commande (interne)
+kit.refCommand = Information commande
+kits.startToUseDate = Date de début d''utilisation
+kits.stopToUseDate = Date de fin d''utilisation
+kits.state.code = Etat
+
+
+boxes.providerID = ID Fournisseur
+boxes.expirationDate = Date de péremption
+boxes.receptionDate = Date de réception
+boxes.possibleUseNumber = Nombre d''utilisations
+boxes.startToUseDate = Date début utilisation
+boxes.stopToUseDate = Date fin utilisation
+boxes.state.code = Etat
+boxes.insert.warning = Voulez-vous supprimer les boîtes existantes ?
+boxes.stockInformation = Informations de stockage
+boxes.lotNumber = Lot
+
+reagents.table.providerID = ID Fournisseur
+reagents.table.expirationDate = Date péremption
+reagents.table.receptionDate = Date de reception
+reagents.table.orderCode = Ref. commande (fournisseur)
+reagents.table.possibleUseNumber = Nombre d''utilisations
+reagents.table.startToUseDate = Date début utilisation
+reagents.table.stopToUseDate = Date fin utilisation
+reagents.table.catalogCode = Code catalogue
+reagents.table.stockNumber = Numéro de stockage
+reagents.table.stateCode = Etat
+
+# Reagent receptions
+
+reagent.receptions.menu = Réception réactifs
+reagent.receptions.menu.search = Recherche
+reagent.receptions.menu.state = Changement d''Etat
+reagent.receptions.menu.create = Création (manuelle)
+reagent.receptions.menu.new_from_file = Création (via un import fichier)
+
+reagent.receptions.page.tab.search = Rechercher une réception de boite ou réactif
+reagent.receptions.page.tab.state = Changement d''Etat réception de boite ou réactif
+reagent.receptions.page.tab.create = Déclarer une réception de boîte ou réactif
+reagent.receptions.page.tab.new = Importer un fichier réception
+
+reagent.receptions.tabs.general = Général
+reagent.receptions.tabs.workflow = Infos workflow
+
+reagents.msg.reception.success = Import fichier réussi
+reagents.msg.reception.error = L'Import a échoué
+reagents.msg.error.providerId = Identifiant chez le fournisseur obligatoire.
+
+search.placeholder.reception.category = Catégorie reagent
+search.placeholder.reception.batchNumber = Numéro de lot du reagent reçu
+search.placeholder.reception.parentBatchNumber = Numéro de lot (reagent parent)
+search.placeholder.reception.code = Code reagent reçu
+search.placeholder.reception.catalogRefCode = Ref. catalogue (fournisseur) du reagent reçu
+search.placeholder.reception.catalogKit.name = Nom kit (usuel) (regex)
+search.placeholder.reception.workLabel = Label de travail (regex)
+search.placeholder.reception.providerCode = Fournisseur
+search.placeholder.reception.fromProviderId = Identifiant unique du reagent chez le fournisseur
+search.placeholder.reception.state = Etat Reagent
+search.placeholder.reception.fromReceptionDate = Réception depuis le (jj/mm/aaaa)
+search.placeholder.reception.toReceptionDate = Réception jusqu''au (jj/mm/aaaa)
+search.placeholder.reception.fromExpirationDate = Date de Péremption depuis le (jj/mm/aaaa)
+search.placeholder.reception.toExpirationDate = Date de Péremption jusqu''au (jj/mm/aaaa)
+search.placeholder.reception.fromCreationDate = Création depuis le (jj/mm/aaaa)
+search.placeholder.reception.toCreationDate = Création jusqu''au (jj/mm/aaaa)
+search.placeholder.reception.createUser = Créé par
+search.placeholder.reception.experimentTypeCode = Type d''Expérience
+
+reagent.receptions.code = Code reagent reçu
+reagent.receptions.category = Catégorie reagent
+reagent.receptions.batchNumber = Numéro de lot du reagent reçu
+reagent.receptions.parentBatchNumber = Numéro de lot (reagent parent)
+reagent.receptions.receptionDate = Date de réception
+reagent.receptions.catalogKit.name = Nom kit (usuel) 
+reagent.receptions.catalogKit.catalogRefCode = Ref. catalogue (fournisseur) kit 
+reagent.receptions.catalogKit.experimentTypeCodes = Expérience(s) associées au kit
+reagent.receptions.catalogBox.name = Nom reagent parent (nom fournisseur) 
+reagent.receptions.catalogBox.catalogRefCode = Ref. catalogue (fournisseur) du reagent parent
+reagent.receptions.providerCode = Fournisseur
+reagent.receptions.catalogBox.storageConditions = Conditions de stockage (°C)
+reagent.receptions.catalog.name = Nom (fournisseur) du reagent reçu
+reagent.receptions.catalog.catalogRefCode = Ref. catalogue (fournisseur) du reagent reçu
+reagent.receptions.fromProviderId = Identifiant unique du reagent chez le fournisseur
+reagent.receptions.expirationDate = Date de péremption
+reagent.receptions.workLabel = Label de travail
+reagent.receptions.comments = Commentaires (liste)
+reagent.receptions.newComment = Nouveau Commentaire
+reagent.receptions.startUseDate = Date de début d'utilisation
+reagent.receptions.endUseDate = Date de fin d'utilisation
+reagent.receptions.state = Etat Reagent
+reagent.receptions.createUser = Créé par
+reagent.receptions.creationDate = Date de création
+reagent.receptions.modifyUser = Modifié par
+reagent.receptions.modifyDate = Date de modification
+
+reagent.receptions.table.code = Code du reagent reçu
+reagent.receptions.table.catalog.name = Nom (fournisseur) du reagent reçu
+reagent.receptions.table.catalogRefCode = Ref. catalogue (fournisseur) du reagent reçu
+reagent.receptions.table.batchNumber = Numéro de lot du reagent reçu
+reagent.receptions.table.fromProviderId = Identifiant unique du reagent chez le fournisseur
+reagent.receptions.table.expirationDate = Date de péremption
+reagent.receptions.table.workLabel = Label de travail
+reagent.receptions.table.comments = Commentaires
+reagent.receptions.table.receptionDate = Date de réception
+reagent.receptions.table.catalogKit.name = Nom kit (usuel)
+reagent.receptions.table.catalogKit.catalogRefCode = Ref. catalogue (fournisseur) kit
+reagent.receptions.table.catalogKit.experimentTypeCodes = Expérience(s) associée(s) au kit
+reagent.receptions.table.providerCode = Fournisseur
+reagent.receptions.table.storageConditions = Conditions de stockage (°C)
+reagent.receptions.table.category = Catégorie reagent
+reagent.receptions.import.type.code = Type d''import
+reagent.receptions.type.code = Type
+reagent.receptions.table.traceInformation.createUser = Créé par
+reagent.receptions.table.traceInformation.creationDate = Date de création
+reagent.receptions.table.startUseDate = Date de début d''utilisation
+reagent.receptions.table.endUseDate = Date de fin d''utilisation
+
+reagents.reception.workflow.state = Etat
+reagents.reception.workflow.date = Date
+reagents.reception.workflow.who = Par
+
+error.notnull = Le champ devrait être vide, valeur obtenue: {0}
+error.reagent.reception.create.kit.catalog = Création impossible. Des réceptions de réactifs utilisent un autre catalogue avec le même nom.
+error.reagent.reception.modify.kit.catalog = Modification impossible. Des réceptions de réactifs utilisent la valeur de ce champ.
+error.reagent.reception.mapping.row.mendatory.property = Le champ ''{0}'' (obligatoire) n''est pas renseigné.
+
+error.reagent.catalog.remove.used.experiment.type = Impossible de supprimer le type d'' expérience ''{0}'', il existe des expériences de ce type utilisant le kit Catalogue (ou son contenu) : {1}.
+
+error.delete.used.catalog = Impossible de supprimer le {0} catalogue ''{1}'' : cette référence catalogue est utilisée dans une ou plusieurs expériences.
+error.delete.reception.catalog = Impossible de supprimer le {0} catalogue ''{1}'' : cette référence catalogue est utilisée dans une ou plusieurs réceptions de réactifs.

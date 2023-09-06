@@ -1,0 +1,21 @@
+@(entity: String, condition: String="TRUE")(buttons:Html)
+
+
+<div class="row">
+	<div class="col-md-12 col-lg-12">
+	<div class="page-header">	
+		<div class="btn-toolbar pull-right" >
+		@buttons
+		</div>	
+		<!-- genere le titre-->
+		@views.html.tools.title(entity)
+	</div>
+	</div>
+</div>
+
+<div class="row">
+	<!--Affichage du message de reussite ou echec si bouton passe en parametre  activé --> 
+	<div class="col-md-12 col-lg-12" messages="messages"></div>
+</div>
+
+

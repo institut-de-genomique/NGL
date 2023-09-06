@@ -1,0 +1,131 @@
+@this()
+@()
+@import views.html.helper._
+
+@user            = @{ fr.cea.ig.authentication.Authentication.getUser() }
+
+@formConsultation() = {
+
+	@columnSearchForm{
+		@formGroup{
+			<div class="form-control" bt-select  ng-model="form.projCodes" filter="true" multiple="true" placeholder='@Messages("consultation.placeholder.projectCodes")' bt-options="project.code as project|formatProjectListLabel for project in lists.getProjects()"></div>	
+		}		
+		@formGroup{
+			<div class="form-control" bt-select ng-model="form.pseudoStateCodes"  filter="true" multiple="true" placeholder='@Messages("consultation.placeholder.pseudoStateCodes")' 
+			                          bt-options="pseudoStates.code as pseudoStates.name for pseudoStates in sraVariables.miniSimplifiedStates|orderBy:'code'"></div>			
+		}	
+	
+		@formGroup{			
+			<bt-input  class="form-control"  input-ng-model="form.codeRegex" textarea-ng-model="form.codes" 
+			title='@Messages("consultation.textarea-placeholder.experimentCodes")' 
+			textarea-placeholder-ng-model='@Messages("consultation.textarea-placeholder.experimentCodes")' 
+			placeholder='@Messages("consultation.placeholder.experimentCodes")' >
+			</bt-input>									
+		}
+	
+		@formGroup{
+			<bt-input  class="form-control"  input-ng-model="form.accessionRegex" textarea-ng-model="form.accessions" 
+			title='@Messages("consultation.textarea-placeholder.experimentAccessions")'
+			textarea-placeholder-ng-model='@Messages("consultation.textarea-placeholder.experimentAccessions")'
+			placeholder='@Messages("consultation.placeholder.experimentAccessions")' >
+			</bt-input>									
+		}
+	}
+	@columnSearchForm{	
+		@formGroup{
+			<input type="text" class="form-control" ng-model="form.studyCode" placeholder='@Messages("consultation.placeholder.studyCode")' >	
+		}	
+			
+
+		@formGroup{
+			<input type="text" class="form-control" ng-model="form.studyIdentifier" placeholder='@Messages("consultation.placeholder.studyIdentifier")' >	
+		}	
+			
+
+		@formGroup{
+			<input type="text" class="form-control" ng-model="form.sampleCode" placeholder='@Messages("consultation.placeholder.sampleCode")' >	
+		}
+	
+	
+		@formGroup{
+			<input type="text" class="form-control" ng-model="form.sampleIdentifier" placeholder='@Messages("consultation.placeholder.sampleIdentifier")' >	
+		}
+	}
+	@columnSearchForm{			
+		@formGroup{
+			<div>
+			<label>@Messages("userFileExperiment")</label> 
+			<input type="file"  id="idUserFileExperiment" base64-file="form.userFileExperiment"/>
+			</div>
+		}												
+	}
+		
+	@columnSearchForm{
+		@formGroup{
+			<div class="tab-pane active" id="filters">
+				<form class="well well-small">
+				<div class="row">
+					<div class="btn-toolbar">
+						<button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="search('@user')" class="btn btn-primary" >
+							<i class="fa fa-search"></i>
+						</button>	
+						<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="reset()"  class="btn btn-default">
+							<i class="fa fa-undo"></i>
+						</button>				 	
+					</div>		
+				</div>		
+			</form>	
+		</div>
+	
+		}													
+	}
+	
+
+	@columnSearchForm{
+	}	
+	@columnSearchForm{
+	}
+	@columnSearchForm{
+	}
+
+	
+}
+
+
+<div class="row">
+<div class="col-md-12 col-lg-12"  messages="messages"></div>
+</div>
+
+@** XXXXXXXX CONSULTATION EXPERIMENT XXXXXXXXXXXXXX **@
+
+<!--La directive ng-init est appel� au chargement de la page et dans le controlleur javascript on definit la methode
+qui permet d'installer $user dans le scope-->
+
+<span ng-init="setUserInScope('@user')"></span>
+
+@**
+Inutile car spinner qui peut etre geré directement dans le datatable
+<!--Pour affichage d'un spinner-->
+<div class="inProgressSpinner" ng-if="treeLoadInProgress">
+<button class="btn btn-primary btn-lg">
+<i class="fa fa-spinner fa-spin fa-5x"></i>
+</button>
+</div>
+**@
+	
+<div class="row"> 
+	<div class="col-md-12 col-lg-12" ultimate-datatable="experimentsDT">
+		<div dt-form>	
+			<div class="tab-content">
+				<div class="tab-pane active" id="filters">
+					<form name="experimentForm" class="well well-small">
+						<div class="row">
+						@formConsultation
+						</div>		
+					</form>	
+				</div>
+			</div>
+		</div>
+	</div>
+</div> 
+

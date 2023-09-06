@@ -1,0 +1,80 @@
+package rules
+
+rule "Init Lane Run Nanopore"
+	@nglBI(F_S_1)
+	@nglSQ(F_S_1)
+	dialect "java"
+	salience 900
+	no-loop
+	when  
+		$run:Run(categoryCode=="nanopore",lanes==null)
+	then
+		$run.lanes = new ArrayList<Lane>();
+		Lane lane = new Lane();
+		lane.number = 1;
+		lane.readSetCodes = new ArrayList<String>();
+		$run.lanes.add(lane);
+		MongoDBDAO.update(InstanceConstants.RUN_ILLUMINA_COLL_NAME, Run.class
+					,DBQuery.is("code",$run.code)
+					,DBUpdate.set("lanes",$run.lanes));
+end
+
+rule "Create ReadSet Nanopore CNS"
+	@nglBI(F_S_1)
+	@nglSQ(F_S_1)
+	dialect "java"
+	salience 700
+	no-loop
+	when  
+		$run:Run(categoryCode=="nanopore")
+		$container:Container(support.code==$run.containerSupportCode,$contents:contents)
+		$content:Content() from $contents
+		$contextError:ContextValidation()
+	then
+		Logger.debug("ReadSet Creation for run "+$run.code);
+		
+		
+		
+		//Creation des readsets
+ 		Date runStartDate =  $run.sequencingStartDate;
+ 		String codeReadSet = $content.sampleCode+"_ONT_"+$container.support.line+"_"+$run.containerSupportCode;
+ 		List<ReadSet> readSets = MongoDBDAO.find(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, DBQuery.is("code",codeReadSet)).toList();
+ 		if(readSets.size()==0){
+ 			
+			ReadSet readSet=new ReadSet();
+			readSet.typeCode="rsnanopore";
+			readSet.code=codeReadSet;
+			if($content.properties.containsKey("tag")){
+				String tag = $content.properties.get("tag").value.toString();
+				Index index=MongoDBDAO.findOne(InstanceConstants.PARAMETER_COLL_NAME, Index.class, DBQuery.in("typeCode", "index-nanopore-sequencing").is("code", tag));
+				readSet.code=readSet.code+"."+index.shortName;
+			}
+			readSet.state=new State("N","ngsrg");
+			readSet.submissionState = new State("NONE", "ngsrg");
+		
+			readSet.runCode=$run.code;
+			readSet.runTypeCode=$run.typeCode;
+			readSet.runSequencingStartDate=runStartDate;
+			readSet.laneNumber=new Integer($container.support.line);
+			readSet.sampleCode=$content.sampleCode;
+			readSet.projectCode=$content.projectCode;
+			//TO DO
+			readSet.path="A_RENSEIGNER";
+     		readSet.location="CNS";	
+			readSet.traceInformation=new TraceInformation();
+			readSet.traceInformation.setTraceInformation("ngsrg");
+
+			ContextValidation localContextError = ContextValidation.createCreationContext("nsgrg");
+			localContextError.setContextObjects($contextError.getContextObjects());
+	    	InstanceHelpers.save(InstanceConstants.READSET_ILLUMINA_COLL_NAME,readSet,localContextError,true);
+	    	
+	    	//add readsetCode to lane
+			$run.lanes.get(0).readSetCodes.add(readSet.code);
+			
+	    	MongoDBDAO.update(InstanceConstants.RUN_ILLUMINA_COLL_NAME, Run.class
+					,DBQuery.is("code",$run.code)
+					,DBUpdate.addToSet("sampleCodes", $content.sampleCode).addToSet("projectCodes",$content.projectCode).set("lanes",$run.lanes));
+		}
+	    
+end
+

@@ -1,0 +1,182 @@
+date.format=dd/MM/yyyy
+datetime.format=dd/MM/yyyy HH:mm:ss
+unit.percent = %
+
+symbol.delimiter.parenthesis.open = (
+symbol.delimiter.parenthesis.close = )
+symbol.delimiter.comma = ,
+
+#application
+application.name=NGL-PROJECTS
+
+
+#home page main
+home.a.comment=En savoir plus...
+home.h10.header=Bienvenue {0} sur NGL - Projects
+home.p.comment=NGL-PROJECTS est un LIMS simple et flexible pour le suivi des projets de séquençage de nouvelle génération.
+home.title.name=Bienvenue dans NGL-PROJECTS
+add.title.name=Nouveau projet
+
+#menu
+menu.projects = Projets
+
+
+#search
+search.form = Formulaire
+search.config = Configuration
+search.tab.addfilters = Filtres supplémentaires
+search.placeholder.projects = Projets
+search.placeholder.fromDate = Créé depuis le (jj/mm/aaaa)
+search.placeholder.toDate = Créé jusqu''au (jj/mm/aaaa)
+search.placeholder.project = Projet
+search.placeholder.run = Projet
+search.placeholder.runtypes = Types de run
+search.placeholder.states = Etats
+search.placeholder.types = Types
+search.placeholder.valid = Evaluation
+search.placeholder.regexCode = Regex pour le code
+search.placeholder.umbrellaProject = Nom
+search.placeholder.fgGroup = Projet France Génomique ?
+search.placeholder.codeFgGroup = Groupe France Génomique
+search.placeholder.unixGroup = Groupe Unix
+search.placeholder.labos= Laboratoire
+search.placeholder.users= Utilisateur
+search.placeholder.code = Code
+search.textarea.placeholder.codesList= Liste exacte de codes
+
+search.tab.addcolumns = Colonnes supplémentaires
+search.tab.filters = Filtres
+
+#projects
+projects.menu = Projets
+projects.menu.search = Recherche
+projects.menu.add = Création
+
+description.history.code = Code
+description.history.modifyUser = Utilisateur
+description.history.comment = Commentaire 
+description.history.date = Date
+description.history.obj.before.update = Objet avant mise à jour
+
+umbrellaProjects.menu = Umbrella Projets
+umbrellaProjects.menu.search = Recherche
+umbrellaProjects.menu.add = Création
+
+umbrellaprojects.page.title = Umbrella Projets
+
+button.projects.show = Voir Projets
+
+projects.page.title = Projets
+projects.page.tab.validate = Projets à évaluer
+
+projects.category.type = Catégorie
+projects.code = Code
+projects.comments = Commentaire
+projects.name = Nom
+projects.traceInformation.createUser = Créé par
+projects.traceInformation.creationDate = Créé le 
+projects.typeCode = Type
+projects.type = Type
+projects.stateCode = Etat
+projects.state.code = Etat
+projects.state.updatedAt = Mis à jour le: 
+projects.state.by = par:
+projects.projectCodes = Projets
+projects.umbrellaProjectCode = Umbrella project
+projects.description = Description
+projects.bioinformaticParameters.regexBiologicalAnalysis = Expression régulière pour BA
+projects.bioinformaticParameters.mappingReference = Référence mapping
+projects.bioinformaticParameters.fgGroup = Groupe France Génomique
+projects.bioinformaticParameters.fgPriority = Priorité Transfert CCRT
+
+projects.lastSampleCode = Dernier sample code
+projects.nbCharactersInSampleCode = Nb de lettres dans le code sample initial
+projects.unixGroup= Groupe unix 
+projects.defaultGroup = Membres par défaut avec accès aux données
+projects.users = Membres avec accès aux données
+projects.admins = Administrateurs
+projects.properties.projQtreeQuota = Quota du qtree proj
+projects.properties.rawdataQtreeQuota = Quota du qtree rawdata
+projects.properties.scratchQtreeQuota = Quota du qtree scratch (Gb)
+projects.properties.os = OS
+projects.technicalDescription = DT
+projects.properties.financingSource = Financing source
+projects.properties.bioProjectManager = Chef projet bio
+projects.properties.infoProjectManager = Chef projet info
+projects.genre =Genre
+
+login.name = Nom
+
+umbrellaProjects.code = Code
+umbrellaProjects.name = Nom
+umbrellaProjects.description = Description
+umbrellaProjects.traceInformation.creationDate = Créé le
+umbrellaProjects.traceInformation.createUser = Créé par
+umbrellaProjects.limsCode = Code LIMS
+umbrellaProjects.applicant = Demandeur
+umbrellaProjects.technicalDescription = DT
+umbrellaProject.typeCode = Type
+umbrellaProject.category.type = Catégorie
+umbrellaProject.button.delete = Supprimer le DT
+
+projects.projectCodesSelected = Projets rattachés
+projects.bioinformaticParameters.biologicalAnalysis = Analyse biologique ?
+projects.bioinformaticParameters.analysisType = Type(s) analyse(s)
+projects.bioinformaticParameters.localDataDelete = Suppression des données locales ?
+projects.bioinformaticParameters.ccrtAutomaticTransfer = Transfert des données au CCRT automatique ?
+
+docs.tableau_decisions_cocher_BA = Tableau de décisions pour cocher BA
+docs.workfow_suivi_BI_readset_multi_anlalyse_BA = Schémas Workflow Readsets avec multi-analyses BA
+
+#button
+button.validate = Sauvegarder
+button.cancel = Annuler
+button.edit = Editer
+button.addUser = Ajout membre avec accès aux données
+button.addAdmin = Ajout administrateur
+button.addComment = Ajouter un commentaire
+project.comment.button.save = Envoyer
+project.comment.button.cancel = Annuler
+project.comment.button.update = Ajouter
+project.comments=Commentaires
+project.comment.title=Commentaire
+project.comment.textarea=Laissez votre commentaire
+
+projects.details.systemParameters=Paramètres système
+projects.archive=Projet archivé ?
+projects.synchroProj=Synchronisation avec système de fichiers
+projects.action=Action
+projects.rawArchiveId=RawArchiveId
+projects.scratchArchiveId=ScratchArchiveId
+projects.projArchiveId=ProjArchiveId
+projects.archiveDate=Date de l''archive 
+
+#tab
+projects.details.general = Général
+projects.details.bioinformaticParameters = Paramètres bio-informatique
+projects.details.admin = Administration
+
+#msg
+projects.msg.save.sucess = Sauvegarde réussie
+projects.msg.save.error = Sauvegarde échouée
+projects.msg.details = [détails]
+
+user.group.title.delete = Suppression utilisateur(s)
+user.group.question.delete= Êtes-vous certain de vouloir supprimer ces utilisateurs {0} ?
+group.question.yes = Oui
+group.question.no = Non
+
+user.group.title.add = Ajout utilisateur(s) au groupe
+user.group.question.add= Êtes-vous certain de vouloir ajouter ces utilisateur(s) aux membres avec accès aux données ?
+
+admin.group.title.add = Ajout utilisateur(s) au groupe administrateur
+admin.group.question.add= Êtes-vous certain de vouloir ajouter ce(s) utilisateur(s) aux administrateurs du projet ?
+choice.user.group=Choisir un (des) utilisateur(s) pour les ajouter à un groupe 
+
+error.idnotuniqueProject = Id archive existant dans le projet {0}
+error.desarchivage.idnotrequired = Ne pas renseigner l''id archive pour l''action DESARCHIVAGE
+error.required.archive = Propriété obligatoire {0}
+error.badformat.archive = Le format du champ {0} n''est pas valide.
+error.codedouble.archive = {0} :  Code en double {1}
+
+error.noanalysetypeforba = Vous devez choisir au moins un type d''analyse

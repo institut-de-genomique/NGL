@@ -1,0 +1,39 @@
+@this(ctx : fr.cea.ig.ngl.NGLApplication, menu_ : menu)
+@(code: String)
+
+@minifyEnabled = @{ true == ctx.nglConfig().isMinified() }
+
+@scripts() = {
+	<script src="@controllers.authorisation.tpl.routes.Users.javascriptRoutes" type="text/javascript" charset="utf-8"></script>
+	<script src="@controllers.main.tpl.routes.Main.jsCodes" type="text/javascript" charset="utf-8"></script> 
+	
+	@if(!minifyEnabled) {
+		<script src="@routes.Assets.at("lib/datatable/datatable/javascripts/services/ultimate-datatable.js")" type="text/javascript" charset="utf-8"></script>                      
+		
+		<script src="@routes.Assets.at("ngl-bi/javascripts/authorisation/users/app.js")" type="text/javascript" charset="utf-8"></script>
+		<script src="@routes.Assets.at("ngl-bi/javascripts/authorisation/users/search-ctrl.js")" type="text/javascript" charset="utf-8"></script>  
+		<script src="@routes.Assets.at("ngl-bi/javascripts/authorisation/users/services.js")" type="text/javascript" charset="utf-8"></script>
+		
+		<script src="@routes.Assets.at("lib/lib-frameworkweb/ngl-common/javascripts/controllers/mainctrl.js")" type="text/javascript" charset="utf-8"></script>
+		
+		<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/commons.js")" type="text/javascript" charset="utf-8"></script> 
+		<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/list-resize.js")" type="text/javascript" charset="utf-8"></script> 
+
+		<script src="@routes.Assets.at("ngl-bi/javascripts/commons/commons.js")" type="text/javascript" charset="utf-8"></script>
+	} else {
+		<script src="@routes.Assets.at("lib/datatable/datatable/javascripts/services/ultimate-datatable.min.js")" type="text/javascript" charset="utf-8"></script>                      
+		
+		<script src="@routes.Assets.at("ngl-bi/javascripts/authorisation/users/app.min.js")" type="text/javascript" charset="utf-8"></script>
+		<script src="@routes.Assets.at("ngl-bi/javascripts/authorisation/users/search-ctrl.min.js")" type="text/javascript" charset="utf-8"></script>  
+		<script src="@routes.Assets.at("ngl-bi/javascripts/authorisation/users/services.min.js")" type="text/javascript" charset="utf-8"></script>
+		
+		<script src="@routes.Assets.at("lib/lib-frameworkweb/ngl-common/javascripts/controllers/mainctrl.min.js")" type="text/javascript" charset="utf-8"></script>
+		
+		<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/commons.min.js")" type="text/javascript" charset="utf-8"></script> 
+		<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/list-resize.min.js")" type="text/javascript" charset="utf-8"></script> 
+
+		<script src="@routes.Assets.at("ngl-bi/javascripts/commons/commons.min.js")" type="text/javascript" charset="utf-8"></script>
+	}
+}
+
+@views.html.main("authorisation.userroles.page", menu_("admin."+code), scripts)(views.html.contents.lefttabs())

@@ -1,0 +1,40 @@
+@()
+<div ng-controller="CNGPlatesToPlateCtrl">
+<div class="col-md-12 col-lg-12" ng-controller="XToPlateCtrl">
+  <div class="row margin-bottom-7"> 
+    <form class="form-inline" role="form">
+         <div class="form-group col-lg-4">          
+              <div ng-switch on="mainService.isEditMode()"> 
+              <div ng-switch-when="false">   
+                   <label for="plateCode" class="control-label">@Messages("experiments.outputContainerSupportCode")</label>
+                   <span class="form-control-static" ng-bind="outputContainerSupport.code"></span>    
+               </div>                           
+               <div ng-switch-when="true">
+                   <label for="plateCode"  class="control-label">@Messages("experiments.outputContainerSupportCode")</label>
+                   <input class="form-control input-sm" type="text" id="plateCode"
+									                    title=@Messages("experiments.outputContainerSupportCode")
+			  							                ng-model="outputContainerSupport.code" />	
+			  </div>
+			  </div>   
+	     </div>   
+         <div class="form-group col-lg-6">
+              <div ng-switch on="mainService.isEditMode()"> 
+              <div ng-switch-when="false">   
+                   <label for="plateStorage" class="control-label">@Messages("experiments.outputContainerSupportStorageCode")</label>
+                   <span class="form-control-static" ng-bind="outputContainerSupport.storageCode"></span> 
+              </div>
+              <div ng-switch-when="true">
+                  <label for="plateStorage" class="control-label">@Messages("experiments.outputContainerSupportStorageCode")</label>
+                  <!-- FDS pas trouvé de classe correcte==> style="width:65%" -->
+                  <input class="form-control input-sm" type="text" id="plateStorage" style="width:65%"
+									                   title=@Messages("experiments.outputContainerSupportStorageCode") 
+			 						                   ng-model="outputContainerSupport.storageCode" />	
+			  </div>
+			  </div>   
+	     </div>
+     </form>	
+   </div>
+   </br> <!--  margin-bottom-7 pas pris en compte !! -->   
+   @views.html.experiments.onetoone.defaults.partials.udtAndPlateDesign()
+</div>
+</div>

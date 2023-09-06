@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+	
+<Specification xmlns="http://www.genoscope.cns.fr/specification"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.genoscope.cns.fr/specification
+H:\birdsSpec.xsd">
+
+	<!-- Group treatment for submission -->
+	<Treatment name="WF_Submission" checkIfNewTreatmentAlreadyPerformed="true" ruleFlowId="fr.cea.ig.auto.submission.WorkflowSubmission">
+		<ExecutableSpecification>
+			<Executable />
+		</ExecutableSpecification>
+		<ParametersSpecification />
+		<InputsSpecification>
+			<InputElement name="subData" count="1" resourceType="submission">
+				<Referential name="nglSubRef" />			
+			</InputElement>
+		</InputsSpecification>
+	</Treatment>
+	
+	<!-- Treatment for file transfert  -->
+	<Treatment name="transfertRawData" useJobScheduler="true" checkIfNewTreatmentAlreadyPerformed="true">
+	
+		<!-- Script test -->
+		<ExecutableSpecification commandSyntaxStrategyName="ncftpputSyntax">
+			<!--  <Executable path="/usr/local/aspera/connect/bin/ascp" user="william" host="etna15.genoscope.cns.fr"/>-->
+			<Executable path="/env/cns/opt/BIRDS/AUTO_NGL_SUB/scriptTest/scriptTest.sh" user="william" host="etna15.genoscope.cns.fr"/>
+			<Lsf job="ascpJob" queue="big" />
+		</ExecutableSpecification>
+		
+		<ParametersSpecification>
+			<KeyValueElement key="-i" value="~/.ssh/ebi.sra" parameterName="cert"/>
+			<KeyValueElement key="-l" value="300M" parameterName="optionl"/>
+			<KeyValueElement key="--file-list" value="%directoryPath%/list_aspera_WGS" parameterName="fileList"/>
+			<KeyValueElement key="--mode" value="send" parameterName="mode"/>
+			<KeyValueElement key="--host" value="webin.ebi.ac.uk" parameterName="hostName"/>
+			<KeyValueElement key="--user" value="Webin-9" parameterName="userEBI"/>
+			<LineElement line="-T" parameterName="encryption"/>
+			<LineElement line="." parameterName="localDirectory"/>
+		</ParametersSpecification>
+		
+		<InputsSpecification>
+			<InputElement name="rawDataDir" count="1" resourceType="submission">
+				<Referential name="internalRefSubmission"/>
+			</InputElement>
+		</InputsSpecification>
+		<OutputsSpecification>
+			<OutputElement name="outputRawData" resourceType="rawData">
+				<Referential name="internalRefSubmissionXML" />
+			</OutputElement>
+		</OutputsSpecification>
+		
+	</Treatment>
+	
+	<!-- Treatment : call NGL SUB services to create xml files to send to EBI -->
+	<!-- Call on dev server -->
+	<Treatment name="createXML" useJobScheduler="false" checkIfNewTreatmentAlreadyPerformed="true">
+		<ExecutableSpecification commandSyntaxStrategyName="createXMLSyntax">
+			
+			<Executable path="curl -X PUT http://appdev.genoscope.cns.fr:9005/sra/submissions/%code%/xml"/>
+		</ExecutableSpecification>
+		
+		<InputsSpecification>
+			<InputElement name="subToXML" count="1" resourceType="submission">
+				<Referential name="internalRefSubmission"/>
+			</InputElement>
+		</InputsSpecification>
+		<OutputsSpecification>
+			<OutputElement name="outputSubXML" resourceType="submissionXML">
+				<Referential name="internalRefSubmissionXML" />
+			</OutputElement>
+		</OutputsSpecification>
+	</Treatment>
+	
+	<!-- Treatment : call EBI services to send xml files -->
+	<!-- Script test -->
+	<Treatment name="sendXML" useJobScheduler="false" checkIfNewTreatmentAlreadyPerformed="true">
+		<ExecutableSpecification commandSyntaxStrategyName="sendXMLSyntax">
+			<!-- <Executable path="curl https://www.ebi.ac.uk/ena/submit/drop-box/submit/?auth=ERA%20era-drop-9%20N7mo%2B8F4aHH%2BrCjLTuMo59xwfFo%3D" /> -->
+			<Executable path="/env/cns/opt/BIRDS/AUTO_NGL_SUB/scriptTest/scriptTest.sh" user="william" host="etna15.genoscope.cns.fr"/>
+		</ExecutableSpecification>
+		<ParametersSpecification>
+			<KeyValueElement key="-F" value="&quot;SUBMISSION=@%xmlSubmission%&quot;" parameterName="xmlSubmission"/>
+			<KeyValueElement key="-F" value="&quot;STUDY=@%xmlStudys%&quot;" parameterName="xmlStudys"/>
+			<KeyValueElement key="-F" value="&quot;SAMPLE=@%xmlSamples%&quot;" parameterName="xmlSamples"/>
+			<KeyValueElement key="-F" value="&quot;EXPERIMENT=@%xmlExperiments%&quot;" parameterName="xmlExperiments"/>
+			<KeyValueElement key="-F" value="&quot;RUN=@%xmlRuns%&quot;" parameterName="xmlRuns"/>
+			<LineElement line="-k" parameterName="optK" />
+			<LineElement line="listAC_%submissionCode%_%submissionDate%.txt" parameterName="listAC"/>
+			
+		</ParametersSpecification>
+		<InputsSpecification>
+			<InputElement name="subToSend" count="1" resourceType="submissionXML">
+				<Referential name="internalRefSubmissionXML" />
+			</InputElement>
+			<InputElement name="rawDataSend" count="1" resourceType="rawData">
+				<Referential name="internalRefSubmissionXML" />
+			</InputElement>
+		</InputsSpecification>
+	</Treatment>
+</Specification>

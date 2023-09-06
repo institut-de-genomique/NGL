@@ -1,0 +1,201 @@
+@()
+<div class="row">
+	<div class="col-md-10 col-lg-10 col-xs-12">
+		<table class="table table-condensed table-hover table-bordered">
+			<caption><h3>@Messages("runs.treatments.ccsReport_pacbio.legende_1")</h3></caption>
+	 		<tbody>
+	 			<tr>
+			       	<th>@Messages("runs.treatments.ccsReport_pacbio.zmwsInput")</th>
+					<td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.zmwsInput.value|number"></td>
+				</tr>
+				<tr>
+			       	<th>@Messages("runs.treatments.ccsReport_pacbio.zmwsPassFilters")</th>
+					<td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.zmwsPassFilters.value|number"></td>
+				</tr>
+				<tr>
+			       	<th>@Messages("runs.treatments.ccsReport_pacbio.zmwsPassFiltersPercent")</th>
+					<td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.zmwsPassFiltersPercent.value|number:3"></td>
+				</tr>
+				<tr>
+			       	<th>@Messages("runs.treatments.ccsReport_pacbio.zmwsFailFilters")</th>
+					<td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.zmwsFailFilters.value|number"></td>
+				</tr>
+				<tr>
+			       	<th>@Messages("runs.treatments.ccsReport_pacbio.zmwsFailFiltersPercent")</th>
+					<td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.zmwsFailFiltersPercent.value|number:3"></td>
+				</tr>
+				<tr>
+			       	<th>@Messages("runs.treatments.ccsReport_pacbio.zmwsShortcutFilters")</th>
+					<td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.zmwsShortcutFilters.value|number"></td>
+				</tr>
+				<tr>
+			       	<th>@Messages("runs.treatments.ccsReport_pacbio.zmwsShortcutFiltersPercent")</th>
+					<td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.zmwsShortcutFiltersPercent.value|number:3"></td>
+				</tr>
+				<tr>
+			       	<th>@Messages("runs.treatments.ccsReport_pacbio.zmwsWithTandemRepeats")</th>
+					<td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.zmwsWithTandemRepeats.value|number"></td>
+				</tr>
+				<tr>
+			       	<th>@Messages("runs.treatments.ccsReport_pacbio.zmwsWithTandemRepeatsPercent")</th>
+					<td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.zmwsWithTandemRepeatsPercent.value|number:3"></td>
+				</tr>
+	 		</tbody>
+	 	</table>
+	</div>
+</div>
+<br/>
+<br/>
+<div class="row">
+	<div class="col-md-10 col-lg-10 col-xs-12">
+		<table class="table table-condensed table-hover table-bordered">
+			<caption><h3>@Messages("runs.treatments.ccsReport_pacbio.legende_2")</h3></caption>
+	 		<tbody>
+	 			<tr>
+			       	<th>@Messages("runs.treatments.ccsReport_pacbio.failed.belowSnrThreshold")</th>
+					<td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.failed.value.belowSnrThreshold|number"></td>
+				</tr>
+				<tr>
+			       	<th>@Messages("runs.treatments.ccsReport_pacbio.failed.medianLengthFilter")</th>
+					<td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.failed.value.medianLengthFilter|number"></td>
+				</tr>
+				<tr>
+			       	<th>@Messages("runs.treatments.ccsReport_pacbio.failed.lackingFullPasses")</th>
+					<td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.failed.value.lackingFullPasses|number"></td>
+				</tr>
+				<tr>
+			       	<th>@Messages("runs.treatments.ccsReport_pacbio.failed.heteroduplexInsertions")</th>
+					<td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.failed.value.heteroduplexInsertions|number"></td>
+				</tr>
+				<tr>
+			       	<th>@Messages("runs.treatments.ccsReport_pacbio.failed.coverageDrops")</th>
+					<td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.failed.value.coverageDrops|number"></td>
+				</tr>
+				<tr>
+			       	<th>@Messages("runs.treatments.ccsReport_pacbio.failed.insufficientDraftCov")</th>
+					<td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.failed.value.insufficientDraftCov|number"></td>
+				</tr>
+				<tr>
+			       	<th>@Messages("runs.treatments.ccsReport_pacbio.failed.draftTooDifferent")</th>
+					<td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.failed.value.draftTooDifferent|number"></td>
+				</tr>
+				<tr>
+			       	<th>@Messages("runs.treatments.ccsReport_pacbio.failed.draftGenerationError")</th>
+					<td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.failed.value.draftGenerationError|number"></td>
+				</tr>
+				<tr>
+			       	<th>@Messages("runs.treatments.ccsReport_pacbio.failed.draftAboveMaxLength")</th>
+					<td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.failed.value.draftAboveMaxLength|number"></td>
+				</tr>
+				<tr>
+			       	<th>@Messages("runs.treatments.ccsReport_pacbio.failed.draftBelowMinLength")</th>
+					<td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.failed.value.draftBelowMinLength|number"></td>
+				</tr>
+				<tr>
+			       	<th>@Messages("runs.treatments.ccsReport_pacbio.failed.readsFailedPolishing")</th>
+					<td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.failed.value.readsFailedPolishing|number"></td>
+				</tr>
+				<tr>
+			       	<th>@Messages("runs.treatments.ccsReport_pacbio.failed.emptyCoverageWindows")</th>
+					<td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.failed.value.emptyCoverageWindows|number"></td>
+				</tr>
+				<tr>
+			       	<th>@Messages("runs.treatments.ccsReport_pacbio.failed.ccsNotConverge")</th>
+					<td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.failed.value.ccsNotConverge|number"></td>
+				</tr>
+				<tr>
+			       	<th>@Messages("runs.treatments.ccsReport_pacbio.failed.belowMinimumRq")</th>
+					<td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.failed.value.belowMinimumRq|number"></td>
+				</tr>
+				<tr>
+			       	<th>@Messages("runs.treatments.ccsReport_pacbio.failed.unknownError")</th>
+					<td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.failed.value.unknownError|number"></td>
+				</tr>
+				<tr>
+			       	<th>@Messages("runs.treatments.ccsReport_pacbio.failed.belowSnrThresholdPercent")</th>
+					<td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.failed.value.belowSnrThresholdPercent|number:3"></td>
+				</tr>
+				<tr>
+			       	<th>@Messages("runs.treatments.ccsReport_pacbio.failed.medianLengthFilterPercent")</th>
+					<td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.failed.value.medianLengthFilterPercent|number:3"></td>
+				</tr>
+				<tr>
+			       	<th>@Messages("runs.treatments.ccsReport_pacbio.failed.lackingFullPassesPercent")</th>
+					<td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.failed.value.lackingFullPassesPercent|number:3"></td>
+				</tr>
+				<tr>
+			       	<th>@Messages("runs.treatments.ccsReport_pacbio.failed.heteroduplexInsertionsPercent")</th>
+					<td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.failed.value.heteroduplexInsertionsPercent|number:3"></td>
+				</tr>
+				<tr>
+			       	<th>@Messages("runs.treatments.ccsReport_pacbio.failed.coverageDropsPercent")</th>
+					<td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.failed.value.coverageDropsPercent|number:3"></td>
+				</tr>
+				<tr>
+			       	<th>@Messages("runs.treatments.ccsReport_pacbio.failed.insufficientDraftCovPercent")</th>
+					<td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.failed.value.insufficientDraftCovPercent|number:3"></td>
+				</tr>
+				<tr>
+			       	<th>@Messages("runs.treatments.ccsReport_pacbio.failed.draftTooDifferentPercent")</th>
+					<td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.failed.value.draftTooDifferentPercent|number:3"></td>
+				</tr>
+				<tr>
+			       	<th>@Messages("runs.treatments.ccsReport_pacbio.failed.draftGenerationErrorPercent")</th>
+					<td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.failed.value.draftGenerationErrorPercent|number:3"></td>
+				</tr>
+				<tr>
+			       	<th>@Messages("runs.treatments.ccsReport_pacbio.faied.draftAboveMaxLengthPercent")</th>
+					<td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.failed.value.draftAboveMaxLengthPercent|number:3"></td>
+				</tr>
+				<tr>
+			       	<th>@Messages("runs.treatments.ccsReport_pacbio.failed.draftBelowMinLengthPercent")</th>
+					<td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.failed.value.draftBelowMinLengthPercent|number:3"></td>
+				</tr>
+				<tr>
+			       	<th>@Messages("runs.treatments.ccsReport_pacbio.failed.readsFailedPolishingPercent")</th>
+					<td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.failed.value.readsFailedPolishingPercent|number:3"></td>
+				</tr>
+				<tr>
+			       	<th>@Messages("runs.treatments.ccsReport_pacbio.failed.emptyCoverageWindowsPercent")</th>
+					<td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.failed.value.emptyCoverageWindowsPercent|number:3"></td>
+				</tr>
+				<tr>
+			       	<th>@Messages("runs.treatments.ccsReport_pacbio.failed.ccsNotConvergePercent")</th>
+					<td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.failed.value.ccsNotConvergePercent|number:3"></td>
+				</tr>
+				<tr>
+			       	<th>@Messages("runs.treatments.ccsReport_pacbio.failed.belowMinimumRqPercent")</th>
+					<td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.failed.value.belowMinimumRqPercent|number:3"></td>
+				</tr>
+				<tr>
+			       	<th>@Messages("runs.treatments.ccsReport_pacbio.failed.unknownErrorPercent")</th>
+					<td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.failed.value.unknownErrorPercent|number:3"></td>
+				</tr>
+	 		</tbody>
+	 	</table>
+	</div>
+</div>
+<br/>
+<div class="row">
+	<div class="col-md-10 col-lg-10 col-xs-12">
+		<table class="table table-condensed table-hover table-bordered">
+					<caption><h3>@Messages("runs.treatments.ccsReport_pacbio.legende_3")</h3></caption>
+
+	 		<tbody>
+	 			<tr>
+			       	<th>@Messages("runs.treatments.ccsReport_pacbio.pass.zmwsMissingAdapters")</th>
+					<td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.pass.value.zmwsMissingAdapters|number"></td>
+				</tr>
+				<tr>
+			       	<th>@Messages("runs.treatments.ccsReport_pacbio.pass.zmwsMissingAdaptersPercent")</th>
+					<td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.pass.value.zmwsMissingAdaptersPercent|number:3"></td>
+				</tr>
+	 		</tbody>
+	 	</table>
+	</div>
+</div>
+<br/>
+
+</form>	
+</div>
+</div>

@@ -1,0 +1,77 @@
+@this(config: fr.cea.ig.ngl.NGLConfig)
+
+@()
+
+@import play.mvc.Http.Context
+@import controllers.authorisation.PermissionHelper
+
+@user            = @{ fr.cea.ig.authentication.Authentication.getUser(Context.current().session()) }
+@writePermission = @{ PermissionHelper.checkPermission(user, "writing") }
+@adminPermission = @{ PermissionHelper.checkPermission(user, "admin")   }
+
+<div class="row">
+	<div class="col-md-12 col-lg-12">
+		<div class="page-header">	
+			@if(writePermission){
+			<div class="btn-toolbar pull-right">
+			
+					<div class="btn-group " id="experiment_action" ng-if="getNbAvailableAdditionnalButtons() > 1 ">
+						<a class="btn btn-default dropdown-toggle" data-toggle="dropdown"><span ng-bind="getAdditionnalButtonsLabel()"></span>
+							<span class="caret"></span>
+						</a>
+						<ul class="dropdown-menu dropdown-menu-right">
+							<li ng-repeat="button in getAdditionnalButtons() track by $index">
+								<a href="#" ng-disabled="button.isDisabled()" ng-show="button.isShow()" ng-bind="button.label" ng-click="button.click()"></a>
+							</li>
+						</ul>
+					</div>
+					<button ng-if="getNbAvailableAdditionnalButtons() === 1" ng-repeat="button in getAdditionnalButtons() track by $index" class="btn btn-default" ng-show="button.isShow()"  ng-click="button.click()" ng-disabled="button.isDisabled()" ng-bind="button.label"></button>
+				 	
+				 	@if(config.getBoolean("ngl.printing.cb", java.lang.Boolean.FALSE)){
+					<button class="btn btn-default" ng-click="openPrintTagsPage()" ng-if="isInProgressState() || isFinishState()" title="@Messages("button.tag.printing")"><i class="fa fa-tags" ></i></button>
+					}
+				
+					<button class="btn btn-default" ng-if="isDispatchModalAvailable()" ng-click="initDispatchModal()" data-toggle="tooltip" title="@Messages("button.dispatch")"><i class="fa fa-arrows-alt"></i></button>
+					
+				
+				 	<button class="btn btn-primary" ng-disabled="isSaveInProgress()" ng-click="save()" data-toggle="tooltip" title="@Messages("button.validate")" ><i class="fa fa-save"></i></button>
+				 	
+				 	
+				 	
+				 	<div class="btn-group" ng-switch on="mainService.isEditMode()" ng-if="isEditModeAvailable()">
+				 		<button class="btn btn-default" ng-switch-when="true"  ng-click="cancel()" data-toggle="tooltip" title="@Messages("button.cancel")" ><i class="fa fa-undo"></i></button>
+				 		<button class="btn btn-default" ng-switch-when="false"  ng-click="activeEditMode()" data-toggle="tooltip" title="@Messages("button.edit")" ><i class="fa fa-edit"></i></button>
+				 	</div>		
+				 	
+				 	<div class="btn-group" ng-switch on="isFinishEditMode()" ng-if="isFinishState()">
+				 		<button class="btn btn-default" ng-switch-when="true"  ng-click="cancel()" data-toggle="tooltip" title="@Messages("button.cancel")" ><i class="fa fa-undo"></i></button>
+				 		<button class="btn btn-default" ng-switch-when="false"  ng-click="activeFinishEditMode()" data-toggle="tooltip" title="@Messages("button.editFinish")" ><i class="fa fa-edit"></i></button>
+				 	</div>		
+				 	
+				 	
+				 	<div class="btn-group">
+				 		<button class="btn btn-default" ng-if="isWorkflowModeAvailable('IP')" ng-click="startExperiment()" title="@Messages("experiments.button.start")"><i class="fa fa-play"></i> @Messages("experiments.button.start")</button>
+						<button class="btn btn-default" ng-if="isWorkflowModeAvailable('F')" ng-click="finishExperiment()" title="@Messages("experiments.button.finish")"><i class="fa fa-stop"></i> @Messages("experiments.button.finish")</button>		
+			 		</div>
+			 	
+			 		<button class="btn btn-default" data-toggle="modal" data-target="#commentModal" title="@Messages("experiment.button.addComment")"><i class="fa fa-comment"></i></button>
+			 		
+			 		<button class="btn btn-default" ng-if="isExperimentDeleteAvailable('@user')" ng-click="askDeleteExperiment()" data-toggle="tooltip" title="@Messages("button.delete")" ><i class="fa fa-trash"></i></button>
+				 	@if(adminPermission){
+				 		<button class="btn btn-danger" ng-if="isFinishState() && isEditModeAvailable()" ng-disabled="isSaveInProgress()" ng-click="askSaveAdmin()" data-toggle="tooltip" title="@Messages("button.validate.warning.content")" ><i class="fa fa-save"></i></button>				 	
+			 		}
+			 	}
+			 				 					
+			</div>	
+			 <h1>		
+			 	<span ng-bind="experiment.code || '@Messages("experiments.noCode")'"></span> 			 	
+			 	<small ng-if="!isCreationMode()">   
+			 		<span ng-bind="experiment.state.code|codes:'state'"></span>
+			 	</small>
+		 	</h1>			 
+		</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-12 col-lg-12"  messages="messages"></div>
+</div>

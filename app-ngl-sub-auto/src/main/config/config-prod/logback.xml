@@ -1,0 +1,81 @@
+<!--
+  Copyright CEA, DSV/IG/GEN/LABGEM, 91000 Evry, France. contributor(s) : Dr. Ludovic FLEURY (Jan 1, 2011)
+  e-mail of the contributor(s) lfleury@genoscope.cns.fr
+  
+  This software is an API and components of a platform dedicated to the automatic execution of bioniformatics modules (Bio Informatics Rules Driven System)  
+  This software is governed by the CeCILL license under French law and abiding by the rules of distribution of free software. You can use, modify and/ or redistribute the software under the terms of the CeCILL license as circulated by CEA, CNRS and INRIA at the following URL "http://www.cecill.info".
+  As a counterpart to the access to the source code and rights to copy, modify and redistribute granted by the license, users are provided only with a limited warranty and the software's author, the holder of the economic rights, and the successive licensors have only limited liability.
+   
+  In this respect, the user's attention is drawn to the risks associated with loading, using, modifying and/or developing or reproducing the software by the user in light of its specific status of free software, that may mean that it is complicated to manipulate, and that also therefore means that it is reserved for developers and experienced professionals having in-depth computer knowledge. Users are therefore encouraged to load and test the software's suitability as regards their requirements in conditions enabling the security of their systems and/or data to be ensured and, more generally, to use and operate it in the same conditions as regards security.
+  The fact that you are presently reading this means that you have had knowledge of the CeCILL license and that you accept its terms. 
+-->
+
+<configuration>
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<!-- encoders are assigned the type ch.qos.logback.classic.encoder.PatternLayoutEncoder 
+			by default -->
+		 <encoder>
+     <pattern>
+        %d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
+      </pattern>
+    </encoder>
+
+	</appender>
+	
+	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    	<file>autoNGLSUB.log</file>
+   		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      		<!-- daily rollover -->
+      		<fileNamePattern>autoNGLSUB.%d{yyyy-MM-dd}.log</fileNamePattern>
+      		<!-- keep 10 days -->
+      		<maxHistory>10</maxHistory>
+    	</rollingPolicy>
+    	<encoder>
+      		<pattern>%d{dd/MM/yyyy HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+    	</encoder>
+  	</appender> 
+  	
+  	<appender name="SMTP_ERROR" class="ch.qos.logback.classic.net.SMTPAppender">
+		<smtpHost>smtp.genoscope.cns.fr</smtpHost>
+		<to>ejacoby@genoscope.cns.fr,sgas@genoscope.cns.fr</to>
+		<from>william@genoscope.cns.fr</from>
+		<subject>WORKFLOW BIRDS NGL-SUB Error </subject>
+		<layout class="ch.qos.logback.classic.html.HTMLLayout">
+			<pattern>%date%level%logger{36} - %msg</pattern>
+		</layout>
+				
+		 <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+          		<level>ERROR</level>
+      		</filter>
+	</appender>
+	
+	<logger name="fr.genoscope.lis.devsi.birds" level="INFO"  />
+	<logger name="fr.cea.ig.auto.submission.SubmissionServices" level="ERROR"  />
+	<logger name="fr.cea.ig.auto.submission.XMLServices" level="ERROR"  />
+	
+	<logger name="fr.genoscope.lis.devsi.birds.impl.properties.BirdsProperties" level="ERROR"  />
+	<logger name="fr.genoscope.lis.devsi.birds.api.execution.ProcessBuilderRunnerWithRedirectedOutputs" level="ERROR"  />
+	<logger name="fr.genoscope.lis.devsi.birds.api.client.JobUnixWrapper" level="ERROR"  />
+	
+	<logger name="fr.genoscope.lis.devsi.birds.api.client.BirdsLineCommands" level="INFO">
+		<appender-ref ref="STDOUT"/>
+	</logger>
+	<logger name="fr.genoscope.lis.devsi.birds.impl.command" level="INFO">
+		<appender-ref ref="STDOUT"/>
+	</logger>
+	<logger name="org.hibernate" level="ERROR"  />
+	<logger name="bitronix.tm" level="ERROR"  />
+	<logger name="org.apache" level="ERROR" />
+	<logger name="org.hibernate.tool" level="ERROR" />
+	<logger name="org.hibernate.tool.hbm2ddl" level="OFF" />
+	<logger name="org.springframework" level="ERROR" />
+	<logger name="com.mchange.v2" level="ERROR" />
+	
+	<logger name="ngl.sub.rules" level="DEBUG" />
+
+	<root level="INFO">
+		<!-- <appender-ref ref="STDOUT" />-->
+		<appender-ref ref="FILE" />
+		<appender-ref ref="SMTP_ERROR"/>
+	</root>
+</configuration>

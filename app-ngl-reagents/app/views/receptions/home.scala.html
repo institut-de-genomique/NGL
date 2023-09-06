@@ -1,0 +1,28 @@
+@this(menu_ : menu)
+@(code : String)
+
+@import models.laboratory.common.description.ObjectType
+
+@scripts() = {
+	<script src="@controllers.reagents.tpl.routes.Receptions.javascriptRoutes" type="text/javascript" charset="utf-8"></script>
+	<script src="@controllers.main.tpl.routes.Main.jsCodes" type="text/javascript" charset="utf-8"></script> 
+	<script src="@controllers.main.tpl.routes.Main.jsPermissions" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-reagents/javascripts/receptions/app.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("lib/datatable/datatable/javascripts/services/ultimate-datatable.js")" type="text/javascript" charset="utf-8"></script>     
+	<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/commons.js")" type="text/javascript" charset="utf-8"></script> 
+	<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/bt-input.js")" type="text/javascript" charset="utf-8"></script>  
+	<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/list-resize.js")" type="text/javascript" charset="utf-8"></script>
+    <script src="@routes.Assets.at("lib/lib-frameworkweb/ngl-common/javascripts/controllers/mainctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/basket.js")" type="text/javascript" charset="utf-8"></script>   
+	<script src="@routes.Assets.at("ngl-reagents/javascripts/receptions/details-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-reagents/javascripts/receptions/create-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-reagents/javascripts/receptions/new-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-reagents/javascripts/receptions/search-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-reagents/javascripts/receptions/services.js")" type="text/javascript" charset="utf-8"></script>  		
+}
+
+@css() = {
+<link rel="stylesheet" href="@routes.Assets.at("ngl-reagents/css/reagents/creation.css")">
+}
+
+@views.html.main("declarations.title", menu_("reagents."+code), scripts, css)(views.html.contents.lefttabs())

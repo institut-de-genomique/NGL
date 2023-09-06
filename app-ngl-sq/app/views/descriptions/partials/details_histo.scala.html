@@ -1,0 +1,47 @@
+<table class="table table-condensed table-striped table-hover table-bordered form-horizontal">
+	<thead>
+		<tr>
+			<th>@Messages("descriptions.protocols.table.code")</th>
+			<th>@Messages("description.user.modif")</th>
+			<th>@Messages("descriptions.protocols.comment")</th>
+			<th>@Messages("descriptions.protocols.date")</th>
+			<th>@Messages("description.obj.before.update")</th>
+			<th ng-repeat ="(property,value) in protocol.properties">
+				Propriété ({{property}})
+				
+			</th> 
+			
+		</tr>
+		<tbody>
+			<tr ng-repeat="descriptionHistory in descriptionHistories | orderBy : '-date'">
+				<td ng-bind="descriptionHistory.code" />
+				<td ng-bind="descriptionHistory.user" />
+				<td ng-bind="descriptionHistory.comment" />
+				<td ng-bind="descriptionHistory.date | date :'dd-MM-yyyy HH:mm:ss'" />
+				<td>
+					<table class="table table-bordered">
+						<thead>
+							<tr>
+								<th>@Messages("Avant")</th>
+								
+							</tr>
+						<tbody>
+							<td>
+								<p ng-repeat="property in getKeysFromObject(descriptionHistory.objMAjJson)">
+									{{ property }} : {{convertToJson(descriptionHistory.objMAjJson)[property] }},
+								</p>
+							</td>
+							
+							</tr>
+						</tbody>
+						</thead>
+					</table>
+				</td >
+				<td ng-repeat ="propertyValue in getPropertiesValues(descriptionHistory.objMAjJson) track by $index">
+					{{propertyValue}} 
+				</td>
+			</tr>
+			
+		</tbody>
+	</thead>
+</table>

@@ -1,0 +1,76 @@
+@()
+
+@import views.html.helper._
+
+
+
+<div class="row"> 
+	<h4><strong>@Messages("choice.user.group")</strong></h4>
+	<br>
+	@columnSearchForm{
+			@formGroup{
+				<div class="form-control" bt-select ng-model="form.groupLabo" filter="true" placeholder='@Messages("search.placeholder.labos")' bt-options="group.displayName for group in listLabos" ng-change="updateListUsersLabo()"></div>				
+			}
+	}	
+	
+	@columnSearchForm{
+			@formGroup{
+				<div class="form-control" bt-select ng-model="form.usersLabo" multiple="true" filter="true" placeholder='@Messages("search.placeholder.users")' bt-options="member.login as member.displayName for member in getListUsersLabo()"></div>
+			}
+	}
+	
+					<div class="btn-toolbar">
+					<button title='@Messages("button.addAdmin")' data-toggle="tooltip" ng-click="askAddAdminToGroup()" class="btn btn-danger">
+						@Messages("button.addAdmin")
+					</button>
+					<button title='@Messages("button.addUser")' data-toggle="tooltip" ng-click="askAddUserToGroup()" class="btn btn-primary" >
+						@Messages("button.addUser")
+					</button>
+					
+					</div>
+</div>	
+	
+<div class="row" style="margin-top:15px">
+<div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+<div class="panel panel-default">
+  <!-- Default panel contents -->
+  <div class="panel-heading">@Messages("projects.admins")</div>
+  <div class="panel-body">
+  <div class="row">
+	 	<div class="col-md-12 col-lg-12" ultimate-datatable="datatableProjectAdmins"></div>
+ 	</div>
+  </div>
+</div>
+</div>
+
+<div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+<div class="panel panel-default">
+  <!-- Default panel contents -->
+  <div class="panel-heading">@Messages("projects.users")</div>
+  <div class="panel-body">
+  <div class="row">
+	 	<div class="col-md-12 col-lg-12" ultimate-datatable="datatableProjectUsers"></div>
+ 	</div>
+  </div>
+</div>
+</div>
+
+
+ <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+<div class="panel panel-default">
+  <!-- Default panel contents -->
+  <div class="panel-heading">@Messages("projects.defaultGroup")</div>
+  <div class="panel-body">
+  <div class="row">
+	 	<div class="col-md-12 col-lg-12"  ultimate-datatable="datatableProjectDefaultUsers"></div>
+ 	</div>
+  </div>
+</div>
+</div>
+
+
+
+
+</div>
+
+

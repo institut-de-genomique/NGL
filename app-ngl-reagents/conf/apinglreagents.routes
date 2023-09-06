@@ -1,0 +1,31 @@
+#Kit catalogs API
+GET 	/api/kit-catalogs/:code					controllers.reagents.api.KitCatalogs.get(code: java.lang.String)
+GET 	/api/kit-catalogs						controllers.reagents.api.KitCatalogs.list()
+POST 	/api/kit-catalogs						controllers.reagents.api.KitCatalogs.save()
+DELETE 	/api/kit-catalogs/:code					controllers.reagents.api.KitCatalogs.delete(code: java.lang.String)
+PUT 	/api/kit-catalogs/:code					controllers.reagents.api.KitCatalogs.update(code: java.lang.String)
+
+#Box catalogs API
+GET 	/api/box-catalogs						controllers.reagents.api.BoxCatalogs.list()
+POST 	/api/box-catalogs						controllers.reagents.api.BoxCatalogs.save()
+PUT 	/api/box-catalogs/:code					controllers.reagents.api.BoxCatalogs.update(code: java.lang.String)
+DELETE 	/api/box-catalogs/:code					controllers.reagents.api.BoxCatalogs.delete(code: java.lang.String)
+
+#Reagent catalogs API
+GET 	/api/reagent-catalogs					controllers.reagents.api.ReagentCatalogs.list()
+POST 	/api/reagent-catalogs					controllers.reagents.api.ReagentCatalogs.save()
+PUT 	/api/reagent-catalogs/:code				controllers.reagents.api.ReagentCatalogs.update(code: java.lang.String)
+DELETE 	/api/reagent-catalogs/:code				controllers.reagents.api.ReagentCatalogs.delete(code: java.lang.String)
+
+#Catalogs API
+GET 	/api/catalogs							controllers.reagents.api.Catalogs.list()
+
+#Receptions API
+GET 	/api/reagent-receptions							controllers.reagents.api.Receptions.list()
+GET 	/api/reagent-receptions/:code					controllers.reagents.api.Receptions.get(code: java.lang.String)
+POST 	/api/reagent-receptions							controllers.reagents.api.Receptions.save()
+PUT 	/api/reagent-receptions/:code					controllers.reagents.api.Receptions.update(code: java.lang.String)
+PUT		/api/reagent-receptions/batch/state				controllers.reagents.api.Receptions.updateStateBatch()
+PUT		/api/reagent-receptions/:code/state				controllers.reagents.api.Receptions.updateState(code:java.lang.String)
+DELETE 	/api/reagent-receptions/:code					controllers.reagents.api.Receptions.delete(code: java.lang.String)
+POST	/api/reagent-receptions/:code/file/import		controllers.reagents.io.Receptions.importFile(code:java.lang.String)

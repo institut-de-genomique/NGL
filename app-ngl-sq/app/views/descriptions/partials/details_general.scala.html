@@ -1,0 +1,131 @@
+@()
+@import views.html.helper._
+@import views.html.descriptions._
+
+@column()(value: Html) = {
+<div class="col-md-4 col-lg-4 col-xs-4">
+	@value
+</div>
+}
+
+
+<form class="form-horizontal">
+	<div class="row">
+	<div ng-if="!isCreateProtocolPage()">
+		@column(){
+
+		@columnLabelValue(Messages("descriptions.protocols.table.name")){
+		<div ng-class="{'has-error': errorName}">
+			<div ng-switch on="isEditMode()">
+				<p ng-switch-when="false" class="form-control-static" ng-bind="protocol.name" />
+				<input type="text" ng-switch-when="true" class="form-control" ng-model="protocol.name"></input>
+			</div>
+		</div>
+		}
+
+		@columnLabelValue(Messages("descriptions.protocols.table.code")){
+		<p class="form-control-static" ng-bind="protocol.code" />
+		}
+
+		@columnLabelValue(Messages("descriptions.protocols.table.experiment.types.code")){
+		<div ng-class="{'has-error': errorExp}">
+			<div ng-switch on="isEditMode()">
+				<p ng-switch-when="false"  class="form-control-static" ng-repeat="(property,value) in protocol.experimentTypeCodes" >
+					{{value}}
+				</p>
+				<div ng-switch-when="true" bt-select
+					placeholder='@Messages("descriptions.select.protocols.experiment.types")' class="form-control"
+					ng-model="protocol.experimentTypeCodes" filter="true" multiple="true"
+					bt-options="experimentType.code as experimentType|formatProjectListLabel for experimentType in searchService.getExperimentTypes()">
+				</div>
+			</div>
+		</div>
+		}
+
+		@columnLabelValue(Messages("descriptions.protocols.table.active")){
+		<div ng-switch on="isEditMode()">
+			<p ng-switch-when="false" class="form-control-static">
+				{{ protocol.active | codes: 'boolean' }}
+			</p>
+			<input ng-switch-when="true" class="form-control-static" type="checkbox" ng-model="protocol.active" />
+		</div>
+		}
+		}
+
+		@column(){
+
+		@columnLabelValue(Messages("description.protocol.categoryCode")){
+		<div class="form-group required">
+			<div ng-class="{'has-error': errorCatCode}">
+				<p class="form-control-static" ng-bind="protocol.categoryCode" />
+			</div>
+		</div>
+		}
+
+		@columnLabelValue(Messages("description.protocol.filepath")){
+		<div class="form-group required">
+			<div ng-class="{'has-error': errorPath}">
+				<div ng-switch on="isEditMode()">
+					<p ng-switch-when="false" class="form-control-static" ng-bind="protocol.filePath" />
+					<input type="text" ng-switch-when="true" class="form-control" ng-model="protocol.filePath"></input>
+				</div>
+			</div>
+		</div>
+		}
+
+		@columnLabelValue(Messages("description.protocol.version")){
+		<div class="form-group required">
+			<div ng-class="{'has-error': errorVersion}">
+				<div ng-switch on="isEditMode()">
+					<p ng-switch-when="false" class="form-control-static" ng-bind="protocol.version" />
+					<input type="text" ng-switch-when="true" class="form-control" ng-model="protocol.version"></input>
+				</div>
+			</div>
+		</div>
+		}
+		}
+	</div>
+</div>
+</form>
+
+<div class="row">
+	<div class="col-md-4 col-lg-4 ">
+		<table class="table table-condensed table-striped table-hover table-bordered form-horizontal ">
+			<caption>
+				<h4 ng-if ="!isObjEmpty(protocol.properties)">
+					<strong>@Messages("descriptions.processes.tab.properties")</strong>
+				</h4>
+			</caption>
+			<thead>
+				<tr>
+					<th ng-repeat="(property,value) in protocol.properties">
+						Propriété ({{property}})
+
+					</th>
+				</tr>
+			<tbody>
+				<tr>
+					<td ng-repeat="propertyValue in protocol.properties track by $index">
+						{{propertyValue.value}}
+					</td>
+				</tr>
+			</tbody>
+			</thead>
+		</table>
+	</div>
+</div>
+
+<br>
+<form class="form-horizontal">
+	<div class="row">
+		<div class="form-group required">
+			<label class="col-md-2 col-lg-2 control-label ">@Messages("description.comment")</label>
+			<div ng-class="{'has-error': errorComment}" class="col-md-2 col-lg-2">
+				<div ng-switch on="isEditMode()">
+					<p ng-switch-when="false" class="form-control-static">{{searchService.comment}}</p>
+					<textarea ng-switch-when="true" class="form-control" ng-model="searchService.comment"></textarea>
+				</div>
+			</div>
+		</div>
+	</div>
+</form>

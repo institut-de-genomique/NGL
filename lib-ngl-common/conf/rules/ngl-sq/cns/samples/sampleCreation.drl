@@ -1,0 +1,55 @@
+//created on: Feb 2, 2015
+package rules
+
+//list any import classes here.
+
+
+
+//declare any global variables here
+rule "Add property negativeControl when sample is imported "
+	@nglSQ( sampleCreation )
+	dialect "java"
+	salience 900
+	no-loop
+    when
+        $sample : Sample($properties:properties, $properties!=null)
+        not PropertyValue() from $properties.get("negativeControl")
+        $projectCode : String(this in ('CDU','CDW','CDX','CDY','CDZ','CEA','CEB')) from $sample.projectCodes
+    then
+    	Logger.debug("Add property negative control to : "+$sample.code);  
+       	
+       	PropertySingleValue psv = new PropertySingleValue(Boolean.TRUE);
+       	$sample.properties.put("negativeControl", psv);
+	end
+	
+rule "Add property fishAnatomy when sample is imported or updated "
+	@nglSQ( sampleCreation )
+	dialect "java"
+	salience 900
+	no-loop
+    when
+        $sample : Sample($properties:properties, $properties!=null, typeCode=="fish", $pvTaraProtocol:properties.get("taraProtocol")!=null)               
+    then
+    	Logger.debug("Add property fishAnatomy to : "+$sample.code);  
+       	String fishAnatomy = $pvTaraProtocol.value.toString();
+       	if('GIL'.equals(fishAnatomy))fishAnatomy='GILLS';
+       	
+       	PropertySingleValue psv = new PropertySingleValue(fishAnatomy);
+       	$sample.properties.put("fishAnatomy", psv);
+	end	
+
+rule "set correct sample name "
+	@nglSQ( sampleCreation )
+	dialect "java"
+	salience 900
+	no-loop
+    when
+        $sample : Sample($name:name, $code:code, $code!=null, $name!=null)                       
+    then
+    	Logger.debug("set correct sample name to : "+$sample.code);  
+		//by default name = code so if code = [A-Z]_[A-Z] set second part in name
+		if($code.matches("[A-Z]{3}_[A-Z]+")){
+			$sample.name = $code.split("_")[1];
+		}       
+	end	
+	

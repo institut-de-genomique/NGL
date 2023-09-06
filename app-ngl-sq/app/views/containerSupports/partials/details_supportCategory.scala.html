@@ -1,0 +1,43 @@
+@()
+@import views.html.helper._
+
+<div class="row margin-bottom-5 hidden-print" >
+<div class="col-md-12 col-lg-12">
+
+<div class="btn-toolbar pull-right ">
+	<button class="btn btn-info" disabled="disabled">{{containers.length}} @Messages("containers.supportView.results")</button>
+</div>
+</div>
+</div>
+<div class="row visible-print-inline">
+		<div class="col-md-12 col-lg-12">
+			<h3 ng-bind="support.code"></h3>
+		</div>
+</div>
+<div class="row">
+<div class="col-md-12 col-lg-12">
+<table class="table table-bordered table-condensed">
+	<thead>
+		<tr>
+			<th></th>
+			<th ng-if="nbCol" ng-repeat="i in nbCol">{{i}}</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr ng-if="nbLine" ng-repeat="y in nbLine" class="total">
+			<td><strong>{{y}}</strong></td>
+			<td class="plates" ng-repeat="x in nbCol">
+				<div class="{{getClass(x, y)}}">
+					<div ng-if="data" ng-click="goToContainer(x,y)">
+					<small>
+						<div list-resize='getContentInfos(data)' list-resize-min-size='4' vertical></div>
+						<div list-resize='data.fromTransformationTypeCodes|unique|codes:"type"' list-resize-min-size='3' horizontal></div>			
+					</small>
+					</div>
+				</div>
+			</td>
+		</tr>
+	</tbody>
+</table>
+</div>
+</div>

@@ -1,0 +1,24 @@
+#created on: Jul 15, 2014
+package birds
+
+#Select resource for workflow submission for abstract device 
+#Surcharge with default rules in birds-rules project with high salience to disable rules in ressources folder
+rule "hard coded referential device resources query with specified resource type"
+@BirdsRule ( selectionRule )
+dialect 'java'
+ salience 1000
+	when
+		$referentialDevice : AbstractHardCodedReferentialDevice ()
+		$rps : ResourcePropertiesSet( initialized == false )
+	then
+		$rps.initialize();
+        Logger log = Logger.getLogger("Birds.resource.selection.resources.query");
+        log.debug("hard coded referential device resources query with specified resource type : " + $rps.getResourceType().getName());
+        log.debug("referentialName : " + $referentialDevice.getName());
+        ResourcePropertiesSet rps = $referentialDevice.getPropertiesSetByResourceType($rps.getResourceType());
+		log.debug("resourceProperties : " + rps.getResourcePropertiesSet());
+		$rps.setResourcePropertiesSet(rps.getResourcePropertiesSet());
+		modify($rps) {};	
+end
+
+#Transfert ressources to internal referential

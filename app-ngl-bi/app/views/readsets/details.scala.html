@@ -1,0 +1,146 @@
+@this(ctx : fr.cea.ig.ngl.NGLApplication)
+@* @this(ctx : fr.cea.ig.play.migration.NGLContext) *@
+@()
+
+@import play.mvc.Http.Context
+@import controllers.authorisation.PermissionHelper
+
+@user            = @{ ctx.currentUser() }
+@writePermission = @{ PermissionHelper.checkPermission(user, "writing") }
+
+<!-- ----------------------------------------------------------------------------- -->
+<!-- Modal to display image in full size -->
+	<div id="myImageModal" class="modal fade"  tabindex="-1" role="dialog"
+		aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog" style="margin-left:{{modalLeft}}px">
+    		<div class="modal-content" style="width:{{modalWidth+2}}px">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h3 class="modal-title">{{readset.code}}</h3>	
+					<h4 id="myModalLabel">{{modalTitle}}</h4>
+				</div>
+				<div class="modal-body" style="padding:0px">
+					<img ng-src="data:image/png;base64,{{modalImage}}" style="width:{{modalWidth}}px; height:{{modalHeight}}px;" />
+				</div>
+				<div class="modal-footer">
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	
+<!-- -------------------------------------------------------------------------------- -->
+
+<div class="row">
+	<div class="col-md-12 col-lg-12">
+		<div class="page-header">	
+			<div class="btn-toolbar pull-right">
+				@if(writePermission){
+				 	<button class="btn btn-default" ng-if="isEditMode()" ng-click="save()" data-toggle="tooltip" title="@Messages("button.validate")" ><i class="fa fa-save"></i> @Messages("button.validate")</button>
+				 	<button class="btn btn-default" ng-if="isEditMode()" ng-click="cancel()" data-toggle="tooltip" title="@Messages("button.cancel")" ><i class="fa fa-undo"></i> @Messages("button.cancel")</button>
+			 	
+		 			<button class="btn btn-default" ng-if="!isEditMode()" ng-click="activeEditMode()" data-toggle="tooltip" title="@Messages("button.edit")" ><i class="fa fa-edit"></i> @Messages("button.edit")</button>
+				}
+				<button class="btn btn-default" ng-click="activePrintMode(readset.code)" data-toggle="tooltip" title="@Messages("button.printMode")" ><i class="fa fa-print"></i> @Messages("button.printMode")</button>
+			</div>
+			@partials.details_header()		 
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-12 col-lg-12"  messages="messages"></div>
+</div>
+
+<div class="row margin-bottom-7">
+	<div class="col-md-12 col-lg-12">
+		<ul class="nav nav-tabs margin-bottom-5">
+			<li ng-class="getTabClass('general')"><a href="#" data-target="#general" data-toggle="tab" ng-click="setActiveTab('general')">@Messages("readsets.tabs.general")</a></li>
+			<li ng-class="getTabClass('advanced')"><a href="#" data-target="#advanced" data-toggle="tab" ng-click="setActiveTab('advanced')">@Messages("readsets.tabs.advanced")</a></li>
+			<li ng-class="getTabClass('addinfo')"><a href="#" data-target="#addinfo" data-toggle="tab" ng-click="setActiveTab('addinfo')">@Messages("readsets.tabs.addinfo")</a></li>
+			<li ng-class="getTabClass('workflow')"><a href="#" data-target="#workflow" data-toggle="tab" ng-click="setActiveTab('workflow')">@Messages("readsets.tabs.workflow")</a></li>   
+			<li ng-class="getTabClass('valuations')"><a href="#" data-target="#valuations" data-toggle="tab" ng-click="setActiveTab('valuations')">@Messages("readsets.tabs.valuations.history")</a></li>     
+		</ul>
+		<div class="tab-content">
+			<div class="tab-pane {{getTabClass('general')}}" id="general">		
+				@partials.details_general()
+			</div>			
+			<div class="tab-pane {{getTabClass('advanced')}}" id="advanced">
+				@partials.details_advanced()
+				@partials.details_file()	
+			</div>
+			<div class="tab-pane {{getTabClass('addinfo')}}" id="addinfo">
+				@partials.details_addinfo()				
+			</div>
+			<div class="tab-pane {{getTabClass('workflow')}}" id="workflow">
+				<div class="row">
+					<div class="col-md-4 col-lg-4">
+						<table class="table table-condensed table-hover table-bordered">
+						<thead>
+							<tr>
+								<th>@Messages("readsets.workflow.state")</th>
+								<th>@Messages("readsets.workflow.date")</th>
+								<th>@Messages("readsets.workflow.who")</th>								
+							</tr>
+						</thead>
+						<tbody>
+							<tr ng-repeat="state in readset.state.historical|orderBy:'date'">
+								<td>{{state.code|codes:'state'}}</td>
+								<td>{{state.date|date:'@Messages("datetime.format")'}}</td>
+								<td>{{state.user}}</td>
+							</tr>
+						</tbody>
+					</table>
+					
+					</div>
+				</div>
+			</div>			
+			<div class="tab-pane {{getTabClass('valuations')}}" id="valuations">
+				<div class="row">
+					<div class="col-md-4 col-lg-4">
+						<table class="table table-condensed table-hover table-bordered">
+							<thead>
+								<tr>
+									<th>@Messages("readsets.valuation.qc.history.valid")</th>
+									<th>@Messages("readsets.valuation.qc.history.who")</th>
+									<th>@Messages("readsets.valuation.qc.history.date")</th>								
+								</tr>
+							</thead>
+							<tbody>
+								<tr ng-repeat="valuation in readset.productionValuation.history|orderBy:'index'">
+									<td>{{valuation.valid|codes:'valuation'}}</td>
+									<td>{{valuation.user}}</td>
+									<td>{{valuation.date|date:'@Messages("datetime.format")'}}</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<div class="col-md-4 col-lg-4">
+						<table class="table table-condensed table-hover table-bordered">
+							<thead>
+								<tr>
+									<th>@Messages("readsets.valuation.ba.history.valid")</th>
+									<th>@Messages("readsets.valuation.ba.history.who")</th>
+									<th>@Messages("readsets.valuation.ba.history.date")</th>							
+								</tr>
+							</thead>
+							<tbody>
+								<tr ng-repeat="valuation in readset.bioinformaticValuation.history|orderBy:'index'">
+									<td>{{valuation.valid|codes:'valuation'}}</td>
+									<td>{{valuation.user}}</td>
+									<td>{{valuation.date|date:'@Messages("datetime.format")'}}</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>		
+		
+<div class="row">	
+	<div class="col-md-12 col-lg-12"> 
+		@views.html.commons.treatments()  
+	</div>
+</div>	

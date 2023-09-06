@@ -1,0 +1,8 @@
+@()
+
+		@views.html.helper.columnLabelValue(Messages("readset.sampleOnContainer.loadingReport")){
+			<p class="form-control-static" ng-bind="getLoadingReport()"></p>
+		}
+		@views.html.helper.columnLabelValue(Messages("readset.sampleOnContainer.qcFlowcell")){
+			<p class="form-control-static" ng-bind="getQCFlowCell()"></p>
+		}

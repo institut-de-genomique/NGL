@@ -1,0 +1,16 @@
+error.codeNotExist=Le code {0} n'existe pas
+error.codenotunique=Le code {0} existe déja
+error.propertyNotExist=La propriété {0} n'existe pas pour {1}
+limsdao.error.emptymapping =Pas de correspondance avec les paramètres suivants :{0}
+
+cns.ncbiScientificName.taxon.zero=inconnu
+cns.ncbiLineage.taxon.zero=inconnu - code taxon interne
+
+cns.ncbiScientificName.taxon.one=mélange d''organismes non identifiés
+cns.ncbiLineage.taxon.one=on ne connait pas tous les organismes présents - code taxon interne
+
+cns.ncbiScientificName.taxon.two=non renseigné - projet interne prod/dev
+cns.ncbiLineage.taxon.two=non renseigné - code taxon interne
+
+cns.ncbiScientificName.taxon.three=plusieurs organismes identifiés
+cns.ncbiLineage.taxon.three=plusieurs organismes, que l''on connait, dans le même matériel - code taxon interne

@@ -1,0 +1,122 @@
+@this(ctx : fr.cea.ig.ngl.NGLApplication)
+@* @this(ctx : fr.cea.ig.play.migration.NGLContext) *@
+@()
+
+@import play.mvc.Http.Context
+@import controllers.authorisation.PermissionHelper
+@import views.html.helper._
+
+@barCodePrintingEnabled = @{ ctx.nglConfig().isBarCodePrintingEnabled() }
+
+@** FDS 24/11/2020 remise en forme de l'ordre des attributs...
+                   ajout des autres titles manquants  title=placehoder  **@
+
+@formMain() = {
+	@columnSearchForm{
+		@formGroup{
+			<div bt-select class='form-control' placeholder='@Messages("containers.placeholder.importType")' title='@Messages("containers.placeholder.importType")'
+			     ng-model="form.receptionConfigurationCode"	
+			     bt-options='type.code as type.name for type in lists.get("receptionConfigs")'>
+			</div>
+		}
+	}
+	@columnSearchForm{	
+		@formGroup{
+			<input id="importFile" type="file" class="form-control" base64-file="form.file" >
+		}
+	}
+	@columnSearchForm{
+		@formGroup{
+			<div class="btn-toolbar">
+				<button type="submit" data-toggle="tooltip" ng-click="upload()" class="btn btn-primary" title='@Messages("button.upload")'>
+					<i class="fa fa-upload"></i>
+				</button>
+				<button data-toggle="tooltip" ng-click="reset()"  class="btn btn-default" title='@Messages("button.reset")' >
+					<i class="fa fa-undo"></i>
+				</button>
+			</div>
+		}
+	}
+}
+
+@formPrint() = {
+	@columnSearchForm{
+			@formGroup{
+				<input type="text" class="form-control" placeholder='@Messages("containerSupports.placeholder.barcodeGeneration.nbCodes")' title='@Messages("containerSupports.placeholder.barcodeGeneration.nbCodes")'
+				       ng-model="form.nbCodes">
+			}
+			@formGroup{	
+				<div bt-select class="form-control" placeholder='@Messages("search.placeholder.printing.printer")' title='@Messages("search.placeholder.printing.printer")'
+				     ng-disabled="datatable.isEmpty()" 
+				     ng-model="formprint.printerCode" 
+				     bt-options="printer.code as printer.name for printer in printers" 
+				     ng-change="changePrinter()">
+				</div>
+			}
+	}
+	
+	@columnSearchForm{
+			@formGroup{	
+				<div class="btn-toolbar">
+					<button class="btn btn-primary" title='@Messages("containerSupports.button.barcodeGeneration")' data-toggle="tooltip" 
+					        ng-disabled="!datatable.isEmpty()" 
+					        ng-click="generateBarcode()" >
+						<i class="fa fa-barcode"></i>
+					</button>
+					
+					<button class="btn btn-default" title='@Messages("button.reset")' data-toggle="tooltip" 
+					        ng-click="reset()" >
+						<i class="fa fa-undo"></i>
+					</button>
+				</div>
+			}	
+			
+			@formGroup{
+				<div class="form-control" bt-select placeholder='@Messages("search.placeholder.printing.barcode.position")' title='@Messages("search.placeholder.printing.barcode.position")'  
+				     ng-disabled="datatable.isEmpty()" 
+				     ng-model="formprint.barcodePositionId" auto-select 
+				     bt-options="position.id as position.barcodePositionName for position in selectedPrinter.barcodePositions" >
+				</div>
+			}
+		}
+}
+
+<div class="inProgressSpinner" ng-if="spinner">
+	<button class="btn btn-primary btn-lg">
+		<i class="fa fa-spinner fa-spin fa-5x"></i>
+	</button>
+</div>
+	
+<div class="row"> 
+<div class="col-md-12 col-lg-12" >
+	<div udt-form>
+		<ul class="nav nav-tabs margin-bottom-5">
+	   	<li class="active"><a href="#" data-target="#importfile" data-toggle="tab">@Messages("containers.create.tab.importfile")</a></li>
+	  @if(barCodePrintingEnabled){
+	   	<li ><a href="#" data-target="#printbarcode" data-toggle="tab">@Messages("containers.create.tab.printbarcode")</a></li>
+	  }
+	   	</ul>
+			
+<div class="tab-content">
+	<div class="tab-pane active" id="importfile">
+			<form class="well well-small">
+			<div class="row">
+			@formMain
+			</div>		
+		</form>	
+	</div>
+	@if(barCodePrintingEnabled){
+	<div class="tab-pane" id="printbarcode" ultimate-datatable="datatable">
+	<form class="well well-small">
+			<div class="row">
+			@formPrint
+			</div>
+			
+	</form>	
+	</div>
+	}
+</div>
+
+<div class="row">
+	<div class="col-md-12 col-lg-12"  messages="messages"></div>
+</div>

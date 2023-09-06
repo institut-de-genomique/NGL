@@ -1,0 +1,32 @@
+@()
+<div class="col-md-12 col-lg-12">
+
+
+	<div class="row" ng-controller="DnaExtractionCtrl">
+		<form class="form-horizontal" name="DnaExtractionCtrl">
+
+			<div class="  form-group">
+
+				<label class="col-md-2 col-lg-2 control-label">Code éch.
+					témoin négatif extraction_ADN: </label>
+				<div ng-switch on="mainService.isEditMode()"
+					class="col-md-2 col-lg-2">
+					<p class="col-md-2 col-lg-2 form-control" ng-switch-when="false"
+						ng-bind="sample.extractionDNABlankSampleCode" />
+					<div ng-switch-when="true">
+						<div class="col-md-2 col-lg-2 form-control" bt-select
+							ng-model="sample.extractionDNABlankSampleCode"
+							placeholder='@Messages("search.placeholder.samples")'
+							bt-options="sample.code as sample.code for sample in lists.get('sampleDNA')|orderBy:'code':true"
+							filter="true"></div>
+					</div>
+				</div>
+		</form>
+
+
+	</div>
+	<div>@views.html.experiments.onetoone.defaults.partials.udtAndPlateDesign()</div>
+
+</div>
+
+

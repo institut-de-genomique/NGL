@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<process xmlns="http://drools.org/drools-5.0/process"
+         xmlns:xs="http://www.w3.org/2001/XMLSchema-instance"
+         xs:schemaLocation="http://drools.org/drools-5.0/process drools-processes-5.0.xsd"
+         type="RuleFlow" name="fr.cea.ig.auto.submission.WFZipMd5" id="fr.cea.ig.auto.submission.WFZipMd5" package-name="birds" >
+
+  <header>
+    <imports>
+      <import name="fr.genoscope.lis.devsi.birds.impl.model.Birds" />
+    </imports>
+  </header>
+
+  <nodes>
+    <start id="1" name="Start" x="319" y="33" width="48" height="48" />
+    <end id="2" name="End" x="332" y="482" width="48" height="48" />
+    <actionNode id="3" name="ZipFile" x="284" y="129" width="120" height="48" >
+        <action type="expression" dialect="java" >Birds.generateJobs("ZipFile", "SRA", (org.drools.spi.ProcessContext)kcontext);</action>
+    </actionNode>
+    <actionNode id="7" name="Md5File" x="426" y="295" width="131" height="48" >
+        <action type="expression" dialect="java" >Birds.generateJobs("Md5File", "SRA", (org.drools.spi.ProcessContext)kcontext);</action>
+    </actionNode>
+    <actionNode id="8" name="LinkFile" x="133" y="296" width="124" height="48" >
+        <action type="expression" dialect="java" >Birds.generateJobs("LinkFile", "SRA", (org.drools.spi.ProcessContext)kcontext);</action>
+    </actionNode>
+    <split id="9" name="Gateway" x="326" y="199" width="49" height="49" type="1" />
+    <join id="10" name="Gateway" x="327" y="387" width="49" height="49" type="1" />
+  </nodes>
+
+  <connections>
+    <connection from="10" to="2" />
+    <connection from="1" to="3" />
+    <connection from="9" to="7" />
+    <connection from="9" to="8" />
+    <connection from="3" to="9" />
+    <connection from="7" to="10" />
+    <connection from="8" to="10" />
+  </connections>
+
+</process>

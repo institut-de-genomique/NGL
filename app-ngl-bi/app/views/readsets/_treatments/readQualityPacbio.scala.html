@@ -1,0 +1,116 @@
+@()
+@**NGL-3967**@
+<!-- Tableau a 2 dimensions -->
+ <div class="row">
+	<div class="col-md-6 col-lg-6">	
+		 <table class="table table-condensed table-hover table-bordered">
+				<caption><h3>@Messages("readsets.treatments.read_quality_pacbio.legende_1")</h3></caption>
+			<tbody>
+				<tr>
+					<th>@Messages("readsets.treatments.read_quality_pacbio.reads.nbRead")</th>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['read-quality-pacbio'].value.reads.nbBases | number}}</td>				
+				<tr>					
+				<tr>
+					<th>@Messages("readsets.treatments.read_quality_pacbio.reads.maxSize")</th>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['read-quality-pacbio'].value.reads.maxSize | number}}</td>				
+				<tr>	
+				<tr>
+					<th>@Messages("readsets.treatments.read_quality_pacbio.reads.nbBases")</th>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['read-quality-pacbio'].value.reads.nbBases | number}}</td>				
+				<tr>	
+				<tr>
+					<th>@Messages("readsets.treatments.read_quality_pacbio.reads.nbReadsOver50kb")</th>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['read-quality-pacbio'].value.reads.nbReadsOver50kb | number}}</td>				
+				<tr>
+				<tr>
+					<th>@Messages("readsets.treatments.read_quality_pacbio.reads.nbReadsOver10kb")</th>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['read-quality-pacbio'].value.reads.nbReadsOver10kb | number}}</td>				
+				<tr>
+				<tr>
+					<th>@Messages("readsets.treatments.read_quality_pacbio.reads.qualityAvg")</th>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['read-quality-pacbio'].value.reads.qualityAvg | number}}</td>				
+				<tr>
+				<tr>
+					<th>@Messages("readsets.treatments.read_quality_pacbio.reads.avgSize")</th>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['read-quality-pacbio'].value.reads.avgSize | number}}</td>				
+				<tr>
+				<tr>
+					<th>@Messages("readsets.treatments.read_quality_pacbio.reads.GCPercent")</th>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['read-quality-pacbio'].value.reads.GCPercent | number:3}}</td>				
+				<tr>
+				<tr>
+					<th>@Messages("readsets.treatments.read_quality_pacbio.reads.N50")</th>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['read-quality-pacbio'].value.reads.N50 | number}}</td>				
+				<tr>				
+				<tr>
+					<th>@Messages("readsets.treatments.read_quality_pacbio.reads.nbReadsOver30kb")</th>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['read-quality-pacbio'].value.reads.nbReadsOver30kb | number}}</td>				
+				<tr>	
+				<tr>
+					<th>@Messages("readsets.treatments.read_quality_pacbio.reads.nbReadsOver100kb")</th>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['read-quality-pacbio'].value.reads.nbReadsOver100kb | number}}</td>				
+				<tr>	
+					
+			</tbody>
+		 </table>
+	</div>
+</div>
+
+<!-- Image -->
+
+<div class="row">
+	<div class="col-md-5 col-lg-5">
+	<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+		ng-click="setImage(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.readLengthDistribution.value,'readLengthDistribution','',treament.code!=undefined?treament.code:treatments.getTreatment().code,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.readLengthDistribution.width,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.readLengthDistribution.height)">
+		 <a href="#">
+		    <img id="default_readLengthDistribution" ng-src="data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.readLengthDistribution.value}}" />
+		 </a> 
+	</div>
+	</div>
+	<div class="col-md-5 col-lg-5">
+	<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+		ng-click="setImage(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.GCDistribution.value,'GCDistribution','',treament.code!=undefined?treament.code:treatments.getTreatment().code,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.GCDistribution.width,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.GCDistribution.height)">
+		 <a href="#">
+		    <img id="default_GCDistribution" ng-src="data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.GCDistribution.value}}" />
+		 </a> 
+	 </div>
+	 </div>
+	<div class="col-md-5 col-lg-5">
+	<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+		ng-click="setImage(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.basesCumulativeDistribution.value,'basesCumulativeDistribution','',treament.code!=undefined?treament.code:treatments.getTreatment().code,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.basesCumulativeDistribution.width,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.basesCumulativeDistribution.height)">
+		 <a href="#">
+		    <img id="default_basesCumulativeDistribution" ng-src="data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.basesCumulativeDistribution.value}}" />
+		 </a> 
+	 </div>
+	 </div>
+</div>
+
+
+<div class="row">
+	<div class="col-md-5 col-lg-5">
+	<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+		ng-click="setImage(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.readLengthVsreadQuality.value,'readLengthVsreadQuality','',treament.code!=undefined?treament.code:treatments.getTreatment().code,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.readLengthDistribution.width,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.readLengthDistribution.height)">
+		 <a href="#">
+		    <img id="default_readLengthVsreadQuality" ng-src="data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.readLengthVsreadQuality.value}}" />
+		 </a> 
+	</div>
+	</div>
+	<div class="col-md-5 col-lg-5">
+	<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+		ng-click="setImage(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.readQualityDistribution.value,'readQualityDistribution','',treament.code!=undefined?treament.code:treatments.getTreatment().code,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.readQualityDistribution.width,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.readQualityDistribution.height)">
+		 <a href="#">
+		    <img id="default_readQualityDistribution" ng-src="data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.readQualityDistribution.value}}" />
+		 </a> 
+	 </div>
+	 </div>
+</div>

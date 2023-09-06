@@ -1,0 +1,43 @@
+@this()
+@(code: String)
+
+@if(code == "merging-ba") {
+	@_treatments.mergingBA()		
+}
+
+@if(code == "assembly-ba") {
+	@_treatments.assemblyBA()		
+}
+
+@if(code == "contigfilter-ba") {
+	@_treatments.contigFilterBA()		
+}
+
+@if(code == "scaffolding-ba") {
+	@_treatments.scaffoldingBA()		
+}
+
+@if(code == "assemblyfilter-ba") {
+	@_treatments.assemblyFilterBA()		
+}
+
+@if(code == "gapclosing-ba") {
+	@_treatments.gapClosingBA()		
+}
+
+@if(code == "whole-genome") {
+	@_treatments.wholeGenome()		
+}
+
+@if(code == "ampliconassignation-ba") {
+	@_treatments.assignationBA()		
+}
+
+@if(code == "exome") {
+	@_treatments.exome()		
+}
+
+@if(code == "rna-seq") {
+	@_treatments.rnaSeq()		
+}
+

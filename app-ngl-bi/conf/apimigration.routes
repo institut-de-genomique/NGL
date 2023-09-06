@@ -1,0 +1,28 @@
+#migration
+GET		/migrationSampleOnContainer						controllers.admin.supports.api.MigrationUpdateSampleOnContainer.migration(code: java.lang.String ?= "all", onlyNull:Boolean ?=false)
+
+#GET		/compare-lims-files							controllers.migration.CompareLimsVsNGL.compareFile(update:Boolean ?=false)
+#GET		/migrationSampleOnContainer					controllers.migration.MigrationUpdateSampleOnContainer.migration(code: java.lang.String ?= "all", onlyNull:Boolean ?=false)
+#GET		/synchro-run-ngl-lims/:code					controllers.migration.SynchroRunNGLToDBLims.synchro(code: java.lang.String)
+
+#GET		/migration-fraction							controllers.migration.MigrationFractionRun.migration()
+#GET		/migrationRSFF								controllers.migration.RemoveStateFromFile.migration()
+#GET		/compare-lims-support						controllers.migration.CompareLimsVsNGL.compareSupport(update:Boolean ?=false)
+#GET		/migration-process-type-codes				controllers.migration.MigrationLibProcessTypeCodesRun.migration()
+#GET		/readsets/update-nb-cycles					@controllers.migration.MigrationUpdateReadSetNbCycles.migration()		
+
+#GET		/readsets/update-q-qualityScore				controllers.migration.MigrationUpdateReadSetQ30QualMean.migration()
+#GET		/migration-sequencing-start-date			controllers.migration.MigrationUpdateSequencingStartDateNanopore.migration()
+#GET		/migration-metrichor-run-id					controllers.migration.MigrationUpdateRunMetrichorRunID.migration()
+#GET		/check-type-description						controllers.migration.CheckTypeDescription.check()
+#GET		/create-run-nanopore						@controllers.migration.MigrationCreateRunNanopore.migration()
+#GET		/migration-sample-aliquote-codes			controllers.migration.MigrationPropSampleAliquoteCode.migration()
+#GET		/migration-submission-state					controllers.migration.MigrationUpdateSubmissionState.migration()
+#GET		/migration-fungi							controllers.migration.MigrationTaxonomyFungi.migration(code: java.lang.String ?= "all")
+#GET		/migration-taxonomy-software				controllers.migration.MigrationUpdateSoftwareTaxonomy.migration()
+#GET		/migration-mapping-software					controllers.migration.MigrationUpdateSoftwareMapping.migration()
+#GET		/migration-update-kraken					controllers.migration.MigrationUpdateKraken.migration()
+#GET		/migration-readSet-tara-invalid				@controllers.migration.MigrationUpdateReadSetTaraInvalid.migration()
+#GET		/migration-sortRibo-software				controllers.migration.MigrationUpdateSortRibo.migration()
+
+

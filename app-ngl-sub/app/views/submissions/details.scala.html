@@ -1,0 +1,108 @@
+@this()
+
+@import views.html.tools._
+
+@user            = @{ fr.cea.ig.authentication.Authentication.getUser() }
+
+@column()(value: Html) = {
+	<div class="col-md-4 col-lg-4">
+		@value
+	</div>
+}
+
+@**XXXXXXXX DETAILS XXXXXXXXXXXXXX**@
+
+	
+@standard_header("submission", "TRUE") { 
+<span ng-init="setUserInScope('@user')"></span>
+
+   <button type="submit" ng-if="isEditable()"  title="Enregistrer les donnees du tableau dans la base")
+           ng-click="userRegister()" data-toggle="tooltip" class="btn btn-primary" ><i class="fa fa-save"></i> Enregistrer</button> 
+   <button type="submit" ng-if="isEditable()" ng-disabled="!(studyCheck && sampleCheck && experimentCheck && runCheck && rawDataCheck)" title="Valider et enregistrer les donnees du tableau dans la base")
+           ng-click="userValidate()" data-toggle="tooltip" class="btn btn-primary" ><i class="fa fa-save"></i> Enregistrer et Valider</button>
+   <button class="btn btn-default" ng-if="isEditable()" 
+           ng-click="cancel()" data-toggle="tooltip" title="@Messages("button.cancel")" ><i class="fa fa-undo"></i> @Messages("button.cancel")</button>
+   <button class="btn btn-default" ng-if="isEditable()" 
+           ng-click="activeEditMode()" data-toggle="tooltip" title="@Messages("button.edit")" ><i class="fa fa-edit"></i> @Messages("button.edit")</button>		 					  
+   <button class="btn btn-default" 
+		   data-toggle="modal" data-target="#commentModal" title="@Messages("button.addComment")"><i class="fa fa-comment"></i></button>
+
+	}
+
+<!-- stopPropagation on checkbox prevent parents default behavior (stop <a> call) -->
+
+<!--La directive ng-init est appel� au chargement de la page et dans le controlleur javascript on definit la methode
+qui permet d'installer $user dans le scope-->
+
+<span ng-init="setUserInScope('@user')"></span>
+
+<!--Pour affichage d'un spinner-->
+<div class="inProgressSpinner" ng-if="treeLoadInProgress">
+<button class="btn btn-primary btn-lg">
+<i class="fa fa-spinner fa-spin fa-5x"></i>
+</button>
+</div>
+
+<div class="row margin-bottom-7">	
+	<div class="col-md-12 col-lg-12">
+		<!-- <ul class="nav nav-tabs margin-bottom-5"> --> 
+		<!-- Intitules des onglets -->
+		<ul  class="nav nav-tabs"> 
+			<li ng-if="isActiveProject()" class="active" ><a  href="#" data-target="#project" data-toggle="tab">@Messages("submissions.tabs.project")</a></li>
+			<li ng-if="isActiveStudy()" class="active"><a  href="#" data-target="#study" data-toggle="tab">@Messages("submissions.tabs.study")</a></li>
+			<li ng-if="isActiveAnalysis()" class="active"><a  href="#" data-target="#analysis" data-toggle="tab">@Messages("submissions.tabs.analysis")</a></li>
+			<!--li ng-if="isDataNotActiveStudy()"><a href="#" data-target="#study" data-toggle="tab">@Messages("submissions.tabs.study")</a></li-->
+			<li ng-if="isActiveSample()" class="active"><a  href="#" data-target="#sample" data-toggle="tab"> @Messages("submissions.tabs.sample")</a></li>
+			<li ng-if="isDataNotActiveSample()"><a href="#" data-target="#sample" data-toggle="tab"> @Messages("submissions.tabs.sample")</a></li>
+			<li ng-if="isActiveExperiment()" class="active"><a  href="#" data-target="#experiment" data-toggle="tab">@Messages("submissions.tabs.experiment")</a></li>
+			<li ng-if="isDataNotActiveExperiment()"><a  href="#" data-target="#experiment" data-toggle="tab">@Messages("submissions.tabs.experiment")</a></li>
+			<li ng-if="countRun > 0"><a href="#" data-target="#run" data-toggle="tab">@Messages("submissions.tabs.run")</a></li>
+			<li ng-if="countRawData > 0"><a href="#" data-target="#rawData" data-toggle="tab">@Messages("submissions.tabs.rawData")</a></li>
+		</ul>	
+		
+        <!-- Initialisation des onglets -->
+		<div class="tab-content">
+		    <!-- Cas d'une soumission avec project umbrella-->
+			<div class="tab-pane"  ng-class="{'active':isActiveUmbrellaProject()}" id="umbrellaProject">
+				<div ultimate-datatable="umbrellaProjectDT"></div>
+			</div>
+			
+			<div class="tab-pane" ng-class="{'active':isActiveStudy()}" id="study">
+				<!-- Afficher bouton uniquement si donnee existe et submission.state.N==SUB-N et bon user => si checkable -->  
+				<div class="checkbox" ng-hide="! isStudyCheckable"><label><input type="checkbox" ng-model="studyCheck"/>Validate Study</label></div>
+				<div ultimate-datatable="studyDT"></div>
+			</div>
+			
+			<div class="tab-pane" ng-class="{'active':isActiveAnalysis()}" id="analysis">
+				<!-- Afficher bouton uniquement si donnee existe et submission.state.N==SUB-N et bon user => si checkable -->  
+				<div class="checkbox" ng-hide="! isAnalysisCheckable"><label><input type="checkbox" ng-model="analysisCheck"/>Validate Analysis</label></div>
+				<div ultimate-datatable="analysisDT"></div>
+			</div>
+			
+			<div class="tab-pane"  ng-class="{'active':isActiveSample()}" id="sample">
+				@attributesInstructions()
+				<div class="checkbox" ng-hide="! isSampleCheckable"><label><input type="checkbox" ng-model="sampleCheck"/>Validate Sample</label></div>
+				<div ultimate-datatable="sampleDT"></div>
+			</div>
+			
+			<div class="tab-pane"  ng-class="{'active':isActiveExperiment()}" id="experiment">
+				<div class="checkbox" ng-hide="! isExperimentCheckable"><label><input type="checkbox" ng-model="experimentCheck"/>Validate Experiment</label></div>
+				<div ultimate-datatable="experimentDT"></div>
+			</div>
+		
+			<div class="tab-pane" id="run">
+				<div class="checkbox" ng-hide="! isRunCheckable"><label><input type="checkbox" ng-model="runCheck"/>Validate Run</label></div>
+				<div ultimate-datatable="runDT"></div>
+			</div>
+		
+			<div class="tab-pane" id="rawData">
+				<div class="checkbox" ng-hide="! isRawDataCheckable"><label><input type="checkbox" ng-model="rawDataCheck"/>Validate Raw Data</label></div>
+				<div ultimate-datatable="rawDataDT"></div>
+			</div>
+		
+		</div>
+		@partials.commentSection(user)
+
+		
+	</div>
+</div>

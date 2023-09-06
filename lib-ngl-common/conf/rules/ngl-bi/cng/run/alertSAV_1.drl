@@ -1,0 +1,122 @@
+//created on: Nov 8, 2013
+//Rules for SAV alerting
+package rules
+
+rule "Insert AlertSAVInfo for each run"
+	@nglBI( sav_1 )
+	dialect "java"
+	salience 700
+	no-loop
+	when
+        $run : Run( )
+    then
+    	Logger.debug("Insert alertSAVInfo");
+    	AlertSAVInfo AlertSAVInfo = new AlertSAVInfo($run.code);
+    	insert(AlertSAVInfo);
+
+end
+
+rule "BAD alerte"
+	@nglBI( sav_1 )
+	dialect "java"
+	salience 500
+	no-loop
+    when
+        $run : Run( )
+        $lane : Lane( $treatment : treatments["sav"], $treatment!=null) from $run.lanes
+        $result : Entry () from $treatment.results.entrySet()
+        $mapValue : Map() from $result.getValue()
+        $alertValue : Entry($keyAlert : key, $toEval : ((PropertyValue)value).getValue()) from $mapValue.entrySet()
+        $alertSAVInfo : AlertSAVInfo(flagEvaluate==false)
+        eval ($keyAlert.equals("clusterDensity") && ((Long)$toEval<200 || (Long)$toEval>1000)) || 
+        eval ($keyAlert.equals("clusterPFPerc") && (Double)$toEval<75) ||
+        eval ($keyAlert.equals("greaterQ30Perc") && (Double)$toEval<80) ||
+        eval (( $keyAlert.equals("phasing") || 
+        			$keyAlert.equals("prephasing")) && (Double)$toEval>0.5) ||
+        eval ($keyAlert.equals("alignedPerc") && (Double)$toEval<0.1) ||
+        eval (( $keyAlert.equals("errorRatePerc") || 
+        			$keyAlert.equals("errorRatePercCycle35") || 
+        			$keyAlert.equals("errorRatePercCycle75") || 
+        			$keyAlert.equals("errorRatePercCycle100") ) && (Double)$toEval>1)
+        
+    then
+       Map<String,String> values = new HashMap<String,String>();
+       values.put($keyAlert.toString(),$toEval.toString());
+       $alertSAVInfo.putData($result.getKey().toString(), $lane.number.toString(), AlertSAVInfo.alertBAD, values);
+       $alertSAVInfo.putCyclesErrRated($lane.number.toString(),((PropertyValue)$mapValue.get("cyclesErrRated")).value.toString());
+       update($alertSAVInfo);
+end
+
+rule "FLAG alerte"
+	@nglBI( sav_1 )
+	dialect "java"
+	salience 400
+	no-loop
+    when
+        $run : Run( )
+        $lane : Lane( $treatment : treatments["sav"], $treatment != null) from $run.lanes
+        $result : Entry () from $treatment.results.entrySet()
+        $mapValue : Map() from $result.getValue()
+        $alertValue : Entry($keyAlert : key, $toEval : ((PropertyValue)value).getValue()) from $mapValue.entrySet()
+        $alertSAVInfo : AlertSAVInfo()
+        eval ( $keyAlert.equals("clusterDensity") && ( ( (Long)$toEval>=200 && (Long)$toEval<=250 ) || ( (Long)$toEval>=850 && (Long)$toEval<=1000 ) ) ) || 
+        eval ($keyAlert.equals("clusterPFPerc") && ((Double)$toEval>=75 && (Double)$toEval<=80 )) ||
+        eval ($keyAlert.equals("greaterQ30Perc") && ( (Double)$toEval>=80 && (Double)$toEval<=85 ) ) ||
+        eval (( $keyAlert.equals("phasing") || 
+        			$keyAlert.equals("prephasing") ) && ( (Double)$toEval>=0.3 && (Double)$toEval<=0.5 ) ) ||
+        eval ($keyAlert.equals("alignedPerc") && ( (Double)$toEval>=0.1 && (Double)$toEval<=0.4 ) ) ||
+        eval ($keyAlert.equals("errorRatePerc") && ( (Double)$toEval>=0.5 && (Double)$toEval<=1 ) ) ||
+        eval ($keyAlert.equals("errorRatePercCycle35") && ( (Double)$toEval>=0.4 && (Double)$toEval<=1 ) ) ||
+        eval ($keyAlert.equals("errorRatePercCycle75") && ( (Double)$toEval>=0.6 && (Double)$toEval<=1 ) )
+    then
+       Map<String,String> values = new HashMap<String,String>();
+       values.put($keyAlert.toString(),$toEval.toString());
+       $alertSAVInfo.putData($result.getKey().toString(), $lane.number.toString(), AlertSAVInfo.alertFLAG, values);
+       $alertSAVInfo.putCyclesErrRated($lane.number.toString(),((PropertyValue)$mapValue.get("cyclesErrRated")).value.toString());
+       $alertSAVInfo.setFlagEvaluate(true);
+       update($alertSAVInfo);
+end
+
+
+
+rule "Send alert info"
+	@nglBI( sav_1 )
+	dialect "java"
+	salience 100
+    when
+        $alertSAVInfo : AlertSAVInfo(allResults.size()>0)
+    then
+	   String alertMailExp = Play.application().configuration().getString("alert.sav.mail.exp"); 
+	   String alertMailDest = Play.application().configuration().getString("alert.sav.mail.dest");    	
+       MailServices mailService = new MailServices();
+       Set<String> destinataires = new HashSet<String>();
+       destinataires.addAll(Arrays.asList(alertMailDest.split(",")));
+       mailService.sendMail(alertMailExp, destinataires, "ALERT SAV - "+$alertSAVInfo.getRunCode(), $alertSAVInfo.toString());
+end
+
+rule "Save alert info"
+	@nglBI( sav_1 )
+	dialect "java"
+	salience 50
+	when
+        $alertSAVInfo : AlertSAVInfo(allResults.size()>0)
+    then
+    	//Convert AlertInfo to instance Alert
+    	List<Alert> alerts = $alertSAVInfo.convertToAlert("sav_1");
+    	//Save Alert in database
+    	for(Alert alert : alerts){
+    		//Check if alert exist
+    		Alert alertDB = MongoDBDAO.findByCode(InstanceConstants.ALERT_COLL_NAME, Alert.class, alert.code);
+			if(alertDB==null){
+				alert.createDate=new Date();
+				MongoDBDAO.save(InstanceConstants.ALERT_COLL_NAME, alert);
+			}else{
+				alert.createDate=alertDB.createDate;
+				alert.updateDate=new Date();
+				alert._id=alertDB._id;
+				MongoDBDAO.update(InstanceConstants.ALERT_COLL_NAME, alert);
+			}
+    	}
+    	
+    	//MongoDBDAO.save(InstanceConstants.ALERT_COLL_NAME,alerts);
+end

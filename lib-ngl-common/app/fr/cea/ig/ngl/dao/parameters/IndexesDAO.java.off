@@ -1,0 +1,13 @@
+package fr.cea.ig.ngl.dao.parameters;
+
+import fr.cea.ig.ngl.dao.GenericMongoDAO;
+import models.laboratory.parameter.index.Index;
+import models.utils.InstanceConstants;
+
+public class IndexesDAO extends GenericMongoDAO<Index> {
+
+	public IndexesDAO() {
+		super(InstanceConstants.PARAMETER_COLL_NAME, Index.class);
+	}
+
+}

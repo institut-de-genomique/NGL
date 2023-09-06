@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+	
+<Specification xmlns="http://www.genoscope.cns.fr/specification"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.genoscope.cns.fr/specification
+H:\birdsSpec.xsd">
+
+	
+	<!-- Treatment : call EBI services to send xml files -->
+	<Treatment name="sendUpdateXML" useJobScheduler="false" checkIfNewTreatmentAlreadyPerformed="true">
+		<ExecutableSpecification commandSyntaxStrategyName="sendXMLSyntax">
+			<Executable path="/env/cns/submit_traces/SRA/NGL_test/script/test.sh" />
+		</ExecutableSpecification>
+		<ParametersSpecification>
+			<KeyValueElement key="-F" value="&quot;SUBMISSION=@%xmlSubmission%&quot;" parameterName="xmlSubmission"/>
+			<KeyValueElement key="-F" value="&quot;STUDY=@%xmlStudys%&quot;" parameterName="xmlStudys"/>
+			<KeyValueElement key="-F" value="&quot;SAMPLE=@%xmlSamples%&quot;" parameterName="xmlSamples"/>
+			<KeyValueElement key="-F" value="&quot;EXPERIMENT=@%xmlExperiments%&quot;" parameterName="xmlExperiments"/>
+			<KeyValueElement key="-F" value="&quot;RUN=@%xmlRuns%&quot;" parameterName="xmlRuns"/>
+			<KeyValueElement key="-F" value="&quot;PROJECT=@%xmlProjects%&quot;" parameterName="xmlProjects"/>
+			<KeyValueElement key="-F" value="&quot;PROJECT=@%xmlUmbrella%&quot;" parameterName="xmlUmbrella"/>
+			<LineElement line="-k" parameterName="optK" />
+			<LineElement line="%ebiResult%" parameterName="listAC"/>
+			<LineElement line="cd %submissionDirectory%" parameterName="OptionCD"/>
+			
+		</ParametersSpecification>
+		<InputsSpecification>
+			<InputElement name="updateToSend" count="1" resourceType="submission">
+				<Referential name="nglSubRef" />
+			</InputElement>
+		</InputsSpecification>
+	</Treatment>
+</Specification>

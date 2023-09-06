@@ -1,0 +1,111 @@
+@(name:java.lang.String, updateFunctionName:java.lang.String)
+<label  class="col-md-6 col-lg-6 control-label" ng-bind="propertyDef.displayMeasureValue ? propertyDef.name+' ('+propertyDef.displayMeasureValue.value+')' : propertyDef.name"></label>
+<!-- FDS 27/10/2021 suppression vieux commentaires + reformatage code ( suppression tabulations initiales ) -->
+<div ng-switch-when="java.util.Date" class="col-md-6 col-lg-6">
+	<div ng-switch on="mainService.isEditMode()">
+		<p class="form-control-static"                  ng-switch-when="false" ng-bind="experiment.@{name}[propertyDef.code].value | date:'@Messages("date.format")'" />
+		<input class="form-control" class="input-small" ng-switch-when="true"
+			name="@{name}{{propertyDef.code}}" ng-required="propertyDef.required"
+			placeholder="@Messages("date.format")" 
+			ng-model="experiment.@{name}[propertyDef.code].value" 
+			type="text" date-timestamp >
+	</div>
+</div>
+
+<div ng-switch-when="java.io.File" class="col-md-6 col-lg-6">
+	<div ng-switch on="mainService.isEditMode()">
+		<!-- FDS 27/10/2021 la balise <input était tronquée: <inp   depuis ??? 
+		     propriété File.class utilisée dans:
+		       -  Expériences CNS Bionano.java et Nanopore.java
+               -  Run AbstractTreatmentService.java et TreatmentServiceCNS.java
+         -->
+		<input
+				name="@{name}{{propertyDef.code}}" ng-required="propertyDef.required" 
+				type="file" ng-switch-when="true" base64-file="experiment.@{name}[propertyDef.code]" />
+		<div ng-switch-when="false" ng-if="experiment.@{name}[propertyDef.code] !== undefined">
+			<a target="_blank" ng-href="data:application/{{experiment.@{name}[propertyDef.code].extension}};base64,{{experiment.@{name}[expp.code].value}}">
+				{{experiment.@{name}[expp.code].fullname}}
+			</a>
+		</div>
+		<button ng-switch-when="false" ng-if="isEditModeAvailable()" class="btn btn-default btn-xs"
+				ng-show="experiment.@{name}[propertyDef.code] !== undefined" 
+				ng-click="experiment.@{name}[propertyDef.code] = undefined" ><i class="fa fa-trash-o"></i>
+		</button>
+	</div>
+</div>
+
+<div ng-switch-when="java.awt.Image" class="col-md-6 col-lg-6">
+	<div ng-switch on="mainService.isEditMode()">
+		<input 
+			name="@{name}{{propertyDef.code}}" ng-required="propertyDef.required"
+			type="file" ng-switch-when="true" base64-img="experiment.@{name}[propertyDef.code]" />
+		<div ng-switch-when="false" ng-click="setImage(experiment.@{name}[propertyDef.code].value,
+			experiment.@{name}[propertyDef.code].fullname,
+			experiment.@{name}[propertyDef.code].width,
+			experiment.@{name}[propertyDef.code].height)" 
+			class="thumbnail col-md-6 col-lg-6"  
+			ng-if="experiment.@{name}[propertyDef.code] !== undefined" >
+			<div data-target="#modalImage" role="button" data-toggle="modal" >
+				<a href="#">
+					<img  src="data:image/{{experiment.@{name}[propertyDef.code].extension}};base64,{{experiment.@{name}[propertyDef.code].value}}">
+				</a>
+			</div>
+		</div>
+		<button ng-switch-when="false" ng-if="isEditModeAvailable()" class="btn btn-default btn-xs"  
+				ng-show="experiment.@{name}[propertyDef.code] !== undefined" 
+				ng-click="experiment.@{name}[propertyDef.code] = undefined" ><i class="fa fa-trash-o"></i>
+		</button>
+	</div>
+</div>
+
+<div ng-switch-when="java.lang.Boolean" class="col-md-6 col-lg-6" ng-switch on="mainService.isEditMode()">
+<!-- NGL-3554 le cas editable=false n'est pas géré ! -->
+	<div class="checkbox" ng-switch-when="true">
+	<label>
+		<input type="checkbox"  ng-model="experiment.@{name}[propertyDef.code].value" pdef-default-value="propertyDef"/>&nbsp;	
+	</label>
+	</div>
+	<p class="form-control-static" ng-switch-when="false" ng-switch on="experiment.@{name}[propertyDef.code].value" >
+		<i ng-switch-when="true" class="fa fa-check-square-o  fa-lg"></i>
+		<i ng-switch-default class="fa fa-square-o  fa-lg"></i>
+	</p>
+</div>
+
+<div ng-switch-default class="col-md-6 col-lg-6" ng-switch on="propertyDef.choiceInList">
+	<!-- OLD CODE 
+	<div ng-switch-when="false" ng-switch on="mainService.isEditMode() && propertyDef.editable">
+		<p ng-switch-when="false" class="form-control-static" ng-bind="experiment.@{name}[propertyDef.code].value" />
+		<input ng-switch-when="true" class="form-control" type="text" title='{{propertyDef.name}}'  class="input-small"
+				name="@{name}{{propertyDef.code}}" ng-required="propertyDef.required"
+				ng-model="experiment.@{name}[propertyDef.code].value"
+				default-value="propertyDef.defaultValue"
+				ng-change="@{updateFunctionName}(propertyDef.code)"/>
+	</div>
+	-->
+	<!-- FDS 27/10/2021 : Pour une valeur par défault non éditable, séparer les cas mainService.isEditMode() // propertyDef.editable -->
+	<div ng-switch-when="false" ng-switch on="mainService.isEditMode()">
+		<p ng-switch-when="false" class="form-control-static" ng-bind="experiment.@{name}[propertyDef.code].value" />
+		<div ng-switch-when="true"  ng-switch on="propertyDef.editable">
+		<input ng-switch-when="true" class="form-control" type="text" title='{{propertyDef.name}}'  class="input-small"
+				name="@{name}{{propertyDef.code}}" ng-required="propertyDef.required"
+				ng-model="experiment.@{name}[propertyDef.code].value"
+				default-value="propertyDef.defaultValue"
+				ng-change="@{updateFunctionName}(propertyDef.code)"/>
+		<input ng-switch-when="false" class="form-control" type="text" title='{{propertyDef.name}}'  class="input-small"
+				name="@{name}{{propertyDef.code}}" ng-required="propertyDef.required"
+				ng-model="experiment.@{name}[propertyDef.code].value"
+				default-value="propertyDef.defaultValue"
+				disabled="disabled"/>
+		</div>
+	</div>
+	
+	<div ng-switch-when="true" bt-select class="form-control"
+		name="@{name}{{propertyDef.code}}" ng-required="propertyDef.required"
+		ng-model="experiment.@{name}[propertyDef.code].value"
+		default-value="propertyDef.defaultValue"
+		bt-options="opt.code as opt.name for opt in propertyDef.possibleValues"
+		auto-select
+		ng-edit="mainService.isEditMode()"
+		ng-change="@{updateFunctionName}(propertyDef.code)">
+	</div>
+</div>

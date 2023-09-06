@@ -1,0 +1,38 @@
+//created on: Nov 21, 2013
+package rules
+
+//list any import classes here.
+import models.laboratory.container.instance.Content;
+import models.laboratory.container.instance.Container;
+import models.laboratory.container.instance.ContainerSupport;
+import models.laboratory.run.instance.Run;
+import models.laboratory.run.instance.Lane;
+import models.laboratory.run.instance.Analysis;
+import models.laboratory.run.instance.ReadSetProperties;
+import models.laboratory.run.instance.Treatment;
+import models.laboratory.project.instance.Project;
+import models.utils.InstanceConstants;
+import models.laboratory.common.instance.PropertyValue;
+import models.laboratory.common.instance.property.PropertySingleValue;
+import models.laboratory.common.instance.property.PropertyFileValue;
+import models.laboratory.common.instance.property.PropertyObjectListValue;
+import models.laboratory.common.instance.property.PropertyListValue;
+import models.laboratory.common.instance.State;
+import models.laboratory.parameter.index.*;
+import fr.cea.ig.MongoDBDAO;
+import play.Logger;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.HashMap;
+import java.text.DecimalFormat;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.mongojack.DBQuery;
+import org.mongojack.DBUpdate;
+import com.mongodb.BasicDBObject;
+import org.apache.commons.lang3.StringUtils;

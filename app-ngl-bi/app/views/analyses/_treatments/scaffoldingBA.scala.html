@@ -1,0 +1,109 @@
+@()
+<div class="row">
+ <div class="col-md-6 col-lg-6">
+ 
+ 	<table class="table table-condensed table-hover table-bordered">
+ 		<thead>
+			<tr>
+				<th></th>
+				<th>@Messages("analyses.treatments.scaffolding_ba.NXScaffoldSize")</th>
+				<th>@Messages("analyses.treatments.scaffolding_ba.NXScaffoldNb")</th>							
+ 			</tr>
+ 		</thead>
+ 		<tbody>
+ 			<tr>
+ 				<th>@Messages("analyses.treatments.scaffolding_ba.N50Scaffold")</th>
+				<td ng-class="highLight('treatments.'+treatments.getTreatment().code+'.pairs.N50ScaffoldSize.value')">
+				{{analysis.treatments[treatments.getTreatment().code].pairs.N50ScaffoldSize.value | number}}</td>
+				<td>{{analysis.treatments[treatments.getTreatment().code].pairs.N50ScaffoldNb.value | number}}</td>
+			</tr>
+ 			<tr>
+ 				<th>@Messages("analyses.treatments.scaffolding_ba.N80Scaffold")</th>				
+				<td>{{analysis.treatments[treatments.getTreatment().code].pairs.N80ScaffoldSize.value | number}}</td>
+				<td>{{analysis.treatments[treatments.getTreatment().code].pairs.N80ScaffoldNb.value | number}}</td>
+			</tr>
+ 			<tr>
+ 				<th>@Messages("analyses.treatments.scaffolding_ba.N90Scaffold")</th>	
+				<td>{{analysis.treatments[treatments.getTreatment().code].pairs.N90ScaffoldSize.value | number}}</td>
+				<td>{{analysis.treatments[treatments.getTreatment().code].pairs.N90ScaffoldNb.value | number}}</td>
+ 			</tr>
+ 		</tbody>
+ 	</table>
+ </div>
+ 
+ <div class="col-md-6 col-lg-6">
+ 
+ 	<table class="table table-condensed table-hover table-bordered">
+ 		<thead>
+			<tr>
+ 				<th>@Messages("analyses.treatments.scaffolding_ba.scaffoldSizeRepartition.size")</th>
+				<th>@Messages("analyses.treatments.scaffolding_ba.scaffoldSizeRepartition.scaffoldNumber")</th>
+				<th>@Messages("analyses.treatments.scaffolding_ba.scaffoldSizeRepartition.scaffoldPercent")</th>
+				<th>@Messages("analyses.treatments.scaffolding_ba.scaffoldSizeRepartition.cumulativeSize")</th>
+				<th>@Messages("analyses.treatments.scaffolding_ba.scaffoldSizeRepartition.cumulativeSizePercent")</th>
+			</tr>
+ 		</thead>
+ 		<tbody>
+ 			<tr ng-repeat="value in analysis.treatments[treatments.getTreatment().code].pairs.scaffoldSizeRepartition.value | orderBy:'scaffoldNumber'">
+ 				<td>>= {{value.size | number}}</td>
+ 				<td>{{value.scaffoldNumber | number}}</td>
+ 				<td>{{value.scaffoldPercent | number:2}} %</td>
+ 				<td>{{value.cumulativeSize | number}}</td>
+ 				<td>{{value.cumulativeSizePercent | number:2}} %</td>
+ 			</tr>
+ 		</tbody>
+ </table>
+ </div>
+ 
+</div>
+
+<div class="row">
+<div class="col-md-8 col-lg-8">
+ 
+	 <table class="table table-condensed table-hover table-bordered">
+		<thead>
+		<tr>
+			<th>@Messages("analyses.treatments.scaffolding_ba.assemblyScaffoldSize")</th>
+			
+			<th>@Messages("analyses.treatments.scaffolding_ba.GCpercent")</th>
+			<th>@Messages("analyses.treatments.scaffolding_ba.expectedPoolSizePercent")</th>
+			
+			
+			<th>@Messages("analyses.treatments.scaffolding_ba.assemblyScaffoldNb")</th>
+			<th>@Messages("analyses.treatments.scaffolding_ba.minScaffoldSize")</th>
+			<th>@Messages("analyses.treatments.scaffolding_ba.maxScaffoldSize")</th>
+			<th>@Messages("analyses.treatments.scaffolding_ba.averageScaffoldSize")</th>
+			
+			<th>@Messages("analyses.treatments.scaffolding_ba.nbMappedPairs")</th>
+			
+			<th>@Messages("analyses.treatments.scaffolding_ba.nbPairedSatisfied")</th>
+			<th>@Messages("analyses.treatments.scaffolding_ba.nbPairedUnsatisfied")</th>
+			<th>@Messages("analyses.treatments.scaffolding_ba.nbMappedSequences")</th> 
+			<th>@Messages("analyses.treatments.scaffolding_ba.medianInsertSize")</th>
+			
+			<th>@Messages("analyses.treatments.scaffolding_ba.numberOfN")</th>
+			
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+		<td>{{analysis.treatments[treatments.getTreatment().code].pairs.assemblyScaffoldSize.value | number}}</td>
+		
+		<td>{{analysis.treatments[treatments.getTreatment().code].pairs.GCpercent.value | number:2}} %</td>
+		<td ng-class="highLight('treatments.'+treatments.getTreatment().code+'.pairs.expectedPoolSizePercent.value')">
+		{{analysis.treatments[treatments.getTreatment().code].pairs.expectedPoolSizePercent.value | number:2}} %</td>					
+				<td>{{analysis.treatments[treatments.getTreatment().code].pairs.assemblyScaffoldNb.value | number}}</td>
+		<td>{{analysis.treatments[treatments.getTreatment().code].pairs.minScaffoldSize.value | number}}</td>
+		<td>{{analysis.treatments[treatments.getTreatment().code].pairs.maxScaffoldSize.value | number}}</td>
+		<td>{{analysis.treatments[treatments.getTreatment().code].pairs.averageScaffoldSize.value | number:2}}</td>
+		<td>{{analysis.treatments[treatments.getTreatment().code].pairs.nbMappedPairs.value | number}}</td>
+		<td>{{analysis.treatments[treatments.getTreatment().code].pairs.nbPairedSatisfied.value | number}}</td>
+		<td>{{analysis.treatments[treatments.getTreatment().code].pairs.nbPairedUnsatisfied.value | number}}</td>
+		<td>{{analysis.treatments[treatments.getTreatment().code].pairs.nbMappedSequences.value | number}}</td>
+		<td>{{analysis.treatments[treatments.getTreatment().code].pairs.medianInsertSize.value | number}}</td>
+		<td>{{analysis.treatments[treatments.getTreatment().code].pairs.numberOfN.value | number}}</td>
+		</tr>						
+	</tbody>
+	 </table>
+ </div>	
+</div>	 

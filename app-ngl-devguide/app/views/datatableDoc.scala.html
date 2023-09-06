@@ -1,0 +1,26 @@
+@()
+
+@scripts() = {
+	 <script src="@routes.Assets.at("lib/datatable/datatable/javascripts/services/datatable.js")" type="text/javascript" charset="utf-8"></script>    
+	 <script src="@routes.Assets.at("ngl-devguide/javascripts/datatable/app.js")" type="text/javascript" charset="utf-8"></script>
+	 <script src="@routes.Assets.at("ngl-devguide/javascripts/datatable/doc-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	 <script src="@routes.Assets.at("ngl-devguide/javascripts/datatable/demo-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	 <script src="@routes.Assets.at("ngl-devguide/javascripts/directives/directives.js")" type="text/javascript" charset="utf-8"></script>
+	 <script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js?lang=css&skin=sunburst"></script>
+}
+
+@main("Datatable", menu("datatable"), dvJavascripts(scripts()), dvCss()) {
+<header>
+ <div class="row-fluid">
+    <div class="span11 offset1">
+		<h1>Datatable</h1>
+	</div>
+</div>
+</header>
+<div class="row-fluid" ng-app="home" ng-init="init()">
+<div class="span10 offset2">
+<div ng-view></div>
+</div>
+</div>
+
+}

@@ -1,0 +1,34 @@
+@this()
+
+@()
+
+<!-- work with atmDragAndDrop2 -->
+
+<table class="table table-bordered table-condensed"
+				ng-mouseup="atmService.data.stopSelectInputContainer($event)"
+				ng-mousedown="atmService.data.startSelectInputContainer($event)">
+	<thead>
+	     <tr>
+	         <th ng-mousedown="atmService.data.selectInputContainers($event, atmService.data.getCurrentSupportCode())"></th>
+	         <th ng-repeat="i in [1,2,3,4,5,6,7,8,9,10,11,12]" 
+	         	 ng-mouseenter="atmService.data.selectInputContainers($event, atmService.data.getCurrentSupportCode(),undefined,i)"
+	         	 ng-mousedown="atmService.data.selectInputContainers($event, atmService.data.getCurrentSupportCode(),undefined,i)">{{i}}</th>
+	     </tr>
+	</thead>
+	<tbody>
+	    <tr ng-repeat="line in ['A','B','C','D','E','F','G','H']">
+	        <td ng-mouseenter="atmService.data.selectInputContainers($event, atmService.data.getCurrentSupportCode(),line)"
+	        	ng-mousedown="atmService.data.selectInputContainers($event, atmService.data.getCurrentSupportCode(),line)">
+	        	<strong>{{line}}</strong>
+	        </td>
+	        <td ng-repeat="container in atmService.data.getInputContainers(atmService.data.getCurrentSupportCode(), line ,[1,2,3,4,5,6,7,8,9,10,11,12]) track by $index" 
+	        	ng-mouseenter="atmService.data.selectInputContainer($event, container)"
+	        	ng-mousedown="atmService.data.startSelectInputContainer($event, container)"
+	        	ng-class="atmService.data.getInputContainerCellClass(container)">
+	        	   <!-- NGL-2400 afficher processProperties.nPlex s'il y en a -->
+	        	   <div ng-if="(container.contents | countDistinct:'processProperties.nPlex.value') == 0" list-resize="container.contents | collect:'sampleCode+&quot; / &quot;+properties.libProcessTypeCode.value+&quot; / &quot;+properties.secondaryTag.value+&quot; / &quot;+properties.tag.value'"></div> 
+	        	   <div ng-if="(container.contents | countDistinct:'processProperties.nPlex.value') != 0" list-resize="container.contents | collect:'sampleCode+&quot; / &quot;+properties.libProcessTypeCode.value+&quot; / &quot;+properties.secondaryTag.value+&quot; / &quot;+properties.tag.value+&quot; / &quot;+processProperties.nPlex.value'"></div> 
+	         </td>
+	    </tr>
+	</tbody>
+</table>

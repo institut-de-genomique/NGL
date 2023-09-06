@@ -1,0 +1,88 @@
+@**  FDS NGL-836 19/11/2018 d'apres Samples : appelé depuis details.scala.html 
+     ... inutilisé pour l'instant car le bouton de selection est desactivé dans indexes/search-ctrl.js
+**@
+    
+@()
+@import views.html.helper._
+
+@column()(value: Html) = {
+	<div class="col-md-4 col-lg-4 col-xs-4">
+		@value
+	</div>
+}
+@sortableColumn(msg: String)() = {}
+
+<form class="form-horizontal">
+	<div class="row">
+		@column(){
+		
+			@columnLabelValue(Messages("NOT USED !!!!!!!!")){
+				<p class="form-control-static" ng-bind="index.code" />
+			}
+			
+			@columnLabelValue(Messages("indexes.table.code")){
+				<p class="form-control-static" ng-bind="index.code" />
+			}
+			
+			@columnLabelValue(Messages("indexes.table.name")){
+				<p class="form-control-static" ng-bind="index.name" />
+			}
+			
+			@columnLabelValue(Messages("indexes.table.shortName")){
+				<p class="form-control-static" ng-bind="index.shortName" />
+			}
+			
+			@columnLabelValue(Messages("indexes.table.typeCode")){
+				<div class="form-control-static" ng-bind="indexes.typeCode|codes:'type'" />
+			}
+			@columnLabelValue(Messages("indexes.table.categoryCode")){
+				<div class="form-control-static" ng-bind="index.categoryCode" />
+			}
+			@columnLabelValue(Messages("indexes.table.groupNames")){	
+			<div  class="form-control-static" ng-if="indexes.groupNames !== null" ng-repeat="group in index.groupNames|unique">
+				{{group}}
+			</div>				
+			}
+		}
+		
+		@column(){
+			@columnLabelValue(Messages("indexes.table.sequence")){	
+				<div class="form-control-static" ng-bind="index.sequence" />
+			}	
+			@columnLabelValue(Messages("indexes.table.size")){	
+				<div class="form-control-static" ng-bind="index.sequence" /> @** | countBase filtre TODO **@
+			}			
+			@columnLabelValue(Messages("indexes.table.supplierName")){	
+				<div class="form-control-static" ng-if="index.supplierName !== null" ng-bind="index.supplierName" /> @** |grepsupplier  filtre TODO **@
+			}
+			@columnLabelValue(Messages("indexes.table.supplierIndexName")){	
+				<div class="form-control-static" ng-if="index.supplierName !== null" ng-bind="index.supplierName" /> @** |grep index name filtre TODO **@
+			}
+			@columnLabelValue(Messages("indexes.table.creationDate")){	
+				<p  class="form-control-static" ng-bind="index.traceInformation.creationDate|date:'@Messages("date.format")'"/>
+			}
+			@columnLabelValue(Messages("indexes.table.createUser")){	
+				<div class="form-control-static" ng-bind="index.traceInformation.createUser" />
+			}
+			@columnLabelValue(Messages("indexes.table.comments")){
+				<div ng-switch on="isEditMode()">
+					<p ng-switch-when="false"  class="form-control-static" ng-bind-html="convertToBr(index.comments[0].comment)" />	 
+					<textarea ng-switch-when="true" class="form-control" ng-model="index.comments[0].comment" rows="3"></textarea>
+				</div>
+			}
+		}
+		
+		@column(){
+		<div class="row">
+					<div  class="col-md-12 col-lg-12" ng-repeat="(key, value) in index.properties">
+							<property-value key-ng-model="key" value-ng-model="value"/>
+					</div>
+			</div>
+		}
+		
+		@** reserver une 3eme colonne, meme si vide...**@
+		@column(){
+
+		}
+	</div>
+</form>

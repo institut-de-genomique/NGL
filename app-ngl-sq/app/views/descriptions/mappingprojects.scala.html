@@ -1,0 +1,342 @@
+@this()
+@()
+
+@import views.html.helper._
+@import play.mvc.Http.Context
+@import controllers.authorisation.PermissionHelper
+
+@user = @{ fr.cea.ig.authentication.Authentication.getUser(Context.current().session()) }
+@adminPermission = @{ PermissionHelper.checkPermission(user, "admin") }
+
+@formDnaExtraction() = {
+<form class="well well-small">
+	<div class="row">
+		<div class="col-md-4 col-lg-4">
+			@formGroup{
+			<div bt-select placeholder='@Messages("descriptions.select.project.code")' class="form-control"
+				filter="true" multiple="true" ng-model="searchService.tabs.dnaExtraction.form.projectCodes"
+				bt-options="project.code for project in searchService.tabs.dnaExtraction.lists.projects">
+			</div>
+			}
+		</div>
+		@columnSearchForm{
+		@formGroup{
+		<div class="btn-toolbar">
+			<button type="submit" title='@Messages("button.search")' data-toggle="tooltip"
+				ng-click="searchService.searchDnaExtractionMappings()" class="btn btn-primary">
+				<i class="fa fa-search"></i>
+			</button>
+			<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="resetDnaExtractionForm()"
+				class="btn btn-default">
+				<i class="fa fa-undo"></i>
+			</button>
+
+		</div>
+		}
+		}
+	</div>
+</form>
+}
+
+@formRnaExtraction() = {
+<form class="well well-small">
+	<div class="row">
+		<div class="col-md-4 col-lg-4">
+			@formGroup{
+			<div bt-select placeholder='@Messages("descriptions.select.project.code")' class="form-control"
+				filter="true" multiple="true" ng-model="searchService.tabs.rnaExtraction.form.projectCodes"
+				bt-options="project.code for project in searchService.tabs.rnaExtraction.lists.projects">
+			</div>
+			}
+		</div>
+		@columnSearchForm{
+		@formGroup{
+		<div class="btn-toolbar">
+			<button type="submit" title='@Messages("button.search")' data-toggle="tooltip"
+				ng-click="searchService.searchRnaExtractionMappings()" class="btn btn-primary">
+				<i class="fa fa-search"></i>
+			</button>
+			<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="resetRnaExtractionForm()"
+				class="btn btn-default">
+				<i class="fa fa-undo"></i>
+			</button>
+
+		</div>
+		}
+		}
+	</div>
+</form>
+}
+
+@formTagPCR() = {
+<form class="well well-small">
+	<div class="row">
+		<div class="col-md-4 col-lg-4">
+			@formGroup{
+			<div bt-select placeholder='@Messages("descriptions.select.project.code")' class="form-control"
+				filter="true" multiple="true" ng-model="searchService.tabs.tagPcr.form.projectCodes"
+				bt-options="project.code for project in searchService.tabs.tagPcr.lists.projects">
+			</div>
+			}
+		</div>
+		@columnSearchForm{
+		@formGroup{
+		<div class="btn-toolbar">
+			<button type="submit" title='@Messages("button.search")' data-toggle="tooltip"
+				ng-click="searchService.searchTagPcrMappings()" class="btn btn-primary">
+				<i class="fa fa-search"></i>
+			</button>
+			<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="resetTagPcrForm()"
+				class="btn btn-default">
+				<i class="fa fa-undo"></i>
+			</button>
+
+		</div>
+		}
+		}
+	</div>
+</form>
+}
+
+@formPrepHiC() = {
+<form class="well well-small">
+	<div class="row">
+		<div class="col-md-4 col-lg-4">
+			@formGroup{
+			<div bt-select placeholder='@Messages("descriptions.select.project.code")' class="form-control"
+				filter="true" multiple="true" ng-model="searchService.tabs.prepHic.form.projectCodes"
+				bt-options="project.code for project in searchService.tabs.prepHic.lists.projects">
+			</div>
+			}
+		</div>
+		@columnSearchForm{
+		@formGroup{
+		<div class="btn-toolbar">
+			<button type="submit" title='@Messages("button.search")' data-toggle="tooltip"
+				ng-click="searchService.searchPrepHicMappings()" class="btn btn-primary">
+				<i class="fa fa-search"></i>
+			</button>
+			<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="resetPrepHicForm()"
+				class="btn btn-default">
+				<i class="fa fa-undo"></i>
+			</button>
+
+		</div>
+		}
+		}
+	</div>
+</form>
+}
+
+@formLargeRnaIsolation() = {
+<form class="well well-small">
+	<div class="row">
+		<div class="col-md-4 col-lg-4">
+			@formGroup{
+			<div bt-select placeholder='@Messages("descriptions.select.project.code")' class="form-control"
+				filter="true" multiple="true" ng-model="searchService.tabs.largeRnaIsolation.form.projectCodes"
+				bt-options="project.code for project in searchService.tabs.largeRnaIsolation.lists.projects">
+			</div>
+			}
+		</div>
+		@columnSearchForm{
+		@formGroup{
+		<div class="btn-toolbar">
+			<button type="submit" title='@Messages("button.search")' data-toggle="tooltip"
+				ng-click="searchService.searchLargeRnaIsolationMappings()" class="btn btn-primary">
+				<i class="fa fa-search"></i>
+			</button>
+			<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="resetLargeRnaIsolationForm()"
+				class="btn btn-default">
+				<i class="fa fa-undo"></i>
+			</button>
+
+		</div>
+		}
+		}
+	</div>
+</form>
+}
+
+@formSmallRnaIsolation() = {
+<form class="well well-small">
+	<div class="row">
+		<div class="col-md-4 col-lg-4">
+			@formGroup{
+			<div bt-select placeholder='@Messages("descriptions.select.project.code")' class="form-control"
+				filter="true" multiple="true" ng-model="searchService.tabs.smallRnaIsolation.form.projectCodes"
+				bt-options="project.code for project in searchService.tabs.smallRnaIsolation.lists.projects">
+			</div>
+			}
+		</div>
+		@columnSearchForm{
+		@formGroup{
+		<div class="btn-toolbar">
+			<button type="submit" title='@Messages("button.search")' data-toggle="tooltip"
+				ng-click="searchService.searchSmallRnaIsolationMappings()" class="btn btn-primary">
+				<i class="fa fa-search"></i>
+			</button>
+			<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="resetSmallRnaIsolationForm()"
+				class="btn btn-default">
+				<i class="fa fa-undo"></i>
+			</button>
+		</div>
+		}
+		}
+	</div>
+</form>
+}
+
+@formCreateMappingProject() = {
+<div class="col-md-12 col-lg-12">
+	<div class="row">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h2 class="panel-title">@Messages("descriptions.mapping.projects.tab.create.mapping.project") </h2>
+			</div>
+			<div class="panel-body">
+				@formGroup{
+				<div class="form-group required {{getHasErrorClass('experimentForm', 'protocolCode')}}">
+					<label class="col-md-6 col-lg-6 control-label">@Messages("descriptions.select.project.code")</label>
+					<div class="col-md-6 col-lg-4">
+						<div ng-required=true bt-select placeholder='@Messages("descriptions.select.project.code")'
+							class="form-control" filter="true"
+							ng-model="searchService.tabs.createMappingProject.entry.mapParameter"
+							bt-options="mapParameter.code as mapParameter.name for mapParameter in searchService.lists.getMapParameter()">
+						</div>
+					</div>
+				</div>
+				}
+				@columnSearchForm{
+				@formGroup{
+				<div class="btn-toolbar affix-top">
+					<button type="submit" title='@Messages("button.search")' data-toggle="tooltip"
+						ng-disabled="!isClickable()" ng-click="addMappingTab()" class="btn btn-primary" ng-model="save">
+						<i class="fa fa-plus"></i>
+					</button>
+					<button title='@Messages("button.reset")' data-toggle="tooltip"
+						ng-click="resetCreateMappingProjectForm()" class="btn btn-default">
+						<i class="fa fa-undo"></i>
+					</button>
+				</div>
+				}
+				}
+				@formGroup{
+				<div class="form-group required {{getHasErrorClass('experimentForm', 'protocolCode')}}"
+					style="padding-top:3%;">
+					<label
+						class="col-md-6 col-lg-6 control-label">@Messages("descriptions.mapping.comment.jira")</label>
+					<div class="col-md-6 col-lg-4">
+						<textarea class="form-control " placeholder='@Messages("descriptions.mapping.comment.jira")'
+							ng-model="searchService.tabs.createMappingProject.entry.comment"></textarea>
+					</div>
+				</div>
+				}
+			</div>
+		</div>
+	</div>
+</div>
+}
+
+@dnaExtraction()={
+<div ultimate-datatable="searchService.tabs.dnaExtraction.datatable">
+	<div udt-form></div>
+</div>
+}
+
+@rnaExtraction() ={
+<div ultimate-datatable="searchService.tabs.rnaExtraction.datatable">
+	<div udt-form></div>
+</div>
+}
+
+@tagPcr()={
+<div ultimate-datatable="searchService.tabs.tagPcr.datatable">
+	<div udt-form></div>
+</div>
+}
+@prepHic() = {
+<div ultimate-datatable="searchService.tabs.prepHic.datatable">
+	<div udt-form></div>
+</div>
+}
+
+@largeRnaIsolation() = {
+<div ultimate-datatable="searchService.tabs.largeRnaIsolation.datatable">
+	<div udt-form></div>
+</div>
+}
+
+@smallRnaIsolation = {
+<div ultimate-datatable="searchService.tabs.smallRnaIsolation.datatable">
+	<div udt-form></div>
+</div>
+}
+
+<div class="row">
+	<div class="col-md-7 col-lg-7">
+		<ul class="nav nav-tabs" role="tablist">
+			<li role="presentation" class="active">
+				<a href="#" data-target="#dnaExtraction" data-toggle="tab"
+					role="tab">@Messages("descriptions.mapping.projects.tab.dna.extraction")</a>
+			</li>
+			<li role="presentation">
+				<a href="#" data-target="#rnaExtraction" data-toggle="tab"
+					role="tab">@Messages("descriptions.mapping.projects.tab.rna.extraction")</a>
+			</li>
+			<li role="presentation">
+				<a href="#" data-target="#tagPcr" data-toggle="tab"
+					role="tab">@Messages("descriptions.mapping.projects.tab.tag.pcr")</a>
+			</li>
+			<li role="presentation">
+				<a href="#" data-target="#prepHic" data-toggle="tab"
+					role="tab">@Messages("descriptions.mapping.projects.tab.hi.c.dna")</a>
+			</li>
+			<li role="presentation">
+				<a href="#" data-target="#largeRnaIsolation" data-toggle="tab"
+					role="tab">@Messages("descriptions.mapping.projects.tab.large.rna.isolation")</a>
+			</li>
+			<li role="presentation">
+				<a href="#" data-target="#smallRnaIsolation" data-toggle="tab"
+					role="tab">@Messages("descriptions.mapping.projects.tab.small.rna.isolation")</a>
+			</li>
+			@if(adminPermission){
+			<li role="presentation">
+				<a href="#" data-target="#createMappingProject" data-toggle="tab"
+					role="tab">@Messages("descriptions.mapping.projects.tab.create.mapping.project")</a>
+			</li>
+			}
+		</ul>
+		<div class="tab-content">
+			<div class="tab-pane fade in active" id="dnaExtraction">
+				@formDnaExtraction
+				@dnaExtraction
+			</div>
+			<div class="tab-pane fade" id="rnaExtraction">
+				@formRnaExtraction
+				@rnaExtraction
+			</div>
+			<div class="tab-pane fade" id="tagPcr">
+				@formTagPCR
+				@tagPcr
+			</div>
+			<div class="tab-pane fade" id="prepHic">
+				@formPrepHiC
+				@prepHic
+			</div>
+			<div class="tab-pane fade" id="largeRnaIsolation">
+				@formLargeRnaIsolation
+				@largeRnaIsolation
+			</div>
+			<div class="tab-pane fade" id="smallRnaIsolation">
+				@formSmallRnaIsolation
+				@smallRnaIsolation
+			</div>
+			@if(adminPermission){
+			<div class="tab-pane fade" id="createMappingProject">
+				@formCreateMappingProject
+			</div>
+			}
+		</div>
+	</div>
+</div>

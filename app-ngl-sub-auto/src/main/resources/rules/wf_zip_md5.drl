@@ -1,0 +1,117 @@
+#created on: Jul 15, 2014
+package birds
+
+import  fr.genoscope.lis.devsi.birds.impl.factory.ResourcesReferentialServiceFactory;
+import fr.cea.ig.auto.submission.SubmissionServicesFactory;
+import fr.genoscope.lis.devsi.birds.impl.properties.ProjectProperties;
+import fr.cea.ig.auto.submission.SRAFilesUtil;
+
+#Select resource for workflow submission
+rule "select resources from nglsub for workflow zip md5"
+	@BirdsRule ( selectionRule )
+	salience 200
+	dialect 'java'
+	no-loop
+	when
+		$input : InputSpecificationElement(name=="inputZipMd5", treatmentSpecification.name=="WF_ZipMd5Process", project.name == "SRA")
+		$resourcesReferential : ResourcesReferential(name=="nglSubRef_processZip") 
+		$device : JSONDevice() from $resourcesReferential.referentialDevice
+		$rps : ResourcePropertiesSet(initialized==false, inputSpecificationElement==$input, resourcesReferential==$resourcesReferential)
+		//$groupJob : Job( treatmentSpecification.specificationGroup == true)
+	then
+		Logger log = Logger.getLogger("ngl.sub.rules");
+		$rps.initialize();
+		
+		//JobResource groupJobResource = $groupJob.getUniqueJobResource("subData");
+		Set<ResourceProperties> resourceProperties = new HashSet<ResourceProperties>();
+		
+		JSONDevice jsonDevice = new JSONDevice();
+		
+		//Get code submission IP-SUB
+		Set<ResourceProperties> rpSubmissions = $device.httpGetJSON(ProjectProperties.getProperty("server")+"/api/sra/submissions?stateCode=SUB-SRD-IP", "bot");
+		for(ResourceProperties rpSub : rpSubmissions){
+			//Get submission code
+			String codeSubmission = rpSub.getProperty("code");
+			log.debug("Get input zip for "+codeSubmission);
+			String submissionDirectory = rpSub.getProperty("submissionDirectory");
+			String typeRawDataSubmitted = rpSub.getProperty("typeRawDataSubmitted");
+			
+			String experimentCodes=null;
+			String analysisCode=null;
+			Set<ResourceProperties> rpsRawData = null;
+			if(typeRawDataSubmitted.equals("bionanoRawData")){
+				analysisCode = rpSub.getProperty("analysisCode");
+				rpsRawData = jsonDevice.httpGetJSON(ProjectProperties.getProperty("server")+"/api/sra/analyzes/rawDatas?submissionCode="+codeSubmission,"bot");
+			}else{
+				experimentCodes = rpSub.getProperty("experimentCodes");
+				rpsRawData = jsonDevice.httpGetJSON(ProjectProperties.getProperty("server")+"/api/sra/experiments/rawDatas?submissionCode="+codeSubmission,"bot");
+			}
+			
+			boolean gzipForSubmission = SRAFilesUtil.checkGzipForSubmission(rpsRawData);
+			//verifie que les données du CCRT ont bien été rapatriées
+			boolean checkDataCCRT = SRAFilesUtil.checkDataCCRT(rpsRawData,codeSubmission);
+			log.debug("gzip for submission "+gzipForSubmission);
+			log.debug("checkDataCCRT for submission "+checkDataCCRT);
+			if(gzipForSubmission && checkDataCCRT){
+				ResourceProperties newRp = new ResourceProperties();
+				newRp.setProperty("code",codeSubmission);
+				newRp.setProperty("gzipForSubmission","true");
+				newRp.setProperty("submissionDirectory",submissionDirectory);
+				newRp.setProperty("typeRawDataSubmitted",typeRawDataSubmitted);
+				if(typeRawDataSubmitted.equals("bionanoRawData"))
+					newRp.setProperty("analysisCode",analysisCode);
+				else
+					newRp.setProperty("experimentCodes",experimentCodes.replaceAll("\"",""));
+				//newRp.setProperty("idGroupJob",""+$groupJob.getId());
+				resourceProperties.add(newRp);
+			}
+		}
+		log.debug("size resources "+resourceProperties.size());
+		$rps.setResourcePropertiesSet(resourceProperties);
+		modify($rps){};
+end
+
+
+#Transfert ressources to internal referential
+rule "add resources submission to internal referential internalRefZip for first step of zip md5 workflow"
+    @BirdsRule( ExecutionService )
+    salience 150
+	dialect 'java'
+	no-loop 
+	when
+	    $executionService : ExecutionService( status == ExecutionService.JOB_PROCESSING_STATUS, caught==false )
+	    $j : Job( treatmentSpecification.name!=null, treatmentSpecification.name =="WF_ZipMd5Process" , treatmentSpecification.specificationGroup == true )
+	then
+	    Logger log = Logger.getLogger("ngl.sub.rules");
+	    log.debug("transfertResource for WF_ZipMd5Process");
+	  	$j.groupTransferInputResourcesToInternalReferential("inputZipMd5", "internalRefZip",$j.getId());
+	  	
+end
+
+
+rule "add submissionZip resources in internalRefSubmission to fire createXML and transferRawData"
+	@BirdsRule( addResources ) 
+	dialect 'java'
+	salience 200
+	when
+		$flag : Flag ( done == false ) 
+		$output : OutputSpecificationElement(treatmentSpecification.name == "WF_ZipMd5Process")
+	  	$referential : ResourcesReferential ( name == "internalRefSubmission" )
+		$resourceSet : ResourceSet( ioSpecificationElement == $output )
+		$job : Job(treatmentSpecification!=null, treatmentSpecification.name == "WF_ZipMd5Process")
+	then
+		Logger log = Logger.getLogger("ngl.sub.rules");
+		log.debug("Add resources rules for create XML and transfertRawData from file "+$job.getProperty(Job.STDOUT));
+		JobResource jobResource = $job.getUniqueJobResource("inputZipMd5");
+		JobResource outputResource = $resourceSet.createJobResource($output.getResourceType(),$referential.getName());
+		ResourceProperties resourceProperties = outputResource.getResourceProperties();
+	  	resourceProperties.setProperty("code",jobResource.getProperty("code"));
+	  	resourceProperties.setProperty("gzipForSubmission",jobResource.getProperty("gzipForSubmission"));
+	  	resourceProperties.setProperty("submissionDirectory",jobResource.getProperty("submissionDirectory"));
+	  	resourceProperties.setProperty("experimentCodes",jobResource.getProperty("experimentCodes"));
+	  	resourceProperties.setProperty("analysisCode",jobResource.getProperty("analysisCode"));
+	  	resourceProperties.setProperty("typeRawDataSubmitted",jobResource.getProperty("typeRawDataSubmitted"));
+		$flag.setDone(true);
+		modify($flag){};
+		modify($resourceSet){};
+end

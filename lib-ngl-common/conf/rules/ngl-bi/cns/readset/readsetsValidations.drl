@@ -1,0 +1,17 @@
+package rules
+
+import models.laboratory.run.instance.File;
+
+rule "Check collabFileName contains no spaces"
+	@nglBI( validations )
+	dialect "java"
+	salience 600
+	no-loop
+	when
+		$readset : ReadSet(files != null)
+		$file: File(properties != null, properties["collabFileName"] != null) from $readset.files
+		$collabFileName: String(this not matches "[a-zA-Z0-9._-]+") from $file.properties["collabFileName"].value
+        $contextVal : ContextValidation()
+	then
+		$contextVal.addErrors("files","error.invalid.collabFileName", $collabFileName);
+end

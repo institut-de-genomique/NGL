@@ -1,0 +1,262 @@
+@this()
+@()
+@import views.html.helper._
+
+@formTypes() = {
+    <form class="well well-small">
+        <div class="row">
+            @columnSearchForm{
+                @formGroup{
+                <div bt-select placeholder='@Messages("descriptions.select.experiment.types")' class="form-control" filter="true" multiple="true"
+                    ng-model="searchService.tabs.types.form.codes"
+                    bt-options="type.code as type.name for type in searchService.lists.getExperimentTypes()">
+                </div>
+                }
+            }
+            @columnSearchForm{
+                @formGroup{
+                <div class="btn-toolbar">
+                    <button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="searchService.searchTypes()" class="btn btn-primary" >
+                        <i class="fa fa-search"></i>
+                    </button>
+                    <button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="resetTypesForm()"  class="btn btn-default">
+                        <i class="fa fa-undo"></i>
+                    </button>
+                                                    
+                </div>	
+                }
+            }
+        </div>
+    </form>
+}
+
+@formProperties() = {
+    <form class="well well-small">
+        <div class="row">
+            @columnSearchForm{
+                @formGroup{
+                <div bt-select placeholder='@Messages("descriptions.select.experiment.types")' class="form-control" filter="true" multiple="true"
+                    ng-model="searchService.tabs.properties.form.codes"
+                    bt-options="type.code as type.name for type in searchService.lists.getExperimentTypes()"
+                    ng-change="searchService.tabs.properties.form.propertyDefinitionNames=null">
+                </div>
+                }
+            }
+            @columnSearchForm{
+                @formGroup{
+                <div bt-select placeholder='@Messages("descriptions.select.property.definitions")' class="form-control" filter="true" multiple="true"
+                    ng-model="searchService.tabs.properties.form.propertyDefinitionNames"
+                    bt-options="propertyDefinition.name for propertyDefinition in searchService.tabs.properties.lists.propertyDefinitions() | unique:'name'">
+                </div>
+                }
+            }
+            @columnSearchForm{
+                @formGroup{
+                <div class="btn-toolbar">
+                    <button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="searchService.searchProperties()" class="btn btn-primary" >
+                        <i class="fa fa-search"></i>
+                    </button>
+                    <button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="resetPropertiesForm()"  class="btn btn-default">
+                        <i class="fa fa-undo"></i>
+                    </button>
+                </div>	
+                }
+            }
+        </div>
+    </form>
+}
+
+@formInstruments() = {
+    <form class="well well-small">
+        <div class="row">
+            @columnSearchForm{
+                @formGroup{
+                <div bt-select placeholder='@Messages("descriptions.select.experiment.types")' class="form-control" filter="true" multiple="true"
+                    ng-model="searchService.tabs.instruments.form.codes"
+                    bt-options="type.code as type.name for type in searchService.lists.getExperimentTypes()">
+                </div>
+                }
+            }
+            @columnSearchForm{
+                @formGroup{
+                <div bt-select placeholder='@Messages("descriptions.select.experiments.instrument.types")' class="form-control" filter="true" multiple="true"
+                    ng-model="searchService.tabs.instruments.form.instrumentUsedTypeCodes"
+                    bt-options="type.code as type.name for type in searchService.lists.getInstrumentUsedTypes()">
+                </div>
+                }
+            }
+            @columnSearchForm{
+                @formGroup{
+                <div class="btn-toolbar">
+                    <button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="searchService.searchInstruments()" class="btn btn-primary" >
+                        <i class="fa fa-search"></i>
+                    </button>
+                    <button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="resetInstrumentsForm()"  class="btn btn-default">
+                        <i class="fa fa-undo"></i>
+                    </button>
+                                                    
+                </div>	
+                }
+            }
+        </div>
+    </form>
+}
+
+@formAtms() = {
+    <form class="well well-small">
+        <div class="row">
+            @columnSearchForm{
+                @formGroup{
+                <div bt-select placeholder='@Messages("descriptions.select.experiment.types")' class="form-control" filter="true" multiple="true"
+                    ng-model="searchService.tabs.atms.form.experimentCodes"
+                    bt-options="type.code as type.name for type in searchService.lists.getExperimentTypes()">
+                </div>
+                }
+            }
+            @columnSearchForm{
+                @formGroup{
+                <div class="btn-toolbar">
+                    <button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="searchService.searchAtms()" class="btn btn-primary" >
+                        <i class="fa fa-search"></i>
+                    </button>
+                    <button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="resetAtmsForm()"  class="btn btn-default">
+                        <i class="fa fa-undo"></i>
+                    </button>
+                                                    
+                </div>	
+                }
+            }
+        </div>
+    </form>
+}
+
+@formPrevious() = {
+    <form class="well well-small">
+        <div class="row">
+            @columnSearchForm{
+                @formGroup{
+                <div bt-select placeholder='@Messages("descriptions.select.experiment.types")' class="form-control" filter="true" multiple="true"
+                    ng-model="searchService.tabs.previous.form.experimentCodes"
+                    bt-options="type.code as type.name for type in searchService.lists.getExperimentTypes()">
+                </div>
+                }
+            }
+            @columnSearchForm{
+                @formGroup{
+                <div class="btn-toolbar">
+                    <button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="searchService.searchPrevious()" class="btn btn-primary" >
+                        <i class="fa fa-search"></i>
+                    </button>
+                    <button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="resetPreviousForm()"  class="btn btn-default">
+                        <i class="fa fa-undo"></i>
+                    </button>
+                                                    
+                </div>	
+                }
+            }
+        </div>
+    </form>
+}
+
+@formCrossTable() = {
+    <form class="well well-small">
+        <div class="row">
+            @columnSearchForm{
+                @formGroup{
+                <div bt-select placeholder='@Messages("descriptions.select.experiment.types")' class="form-control" filter="true" multiple="true"
+                    ng-model="searchService.tabs.crossTable.form.codes"
+                    bt-options="type.code as type.name for type in searchService.lists.getExperimentTypes()">
+                </div>
+                }
+            }
+            @columnSearchForm{
+                @formGroup{
+                <div bt-select placeholder='@Messages("descriptions.select.experiments.instrument.types")' class="form-control" filter="true" multiple="true"
+                    ng-model="searchService.tabs.crossTable.form.instrumentUsedTypeCodes"
+                    bt-options="type.code as type.name for type in searchService.lists.getInstrumentUsedTypes()">
+                </div>
+                }
+            }
+            @columnSearchForm{
+                @formGroup{
+                <div class="btn-toolbar">
+                    <button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="searchService.searchCrossTable()" class="btn btn-primary" >
+                        <i class="fa fa-search"></i>
+                    </button>
+                    <button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="resetCrossTableForm()"  class="btn btn-default">
+                        <i class="fa fa-undo"></i>
+                    </button>
+                                                    
+                </div>	
+                }
+            }
+        </div>
+    </form>
+}
+
+<div class="row">
+	<div class="col-md-12 col-lg-12"  messages="messages"></div>
+</div>
+<div class="row"> 
+
+<div class="col-md-12 col-lg-12">
+    <ul class="nav nav-tabs" role="tablist">
+        <li role="presentation" class="active">
+            <a href="#" data-target="#types" data-toggle="tab" role="tab">@Messages("descriptions.experiments.tab.types")</a>
+        </li>
+        <li role="presentation">
+            <a href="#" data-target="#properties" data-toggle="tab" role="tab">@Messages("descriptions.experiments.tab.properties")</a>
+        </li> 
+		<li role="presentation">
+            <a href="#" data-target="#instruments" data-toggle="tab" role="tab">@Messages("descriptions.experiments.tab.instruments")</a>
+        </li> 
+		<li role="presentation">
+            <a href="#" data-target="#atms" data-toggle="tab" role="tab">@Messages("descriptions.experiments.tab.atms")</a>
+        </li>
+		<li role="presentation">
+            <a href="#" data-target="#previous" data-toggle="tab" role="tab">@Messages("descriptions.experiments.tab.previous")</a>
+        </li>
+		<li role="presentation">
+            <a href="#" data-target="#crossTable" data-toggle="tab" role="tab">@Messages("descriptions.experiments.tab.cross.table")</a>
+        </li>
+    </ul>	
+    <div class="tab-content">
+        <div class="tab-pane fade in active" id="types">
+            @formTypes
+            <div  ultimate-datatable="searchService.tabs.types.datatable">
+                <div udt-form></div>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="properties">
+            <div class="alert alert-warning">@Messages("descriptions.info.export.properties.definitions.value.possibles")</div>
+            @formProperties
+            <div ultimate-datatable="searchService.tabs.properties.datatable">
+                <div udt-form></div>
+            </div>
+        </div>
+		<div class="tab-pane fade" id="instruments">
+            @formInstruments
+            <div ultimate-datatable="searchService.tabs.instruments.datatable">
+                <div udt-form></div>
+            </div>
+        </div>
+		<div class="tab-pane fade" id="atms">
+            @formAtms
+            <div ultimate-datatable="searchService.tabs.atms.datatable">
+                <div udt-form></div>
+            </div>
+        </div>
+		<div class="tab-pane fade" id="previous">
+            @formPrevious
+            <div ultimate-datatable="searchService.tabs.previous.datatable">
+                <div udt-form></div>
+            </div>
+        </div>
+		<div class="tab-pane fade" id="crossTable">
+            @formCrossTable
+            <div ultimate-datatable="searchService.tabs.crossTable.datatable">
+                <div udt-form></div>
+            </div>
+        </div>
+    </div>
+</div>

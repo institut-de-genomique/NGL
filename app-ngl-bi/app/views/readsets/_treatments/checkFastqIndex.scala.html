@@ -1,0 +1,47 @@
+@()
+
+
+<div class="row">
+ <div class="col-md-7 col-lg-7">
+ 
+ 	<div class="panel panel-default">
+	<div class="panel-heading">
+ 	<label for="inputFilter">@Messages("filterKmerPercent") </label>
+	<input type="text" ng-model="filterKmerPercentDefault" placeholder='@Messages("filterKmerPercent")' title='@Messages("filterKmerPercent")' ng-value="filterKmerPercentDefault" ng-change="setFilterKmerPercentBilanDefault(filterKmerPercentDefault)" id="inputFilter">
+ 	</div>	
+ 	<table class="table table-condensed table-hover table-bordered">
+ 		<thead>
+			<tr>
+ 				<th>@Messages("readsets.treatments.checkFastqIndex.kmersBilan.kmer")</th>
+				<th>@Messages("readsets.treatments.checkFastqIndex.kmersBilan.kmerName")</th>
+				<th>@Messages("readsets.treatments.checkFastqIndex.kmersBilan.kmerNumber")</th>
+				<th>@Messages("readsets.treatments.checkFastqIndex.kmersBilan.kmerPercent")</th>
+			</tr>
+ 		</thead>
+ 		<tbody>
+ 			<tr ng-repeat="value in readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.kmersBilan.value | orderBy:'-kmerPercent'" ng-if="value.kmerPercent>filterKmerPercentDefault">
+ 				<td>{{value.kmer}}</td>
+ 				<td>{{value.kmerName}}</td>
+ 				<td>{{value.kmerNumber | number}}</td>
+ 				<td>{{value.kmerPercent | number:2}}</td>
+ 			</tr>
+ 		</tbody>
+	 </table>
+	 </div>
+ </div>
+ 
+ <div class="col-md-2 col-lg-2">
+ 	<div class="panel panel-default">
+	<div class="panel-heading"><strong>@Messages("readsets.treatments.checkFastqIndex.expectedSequences")</strong></div>	
+ 	<table class="table table-condensed table-hover table-bordered">
+ 		<tbody>
+ 			<tr ng-repeat="value in arrayExpectedSeq">
+ 				<td>{{value}}</td>
+ 			</tr>
+ 		</tbody>
+	 </table>
+	 </div>
+ </div>
+ 
+</div>
+

@@ -1,0 +1,43 @@
+@this(ctx : fr.cea.ig.ngl.NGLApplication, menu_ : menu)
+@(code: String)
+
+@minifyEnabled = @{ true == ctx.nglConfig().isMinified() }
+
+@scripts() = {
+	 <script src="@controllers.projects.tpl.routes.UmbrellaProjects.javascriptRoutes" type="text/javascript" charset="utf-8"></script>
+     <script src="@controllers.main.tpl.routes.Main.jsPermissions" type="text/javascript" charset="utf-8"></script>
+     <script src="@controllers.main.tpl.routes.Main.jsCodes" type="text/javascript" charset="utf-8"></script> 
+     
+     @if(minifyEnabled) {
+            <script src="@routes.Assets.at("ngl-projects/javascripts/umbrellaprojects/app.min.js")" type="text/javascript" charset="utf-8"></script>
+            
+            <script src="@routes.Assets.at("lib/datatable/datatable/javascripts/services/ultimate-datatable.min.js")" type="text/javascript" charset="utf-8"></script>                            
+      
+            <script src="@routes.Assets.at("lib/lib-frameworkweb/ngl-common/javascripts/controllers/mainctrl.min.js")" type="text/javascript" charset="utf-8"></script>
+
+            <script src="@routes.Assets.at("ngl-projects/javascripts/umbrellaprojects/services.min.js")" type="text/javascript" charset="utf-8"></script>
+            <script src="@routes.Assets.at("ngl-projects/javascripts/umbrellaprojects/search-ctrl.min.js")" type="text/javascript" charset="utf-8"></script>
+            <script src="@routes.Assets.at("ngl-projects/javascripts/umbrellaprojects/details-ctrl.min.js")" type="text/javascript" charset="utf-8"></script>
+            
+            <script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/commons.min.js")" type="text/javascript" charset="utf-8"></script>
+            <script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/list-resize.min.js")" type="text/javascript" charset="utf-8"></script>
+            <script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/bt-input.min.js")" type="text/javascript" charset="utf-8"></script>  
+    } else {
+        <script src="@routes.Assets.at("ngl-projects/javascripts/umbrellaprojects/app.js")" type="text/javascript" charset="utf-8"></script>
+            
+        <script src="@routes.Assets.at("lib/datatable/datatable/javascripts/services/ultimate-datatable.js")" type="text/javascript" charset="utf-8"></script>                            
+      
+        <script src="@routes.Assets.at("lib/lib-frameworkweb/ngl-common/javascripts/controllers/mainctrl.js")" type="text/javascript" charset="utf-8"></script>
+
+        <script src="@routes.Assets.at("ngl-projects/javascripts/umbrellaprojects/services.js")" type="text/javascript" charset="utf-8"></script>
+        <script src="@routes.Assets.at("ngl-projects/javascripts/umbrellaprojects/search-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+        <script src="@routes.Assets.at("ngl-projects/javascripts/umbrellaprojects/details-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+            
+        <script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/commons.js")" type="text/javascript" charset="utf-8"></script>
+        <script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/bt-input.js")" type="text/javascript" charset="utf-8"></script> 
+        <script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/list-resize.js")" type="text/javascript" charset="utf-8"></script> 
+    }
+}
+
+@views.html.main("umbrellaprojects.page.title", menu_("umbrellaProjects."+code), scripts)(views.html.contents.lefttabs())
+

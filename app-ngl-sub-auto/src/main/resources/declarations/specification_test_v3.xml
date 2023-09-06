@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+	
+<Specification xmlns="http://www.genoscope.cns.fr/specification"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.genoscope.cns.fr/specification
+H:\birdsSpec.xsd">
+	
+	<!-- Group treatment for submission -->
+	<Treatment name="WF_Submission" checkIfNewTreatmentAlreadyPerformed="true" ruleFlowId="fr.cea.ig.auto.submission.WorkflowSubmission">
+		<ExecutableSpecification>
+			<Executable />
+		</ExecutableSpecification>
+		<ParametersSpecification />
+		<InputsSpecification>
+			<InputElement name="subData" count="1" resourceType="submission">
+				<Referential name="nglSubRef" />			
+			</InputElement>
+		</InputsSpecification>
+	</Treatment>
+	
+	<!-- Group treatment for Zip/MD5 process -->
+	<Treatment name="WF_ZipMd5Process" checkIfNewTreatmentAlreadyPerformed="true" ruleFlowId="fr.cea.ig.auto.submission.WFZipMd5">
+		<ExecutableSpecification>
+			<Executable />
+		</ExecutableSpecification>
+		<ParametersSpecification />
+		<InputsSpecification>
+			<InputElement name="inputZipMd5" count="1" resourceType="submissionZip">
+				<Referential name="nglSubRef_processZip" />			
+			</InputElement>
+		</InputsSpecification>
+		<OutputsSpecification>
+			<OutputElement name="outputZipMd5" resourceType="submissionZip">
+				<Referential name="internalRefSubmission" />
+			</OutputElement>
+		</OutputsSpecification>
+	</Treatment>
+	
+	<Treatment name="ZipFile" useJobScheduler="true" checkIfNewTreatmentAlreadyPerformed="true">
+	
+		<ExecutableSpecification commandSyntaxStrategyName="default">
+			<Executable path="gzip" user="cnsnglapps" host="kon.cnrgh.fr"/>
+			<Slurm job="gzip" part="normal"/>
+		</ExecutableSpecification>
+		
+		<ParametersSpecification>
+			<KeyValueElement key="-c" value="%fileToZip%" parameterName="fileToZip"/>
+			<LineElement line=">%FileZipped%" parameterName="endArg" />
+		</ParametersSpecification>
+		
+		<InputsSpecification>
+			<InputElement name="inputSubZip" count="1" resourceType="submissionZip">
+				<Referential name="internalRefZip"/>
+			</InputElement>
+			<InputElement name="inputRawDataZip" count="1" resourceType="rawDataZip">
+				<Referential name="nglSubRef_zip"/>
+			</InputElement>
+		</InputsSpecification>
+		<OutputsSpecification>
+			<OutputElement name="outputZip" resourceType="rawDataZip">
+				<Referential name="internalRefMd5" />
+			</OutputElement>
+		</OutputsSpecification>
+		
+	</Treatment>
+	
+	<Treatment name="LinkFile" useJobScheduler="false" checkIfNewTreatmentAlreadyPerformed="true">
+	
+		<ExecutableSpecification commandSyntaxStrategyName="default">
+			<Executable path="ln"/>
+		</ExecutableSpecification>
+		
+		<ParametersSpecification>
+			<KeyValueElement key="-s" value="%fileToLink%" parameterName="fileToLink"/>
+			<LineElement line=">%linkFike%" parameterName="endArg" />
+		</ParametersSpecification>
+		
+		<InputsSpecification>
+			<InputElement name="inputLinkFile" count="1" resourceType="rawDataZip">
+				<Referential name="internalRefMd5"/>
+			</InputElement>
+		</InputsSpecification>		
+	</Treatment>
+	
+	
+	<Treatment name="Md5File" useJobScheduler="true" checkIfNewTreatmentAlreadyPerformed="true">
+	
+		<ExecutableSpecification commandSyntaxStrategyName="default">
+			<Executable path="md5sum" user="cnsnglapps" host="kon.cnrgh.fr"/>
+			<Slurm job="md5sum" part="normal"/>
+		</ExecutableSpecification>
+		
+		<ParametersSpecification>
+			<LineElement line="%fileZipped%" parameterName="fileZipped" />
+			<!-- <LineElement line=">%md5%" parameterName="endArg" /> -->
+		</ParametersSpecification>
+		
+		<InputsSpecification>
+			<InputElement name="inputRawDataMd5" count="1" resourceType="rawDataZip">
+				<Referential name="internalRefMd5"/>
+			</InputElement>
+		</InputsSpecification>		
+	</Treatment>
+	
+	
+	<!-- Treatment for file transfert  -->
+	<Treatment name="transfertRawData" useJobScheduler="true" checkIfNewTreatmentAlreadyPerformed="true">
+	
+		<ExecutableSpecification commandSyntaxStrategyName="ncftpputSyntax">
+			<Executable path="/env/cns/submit_traces/SRA/NGL_test/script/test.sh" user="cnsnglapps" host="kon.cnrgh.fr"/>
+			<Slurm job="ascpJob" part="normal"/>
+		</ExecutableSpecification>
+		
+		<ParametersSpecification>
+			<KeyValueElement key="-i" value="~/.ssh/ebi.rsa" parameterName="cert"/>
+			<KeyValueElement key="-l" value="300M" parameterName="optionl"/>
+			<KeyValueElement key="-k" value="2" parameterName="optionk"/>
+			<KeyValueElement key="--file-list" value="%directoryPath%/list_aspera" parameterName="fileList"/>
+			<KeyValueElement key="--mode" value="send" parameterName="mode"/>
+			<KeyValueElement key="--host" value="webin.ebi.ac.uk" parameterName="hostName"/>
+			<KeyValueElement key="--user" value="Webin-9" parameterName="userEBI"/>
+			<LineElement line="-T" parameterName="encryption"/>
+			<LineElement line="." parameterName="localDirectory"/>
+		</ParametersSpecification>
+		
+		<InputsSpecification>
+			<InputElement name="rawDataDir" count="1" resourceType="submission">
+				<Referential name="internalRefSubmission"/>
+			</InputElement>
+			<InputElement name="inputTransfertSubZip" count="1" resourceType="submissionZip">
+				<Referential name="internalRefSubmission"/>
+			</InputElement>
+		</InputsSpecification>
+		
+	</Treatment>
+	
+	
+	<!-- Treatment : call EBI services to send xml files -->
+	<Treatment name="sendXML" useJobScheduler="false" checkIfNewTreatmentAlreadyPerformed="true">
+		<ExecutableSpecification commandSyntaxStrategyName="sendXMLSyntax">
+			<Executable path="/env/cns/submit_traces/SRA/NGL_test/script/test.sh" />
+		</ExecutableSpecification>
+		<ParametersSpecification>
+			<KeyValueElement key="-F" value="&quot;SUBMISSION=@%xmlSubmission%&quot;" parameterName="xmlSubmission"/>
+			<KeyValueElement key="-F" value="&quot;STUDY=@%xmlStudys%&quot;" parameterName="xmlStudys"/>
+			<KeyValueElement key="-F" value="&quot;SAMPLE=@%xmlSamples%&quot;" parameterName="xmlSamples"/>
+			<KeyValueElement key="-F" value="&quot;EXPERIMENT=@%xmlExperiments%&quot;" parameterName="xmlExperiments"/>
+			<KeyValueElement key="-F" value="&quot;RUN=@%xmlRuns%&quot;" parameterName="xmlRuns"/>
+			<KeyValueElement key="-F" value="&quot;PROJECT=@%xmlUmbrella%&quot;" parameterName="xmlUmbrella"/>
+			<KeyValueElement key="-F" value="&quot;ANALYSIS=@%xmlAnalysis%&quot;" parameterName="xmlAnalysis"/>
+			<LineElement line="-k" parameterName="optK" />
+			<LineElement line="%ebiResult%" parameterName="listAC"/>
+			<LineElement line="cd %submissionDirectory%" parameterName="OptionCD"/>
+		</ParametersSpecification>
+		<InputsSpecification>
+			<InputElement name="subToSend" count="1" resourceType="submissionXML">
+				<Referential name="nglSubRef" />
+			</InputElement>
+		</InputsSpecification>
+	</Treatment>
+</Specification>

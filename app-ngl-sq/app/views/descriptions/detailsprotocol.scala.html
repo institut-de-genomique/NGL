@@ -1,0 +1,267 @@
+@this(ctx : fr.cea.ig.ngl.NGLApplication)
+@()
+@import play.mvc.Http.Context
+@import views.html.helper._
+
+@column()(value: Html) = {
+	<div class="col-md-4 col-lg-4 col-xs-4">
+		@value
+	</div>
+}
+<div class="row">
+	<div class="col-md-12 col-lg-12">
+		<div class="page-header">
+			<div class="btn-toolbar pull-right" ng-if="!isCreateProtocolPage()">
+				<button class="btn btn-default" ng-if="mainService.isEditMode()" ng-click="save()" data-toggle="tooltip" title="@Messages("button.validate")" ><i class="fa fa-save"></i> @Messages("button.validate")</button>
+				<button class="btn btn-danger" ng-if="mainService.isEditMode()" ng-click="warningRemoveProtocol()" data-toggle="tooltip" title="@Messages("button.delete")" ><i class="fa fa-trash"></i> @Messages("button.delete")</button>
+				<button class="btn btn-default" ng-if="mainService.isEditMode()" ng-click="cancel()" data-toggle="tooltip" title="@Messages("button.cancel")" ><i class="fa fa-undo"></i> @Messages("button.cancel")</button>
+				<button class="btn btn-default" ng-if="!mainService.isEditMode()" ng-click="activeEditMode()" data-toggle="tooltip" title="@Messages("button.edit")" ><i class="fa fa-edit"></i> @Messages("button.edit")</button>		 					
+			</div>
+			<div class="btn-toolbar pull-right" ng-if="isCreateProtocolPage()">
+				<button  class="btn btn-primary"  ng-click="addProtocol()" data-toggle="tooltip">
+					<i class="fa fa-save"></i>
+				</button>
+			</div>
+       		<h1 ng-bind = 'protocol.name'></h1>
+		</div>
+	</div>
+</div>
+<div class="row">
+	<p ng-if="warningTagPcr(protocol.experimentTypeCodes)" class="alert alert-warning">
+		<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		
+		<b>Attention, les protocoles dans le contexte de tag-pcr NESTED sont soumis à des règles précises,<br>
+			il peut y avoir une partie de code à faire en plus de la création de protocole - se référer à la fiche wiki pour plus de détails</b>
+	</p>
+
+</div>
+<div class="row">
+	<div class="col-md-12 col-lg-12"  messages="warningMessage"></div>
+</div>
+<div class="row">
+
+	<div class="col-md-12 col-lg-12"  messages="messages"></div>
+</div>
+<div class="row">
+	<div class="col-md-12 col-lg-12"  messages="validationMessage"></div>
+</div>
+<div class="inProgressSpinner" ng-if="isSaveInProgress()">
+	<button class="btn btn-primary btn-lg">
+		<i class="fa fa-spinner fa-spin fa-5x"></i>
+	</button>
+</div>
+
+<div class="modal fade" id="affichageAlert" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+		  <div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+		  </div>
+		  <div class="modal-body">
+				<p> Vous ne pouvez pas supprimer ce type d'expérience car le protocole est déjà utilisé dans une ou plusieurs expérience(s) de ce type</p>
+		  </div>
+		  <div class="modal-footer">
+			<button  class="btn btn-primary" data-dismiss="modal" aria-hidden="true">OK</i></button>
+		  </div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="affichageAlertRemove" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+		  <div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+		  </div>
+		  <div class="modal-body">
+				<p> Vous ne pouvez pas supprimer ce protocole car le protocole est déjà utilisé dans une ou plusieurs expérience(s) </p>
+		  </div>
+		  <div class="modal-footer">
+			<button  class="btn btn-primary" data-dismiss="modal" aria-hidden="true">OK</button>
+		  </div>
+		</div>
+	</div>
+</div>
+<div class="modal fade" id="affichageAlertRemoveSure" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+		  <div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+			<h2>Suppression du protocole</h2>
+		  </div>
+		  <div class="modal-body">
+				<h4> Êtes-vous certain de vouloir supprimer le protocole ? </h4>
+		  </div>
+		  <div class="modal-footer">
+			<button  class="btn btn-danger" ng-click="removeProtocol()">OK</button>
+			<button  class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Annuler</button>
+		  </div>
+		</div>
+	</div>
+</div>
+<div ng-if="!isCreateProtocolPage()">
+	<div class="row margin-bottom-7">
+		<div class="col-md-12 col-lg-12">
+			<ul class="nav nav-tabs margin-bottom-5">
+				<li ng-class="getTabClass('general')"><a href="#" data-target="#general" data-toggle="tab" ng-click="setActiveTab('general')">@Messages("description.general.modif")</a></li>
+				<li ng-if="isDisplay" ng-class="getTabClass('histo')"><a href="#" data-target="#histo" data-toggle="tab" ng-click="setActiveTab('histo')">@Messages("historique.modif")</a></li>
+			</ul>
+			<div class="tab-content">
+				<div class="tab-pane {{getTabClass('general')}}" id="general">
+					@partials.details_general()
+				</div>
+				<div class="tab-pane {{getTabClass('histo')}}" id="histo">
+					@partials.details_histo()
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<form class="form-horizontal">
+	<div ng-if="isCreateProtocolPage()">
+		<div class="row">
+			@column() {
+				<div class="row form-group required">
+					
+					<label class="col-md-6 col-lg-6 control-label">@Messages("descriptions.protocols.table.name")</label>
+					<div ng-class="{'has-error': errorName}" class="col-md-5 col-lg-5">
+						<div ng-switch on="isSaved">
+							<input  ng-switch-when="false" class="form-control" type="text" ng-model="protocol.name"></input>
+							<p      ng-switch-when="true" class="form-control-static" type="text" ng-bind="protocol.name" ></p>
+						</div>
+					</div>
+				</div>
+
+				<br/>
+				
+
+				<div class="row form-group required">
+					<label class="col-md-6 col-lg-6 control-label">@Messages("descriptions.protocols.table.code")</label>
+					<div ng-class="{'has-error': errorCode}" class="col-md-5 col-lg-5">
+						<div ng-switch on="isSaved">
+							<input  ng-switch-when="false" class="form-control" type="text" ng-model="protocol.code"></input>
+						<p      ng-switch-when="true" class="form-control-static" type="text" ng-bind="protocol.code" ></p>
+					</div>
+					</div>
+				</div>
+
+				<br/>
+
+				<div class="row form-group required">
+					<label class="col-md-6 col-lg-6 control-label">@Messages("descriptions.protocols.table.experiment.types.code")</label>
+					<div ng-class="{'has-error': errorTypeExp}" class="col-md-5 col-lg-5">
+						<div ng-switch on="isSaved">
+						<p      ng-switch-when="true" class="form-control-static" type="text" ng-bind="protocol.experimentTypeCodes" ></p>
+						<div   ng-switch-when="false" bt-select placeholder='@Messages("descriptions.select.protocols.experiment.types")' class="form-control" 
+						ng-model="protocol.experimentTypeCodes" ng-change="warningTagPcr()" filter="true" multiple="true"
+						bt-options="experimentType.code as experimentType|formatProjectListLabel for experimentType in searchService.getExperimentTypes()">
+					</div>
+					</div>
+					
+					</div>
+				</div>
+
+				<div class="row form-group required">
+					<label class="col-md-6 col-lg-6 control-label">@Messages("descriptions.protocols.table.active")</label>
+					<div class="col-md-5 col-lg-5">
+						<div ng-switch on="isSaved">
+							<p ng-switch-when="true"  class="form-control-static ">
+								{{ protocol.active | codes: 'boolean' }}
+							</p>
+							<input  ng-switch-when="false" class="form-control-static" type="checkbox" ng-model="protocol.active"/>
+						</div>
+					</div>
+				</div>
+
+				
+			}
+			
+			@column(){
+				@columnLabelValue(Messages("description.protocol.categoryCode")){
+					<div class="row form-group required">        
+						<div ng-class="{'has-error': errorCatCode}" >
+								<p class="form-control-static" ng-bind="protocol.categoryCode" ></p>
+						</div>
+					</div>
+				}
+			
+				@columnLabelValue(Messages("description.protocol.filepath")){
+					<div class="row form-group required">        
+						<div ng-class="{'has-error': errorPath}" >
+								<p  class="form-control-static" ng-bind="protocol.filePath" />		
+						</div>
+					</div>
+			}
+				
+
+				@columnLabelValue(Messages("description.protocol.version")){
+					<div class="row form-group required">        
+						<div ng-class="{'has-error': errorVersion}" >
+								<p   class="form-control-static" ng-bind="protocol.version" />
+						</div>
+					</div>
+				}
+			
+				<div class="form-group ">
+					<div class="col-md-6 col-lg-6 control-label" >
+						<p><a class="fa fa-info-circle" style="color:red" ng-click="toggleIsShowInformation()" title="Information" href=""> Information importante</a></p>
+					</div>
+				</div>
+			
+						<div class="col-md-6 col-lg-12"ng-show="isShowInformation">
+							<p>Attention, un protocole n'a pas forcément de propriété.</p>
+								<p>La propriété de protocole est une propriété de niveau CONTENT qui se propage pour des bilans précis ou les besoins d'un pipeline bioinfo.</p>
+								<p>Attention à choisir correctement la valeur de propriété (faire une revue de l'existant au besoin).</p>
+						</div>
+					
+				
+			
+					<div class="form-group ">
+						<label   class="col-md-6 col-lg-6 control-label" data-toggle="tooltip" title="@Messages("description.protocol.property.notmandatory")">@Messages("descriptions.processes.tab.properties")</label>
+						<div ng-if="!isSaved" ng-class="{'has-error': errorProp}" class="col-md-5 col-lg-5">
+							<div bt-select placeholder='@Messages("Propriété")' class="form-control"
+								ng-model="searchService.propertyDefinition" 
+								bt-options="propertyDefinition.code for propertyDefinition in getPropertyKey()" data-toggle="tooltip" title="@Messages("description.protocol.property.notmandatory")" >
+							</div>
+						</div>
+						<div class="col-md-1 col-lg-1">
+							<button ng-if="!isSaved" class="btn btn-primary" ng-click="addPropertyDefinition()"data-toggle="tooltip" title="@Messages("description.protocol.property.notmandatory")">
+							@Messages("description.add.property")
+							</button>
+						</div>
+					</div>
+				
+					
+				
+				<div class="row" ng-repeat="futurProperty in futurProperties">
+					<div class="col-md-1 col-lg-1"></div>
+					<p class="col-md-5 col-lg-5 control-label">{{ futurProperty.name }}</p>
+					<div   ng-class="{'has-error': errorProperty}" class="col-md-5 col-lg-5">
+						<div ng-switch on="isSaved">
+							<input ng-switch-when="false" ng-if="!futurProperty.hasMultipleValues()" class="form-control" type="text" ng-model="futurProperty.defaultValue" />
+							<p ng-switch-when="true" ng-if="!futurProperty.hasMultipleValues()" class="form-control-static" ng-bind="futurProperty.defaultValue" ></p>
+						</div>
+						<div ng-switch on="isSaved">
+
+							<div ng-switch-when="false" ng-if="futurProperty.hasMultipleValues()" bt-select placeholder='@Messages("Propriété")' class="form-control"
+								ng-model="futurProperty.getProperty"
+								bt-options="value.code for value in getValuesFromSelectedProperty(futurProperty)">
+							</div>
+								<p ng-switch-when="true" ng-if="futurProperty.hasMultipleValues()" class="form-control-static" ng-bind ="futurProperty.getProperty"></p>
+						</div>
+						<br/>
+					</div>
+			
+					<div class="col-md-1 col-lg-1">
+						<button ng-if="!isSaved" class="btn btn-danger" ng-click="removeProperty(futurProperty)">
+							@Messages("description.remove.property")
+						</button>
+					
+					</div>
+				</div>
+				
+			}
+		</div>
+	</div>
+	</div>
+</form>

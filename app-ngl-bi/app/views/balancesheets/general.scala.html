@@ -1,0 +1,46 @@
+@this()
+@()
+
+<div class="row">
+	<div class="col-md-12 col-lg-12">
+		<div ng-switch on="isLoading()">
+			<div ng-switch-when="true">
+				<div class="row">
+					<div class="col-md-12 col-lg-12 text-center">
+					<div class="inProgressSpinner"><button class="spinnerBtn btn btn-primary btn-lg"><i class="fa fa-spinner fa-spin fa-5x"></i></button></div>
+					</div>
+				</div>
+			</div>
+			<div ng-switch-when="false">
+				<div class="row">
+					<div class="dropdown col-md-4">
+						<button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown"><i class="fa fa-file-text-o"></i></button>
+						<ul class="dropdown-menu">
+							<li><a ng-click="computeExcelExport()">@Messages("balanceSheets.export.excel")</a></li>
+							<li><a ng-click="computePdfExport()">@Messages("balanceSheets.export.pdf")</a></li>
+						</ul>
+					</div>
+					<div class="col-md-8">
+						<h1>{{headerText}}</h1>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12 col-lg-12" ultimate-datatable="dtYearlyBalanceSheets"></div>
+				</div>
+				<div class="row">
+					<div class="col-md-12 col-lg-12" ultimate-datatable="dtSumYearlyBalanceSheets"></div>
+				</div>
+				<div class="row">
+					<div class="col-ld-12 col-md-12">
+						<chart value="ChartYearlyNbBases"></chart>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-ld-12 col-md-12">
+						<chart value="ChartYearlyNbReadsets"></chart>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

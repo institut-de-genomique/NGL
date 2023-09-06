@@ -1,0 +1,11 @@
+@(experiment: models.laboratory.experiment.instance.Experiment)
+
+@import controllers.instruments.io.utils._;
+@import java.lang._
+
+Numero tube; nom banque (manip prec); vol adn a prelever; vol tampon; nom sol stock;Code projet;Code echantillon;Tag\u000D\u000A	
+@for((a,index) <- experiment.atomicTransfertMethods.toList.sortWith(_.inputContainerUseds.get(0).code<_.inputContainerUseds.get(0).code).zipWithIndex){
+		@for(c <- a.inputContainerUseds){
+			@(index+1);@(c.code);@(OutputHelper.getInputContainerUsedExperimentProperty(c,"requiredVolume"));@(OutputHelper.getInputContainerUsedExperimentProperty(c,"bufferVolume"));@(OutputHelper.getOutputContainerUsedCode(a));@(OutputHelper.getProjectCodeIfOne(c));@(OutputHelper.getSampleCodeIfOne(c));@(OutputHelper.getContentPropertyIfOne(c,"tag"))\u000D\u000A	
+		}	
+} 

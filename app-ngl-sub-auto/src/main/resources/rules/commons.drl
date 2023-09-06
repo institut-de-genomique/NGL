@@ -1,0 +1,124 @@
+#created on: Jul 7, 2014
+package birds
+
+import java.util.Date;
+import fr.genoscope.lis.devsi.birds.api.jobscheduler.JobScheduler;
+import fr.cea.ig.auto.submission.SubmissionServices;
+import fr.cea.ig.auto.submission.SubmissionServicesFactory;
+import fr.cea.ig.auto.submission.ISubmissionServices;
+import fr.genoscope.lis.devsi.birds.api.entity.JobProperties;
+
+
+
+rule "Syntax order command line for sendXML specification"
+	@BirdsRule(unixSyntaxRule)
+	dialect 'java'
+	salience 200
+	when
+		$strategy : UnixCommandSyntaxStrategy ( name == "sendXMLSyntax" , commandLine == null)
+	then
+		Logger log = Logger.getLogger("ngl.sub.rules");
+		log.debug("Syntax sendXML : curl https://www.ebi.ac.uk/ena/submit/drop-box/submit/?auth=ERA%20era-drop-9%20N7mo%2B8F4aHH%2BrCjLTuMo59xwfFo%3D -k -F \"SAMPLE=@sampleXml\" -F \"RUN=@runXml\" -F \"SUBMISSION=@submissionXML\" -F \"STUDY=@studyXML\" -F \"EXPERIMENT=@experimentXML\" ");
+		String parameterLine = $strategy.getParameterValue().get("optK")+" ";
+		for (String key : $strategy.getParameterValue().keySet()) {
+			if(!key.equals("optK") && !key.equals("listAC") && !$strategy.getParameterValue().get(key).contains("null") && !key.equals("OptionCD"))
+	         parameterLine += $strategy.getParameterValue().get(key) + " ";
+	    }
+		//Add redirect to AC file
+		$strategy.setCommandLine($strategy.getParameterValue().get("OptionCD")+";"+$strategy.getExecutableName() + " " + parameterLine +" > "+$strategy.getParameterValue().get("listAC"));
+		log.debug("command line : " + $strategy.getCommandLine());
+		
+		modify($strategy) {}
+end
+
+
+rule "Syntax order command line for createXML specification"
+	@BirdsRule(unixSyntaxRule)
+	dialect 'java'
+	salience 200
+    when
+        $strategy : UnixCommandSyntaxStrategy ( name == "createXMLSyntax" , commandLine == null)
+    then
+        Logger log = Logger.getLogger("ngl.sub.rules");
+		$strategy.setCommandLine($strategy.getExecutableName());
+		log.debug("command line : " + $strategy.getCommandLine());
+
+end
+
+#Send mail when job is exited
+rule "Send error mail when job exited"
+@BirdsRule( ExecutionService )
+	dialect 'java'
+	salience 100
+	no-loop
+	when
+		$executionService : ExecutionService( status == ExecutionService.POST_JOB_EXECUTION_STATUS)
+		$job : Job( treatmentSpecification.specificationGroup == false, executionState == Job.ERROR_STATUS, treatmentSpecification.name != "transfertRawData",treatmentSpecification.name != "sendXML", treatmentSpecification.name != "sendReleaseXML", treatmentSpecification.name != "sendUpdateXML" )
+	then
+		if($job.getProperty("retryJob")==null || ($job.getProperty("retryJob")!=null && $job.getProperty("retryJob").equals("3"))){
+	
+			//Send mail
+			String errorMessage = "Error during executing job"+$job.getTreatmentSpecification().getName()+". Check outputFile and log \n"+
+			"STDOUT "+$job.getProperty(Job.STDOUT)+"\n"+
+			"STDERR "+$job.getProperty(Job.STDERR)+"\n"+
+			"SCHEDULER STDOUT "+$job.getProperty(JobScheduler.JOB_SCHEDULER_STD_OUTPUT_PATH+JobScheduler.JOB_SCHEDULER_STD_OUTPUT_FILE)+"\n"+
+			"SCHEDULER STDERR "+$job.getProperty(JobScheduler.JOB_SCHEDULER_STD_ERROR_PATH+JobScheduler.JOB_SCHEDULER_STD_ERROR_FILE)+"\n"+
+			"Exception "+$job.getProperty("Exception");
+		
+			SubmissionServicesFactory.getInstance().sendMail("william","JOB ERROR "+$job.getTreatmentSpecification().getName()+" id="+$job.getId(),errorMessage);
+		}
+
+end
+
+rule "Delete STDOUT/STDERR for job DONE"
+@BirdsRule( ExecutionService )
+	dialect 'java'
+	salience 80
+	no-loop
+	when
+		$executionService : ExecutionService( status == ExecutionService.POST_JOB_EXECUTION_STATUS)
+		$job : Job( treatmentSpecification!=null, executionState == Job.DONE_STATUS )
+	then
+		Logger log = Logger.getLogger("Birds.executionService");
+		log.debug("Delete stdout/sdterr for job "+$job.getId());
+		$job.removeOutputDir();
+end
+
+rule "Send mail FATAL ERROR"
+    @BirdsRule( ExecutionService )
+    salience 100
+	dialect 'java'
+	no-loop 
+	when
+	    $executionService : ExecutionService( status in (ExecutionService.ON_FATAL_EXCEPTION, ExecutionService.ON_BIRDS_EXCEPTION)  )
+		$k : ProcessContext()
+	then
+	    Logger log = Logger.getLogger("Birds.executionService");
+	    log.error("A exception has occured. The error message is : " + $k.getVariable("errorMessage") + ".");
+	    
+	    String message="";
+	    if($executionService.getStatus().equals(ExecutionService.ON_FATAL_EXCEPTION))
+	    	message+="FATAL ERROR The process (Birds.rf) with id=fr.genoscope.lis.devsi.birds has been stopped. \n";
+	    
+	    message += 	"ERROR TYPE : "+$k.getVariable(ExecutionService.keyError)+"\n"+
+					"ERROR MESSAGE : "+$k.getVariable(ExecutionService.keyErrorMessage)+"\n";
+	    
+	    if($k.getVariable(ExecutionService.keyError).equals(ExecutionService.FATAL_ERROR_ON_SUBMITTING_JOBS) || $k.getVariable(ExecutionService.keyError).equals(ExecutionService.ERROR_ON_SUBMITTING_JOB)){
+	    	if($k.getVariable(ExecutionService.keyJob)!=null){
+	    		Job job = (Job)$k.getVariable(ExecutionService.keyJob);
+	    		if($executionService.getStatus().equals(ExecutionService.BIRDS_EXCEPTION_ON_BUILDING_JOBS))
+	    			message+="SPECIFICATION IS BEING FAULTY "+job.getTreatmentSpecification().getName()+"\n";
+	    		message+="JOB ID : "+job.getId();
+	    	}
+	   }
+	   SubmissionServicesFactory.getInstance().sendMail("william","FATAL ERROR",message);
+end
+
+
+function void updateParameterXML(String valueParam, Job job, String resourceName)
+{
+	if(job.getUniqueJobResource(resourceName).getProperty(valueParam)!=null)
+		job.setParameterValue(valueParam,job.getParameterValue(valueParam).getValue().replace("%"+valueParam+"%",job.getUniqueJobResource(resourceName).getProperty(valueParam)));
+	else
+		job.setParameterValue(valueParam,null);
+}

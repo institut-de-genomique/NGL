@@ -1,0 +1,45 @@
+@()
+<div class="row">
+	<div class="col-md-10 col-lg-10">
+		<table class="table table-condensed table-hover table-bordered">
+			<thead>
+				<tr>
+					<th></th>
+					<th>@Messages("readsets.treatments.contamination.readsInput")</th>
+					<th>@Messages("readsets.treatments.contamination.removedReads")</th>
+					<th>@Messages("readsets.treatments.contamination.remainingReads")</th>
+					<th>@Messages("readsets.treatments.contamination.removedReadsPercent")</th>
+					<th ng-if="readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.contadb.value != null">@Messages("readsets.treatments.contamination.contadb")</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr ng-if="readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs != null">
+					<th>@Messages("readsets.treatments.contamination.read1_2")</th>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.readsInput.value | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.removedReads.value | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.remainingReads.value | number}}</td>			
+					<td ng-class="highLight('treatments.' + treatments.getTreatment().code + '.pairs.removedReadsPercent.value')">
+						{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.removedReadsPercent.value | number:2}} @Messages("unit.percent")
+					</td>
+					<td ng-if="readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.contadb.value != null">{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.contadb.value}}</td>
+				</tr>
+				<tr ng-if="readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].read1 != null">
+					<th>@Messages("readsets.treatments.contamination.read1")</th>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].read1.readsInput.value | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].read1.removedReads.value | number}}</td>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].read1.remainingReads.value | number}}</td>			
+					<td ng-class="highLight('treatments.' + treatments.getTreatment().code + '.read1.removedReadsPercent.value')">
+						{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].read1.removedReadsPercent.value | number:2}} @Messages("unit.percent")
+					</td>
+				</tr>						
+				<tr ng-if="readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].single != null">
+					<th ng-if="readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].single != null">@Messages("readsets.treatments.contamination.single")</th>
+					<td ng-if="readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].single != null">{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].single.readsInput.value | number}}</td>
+					<td ng-if="readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].single != null">{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].single.removedReads.value | number}}</td>
+					<td ng-if="readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].single != null">{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].single.remainingReads.value | number}}</td>
+					<td ng-if="readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].single != null">{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].single.removedReadsPercent.value | number:2}} @Messages("unit.percent")</td>
+				</tr>						
+			</tbody>
+		</table>
+	</div>	 
+</div>

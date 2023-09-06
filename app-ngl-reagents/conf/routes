@@ -1,0 +1,30 @@
+
+->  / apinglcommon.Routes
+->  / apinglsq.Routes
+->  / apinglreagents.Routes
+->  / nglcommon.Routes  
+
+# Home page
+GET     /                           									controllers.main.tpl.Main.home()
+
+#Kit catalogs TPL
+GET 	/kit-catalogs/:code										controllers.reagents.tpl.KitCatalogs.get(code: java.lang.String)
+GET	   	/kit-catalogs/:homecode/home							controllers.reagents.tpl.KitCatalogs.home(homecode: java.lang.String)
+GET		/tpl/reagent-catalogs/js-routes							controllers.reagents.tpl.KitCatalogs.javascriptRoutes()
+GET		/tpl/kit-catalogs/creation								controllers.reagents.tpl.KitCatalogs.createOrEdit()
+GET		/tpl/kit-catalogs/search								controllers.reagents.tpl.KitCatalogs.search()
+
+#Receptions TPL
+GET	   	/reagent-receptions/:homecode/home						controllers.reagents.tpl.Receptions.home(homecode: java.lang.String)
+GET		/reagent-receptions/:code								controllers.reagents.tpl.Receptions.get(code: java.lang.String)
+GET 	/tpl/reagent-receptions/search							controllers.reagents.tpl.Receptions.search()
+GET		/tpl/reagent-receptions/details							controllers.reagents.tpl.Receptions.details()
+GET 	/tpl/reagent-receptions/create							controllers.reagents.tpl.Receptions.create()
+GET		/tpl/reagent-receptions/new-from-file					controllers.reagents.tpl.Receptions.newFromFile()
+GET 	/tpl/reagent-receptions/js-routes						controllers.reagents.tpl.Receptions.javascriptRoutes()
+
+# Map static resources from the /public folder to the /assets URL path
+# GET     /assets/*file               									controllers.Assets.at(path="/public", file)
+GET     /messages.js                									controllers.main.tpl.Main.jsMessages()
+GET     /codes.js        	        									controllers.main.tpl.Main.jsCodes()
+GET		/permissions.js													controllers.main.tpl.Main.jsPermissions()

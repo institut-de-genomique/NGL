@@ -1,0 +1,8 @@
+@(lines: List[controllers.instruments.io.cns.brandlhs.PlateSampleSheetLine])
+
+@import controllers.instruments.io.utils._;
+
+Well;Volume;Name;Type;Priority\u000D\u000A
+@for((line) <- lines.sorted){
+@line.dwell;@line.bufferVolume;@line.sampleName;@line.sampleType;@line.priority\u000D\u000A	
+}

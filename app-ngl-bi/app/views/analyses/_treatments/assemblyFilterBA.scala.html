@@ -1,0 +1,97 @@
+@()
+
+<div class="row">
+ 
+ <div class="col-md-6 col-lg-6">
+ 	<table class="table table-condensed table-hover table-bordered">
+ 		<thead>
+			<tr>
+				<th></th>
+				<th>@Messages("analyses.treatments.assemblyFilter_ba.NXSequenceSize")</th>
+				<th>@Messages("analyses.treatments.assemblyFilter_ba.NXSequenceNb")</th>			
+ 			</tr>
+ 		</thead>
+ 		<tbody>
+ 			<tr>
+ 				<th>@Messages("analyses.treatments.assembly_ba.N50Sequence")</th>
+				<td>{{analysis.treatments[treatments.getTreatment().code].pairs.N50SequenceSize.value | number}}</td>
+				<td>{{analysis.treatments[treatments.getTreatment().code].pairs.N50SequenceNb.value | number}}</td>
+				
+				</tr>
+ 			<tr>
+ 				<th>@Messages("analyses.treatments.assembly_ba.N80Sequence")</th>
+				<td>{{analysis.treatments[treatments.getTreatment().code].pairs.N80SequenceSize.value | number}}</td>
+				<td>{{analysis.treatments[treatments.getTreatment().code].pairs.N80SequenceNb.value | number}}</td>				
+ 			</tr>
+ 			<tr>
+ 				<th>@Messages("analyses.treatments.assembly_ba.N90Sequence")</th>	
+				<td>{{analysis.treatments[treatments.getTreatment().code].pairs.N90SequenceSize.value | number}}</td>
+ 				<td>{{analysis.treatments[treatments.getTreatment().code].pairs.N90SequenceNb.value | number}}</td>
+ 			</tr>
+ 		</tbody>
+ 	</table>
+ </div>
+ 
+ 
+ <div class="col-md-6 col-lg-6">
+ 
+ 	<table class="table table-condensed table-hover table-bordered">
+ 		<thead>
+			<tr>
+ 				<th>@Messages("analyses.treatments.assemblyFilter_ba.sequenceSizeRepartition.size")</th>
+				<th>@Messages("analyses.treatments.assemblyFilter_ba.sequenceSizeRepartition.sequenceNumber")</th>
+				<th>@Messages("analyses.treatments.assemblyFilter_ba.sequenceSizeRepartition.sequencePercent")</th>
+				<th>@Messages("analyses.treatments.assemblyFilter_ba.sequenceSizeRepartition.cumulativeSize")</th>
+				<th>@Messages("analyses.treatments.assemblyFilter_ba.sequenceSizeRepartition.cumulativeSizePercent")</th>
+			</tr>
+ 		</thead>
+ 		<tbody>
+ 			<tr ng-repeat="value in analysis.treatments[treatments.getTreatment().code].pairs.sequenceSizeRepartition.value | orderBy:'sequenceNumber'">
+ 				<td>>= {{value.size | number}}</td>
+ 				<td>{{value.sequenceNumber | number}}</td>
+ 				<td>{{value.sequencePercent | number:2}} %</td>
+ 				<td>{{value.cumulativeSize | number}}</td>
+ 				<td>{{value.cumulativeSizePercent | number:2}} %</td>
+ 			</tr>
+ 		</tbody>
+ </table>
+ </div>
+ </div>
+
+<div class="row">
+ <div class="col-md-12 col-lg-12">
+	 <table class="table table-condensed table-hover table-bordered">
+		<thead>
+		<tr>
+			<th>@Messages("analyses.treatments.assemblyFilter_ba.preservedBases")</th>
+			<th>@Messages("analyses.treatments.assemblyFilter_ba.preservedSequences")</th>			
+			<th>@Messages("analyses.treatments.assemblyFilter_ba.numberOfN")</th>			
+			<th>@Messages("analyses.treatments.assemblyFilter_ba.preservedCoverage")</th>
+			<th>@Messages("analyses.treatments.assemblyFilter_ba.minSequenceSize")</th>
+			<th>@Messages("analyses.treatments.assemblyFilter_ba.maxSequenceSize")</th>
+			<th>@Messages("analyses.treatments.assemblyFilter_ba.averageSequenceSize")</th>
+			<th>@Messages("analyses.treatments.assemblyFilter_ba.assemblySequenceNb")</th>
+			<th>@Messages("analyses.treatments.assemblyFilter_ba.assemblySize")</th>
+			<th>@Messages("analyses.treatments.assemblyFilter_ba.GCpercent")</th>
+						
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.preservedBases.value | number}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.preservedSequences.value | number}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.numberOfN.value | number}}</td>	
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.preservedCoverage.value | number}}</td>		
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.minSequenceSize.value | number}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.maxSequenceSize.value | number}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.averageSequenceSize.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.assemblySequenceNb.value | number}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.assemblySize.value | number}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.GCpercent.value | number:2}}</td>
+		</tr>						
+	</tbody>
+	 </table>
+ </div>	 
+</div>
+
+

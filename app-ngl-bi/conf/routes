@@ -1,0 +1,84 @@
+
+-> / apinglcommon.Routes
+-> / apinglprojects.Routes
+-> / apinglsq.Routes
+-> / apinglbi.Routes
+-> / apimigration.Routes
+-> / nglcommon.Routes   
+
+GET		/scripts/run/:clazz												fr.cea.ig.lfw.controllers.scripts.ScriptController.run(clazz : java.lang.String)
+POST	/scripts/run/:clazz												fr.cea.ig.lfw.controllers.scripts.ScriptController.run(clazz : java.lang.String)
+
+# Home page
+GET     /                           				@controllers.main.tpl.Main.home()
+
+#run tpl
+GET	   	/runs/:homecode/home						@controllers.runs.tpl.Runs.home(homecode: java.lang.String)
+GET	   	/runs/:code									@controllers.runs.tpl.Runs.get(code: java.lang.String)
+GET	   	/runs/:code/valuation						@controllers.runs.tpl.Runs.valuation(code: java.lang.String)
+GET		/tpl/runs/search/:type						@controllers.runs.tpl.Runs.search(type: java.lang.String)
+GET		/tpl/runs/details							@controllers.runs.tpl.Runs.details()
+GET		/tpl/runs/treatments/:code					@controllers.runs.tpl.Runs.treatments(code: java.lang.String)
+GET		/tpl/runs/lanes/treatments/:code			@controllers.runs.tpl.Runs.laneTreatments(code: java.lang.String)
+GET		/tpl/runs/js-routes							@controllers.runs.tpl.Runs.javascriptRoutes()
+
+#readset
+GET	   	/readsets/:homecode/home				@controllers.readsets.tpl.ReadSets.home(homecode: java.lang.String)
+GET	   	/readsets/:code							@controllers.readsets.tpl.ReadSets.get(code: java.lang.String)
+GET	   	/readsets/:code/valuation				@controllers.readsets.tpl.ReadSets.valuation(code: java.lang.String)
+GET	   	/readsets/:code/*other					@controllers.readsets.tpl.ReadSets.other(code: java.lang.String, other: java.lang.String)
+GET		/tpl/readsets/search					@controllers.readsets.tpl.ReadSets.search()
+GET		/tpl/readsets/details					@controllers.readsets.tpl.ReadSets.details()
+GET		/tpl/readsets/details-print-view		@controllers.readsets.tpl.ReadSets.detailsPrintView()
+GET		/tpl/readsets/treatments/:code			@controllers.readsets.tpl.ReadSets.treatments(code: java.lang.String, media: java.lang.String ?= "screen")
+GET		/tpl/readsets/js-routes					@controllers.readsets.tpl.ReadSets.javascriptRoutes()
+
+
+#analyses
+GET	   	/analyses/:homecode/home					@controllers.analyses.tpl.Analyses.home(homecode: java.lang.String)
+GET	   	/analyses/:code								@controllers.analyses.tpl.Analyses.get(code: java.lang.String)
+GET	   	/analyses/:code/valuation					@controllers.analyses.tpl.Analyses.valuation(code: java.lang.String)
+GET		/tpl/analyses/search/:type					@controllers.analyses.tpl.Analyses.search(type: java.lang.String)
+GET		/tpl/analyses/details						@controllers.analyses.tpl.Analyses.details()
+GET		/tpl/analyses/treatments/:code				@controllers.analyses.tpl.Analyses.treatments(code: java.lang.String)
+GET		/tpl/analyses/js-routes						@controllers.analyses.tpl.Analyses.javascriptRoutes()
+
+#archive tpl
+GET	   	/archives/:homecode/home					@controllers.archives.tpl.ReadSets.home(homecode: java.lang.String)
+GET	   	/archives/:code								@controllers.archives.tpl.ReadSets.get(code: java.lang.String)
+GET		/tpl/archives/search						@controllers.archives.tpl.ReadSets.search()
+GET		/tpl/archives/js-routes						@controllers.archives.tpl.ReadSets.javascriptRoutes()
+
+#stats tpl
+GET	   	/stats/:homecode/home						@controllers.stats.tpl.Stats.home(homecode: java.lang.String)
+GET		/tpl/stats/:type/choice						@controllers.stats.tpl.Stats.choice(type: java.lang.String)
+GET		/tpl/stats/:type/config						@controllers.stats.tpl.Stats.config(type: java.lang.String)
+GET		/tpl/stats/:type/show						@controllers.stats.tpl.Stats.show(type: java.lang.String)
+GET		/tpl/stats/js-routes						@controllers.stats.tpl.Stats.javascriptRoutes()
+
+#balance sheets tpl
+GET 	/balance-sheets/:typeCode/:year/home		@controllers.balancesheets.tpl.BalanceSheets.home(typeCode : java.lang.String, year : java.lang.String)
+GET		/tpl/balance-sheets/year					@controllers.balancesheets.tpl.BalanceSheets.year()			
+GET		/tpl/balance-sheets/general					@controllers.balancesheets.tpl.BalanceSheets.general()
+GET		/tpl/balance-sheets/js-routes				@controllers.balancesheets.tpl.BalanceSheets.javascriptRoutes()
+
+#descriptions tpl
+GET		/descriptions/:homecode/home				@controllers.descriptions.tpl.Descriptions.home(homecode:java.lang.String)
+GET		/tpl/descriptions/treatments				@controllers.descriptions.tpl.Descriptions.treatments()
+GET		/tpl/descriptions/types				        @controllers.descriptions.tpl.Descriptions.types()
+GET		/tpl/descriptions/js-routes					@controllers.descriptions.tpl.Descriptions.javascriptRoutes()
+
+#users tpl
+GET		/users/:homecode/home						@controllers.authorisation.tpl.Users.home(homecode: java.lang.String)
+GET		/tpl/users/search							@controllers.authorisation.tpl.Users.search()
+GET		/tpl/users/js-routes						@controllers.authorisation.tpl.Users.javascriptRoutes()
+
+# Map static resources from the /public folder to the /assets URL path
+# GET     /assets/*file              					controllers.Assets.at(path="/public", file)
+GET     /messages.js                				@controllers.main.tpl.Main.jsMessages()
+GET     /codes.js        	        				@controllers.main.tpl.Main.jsCodes()
+GET		/permissions.js								@controllers.main.tpl.Main.jsPermissions()
+GET		/app-url.js									@controllers.main.tpl.Main.jsAppURL()
+#GET    /api/js-routes.js        	        		@controllers.main.tpl.Main.apiJavascriptRoutes()
+
+

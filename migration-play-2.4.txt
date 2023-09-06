@@ -1,0 +1,46 @@
+
+-- ngl-sq 
+
+
+-- config file
+# Avoid hikaricp, see https://www.playframework.com/documentation/2.4.x/Migration24#JDBC-connection-pool
+play.db.pool = bonecp
+
+-- libraries
+Dependencies files are now in /lib/$lib in stead of /.
+
+-- lib-ngl-framework
+Renamed AssetPlugin class to avoid using it as it is defined in the auth lib.
+Renamed getAsset.scala.html to .off to avoid using it as it is defined in the auth lib.
+
+-- Numbers in JSON deserialized as BigInteger
+https://github.com/playframework/playframework/issues/4897
+
+        
+-- 2.6
+Downgrade jackson to 2.7.x: https://github.com/FasterXML/jackson-databind/issues/1339
+
+DI:
+  add bind(fr.cea.ig.play.IGGlobals.class                   ).toSelf().eagerly(), to starter module
+
+  helper -> fr.cea.ig.play.NGLContext
+  @message...@helper.env() -> @tools.messageEnv("application.name")
+  @HttpContext...username() -> @tools.currentUser()
+  
+  import play.Routes; -> import play.routing.JavaScriptReverseRouter;
+  Routes.javascriptRouter("jsRoutes", -> JavaScriptReverseRouter.create("jsRoutes",
+  
+  import static play.data.Form.form; -> import static fr.cea.ig.play.IGGlobals.form;
+  
+  @BodyParser.Of(value = BodyParser.Json.class, maxLength = 5000 * 1024) -> @BodyParser.Of(value = fr.cea.ig.play.IGBodyParsers.Json5MB.class)
+  -- possible changes (non blocking)
+  play.Play.application().configuration().getString("institute") -> tools.getInstitute()
+  fr.cea.ig.authentication.Helper.username(Context.current().session()) -> tools.currentUser()
+
+Plugins
+  eager bind in starter module
+  ! starter modules should have some factored out base
+
+
+  
+

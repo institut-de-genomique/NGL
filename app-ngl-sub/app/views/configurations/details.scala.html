@@ -1,0 +1,51 @@
+@()
+@column()(value: Html) = {
+	<div class="col-md-4 col-lg-4">
+		@value
+	</div>
+}
+
+<div class="row">
+	<div class="col-md-12 col-lg-12">
+	<div class="page-header">	
+		<div class="btn-toolbar pull-right" >
+			<!--Afficher boutons  uniquement si configuration.state.code='new' => ng-if="configuration.state.code=='new'"
+			Variable configuration declarée dans scope de details.ctrl.js-->
+			 <button class="btn btn-default" ng-if="mainService.isEditMode() ng-click="cancel()" data-toggle="tooltip" title="@Messages("button.cancel")" ><i class="fa fa-undo"></i> @Messages("button.cancel")</button>
+			 <button class="btn btn-default" ng-if="!mainService.isEditMode() ng-click="activeEditMode()" data-toggle="tooltip" title="@Messages("button.edit")" ><i class="fa fa-edit"></i> @Messages("button.edit")</button>		 					
+		</div>
+		<span ng-bind="configuration.code"></span>
+		<small>   
+ 			<span ng-bind="configuration.state.code"></span>
+ 		</small>	  
+    </div>
+	</div>
+</div>
+
+
+
+
+
+<div class="row">
+	<div class="col-md-12 col-lg-12" messages="messages"></div>
+</div>
+</div>
+	<h1 >
+	<span  ng-bind="configuration.code" ></span>
+	</h1>
+	<h5>
+	</h5>
+</div>
+
+
+<!-- stopPropagation on checkbox prevent parents default behavior (stop <a> call) -->
+
+<div class="row margin-bottom-7">
+	<div class="col-md-12 col-lg-12">
+		<div class="tab-content">
+			<div class="tab-pane active" id="configuration">
+				<div datatable="configurationDT"></div>
+			</div>
+		</div>
+	</div>
+</div>

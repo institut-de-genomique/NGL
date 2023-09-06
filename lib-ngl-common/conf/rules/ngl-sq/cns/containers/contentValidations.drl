@@ -1,0 +1,92 @@
+//created on: Apr 21, 2015
+package rules
+
+
+
+rule "Check content extractionBlankSampleCode properties"
+	@nglSQ( validations )
+	dialect "java"
+	salience 1000
+	no-loop
+    when
+    Container($code:code)
+	Content(properties != null, $extractionBlankSampleCode:properties.get("extractionBlankSampleCode"))
+	$contextValidation:ContextValidation()	
+	eval($extractionBlankSampleCode !=null) 
+	then
+		Logger.debug("Check content extractionBlankSampleCode properties "+$extractionBlankSampleCode.value.toString());
+		if(!MongoDBDAO.checkObjectExistByCode(InstanceConstants.SAMPLE_COLL_NAME, Sample.class,  $extractionBlankSampleCode.value.toString())){
+			$contextValidation.addErrors("properties.extractionBlankSampleCode", ValidationConstants.ERROR_CODE_NOTEXISTS_MSG, $extractionBlankSampleCode.value.toString(), "Sample");
+		}		
+	end
+
+rule "Check content tagPcrBlank1SampleCode properties"
+	@nglSQ( validations )
+	dialect "java"
+	salience 1000
+	no-loop
+    when
+    Container($code:code)
+	Content(properties != null, $tagPcrBlank1SampleCode:properties.get("tagPcrBlank1SampleCode"))
+	$contextValidation:ContextValidation()	
+	eval($tagPcrBlank1SampleCode !=null) 
+	then
+		Logger.debug("Check content tagPcrBlank1SampleCode properties "+$tagPcrBlank1SampleCode.value.toString());
+		if(!MongoDBDAO.checkObjectExistByCode(InstanceConstants.SAMPLE_COLL_NAME, Sample.class,  $tagPcrBlank1SampleCode.value.toString())){
+			$contextValidation.addErrors("properties.tagPcrBlank1SampleCode", ValidationConstants.ERROR_CODE_NOTEXISTS_MSG, $tagPcrBlank1SampleCode.value.toString(), "Sample");
+		}		
+	end
+
+rule "Check content tagPcrBlank2SampleCode properties"
+	@nglSQ( validations )
+	dialect "java"
+	salience 1000
+	no-loop
+    when
+    Container($code:code)
+	Content(properties != null, $tagPcrBlank2SampleCode:properties.get("tagPcrBlank2SampleCode"))
+	$contextValidation:ContextValidation()	
+	eval($tagPcrBlank2SampleCode !=null) 
+	then
+		Logger.debug("Check content tagPcrBlank2SampleCode properties "+$tagPcrBlank2SampleCode.value.toString());
+		if(!MongoDBDAO.checkObjectExistByCode(InstanceConstants.SAMPLE_COLL_NAME, Sample.class,  $tagPcrBlank2SampleCode.value.toString())){
+			$contextValidation.addErrors("properties.tagPcrBlank2SampleCode", ValidationConstants.ERROR_CODE_NOTEXISTS_MSG, $tagPcrBlank2SampleCode.value.toString(), "Sample");
+		}		
+	end
+	
+rule "Check MGI property expectedPrimaryTag"
+	@nglSQ( validations )
+	dialect "java"
+	salience 1000
+	no-loop
+	when
+		Container($code:code, importTypeCode=="mgi-library-reception")
+		Content(properties != null, $expectedPrimaryTags:properties.get("expectedPrimaryTags"), $tag:properties.get("tag"))
+		$contextValidation:ContextValidation()
+		eval($expectedPrimaryTags != null)
+	then
+		Logger.debug("Check expectedPrimaryTags");
+		//Convert to ArrayList
+		List<String> listExpectedPrimaryTags = Arrays.asList($expectedPrimaryTags.value.toString().split(","));
+		//remove doublon
+		Set<String> setExpectedPrimaryTags = new HashSet<String>(listExpectedPrimaryTags);
+		//Compare size for doublon 
+		if(listExpectedPrimaryTags.size()!=setExpectedPrimaryTags.size()){
+			$contextValidation.addErrors($code+" properties.expectedPrimaryTags", "error.receptionfile.expectedPrimaryTags.doubleValue", $expectedPrimaryTags.value.toString());
+		}
+		
+		//Order list
+		List<String> orderedListExpectedPrimaryTags = new ArrayList<String>(listExpectedPrimaryTags);
+		Collections.sort(orderedListExpectedPrimaryTags);
+		Logger.debug("List after order "+orderedListExpectedPrimaryTags.toString());
+		Logger.debug("Tag value "+$tag.value.toString());
+		Logger.debug("Get first value of list "+orderedListExpectedPrimaryTags.get(0));
+		if(!listExpectedPrimaryTags.equals(orderedListExpectedPrimaryTags)){
+			$contextValidation.addErrors($code+" properties.expectedPrimaryTags", "error.receptionfile.expectedPrimaryTags.errorSorting", $expectedPrimaryTags.value.toString());
+		}
+		if(!$tag.value.toString().equals(orderedListExpectedPrimaryTags.get(0))){
+			$contextValidation.addErrors($code+" properties.expectedPrimaryTags", "error.receptionfile.expectedPrimaryTags.errorFirstTag", $tag.value.toString());
+		}
+		
+end
+

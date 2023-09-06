@@ -1,0 +1,294 @@
+//created on: Nov 21, 2013
+package rules
+
+//declare any global variables here
+declare ReadSetKrona
+	readSet : ReadSet
+	kronaFormat : Boolean 
+end
+
+
+rule "Check sampleOnContainer for create external sample"
+	@nglBI( N_1 )
+	dialect "java"
+	salience 600
+	no-loop
+	when
+		$readset : ReadSet()
+		$contextVal : ContextValidation($external:contextObjects["external"], $external!=null, (Boolean)$external==true)
+	then
+		Logger.debug("Validate ReadSet external");
+		Logger.debug("Context object "+$contextVal.getObject("external"));
+		if($readset.sampleOnContainer==null){
+			$contextVal.addErrors("sampleOnContainer","error.no.sampleOnContainer",$readset.sampleCode);
+		}else{
+			if($readset.sampleOnContainer.containerSupportCode==null)
+				$contextVal.addErrors("sampleOnContainer","error.sampleOnContainer.containerSupportCode",$readset.code);
+			if($readset.sampleOnContainer.containerCode==null)
+				$contextVal.addErrors("sampleOnContainer","error.sampleOnContainer.containerCode",$readset.code);
+			if($readset.sampleOnContainer.properties==null)
+				$contextVal.addErrors("sampleOnContainer","error.sampleOnContainer.properties",$readset.code);
+		}
+		
+end
+		
+rule "Update sampleOnContainer properties Readset external"
+	@nglBI( N_1 )
+	dialect "java"
+	salience 500
+	no-loop
+	when
+		$readset : ReadSet(sampleCode!=null, $sampleOnContainer:sampleOnContainer, $sampleOnContainer!=null, $sampleOnContainer.containerSupportCode!=null, $sampleOnContainer.properties!=null)
+		$contextVal : ContextValidation($external:contextObjects["external"], $external!=null, (Boolean)$external==true)
+	then
+		//create external sample
+		Logger.debug("Create external readSet");
+		//Get sample from NGL
+		Sample extSample = MongoDBDAO.findByCode(InstanceConstants.SAMPLE_COLL_NAME, Sample.class, $readset.sampleCode);
+		if(extSample==null){
+			$contextVal.addErrors("sampleCode","error.codenotexists",$readset.sampleCode);
+		}else{
+			//update sampleOnContainer
+			$sampleOnContainer.projectCode = $readset.projectCode;
+			$sampleOnContainer.sampleCode = $readset.sampleCode;
+			$sampleOnContainer.lastUpdateDate = new Date();
+			$sampleOnContainer.sampleTypeCode = extSample.typeCode;
+			$sampleOnContainer.sampleCategoryCode = extSample.categoryCode;
+			$sampleOnContainer.referenceCollab = extSample.referenceCollab;
+			$sampleOnContainer.taxonCode = extSample.taxonCode;
+			$sampleOnContainer.ncbiScientificName = extSample.ncbiScientificName;
+			
+			if($sampleOnContainer.properties==null){
+				$sampleOnContainer.properties = new HashMap();
+			}
+			if($readset.typeCode.equals("rsillumina") || $readset.typeCode.equals("rsnanopore")){
+				$sampleOnContainer.properties.put("devProdContext",new PropertySingleValue("PROD"));
+			}
+			if(extSample.properties.get("meta")!=null){
+				$sampleOnContainer.properties.put("meta",extSample.properties.get("meta"));
+			}
+			//NGL-4099 :
+			if (extSample.typeCode != null && extSample.typeCode.equals("amplicon")) {
+				if(extSample.properties != null && extSample.properties.get("targetedRegion") != null) {
+					$sampleOnContainer.properties.put("targetedRegion", extSample.properties.get("targetedRegion"));
+				}
+				if(extSample.properties != null && extSample.properties.get("amplificationPrimers") != null) {
+					$sampleOnContainer.properties.put("amplificationPrimers", extSample.properties.get("amplificationPrimers"));
+				}
+			}
+			
+			MongoDBDAO.update(InstanceConstants.READSET_ILLUMINA_COLL_NAME,  ReadSet.class, 
+						DBQuery.is("code", $readset.code), DBUpdate.set("sampleOnContainer", $sampleOnContainer));
+		}
+		
+end
+
+rule "Find Pattern Krona for taxonomy treatment"
+	@nglBI( F_QC_1 )
+	dialect "java"
+	salience 800
+	no-loop
+	when
+		$readset : (ReadSet ( $treatmentTaxo:treatments["taxonomy"] && $treatmentTaxo != null ))
+	then
+	 	//Check pattern
+	 	Logger.debug("Find version in taxonomy krona "+$readset.code);	
+		
+		//Get krona from read1 or pairs value
+		String krona = null;
+		if($treatmentTaxo.results.get("read1")!=null){
+//			krona = new String(((PropertyFileValue)$treatmentTaxo.results.get("read1").get("krona")).value);
+//			krona = new String(((PropertyFileValue)$treatmentTaxo.results.get("read1").get("krona")).getValue());
+			krona = new String(((PropertyFileValue)$treatmentTaxo.results.get("read1").get("krona")).byteValue());
+		}else if($treatmentTaxo.results.get("pairs")!=null){
+//			krona = new String(((PropertyFileValue)$treatmentTaxo.results.get("pairs").get("krona")).value);
+//			krona = new String(((PropertyFileValue)$treatmentTaxo.results.get("pairs").get("krona")).getValue());
+			krona = new String(((PropertyFileValue)$treatmentTaxo.results.get("pairs").get("krona")).byteValue());
+		}
+		if(krona!=null){
+			Pattern p1 = Pattern.compile(".*<node name=\"all\">\\s+<magnitude><val>(\\d+)</val></magnitude>.*", Pattern.DOTALL);
+			Pattern p2 = Pattern.compile(".*<node name=\"all\"\\s+magnitude=\"(\\d+)\">.*", Pattern.DOTALL);
+			Pattern p3 = Pattern.compile(".*<node name=\"Root\">\\s+(<members><val>\\S+</val>\\s+</members>\\s+)?<count><val>(\\d+)</val></count>.*", Pattern.DOTALL);
+			Pattern p4 = Pattern.compile(".*<node name=\"Root\">\\s+(<members>\\s+<vals>(<val>\\S+</val>)*</vals>\\s+</members>\\s+)?<count><val>(\\d+)</val></count>.*", Pattern.DOTALL);
+		
+			ReadSetKrona readSetKrona = null;
+			if(p1.matcher(krona).matches() || p2.matcher(krona).matches() || p3.matcher(krona).matches() || p4.matcher(krona).matches()){
+				readSetKrona = new ReadSetKrona($readset,true);
+			}else{
+				readSetKrona = new ReadSetKrona($readset,false);
+			}
+		
+			insert(readSetKrona);
+		}
+end
+
+rule "Set state to In Waiting Transfert CCRT from Avalaible readSet"
+	@nglBI( A_1 )
+	dialect "java"
+	salience 600
+	no-loop
+	when
+		$nextState : State(code=="A")
+		$project : Project(bioinformaticParameters!=null, bioinformaticParameters.fgGroup!=null, !StringUtils.isBlank(bioinformaticParameters.fgGroup),
+							bioinformaticParameters.ccrtAutomaticTransfer!=null, bioinformaticParameters.ccrtAutomaticTransfer==true)
+		$readSet : ReadSet(location==null || (location!=null && location!="CCRT"))
+		$mapValue : Map() from $readSet.sampleOnContainer.properties
+		$propValue : Entry(key=="devProdContext",$toEval:((PropertyValue)value).getValue()) from $mapValue.entrySet()
+		eval (((String)$toEval).equals("PROD"))
+	then
+		Logger.debug("Update state code "+$readSet.code+" to IW-TF");	
+		$nextState.code="IW-TF";
+end
+
+rule "Find Fungi for taxonomy treatment"
+	@nglBI( F_QC_1 )
+	dialect "java"
+	salience 600
+	no-loop
+	when
+		$readsetKrona : ReadSetKrona (kronaFormat==true)
+		$readset : ReadSet($treatmentTaxo:treatments["taxonomy"], $treatmentTaxo != null) from $readsetKrona.readSet 						
+	then
+		Logger.debug("Find Fungi in taxonomy krona "+$readset.code);	
+		
+		if($treatmentTaxo.results.get("read1")!=null){
+			fungiCalculate($readset.code, $treatmentTaxo, "read1");
+		}
+		
+		if($treatmentTaxo.results.get("pairs")!=null){
+			fungiCalculate($readset.code, $treatmentTaxo, "pairs");
+		}
+end
+
+
+rule "Send mail agirs F_VQC"
+	@nglBI( F_VQC_1 )
+	dialect "java"
+	salience 600
+	no-loop
+	when
+		$readset : ReadSet(typeCode == "default-readset" || typeCode == "rsillumina")
+	then
+		Logger.debug("Send mail agirs F_VQC "+$readset.code);
+		Spring.getBeanOfType(ILimsRunServices.class).sendMailFVQC($readset);
+			
+end
+
+rule "Set state to Avalaible from Finished Transfert CCRT"
+	@nglBI( F_TF_1 )
+	dialect "java"
+	salience 600
+	no-loop
+	when
+		$nextState : State(code=="F-TF")
+		$project : Project(bioinformaticParameters!=null, bioinformaticParameters.fgGroup!=null, !StringUtils.isBlank(bioinformaticParameters.fgGroup))
+	then
+		Logger.debug("State F-TF to A");
+		$nextState.code="A";
+end
+
+rule "Set state to Unavailable from In Waiting Transfert CCRT"
+	@nglBI( IW_TF_1 )
+	dialect "java"
+	salience 600
+	no-loop
+	when
+		$nextState : State(code=="IW-TF")
+		$project : Project(bioinformaticParameters!=null, bioinformaticParameters.fgGroup!=null, !StringUtils.isBlank(bioinformaticParameters.fgGroup))
+		$readSet : ReadSet(bioinformaticValuation.valid==TBoolean.UNSET)
+	then
+		Logger.debug("State IW-TF to UA");
+		$nextState.code="UA";
+end
+
+rule "Copy moleculeQualityReport properties to ReadSet"
+	@nglBI( F_RG_1 )
+	dialect "java"
+	salience 600
+	no-loop
+	when
+		$readset : ReadSet(typeCode == "rsbionano")		
+	then
+		Logger.debug("Copy moleculeQualityReport properties to ReadSet "+$readset.code);
+		BasicDBObject keys = new BasicDBObject();
+		keys.put("code", 1);
+		keys.put("lanes", 1);
+		Run run = MongoDBDAO.findOne(InstanceConstants.RUN_ILLUMINA_COLL_NAME, Run.class, DBQuery.is("code", $readset.runCode), keys);
+		if(null != run){
+			Logger.debug("From run "+run.code);
+			Treatment laneMolQualReport = run.getLane($readset.laneNumber).treatments.get("moleculeQualityReport");
+			Treatment readSetMolQualReport = $readset.treatments.get("moleculeQualityReport");
+			if(laneMolQualReport!=null && readSetMolQualReport!=null){
+				boolean isUpdate = false;
+				if(null != laneMolQualReport.results.get("default").get("totalDnaGe20kbp")){
+					readSetMolQualReport.results.get("default").put("totalDnaGe20kbp", laneMolQualReport.results.get("default").get("totalDnaGe20kbp"));
+					isUpdate = true;
+				}
+				if(null != laneMolQualReport.results.get("default").get("n50Ge20kbp")){
+					readSetMolQualReport.results.get("default").put("n50Ge20kbp", laneMolQualReport.results.get("default").get("n50Ge20kbp"));
+					isUpdate = true;
+				}
+				if(null != laneMolQualReport.results.get("default").get("totalDnaGe150kbp")){
+					readSetMolQualReport.results.get("default").put("totalDnaGe150kbp", laneMolQualReport.results.get("default").get("totalDnaGe150kbp"));
+					isUpdate = true;
+				}
+				if(null != laneMolQualReport.results.get("default").get("n50Ge150kbp")){
+					readSetMolQualReport.results.get("default").put("n50Ge150kbp", laneMolQualReport.results.get("default").get("n50Ge150kbp"));
+					isUpdate = true;
+				}
+				if(null != laneMolQualReport.results.get("default").get("totalDnaGe150kbpMinSitesGe9")){
+					readSetMolQualReport.results.get("default").put("totalDnaGe150kbpMinSitesGe9", laneMolQualReport.results.get("default").get("totalDnaGe150kbpMinSitesGe9"));
+					isUpdate = true;
+				}
+				if(null != laneMolQualReport.results.get("default").get("n50Ge150kbpMinSitesGe9")){
+					readSetMolQualReport.results.get("default").put("n50Ge150kbpMinSitesGe9", laneMolQualReport.results.get("default").get("n50Ge150kbpMinSitesGe9"));
+					isUpdate = true;
+				}
+				if(null != laneMolQualReport.results.get("default").get("enzyme")){
+					readSetMolQualReport.results.get("default").put("enzyme", laneMolQualReport.results.get("default").get("enzyme"));
+					isUpdate = true;
+				}
+				if(null != laneMolQualReport.results.get("default").get("enzymeRecognitionSequence")){
+					readSetMolQualReport.results.get("default").put("enzymeRecognitionSequence", laneMolQualReport.results.get("default").get("enzymeRecognitionSequence"));
+					isUpdate = true;
+				}
+				if(null != laneMolQualReport.results.get("default").get("labelColor")){
+					readSetMolQualReport.results.get("default").put("labelColor", laneMolQualReport.results.get("default").get("labelColor"));
+					isUpdate = true;
+				}
+				if(null != laneMolQualReport.results.get("default").get("avgLabelDensityGe150kbp")){
+					readSetMolQualReport.results.get("default").put("avgLabelDensityGe150kbp", laneMolQualReport.results.get("default").get("avgLabelDensityGe150kbp"));
+					isUpdate = true;
+				}
+				if(isUpdate){
+					MongoDBDAO.update(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, DBQuery.is("code", $readset.code),  DBUpdate.set("treatments.moleculeQualityReport", readSetMolQualReport));
+				}
+			}
+		}else{
+			Logger.error("ReadSet Does not exist: "+$readset.runCode);
+		}
+		
+end
+
+rule "Calculate runFractionPercentage for all readset"
+	@nglBI( F_RG_1 )
+	dialect "java"
+	salience 600
+	no-loop
+	when
+		$readset : ReadSet()
+	then
+		Logger.debug("Calculate runFractionPercentage for all readset");
+		//Get Run
+		 Run run = MongoDBDAO.findByCode(InstanceConstants.RUN_ILLUMINA_COLL_NAME, Run.class, $readset.runCode);
+		 //Calculate runFractionPercentage
+		 Double runFractionPercentageValue = null;
+		 if(run.getLanes()!=null && run.getLanes().size()>0 && $readset.getSampleOnContainer().getPercentage()!=null){
+		 	runFractionPercentageValue = $readset.getSampleOnContainer().getPercentage()/run.getLanes().size();
+		 }
+		
+		PropertySingleValue runFractionPercentage = new PropertySingleValue(runFractionPercentageValue);
+		MongoDBDAO.update(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, 
+				DBQuery.is("code", $readset.code),
+				DBUpdate.set("sampleOnContainer.properties.runFractionPercentage", runFractionPercentage));
+end

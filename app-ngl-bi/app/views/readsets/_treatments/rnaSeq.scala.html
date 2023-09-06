@@ -1,0 +1,237 @@
+@()
+
+<!-- Echantillonnage -->
+<div class="row">
+	<div class="col-md-2 col-lg-2">
+	<div class="panel panel-default">
+		<div class="panel-heading text-center"><strong>@Messages("readsets.treatments.rnaSeq.echantillonage")</strong></div>		
+		<table class="table table-condensed table-hover table-bordered">
+	 		<thead>
+				<tr>
+					<th>@Messages("readsets.treatments.rnaSeq.sampleInput")</th>
+	 			</tr>
+	 		</thead>
+	 		<tbody>
+	 			<tr>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.sampleInput.value | number}}</td>
+				</tr>
+	 		</tbody>
+	 	</table>
+	</div>
+	</div>
+<!-- </div> -->
+
+<!-- Nettoyage -->
+<!-- <div class="row">-->
+	<div class="col-md-8 col-lg-8">
+		<div class="panel panel-default">
+		<div class="panel-heading text-center"><strong>@Messages("readsets.treatments.rnaSeq.nettoyage")</strong></div>
+		<table class="table table-condensed table-hover table-bordered">
+	 		<thead>
+				<tr>
+					<th>@Messages("readsets.treatments.rnaSeq.storedPairsPercent")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.storedForwardReadPercent")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.storedReverseReadPercent")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.rejectedPairsPercent")</th>
+	 			</tr>
+	 		</thead>
+	 		<tbody>
+	 			<tr>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.storedPairsPercent.value | number:2}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.storedForwardReadPercent.value | number:2}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.storedReverseReadPercent.value | number:2}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.rejectedPairsPercent.value | number:2}}</td>
+				</tr>
+	 		</tbody>
+	 	</table>
+	 	</div>
+	</div>
+</div>
+
+<!-- Alignement Genome -->
+<div class="row">
+	<div class="col-md-10 col-lg-10">
+		<div class="panel panel-default">
+		<div class="panel-heading text-center"><strong>@Messages("readsets.treatments.rnaSeq.alignGenome")</strong></div>
+		<table class="table table-condensed table-hover table-bordered">
+	 		<thead>
+				<tr>
+					<th>@Messages("readsets.treatments.rnaSeq.alignedReadsPercent")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.uniqueReadsPercent")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.uniqueAlignedReadsPercent")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.mismatchPercent")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.duplicatedReadsPercent")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.insertLengthMean")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.insertLengthMeanSd")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.1SenseAlignedReadsPercent")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.2SenseAlignedReadsPercent")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.intragenicReadsPercent")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.exonicReadsPercent")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.intergenicReadsPercent")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.intronicReadsPercent")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.mappedEnd2ReadsPercent")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.mappedEnd1ReadsPercent")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.nbTranscripts")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.nbGenes")</th>
+	 			</tr>
+	 		</thead>
+	 		<tbody>
+	 			<tr>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.alignedReadsPercent.value | number:2}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.uniqueReadsPercent.value | number:2}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.uniqueAlignedReadsPercent.value | number:2}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.mismatchPercent.value | number:2}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.duplicatedReadsPercent.value | number:2}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.insertLengthMean.value | number}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.insertLengthMeanSd.value | number}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs['1SenseAlignedReadsPercent'].value | number:2}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs['2SenseAlignedReadsPercent'].value | number:2}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.intragenicReadsPercent.value | number:2}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.exonicReadsPercent.value | number:2}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.intergenicReadsPercent.value | number:2}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.intronicReadsPercent.value | number:2}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs['mappedEnd2ReadsPercent'].value | number:2}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs['mappedEnd1ReadsPercent'].value | number:2}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.nbTranscripts.value | number}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.nbGenes.value | number}}</td>
+				</tr>
+	 		</tbody>
+	 	</table>
+	 	</div>
+	</div>
+</div>
+<!-- Annotation -->
+<div class="row">
+	<div class="col-md-10 col-lg-10">
+		<div class="panel panel-default">
+		<div class="panel-heading text-center"><strong>@Messages("readsets.treatments.rnaSeq.annotation")</strong></div>
+		<table class="table table-condensed table-hover table-bordered">
+	 		<thead>
+				<tr>
+					<th>@Messages("readsets.treatments.rnaSeq.nbProteinCodingGenes")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.nbProteinCodingTranscripts")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.nbMiRnaGenes")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.nbSnoRnaGenes")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.nbSnRnaGenes")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.nbProtCodGeneChrY")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.nbProtCodTrscriptChrY")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.nblncRnaGenes")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.nblncRnaTrscripts")</th>
+	 			</tr>
+	 		</thead>
+	 		<tbody>
+	 			<tr>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.nbProteinCodingGenes.value | number}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.nbProteinCodingTranscripts.value | number}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.nbMiRnaGenes.value | number}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.nbSnoRnaGenes.value | number}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.nbSnRnaGenes.value | number}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.nbProtCodGeneChrY.value | number}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.nbProtCodTrscriptChrY.value | number}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.nbLncRNAGenes.value | number}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.nbLncRNATranscripts.value | number}}</td>
+				</tr>
+	 		</tbody>
+	 	</table>
+	 	</div>
+	</div>
+</div>
+<!-- Alignement transcriptome -->
+<div class="row">
+	<div class="col-md-5 col-lg-5">
+		<div class="panel panel-default">
+		<div class="panel-heading text-center"><strong>@Messages("readsets.treatments.rnaSeq.alignTranscriptome")</strong></div>
+		<table class="table table-condensed table-hover table-bordered">
+	 		<thead>
+				<tr>
+					<th>@Messages("readsets.treatments.rnaSeq.mappedReadsPercent")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.readLengthMean")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.adaptersPercent")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.rRnaMappedPercent")</th>
+	 			</tr>
+	 		</thead>
+	 		<tbody>
+	 			<tr>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.mappedReadsPercent.value | number:2}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.readLengthMean.value | number:2}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.adaptersPercent.value | number:2}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.rRnaMappedPercent.value | number:2}}</td>
+				</tr>
+	 		</tbody>
+	 	</table>
+	 	</div>
+	</div>
+<!-- </div>-->
+<!-- Duplication -->
+<!-- <div class="row">-->
+	<div class="col-md-5 col-lg-5">
+		<div class="panel panel-default">
+		<div class="panel-heading text-center"><strong>@Messages("readsets.treatments.rnaSeq.duplication")</strong></div>
+		<table class="table table-condensed table-hover table-bordered">
+	 		<thead>
+				<tr>
+					<th>@Messages("readsets.treatments.rnaSeq.transcriptDuplicMappedReadsPerc")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.genomDuplicMappedReadsPerc")</th>
+	 			</tr>
+	 		</thead>
+	 		<tbody>
+	 			<tr>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.transcriptDuplicMappedReadsPerc.value | number:2}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.genomDuplicMappedReadsPerc.value | number:2}}</td>
+				</tr>
+	 		</tbody>
+	 	</table>
+	 	</div>
+	</div>
+</div>
+<!-- Insert Size -->
+<div class="row">
+	<div class="col-md-10 col-lg-10">
+		<div class="panel panel-default">
+		<div class="panel-heading text-center"><strong>@Messages("readsets.treatments.rnaSeq.insertSize")</strong></div>
+		<table class="table table-condensed table-hover table-bordered">
+	 		<thead>
+				<tr>
+					<th>@Messages("readsets.treatments.rnaSeq.insertsizeMedian")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.insertsizeMin")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.insertsizeMax")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.insertsizeMean")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.standardDeviation")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.pairOrientation")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.widthOf10percent")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.widthOf20percent")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.widthOf30percent")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.widthOf40percent")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.widthOf50percent")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.widthOf60percent")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.widthOf70percent")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.widthOf80percent")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.widthOf90percent")</th>
+					<th>@Messages("readsets.treatments.rnaSeq.widthOf99percent")</th>
+	 			</tr>
+	 		</thead>
+	 		<tbody>
+	 			<tr>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.insertsizeMedian.value | number}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.insertsizeMin.value | number}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.insertsizeMax.value | number}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.insertsizeMean.value | number:2}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.standardDeviation.value | number:2}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.pairOrientation.value}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs['widthOf10percent'].value | number}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs['widthOf20percent'].value | number}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs['widthOf30percent'].value | number}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs['widthOf40percent'].value | number}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs['widthOf50percent'].value | number}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs['widthOf60percent'].value | number}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs['widthOf70percent'].value | number}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs['widthOf80percent'].value | number}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs['widthOf90percent'].value | number}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs['widthOf99percent'].value | number}}</td>
+				</tr>
+	 		</tbody>
+	 	</table>
+	 	</div>
+	</div>
+</div>
+

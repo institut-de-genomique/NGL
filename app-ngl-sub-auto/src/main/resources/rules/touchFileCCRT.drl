@@ -1,0 +1,51 @@
+#created on: Jul 15, 2014
+package birds
+
+import  fr.genoscope.lis.devsi.birds.impl.factory.ResourcesReferentialServiceFactory;
+import fr.cea.ig.auto.submission.SubmissionServicesFactory;
+import fr.genoscope.lis.devsi.birds.impl.properties.ProjectProperties;
+import fr.cea.ig.auto.submission.SRAFilesUtil;
+
+
+rule "set parameter for touchFiles"
+	@BirdsRule(fsRule)
+	dialect 'java'
+	salience 300
+	no-loop
+		when
+			$treatSpec : TreatmentSpecification(name=="touchFileCCRT", project.name=="SRA")
+			$job : Job()
+		then
+			Logger log = Logger.getLogger("ngl.sub.rules");
+			log.debug("set parameter value");
+			
+			String filePath = ProjectProperties.getProperty("tmpDirectory")+File.separator+$job.getUniqueJobResource("inputTouchCCRT").getProperty("code")+File.separator+$job.getUniqueJobResource("inputTouchCCRT").getProperty("relatifName");
+			
+			String endArg = $job.getParameterValue("endArg").getValue().replace("%filePath%",filePath);
+			$job.setParameterValue("endArg", endArg);
+end
+
+rule "add resources in internalRefLinkCCRT to fire link file"
+	@BirdsRule( addResources ) 
+	dialect 'java'
+	salience 200
+	when
+		$flag : Flag ( done == false ) 
+		$output : OutputSpecificationElement(treatmentSpecification.name == "touchFileCCRT")
+	  	$referential : ResourcesReferential ( name == "internalRefLinkCCRT" )
+		$resourceSet : ResourceSet( ioSpecificationElement == $output )
+		$job : Job(treatmentSpecification!=null, treatmentSpecification.name == "touchFileCCRT")
+	then
+		Logger log = Logger.getLogger("ngl.sub.rules");
+		log.debug("Add resources rules for link from file "+$job.getProperty(Job.STDOUT));
+		JobResource jobResource = $job.getUniqueJobResource("inputTouchCCRT");
+		JobResource outputResource = $resourceSet.createJobResource($output.getResourceType(),$referential.getName());
+		ResourceProperties resourceProperties = outputResource.getResourceProperties();
+	  	resourceProperties.setProperty("code",jobResource.getProperty("code"));
+	  	resourceProperties.setProperty("submissionDirectory",jobResource.getProperty("submissionDirectory"));
+	  	resourceProperties.setProperty("fileName",jobResource.getProperty("relatifName"));
+	  	resourceProperties.setProperty("directory",jobResource.getProperty("directory"));
+		$flag.setDone(true);
+		modify($flag){};
+		modify($resourceSet){};
+end

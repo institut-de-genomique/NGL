@@ -1,0 +1,49 @@
+Voici les propriétés cutomisés à partir de http://getbootstrap.com/customize/
+
+Typography
+	@font-size-base : 14px -> 12px
+	@line-height-base : 1.428571429 -> 1.333333333
+	
+Components
+	@padding-small-vertical :	
+	@padding-base-vertical :	
+	@padding-large-vertical : 	
+	@padding-small-horizontal :		
+	@padding-base-horizontal :	
+	@padding-large-horizontal : 
+	
+	
+Grid system
+	@grid-gutter-width : 30px -> 18px
+
+Tables
+	@table-cell-padding : 
+	@table-condensed-cell-padding : 
+	
+Navbar
+	@navbar-height : 50px -> 40px
+	
+Navs
+	Shared nav styles
+		@nav-link-padding : 10px 15px -> 7px 10px
+		
+
+Jumbotron
+	@jumbotron-padding : 30px -> 20px
+
+
+Thumbnails
+	@thumbnail-padding : 
+
+Alerts
+	@alert-padding : 15px -> 10px
+
+List group
+	 config dans la ngl.css
+		.list-group-item{
+			padding: 7px 10px;
+		}
+		
+Panels
+	@panel-body-padding : 15px -> 10px
+	

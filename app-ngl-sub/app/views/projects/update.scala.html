@@ -1,0 +1,89 @@
+@this()
+@()
+@import views.html.helper._
+
+@user            = @{ fr.cea.ig.authentication.Authentication.getUser() }
+
+@formUpdate() = {
+
+
+	@columnSearchForm{
+		@formGroup{					
+			<bt-input  class="form-control"  input-ng-model="form.accessionRegex" textarea-ng-model="form.accessions" 
+			title='@Messages("consultation.textarea-placeholder.umbrellaProjectAccessions")'  
+			textarea-placeholder-ng-model='@Messages("consultation.textarea-placeholder.umbrellaProjectAccessions")'  
+			placeholder='@Messages("consultation.placeholder.umbrellaProjectAccessions")' >
+			</bt-input>					
+		}
+	}	
+		
+	@columnSearchForm{
+		@formGroup{
+			<div class="tab-pane active" id="filters">
+				<form class="well well-small">
+				<div class="row">
+					<div class="btn-toolbar">
+						<button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="search('@user')" class="btn btn-primary" >
+							<i class="fa fa-search"></i>
+						</button>	
+						<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="reset()"  class="btn btn-default">
+							<i class="fa fa-undo"></i>
+						</button>				 	
+					</div>		
+				</div>		
+			</form>	
+		</div>
+	
+		}													
+	}
+	
+
+	@columnSearchForm{
+	}	
+	@columnSearchForm{
+	}
+	@columnSearchForm{
+	}
+
+
+
+
+	@formGroup{
+		<div class="btn-toolbar">
+			<button type="submit" title='@Messages("button.submitUpdate")'  ng-click="submit()" data-toggle="tooltip" class="btn btn-primary" >
+				<i class="fa fa-save"></i>
+			</button>	
+		</div>				
+	}		
+}
+
+
+<div class="row">
+<div class="col-md-12 col-lg-12"  messages="messages"></div>
+</div>
+
+@** XXXXXXXX UPDATE PROJECTUMBRELLA XXXXXXXXXXXXXX **@
+
+<!--La directive ng-init est appel� au chargement de la page et dans le controlleur javascript on definit la methode
+qui permet d'installer $user dans le scope-->
+
+<span ng-init="setUserInScope('@user')"></span>
+
+<div><br><br><h4 class="text-warning">Attention, vous pouvez seulement ajouter des projects enfants et des identifiants PUBMED, si vous voulez en supprimer, il faut faire un ticket JIRA</h4><br><br></div>
+	
+<div class="row"> 
+	<div class="col-md-12 col-lg-12" ultimate-datatable="projectsDT">
+		<div dt-form>	
+			<div class="tab-content">
+				<div class="tab-pane active" id="filters">
+					<form name="projectForm" class="well well-small">
+						<div class="row">
+						@formUpdate
+						</div>		
+					</form>	
+				</div>
+			</div>
+		</div>
+	</div>
+</div> 
+

@@ -1,0 +1,11 @@
+@()
+
+<table class="table table-condensed table-hover table-bordered">
+    <caption><h3>@Messages("runs.ngsrg_pacbio.demultiplexage")</h3></caption>
+     <tbody>
+         <tr>
+               <th>@Messages("runs.ngsrg_pacbio.lostReadsPercentage")</th>
+            <td ng-bind="run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.lostReadsPercentage.value|number"></td>
+        </tr>
+     </tbody>
+ </table>

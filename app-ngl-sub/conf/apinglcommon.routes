@@ -1,0 +1,18 @@
+GET		/api/commons/types								controllers.commons.api.CommonInfoTypes.list()
+GET		/api/commons/states								controllers.commons.api.States.list()
+
+#reporting configuration
+GET    	/api/reporting/configs    	           			controllers.reporting.api.ReportingConfigurations.list()
+GET	   	/api/reporting/configs/:code					controllers.reporting.api.ReportingConfigurations.get(code)
+POST 	/api/reporting/configs							controllers.reporting.api.ReportingConfigurations.save()
+PUT    	/api/reporting/configs/:code					controllers.reporting.api.ReportingConfigurations.update(code)
+
+GET    	/api/reporting/filters    	           			controllers.reporting.api.FilteringConfigurations.list()
+GET	   	/api/reporting/filters/:code					controllers.reporting.api.FilteringConfigurations.get(code)
+POST 	/api/reporting/filters							controllers.reporting.api.FilteringConfigurations.save()
+
+GET		/api/values										controllers.commons.api.Values.list()
+
+GET		/api/commons/users								controllers.commons.api.Users.list()
+
+GET		/api/authorisation/user							controllers.authorisation.User.get()

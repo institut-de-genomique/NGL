@@ -1,0 +1,61 @@
+@()
+@** deplacé depuis menu.scala.html **@
+
+
+
+	<!-- NGL-3272 utilisation de sub-menu => ajout CSS dédié dans ngl.css , class fa-align-right pas reconnue ? mal utilisée ? -->						
+	<li class="dropdown-submenu">
+		<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> <span class="nav-label">Guides d'utilisation &nbsp; &nbsp;</span><span class="fa fa-caret-right"></span></a>
+			<ul class="dropdown-menu">
+				<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/NGL_SQ_Illumina-CNG.pdf")"                                         target="_blank">@Messages("docs.illumina")</a></li>
+				<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Workflows etats processus, experiences, containers.pdf")"          target="_blank">@Messages("docs.workflowsCNG")</a></li>
+				<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Specificite des experiences de categorie QC.pdf")"                 target="_blank">@Messages("docs.experiment.qc")</a></li>
+				<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Specificite de l'exp. de POOL (ou many to one en general).pdf")"   target="_blank">@Messages("docs.experiment.pool")</a></li>
+				<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Cas d'erreurs auto-corrigeables.pdf")"                             target="_blank">@Messages("docs.errors.auto-correction")</a></li>
+			</ul>
+	</li>
+							
+	<li class="dropdown-submenu">
+		<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> <span class="nav-label">Schémas Processus </span><span class="fa fa-caret-right"></span></a>
+			<ul class="dropdown-menu">
+				<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schema processus Chromium.pdf")"								target="_blank">@Messages("docs.schema-processus.chromium")</a></li>
+				<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schema processus Exp satellites uniquement.pdf")" 				target="_blank">@Messages("docs.schema-processus.ExpSatellites")</a></li>
+				<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schema processus RNAseq.pdf")"									target="_blank">@Messages("docs.schema-processus.RNAseq")</a></li>
+				<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schema processus RNAseq (equipe de DEV).pdf")"					target="_blank">@Messages("docs.schema-processus.RNAseq-Dev")</a></li>
+				<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schema processus WG NANO.pdf")"								target="_blank">@Messages("docs.schema-processus.WGNANO")</a></li>
+				<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schema processus WG PCR free.pdf")"							target="_blank">@Messages("docs.schema-processus.WGPCRfree")</a></li>
+				<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schemas processus CAPTURE.pdf")"								target="_blank">@Messages("docs.schema-processus.Capture")</a></li>
+				<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schema processus-Capture-XT-HS2.pdf")" 						target="_blank">@Messages("docs.schema-processus.Capture-XT-HS2")</a></li>
+				<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schema processus NANOPORE et regles SQ-BI.pdf")"				target="_blank">@Messages("docs.schema-processus.Nanopore")</a></li>
+				<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schema processus -Ox-Bis-Seq.pdf")"              				target="_blank">@Messages("docs.schema-processus.Ox-Bis-Seq")</a></li>
+				<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schema processus small RNA-seq et Bis-Seq.pdf")"				target="_blank">@Messages("docs.schema-processus.smallRNAseq-Bis-Seq")</a></li>
+				<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schema processus ATAC-Seq.pdf")"								target="_blank">@Messages("docs.schema-processus.ATAC-Seq")</a></li>
+				<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schemas-processus-QMPseq-OxQMPseq-doc-utilisateur.pdf")" 		target="_blank">@Messages("docs.schema-processus.QMPSeq-OxQMPSeq")</a></li>
+				<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schemas processus Librairies pour sequencage Illumina.pdf")"	target="_blank">@Messages("docs.schema-processus.LibSeqIllumina")</a></li>
+				<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schemas processus reprise debutant par Normalisation.pdf")"	target="_blank">@Messages("docs.schema-processus.repriseNorm")</a></li>
+				<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schemas processus Sequencage.pdf")" 							target="_blank">@Messages("docs.schema-processus.sequencing")</a></li>
+				<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schema processus LowPass-WG.pdf")" 							target="_blank">@Messages("docs.schema-processus.LowPass")</a></li>
+				<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schema processus Prep Lib RNAseq-Anchor.pdf")" 				target="_blank">@Messages("docs.schema-processus.RNAseq-Anchor")</a></li>
+				<li><a href="@routes.Assets.at("ngl-sq/documentation/cng/Schema processus MetaG.pdf")" 									target="_blank">@Messages("docs.schema-processus.MetaG")</a></li>
+				
+			</ul>
+	</li>
+				
+@** NGL-3271 ajout liens directs vers les templates d'import CNRGH dans Alfresco   !! demande une connexion **@
+@CnrghTemplatesUrl=@{"https://intra.institut-genomique.fr/share/page/site/ngl/document-details?nodeRef=workspace://SpacesStore/"}					
+	<li class="dropdown-submenu">
+		<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> <span class="nav-label">Templates d'import &nbsp; &nbsp;</span><span class="fa fa-caret-right"></span></a>
+			<ul class="dropdown-menu">
+				<li><a href='@{CnrghTemplatesUrl+"a56dcf82-f7f6-4984-9cb3-a94e359108f5"}' target="_blank">Import Aliquots en plaques</a></li>
+				<li><a href='@{CnrghTemplatesUrl+"1705e5cb-96f5-457d-8d38-295420da8ea1"}' target="_blank">Import Aliquots en tubes</a></li>
+				<li><a href='@{CnrghTemplatesUrl+"4b28c03d-afbe-4daa-8ff2-b04d17c3ff82"}' target="_blank">Import Librairie indexées non poolées (équipes internes)</a></li>
+				<li><a href='@{CnrghTemplatesUrl+"409a3b69-dd7e-43e2-84e6-780f3200cde6"}' target="_blank">Import Librairie indexées non poolées</a></li>
+				<li><a href='@{CnrghTemplatesUrl+"7cf29609-3d08-453f-a043-10ce838d8448"}' target="_blank">Import Librairie indexées poolées</a></li>
+				<li><a href='@{CnrghTemplatesUrl+"4b6572a9-6af6-45e0-aaca-e6f92185e005"}' target="_blank">Import Librairie indexées poolées (SANS démultiplexage)</a></li>
+			</ul>
+	</li>
+
+	<!-- liste des Code Processus Libairies  02/12/2019 basculer vers version wiki -->
+	<li><a style="color:#0099cc" href="http://wiki.cnrgh.fr/wiki/ngldocumentation/view/Main/Liste%20des%20types%20de%20processus%20Banque/" 
+							target="_blank">@Messages("docs.list-libraryProcessTypeCodes")</a>
+	</li>

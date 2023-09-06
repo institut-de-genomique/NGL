@@ -1,0 +1,33 @@
+// creation 13/07/2021 FDS NGL-3450
+// copier  run.treatments.ngsrg.default.flowcellVersion => n x ( readset.sampleOnContainer.properties.novaseqFlowcellMode)
+package rules
+
+rule "Copy propertie flowcellVersion from Run to Readsets"
+	@nglBI( F_RG_1 )
+	dialect "java"
+	salience 600
+	no-loop
+	when
+		$run : Run($treatment : treatments["ngsrg"], $treatment!=null, categoryCode=="illumina", typeCode == "RNVS6000" )
+		$mapValue : Map() from $treatment.results.values()
+		$flowcellVersion : Entry(key=="flowcellVersion") from $mapValue.entrySet()
+	then
+		String flowcellVersion = (String)((PropertyValue)$flowcellVersion.getValue()).getValue();
+		Logger.debug("Copy flowcellVersion propertie value "+ flowcellVersion +" of Run "+$run.code + " to readsets");
+		
+		PropertySingleValue novaseqFlowcellMode = new PropertySingleValue(flowcellVersion);
+		
+		/*... code pour visualiser les readset a modifier avant de lancer MongoDBDAO.update...
+		List<ReadSet> readsets=MongoDBDAO.find(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, 
+				DBQuery.is("runCode", $run.code)).toList();
+		
+		for(ReadSet rs:readsets){
+			Logger.debug("readset to update: "+rs.code);
+		}
+		*/
+		
+		MongoDBDAO.update(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, 
+				DBQuery.is("runCode", $run.code),
+				DBUpdate.set("sampleOnContainer.properties.novaseqFlowcellMode", novaseqFlowcellMode));
+
+end

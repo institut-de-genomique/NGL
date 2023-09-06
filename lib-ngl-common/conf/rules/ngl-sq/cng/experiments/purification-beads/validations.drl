@@ -1,0 +1,23 @@
+package rules
+
+// NGL-3280 26/05/2021
+rule "Volume not null in purification-beads outputContainer"
+    @nglSQ( validations )
+	dialect "java"
+	salience 930
+	no-loop
+    when
+    	$experiment:Experiment($typeCode:typeCode,$typeCode=="purification-beads")
+    	// code!="N" comme dans denat-dil-lib c'est trop tot; code=="IP" comme dans additional-normalization on zappe l'etat "N"
+    	//State($stateCode:code=="N") || State($stateCode:code=="IP")  
+      	State($stateCode:code=="IP") || State($stateCode:code=="F")
+		$atomicTransfert: OneToOneContainer($inputContainerUsed:inputContainerUseds.get(0), $outputContainerUsed: outputContainerUseds.get(0))
+	   	OutputContainerUsed($finalVolume: volume) from $outputContainerUsed
+    	$contextValidation:ContextValidation()
+    	// 0 autorisé ???!!!
+    	eval($finalVolume == null || $finalVolume.value == null || $finalVolume.value == "")
+    then
+    //Logger.debug("Volume null in purifcation-beads outputContainer");
+    // 1 message par container meme sans boucle for !!!
+    $contextValidation.addErrors("purification-beads","error.validationexp.outputvolumenotnull",  $outputContainerUsed.code );
+end

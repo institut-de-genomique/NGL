@@ -1,0 +1,128 @@
+<section id="intro">
+<div class="page-header">
+<h1>Introduction</h1>
+</div>
+
+<div class="alert alert-error">
+<strong>Important avant lecture :</strong>
+<p>La documentation suivante présente les règles de nommage pour le développement de NGL et pour toutes les applications web de l'équipe développement.
+<br/><br/>
+Les règles suivantes sont le résultat de l'analyse des différents problèmes de nommage rencontrés au cours des développements de NGL. 
+L'objectifs de ses règles est d'avoir une cohérence et une cohésion entre les différentes parties d'une application web.
+<br/><br/>
+Le code d'une application web appartient aux développeurs.  
+Il est donc de la responsabilité de celui çi de respecter les règles de codage mais c'est surtout un devoir, en tant que développeur, d'améliorer continuellement le code.
+<br/><br/>
+Lors de vos développements, vous allez rencontrer des bouts de code ne respectant pas les règles définies. 
+Il peut y avoir deux raisons valables à cela :
+</p>
+<ol>
+<li>Le code date d'avant les règles de nommage et n'a pas été remanié</li>
+<li>Les règles ont évolué et tout le code n'a pas été reprit</li>
+</ol>
+<p>
+<b>Pour ces bouts de code, il est du devoir du développeur de les remettre dans le droit chemin sans attendre.</b> 
+Il est donc vivement conseiller de faire le refactoring dès que l'intrus est démasqué et de ne pas remettre cela à plus tard <b>même si le code n'est pas le votre</b>.
+<br/><br/>
+De même pour cette documentation, elle doit <b>vivre</b> donc n'hésitez pas : 
+</p>
+<ul>
+<li>à mettre en évidence les incohérences.</li>
+<li>à la corriger.</li>
+<li>à améliorer les règles.</li>
+<li>à ajouter des règles.</li>
+</ul>
+</div>
+
+<p>
+Les règles de nommage interviennent à tous les niveaux d'une application :
+</p>
+<ul>
+<li>Package (controllers, view, etc.)</li>
+<li>Nom des classes Controllers</li>
+<li>Nom des classes View</li>
+<li>Nom des méthodes des Controllers</li>
+<li>Nom des répertoires pour les assets</li>
+<li>Nommage des routes</li>
+<li>Nommage des clés pour l'internationalisation (messages)</li>
+<li>etc.</li>
+</ul>
+<hr>
+<h3>1. La ressource primaire</h3>
+<p>
+Pour organiser son code et appliquer la bonne nomenclature, il faut définir la <strong>ressource primaire</strong> sur laquelle le développement va se faire.
+La ressource est à prendre au sens <strong>REST</strong> du terme.
+</p>
+<p>
+Pour cela, avant de commencer, il faut répondre à l'une des questions suivantes en fonction du développement à faire :
+</p>
+<ul>
+<li>Qu'est ce que je dois afficher ?</li>
+<li>Qu'est ce que je dois rechercher ?</li>
+<li>Qu'est ce que je dois créer ?</li>
+</ul> 
+<p>
+La réponse à l'une de ses questions définie la <strong>ressource primaire</strong>.
+</p>
+<p>
+Par exemples :
+</p>
+
+<ul>
+<li>je souhaite afficher des tubes => la ressource est <strong>tubes</strong>.</li>
+<li>je souhaite rechercher des processus => la ressource est <strong>processus</strong>.</li>
+<li>je souhaite créer une liste de courses => la ressource est <strong>listes de courses </strong>.</li>
+<li>etc.</li>
+</ul>
+<p>
+Une fois la ressource primaire trouvée, il faut la mettre au <strong>pluriel</strong> et en <strong>anglais</strong> tout de suite. 
+Dans les chapitres suivants nous utiliserons cette syntaxe pour y faire référence : <b>&lt;ResourceNames&gt;</b>
+</p>
+<div class="alert alert-info">
+<strong>Remarque :</strong>
+Il est important de prendre 5 minutes pour faire cette réflexion car c'est beaucoup plus long de faire du refactoring et de se battre avec SVN ;-).
+</div>
+<div class="alert alert-info">
+<strong>Remarque :</strong>
+Mettre les termes en anglais est obligatoire car pour définir des noms de variable c'est plus simple qu'en français et que de toute manière un language informatique est à base d'anglais.
+</div>
+<hr>
+<h3>2. L'organisation générale</h3>
+<p>
+Dans un programme en java qui utilise des packages pour organiser les classes, il y a deux possibilités pour organiser son code :
+</p>
+
+<ul>
+<li>Soit en utilisant une organisation orientée par les parties techniques.</li>
+<li>Soit en utilisant une organisation orientée par les parties métiers.</li>
+</ul>
+<p>
+Les deux ont des avantages et des inconvenients qui ne seront pas listés ici. Ce qu'il faut retenir c'est que les 2 organisations se mélangent avec en fonction du contexte une dominante technique ou une dominante fonctionnelle.
+<br/><br/>
+Nous utilisons le framework Play qui s'appuie sur le design pattern <abbr title="Model View Controller">MVC</abbr> et ceci fait que nous avons une séparation technique des classes qui sont des controlleurs, des vues et des modèles dans 3 packages différents :
+</p>
+<ul>
+<li>controllers</li>
+<li>views</li>
+<li>models</li>
+</ul>
+<p>
+Au sein de ces 3 packages nous auront une organisation fonctionnelle par ressource primaire. Ceci permettra de regrouper dans un même sous package ce qui est lié à une ressource primaire. 
+Cette façons de faire vous permet en tant que développeur de vous concentrer sur le métier. 
+L'organisation de ses 3 packages sera abordée dans les chapitres suivants. 
+<br/><br/>
+Nous aurons également une organisation plutôt orientée technique pour tout ce qui est commun à plusieurs métiers, comme des classes utilitaires ou des services transverses qui seront tous dans un même package.
+</p>
+<hr>
+<h3>3. Les exemples</h3>
+<p>
+Dans les chapitres suivants, les exemples s'appuirons sur une application qui doit permettre de réserver un hôtel. 
+</p><p>
+Cette application doit permettre de :
+</p>
+<ul>
+<li>Rechercher des hôtels et afficher les détails d'un hôtel.</li>
+<li>Pouvoir afficher l'ensemble des chambres d'un hotel et les administrer (ajouter, supprimer, editer)</li>
+<li>Faire une réservation d'hotel, rechercher des réservations et afficher les détails d'une réservation.</li>
+</ul>
+</section>

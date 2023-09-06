@@ -1,0 +1,150 @@
+@this(ctx : fr.cea.ig.ngl.NGLApplication)
+@()
+
+@isCNSInstitute  = @{ "CNS" == ctx.nglConfig().getInstitute() }
+
+<div class="row">
+	<div class="dropdown col-md-4">
+		<button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown"><i class="fa fa-file-text-o"></i></button>
+		<ul class="dropdown-menu">
+			<li><a ng-click="computeExcelExport()">@Messages("balanceSheets.export.excel")</a></li>
+			<li><a ng-click="computePdfExport()">@Messages("balanceSheets.export.pdf")</a></li>
+		  </ul>
+	</div>
+	<div class="col-md-8">
+		<h1>{{headerText}}</h1>
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-12 col-lg-12">
+		<ul class="nav nav-tabs nav-justified">
+			<li ng-class="getTabClass('quarter')"><a href="#" data-target="#quarter" data-toggle="tab" ng-click="setActiveTab('quarter')">@Messages("balanceSheets.tab.quarters")</a></li>
+			<li ng-class="getTabClass('sequencingType')"><a href="#" data-target="#sequencingType" data-toggle="tab" ng-click="setActiveTab('sequencingType')">@Messages("balanceSheets.tab.sequencingType")</a></li>
+			<li ng-class="getTabClass('firstTen')"><a href="#" data-target="#firstTen" data-toggle="tab" ng-click="setActiveTab('firstTen')">@Messages("balanceSheets.tab.firstTen")</a></li>
+			<li ng-class="getTabClass('sampleType')"><a href="#" data-target="#sampleType" data-toggle="tab" ng-click="setActiveTab('sampleType')">@Messages("balanceSheets.tab.projectType")</a></li>    
+			<li ng-class="getTabClass('runType')"><a href="#" data-target="#runType" data-toggle="tab" ng-click="setActiveTab('runType')">@Messages("balanceSheets.tab.runType")</a></li>    
+		</ul>
+		<div class="tab-content">
+			<div class="tab-pane {{getTabClass('quarter')}}" id="quarter">		
+				<div ng-switch on="isLoading()">
+					<div ng-switch-when="true">
+						<div class="row">
+							<div class="text-center">
+							<div class="inProgressSpinner"><button class="spinnerBtn btn btn-primary btn-lg"><i class="fa fa-spinner fa-spin fa-5x"></i></button></div>
+							</div>
+						</div>
+					</div>
+					<div ng-switch-when="false">
+						<div class="row">
+						<div class="col-md-12 col-lg-12" ultimate-datatable="dtQuarters">
+						</div>
+						<div class="row">
+							<chart class="col-md-12 col-lg-12" value="chartQuarter"></chart>
+					</div>
+					</div>
+					</div>
+				</div>	
+			</div>		
+			<div class="tab-pane {{getTabClass('sequencingType')}}" id="sequencingType">
+				<div ng-switch on="isLoading()">
+					<div ng-switch-when="true">
+						<div class="row">
+							<div class="col-md-12 col-lg-12 text-center">
+							<div class="inProgressSpinner"><button class="spinnerBtn btn btn-primary btn-lg"><i class="fa fa-spinner fa-spin fa-5x"></i></button></div>
+							</div>
+						</div>
+					</div>
+					<div ng-switch-when="false">
+					<div class="row">
+						<div class="col-md-12 col-lg-12" ultimate-datatable="dtSequencing"></div>
+					</div>
+					<div class="row">
+						<div class="col-md-12 col-lg-12" ultimate-datatable="dtSequencingSum"></div>
+					</div>
+					<div class="row">
+						<div>
+							<chart class="col-md-12 col-lg-12" value="chartSequencing"></chart>
+						</div>
+					</div>
+						
+					</div>
+				</div>
+				
+			</div>
+			<div class="tab-pane {{getTabClass('firstTen')}}" id="firstTen">
+				<div ng-switch on="isLoading()">
+					<div ng-switch-when="true">
+						<div class="row">
+							<div class="col-md-12 col-lg-12 text-center">
+							<div class="inProgressSpinner"><button class="spinnerBtn btn btn-primary btn-lg"><i class="fa fa-spinner fa-spin fa-5x"></i></button></div>
+							</div>
+						</div>
+					</div>
+					<div ng-switch-when="false">
+					<div class="row">
+						<div class="col-md-12 col-lg-12" ultimate-datatable="dtProject"></div>
+					</div>		
+					<div class="row">
+						<div class="col-md-12 col-lg-12" ultimate-datatable="dtProjectSum"></div>
+					</div>	
+					<div class="row">
+					<div>
+						<chart class="col-md-12 col-lg-12" value="chartProject"></chart>
+					</div>
+					</div>			
+					</div>
+				</div>
+			</div>
+			<div class="tab-pane {{getTabClass('sampleType')}}" id="sampleType">
+				<div ng-switch on="isLoading()">
+					<div ng-switch-when="true">
+						<div class="row">
+							<div class="col-md-12 col-lg-12 text-center">
+							<div class="inProgressSpinner"><button class="spinnerBtn btn btn-primary btn-lg"><i class="fa fa-spinner fa-spin fa-5x"></i></button></div>
+							</div>
+						</div>
+					</div>
+					<div ng-switch-when="false"><div class="row">
+						<div class="col-md-12 col-lg-12">
+							<br /><div class="alert alert-info">@Messages("balanceSheets.info.projectType")</div>
+							@if(isCNSInstitute){
+								<div class="alert alert-info">@Messages("balanceSheets.info.projectType.2")</div>
+							}
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12 col-lg-12" ultimate-datatable="dtSample"></div>
+					</div>		
+					<div class="row">
+						<div class="col-md-12 col-lg-12" ultimate-datatable="dtSampleSum"></div>
+					</div>		
+					</div>
+					<div class="row">
+					<div>
+						<chart class="col-md-12 col-lg-12" value="chartSample"></chart>
+					</div>
+					</div>	
+				</div>
+			</div>
+			<div class="tab-pane {{getTabClass('runType')}}" id="runType">
+				<div ng-switch on="isLoading()">
+					<div ng-switch-when="true">
+						<div class="row">
+							<div class="col-md-12 col-lg-12 text-center">
+							<div class="inProgressSpinner"><button class="spinnerBtn btn btn-primary btn-lg"><i class="fa fa-spinner fa-spin fa-5x"></i></button></div>
+							</div>
+						</div>
+					</div>
+					<div ng-switch-when="false">
+					<div class="row">
+						<div class="col-md-12 col-lg-12" ultimate-datatable="dtRun"></div>
+					</div>		
+					<div class="row">
+						<div class="col-md-12 col-lg-4" ultimate-datatable="dtRunSum"></div>
+					</div>		
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

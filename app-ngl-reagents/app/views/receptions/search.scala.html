@@ -1,0 +1,98 @@
+@this()
+@()
+
+@import views.html.helper._
+@form() = {
+
+	@columnSearchForm{
+		@formGroup{
+			<bt-input class='form-control' textarea="true" input-ng-model="searchService.form.kitCatalogName" textarea-ng-model="searchService.form.kitCatalogNames" placeholder='@Messages("search.placeholder.reception.catalogKit.name")'>			
+		}
+		@formGroup{
+			<bt-input class='form-control' textarea="true" input-ng-model="searchService.form.providerCode" textarea-ng-model="searchService.form.providerCodes" placeholder='@Messages("search.placeholder.reception.providerCode")'>
+		}
+		@formGroup{
+			<bt-input class='form-control' textarea="true" input-ng-model="searchService.form.catalogRefCode" textarea-ng-model="searchService.form.catalogRefCodes" placeholder='@Messages("search.placeholder.reception.catalogRefCode")'>			
+		}
+		@formGroup{
+			<bt-input class='form-control' textarea="true" input-ng-model="searchService.form.code" textarea-ng-model="searchService.form.codes" placeholder='@Messages("search.placeholder.reception.code")'>			
+		}
+	}
+	@columnSearchForm{
+		@formGroup{
+			<div bt-select ng-model="searchService.form.categories" class="form-control" multiple="true" placeholder='@Messages("search.placeholder.reception.category")' bt-options="category.code as category.name for category in searchService.lists.getReagentCategories()" auto-select></div>			
+		}
+		@formGroup{
+			<div bt-select ng-model="searchService.form.stateCodes" class="form-control" multiple="true" placeholder='@Messages("search.placeholder.reception.state")' bt-options="state.code as state.name for state in searchService.lists.getStates()" auto-select></div>			
+		}
+		@formGroup{
+			<bt-input class='form-control' textarea="true" input-ng-model="searchService.form.workLabel" textarea-ng-model="searchService.form.workLabels" placeholder='@Messages("search.placeholder.reception.workLabel")'>			
+		}	
+		@formGroup{
+			<div bt-select ng-model="searchService.form.experimentTypeCodes" class="form-control" multiple="true" filter="true" placeholder='@Messages("search.placeholder.reception.experimentTypeCode")' bt-options="experimentType.code as experimentType.name for experimentType in searchService.lists.getExperimentTypes()" auto-select></div>	
+		}		
+	}
+	@columnSearchForm{
+		@formGroup{
+			<bt-input class='form-control' textarea="true" input-ng-model="searchService.form.batchNumber" textarea-ng-model="searchService.form.batchNumbers" placeholder='@Messages("search.placeholder.reception.batchNumber")'>
+		}
+		@formGroup{
+			<bt-input class='form-control' textarea="true" input-ng-model="searchService.form.fromProviderId" textarea-ng-model="searchService.form.fromProviderIds" placeholder='@Messages("search.placeholder.reception.fromProviderId")'>		
+		}
+		@formGroup{
+			<input type="text" class="form-control" ng-model="searchService.form.fromExpirationDate" placeholder='@Messages("search.placeholder.reception.fromExpirationDate")' title='@Messages("search.placeholder.reception.fromExpirationDate")' date-timestamp>
+		}
+	}
+	@columnSearchForm{
+		@formGroup{	
+			<input class="form-control" type="text"  ng-model="searchService.form.fromReceptionDate" placeholder='@Messages("search.placeholder.reception.fromReceptionDate")' title='@Messages("search.placeholder.reception.fromReceptionDate")' date-timestamp>	
+		}
+		@formGroup{
+			<input type="text"  class="form-control" ng-model="searchService.form.fromCreationDate" placeholder='@Messages("search.placeholder.reception.fromCreationDate")' title='@Messages("search.placeholder.reception.fromCreationDate")' date-timestamp>
+		}
+		@formGroup{
+			<input type="text"  class="form-control" ng-model="searchService.form.toExpirationDate" placeholder='@Messages("search.placeholder.reception.toExpirationDate")' title='@Messages("search.placeholder.reception.toExpirationDate")' date-timestamp>
+		}
+	}
+	@columnSearchForm{
+		@formGroup{	
+			<input class="form-control" type="text"  ng-model="searchService.form.toReceptionDate" placeholder='@Messages("search.placeholder.reception.toReceptionDate")' title='@Messages("search.placeholder.reception.toReceptionDate")' date-timestamp>	
+		}
+		@formGroup{
+			<input type="text"  class="form-control" ng-model="searchService.form.toCreationDate" placeholder='@Messages("search.placeholder.reception.toCreationDate")' title='@Messages("search.placeholder.reception.toCreationDate")' date-timestamp>
+		}
+		@formGroup{
+			<input class="form-control" type="text" ng-model="searchService.form.createUser" typeahead="user.name as user.name for user in searchService.lists.getUsers() | filter:$viewValue | limitTo:20" placeholder='@Messages("search.placeholder.reception.createUser")' title='@Messages("search.placeholder.reception.createUser")'>		
+		}
+	}					
+}
+
+<div class="row"> 
+<div class="col-md-12 col-lg-12" ultimate-datatable="searchService.datatable">
+		<div udt-form>			
+		<div class="tab-content">
+		<div class="tab-pane active" id="filters">
+			<form class="well well-small">
+			<div class="row">
+			@form
+			@columnSearchForm{
+				@formGroup{
+				<div class="btn-toolbar">
+					<button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="search()" class="btn btn-primary" >
+						<i class="fa fa-search"></i>
+					</button>
+					<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="reset()"  class="btn btn-default">
+						<i class="fa fa-undo"></i>
+					</button>
+												 	
+				</div>	
+				}					
+			}
+			</div>		
+		</form>	
+	</div>
+
+	</div>
+	</div>
+</div>
+</div>

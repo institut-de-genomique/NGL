@@ -1,0 +1,228 @@
+@this(ctx : fr.cea.ig.ngl.NGLApplication)
+@* @this(ctx : fr.cea.ig.play.migration.NGLContext) *@
+
+@()
+
+@import play.mvc.Http.Context
+@import controllers.authorisation.PermissionHelper
+
+@user            = @{ ctx.currentUser() }
+@writePermission = @{ PermissionHelper.checkPermission(user, "writing") }
+
+@column()(value: Html) = {
+	<div class="col-md-4 col-lg-4">
+		@value
+	</div>
+}
+
+@columnLabelValueAdv(label:String)(value: Html) = {
+	<div class="form-group">
+	    <label class="col-md-2 col-lg-2 control-label">@label</label>
+	    <div class="col-md-10 col-lg-10">
+	      @value
+	    </div>
+	</div>
+}
+
+<div class="row">
+	<div class="col-md-12 col-lg-12">
+	<div class="page-header">	
+		<div class="btn-toolbar pull-right" >
+				@if(writePermission) {
+				 	<button class="btn btn-default" ng-if="isEditMode()" ng-click="save()" data-toggle="tooltip" title="@Messages("button.validate")" ><i class="fa fa-save"></i> @Messages("button.validate")</button>
+				 	<button class="btn btn-default" ng-if="isEditMode()" ng-click="cancel()" data-toggle="tooltip" title="@Messages("button.cancel")" ><i class="fa fa-undo"></i> @Messages("button.cancel")</button>
+			 		<button class="btn btn-default" ng-if="!isEditMode()" ng-click="activeEditMode()" data-toggle="tooltip" title="@Messages("button.edit")" ><i class="fa fa-edit"></i> @Messages("button.edit")</button>
+				}
+			</div>
+		 <h1 ng-switch on="analysis.valuation.valid">		
+
+		 	<span ng-switch-when="FALSE" class="text-danger">{{analysis.code}}</span> 
+		 	<span ng-switch-when="TRUE" class="text-success">{{analysis.code}}</span> 
+		 	<span ng-switch-default>{{analysis.code}}</span> 
+		 	<small>   
+		 	<span ng-bind="analysis.state.code|codes:'state'"></span>
+		 	</small>
+		 </h1>		 
+	</div>
+	</div>
+</div>
+
+<div class="row">
+<div class="col-md-12 col-lg-12"  messages="messages"></div>
+</div>
+
+<div class="row margin-bottom-7">
+<div class="col-md-12 col-lg-12">
+	<ul class="nav nav-tabs margin-bottom-5">
+		<li ng-class="getTabClass('general')"><a href="#" data-target="#general" data-toggle="tab" ng-click="setActiveTab('general')">@Messages("analyses.tabs.general")</a></li>
+		<li ng-class="getTabClass('advanced')"><a href="#" data-target="#advanced" data-toggle="tab" ng-click="setActiveTab('advanced')">@Messages("analyses.tabs.advanced")</a></li>    
+		<li ng-class="getTabClass('workflow')"><a href="#" data-target="#workflow" data-toggle="tab" ng-click="setActiveTab('workflow')">@Messages("analyses.tabs.workflow")</a></li>
+		<li ng-class="getTabClass('valuations')"><a href="#" data-target="#valuations" data-toggle="tab" ng-click="setActiveTab('valuations')">@Messages("analyses.tabs.valuations.history")</a></li>
+	</ul>
+	<div class="tab-content">
+	<div class="tab-pane {{getTabClass('general')}}" id="general">		
+			<form class="form-horizontal">
+				<div class="row">
+				@column(){
+					@views.html.helper.columnLabelValue(Messages("analyses.code")){
+						<p class="form-control-static">{{analysis.code}}</p>
+					}
+					@views.html.helper.columnLabelValue(Messages("analyses.state.code")){
+						<!-- workflow-chart ng-attr-modal-bg-color="white" ng-attr-modal-width="700" ng-attr-modal-height="800" ng-attr-modal-header-text='@Messages("analyses.modal.header.text")'
+		        			ng-attr-modal-data="statesHierarchy" ng-attr-modal-historical-data="analysis.state.historical" ng-attr-modal-current-code="analysis.state.code">
+		        		</workflow-chart-->
+		        		
+		        		<p class="form-control-static" ng-bind="analysis.state.code|codes:'state'"></p>
+					}
+					
+					@views.html.helper.columnLabelValue(Messages("analyses.valuation.valid")){
+						<div ng-switch on="isEditMode()">
+							<p class="form-control-static" ng-switch-when="false" ng-bind="analysis.valuation.valid|codes:'valuation'"/>
+							<div ng-switch-when="true"><div bt-select class="form-control" ng-model="analysis.valuation.valid" bt-options="valid.code as valid.name for valid in lists.getValuations()"></div></div>
+						</div>
+					}				
+					@views.html.helper.columnLabelValue(Messages("analyses.valuation.resolutions")){
+							<div bt-select  class="form-control" ng-model="analysis.valuation.resolutionCodes" multiple="true" bt-options="valid.code as valid.name group by valid.category.name for valid in lists.getResolutions()" ng-edit="isEditMode()"></div>							
+					}
+					@views.html.helper.columnLabelValue(Messages("analyses.valuation.criteria")){
+						<div ng-switch on="isEditMode()">
+							<p class="form-control-static" ng-switch-when="false" ng-bind="analysis.valuation.criteriaCode|codes:'valuation_criteria'" />
+							<div ng-switch-when="true"><div bt-select class="form-control" ng-model="analysis.valuation.criteriaCode" bt-options="valid.code as valid.name for valid in lists.getValuationCriterias()"></div></div>
+						</div>
+					}
+					@views.html.helper.columnLabelValue(Messages("analyses.valuation.user")){
+						<p class="form-control-static" >{{analysis.valuation.user}} ({{analysis.valuation.date | date:'@Messages("date.format")'}})</p>
+					}
+				}
+				
+				@column(){
+					@views.html.helper.columnLabelValue(Messages("analyses.typeCode")){
+						<p class="form-control-static">{{analysis.typeCode|codes:'type'}}</p>
+					}
+					
+					@views.html.helper.columnLabelValue(Messages("analyses.masterReadSetCodes")){
+						<div class="form-control-static" list-resize="analysis.masterReadSetCodes|unique" list-resize-min-size='5' />						
+					}
+					
+					@views.html.helper.columnLabelValue(Messages("analyses.readSetCodes")){			
+						<div class="form-control-static" list-resize="analysis.readSetCodes|unique" list-resize-min-size='5' />																		
+					}
+					
+				}
+				</div>
+				
+				<div class="row">
+					<div ng-switch on="isEditMode()">
+						<div class="col-md-8 col-lg-8" ng-switch-when="false">
+							<div class="form-group">
+								<label class="col-md-3 col-lg-3 control-label">@Messages("analyses.valuation.comment")</label>
+								<div class="col-md-9 col-lg-9">
+									<p class="form-control-static" ng-bind-html="deliberatelyTrustHTMLComment()"></p>
+				   				</div>
+				   			</div>
+			   			</div>
+			   			<div class="col-md-8 col-lg-8" ng-switch-when="true">
+			   				<div class="form-group">
+								<label class="col-md-3 col-lg-3 control-label">@Messages("analyses.valuation.comment")</label>
+								<div class="col-md-9 col-lg-9">
+									<textarea class="form-control" ng-model="analysis.valuation.comment" rows="3"></textarea>
+								</div>
+							</div>
+						</div>
+			  		</div>		  		
+		  		</div>
+		  		
+			</form>		
+		</div>
+	
+	<div class="tab-pane {{getTabClass('advanced')}}" id="advanced">
+	<div class="row">
+	<form class="form-horizontal">		
+			<div class="col-md-12 col-lg-12">				
+				@columnLabelValueAdv(Messages("analyses.files.path")){
+					<p class="form-control-static">{{analysis.path}}</p>
+				}				
+			</div>					
+	</form>
+	</div>
+		<div class="row">
+			<div class="col-md-10 col-lg-10">
+				<table class="table table-condensed table-hover table-bordered">
+					<thead>
+						<tr>
+							<th>@Messages("analyses.files.fullname")</th>
+							<th>@Messages("analyses.files.typeCode")</th>
+							<th>@Messages("analyses.files.usable")</th>							
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="file in analysis.files">
+							<td>{{file.fullname}}</td>
+							<td>{{file.typeCode}}</td>
+							<td ng-if="file.usable == true">@Messages("analyses.files.isUsable")</td>
+							<td ng-if="file.usable == false">@Messages("analyses.files.isNotUsable")</td>							
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>	
+		
+	</div>
+	<div class="tab-pane {{getTabClass('workflow')}}" id="workflow">
+	<div class="row">
+		<div class="col-md-4 col-lg-4">
+				<table class="table table-condensed table-hover table-bordered">
+				<thead>
+						<tr>
+							<th>@Messages("analyses.workflow.state")</th>
+							<th>@Messages("analyses.workflow.date")</th>
+							<th>@Messages("analyses.workflow.who")</th>								
+						</tr>
+				</thead>
+				<tbody>
+					<tr ng-repeat="state in analysis.state.historical|orderBy:'date'">
+								<td>{{state.code|codes:'state'}}</td>
+								<td>{{state.date|date:'@Messages("datetime.format")'}}</td>
+								<td>{{state.user}}</td>
+						</tr>
+				</tbody>
+				</table>
+					
+			</div>
+	</div>	
+		
+	</div>
+
+	<div class="tab-pane {{getTabClass('valuations')}}" id="valuations">
+		<div class="row">
+			<div class="col-md-4 col-lg-4">
+				<table class="table table-condensed table-hover table-bordered">
+					<thead>
+						<tr>
+							<th>@Messages("analyses.valuation.history.valid")</th>
+							<th>@Messages("analyses.valuation.history.who")</th>
+							<th>@Messages("analyses.valuation.history.date")</th>								
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="valuation in analysis.valuation.history|orderBy:'index'">
+							<td>{{valuation.valid|codes:'valuation'}}</td>
+							<td>{{valuation.user}}</td>
+							<td>{{valuation.date|date:'@Messages("datetime.format")'}}</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+	
+	
+</div>
+</div>
+</div>
+<div class="row">	
+	<div class="col-md-12 col-lg-12">
+		@views.html.commons.treatments()
+	</div>
+</div>	
+

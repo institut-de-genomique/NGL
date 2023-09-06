@@ -1,0 +1,135 @@
+@()
+
+<div class="row">
+	<div class="col-xs-6">
+		<table class="table table-condensed table-bordered ">
+			<thead></thead>	
+	 		<tbody>
+	 			<tr>
+	 				<th>@Messages("readsets.code")</th>
+	 				<td>{{readset.code}}</td>
+	 			</tr>
+	 			<tr>
+	 				<th>@Messages("readsets.productionValuation.valid")</th>
+	 				<td>{{readset.productionValuation.valid|codes:'valuation'}}</td>
+	 			</tr>
+	 			<tr>
+	 				<th>@Messages("readsets.productionValuation.resolutions")</th>
+	 				<td><div bt-select  class="form-control" ng-model="readset.productionValuation.resolutionCodes" multiple="true" bt-options="valid.code as valid.name group by valid.category.name for valid in lists.getResolutions()" ng-edit="false"></div></td>
+				</tr>
+	 			<tr>
+	 				<th>@Messages("readsets.productionValuation.criteria")</th>
+	 				<td>{{readset.productionValuation.criteriaCode|codes:'valuation_criteria'}}</td>
+				</tr>
+				<tr>
+	 				<th>@Messages("readsets.valuation.user")</th>
+	 				<td>{{readset.productionValuation.user}} ({{readset.productionValuation.date | date:'@Messages("date.format")'}})</td>
+				</tr>
+				<tr>
+	 				<th>@Messages("readsets.treatments.global.usefulSequences")</th>
+	 				<td>{{readset.treatments.global["default"].usefulSequences.value | number}}</td>
+				</tr>
+				<tr>
+	 				<th>@Messages("readsets.treatments.global.usefulBases")</th>
+	 				<td>{{readset.treatments.global["default"].usefulBases.value | number}}</td>
+				</tr>
+				<tr>
+	 				<th>@Messages("readsets.bioinformaticValuation.valid")</th>
+	 				<td>{{readset.bioinformaticValuation.valid|codes:'valuation'}}</td>
+				</tr>
+				<tr>
+	 				<th>@Messages("readsets.bioinformaticValuation.resolutions")</th>
+	 				<td><div bt-select  class="form-control" ng-model="readset.bioinformaticValuation.resolutionCodes" multiple="true" bt-options="valid.code as valid.name group by valid.category.name for valid in lists.getResolutions()" ng-edit="false"></div></td>
+				</tr>
+				<tr>
+	 				<th>@Messages("readsets.bioinformaticValuation.criteria")</th>
+	 				<td>{{readset.bioinformaticValuation.criteriaCode|codes:'valuation_criteria'}}</td>
+				</tr>
+				<tr>
+	 				<th>@Messages("readsets.valuation.user")</th>
+	 				<td>{{readset.bioinformaticValuation.user}} ({{readset.bioinformaticValuation.date | date:'@Messages("date.format")'}})</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+	<div class="col-xs-6">
+		<table class="table table-condensed table-bordered ">
+			<thead></thead>	
+	 		<tbody>	
+				<tr>
+					<th>@(Messages("readsets.runCode")+" / "+Messages("readsets.laneNumber"))</th>
+					<td>{{readset.runCode}} / {{readset.laneNumber}}</td>	 		
+	 			</tr>
+				<tr>
+	 				<th>@Messages("readsets.runType")</th>
+	 				<td>{{readset.runTypeCode}}</td>
+				</tr>
+				<tr>
+	 				<th>@Messages("readsets.nbCycles")</th>
+	 				<td>{{runNGSRG["default"].nbCycle.value}}</td>
+				</tr>
+				<tr>
+	 				<th>@Messages("runs.sequencingStartDate")</th>
+	 				<td>{{readset.runSequencingStartDate|date:'@Messages("date.format")'}}</td>
+				</tr>
+				<tr>
+	 				<th>@Messages("readsets.endOfRG")</th>
+	 				<td>{{readset.state.historical|filter:'F-RG'|get:'date'|date:'@Messages("datetime.format")'}}</td>
+				</tr>
+				<tr>
+	 				<th>@Messages("readsets.endOfQC")</th>
+	 				<td>{{readset.state.historical|filter:'F-QC'|get:'date'|date:'@Messages("datetime.format")'}}</td>
+				</tr>
+				<tr>
+	 				<th>@Messages("readsets.archiveId")</th>
+	 				<td>{{readset.archiveId}}</td>
+				</tr>
+				<tr>
+	 				<th>@Messages("readsets.archiveDate")</th>
+	 				<td>{{readset.archiveDate | date:'@Messages("datetime.format")'}}</td>
+				</tr>
+				<tr>
+	 				<th>@Messages("readsets.files.path")</th>
+	 				<td>{{readset.path}}</td>
+				</tr>
+				<tr>
+	 				<th>@Messages("readsets.properties.isSentCCRT")</th>
+	 				<td>
+		 				<div ng-switch on="readset.properties.isSentCCRT.value">
+							<i ng-switch-when="true" class="fa fa-check-square-o  fa-lg"></i>
+							<i ng-switch-default class="fa fa-square-o  fa-lg"></i>
+						</div>
+	 				</td>
+				</tr>
+				<tr>
+	 				<th>@Messages("readsets.properties.isSentCollaborator")</th>
+	 				<td>
+		 				<div ng-switch on="readset.properties.isSentCollaborator.value">
+							<i ng-switch-when="true" class="fa fa-check-square-o  fa-lg"></i>
+							<i ng-switch-default class="fa fa-square-o  fa-lg"></i>
+						</div>
+	 				</td>
+				</tr>
+	 		</tbody>
+	 	</table>
+	 </div>
+</div>
+
+
+<div class="row">
+	<div class="col-xs-12">
+		<table class="table table-condensed no-border">
+			<thead></thead>	
+			<tbody>
+				<tr>
+					<th>@Messages("readsets.productionValuation.comment")</th>
+					<td>{{deliberatelyTrustHTMLComment()}}</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+
+
+

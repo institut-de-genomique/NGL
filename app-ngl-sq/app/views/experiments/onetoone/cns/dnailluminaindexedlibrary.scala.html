@@ -1,0 +1,46 @@
+@()
+
+
+<div class="col-md-12 col-lg-12"  ng-controller="DNAIlluminaIndexedLibraryCtrl" >
+
+<div class="row" ng-show="plateUtils.isPlate()" ng-if="mainService.isEditMode()" >
+<div class="col-md-4 col-lg-4">
+<form class="form-horizontal">
+  	<div class="form-group">
+   		<label class="col-md-4 col-lg-4 control-label">Choisissez un plan d'index : </label>
+		<div class="input-group col-md-6 col-lg-6" >
+			<div bt-select class="form-control" 
+				ng-model="selectedPlateIndex" 
+				bt-options="value as label for plate in indexPlates"
+				ng-change="updatePlateWithIndex(selectedPlateIndex)">
+				
+			</div>
+		</div>
+	</div>
+</form>
+</div>
+</div>
+
+<!--NGL-3667 ajout choix d'un groupe de tags-->
+<div class="row" ng-show="selectGroup.isShow()" ng-if="mainService.isEditMode()" >
+<div class="col-md-4 col-lg-4">
+<form class="form-horizontal">
+	<div class="form-group " >
+          <label class="col-md-4 col-lg-4 control-label" control-label">Choisissez un groupe de tags : </label>
+          <div class="input-group col-md-6 col-lg-6" >
+          		<select ng-model="selectedTagGroup" class="form-control" 
+          			ng-options="group.name for group in getTagGroups()" 
+           			ng-change="selectGroup.select(selectedTagGroup)">
+          		</select>
+          </div>
+    </div>
+</form>
+</div>
+</div>
+
+<div class="row">
+<div class="col-md-12 col-lg-12">
+	@views.html.experiments.onetoone.defaults.partials.udtAndPlateDesign()
+</div>
+</div>	
+</div>

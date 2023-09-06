@@ -1,0 +1,33 @@
+@this(headerSection: views.html.experiments.partials.headerSection, ctx : fr.cea.ig.ngl.NGLApplication)
+
+@(currentUser:java.lang.String)
+
+@import views.html.helper._
+@import views.html.experiments.partials._
+
+@isCNSInstitute  = @{ "CNS" == ctx.nglConfig().getInstitute() }
+
+<div ng-form name="allForm" class="row">
+<div class="col-md-12 col-lg-12">
+@imageModal()
+@headerSection()
+<div class="inProgressSpinner" ng-if="isSaveInProgress()">
+	<button class="btn btn-primary btn-lg">
+		<i class="fa fa-spinner fa-spin fa-5x"></i>
+	</button>
+</div>
+		
+@mainSection()
+
+<div class="row break">
+	<div ng-include="experimentTypeTemplate"></div>
+</div>
+@reagentsSection(isCNSInstitute)
+@commentSection(currentUser)
+@finalValuationModal()
+@finalResolutionModal()
+@finalDispatchModal()
+@deleteModal()
+@saveAdminModal()
+</div>
+</div>

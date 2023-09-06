@@ -1,0 +1,93 @@
+@()
+
+<div class="col-md-12 col-lg-12" ng-controller="TagPCRCtrl">
+	<!-- <form class="form-horizontal" name="TagPCRCtrl">
+
+	 	<div class="form-group">
+		
+				<label class="col-md-2 col-lg-2 control-label">@Messages("property_definition.tagPcrBlank1SampleCode")
+				</label>
+
+				<div ng-switch on="mainService.isEditMode()"
+					class="col-md-2 col-lg-2">
+					<p class="col-md-2 col-lg-2 form-control" ng-switch-when="false" ng-bind="sample.tagPcrBlank1SampleCode" />
+					<div ng-switch-when="true">
+						<div class="col-md-2 col-lg-2 form-control" bt-select ng-model="sample.tagPcrBlank1SampleCode"
+							placeholder='@Messages("search.placeholder.samples")'
+							bt-options="sample.code as sample.code for sample in lists.get('sampleTag')|orderBy:'code':true"
+							filter="true"></div>
+					</div>
+				</div>
+		
+			<label class="col-md-2 col-lg-2 control-label">@Messages("property_definition.tagPcrBlank2SampleCode")
+			</label>
+			<div ng-switch on="mainService.isEditMode()"
+				class="col-md-2 col-lg-2">
+				<p class="col-md-2 col-lg-2 form-control"
+					ng-switch-when="false" ng-bind="sample.tagPcrBlank2SampleCode" />
+				<div ng-switch-when="true">
+					<div class="col-md-2 col-lg-2 form-control" bt-select
+						ng-model="sample.tagPcrBlank2SampleCode"
+						placeholder='@Messages("search.placeholder.samples")'
+						bt-options="sample.code as sample.code for sample in lists.get('sampleTag')|orderBy:'code':true"
+						filter="true"></div>
+				</div>
+			</div>
+
+		</div>
+			</form>-->
+			<div class="row" ng-show="plateUtils.isPlate()" ng-if="mainService.isEditMode()">
+	<div class="col-md-4 col-lg-4">
+		<form class="form-horizontal">
+			<div class="form-group">
+				<label class="col-md-6 col-lg-6 control-label">Choisissez un
+					plan de tag 2ndaire : </label>
+				<div class="input-group col-md-6 col-lg-6">
+					<div bt-select class="form-control" ng-model="selectedPlateIndex"
+						bt-options="value as label for plate in indexPlates"
+						ng-change="updatePlateWithIndex(selectedPlateIndex)"></div>
+				</div>
+			</div>
+		</form>
+	</div>
+	</div>
+	<div class="row">
+		<div class="col-md-12 col-lg-12">
+			<ul class="list-unstyled">
+				<li><u>Attention</u>, <strong>passer par étape
+						démarrer</strong>, <span class="label label-danger">ne pas terminer
+						avant étape démarrer</span> pour permettre la génération des codes ech
+					témoin</li>
+			</ul>
+		</div>
+		<div class="col-md-12 col-lg-12" >
+			<div  class="alert alert-warning" ng-show="isMissingExtractionNegativeControlsWarning()">
+				Attention témoin négatif d'extraction présent pour cette expérience : <strong>{{missingExtractionNegativeControls}}</strong>. Pensez à les ajouter
+			</div>
+		</div>
+	</div>
+	<div class="row" ng-show="isNested()">
+	<div class="col-md-12 col-lg-12" >
+		<p><a class="fa fa-info-circle" style="color:blue" ng-click="toggleIsShowInformation()" title="Information" href=""> Information valeurs forcées</a></p>
+		<div ng-show="isShowInformation">
+		  <ol>
+			<li>Si protocole = "metaB_primerFusion_DEV" => NGL force la valeur de <strong>Région ciblée = 16S_Full Length + 16S_V4V5</strong> mais laisse la saisie utilisateur pour amorces et protocole</li>
+			<li>Si protocole = "Tag ITS FL + ITS FUN" => NGL laisse la saisie utilisateur pour Région ciblée, Amorces et Protocole</li>
+			<li>Si protocole = "Tag 16S_Full Length + 16S_V3V4" => NGL laisse la saisie utilisateur pour Région ciblée, Amorces et Protocole</li>
+			<li>Si protocole = "Tag 18S_Full Length + 18S_V9" => NGL laisse la saisie utilisateur pour Région ciblée, Amorces et Protocole</li>
+			<li>En dehors de ces 4 protocoles => NGL force les valeurs de
+				<ul>
+				<li><strong>Région ciblée = 16S_Full Length + 16S_V4V5 ;</strong></li>
+				<li><strong>Amorces = 16S FL 27F/1492R + Fuhrman primers ;</strong></li>
+				<li><strong>Protocole = Tag 16S_Full Length + 16S_V4V5_Fuhrman</strong></li>
+				</ul>
+			</li>
+		  </ol>
+		  <p><i>(Attention &agrave; ne pas se tromper dans les cas où la saisie utilisateur est libre)</i></p>
+		
+		</div>
+	</div>
+	</div>
+
+	@views.html.experiments.onetoone.defaults.partials.udtAndPlateDesign()
+</div>

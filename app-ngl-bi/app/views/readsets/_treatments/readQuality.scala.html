@@ -1,0 +1,19 @@
+@()
+
+<div class="row">
+<div class="col-md-12 col-lg-12">
+   <ul class="nav nav-tabs margin-bottom-5">
+   	<li class="active"><a href="#" data-target="#read1" data-toggle="tab">@Messages("readsets.treatments.read_quality.tabs.read1")</a></li>
+   	<li ><a href="#" data-target="#read2" data-toggle="tab">@Messages("readsets.treatments.read_quality.tabs.read2")</a></li>    	
+   </ul>
+
+	<div class="tab-content">	
+		<div class="tab-pane active" id="read1">
+			@partials.readQuality("read1")
+	 	</div>	
+		<div class="tab-pane" id="read2">	
+			@partials.readQuality("read2")
+	 	</div>	
+	</div>	
+</div>
+</div>

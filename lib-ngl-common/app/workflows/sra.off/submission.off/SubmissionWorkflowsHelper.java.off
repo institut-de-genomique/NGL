@@ -1,0 +1,723 @@
+package workflows.sra.submission;
+
+import static ngl.refactoring.state.SRASubmissionStateNames.*;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import org.apache.commons.lang3.StringUtils;
+//import org.hamcrest.core.IsInstanceOf;
+import org.mongojack.DBQuery;
+import org.mongojack.DBUpdate;
+
+import fr.cea.ig.MongoDBDAO;
+import fr.cea.ig.ngl.dao.api.APIException;
+import fr.cea.ig.ngl.dao.api.sra.AbstractSampleAPI;
+import fr.cea.ig.ngl.dao.api.sra.AbstractStudyAPI;
+//import fr.cea.ig.ngl.dao.api.sra.AbstractStudyAPI;
+import fr.cea.ig.ngl.dao.api.sra.ConfigurationAPI;
+import fr.cea.ig.ngl.dao.api.sra.ExperimentAPI;
+import fr.cea.ig.ngl.dao.api.sra.ExternalSampleAPI;
+import fr.cea.ig.ngl.dao.api.sra.ExternalStudyAPI;
+import fr.cea.ig.ngl.dao.api.sra.ReadsetAPI;
+import fr.cea.ig.ngl.dao.api.sra.SampleAPI;
+import fr.cea.ig.ngl.dao.api.sra.StudyAPI;
+import fr.cea.ig.ngl.dao.api.sra.SubmissionAPI;
+import fr.cea.ig.ngl.dao.projects.ProjectsAPI;
+import fr.cea.ig.ngl.dao.readsets.ReadSetsAPI;
+// import models.laboratory.common.instance.State;
+import models.laboratory.project.instance.Project;
+import models.laboratory.run.instance.ReadSet;
+import models.sra.submit.common.instance.AbstractSample;
+import models.sra.submit.common.instance.AbstractStudy;
+import models.sra.submit.common.instance.ExternalSample;
+import models.sra.submit.common.instance.ExternalStudy;
+import models.sra.submit.common.instance.Sample;
+import models.sra.submit.common.instance.Study;
+import models.sra.submit.common.instance.Submission;
+//import models.sra.submit.sra.instance.Configuration;
+import models.sra.submit.sra.instance.Experiment;
+import models.sra.submit.sra.instance.RawData;
+import models.sra.submit.util.SraException;
+import models.sra.submit.util.VariableSRA;
+import models.utils.InstanceConstants;
+import validation.ContextValidation;
+import workflows.sra.SRA;
+// import workflows.readset.ReadSetWorkflows;
+//import workflows.sra.experiment.ExperimentWorkflows;
+//import workflows.sra.sample.SampleWorkflows;
+//import workflows.sra.study.StudyWorkflows;
+
+@Singleton
+public class SubmissionWorkflowsHelper {
+	
+	private static final play.Logger.ALogger logger = play.Logger.of(SubmissionWorkflowsHelper.class);
+
+	/*@Autowired
+	StudyWorkflows studyWorkflows;
+	@Autowired
+	SampleWorkflows sampleWorkflows;
+	@Autowired
+	ExperimentWorkflows experimentWorkflows;
+	@Autowired
+	ReadSetWorkflows readSetWorkflows;*/
+
+//	private final Provider<StudyWorkflows>      studyWorkflows;
+//	private final SampleWorkflows     sampleWorkflows;
+//	private final ExperimentWorkflows experimentWorkflows;
+	// private final ReadSetWorkflows    readSetWorkflows;
+	
+//	@Inject
+//	public SubmissionWorkflowsHelper(Provider<StudyWorkflows>      studyWorkflows, 
+//					                 SampleWorkflows     sampleWorkflows,
+//			                         ExperimentWorkflows experimentWorkflows) {
+//		this.studyWorkflows      = studyWorkflows;
+//		this.sampleWorkflows     = sampleWorkflows;
+//		this.experimentWorkflows = experimentWorkflows;
+//		// this.readSetWorkflows    = readSetWorkflows;
+//	}
+
+	private final StudyAPI studyAPI;
+	@SuppressWarnings("unused") // SGAS
+	private final AbstractStudyAPI abstractStudyAPI;
+	private final ExternalStudyAPI externalStudyAPI;
+	private final SampleAPI sampleAPI;
+	private final AbstractSampleAPI abstractSampleAPI;
+	private final ExternalSampleAPI externalSampleAPI;
+	private final ExperimentAPI experimentAPI;
+	private final SubmissionAPI submissionAPI;
+	private final ConfigurationAPI configurationAPI;
+	private final ReadSetsAPI readsetsAPI;	
+	private final ReadsetAPI readsetAPI;	
+	private final ProjectsAPI projectAPI;
+
+	@Inject
+	public SubmissionWorkflowsHelper(StudyAPI          studyAPI,
+									 AbstractStudyAPI  abstractStudyAPI,
+									 ExternalStudyAPI  externalStudyAPI,
+									 SampleAPI         sampleAPI,
+									 AbstractSampleAPI abstractSampleAPI,
+									 ExternalSampleAPI externalSampleAPI,
+									 ExperimentAPI     experimentAPI,
+									 SubmissionAPI     submissionAPI,
+									 ConfigurationAPI  configurationAPI,
+									 ReadSetsAPI       readsetsAPI,
+									 ReadsetAPI        readsetAPI,
+									 ProjectsAPI       projectAPI) {
+		
+		this.studyAPI          = studyAPI;
+		this.abstractStudyAPI  = abstractStudyAPI;
+		this.externalStudyAPI  = externalStudyAPI;
+		this.sampleAPI         = sampleAPI;
+		this.abstractSampleAPI = abstractSampleAPI;
+		this.externalSampleAPI = externalSampleAPI;
+		this.experimentAPI     = experimentAPI;
+		this.submissionAPI     = submissionAPI;
+		this.configurationAPI  = configurationAPI;
+		this.readsetsAPI       = readsetsAPI;   
+		this.readsetAPI        = readsetAPI;   
+		this.projectAPI        = projectAPI;
+    }
+	
+//	public static final String NONE          = "NONE"; //,
+//							   N             = "N",
+//							   N_R           = "N-R",
+//							   V_SUB         = "V-SUB",
+//							   IW_SUB	     = "IW-SUB",
+//							   IP_SUB        = "IP-SUB",
+//							   FE_SUB        = "FE-SUB",
+//							   F_SUB         = "F-SUB",
+//							   IW_SUB_R      = "IW-SUB-R",
+//							   IP_SUB_R      = "IP-SUB-R",
+//							   FE_SUB_R      = "FE_SUB-R";	
+	
+	public void updateSubmissionRelease(Submission submission) {	
+		Study study = MongoDBDAO.findByCode(InstanceConstants.SRA_STUDY_COLL_NAME, Study.class, submission.studyCode);
+		Calendar calendar = Calendar.getInstance();
+		Date date  = calendar.getTime();		
+		Date release_date  = calendar.getTime();
+		logger.debug("update submission date study "+study.code+" with date "+release_date);		
+		submissionAPI.dao_update(DBQuery.is("code", submission.code),
+		        				 DBUpdate.set("submissionDate", date)
+		        				 .set("xmlSubmission", "submission.xml")
+		        				 .set("traceInformation.modifyUser", submission.creationUser)
+		        				 .set("traceInformation.modifyDate", date));
+	
+		studyAPI.dao_update(DBQuery.is("code", submission.studyCode),  
+							DBUpdate.set("releaseDate", release_date)
+									.set("traceInformation.modifyUser", submission.creationUser)
+									.set("traceInformation.modifyDate", date));
+	}
+	
+	public void updateSubmissionForDates(Submission submission) {
+		Calendar calendar = Calendar.getInstance();
+		Date date  = calendar.getTime();		
+		calendar.add(Calendar.YEAR, 2);
+		Date release_date  = calendar.getTime();
+		
+//		MongoDBDAO.update(InstanceConstants.SRA_SUBMISSION_COLL_NAME, Submission.class, 
+//				DBQuery.is("code", submission.code),
+//				DBUpdate.set("submissionDate", date));
+		submissionAPI.dao_update(DBQuery.is("code", submission.code),
+				DBUpdate.set("submissionDate", date));		
+
+		if (submission.studyCode != null) {
+//			MongoDBDAO.update(InstanceConstants.SRA_STUDY_COLL_NAME, Study.class, 
+//				DBQuery.is("code", submission.studyCode),
+//				DBUpdate.set("firstSubmissionDate", date).set("releaseDate", release_date));
+			studyAPI.dao_update(DBQuery.is("code", submission.studyCode),
+					DBUpdate.set("firstSubmissionDate", date).set("releaseDate", release_date));
+		}
+
+	}
+	
+	/**
+	 * Cree le bon repertoire de soumission 
+	 * (regle de nomage si soumission primaire de données brutes ou si soumission release)
+	 * et met à jour la soumission dans la base pour le champs submissionDirectory.  
+	 * @param submission submission
+	 * @param validation contient une erreur si le repertoire n'a pas pu etre crée
+	 */
+	public void createDirSubmission(Submission submission, ContextValidation validation) {
+		// Determiner le repertoire de soumission:
+		submission.submissionDirectory = VariableSRA.submissionRootDirectory + File.separator + submission.code; 
+		if (submission.release) {
+			submission.submissionDirectory = submission.submissionDirectory + "_release"; 
+		}
+		File dataRep = new File(submission.submissionDirectory);
+		logger.debug("Creation du repertoire de soumission : " + submission.submissionDirectory);
+		SRA.logger.info("Creation du repertoire de soumission" + submission.submissionDirectory);
+//		logger.info("Creation du repertoire de soumission" + submission.submissionDirectory);
+		if (dataRep.exists()){
+			validation.addError("submission", "error.directory.release.exist",dataRep,submission.code);
+		} else {
+			if(!dataRep.mkdirs()){	
+				validation.addError("submission", "error.directory.release.create",dataRep,submission.code);
+			}
+		}
+//		MongoDBDAO.update(InstanceConstants.SRA_SUBMISSION_COLL_NAME,  Submission.class, 
+//				DBQuery.is("code", submission.code),
+//				DBUpdate.set("submissionDirectory", submission.submissionDirectory));
+		submissionAPI.dao_update(DBQuery.is("code", submission.code),
+				DBUpdate.set("submissionDirectory", submission.submissionDirectory));
+
+	}
+
+	public void rollbackSubmission(Submission submission, ContextValidation validation) throws SraException{
+		// Si la soumission est connu de l'EBI on ne pourra pas l'enlever de la base :
+		if (StringUtils.isNotBlank(submission.accession)){
+			logger.debug("objet submission avec AC : submissionCode = "+ submission.code + " et submissionAC = "+ submission.accession);
+			return;
+		} 
+		
+		// Si la soumission concerne une release avec status "N-R" ou IW-SUB-R:
+		if (submission.release && (submission.state.code.equalsIgnoreCase(N_R)||(submission.state.code.equalsIgnoreCase(IW_SUB_R)))) {
+			// detruire la soumission :
+//			MongoDBDAO.deleteByCode(InstanceConstants.SRA_SUBMISSION_COLL_NAME, Submission.class, submission.code);
+			submissionAPI.dao_deleteByCode(submission.code);
+			// remettre le status du study avec un status F-SUB
+			// La date de release du study est modifié seulement si retour positif de l'EBI pour release donc si status F-SUB
+			// study qui ne peut etre external si release.
+			studyAPI.dao_update(DBQuery.is("code", submission.studyCode),
+					DBUpdate.set("state.code", F_SUB)
+							.set("traceInformation.modifyUser", validation.getUser())
+							.set("traceInformation.modifyDate", new Date()));
+	
+			return;
+		} 
+		
+		// Si la soumission concerne une soumission primaire de données avec status != N :
+		if ( !submission.release && !submission.state.code.equalsIgnoreCase(N)) {
+			return;
+		}
+		
+		// Si la soumission concerne une soumission primaire de données avec status = N :
+		if (! submission.experimentCodes.isEmpty()) {
+			for (String experimentCode : submission.experimentCodes) {
+				// verifier que l'experiment n'est pas utilisé par autre objet submission avant destruction
+				Experiment experiment = MongoDBDAO.findByCode(InstanceConstants.SRA_EXPERIMENT_COLL_NAME, Experiment.class, experimentCode);
+				// mettre le status pour la soumission des readSet à NONE si possible: 
+				if (experiment != null){
+					// remettre les readSet dans la base avec submissionState à "NONE":
+//					MongoDBDAO.update(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class,
+//							DBQuery.is("code", experiment.readSetCode),
+//							DBUpdate.set("submissionState.code", NONE).set("traceInformation.modifyUser", validation.getUser()).set("traceInformation.modifyDate", new Date()));
+//					//System.out.println("submissionState.code remis à 'N' pour le readSet "+experiment.readSetCode);
+
+					readsetsAPI.dao_update(DBQuery.is("code", experiment.readSetCode),
+							DBUpdate.set("submissionState.code", NONE)
+									.set("traceInformation.modifyUser", validation.getUser())
+									.set("traceInformation.modifyDate", new Date()));
+					
+					// Enlever les readsets de la collection sra :
+					readsetAPI.dao_deleteByCode(experiment.readSetCode);
+					
+					List <Submission> submissionList = MongoDBDAO.find(InstanceConstants.SRA_SUBMISSION_COLL_NAME, Submission.class, DBQuery.in("experimentCodes", experimentCode)).toList();
+					if (submissionList.size() > 1) {
+						for (Submission sub: submissionList) {
+//							System.out.println(experimentCode + " utilise par objet Submission " + sub.code);
+							logger.debug(experimentCode + " utilise par objet Submission " + sub.code);
+						}
+					} else {
+						// verifier qu'on ne detruit que des experiments avec un status N ou V_SUB
+						if (N.equals(experiment.state.code) || V_SUB.equals(experiment.state.code)){
+//							MongoDBDAO.deleteByCode(InstanceConstants.SRA_EXPERIMENT_COLL_NAME, models.sra.submit.sra.instance.Experiment.class, experimentCode);
+							try {
+                                experimentAPI.delete(experimentCode);
+                            } catch (APIException e) {
+                                logger.error(e.getMessage(), e);
+                                throw new SraException(e.getMessage(), e);
+                            }
+						} else {
+							logger.debug(experimentCode + " non delété dans base car status = " + experiment.state.code);
+						}
+					}
+				}
+			}
+		}
+
+		if (! submission.refSampleCodes.isEmpty()) {	
+			for (String sampleCode : submission.refSampleCodes){
+				// verifier que sample n'est pas utilisé par autre objet submission avant destruction
+				// normalement sample crees dans init de type external avec state=F-SUB ou sample avec state='N'
+//				Sample sample = MongoDBDAO.findByCode(InstanceConstants.SRA_SAMPLE_COLL_NAME, Sample.class, sampleCode);
+				AbstractSample abstSample = abstractSampleAPI.dao_getObject(sampleCode);
+				
+				List <Submission> submissionList = MongoDBDAO.find(InstanceConstants.SRA_SUBMISSION_COLL_NAME, Submission.class, DBQuery.in("refSampleCodes", sampleCode)).toList();
+				if (submissionList.size() > 1) {
+					for (Submission sub: submissionList) {
+						logger.debug(sampleCode + " utilise par objet Submission " + sub.code);
+					}
+				} else {
+//					MongoDBDAO.deleteByCode(InstanceConstants.SRA_SAMPLE_COLL_NAME, models.sra.submit.common.instance.Sample.class, sampleCode);
+//					abstractSampleAPI.delete(sampleCode);
+					
+					// verifier qu'on ne detruit que des samples avec un status N ou bien des samples externes:
+					if (abstSample instanceof ExternalSample) {
+						try {
+                            externalSampleAPI.delete(sampleCode);
+                        } catch (APIException e) {
+                            logger.error(e.getMessage(), e);
+                            throw new SraException(e.getMessage(), e);
+                        }
+					} else {
+						Sample sample = (Sample) abstSample; 
+						if ( N.equals(sample.state.code) ) {
+							try {
+                                sampleAPI.delete(sampleCode);
+                            } catch (APIException e) {
+                                logger.error(e.getMessage(), e);
+                                throw new SraException(e.getMessage(), e);
+                            }
+						} else {
+							logger.debug("Pas de deletion dans base du sample interne " + sampleCode + "avec statut= "+sample.state.code);
+						}
+					}
+				}
+			}
+		}
+
+		// verifier que la config à l'etat used n'est pas utilisé par une autre soumission avant de remettre son etat à "NONE"
+		// update la configuration pour le statut en remettant le statut new si pas utilisé par ailleurs :
+		List <Submission> submissionList = MongoDBDAO.find(InstanceConstants.SRA_SUBMISSION_COLL_NAME, Submission.class, DBQuery.in("configCode", submission.configCode)).toList();
+		if (submissionList.size() <= 1) {
+//			MongoDBDAO.update(InstanceConstants.SRA_CONFIGURATION_COLL_NAME, Configuration.class, 
+//					DBQuery.is("code", submission.configCode),
+//					DBUpdate.set("state.code", NONE).set("traceInformation.modifyUser", validation.getUser()).set("traceInformation.modifyDate", new Date()));	
+			configurationAPI.dao_update(DBQuery.is("code", submission.configCode), 
+										DBUpdate.set("state.code", NONE)
+											    .set("traceInformation.modifyUser", validation.getUser())
+											    .set("traceInformation.modifyDate", new Date()));
+			logger.debug("state.code remis à '"+NONE+"' pour configuration "+submission.configCode);
+		}
+
+		// verifier que le study à l'etat N n'est pas utilisé par une autre soumission avant de remettre son etat à "NONE"
+		if (StringUtils.isNotBlank(submission.studyCode)){
+			List <Submission> submissionList2 = MongoDBDAO.find(InstanceConstants.SRA_SUBMISSION_COLL_NAME, Submission.class, DBQuery.in("studyCode", submission.studyCode)).toList();
+			if (submissionList2.size() == 1) {
+//				MongoDBDAO.update(InstanceConstants.SRA_STUDY_COLL_NAME, Study.class, 
+//						DBQuery.is("code", submission.studyCode).is("state.code", N),
+//						DBUpdate.set("state.code", NONE).set("traceInformation.modifyUser", validation.getUser()).set("traceInformation.modifyDate", new Date()));	
+				studyAPI.dao_update(DBQuery.is("code", submission.studyCode).is("state.code", N),
+						            DBUpdate.set("state.code", NONE)
+						            		.set("traceInformation.modifyUser", validation.getUser())
+						            		.set("traceInformation.modifyDate", new Date()));	
+				logger.debug("state.code remis à '\"+NONE+\"' pour study "+submission.studyCode);
+			}	
+		}
+
+		if (! submission.refStudyCodes.isEmpty()) {	
+			// On ne peut detruire que des ExternalStudy crées et utilisés seulement par la soumission courante.
+			for (String studyCode : submission.refStudyCodes){
+				// verifier que study n'est pas utilisé par autre objet submission avant destruction
+				// normalement study crees dans init de type external avec state=F-SUB ou study avec state='N'
+				List <Submission> submissionList2 = MongoDBDAO.find(InstanceConstants.SRA_SUBMISSION_COLL_NAME, Submission.class, DBQuery.in("refStudyCodes", studyCode)).toList();
+				if (submissionList2.size() > 1) {
+					for (Submission sub: submissionList2) {
+						logger.debug(studyCode + " utilise par objet Submission " + sub.code);
+					}
+				} else {
+					// on ne veut enlever que les external_study cree par cette soumission, si internalStudy cree, on veut juste le remettre avec bon state.
+
+					AbstractStudy absStudy = MongoDBDAO.findByCode(InstanceConstants.SRA_STUDY_COLL_NAME, models.sra.submit.common.instance.AbstractStudy.class, studyCode);
+					if (absStudy != null) {
+						if ( absStudy instanceof ExternalStudy ) {
+							//System.out.println("Recuperation dans base du study avec Ac = " + studyAc +" qui est du type externalStudy ");
+							if (F_SUB.equalsIgnoreCase(absStudy.state.code) ) {
+								//MongoDBDAO.deleteByCode(InstanceConstants.SRA_STUDY_COLL_NAME, models.sra.submit.common.instance.Study.class, studyCode);		
+								try {
+                                    externalStudyAPI.delete(studyCode);
+                                    logger.debug("deletion dans base pour study "+studyCode);
+								} catch (APIException e) {
+								    logger.error(e.getMessage(), e);
+	                                throw new SraException(e.getMessage(), e);
+								}
+							}
+						} else { // instanceof Study
+							if (N.equalsIgnoreCase(absStudy.state.code) ) {
+								studyAPI.dao_update(DBQuery.is("code", studyCode),
+										DBUpdate.set("state.code", NONE)
+												.set("traceInformation.modifyUser", validation.getUser())
+												.set("traceInformation.modifyDate", new Date()));
+							}
+						}
+					}
+				}
+			}
+		}
+		logger.debug("deletion dans base pour submission "+submission.code);
+		MongoDBDAO.deleteByCode(InstanceConstants.SRA_SUBMISSION_COLL_NAME, models.sra.submit.common.instance.Submission.class, submission.code);
+	}
+
+	/**
+	 * Cascade le traceInformation et le state de la soumission à ses sous-objets
+	 * @param submission submission
+	 * @param validation validation context
+	 */
+	public void updateSubmissionChildObject(Submission submission, ContextValidation validation) {
+		logger.debug("dans applySuccessPostStateRules submission=" + submission.code + " avec state.code='"+submission.state.code+"'");
+		if (StringUtils.isNotBlank(submission.studyCode)) {
+//			Study study = MongoDBDAO.findByCode(InstanceConstants.SRA_STUDY_COLL_NAME, Study.class, submission.studyCode);
+			Study study = studyAPI.dao_getObject(submission.studyCode);
+			if (study == null) {
+				logger.error("study " + submission.studyCode + " absent de la base de données" );
+			} else {
+				// Recuperer object study pour mettre historique des state traceInformation à jour:
+//				MongoDBDAO.update(InstanceConstants.SRA_STUDY_COLL_NAME, Study.class,
+//					DBQuery.is("code", submission.studyCode),
+//					DBUpdate.set("state", submission.state).set("traceInformation", submission.traceInformation));
+				studyAPI.dao_update(DBQuery.is("code", submission.studyCode), 
+									DBUpdate.set("state", submission.state)
+											.set("traceInformation", submission.traceInformation));
+				logger.debug("mise à jour du study avec state.code=" + submission.state.code);
+			}
+		}
+		// etat à propager dans samples à soumettre 
+		// donc dans collection sampleCodes qui ne contient que des samples et jamais d'ExternalSample
+		if (submission.sampleCodes != null) {
+			for (int i = 0; i < submission.sampleCodes.size() ; i++) {
+				Sample sample = MongoDBDAO.findByCode(InstanceConstants.SRA_SAMPLE_COLL_NAME, Sample.class, submission.sampleCodes.get(i));
+//				MongoDBDAO.update(InstanceConstants.SRA_SAMPLE_COLL_NAME, Study.class,
+//					DBQuery.is("code", sample.code),
+//					DBUpdate.set("state", submission.state).set("traceInformation", submission.traceInformation));
+				sampleAPI.dao_update(DBQuery.is("code", sample.code),					
+									 DBUpdate.set("state", submission.state)
+									 		 .set("traceInformation", submission.traceInformation));
+			}
+		}
+		// etat à propager dans experiments à soumettre et readset: 
+		if (submission.experimentCodes != null) {
+			for (int i = 0; i < submission.experimentCodes.size() ; i++) {
+				Experiment experiment = MongoDBDAO.findByCode(InstanceConstants.SRA_EXPERIMENT_COLL_NAME, Experiment.class, submission.experimentCodes.get(i));
+				if (experiment == null) {
+					logger.error("experiment " + submission.experimentCodes.get(i) + " absent de la base de données" );
+					continue;
+				} else {
+//					MongoDBDAO.update(InstanceConstants.SRA_EXPERIMENT_COLL_NAME, Study.class,
+//						DBQuery.is("code", experiment.code),
+//						DBUpdate.set("state", submission.state).set("traceInformation", submission.traceInformation));
+					experimentAPI.dao_update(DBQuery.is("code", experiment.code),					
+							 DBUpdate.set("state", submission.state)
+							 		 .set("traceInformation", submission.traceInformation));
+				}
+				// Update objet readSet :
+				ReadSet readset = MongoDBDAO.findByCode(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, experiment.readSetCode);
+				if (readset == null) {
+					logger.error("readset " + experiment.readSetCode + " absent de la base de données" );
+				} else {
+//					MongoDBDAO.update(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class,
+//						DBQuery.is("code", readset.code),
+//						DBUpdate.set("submissionState.code", submission.state.code).set("traceInformation.modifyUser", validation.getUser()).set("traceInformation.modifyDate", new Date()));
+//					MongoDBDAO.update(InstanceConstants.READSET_ILLUMINA_COLL_NAME, Study.class,
+//						DBQuery.is("code", experiment.readSetCode),
+//						DBUpdate.set("submissionState", submission.state).set("traceInformation.modifyUser", validation.getUser()).set("traceInformation.modifyDate", new Date()));
+
+					readsetsAPI.dao_update(DBQuery.is("code", experiment.readSetCode),					
+							 DBUpdate.set("submissionState", submission.state)
+									 .set("traceInformation.modifyUser", submission.traceInformation.modifyUser)
+									 .set("traceInformation.modifyDate", submission.traceInformation.modifyDate));
+					}
+			}
+		}
+	}
+
+	/**
+	 * Cree le repertoire de soumission et met à jour le champs submission.submissionDirectory, sans sauvegarde dans la base.
+	 * @param submission submission
+	 * @return File : Repertoire crée.
+	 * @throws SraException SRA exception
+	 */
+	private File createDirSubmission(Submission submission) throws SraException{
+		// Determiner le repertoire de soumission:
+//		DateFormat dateFormat = new SimpleDateFormat("dd_MM_yyyy");	
+//		Date courantDate = new java.util.Date();
+//		String st_my_date = dateFormat.format(courantDate);
+//		String syntProjectCode = submission.code;
+		submission.submissionDirectory = VariableSRA.submissionRootDirectory + File.separator + submission.code; 
+		if (submission.release) {
+			submission.submissionDirectory = submission.submissionDirectory + "_release"; 
+		}
+		File dataRep = new File(submission.submissionDirectory);
+//		System.out.println("Creation du repertoire de soumission : " + submission.submissionDirectory);
+		logger.debug("Creation du repertoire de soumission : " + submission.submissionDirectory);
+//		play.Logger.of("SRA").info("Creation du repertoire de soumission" + submission.submissionDirectory);
+		SRA.logger.info("Creation du repertoire de soumission" + submission.submissionDirectory);
+		if (dataRep.exists()) {
+			throw new SraException("Le repertoire " + dataRep + " existe deja !!! (soumission concurrente ?)");
+		} else {
+			if (!dataRep.mkdirs()) {	
+				throw new SraException("Impossible de creer le repertoire " + dataRep + " ");
+			}
+		}
+		return (dataRep);
+	}	
+
+	/**
+	 * Active la soumission primaire de données si possible et met à jour la soumission dans la base avec bon etat.
+	 * @param contextValidation : Ne doit pas contenir d'erreur si activation reussie
+	 * @param submission submission
+	 */
+	public void activationPrimarySubmission(ContextValidation contextValidation, Submission submission) {
+		checkForActivatePrimarySubmission(contextValidation, submission);
+		
+		if (!contextValidation.hasErrors()) {
+			activatePrimarySubmission(contextValidation, submission);
+		} 
+	}
+
+	/**
+	 * Active une première soumission de données : 
+	 * cree le repertoire de soumission et fait les liens sur les données brutes si données zippées
+	 * @param contextValidation validation context
+	 * @param submission        submission
+	 */
+	public void activatePrimarySubmission(ContextValidation contextValidation, Submission submission) {
+		System.out.println("XXXX Dans SubmissionWorkflowsHelper.activatePrimarySubmission");
+		logger.debug("XXXX logger Dans SubmissionWorkflowsHelper.activatePrimarySubmission");
+		// creer repertoire de soumission sur disque et faire liens sur données brutes
+		try {
+			// creation repertoire de soumission :
+//			File dataRep = 
+					createDirSubmission(submission);
+			// creation liens donnees brutes vers repertoire de soumission
+			for (String experimentCode: submission.experimentCodes) {
+//				Experiment expElt =  MongoDBDAO.findByCode(InstanceConstants.SRA_EXPERIMENT_COLL_NAME, Experiment.class, experimentCode);
+				Experiment expElt =  experimentAPI.dao_getObject(experimentCode);
+//				ReadSet readSet = MongoDBDAO.findByCode(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, expElt.readSetCode);
+				ReadSet readSet = readsetsAPI.get(expElt.readSetCode);
+//				Project p = 
+//						MongoDBDAO.findByCode(InstanceConstants.PROJECT_COLL_NAME, Project.class, readSet.projectCode);
+//				System.out.println("exp = "+ expElt.code);
+				logger.debug("exp = "+ expElt.code);
+				contextValidation.addKeyToRootKeyName("experiment");
+				contextValidation.addKeyToRootKeyName("run");
+				contextValidation.addKeyToRootKeyName("rawData");
+
+				for (RawData rawData :expElt.run.listRawData) {
+					// Partie de code deportée dans activate : on met la variable location à CNS
+					// si les données sont physiquement au CNS meme si elles sont aussi au CCRT
+					// et on change le chemin pour remplacer /ccc/genostore/.../rawdata par /env/cns/proj/ 
+					String cns_directory = rawData.directory;
+					if (rawData.directory.startsWith("/ccc/")) {
+						int index = rawData.directory.indexOf("/rawdata/");
+						String lotseq_dir = rawData.directory.substring(index + 9);
+						cns_directory="/env/cns/proj/"+lotseq_dir;
+					}
+
+					File fileCible = new File(cns_directory + File.separator + rawData.relatifName);
+					// verification dans check que fileCible est bien soit au CNS soit au CCRT.
+					if (fileCible.exists()) {
+//						System.out.println("le fichier "+ fileCible +"existe bien");
+						logger.debug("le fichier "+ fileCible +"existe bien");
+						rawData.location = "CNS";
+						rawData.directory = cns_directory;
+					} else {				
+						if ("CCRT".equalsIgnoreCase(readSet.location)) {
+							rawData.location = readSet.location;
+						}
+					}
+					if (rawData.extention.equalsIgnoreCase("fastq")) {
+						rawData.gzipForSubmission = true;
+					} else {
+						rawData.gzipForSubmission = false;
+					}
+					// On ne cree les liens dans repertoire de soumission vers rep des projets que si la 
+					// donnée est au CNS et si elle n'est pas à zipper
+					if ("CNS".equalsIgnoreCase(rawData.location) && ! rawData.gzipForSubmission) {
+//						System.out.println("run = "+ expElt.run.code);
+						logger.debug("run = "+ expElt.run.code);
+						File fileLien = new File(submission.submissionDirectory + File.separator + rawData.relatifName);
+						if(fileLien.exists()){
+							fileLien.delete();
+						}
+//						System.out.println("fileCible = " + fileCible);
+//						System.out.println("fileLien = " + fileLien);
+						logger.debug("fileCible = " + fileCible);
+						logger.debug("fileLien = " + fileLien);
+						Path lien = Paths.get(fileLien.getPath());
+						Path cible = Paths.get(fileCible.getPath());
+						Files.createSymbolicLink(lien, cible);
+//						System.out.println("Lien symbolique avec :  lien= "+lien+" et  cible="+cible);
+						logger.debug("Lien symbolique avec :  lien= " + lien + " et  cible=" + cible);
+						//String cmd = "ln -s -f " + rawData.directory + File.separator + rawData.relatifName
+						//+ " " + submission.submissionDirectory + File.separator + rawData.relatifName;
+						//System.out.println("cmd = " + cmd);
+					} else {
+//						System.out.println("Donnée "+ rawData.relatifName + " localisée au " + rawData.location);
+						logger.debug("Donnée "+ rawData.relatifName + " localisée au " + rawData.location);
+					}
+					contextValidation.removeKeyFromRootKeyName("rawData");
+					contextValidation.removeKeyFromRootKeyName("run");
+					contextValidation.removeKeyFromRootKeyName("experiment");
+				}
+
+				// sauver dans base la liste des rawData avec bonne location et bon directory:
+//				MongoDBDAO.update(InstanceConstants.SRA_EXPERIMENT_COLL_NAME,  Experiment.class, 
+//						DBQuery.is("code", experimentCode),
+//						DBUpdate.set("run.listRawData", expElt.run.listRawData));
+				experimentAPI.dao_update(DBQuery.is("code", experimentCode),
+										 DBUpdate.set("run.listRawData", expElt.run.listRawData));
+			}
+		} catch (SraException e) {
+			contextValidation.addError("submission", e.getMessage());
+		 
+		
+	    } catch (SecurityException e) {
+			contextValidation.addError("Dans activatePrimarySubmission, pb SecurityException: ", e.getMessage());
+		} catch (UnsupportedOperationException e) {
+			contextValidation.addError(" Dans activatePrimarySubmission, pb UnsupportedOperationException: ", e.getMessage());
+		} catch (FileAlreadyExistsException e) {
+			contextValidation.addError(" Dans activatePrimarySubmission, pb FileAlreadyExistsException: ", e.getMessage());
+		} catch (IOException e) {
+			contextValidation.addError(" Dans activatePrimarySubmission, pb IOException: ", e.getMessage());		
+		} catch (RuntimeException e) {
+			contextValidation.addError("submission", e.getMessage());
+		}
+		if (! contextValidation.hasErrors()) {
+			// updater la soumission dans la base pour le repertoire de soumission (la date de soumission sera mise à la reception des AC)
+//			MongoDBDAO.update(InstanceConstants.SRA_SUBMISSION_COLL_NAME,  Submission.class, 
+//					DBQuery.is("code", submission.code),
+//					DBUpdate.set("submissionDirectory", submission.submissionDirectory));
+			submissionAPI.dao_update(DBQuery.is("code", submission.code),
+									 DBUpdate.set("submissionDirectory", submission.submissionDirectory));
+		} 
+	}
+
+	/**
+	 * Verifie que la soumission primaire de données peut etre activée.
+	 * @param contextValidation validation context
+	 * @param submission        submission
+	 */
+	public void checkForActivatePrimarySubmission(ContextValidation contextValidation, Submission submission) {
+//		System.out.println("Dans SubmissionWorkflowsHelper.checkForActivatePrimarySubmission");
+		logger.debug("Dans SubmissionWorkflowsHelper.checkForActivatePrimarySubmission");
+		// verifications liens donnees brutes vers repertoire de soumission
+		for (String experimentCode: submission.experimentCodes) {
+//			Experiment expElt =  MongoDBDAO.findByCode(InstanceConstants.SRA_EXPERIMENT_COLL_NAME, Experiment.class, experimentCode);
+			Experiment expElt =  experimentAPI.dao_getObject(experimentCode);
+//			ReadSet readSet = MongoDBDAO.findByCode(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, expElt.readSetCode);
+			ReadSet readSet = readsetsAPI.get(expElt.readSetCode);
+//			Project p = MongoDBDAO.findByCode(InstanceConstants.PROJECT_COLL_NAME, Project.class, readSet.projectCode);
+			Project p = projectAPI.get(readSet.projectCode);
+//			System.out.println("exp = "+ expElt.code);
+			logger.debug("exp = "+ expElt.code);
+			contextValidation.addKeyToRootKeyName("experiment");
+			contextValidation.addKeyToRootKeyName("run");
+			contextValidation.addKeyToRootKeyName("rawData");
+
+			for (RawData rawData :expElt.run.listRawData) {
+				// Partie de code deportée dans activate : on met la variable location à CNS
+				// si les données sont physiquement au CNS meme si elles sont aussi au CCRT
+				// et on change le chemin pour remplacer /ccc/genostore/.../rawdata par /env/cns/proj/ 
+				String cns_directory = rawData.directory;
+				if (rawData.directory.startsWith("/ccc/genostore")) {
+					int index = rawData.directory.indexOf("/rawdata/");
+					String lotseq_dir = rawData.directory.substring(index + 9);
+					cns_directory="/env/cns/proj/"+lotseq_dir;
+				}
+
+				File fileCible = new File(cns_directory + File.separator + rawData.relatifName);
+				if (fileCible.exists()) {
+//					System.out.println("le fichier "+ fileCible +"existe bien");
+					logger.debug("le fichier " + fileCible + "existe bien");
+					rawData.location = "CNS";
+					rawData.directory = cns_directory;
+				} else {
+//					System.out.println("le fichier "+ fileCible +"n'existe pas au CNS");
+					logger.debug("le fichier "+ fileCible + " n'existe pas au CNS");
+					if ("CNS".equalsIgnoreCase(readSet.location)) {
+						if (!(boolean) p.properties.get("synchroProj").value) { // si synchroProj a true => projet non archivé, present sur fileSyst
+							//if (p.archive) {
+							contextValidation.addError("rawData", "error.rawData.activate.CNS.archive", rawData.relatifName, p.code, readSet.code);
+						} else {
+							contextValidation.addError("rawData", "error.rawData.activate.CNS.notArchive", rawData.relatifName, p.code, readSet.code);
+						}
+					} else if ("CCRT".equalsIgnoreCase(readSet.location)) {
+						rawData.location = readSet.location;
+					} else {
+						contextValidation.addError("rawData", "error.rawData.activate.location", readSet.location, rawData.relatifName);
+					}
+				}
+				if (rawData.extention.equalsIgnoreCase("fastq")) {
+					rawData.gzipForSubmission = true;
+				} else {
+					rawData.gzipForSubmission = false;
+					if (StringUtils.isBlank(rawData.md5)) {
+						contextValidation.addError("rawData", "error.rawData.activate.md5 " + rawData.relatifName);
+					}
+				}
+				// On ne cree les liens dans repertoire de soumission vers rep des projets que si la 
+				// donnée est au CNS et si elle n'est pas à zipper
+				if ("CNS".equalsIgnoreCase(rawData.location) && ! rawData.gzipForSubmission) {
+//					System.out.println("run = "+ expElt.run.code);
+					logger.debug("run = "+ expElt.run.code);
+					File fileLien = new File(submission.submissionDirectory + File.separator + rawData.relatifName);
+					if(fileLien.exists()){
+						fileLien.delete();
+					}
+//					System.out.println("fileCible = " + fileCible);
+//					System.out.println("fileLien = " + fileLien);
+					logger.debug("fileCible = " + fileCible);
+					logger.debug("fileLien = " + fileLien);
+				} else {
+//					System.out.println("Donnée "+ rawData.relatifName + " localisée au " + rawData.location);
+					logger.debug("Donnée "+ rawData.relatifName + " localisée au " + rawData.location);
+				}
+				contextValidation.removeKeyFromRootKeyName("rawData");
+				contextValidation.removeKeyFromRootKeyName("run");
+				contextValidation.removeKeyFromRootKeyName("experiment");
+			}
+		}		
+	}
+
+}

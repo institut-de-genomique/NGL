@@ -1,0 +1,27 @@
+@()
+<div class="row">
+	<div class="col-md-10 col-lg-10 col-xs-12">
+		<table class="table table-condensed table-hover table-bordered">
+	 		<thead>
+				<tr>
+					<th>@Messages("readsets.treatments.index_composition.sequencing_summary.barcode")</th>
+					<th>@Messages("readsets.treatments.index_composition.sequencing_summary.count")</th>
+					<th>@Messages("readsets.treatments.index_composition.sequencing_summary.percent")</th>
+	 			</tr>
+	 		</thead>
+	 		<tbody>
+	 			<tr ng-repeat="summary in readset.treatments.indexComposition.default.sequencingSummary.value">
+					<td>
+						{{summary.barcode}}
+					</td>
+					<td>
+						{{summary.count | number}}
+					</td>
+					<td>
+						{{summary.percent | number}}
+					</td>
+				</tr>
+	 		</tbody>
+	 	</table>
+	</div>
+</div>

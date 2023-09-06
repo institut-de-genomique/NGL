@@ -1,0 +1,11 @@
+@()
+
+<h1 ng-switch on="support.valuation.valid">
+	<span ng-switch-when="FALSE" class="text-danger" ng-bind="support.code" />
+	<span ng-switch-when="TRUE" class="text-success" ng-bind="support.code" />
+	<span ng-switch-default class="mute" ng-bind="support.code" />
+	<small ng-bind="support.state.code|codes:'state'" />
+</h1>
+<h5>
+<div list-resize="support.fromTransformationTypeCodes|unique|codes:'type'" list-resize-min-size='3' horizontal></div>
+</h5>

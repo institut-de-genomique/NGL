@@ -1,0 +1,45 @@
+//created on: Nov 21, 2013
+package rules
+
+rule "Copy Properties from Support and Container to Run"
+	@nglBI(IP_S_1)
+	@nglSQ(IP_S_1)
+	dialect "java"
+	salience 200
+	no-loop
+	when
+		$run : Run()		
+	then
+		Logger.debug("Copy properties to Run "+$run.code);
+		ContainerSupport cs = MongoDBDAO.findByCode(InstanceConstants.CONTAINER_SUPPORT_COLL_NAME, ContainerSupport.class, $run.containerSupportCode);
+		if(null != cs){
+			if (cs.properties != null) {
+				$run.properties.putAll(cs.properties);			
+			}
+			
+			List<Container> containers = MongoDBDAO.find(InstanceConstants.CONTAINER_COLL_NAME, Container.class, DBQuery.is("support.code", $run.containerSupportCode)).toList();
+			
+			Set<String> libProcessTypeCodes = new TreeSet<String>();
+			for(Container container:containers){
+				for(Content content:container.contents){
+					if(content.properties.containsKey("libProcessTypeCode")){
+						libProcessTypeCodes.add((String)(content.properties.get("libProcessTypeCode").value));
+					}
+				}
+			}
+			if(libProcessTypeCodes.size() > 0){
+					$run.properties.put("libProcessTypeCodes", new PropertyListValue(new ArrayList(libProcessTypeCodes)));
+			}
+			
+			MongoDBDAO.update(InstanceConstants.RUN_ILLUMINA_COLL_NAME, Run.class, 
+							DBQuery.is("code", $run.code),
+							DBUpdate.set("properties", $run.properties)
+								.set("projectCodes",new TreeSet<String>(cs.projectCodes))
+								.set("sampleCodes",new TreeSet<String>(cs.sampleCodes)));
+		}else{
+			Logger.error("ContainerSupport null for "+$run.containerSupportCode);
+		}
+		
+			
+end
+

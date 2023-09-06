@@ -1,0 +1,56 @@
+@import views.html.helper._
+@()
+
+		@** definition formulaire pour soumission Illumina ou nanopore **@
+		
+		<form>
+		@formGroup{
+			<div  class="form-control" bt-select  ng-model="form.projCodes" filter="true" multiple = "true" placeholder='@Messages("create.placeholder.projectCodes")' bt-options="project.code as project|formatProjectListLabel for project in lists.getProjects()" required ng-change="refreshSubmissions()"></div>	
+		}
+		@** 
+		bt-options = lists.getSraConfigurations() defini dans ngl-common/common.js
+		ng-focus = appelle refreshSraConfigurations de createService
+		**@
+		@formGroup{
+			<div  class="form-control" bt-select ng-model="form.configurationCode" placeholder='@Messages("create.placeholder.submissions.configuration")' bt-options="configuration.code as configuration.code for configuration in lists.getSraConfigurations()" required ng-focus="refreshSraConfigurations()" ng-click="displayStudies()"></div>			
+		}
+		
+		@** 
+		bt-options = lists.getSraStudies() defini dans ngl-common/common.js
+		ng-focus = appelle refreshSraStudies de createService
+		**@
+		@formGroup{
+			<div  ng-if="STRATEGY_CODE_STUDY" class="form-control" bt-select  ng-model="form.studyCode" placeholder='@Messages("create.placeholder.submissions.study")' bt-options="study.code as study.code for study in lists.getSraStudies()" ng-focus="refreshSraStudies()"></div>			
+		}
+		
+		@** 
+		bt-options = lists.getReadSets() defini dans ngl-common/common.js
+		ng-focus = appelle refreshReadSets de createService
+		**@
+		@formGroup{		
+			<div class="form-control" bt-select ng-model="form.readSetCodes" filter="true" multiple="true" textarea="true" placeholder='@Messages("create.placeholder.submissions.readSet")' bt-options="readSet.code as readSet.code for readSet in readSets" ng-focus="refreshReadSets()"></div>			
+		}	
+		@formGroup{		
+			<div ng-if="STRATEGY_AC_STUDY" >
+				<input type="text" class="form-control" ng-model="form.acStudy" placeholder='@Messages("create.placeholder.acStudy")'>
+			</div>
+		}
+		@formGroup{	
+			<div ng-if="STRATEGY_AC_SAMPLE">
+				<input type="text" class="form-control" ng-model="form.acSample" placeholder='@Messages("create.placeholder.acSample")'>
+			</div>
+			<br/>	
+		}
+		@formGroup{	
+				<div>
+					<label>@Messages("userFileReadSet")</label> 
+					<input type="file"  id="idUserFileReadSet" base64-file="userFileReadSet"/>
+				</div>
+				<br/>
+				<div ng-show="STRATEGY_AC_SAMPLE">
+					<label>@Messages("userFileRefCollabToAc")</label> 
+					<input type="file"  id="idUserFileRefCollabToAc" base64-file="userFileRefCollabToAc"/>
+				</div>
+		}
+		
+		</form>

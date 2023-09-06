@@ -1,0 +1,34 @@
+@import views.html.helper._
+@()
+
+	<form>
+		@** definition formulaire pour bionano**@
+	
+		@formGroup{
+			<div  class="form-control" bt-select  ng-model="form.projCodes" filter="true" multiple = "true" placeholder='@Messages("create.placeholder.projectCodes")' bt-options="project.code as project|formatProjectListLabel for project in lists.getProjects()" required ng-change="refreshSubmissions()"></div>	
+		}
+	
+		@formGroup{
+			<div  class="form-control" bt-select  ng-model="form.analysisCode" placeholder='@Messages("create.placeholder.analysisCode")' bt-options="analysis.code as analysis.code for analysis in lists.getSraAnalyzes()" ng-focus="refreshSraAnalyzes()" required ></div>	
+		}
+	
+		@formGroup{		
+			<div class="form-control" bt-select ng-model="form.readSetCodes" filter="true" multiple="true" textarea="true" placeholder='@Messages("create.placeholder.submissions.readSet")' bt-options="readSet.code as readSet.code for readSet in readSets" ng-focus="refreshReadSets()"></div>			
+		}	
+		
+		@** le ng-if empeche la recuperation de la valeur de input file => d'ou le ng-hide **@ 
+		@formGroup{	
+			<div>
+				<label>@Messages("userFileReadSet")</label> 
+				<input type="file"  id="idUserFileReadSet" base64-file="userFileReadSet"/> 
+			</div>	
+			<br/>
+			<div>
+				<label >@Messages("userFilePathcmap")</label> 
+				<input type="file"  id="idUserFilePathcmap" base64-file="userFilePathcmap"/>
+			</div>
+			<br/>
+		}
+	
+	</form>
+

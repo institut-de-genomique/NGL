@@ -1,0 +1,142 @@
+@this(ctx : fr.cea.ig.ngl.NGLApplication)
+@(nav: String = "")
+
+@import play.mvc.Http.Context
+@import controllers.authorisation.PermissionHelper
+@import controllers.samples.tpl.routes.Samples
+@import controllers.containers.tpl.routes.ContainerSupports
+@import controllers.containers.tpl.routes.Containers
+@import controllers.processes.tpl.routes.Processes
+@import controllers.experiments.tpl.routes.Experiments
+@import controllers.indexes.tpl.routes.Indexes 
+@import controllers.descriptions.tpl.routes.Descriptions 
+
+@import views.html.helper.formGroup
+@import views.html.ddmenu._
+
+@user            = @{ ctx.currentUser() }
+@writePermission = @{ PermissionHelper.checkPermission(user, "writing") }
+@adminPermission = @{ PermissionHelper.checkPermission(user, "admin") }
+@isCNSInstitute  = @{ "CNS" == ctx.nglConfig().getInstitute() }
+@isCNGInstitute  = @{ "CNG" == ctx.nglConfig().getInstitute() }
+@always          = @{ true }
+
+
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+	<div class="container-fluid">
+		<div class="navbar-header">
+			<a class="navbar-brand" href="@controllers.main.tpl.routes.Main.home()">@ctx.messageEnv("application.name")</a>
+    	</div>
+    	<div class="collapse navbar-collapse">
+    		<ul class="nav navbar-nav">
+				@ddmenu(nav,"samples","samples.menu") {
+				  @ddentry(nav,					"samples.search",				Samples.home("search"),					"samples.menu.search")
+				}
+				
+				@ddmenu(nav,"containerSupports","containerSupports.menu") {
+				  @ddme(nav, always,          "containerSupports.search",		ContainerSupports.home("search"),		"containerSupports.menu.search")
+				  @ddme(nav, writePermission, "containerSupports.state",		ContainerSupports.home("state"),		"containerSupports.menu.state") 
+			      @ddme(nav, adminPermission, "containerSupports.scanner",		ContainerSupports.homeScanner(),		"containerSupports.menu.scanner")
+				}
+				
+  				@ddmenu(nav,"containers","containers.menu")	{
+  				  @ddme(nav, always,          "containers.search",				Containers.home("search"),				"containers.menu.search")
+				  @ddme(nav, writePermission, "containers.state",				Containers.home("state"),				"containers.menu.state")
+				  @ddme(nav, writePermission, "container.new",					Containers.home("new"),					"containers.menu.new_from_file")
+  				}	
+  					
+  				@ddmenu(nav,"processes","processes.menu") {
+				  @ddme(nav, always,          "processes.search", 				Processes.home("search"),				"processes.menu.search")
+				  @ddme(nav, writePermission, "processes.new-from-containers",	Processes.home("new-from-containers"),	"processes.menu.new-from-containers")
+				  @ddme(nav, writePermission, "new-from-samples",				Processes.home("new-from-samples"),		"processes.menu.new-from-samples")
+				  @ddme(nav, writePermission, "assign-to-container",			Processes.home("assign-to-container"),	"processes.menu.assign-to-container")
+				  @ddme(nav, writePermission, "processes.remove",				Processes.home("remove"),				"processes.menu.remove")
+				  @ddme(nav, adminPermission, "processes.state",				Processes.home("state"),				"processes.menu.state")
+				}
+				
+  				@ddmenu(nav,"experiments","experiments.menu") {
+  				  @ddme(nav, always,          "experiments.search",				Experiments.home("search"),				"experiments.menu.search")
+				  @ddme(nav, writePermission, "experiments.new",				Experiments.home("new"),				"experiments.menu.creation")
+				  @ddme(nav, always,          "experiments.reagents",			Experiments.home("reagents"),			"experiments.menu.reagents")
+				}			
+				
+				@ddmenu(nav,"index","indexes.menu") {
+  				  @ddentry(nav,				  "indexes.search",					Indexes.home("search"),					"indexes.menu.search")
+  				  <!-- attention aux modifications de structure du wiki ... 
+  				       NGL-3641, il faut rajouter ?rev=  a la query string pour recupere la derbier version !! -->
+  				   @if(isCNGInstitute){   
+  				  <li><a href="http://wiki.cnrgh.fr/wiki/ngldocumentation/download/NGL-SQ/Fichiers%20%C3%A0%20t%C3%A9l%C3%A9charger%20CNRGH/Fichier%20de%20d%C3%A9claration%20d%27index/WebHome/Declaration_Index_v1.xlsx?rev="
+  				         target="_blank">@Messages("file.import-index")</a></li>
+  				   
+  				  <!-- ajouter ici les liens vers autres fichiers index a telecharger... 
+  				  <li><a href="http://wiki.cnrgh.fr/wiki/ngldocumentation/download/NGL-SQ/Fichiers%20%C3%A0%20t%C3%A9l%C3%A9charger%20CNRGH/Fichier%20de%20d%C3%A9claration%20d%27index/WebHome/xxxxxxxxxx.xlsx"
+  				         target="_blank">@Messages("xxxxxxx")</a></li>
+  				  --> 
+  				  }
+  				  
+  				  @if(isCNSInstitute){
+  				  <li><a href="http://wiki.cnrgh.fr/wiki/ngldocumentation/download/NGL-SQ/Fichiers%20%C3%A0%20t%C3%A9l%C3%A9charger%20CNS/Fichier%20de%20d%C3%A9claration%20d%27index/WebHome/Declaration_Index_v1.xlsx?rev="
+  				         target="_blank">@Messages("file.import-index")</a></li>
+  				   
+  				  <!-- ajouter ici les liens vers autres fichiers index a telecharger...
+  				  <li><a href="http://wiki.cnrgh.fr/wiki/ngldocumentation/download/NGL-SQ/Fichiers%20%C3%A0%20t%C3%A9l%C3%A9charger%20CNS/Fichier%20de%20d%C3%A9claration%20d%27index/WebHome/xxxxxxxxxx.xlsx"
+  				         target="_blank">@Messages("xxxxxxxx")</a></li>
+  				  --> 
+  				  }
+  				}
+  			
+	  			<li class="dropdown @("active".when(nav.startsWith("help")))">
+	  				<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" id="help">@Messages("docs.menu")<b class="caret"></b></a>
+	  				<ul class="dropdown-menu" role="menu" aria-labelledby="help">
+	  						@if(isCNSInstitute){
+	  							@menuhelpCNS()
+	  						}
+	  						@if(isCNGInstitute){
+	  							@menuhelpCNG()
+	  						}
+	  				</ul>
+
+				@ddmenu(nav,"descriptions","descriptions.menu") {
+					@ddentry(nav,	"descriptions.instruments",	Descriptions.home("instruments"),	"descriptions.menu.instruments")
+					@ddentry(nav,	"descriptions.imports",	Descriptions.home("imports"),	"descriptions.menu.imports")
+					@ddentry(nav,	"descriptions.protocols",	Descriptions.home("protocols"),	"descriptions.menu.protocols")
+					@ddentry(nav,	"descriptions.experiments",	Descriptions.home("experiments"),	"descriptions.menu.experiments")
+					@if(isCNSInstitute){
+						@ddentry(nav,	"descriptions.mapping.projects",	Descriptions.home("mappingprojects"),	"descriptions.menu.mapping.projects")
+					}
+					@ddentry(nav,	"descriptions.processes",	Descriptions.home("processes"),	"descriptions.menu.processes")
+				}
+				
+				@if(adminPermission){
+					<li class="dropdown @("active".when(nav.startsWith("admin")))">
+						<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" id="admin"><i class="fa fa-users"></i> @Messages("admin.menu")<b class="caret"></b></a>
+						<ul class="dropdown-menu" role="menu" aria-labelledby="users">
+							<li class="@("active".when(nav == "admin.supports.switch-index"))"><a href="@controllers.admin.supports.tpl.routes.Supports.home("switch-index")">@Messages("admin.supports.menu.switch-index")</a></li>
+							<li class="@("active".when(nav == "admin.supports.content-update"))"><a href="@controllers.admin.supports.tpl.routes.Supports.home("content-update")">@Messages("admin.supports.menu.content-update")</a></li>
+						</ul>
+					</li>
+				} 								
+			</ul>
+			
+			<ul class="nav navbar-nav navbar-right">
+				<li>
+					<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" id="user"><i class="fa fa-user"></i> @user <b class="caret"></b></a>
+					<ul class="dropdown-menu" role="menu" aria-labelledby="user">
+						<li><a href="/authentication/logout">@Messages("authentification.dropdown_list.signout")</a></li>
+					</ul>
+				</li>
+				<!--  NGL-3363 ajout application version / NGL-3446 ajout lien vers notes de version-->
+				<li>
+					<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" id="more"><i class="fa fa-ellipsis-v"></i></a>
+					<ul class="dropdown-menu" role="menu" aria-labelledby="more">
+						<!--  <li>&nbsp;&nbsp;Version: @Messages("application.name") @Messages("application.version")</li>-->
+						<li><a href='http://wiki.cnrgh.fr/wiki/ngldocumentation/view/Documents%20de%20mise%20en%20production/@Messages("application.name")/@ctx.getVersion()'
+  				         target="_blank">&nbsp;&nbsp;Version: @Messages("application.name") @ctx.getVersion()</a></li>
+					</ul>
+				</li>
+
+			</ul>
+		</div>
+	</div>		
+</nav>
+

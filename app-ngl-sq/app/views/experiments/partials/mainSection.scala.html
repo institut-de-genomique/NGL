@@ -1,0 +1,183 @@
+@()
+@import views.html.helper._
+@import views.html.experiments.partials._
+<div class="row">
+		<div class="col-md-12 col-lg-12">
+		
+		<div class="row">
+			<div class="col-xs-5 col-sm-5 col-md-5 col-lg-5">
+			  <div class="panel panel-default">
+			  <div class="panel-heading">			  	
+				  <h2 class="panel-title">@Messages("experiment.panel.experimentInformation")</h2>			  	
+			  </div>
+			  <div class="panel-body">
+			    <form class="form-horizontal" name="experimentForm">
+					@columnLabelValue(Messages("experiments.type")){
+					<p class="form-control-static" ng-bind="experiment.typeCode | codes:'type'"/>
+					}			    
+					
+					<div class="form-group required {{getHasErrorClass('experimentForm', 'protocolCode')}}">
+				    <label class="col-md-6 col-lg-6 control-label">@Messages("experiments.protocol")</label>
+				    <div class="col-md-6 col-lg-6">
+					<div ng-switch on="mainService.isEditMode()">						
+						<p class="form-control-static" ng-switch-when="false" ng-bind="experiment.protocolCode | codes:'protocol'" />						 
+						<div ng-switch-when="true">
+							<div bt-select class="form-control"
+								name="protocolCode" ng-required=true
+								ng-model="experiment.protocolCode"								
+								bt-options="protocol.code as protocol.name for protocol in lists.get('protocols')"								
+								auto-select>
+							</div>
+						</div>
+					</div>
+					</div>
+					</div>
+						
+			   	 	@columnLabelValue(Messages("experiments.state")){
+			   	 		<p class="form-control-static" ng-bind="experiment.state.code | codes:'state'" ng-if="!isCreationMode()"/>
+					}
+					
+					@columnLabelValue(Messages("experiments.status")){
+			    		<div ng-switch on="mainService.isEditMode() || isFinishEditMode()">
+							<p ng-switch-when="false" class="form-control-static" ng-model='experiment.status.valid' codes="status"/>
+							<div ng-switch-when="true">
+								<div bt-select class="form-control" ng-model="experiment.status.valid" bt-options="valid.code as valid.name for valid in lists.get('status')"></div>
+							</div>
+						</div>						
+					}
+					@attrs = {ng-if="lists.get('valuationCriterias').length!==0"}
+					@columnLabelValue(Messages("experiments.criteria"), attrs){
+			    		<div ng-switch on="mainService.isEditMode() || isFinishEditMode()">
+							<p ng-switch-when="false" class="form-control-static" ng-bind="experiment.status.criteriaCode|codes:'valuation_criteria'"/>
+							<div ng-switch-when="true">
+								<div bt-select class="form-control" ng-model="experiment.status.criteriaCode" bt-options="criteria.code as criteria.name for criteria in lists.get('valuationCriterias')" auto-select></div>
+							</div>
+						</div>						
+					}	
+					
+			    	@columnLabelValue(Messages("experiments.resolutions")){
+			    	<div bt-select class="form-control" ng-model="experiment.state.resolutionCodes" multiple="true" 
+			    		bt-options="valid.code as valid.name for valid in lists.getResolutions()" 
+			    		ng-edit="mainService.isEditMode() || isFinishEditMode()">
+			    	</div>							
+					}	
+					
+					<div  ng-repeat="propertyDef in experimentType.propertiesDefinitions | filter:'Experiment' | orderBy : 'displayOrder'"
+					 class="form-group {{propertyDef.required?'required':''}} {{getHasErrorClass('experimentForm', 'experimentProperties'+propertyDef.code)}}"
+						ng-switch on="propertyDef.valueType">
+						@dynamicPropertyDefinition("experimentProperties", "updateExperimentProperty")						
+				</div>	
+													
+			    </form>
+			  </div>
+			</div>
+		
+			</div>
+			<div class="col-xs-5 col-sm-5 col-md-5 col-lg-5">
+				<div class="panel panel-default">
+			  	<div class="panel-heading">
+			  	  <h2 class="panel-title">@Messages("experiment.panel.instrumentInformation")</h2>			  	
+			  	</div>
+			  	<div class="panel-body">
+			    <form class="form-horizontal" name="instrumentForm">
+			    
+			   <div class="form-group required {{getHasErrorClass('instrumentForm', 'instrumentTypeCode')}}">
+				    <label class="col-md-6 col-lg-6 control-label">@Messages("experiments.instrumentUsedType")</label>
+				    <div class="col-md-6 col-lg-6">
+			    	<div ng-switch on="mainService.isEditMode()">						
+						<p class="form-control-static" ng-switch-when="false" ng-bind="experiment.instrument.typeCode | codes:'type'" />						 
+						<div ng-switch-when="true">
+							<div bt-select class="form-control"
+								name="instrumentTypeCode" ng-required=true
+								ng-model="experiment.instrument.typeCode"							
+								bt-options="instrumentUsedType.code as instrumentUsedType.name for instrumentUsedType in lists.get('instrumentUsedTypes')"
+								ng-change="changeInstrumentType()"	
+								placeholder='@Messages("experiments.select.instrumentUsedType")'
+								auto-select>								
+							</div>
+						</div>
+					</div>	
+					</div>
+				</div>		    			    					
+				<!-- FDS correction label  -->
+			    <div class="form-group required {{getHasErrorClass('instrumentForm', 'instrumentCode')}}">
+				    <label class="col-md-6 col-lg-6 control-label">@Messages("experiments.instrument")</label>
+				    <div class="col-md-6 col-lg-6">
+				     <div ng-switch on="mainService.isEditMode()">						
+						<p class="form-control-static" ng-switch-when="false" ng-bind="experiment.instrument.code| codes:'instrument'" />						 
+						<div ng-switch-when="true">
+							<div bt-select class="form-control"
+								name="instrumentCode" ng-required=true								
+								ng-model="experiment.instrument.code"							
+								bt-options="instrumentInformation.code as instrumentInformation.name for instrumentInformation in instrumentType.instruments"
+								ng-hide="!experiment.instrument.typeCode"	
+								placeholder='@Messages("experiments.select.instrument")'	
+								ng-change="loadTemplate()"
+								auto-select>								
+							</div>
+						</div>
+					</div>	
+				    </div>
+				</div>
+			    <!-- FDS correction label  -->
+				<div class="form-group required  {{getHasErrorClass('instrumentForm', 'instrumentCode')}}" ng-if="(experiment.instrument.typeCode !== undefined &&  experiment.instrument.typeCode !== null && !isOutputATMVoid())">
+					<label class="col-md-6 col-lg-6 control-label">@Messages("experiments.outContainerSupportCategoryCode")</label>
+					<div class="col-md-6 col-lg-6">
+					<div ng-switch on="mainService.isEditMode()">						
+						<p class="form-control-static" ng-switch-when="false" ng-bind="experiment.instrument.outContainerSupportCategoryCode | codes:'container_support_cat'" />						 
+						<div ng-switch-when="true">
+							<div bt-select class="form-control"
+								name="instrumentOutContainerSupportCategoryCode" ng-required=true
+								ng-model="experiment.instrument.outContainerSupportCategoryCode"							
+								bt-options="instrumentCategory.code as instrumentCategory.name for instrumentCategory in instrumentType.outContainerSupportCategories"
+								placeholder='@Messages("experiments.select.outContainerSupportCategoryCode")'						
+								ng-change="loadTemplate()"								
+								auto-select>								
+							</div>
+						</div>
+					</div>
+					</div>
+				</div>
+					
+			    
+			   <div  ng-repeat="propertyDef in instrumentType.propertiesDefinitions | filter:'Instrument' | orderBy : 'displayOrder'" 
+			   		class="form-group {{propertyDef.required?'required':''}} {{getHasErrorClass('instrumentForm', 'instrumentProperties'+propertyDef.code)}}"
+			   		ng-switch on="propertyDef.valueType">
+						@dynamicPropertyDefinition("instrumentProperties", "updateInstrumentProperty")						
+				</div>	
+																												    
+			    </form>
+			    </div>
+			    </div>
+		
+			</div>
+			<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
+				<div class="panel panel-default">
+				  <div class="panel-heading">			  
+				  <h2 class="panel-title">@Messages("experiment.panel.traceInformation")</h2>			  	
+				  </div>
+				  <div class="panel-body">
+				  
+				    <form class="form-horizontal">
+				    @columnLabelValue(Messages("experiments.creationDate")){
+						<p class="form-control-static" ng-bind="experiment.traceInformation.creationDate | date:'@Messages("datetime.format")'"></p>
+					}
+				    @columnLabelValue(Messages("experiments.createUser")){
+						<p class="form-control-static" ng-bind="experiment.traceInformation.createUser"></p>
+					}
+				   	@columnLabelValue(Messages("experiments.modifyDate")){
+						<p class="form-control-static" ng-bind="experiment.traceInformation.modifyDate | date:'@Messages("datetime.format")'"></p>
+					}	
+				    @columnLabelValue(Messages("experiments.modifyBy")){
+						<p class="form-control-static" ng-bind="experiment.traceInformation.modifyUser"></p>
+					}
+				   	 @columnLabelValue(Messages("experiments.finishDate")){
+				   		<p class="form-control-static"  ng-if="(experiment.state.code === 'F')" ng-bind="experiment.state.date | date:'@Messages("datetime.format")' " ></p>
+				   	 }	    								
+					</form>
+				  </div>
+				</div>
+			</div>			
+		</div>			
+		</div>
+</div>

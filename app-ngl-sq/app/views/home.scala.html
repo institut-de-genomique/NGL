@@ -1,0 +1,135 @@
+@this(ctx : fr.cea.ig.ngl.NGLApplication, menu_ : menu)
+
+@import play.mvc.Http.Context
+@import views.html._
+@import views.html.imports._
+
+@user = @{ ctx.currentUser() }
+@minifyEnabled = @{ true == ctx.nglConfig().isMinified() }
+
+@scripts() = {
+  <script src="@controllers.main.tpl.routes.Main.javascriptRoutes"  type="text/javascript" charset="utf-8"></script> 
+  <script src="@controllers.main.tpl.routes.Main.jsCodes" type="text/javascript" charset="utf-8"></script> 
+  <script src="@controllers.main.tpl.routes.Main.jsPermissions" type="text/javascript" charset="utf-8"></script>
+  
+  <script src="@routes.Assets.at("ngl-sq/javascripts/home/app.js")" type="text/javascript" charset="utf-8"></script>
+
+  @if(!minifyEnabled) {
+	<script src="@routes.Assets.at("lib/datatable/datatable/javascripts/services/ultimate-datatable.js")" type="text/javascript" charset="utf-8"></script> 
+
+	<script src="@routes.Assets.at("ngl-sq/javascripts/home/search-ctrl.js")" type="text/javascript" charset="utf-8"></script> 
+
+	<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/commons.js")" type="text/javascript" charset="utf-8"></script> 	 
+	<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/list-resize.js")" type="text/javascript" charset="utf-8"></script> 	 
+	<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/property-value.js")" type="text/javascript" charset="utf-8"></script>
+  } else {
+	<script src="@routes.Assets.at("lib/datatable/datatable/javascripts/services/ultimate-datatable.min.js")" type="text/javascript" charset="utf-8"></script>      
+
+	<script src="@routes.Assets.at("ngl-sq/javascripts/home/search-ctrl.min.js")" type="text/javascript" charset="utf-8"></script>        
+
+	<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/commons.min.js")" type="text/javascript" charset="utf-8"></script> 	 
+	<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/list-resize.min.js")" type="text/javascript" charset="utf-8"></script> 	 
+	<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/property-value.min.js")" type="text/javascript" charset="utf-8"></script>
+  }
+}
+
+@main("index.title", menu_("home"), scripts) {
+	<div  class="row">
+		<div  class="col-md-12 col-lg-12">
+		   <div class="jumbotron">
+		        <h1>@Messages("home.h10.header",user)</h1>
+		        <p>@Messages("home.p.comment")</p>
+		   </div>  
+		</div> 
+    </div>
+    <div ng-controller="SearchCtrl" ng-app="home">
+      <div  class="row">
+      <div class="col-md-6 col-lg-6">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h3 class="text-center">
+						<a href="@controllers.experiments.tpl.routes.Experiments.home("search")?stateCodes=N">
+							<span class="label label-primary pull-right" ng-bind="experimentNDatatable.totalNumberRecords"></span>
+							@Messages("home.experiments.new")							
+						</a>
+					</h3>
+				</div>
+				<div class="panel-body">
+					 	<div ultimate-datatable="experimentNDatatable"></div>
+				</div>
+			</div>
+		</div>
+      
+      <div class="col-md-6 col-lg-6">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h3 class="text-center">
+						<a href="@controllers.experiments.tpl.routes.Experiments.home("search")?stateCodes=IP">
+							<span class="label label-primary pull-right" ng-bind="experimentIPDatatable.totalNumberRecords"></span>
+							@Messages("home.experiments.ip")							
+						</a>
+					</h3>
+				</div>
+				<div class="panel-body">
+      					<div ultimate-datatable="experimentIPDatatable"></div>				
+      			</div>
+			</div>
+		</div>
+		</div>
+		 <div  class="row">
+		 <div class="col-md-6 col-lg-6">
+			
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h3 class="text-center">
+						<a ng-href="@controllers.experiments.tpl.routes.Experiments.home("search")?{{getExperimentCodesParams()}}">
+							<span class="label label-primary pull-right" ng-bind="experimentDispatchDatatable.totalNumberRecords"></span>
+							@Messages("home.experiments.dispatch")							
+						</a>
+					</h3>
+				</div>
+				<div class="panel-body">
+					 	<div ultimate-datatable="experimentDispatchDatatable"></div>
+				</div>
+			</div>
+			
+		</div>
+		 <div class="col-md-6 col-lg-6">
+		 <div class="panel panel-default">
+				<div class="panel-heading">
+					<h3 class="text-center">
+						<a href="@controllers.processes.tpl.routes.Processes.home("search")?stateCodes=N">
+							<span class="label label-primary pull-right" ng-bind="processNDatatable.totalNumberRecords"></span>
+							@Messages("home.processes.new")							
+						</a>
+					</h3>
+				</div>
+				<div class="panel-body">
+					 	<div ultimate-datatable="processNDatatable"></div>
+				</div>
+			</div>			
+		</div>
+		</div>
+		
+		
+		 <div  class="row">
+      <div class="col-md-6 col-lg-6">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h3 class="text-center">
+						<a href="@controllers.processes.tpl.routes.Processes.home("search")?stateCodes=IP">
+							<span class="label label-primary pull-right" ng-bind="processIPDatatable.getTotalNumberRecords()"></span>
+							@Messages("home.processes.ip")							
+						</a>
+					</h3>
+				</div>
+				<div class="panel-body">
+      					<div ultimate-datatable="processIPDatatable"></div>				
+      			</div>
+			</div>
+		</div>
+  
+		</div>
+		</div>
+   
+}

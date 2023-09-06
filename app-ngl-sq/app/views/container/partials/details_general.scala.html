@@ -1,0 +1,210 @@
+@()
+@import views.html.helper._
+
+@column()(value: Html) = {
+	<div class="col-md-4 col-lg-4 col-xs-4">
+		@value
+	</div>
+}
+@sortableColumn(msg: String)() = {}
+
+<form class="form-horizontal">
+	<div class="row">
+		@column(){
+			@columnLabelValue(Messages("containers.table.code")){
+				<p class="form-control-static" ng-bind="container.code" />
+			}
+			@columnLabelValue(Messages("containers.table.fromTransformationTypeCodes")){
+				<div class="form-control-static" list-resize="container.fromTransformationTypeCodes|unique|codes:'type'" list-resize-min-size='3' />
+			}
+			@columnLabelValue(Messages("containers.table.fromPurificationTypeCode"), Html(" ng-if='container.fromPurificationTypeCode'")){
+				<p class="form-control-static" ng-bind="container.fromPurificationTypeCode|unique|codes:'type'" />
+			}
+			@columnLabelValue(Messages("containers.table.fromTransfertTypeCode"), Html(" ng-if='container.fromTransfertTypeCode'")){
+				<p class="form-control-static" ng-bind="container.fromTransfertTypeCode|unique|codes:'type'" />
+			}
+			@columnLabelValue(Messages("containers.table.support.categoryCode")){
+				<p class="form-control-static" ng-bind="container.support.categoryCode|codes:'container_support_cat'" />
+			}
+			@columnLabelValue(Messages("containers.table.supportCode")){
+				<a href="#" ng-click="goToSupport()" ><p class="form-control-static" ng-bind="container.support.code"/></a>
+			}
+			@columnLabelValue(Messages("containers.table.projectCodes")){
+				<div class="form-control-static" list-resize='container.projectCodes' list-resize-min-size='3' horizontal />
+			}
+			@columnLabelValue(Messages("containers.table.sampleCodes")){
+				<div class="form-control-static" list-resize='container.sampleCodes' list-resize-min-size='3' horizontal/>
+			}
+			@columnLabelValue(Messages("containers.table.comments")){
+				<div ng-switch on="isEditMode()">
+					<p ng-switch-when="false"  class="form-control-static" ng-bind-html="convertToBr(container.comments[0].comment)" />	
+					<textarea ng-switch-when="true" class="form-control" ng-model="container.comments[0].comment" rows="3"></textarea>
+				</div>
+			}
+		}
+		
+		@column(){
+			@columnLabelValue(Messages("containers.table.concentration")){
+				<div ng-switch on="isEditMode()">
+					<p ng-switch-when="false" class="form-control-static">
+						<span ng-bind="container.concentration.value|number:3" />
+						<span ng-if="container.concentration.value !== undefined && container.concentration.value !== null" ng-bind="container.concentration.unit" />
+					</p>
+					<div ng-switch-when=true>
+					<div class="col-md-6 col-lg-7">
+						<input class="form-control" udt-html-filter="number" type="text" ng-model="container.concentration.value" ng-change="computeQuantity()">
+					</div>
+					<div class="col-md-6 col-lg-5">
+						<div bt-select class="form-control" placeholder="@Messages("container.placeholder.unit")"  ng-model="container.concentration.unit" bt-options="unit.code as unit.name for unit in getUnits('concentration')" auto-select ng-change="computeQuantity()"></div>								
+					</div>
+					</div>
+				</div>	
+			}
+			@columnLabelValue(Messages("containers.table.volume")){
+				<div ng-switch on="isEditMode()">
+					<p ng-switch-when="false" class="form-control-static">
+						<span ng-bind="container.volume.value|number" />
+						<span ng-if="container.volume.value !== undefined && container.volume.value !== null" ng-bind="container.volume.unit" />
+					</p>
+					<div ng-switch-when=true>
+					<div class="col-md-6 col-lg-7">
+						<input class="form-control" udt-html-filter="number" type="text" ng-model="container.volume.value" ng-change="computeQuantity()">
+					</div>
+					<div class="col-md-6 col-lg-5">
+						<div bt-select class="form-control" placeholder="@Messages("container.placeholder.unit")"  ng-model="container.volume.unit" bt-options="unit.code as unit.name for unit in getUnits('volume')" auto-select ng-change="computeQuantity()"></div>								
+					</div>
+					</div>
+				</div>
+			}
+			@columnLabelValue(Messages("containers.table.quantity")){
+				<p class="form-control-static">
+						<span ng-bind="container.quantity.value|number" />
+						<span ng-if="container.quantity.value !== undefined && container.quantity.value !== null" ng-bind="container.quantity.unit" />
+					</p>
+				
+				<!-- div ng-switch on="isEditMode()">
+					<p ng-switch-when="false" class="form-control-static">
+						<span ng-bind="container.quantity.value" />
+						<span ng-if="container.quantity.value !== undefined && container.quantity.value !== null" ng-bind="container.quantity.unit" />
+					</p>
+					<div ng-switch-when=true>
+					<div class="col-md-6 col-lg-7">
+						<input class="form-control" udt-html-filter="number" type="text" ng-model="container.quantity.value">
+					</div>
+					<div class="col-md-6 col-lg-5">
+						<div bt-select class="form-control" placeholder="@Messages("container.placeholder.unit")"  ng-model="container.quantity.unit" bt-options="unit.code as unit.name for unit in getUnits('quantity')" auto-select></div>								
+					</div>
+					</div>
+				</div-->
+			}
+			@columnLabelValue(Messages("containers.table.sizeqc")){
+				<div ng-switch on="isEditMode()">
+					<p ng-switch-when="false" class="form-control-static">
+						<span ng-bind="container.size.value|number" />
+						<span ng-if="container.size.value !== undefined && container.size.value !== null" ng-bind="container.size.unit" />
+					</p>
+					<div ng-switch-when=true>
+					<div class="col-md-6 col-lg-7">
+						<input class="form-control" udt-html-filter="number" type="text" ng-model="container.size.value">
+					</div>
+					<div class="col-md-6 col-lg-5">
+						<div bt-select class="form-control" placeholder="@Messages("container.placeholder.unit")"  ng-model="container.size.unit" bt-options="unit.code as unit.name for unit in getUnits('size')" auto-select></div>								
+					</div>
+					</div>
+				</div>
+			}
+			
+			<div class="row">
+				<div class="col-md-12 col-lg-12">
+					<div ng-repeat="(key, value) in container.properties">
+							<property-value key-ng-model="key" value-ng-model="value"/>
+					</div>
+				</div>
+			</div>
+			
+			<!-- NGL-2685 -->
+			<div class="row" ng-if="container.importTypeCode !== undefined && container.importTypeCode !== null">
+			@columnLabelValue(Messages("containers.table.importTypeCode")){	
+				<div class="form-control-static" ng-bind="container.importTypeCode|codes:'type'" />
+			}
+			</div>
+		}
+		
+		@column(){
+			@columnLabelValue(Messages("containers.table.valid")){
+				<div ng-switch on="isEditMode()">
+					<p ng-switch-when="false" class="form-control-static"  ng-bind="container.valuation.valid|codes:'valuation'"/>
+					<div ng-switch-when="true">
+						<div bt-select class="form-control" ng-model="container.valuation.valid" bt-options="valid.code as valid.name for valid in lists.getValuations()"></div>
+					</div>
+				</div>
+						
+			}
+			@columnLabelValue(Messages("containers.table.resolutionCodes")){
+				<div bt-select class="form-control" ng-model="container.state.resolutionCodes" multiple="true" 
+			    		bt-options="valid.code as valid.name for valid in lists.get('containerResolutions')" 
+			    		ng-edit="mainService.isEditMode()">
+			    	</div>			
+			}	
+			@columnLabelValue(Messages("containers.table.creationDate")){
+				<p class="form-control-static" ng-bind="container.traceInformation.creationDate|date:'@Messages("date.format")'" />
+			}
+			@columnLabelValue(Messages("containers.table.createUser")){
+				<p class="form-control-static" ng-bind="container.traceInformation.createUser" />
+			}		
+			@columnLabelValue(Messages("containers.table.storageCode")){
+				<p class="form-control-static" ng-bind="container.support.storageCode" />				
+			}	
+			@columnLabelValue(Messages("containers.table.processCodes")){
+				<div class="form-control-static" list-resize="container.processCodes" list-resize-min-size='2' horizontal />
+			}
+		}
+	</div>
+
+	<div class="row">
+		<div class="col-md-12 col-lg-12">
+			<table class="table table-condensed table-striped table-hover table-bordered form-horizontal">
+				<caption>
+				<h4>
+					<strong>@Messages("containers.table.contents") ( <span ng-bind="container.contents.length" /> )</strong>
+				</h4>
+				</caption>
+				<thead>
+					<tr>
+						<th>@Messages("containers.table.percents")</th>
+						<th>@Messages("containers.table.projectCode")</th>
+						<th>@Messages("containers.table.sampleCode")</th>
+						<th>@Messages("containers.table.sampleDetail")</th>
+						<th>@Messages("containers.table.sampleTypes")</th>
+						<th>@Messages("containers.table.properties")</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr ng-repeat="content in container.contents|orderBy:'-percentage'">
+						<td ng-bind="content.percentage|number" />
+						<td ng-bind="content.projectCode" />
+						<td ng-bind="content.sampleCode" />
+						<td class="col-md-4 col-lg-4" >
+							<label class="col-md-3 col-lg-3 control-label">@Messages("containers.table.referenceCollab")</label>
+							<div class="col-md-9 col-lg-9"><p class="form-control-static" ng-bind="content.referenceCollab" /></div>
+								
+							<label class="col-md-3 col-lg-3 control-label" >@Messages("containers.table.taxonCode")</label>
+							<div class="col-md-9 col-lg-9"><p class="form-control-static" ng-bind="content.taxonCode" /></div>
+								
+							<label class="col-md-3 col-lg-3 control-label" >@Messages("containers.table.ncbiScientificName")</label>
+							<div class="col-md-9 col-lg-9"><p class="form-control-static" ng-bind="content.ncbiScientificName" /></div>
+
+						</td>
+						<td ng-bind="content.sampleTypeCode|codes:'type'" />
+						<td>
+							<div ng-repeat="(key, value) in content.properties">
+								<property-value key-ng-model="key" value-ng-model="value"/>
+							</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>	
+	</div>
+
+</form>

@@ -1,0 +1,92 @@
+@this()
+@()
+@user            = @{ fr.cea.ig.authentication.Authentication.getUser() }
+
+@import views.html.tools._
+
+@column()(value: Html) = {
+	<div class="col-md-4 col-lg-4">
+		@value
+	</div>
+}
+
+
+<!--debut-->
+
+@standard_header("experiment", "TRUE"){ 
+	<div class="row">
+	<button class="btn btn-default" 
+				data-toggle="modal" data-target="#commentModal" title="@Messages("button.addComment")"><i class="fa fa-comment"></i></button>
+
+	</div>
+}
+
+
+<form class="form-horizontal" name="experimentForm">
+
+<div class="row">
+	@column(){
+	    @* Ecriture des differentes lignes code, state, title, abstract et description :*@
+	    @lineDate("experiment.traceInformation.creationDate")
+	    @lineDate("Date de première soumission", "experiment.firstSubmissionDate")
+	  	@line("experiment.code")
+		@labelLine("experiment.state")
+		@line("experiment.projectCode")
+		@line("experiment.accession")
+		@line("experiment.title")
+		@line("experiment.librarySelection")
+		@line("experiment.libraryStrategy")
+		@line("experiment.librarySource")
+		@line("experiment.libraryLayout")
+		@line("Library Layout Nominal Length", "experiment.libraryLayoutNominalLength")
+		@line("Library Layout Orientation", "experiment.libraryLayoutOrientation")
+		@line("experiment.libraryName")
+		@line("Library Construction Protocol", "experiment.libraryConstructionProtocol")
+		@line("experiment.typePlatform")
+		@line("experiment.instrumentModel")
+		@line("experiment.lastBaseCoord")
+		@line("experiment.spotLength")
+		@line("experiment.studyCode")
+		@line("experiment.sampleCode")
+	}
+</div>
+
+
+</form>		
+
+<form class="form-horizontal" name="experimentForm2">
+	
+<div class="page-header"/>	
+					
+<div class="row">
+	@column(){	
+		@views.html.helper.columnLabelValue(Messages("experiment.msg.details")){
+			<p class="form-control-static">{{experiment.code}}</p>
+		}	
+	}	
+</div>	
+</div>
+
+</form>		
+
+
+<!-- stopPropagation on checkbox prevent parents default behavior (stop <a> call) -->
+
+<div class="row margin-bottom-7">
+	<div class="col-md-12 col-lg-12">
+		<ul class="nav nav-tabs margin-bottom-5">
+			<!--class="active" permet affichage sans avoir à cliquer sur colonne-->
+			<li class="active"><a a href="#" data-target="#run" data-toggle="tab" >@Messages("studies.tabs.run")</a></li>
+			<li><a a href="#" data-target="#rawData" data-toggle="tab">@Messages("studies.tabs.rawData")</a></li>
+		</ul>
+		<div class="tab-content">
+			<div class="tab-pane active" id="run">
+				<div ultimate-datatable="runDT"></div>
+			</div>
+			<div class="tab-pane" id="rawData">
+				<div ultimate-datatable="rawDataDT"></div>
+			</div>
+		</div>
+	</div>
+	@partials.commentSection(user)
+</div>

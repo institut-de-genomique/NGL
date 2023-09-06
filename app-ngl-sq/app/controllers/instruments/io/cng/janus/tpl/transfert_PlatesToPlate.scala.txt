@@ -1,0 +1,8 @@
+@(lines: List[controllers.instruments.io.cng.janus.SampleSheetPoolLine])
+
+@import controllers.instruments.io.utils._;
+
+Source rack,Source position,Destination rack,Destination position,Volume\u000D\u000A
+@for((line) <- lines.sorted){
+  @line.inputSupportSource,@line.inputSupportContainerPosition,Transferplate,@line.outputSupportPosition,@line.inputSupportContainerVolume\u000D\u000A
+} 

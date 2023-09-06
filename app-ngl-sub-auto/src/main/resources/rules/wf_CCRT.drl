@@ -1,0 +1,76 @@
+#created on: Jul 15, 2014
+package birds
+
+import  fr.genoscope.lis.devsi.birds.impl.factory.ResourcesReferentialServiceFactory;
+import fr.cea.ig.auto.submission.SubmissionServicesFactory;
+import fr.genoscope.lis.devsi.birds.impl.properties.ProjectProperties;
+
+#Select resource for workflow submission
+rule "select resources from nglsub for WF CCRT"
+	@BirdsRule ( selectionRule )
+	salience 200
+	dialect 'java'
+	no-loop
+	when
+		$input : InputSpecificationElement(name=="inputCCRT", treatmentSpecification.name=="WF_CCRT", project.name == "SRA")
+		$resourcesReferential : ResourcesReferential(name=="nglSubRef_processCCRT") 
+		$device : JSONDevice() from $resourcesReferential.referentialDevice
+		$rps : ResourcePropertiesSet(initialized==false, inputSpecificationElement==$input, resourcesReferential==$resourcesReferential)
+	then
+		Logger log = Logger.getLogger("ngl.sub.rules");
+		$rps.initialize();
+		
+		//JobResource groupJobResource = $groupJob.getUniqueJobResource("subData");
+		Set<ResourceProperties> resourceProperties = new HashSet<ResourceProperties>();
+		
+		JSONDevice jsonDevice = new JSONDevice();
+		
+		//Get code submission IP-SUB
+		Set<ResourceProperties> rpSubmissions = $device.httpGetJSON(ProjectProperties.getProperty("server")+"/api/sra/submissions?stateCode=SUB-SRD-IP", "bot");
+		for(ResourceProperties rpSub : rpSubmissions){
+			//Get submission code
+			String codeSubmission = rpSub.getProperty("code");
+			log.debug("Get CCRT files for "+codeSubmission);
+			String submissionDirectory = rpSub.getProperty("submissionDirectory");
+			String typeRawDataSubmitted = rpSub.getProperty("typeRawDataSubmitted");
+			Set<ResourceProperties> rpsRawData = null;
+			if(typeRawDataSubmitted.equals("bionanoRawData")){
+				rpsRawData = jsonDevice.httpGetJSON(ProjectProperties.getProperty("server")+"/api/sra/analyzes/rawDatas?submissionCode="+codeSubmission,"bot");
+			}else{
+				rpsRawData = jsonDevice.httpGetJSON(ProjectProperties.getProperty("server")+"/api/sra/experiments/rawDatas?submissionCode="+codeSubmission,"bot");
+			}
+			
+			rpsRawData = SRAFilesUtil.filterByLocation(rpsRawData);
+			boolean checkDataCCRT = SRAFilesUtil.checkDataCCRT(rpsRawData,codeSubmission);
+			log.debug("Filter by location size "+rpsRawData.size());
+			if(!checkDataCCRT){
+				for(ResourceProperties rp : rpsRawData){
+					ResourceProperties newRp = new ResourceProperties();
+					newRp.setProperty("code",codeSubmission);
+					newRp.setProperty("submissionDirectory",submissionDirectory);
+					newRp.setProperty("relatifName",rp.getProperty("relatifName"));
+					newRp.setProperty("directory",rp.getProperty("directory"));
+					resourceProperties.add(newRp);
+				}
+			}
+		}
+		log.debug("size resources "+resourceProperties.size());
+		$rps.setResourcePropertiesSet(resourceProperties);
+		modify($rps){};
+end
+
+
+#Transfert ressources to internal referential
+rule "add resources submission to internal referential internal_nglSubRef_processCCRT for first step of CCRT workflow"
+    @BirdsRule( ExecutionService )
+    salience 200
+	dialect 'java'
+	no-loop 
+	when
+	    $executionService : ExecutionService( status == ExecutionService.JOB_PROCESSING_STATUS, caught==false )
+	    $j : Job( treatmentSpecification.name!=null, treatmentSpecification.name =="WF_CCRT" , treatmentSpecification.specificationGroup == true )
+	then
+	    Logger log = Logger.getLogger("ngl.sub.rules");
+	    log.debug("transfert resource for WF_Submission");
+	  	$j.groupTransferInputResourcesToInternalReferential("inputCCRT", "internal_nglSubRef_processCCRT",$j.getId());	  	
+end

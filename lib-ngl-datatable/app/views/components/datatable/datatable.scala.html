@@ -1,0 +1,20 @@
+@*
+*	Create a datatable
+*	config: views.components.datatable.DatatableConfig : datatable configuration
+*	form: Html : search form
+*	buttons: Html : additionnal buttons
+*	
+*@
+@(config: views.components.datatable.DatatableConfig, form: Html = Html(""), buttons: Html = Html(""))
+@import views.components.datatable.DatatableColumn
+
+<div class="datatable" ng-init="@(config.name).setColumnsConfig(@config.toJson())">
+  <div datatable="@(config.name).getConfig()">
+    <div id="datatableButtonsConfiguration">
+	  @buttons
+    </div>
+    <div id="datatableFormConfiguration">
+	  @form
+    </div>
+  </div>
+</div>

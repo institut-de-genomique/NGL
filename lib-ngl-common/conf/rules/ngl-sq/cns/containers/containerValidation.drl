@@ -1,0 +1,16 @@
+package rules
+
+rule "Lors d'un import tara microbiome, on valide que le code ne contient pas que SAMEA (sinon oubli de bip)"
+	@nglSQ(containerValidationImport)
+	dialect "java"
+	salience 900
+	no-loop
+    when
+        $container: Container()
+		eval("reception-tara-microbiome".equals($container.importTypeCode))
+		eval($container.code.equals("SAMEA"))
+		$contextError: ContextValidation()
+		
+    then		
+		$contextError.addError("code", "Oubli de code bipé : code à SAMEA");
+	end

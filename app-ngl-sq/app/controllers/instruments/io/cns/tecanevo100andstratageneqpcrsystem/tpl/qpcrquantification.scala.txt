@@ -1,0 +1,8 @@
+@(lines: List[controllers.instruments.io.cns.tecanevo100andstratageneqpcrsystem.SampleSheetStrategeneLine])
+
+@import controllers.instruments.io.utils._;
+
+Well ID;Well Name
+@for((line) <- lines){
+	@line.wellId;@line.wellName\u000D\u000A	
+}

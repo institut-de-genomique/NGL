@@ -1,0 +1,41 @@
+@this()
+@()
+
+@import views.html.helper._
+@form() = {
+	@columnSearchForm{
+		@formGroup{	
+			<div><input type="text" class="form-control" ng-model="searchService.form.login" typeahead="login.name as login.name for login in searchService.lists.getUsers() | filter:$viewValue | limitTo:20" placeholder='@Messages("search.placeholder.userLogin")' title='@Messages("search.placeholder.userLogin")'></div>
+		}
+	}
+}
+
+<div class="row"> 
+<div class="col-md-12 col-lg-12" ultimate-datatable="searchService.datatable">
+	<div udt-form>
+	    
+	    <div class="tab-content">
+	    <div class="tab-pane active" id="filters">
+	    	<form class="well">
+	    	<div class="row">
+	    	@form
+	    	@columnSearchForm{
+	    		@formGroup{
+	    		<div class="btn-toolbar">
+	    			<button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="search()" class="btn btn-primary">
+	    				<i class="fa fa-search"></i>
+	    			</button>
+	    			<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="reset()" class="btn btn-default">
+	    				<i class="fa fa-undo"></i>
+	    			</button>
+	    		</div>
+	    		}
+	    	}
+	    	</div>
+	    	</form>
+	    </div>
+	    </div>
+	    
+	</div>
+</div>
+</div>

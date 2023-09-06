@@ -1,0 +1,117 @@
+@this(ctx : fr.cea.ig.ngl.NGLApplication)
+@(nav: String = "")
+
+@import play.api.Play
+
+@import play.mvc.Http.Context
+@import controllers.authorisation.PermissionHelper
+@import controllers.runs.tpl.routes.Runs
+@import controllers.readsets.tpl.routes.ReadSets
+@import controllers.analyses.tpl.routes.Analyses
+@import controllers.stats.tpl.routes.Stats
+@import controllers.balancesheets.tpl.routes.BalanceSheets
+@import controllers.descriptions.tpl.routes.Descriptions 
+
+@import views.html.ddmenu._
+
+@user            = @{ ctx.currentUser() }
+@writePermission = @{ PermissionHelper.checkPermission(user, "writing") }
+@adminPermission = @{ PermissionHelper.checkPermission(user, "admin") }
+@always          = @{ true }
+@* OLD... @version         = @{ ctx.nglConfig().getApplicationVersion() } *@
+
+@version         = @{ ctx.getVersion() }
+@isCNSInstitute  = @{ "CNS" == ctx.nglConfig().getInstitute() }
+@isCNGInstitute  = @{ "CNG" == ctx.nglConfig().getInstitute() }
+
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+	<div class="container-fluid">
+		<div class="navbar-header">
+			<a class="navbar-brand" href="@controllers.main.tpl.routes.Main.home()">@ctx.messageEnv("application.name")</a>
+    	</div>
+
+    	<div class="collapse navbar-collapse">
+    		<ul class="nav navbar-nav">
+    			@if(writePermission){
+					@ddmenu(nav, "valuation","valuation.menu") {
+					  @ddentry(nav, "valuation.runs",     Runs.home("valuation"),     "valuation.menu.runs")
+					  @ddentry(nav, "valuation.readsets", ReadSets.home("valuation"), "valuation.menu.readsets")
+					  @ddentry(nav, "valuation.analyses", Analyses.home("valuation"), "valuation.menu.analyses")
+					}
+				}
+				@ddmenu(nav,"runs","runs.menu") {
+				  @ddme(nav, always,          "runs.search",    Runs.home("search"),    "runs.menu.search")
+				  @ddme(nav, writePermission, "runs.valuation", Runs.home("valuation"), "runs.menu.valuation")
+				  @ddme(nav, writePermission, "runs.state",     Runs.home("state"),     "runs.menu.state")
+				}
+				@ddmenu(nav, "readsets","readsets.menu") {
+				  @ddme(nav, always,         "readsets.search",    ReadSets.home("search"),    "readsets.menu.search")
+				  @ddme(nav, writePermission,"readsets.valuation", ReadSets.home("valuation"), "readsets.menu.valuation")
+				  @ddme(nav, writePermission,"readsets.state",     ReadSets.home("state"),     "readsets.menu.state")
+				  @ddme(nav, writePermission,"readsets.batch",     ReadSets.home("batch"),     "readsets.menu.batch")
+				}
+				@ddmenu(nav,"analyses","analyses.menu") {
+				  @ddme(nav, always,          "analyses.search",    Analyses.home("search"),    "analyses.menu.search")
+				  @ddme(nav, writePermission, "analyses.valuation", Analyses.home("valuation"), "analyses.menu.valuation")
+				  @ddme(nav, writePermission, "analyses.state",     Analyses.home("state"),     "analyses.menu.state")
+				}
+				@ddmenu(nav, "stats","stats.menu") {
+				  @ddentry(nav, "stats.readsets",Stats.home("readsets"),"stats.menu.readsets")
+				  @ddentry(nav, "stats.lanes",Stats.home("lanes"),"stats.menu.lanes")
+				}
+								
+				<li class="@("active".when(nav == "archives.search"))">
+					<a href="@controllers.archives.tpl.routes.ReadSets.home("search")">@Messages("archives.menu")</a>
+				</li>
+					
+				@ddmenu(nav, "balance","balanceSheets.menu") {
+				  @ddentry(nav, "balanceSheets.illumina", BalanceSheets.home("rsillumina","general"), "balanceSheets.menu.rsillumina")
+				  @ddentry(nav, "balanceSheets.nanopore", BalanceSheets.home("rsnanopore","general"), "balanceSheets.menu.rsnanopore")
+				}
+
+				@ddmenu(nav,"descriptions","descriptions.menu") {
+					@ddentry(nav,	"descriptions.treatments",	Descriptions.home("treatments"),	"descriptions.menu.treatments")
+					@ddentry(nav,	"descriptions.types",	Descriptions.home("types"),	"descriptions.menu.types")
+  				}
+							
+				<li class="@("active".when(nav.startsWith("help")))">
+					 @if(isCNSInstitute){
+					 	<a href="@routes.Assets.at("ngl-bi/documentation/DOC_UTILISATEUR_CNS.pdf")" target="doc">@Messages("docs.menu")</a>
+					 }
+					 @if(isCNGInstitute){
+						<a href="@routes.Assets.at("ngl-bi/documentation/DOC_UTILISATEUR.pdf")" target="doc">@Messages("docs.menu")</a>
+					}
+				</li>
+				
+				@if(adminPermission){
+					<li class="dropdown @("active".when(nav.startsWith("admin")))">
+						<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" id="admin"><i class="fa fa-users"></i> @Messages("authorisation.menu")<b class="caret"></b></a>
+						<ul class="dropdown-menu" role="menu" aria-labelledby="users">
+							<li class="@("active".when(nav == "admin.search"))"><a href="@controllers.authorisation.tpl.routes.Users.home("search")">@Messages("authorisation.menu.userroles")</a></li>
+						</ul>
+					</li>
+				} 
+								
+			</ul>
+
+			<ul class="nav navbar-nav navbar-right">
+				<li>
+				<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" id="user">
+				<i class="fa fa-user"></i> @user <b class="caret"></b></a>
+				<ul class="dropdown-menu" role="menu" aria-labelledby="user">
+						<li><a href="/authentication/logout">@Messages("authentification.dropdown_list.signout")</a></li>
+				</ul>
+				</li>
+				<!--  NGL-3363/NGL-3436 ajout version de l'application   -->
+				<li>
+					<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" id="more"><i class="fa fa-ellipsis-v"></i></a>
+					<ul class="dropdown-menu" role="menu" aria-labelledby="more">
+						<li>&nbsp;&nbsp;Version: @Messages("application.name") @version</li>
+					</ul>
+				</li>
+			</ul>
+		</div>
+	</div>		
+</nav>
+
+

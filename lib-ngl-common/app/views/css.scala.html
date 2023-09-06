@@ -1,0 +1,15 @@
+@(otherCss: Html = Html(""))
+    <link rel="stylesheet" href="@helper.getAsset("css","bootstrap","3.3.5","bootstrap_3.3.5.min.css")">
+
+    <link rel="preload" href="@routes.Assets.at("lib/lib-frameworkweb/font-awesome/4.2.0/css/font-awesome_4.2.0.min.css")" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="@routes.Assets.at("lib/lib-frameworkweb/font-awesome/4.2.0/css/font-awesome_4.2.0.min.css")"></noscript>  
+
+    <link rel="preload" href="@routes.Assets.at("lib/ngl-common/ngl-common/css/ngl.css")" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="@routes.Assets.at("lib/ngl-common/ngl-common/css/ngl.css")"></noscript> 
+
+    <link rel="preload" href="@routes.Assets.at("lib/ngl-common/ngl-common/css/print.css")" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="@routes.Assets.at("lib/ngl-common/ngl-common/css/print.css")" media="print"></noscript> 
+
+    <link rel="preload" href="@routes.Assets.at("lib/datatable/datatable/css/datatable.css")" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="@routes.Assets.at("lib/datatable/datatable/css/datatable.css")"></noscript> 
+@otherCss

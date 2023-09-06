@@ -1,0 +1,23 @@
+@(nav: String)
+
+@scripts() = {
+	 <script src="@routes.Assets.at("ngl-devguide/javascripts/services/app.js")" type="text/javascript" charset="utf-8"></script>
+	 <script src="@routes.Assets.at("ngl-devguide/javascripts/directives/directives.js")" type="text/javascript" charset="utf-8"></script>
+	 
+}
+
+@main("Services", menu(nav), dvJavascripts(scripts()), dvCss()) {
+<header>
+ <div class="row-fluid">
+    <div class="span11 offset1">
+		<h1>Service @nav</h1>
+	</div>
+</div>
+</header>
+<div class="row-fluid" ng-app="home">
+<div class="span10 offset2">
+<div ng-view></div>
+</div>
+</div>
+
+}

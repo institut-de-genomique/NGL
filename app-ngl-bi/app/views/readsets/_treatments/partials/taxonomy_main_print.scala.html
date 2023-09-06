@@ -1,0 +1,145 @@
+@()
+
+<div class="row">	
+	<div class="col-md-12 col-lg-12 col-xs-12">	
+		<div class="panel panel-default">
+			<div class="panel-heading"><strong>@Messages("readsets.treatments.taxonomy.taxonomy")</strong></div>	  	
+			<table class="table table-condensed table-bordered">
+				<thead>
+					<tr>
+						<th class="col-md-1 col-lg-1">
+							@Messages("readsets.treatments.taxonomy.sampleInput")
+						</th>
+						<th class="col-md-1 col-lg-1">
+							@Messages("readsets.treatments.taxonomy.organism")
+						</th>
+						<th class="col-md-8 col-lg-8">
+							@Messages("readsets.treatments.taxonomy.taxonomy")
+						</th>	
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>
+							{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code][(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs!==undefined)?'pairs':'read1'].sampleInput.value | number}}
+						</td>
+						<td>
+							{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code][(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs!==undefined)?'pairs':'read1'].organism.value}}
+						</td>
+						<td>
+							{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code][(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs!==undefined)?'pairs':'read1'].taxonomy.value}}
+						</td>		
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>					
+</div>
+
+<div class="row">
+	<div class="col-xs-6">
+		<div class="panel panel-default">
+			  	<div class="panel-heading"><strong>@Messages("readsets.treatments.taxonomy.divisionBilan")</strong></div>
+				<table class="table table-condensed table-bordered">
+					<thead>						
+					<tr>
+						<th>
+							@Messages("readsets.treatments.taxonomy.divisionBilan.division")
+						</th>
+						<th>
+							@Messages("readsets.treatments.taxonomy.divisionBilan.nbSeq")
+						</th>
+						<th>
+							@Messages("readsets.treatments.taxonomy.divisionBilan.percent")
+						</th>
+					</tr>					
+					</thead>
+					<tbody>
+					<tr ng-repeat="obj in readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code][(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs!==undefined)?'pairs':'read1'].divisionBilan.value">
+						<td>							
+							 {{obj.division}}
+						</td>
+						<td>
+							 {{obj.nbSeq | number}}												
+						</td>
+						<td>
+							 {{ obj.percent | number:2}} @Messages("unit.percent")												
+						</td>
+					</tr>
+					</tbody>
+				</table>
+		</div>				
+	</div>
+	<div class="col-xs-6">
+		<div class="panel panel-default">
+		  	<div class="panel-heading"><strong>@Messages("readsets.treatments.taxonomy.keywordBilan")</strong></div>
+		  	<table class="table table-condensed table-bordered">
+				<thead>						
+					<tr>
+						<th>
+							@Messages("readsets.treatments.taxonomy.keywordBilan.keyword")
+						</th>
+						<th>
+							@Messages("readsets.treatments.taxonomy.keywordBilan.nbSeq")
+						</th>
+						<th>
+							@Messages("readsets.treatments.taxonomy.keywordBilan.percent")
+						</th>
+					</tr>					
+				</thead>
+				<tbody>	
+					<tr ng-repeat="obj in readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code][(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs!==undefined)?'pairs':'read1'].keywordBilan.value">	
+						<td>
+							 {{obj.keyword}}							
+						</td>
+						<td>
+							 {{obj.nbSeq | number}}												
+						</td>
+						<td>
+							 {{ obj.percent | number:2}} @Messages("unit.percent")			
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>					
+	</div>
+</div>
+		
+<div class="row">	
+	<div class="col-xs-12">			
+		<div class="panel panel-default">
+			<!-- Default panel contents -->
+			<div class="panel-heading"><strong>@Messages("readsets.treatments.taxonomy.taxonBilan")</strong></div>
+		 	<table class="table table-condensed table-bordered table-small-cell">
+				<thead>							
+					<tr>
+						<th>
+							@Messages("readsets.treatments.taxonomy.taxonBilan.taxon")
+						</th>
+						<th>
+							@Messages("readsets.treatments.taxonomy.taxonBilan.nbSeq")
+						</th>
+						<th>
+							@Messages("readsets.treatments.taxonomy.taxonBilan.percent")
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr ng-repeat="obj in readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code][(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs!==undefined)?'pairs':'read1'].taxonBilan.value">
+						<td>									
+							 {{obj.taxon}}<a href="{{ncbiUrl + obj.taxon.replace(' ','+') }}"></a>									
+						</td>
+						<td>
+							 {{obj.nbSeq | number}}													
+						</td>
+						<td>
+							{{ obj.percent | number:2}} @Messages("unit.percent")												
+						</td>
+					</tr>
+				</tbody>				
+			</table>
+		</div>
+	</div>
+</div>														
+			
+

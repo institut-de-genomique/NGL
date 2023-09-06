@@ -1,0 +1,26 @@
+package rules
+
+// NGL-3387 28/05/2021 création rule commune à plusieurs expériences
+rule "Volume not null in experiment outputContainer"
+    @nglSQ( validations )
+	dialect "java"
+	salience 930
+	no-loop
+    when
+    	$experiment:Experiment($typeCode:typeCode,$typeCode=="pcr-and-indexing"||
+    	                                          $typeCode=="test")
+    	// code!="N" comme dans denat-dil-lib c'est trop tot
+    	// code=="IP" comme dans additional-normalization on zappe l'etat "N" 
+      	State($stateCode:code=="IP") || State($stateCode:code=="F")
+    	// marche pas:  State($stateCode:code=="IP"||$stateCode:code=="F")
+      	
+		$atomicTransfert: OneToOneContainer($inputContainerUsed:inputContainerUseds.get(0), $outputContainerUsed: outputContainerUseds.get(0))
+	   	OutputContainerUsed($finalVolume: volume) from $outputContainerUsed
+    	$contextValidation:ContextValidation()
+    	// 0 autorisé ???!!!
+    	eval($finalVolume == null || $finalVolume.value == null || $finalVolume.value == "")
+    then
+    	//Logger.debug("Volume null in "+$typeCode+" outputContainer");
+    	// 1 message par container meme sans boucle for !!!
+    	$contextValidation.addErrors($typeCode,"error.validationexp.outputvolumenotnull", $outputContainerUsed.code );
+end

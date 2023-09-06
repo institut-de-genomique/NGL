@@ -1,0 +1,24 @@
+//package ngl.data.crontab;
+//
+//// Named objects, used to provide lockable ids.
+//// It maps names to mongo ids.
+//public class NamedObject extends RawMongoObject {
+//	
+//	private String name;
+//	
+//	public NamedObject() {
+//	}
+//	
+//	public NamedObject(String name) {
+//		this.name = name;
+//	}
+//	
+//	public String getName() { 
+//		return name; 
+//	}
+//	
+//	public void setName(String name) { 
+//		this.name = name; 
+//	}
+//	
+//}

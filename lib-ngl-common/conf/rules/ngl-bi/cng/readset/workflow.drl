@@ -1,0 +1,102 @@
+//created on: Nov 21, 2013
+package rules
+
+rule "Set state to In Waiting Transfert CCRT from In Waiting BI Analyse readSet"
+	@nglBI( IW_BA_1 )
+	dialect "java"
+	salience 600
+	no-loop
+	when
+		$nextState : State(code=="IW-BA")
+		$project : Project(bioinformaticParameters!=null, bioinformaticParameters.fgGroup!=null, !StringUtils.isBlank(bioinformaticParameters.fgGroup),
+							bioinformaticParameters.ccrtAutomaticTransfer!=null, bioinformaticParameters.ccrtAutomaticTransfer==true)
+		$readSet : ReadSet(location==null || (location!=null && location!="CCRT"))
+	then
+		Logger.debug("Set state readSet to IW-TF "+$readSet.code);
+		$nextState.code="IW-TF";
+end
+
+rule "Set state to In Waiting BI Analyse from Finished Transfert CCRT"
+	@nglBI( F_TF_1 )
+	dialect "java"
+	salience 600
+	no-loop
+	when
+		$nextState : State(code=="F-TF")
+		$project : Project(bioinformaticParameters!=null, bioinformaticParameters.fgGroup!=null, !StringUtils.isBlank(bioinformaticParameters.fgGroup))
+	then
+		Logger.debug("Set state readSet to IW-BA");
+		$nextState.code="IW-BA";
+end
+
+rule "Set state to In Progress BI Analyse from In Waiting BI Analyse CCRT"
+	@nglBI( IW_BA_1 )
+	dialect "java"
+	salience 600
+	no-loop
+	when
+		$nextState : State(code=="IW-BA")
+		$project : Project(bioinformaticParameters!=null, bioinformaticParameters.fgGroup!=null, !StringUtils.isBlank(bioinformaticParameters.fgGroup))
+		$readSet : ReadSet(location!=null, location=="CCRT")
+	then
+		Logger.debug("Set state readSet to IP-BA "+$readSet.code);
+		$nextState.code="IP-BA";
+end
+
+
+rule "Check sampleOnContainer for create external sample"
+	@nglBI( N_1 )
+	dialect "java"
+	salience 600
+	no-loop
+	when
+		$readset : ReadSet()
+		$contextVal : ContextValidation($external:contextObjects["external"], $external!=null, (Boolean)$external==true)
+	then
+		Logger.debug("Validate ReadSet external");
+		Logger.debug("Context object "+$contextVal.getObject("external"));
+		if($readset.sampleOnContainer==null){
+			$contextVal.addErrors("sampleOnContainer","error.no.sampleOnContainer",$readset.sampleCode);
+		}else{
+			if($readset.sampleOnContainer.containerSupportCode==null)
+				$contextVal.addErrors("sampleOnContainer","error.sampleOnContainer.containerSupportCode",$readset.code);
+			if($readset.sampleOnContainer.containerCode==null)
+				$contextVal.addErrors("sampleOnContainer","error.sampleOnContainer.containerCode",$readset.code);
+			if($readset.sampleOnContainer.properties==null)
+				$contextVal.addErrors("sampleOnContainer","error.sampleOnContainer.properties",$readset.code);
+		}
+		
+end
+		
+rule "Update sampleOnContainer properties Readset external"
+	@nglBI( N_1 )
+	dialect "java"
+	salience 500
+	no-loop
+	when
+		$readset : ReadSet(sampleCode!=null, $sampleOnContainer:sampleOnContainer, $sampleOnContainer!=null, $sampleOnContainer.containerSupportCode!=null, $sampleOnContainer.properties!=null)
+		$contextVal : ContextValidation($external:contextObjects["external"], $external!=null, (Boolean)$external==true)
+	then
+		//create external sample
+		Logger.debug("Create external readSet");
+		//Get sample from NGL
+		Sample extSample = MongoDBDAO.findByCode(InstanceConstants.SAMPLE_COLL_NAME, Sample.class, $readset.sampleCode);
+		if(extSample==null){
+			$contextVal.addErrors("sampleCode","error.codenotexists",$readset.sampleCode);
+		}else{
+			//update sampleOnContainer
+			$sampleOnContainer.projectCode = $readset.projectCode;
+			$sampleOnContainer.sampleCode = $readset.sampleCode;
+			$sampleOnContainer.lastUpdateDate = new Date();
+			$sampleOnContainer.sampleTypeCode = extSample.typeCode;
+			$sampleOnContainer.sampleCategoryCode = extSample.categoryCode;
+			$sampleOnContainer.referenceCollab = extSample.referenceCollab;
+			$sampleOnContainer.taxonCode = extSample.taxonCode;
+			$sampleOnContainer.ncbiScientificName = extSample.ncbiScientificName;
+			
+			
+			MongoDBDAO.update(InstanceConstants.READSET_ILLUMINA_COLL_NAME,  ReadSet.class, 
+						DBQuery.is("code", $readset.code), DBUpdate.set("sampleOnContainer", $sampleOnContainer));
+		}
+		
+end

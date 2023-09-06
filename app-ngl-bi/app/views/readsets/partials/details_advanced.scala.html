@@ -1,0 +1,55 @@
+@()
+
+@columnLabelValueAdv(label:String)(value: Html) = {
+	<div class="form-group">
+	    <label class="col-md-2 col-lg-2 control-label">@label</label>
+	    <div class="col-md-10 col-lg-10">
+	      @value
+	    </div>
+	</div>
+}
+
+
+	<div class="row">
+		<form class="form-horizontal">		
+			<div class="col-md-12 col-lg-12">
+				@columnLabelValueAdv(Messages("readsets.archiveId")){
+					<p class="form-control-static">{{readset.archiveId}}</p>
+				}
+				@columnLabelValueAdv(Messages("readsets.archiveDate")){
+					<p class="form-control-static">{{readset.archiveDate | date:'@Messages("datetime.format")'}}</p>
+				}
+				@columnLabelValueAdv(Messages("readsets.files.path")){
+					<p class="form-control-static">{{readset.path}}</p>
+				}
+				@columnLabelValueAdv(Messages("readsets.files.location")){
+					<p class="form-control-static">{{readset.location}}</p>
+				}
+				@columnLabelValueAdv(Messages("readsets.properties.isSentCollaborator")){
+					<div class="checkbox" ng-if="isEditMode()">
+	 					<label>
+						<input type="checkbox"  ng-model="readset.properties.isSentCollaborator.value" ng-if="isEditMode()">&nbsp;	
+						</label>
+					</div>
+					
+					<p class="form-control-static" ng-switch on="readset.properties.isSentCollaborator.value" ng-if="!isEditMode()">
+						<i ng-switch-when="true" class="fa fa-check-square-o  fa-lg"></i>
+						<i ng-switch-default class="fa fa-square-o  fa-lg"></i>
+					</p>															
+				}
+			<div ng-if="isRefCollabSub()">
+					@columnLabelValueAdv(Messages("readset.properties.refCollabSub")){
+						<p class="form-control-static">{{readset.properties.refCollabSub.value}}</p>
+					}
+			</div>
+			<div ng-if="isSubmissionState()">
+				@columnLabelValueAdv(Messages("readsets.submissionState")){
+					<p class="form-control-static">{{readset.submissionState.code | codes:'state'}}</p>
+				}
+			</div>
+			
+			
+			</div>	
+		</form>
+	</div>
+	

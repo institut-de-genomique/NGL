@@ -1,0 +1,97 @@
+@this(ctx : fr.cea.ig.ngl.NGLApplication)
+
+@import play.mvc.Http.Context
+@import controllers.authorisation.PermissionHelper
+@import views.html.helper._
+
+@user = @{ ctx.currentUser() }
+@adminPermission = @{ PermissionHelper.checkPermission(user, "admin") }
+<div ng-init="onInit(@adminPermission)">
+	@form() = {
+		@columnSearchForm{
+			@formGroup{
+				<div class="form-control" bt-select placeholder='@Messages("descriptions.select.protocols.experiment.types")' 
+					title='@Messages("descriptions.select.protocols.experiment.types")'
+					textareaplaceholder='@Messages("search.textarea.placeholder.codesList")'
+					textarea="true" filter="true" multiple="true"
+					ng-model="searchService.form.experimentTypeCodes" 
+					bt-options="experimentType.code as experimentType.name for experimentType in searchService.getExperimentTypes()">
+				</div>
+			}
+		}
+		@columnSearchForm{
+			@formGroup{
+				<div class="form-control" bt-select placeholder=' @Messages("experiments.select.protocols")' 
+					title='@Messages("experiments.select.protocols")'
+					textareaplaceholder='@Messages("search.textarea.placeholder.codesList")'
+					textarea="true" multiple=true filter=true
+					ng-model='searchService.form.codes'
+					bt-options='protocol.code as protocol.name for protocol in searchService.lists.getProtocols()'>
+				</div>
+			}
+		}
+		@columnSearchForm{
+			@formGroup{
+				<div class="form-control" bt-select placeholder='@Messages("descriptions.select.protocols.active")'
+					ng-model="searchService.form.isActive"
+					bt-options="bool.code as bool.name for bool in searchService.lists.get('booleans')">
+				</div>
+			}
+		}
+	}
+
+	<div class="row">
+		<div class="col-md-12 col-lg-12" messages="messages"></div>
+	</div>
+	<div class="row">
+		<div class="col-md-12 col-lg-12" ultimate-datatable="searchService.datatable">
+			<div udt-form>
+
+				<div class="tab-content">
+					<div class="tab-pane active" id="filters">
+						<form class="well well-small">
+							<div class="row">
+								@form
+								@columnSearchForm{
+								@formGroup{
+								<div class="btn-toolbar">
+									<button type="submit" title='@Messages("button.search")' data-toggle="tooltip"
+										ng-click="search()" class="btn btn-primary">
+										<i class="fa fa-search"></i>
+									</button>
+									<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="reset()"
+										class="btn btn-default">
+										<i class="fa fa-undo"></i>
+									</button>
+								</div>
+								}
+								}
+								@if(adminPermission){
+
+
+								@columnSearchForm{
+									@formGroup{
+									<div style="margin-top: 5px;"  class="btn-toolbar pull-right">
+										<p>Créer un nouveau protocole:</p>
+									</div>
+									}
+									}
+									@columnSearchForm{
+									@formGroup{
+									<div class="btn-toolbar pull-left">
+										<button class="btn btn-primary" title='@Messages("button.create")' ng-click="createProtocol()">
+											<i class="fa fa-plus"></i>
+										</button>
+										</a>
+									</div>
+									}
+									}
+								}
+
+							</div>
+						</form>
+					</div>
+
+
+				</div>
+			</div>

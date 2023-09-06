@@ -1,0 +1,18 @@
+@(title: String,  menu: Html = Html(""), scripts: Html = Html(""))
+@main(title, menu, scripts){ 
+<div id="home" ng-app="home" >
+<div class="row" ng-controller="TabMainCtrl">
+  <button class="btn btn-xs pull-right hidden-print" ng-click="toggleTabs()"><i class="{{hideTabs.clazz}}"></i></button>
+  <div class="tabbable tabs-left">
+	<ul class="nav nav-tabs hidden-print" ng-hide="hideTabs.hide">
+	   <li ng-repeat="value in getTabs()" class="{{value.clazz}}"><a href="{{value.href}}" ng-click="activeTab(value)" class="pull-left">{{value.label}}</a><button class="close pull-right" ng-click="removeTab($index)" ng-show="value.remove">&times;</button></li>
+    </ul>	
+	<div class="tab-content">
+	<div class="tab-pane active">		
+		<div ng-view></div>
+	</div>		
+  	</div>  	
+  </div>
+ </div>
+</div>
+}

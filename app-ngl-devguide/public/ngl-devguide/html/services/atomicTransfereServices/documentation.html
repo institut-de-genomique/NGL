@@ -1,0 +1,39 @@
+Module: <span class="text-info">atomicTransfereServices</span>
+<h2>Description: </h2>
+<ul>
+	<li>
+		Ce module contient plusieur service permettant la gestion des entrers/sortie d'experience.
+		<ul>
+			<li>
+				oneToOne($scope, interface entrée, interface sortie) 
+			</li>
+			<li>
+				manyToOne($scope, interface entrée, interface sortie) 
+			</li>
+			<li>
+				oneTMany($scope, interface entrée, interface sortie) 
+			</li>
+		</ul>
+	</li>
+</ul>
+<br/>
+<h2 id="helpers">Exemple d’utilisation: </h2>
+<ul>
+<li> $scope.atomicTransfere = oneToOne($scope,"datatable", "none");
+</li>
+</ul>
+<br/>
+<h2>Création de service: </h2>
+<ul>
+<li>
+<h4>Chaque service doit implementer ces fonctions en s'appuyant sur les services oneToX, XToOne, ManyToX, XToMany: </h4>
+</li>
+<ul>
+<li><b>experimentToInput: </b> Cette fonction doit passer les données de la vue des entrées au model $scope.experiment.value</li>
+<li><b>inputToExperiment: </b> Cette fonction doit passer les données du model ($scope.experiment.value) à la vue des entrées</li>
+<li><b>outputToExperiment: </b> Cette fonction doit passer les données de la vue des sorties au model $scope.experiment.value</li>
+<li><b>experimentToOutput: </b> Cette fonction doit passer les données du model ($scope.experiment.value) à la vue des sorties</li>
+<li><b>loadExperiment: </b> Cette fonction doit charger les données d'une experience existante</li>
+<li><b>newExperiment: </b> Cette fonction doit crée une nouvelle experience</li>
+</ul>
+</ul>

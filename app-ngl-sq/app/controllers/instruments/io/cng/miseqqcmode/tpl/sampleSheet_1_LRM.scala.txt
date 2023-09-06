@@ -1,0 +1,53 @@
+@(experiment: models.laboratory.experiment.instance.Experiment, containers: List[models.laboratory.container.instance.Container])
+
+@import controllers.instruments.io.utils._;
+@import java.text.SimpleDateFormat
+@import java.util.Locale
+@import java.lang.String; var well_pos=""; var index_seq=""; var index_name=""; var perc=""; var empty_string="";
+
+@***
+NGL-3185: nouveau format pour LRM
+Date: format "yyyy-MM-dd"
+Library Prep Kit : IDT-ILMN TruSeq DNA-RNA UD Indexes 96 Indexes
+Description: <vide>
+ReverseComplement: NON
+Laisser colonne I7_Index_ID vide
+adapter au lieu de Adapter
+
+04/02/2022 suppression ligne "Description"
+NGL-3716 correction ordre de tri
+***@
+
+[Header]\u000D\u000A
+Experiment Name,@experiment.code\u000D\u000A
+Date,@(new SimpleDateFormat("yyyy-MM-dd").format(experiment.traceInformation.creationDate))\u000D\u000A
+Module,Library QC - 1.0.0\u000D\u000A
+Workflow,LibraryQC\u000D\u000A
+Library Prep Kit,IDT-ILMN TruSeq DNA-RNA UD Indexes 96 Indexes\u000D\u000A
+Chemistry,Default\u000D\u000A
+[Reads]\u000D\u000A
+@experiment.instrumentProperties.get("nbCyclesRead1").value\u000D\u000A
+@experiment.instrumentProperties.get("nbCyclesRead2").value\u000D\u000A
+[Settings]\u000D\u000A
+FlagPCRDuplicates,1\u000D\u000A
+adapter,AGATCGGAAGAGCACACGTCTGAACTCCAGTCA\u000D\u000A
+adapterRead2,AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT\u000D\u000A
+[Data]\u000D\u000A
+Sample_ID,Description,Index_Plate_Well,I7_Index_ID,index,GenomeFolder,Sample_Project\u000D\u000A
+
+@for(c <- containers.sortWith(_.support.line<_.support.line).sortWith(_.support.column.toInt<_.support.column.toInt) ) {
+	@for(co <- c.contents){
+		@{index_seq=OutputHelper.getSequence(OutputHelper.getIndex("index-illumina-sequencing",OutputHelper.getContentProperty(co,"tag")))}
+		@*** kanban 08/12/2020 specs pas claires: obligatoire/pas obligatoire ?? 
+		     @{index_name=OutputHelper.getContentProperty(co,"tag")}
+		     => pour l'instant ne rien faire: laisser index_name vide
+		***@
+		@{perc=Double.toString(co.percentage).replace(".","_")}
+		@{well_pos=c.code.split("_")(1)}
+		@*** !! transformer A1 en A01, A2 en A02 etc...***@
+		@if( well_pos.length() == 2 ) { @{well_pos=well_pos.substring(0,1)+"0"+well_pos.substring(1)} }
+		
+		@(c.code),@(OutputHelper.getContentProperty(co,"tag"))_@(perc),@(well_pos),@(index_name),@(index_seq),@experiment.instrumentProperties.get("genomeFolder").value,,\u000D\u000A
+	}
+} 
+

@@ -1,0 +1,20 @@
+@()
+<div class="row">
+ <div class="col-md-4 col-lg-4">
+	 <table class="table table-condensed table-hover table-bordered">
+		<thead>
+		<tr>
+			<th>@Messages("analyses.treatments.contigFilter_ba.storedBases")</th>
+			<th>@Messages("analyses.treatments.contigFilter_ba.lostBasesPercent")</th>			
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.storedBases.value | number}}</td>
+			<td ng-class="highLight('treatments.'+treatments.getTreatment().code+'.pairs.lostBasesPercent.value')">
+			{{analysis.treatments[treatments.getTreatment().code].pairs.lostBasesPercent.value | number:2}}</td>			
+		</tr>						
+	</tbody>
+	 </table>
+ </div>	 
+</div>

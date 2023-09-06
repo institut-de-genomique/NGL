@@ -1,0 +1,75 @@
+@this()
+@()
+@import views.html.helper._
+@import views.html.tools.attributesInstructions
+
+			   
+@form() = {
+	@attributesInstructions()
+
+	@columnSearchForm{
+		@formGroup{
+			<div class="form-control" bt-select  ng-model="form.projectCode" filter="true" placeholder='@Messages("create.placeholder.projectCodes")' bt-options="project.code as project|formatProjectListLabel for project in lists.getProjects()" required"></div>	
+		}			
+		@formGroup{
+			<textarea type="number" class="form-control"  rows="2" ng-model="form.taxonId" placeholder='@Messages("create.samples.placeholder.taxonId")' required></textarea>		
+		}					
+		@**
+		@formGroup{
+			<textarea class="form-control" rows="2" ng-model="refCollab" placeholder='@Messages("create.samples.placeholder.refCollab")'></textarea>		
+		} **@	
+		@formGroup{
+			<textarea class="form-control" rows="2" ng-model="form.title" placeholder='@Messages("create.samples.placeholder.title")' </textarea>		
+		}		
+		@formGroup{
+			<textarea type="text" class="form-control"  rows="3" ng-model="form.description" placeholder='@Messages("create.samples.placeholder.description")'></textarea>		
+		}					
+		@formGroup{
+			<textarea class="form-control" rows="2" ng-model="form.anonymizedName" placeholder='@Messages("create.samples.placeholder.anonymizedName")'></textarea>		
+		}	
+		
+		@formGroup{
+			<textarea class="form-control" rows="4" ng-model="form.attributes" placeholder='@Messages("create.samples.placeholder.attributes")'></textarea>		
+		}	
+	}
+
+	
+}
+	 </div>
+	</div>
+	</div>
+	</div> 
+<div class="row">
+<div class="col-md-12 col-lg-12"  messages="messages"></div>
+</div>
+
+<div class="row"> 
+	<div class="col-md-12 col-lg-12">
+		<div dt-form>	
+			<div class="tab-content">
+				<div class="tab-pane active" id="filters">
+					<form name="samplesForm" class="well well-small">
+						<div class="row">
+						@form
+						@columnSearchForm{
+							@formGroup{
+							<div class="btn-toolbar">
+								<button type="submit" title='@Messages("button.save")' ng-disabled="samplesForm.$invalid" ng-click="save()" data-toggle="tooltip" class="btn btn-primary" >
+									<i class="fa fa-save"></i>
+								</button>
+								<button title='@Messages("button.reset")' ng-click="reset()" data-toggle="tooltip"  class="btn btn-default">
+									<i class="fa fa-undo"></i>
+								</button>
+															 	
+							</div>	
+							}	
+							
+						}
+						</div>		
+					</form>	
+				</div>
+			</div>
+		</div>
+	</div>
+</div> 
+

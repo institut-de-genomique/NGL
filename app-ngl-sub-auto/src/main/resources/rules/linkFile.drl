@@ -1,0 +1,26 @@
+#created on: Jul 7, 2014
+package birds
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.File;
+import java.io.PrintWriter;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+
+rule "Set parameter for command line linkFile"
+	@BirdsRule(fsRule)
+	dialect 'java'
+	salience 300
+	no-loop
+		when
+			$treatSpec : TreatmentSpecification(name in ("LinkFile","linkFileCCRT"), project.name=="SRA")
+			$job : Job(treatmentSpecification.name!=null, treatmentSpecification.name  in ("LinkFile","linkFileCCRT"))
+		then
+			Logger log = Logger.getLogger("ngl.sub.rules");
+			log.debug("Set parameter for linkFile command");
+			//Get input resource
+			JobResource jobResource = $job.getUniqueJobResource("inputLinkFile");
+			$job.setParameterValue("fileToLink", ProjectProperties.getProperty("tmpDirectory")+File.separator+jobResource.getProperty("code")+File.separator+jobResource.getProperty("fileName"));
+			$job.setParameterValue("endArg", jobResource.getProperty("submissionDirectory")+File.separator+jobResource.getProperty("fileName"));
+end
+

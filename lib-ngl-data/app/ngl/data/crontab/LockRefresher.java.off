@@ -1,0 +1,22 @@
+//package ngl.data.crontab;
+//
+//import org.bson.types.ObjectId;
+//
+//// Losing the lock should cancel the associated process, but there is no such process
+//// at this point.
+//public class LockRefresher implements Runnable {
+//	
+//	private final CronTabAPI api;
+//	private final ObjectId   oid;
+//	
+//	public LockRefresher(CronTabAPI api, ObjectId oid) {
+//		this.api = api;
+//		this.oid = oid;
+//	}
+//	
+//	@Override
+//	public void run() {
+//		api.refreshLock(oid);
+//	}
+//	
+//}

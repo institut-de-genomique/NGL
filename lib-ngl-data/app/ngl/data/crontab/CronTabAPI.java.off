@@ -1,0 +1,404 @@
+//package ngl.data.crontab;
+//
+//import static fr.cea.ig.lfw.utils.Iterables.zen;
+//
+//import java.util.Date;
+//import java.util.List;
+//
+//import javax.inject.Inject;
+//
+//import org.bson.types.ObjectId;
+//
+//import org.mongojack.DBQuery;
+//import org.mongojack.DBSort;
+//import org.mongojack.DBUpdate;
+//import org.mongojack.WriteResult;
+//
+//import com.mongodb.MongoException;
+//
+//import fr.cea.ig.mongo.MongoConfig;
+//
+//
+////
+//// CronTab database API
+//// 
+//public class CronTabAPI {
+//	
+////	private static org.mongojack.JacksonDBCollection xxx;
+//	
+//	private static final play.Logger.ALogger logger = play.Logger.of(CronTabAPI.class);
+//	
+//	private static final String UniquenessCollectionName = "ngl_tmp.unique";
+//	private static final String LockCollectionName       = "ngl_tmp.lock";
+//	private static final String cronTabCollectionName    = "ngl_tmp.crontab"; 
+//	// Lock minimum and maximum reservation duration
+//	private static final long minLockDuration =           500; // 1/2 s
+//	private static final long maxLockDuration = 5 * 60 * 1000; // 5 mns
+//	// Lock data type "definition"
+//	private static final String lastRefreshKey = "lastRefreshDate"; // $currentDate needs the field name.
+////	private static final String durationKey    = "duration";
+////	private static final String ownerKey       = "owner"; 
+//	
+////	private MongoDatabase database;
+//	
+//	private RawMongoJack<NamedObject> namedObjects;
+//	private RawMongoJack<Lock>        locks;
+//	private RawMongoJack<CronTabEntry>    jobs;
+//	
+//	@Inject
+//	public CronTabAPI(MongoConfig mc) {
+////		database     = mc.getDatabase();
+//		namedObjects = new RawMongoJack<>(mc, UniquenessCollectionName, NamedObject.class);
+//		locks        = new RawMongoJack<>(mc, LockCollectionName,       Lock       .class);
+//		jobs         = new RawMongoJack<>(mc, cronTabCollectionName,    CronTabEntry   .class);
+//	}
+//
+//	public List<NamedObject> getNamedObjectsByName(String name) {
+//		return zen(namedObjects.find(DBQuery.is("name", name)).sort(DBSort.asc("_id"))).toList();
+//	}
+//	
+//	public ObjectId getId(String key) {
+//		logger.debug("getting unique id for '{}'", key);
+//		// select key(s) from unique id table ordered by id.
+////		MongoCollection<Document> collection = database.getCollection(UniquenessCollectionName);
+////		Document filter = new Document().append("key", key);
+////		Document sort   = new Document().append("_id", 1);
+////		FindIterable<Document> i = collection.find().filter(filter).sort(sort);
+////		List<Document> r = zen(i).toList();
+////		
+//		// List<NamedObject> nos = zen(namedObjects.collection().find(DBQuery.is("key", key))).toList();
+//		List<NamedObject> nos = getNamedObjectsByName(key);
+//		// if no result, insert key
+//		if (nos.size() == 0) {
+//			logger.debug("creating entry for '{}'", key);
+//			// Document nDoc = new Document().append("key", key);
+////			collection.insertOne(nDoc);
+//			// WriteResult<NamedObject, ObjectId> result = namedObjects.collection().insert(new NamedObject(key));
+////			namedObjects.collection().update(DBQuery.is("name", key), new NamedObject(key), true, false);
+//			namedObjects.upsert(DBQuery.is("name", key), new NamedObject(key));
+//			// Could we upsert ?
+////			result = namedObjects.collection().update(DBQuery.is("name", key), DBUpdate.object)
+//			// Read object id and take the first one as there may be
+//			// concurrent creation.
+////			r = Iterables.zen(collection.find().filter(filter).sort(sort)).toList();
+////			if (r.size() == 0)
+////				throw new RuntimeException("read after insert failed (no result)");
+//			nos = getNamedObjectsByName(key);
+//			if (nos.size() == 0)
+//				throw new RuntimeException("read after insert failed (no result)");
+//		}
+//		// select key(s) from unique id table ordered by id.
+////		ObjectId id = nos.get(0).getObjectId("_id");
+//		ObjectId id = nos.get(0).getId();
+//		logger.debug("unique id for '{}' : {}", key, id );
+//		return id;
+//		// Select latest, delete others. Would be _id > id.
+//		// throw new RuntimeException();
+//	}
+//	
+//	// We need to check if any lock is already there and if so, if the lock has timed
+//	// out. We extract the object for the given id.
+//	// We requires a reservation time (say in milliseconds).
+//	
+//	public void garbageCollectLocks() {
+////		MongoCollection<Document> collection = database.getCollection(LockCollectionName);
+////		for (Document d : collection.find()) 
+////			garbageCollectLock(d.getObjectId("_id"));
+//		for (Lock lock : locks.all())
+//			garbageCollectLock(lock.getId());
+//	}
+//	
+//	public void garbageCollectLock(ObjectId id) {
+//		String vmName = java.lang.management.ManagementFactory.getRuntimeMXBean().getName();
+////		MongoCollection<Document> collection = database.getCollection(LockCollectionName);
+////		Document nDoc = new Document().append("_id", id);
+////		List<Document> r = Iterables.zen(collection.find().filter(nDoc)).toList();
+////		if (r.size() > 0) {
+////			// check mongo time and our time, that would mean that we are able to check the
+////			// mongo time. The lock would have an expiration delay and a last update time.
+////			// Either we have a time table or we modify the object with our key and a server
+////			// date. 
+////			logger.debug("checking lock time");
+////			logger.debug("using vmname {}", vmName);
+////			logger.debug("updating our lock time");
+////			collection.updateOne(nDoc, new Document().append("$currentDate", new Document().append(vmName, true)));
+////			r = Iterables.zen(collection.find().filter(nDoc)).toList();
+////			if (r.size() > 0) {
+////				Date rd = (Date)r.get(0).get(lastRefreshKey);
+////				Date md = (Date)r.get(0).get(vmName);
+////				logger.debug("last refresh {}, our time {}", rd, md);
+////				Number lockDuration = (Number)r.get(0).get(durationKey);
+////				if ((rd == null) || (lockDuration == null)) {
+////					logger.debug("clearing incomplete lock for {}", id);
+////					// This really should not occur
+////					collection.deleteOne(nDoc);
+////				} else {
+////					// A refresh date in the future should be ignored. Giving a one
+////					// second delay should be enough.
+////					Date expirationDate  = new Date(rd.getTime() + lockDuration.longValue());
+////					Date futureTolerance = new Date(md.getTime() + 1000);
+////					if (futureTolerance.before(rd)) {
+////						logger.debug("clearing bad refresh time lock (in the future) for {}", id);
+////						collection.deleteOne(nDoc);						
+////					} else if (expirationDate.before(md)) {
+////						logger.debug("clearing expired lock for {}", id);
+////						collection.deleteOne(nDoc);
+////					} else {
+////						logger.debug("someone onws the lock ({})", r.get(0).get(ownerKey));
+////					}
+////				}
+////			}
+////		}
+////		Lock l = locks.collection().findOneById(id);
+//		Lock l = locks.findOneById(id);
+//		if (l != null) {
+//			// check mongo time and our time, that would mean that we are able to check the
+//			// mongo time. The lock would have an expiration delay and a last update time.
+//			// Either we have a time table or we modify the object with our key and a server
+//			// date. 
+//			logger.debug("checking lock time");
+//			logger.debug("using vmname {}", vmName);
+//			logger.debug("updating our lock time");
+////			locks.collection().updateById(id, new DBUpdate.Builder().addRawOperation("$currentDate", "checkDates." + vmName, true));
+////			locks.updateById(id, new DBUpdate.Builder().addRawOperation("$currentDate", "checkDates." + vmName, true));
+//			locks.updateById(id, new DBUpdate.Builder().addRawOperation("$currentDate", "lastVerificationDate", true));
+//			l = locks.findOneById(id);
+//			if (l != null) {
+//				Date rd = l.getLastRefreshDate();
+//				// The refresh date may be null if we are looking at the lock during
+//				// an acquisition phase.
+//				if (rd != null) {
+//					// Date md = l.checkDates.get(vmName);
+//					Date md = l.getLastVerificationDate();
+//					logger.debug("last refresh {}, last verification {}", rd, md);
+//					long lockDuration = l.getDuration();
+//					// A refresh date in the future should be ignored. Giving a one
+//					// second delay should be enough.
+//					Date expirationDate  = new Date(rd.getTime() + lockDuration);
+//					Date futureTolerance = new Date(md.getTime() + 1000);
+//					if (futureTolerance.before(rd)) {
+//						logger.debug("clearing bad refresh time lock (in the future) for {}", id);
+//						locks.removeById(id);						
+//					} else if (expirationDate.before(md)) {
+//						logger.debug("clearing expired lock for {}", id);
+//						locks.removeById(id);
+//					} else {
+//						logger.debug("someone onws the lock ({})", l.getOwner());
+//					}
+//				} else {
+//					logger.warn("no refresh date set for lock {}", id);
+//				}
+//			}
+//		}
+//	}
+//	
+//	// This could provide the job runner service using a consumer.
+//	public boolean getLock(ObjectId id, long duration) {
+//		if (duration < minLockDuration)
+//			throw new IllegalArgumentException("duration is less than minimum allowed (" + minLockDuration + ")");
+//		if (duration > maxLockDuration)
+//			throw new IllegalArgumentException("duration is less than maximum allowed (" + maxLockDuration + ")");
+//		String vmName = java.lang.management.ManagementFactory.getRuntimeMXBean().getName();
+//		logger.debug("trying to acquire lock for {}", id);
+////		MongoCollection<Document> collection = database.getCollection(LockCollectionName);
+////		Document nDoc = new Document().append("_id", id);
+////		List<Document> r = Iterables.zen(collection.find().filter(nDoc)).toList();
+////		if (r.size() > 0) {
+////			// check mongo time and our time, that would mean that we are able to check the
+////			// mongo time. The lock would have an expiration delay and a last update time.
+////			// Either we have a time table or we modify the object with our key and a server
+////			// date. 
+////			logger.debug("checking lock time");
+////			logger.debug("using vmname {}", vmName);
+////			logger.debug("updating our lock time");
+////			collection.updateOne(nDoc, new Document().append("$currentDate", new Document().append(vmName, true)));
+////			r = Iterables.zen(collection.find().filter(nDoc)).toList();
+////			if (r.size() > 0) {
+////				Date rd = (Date)r.get(0).get(lastRefreshKey);
+////				Date md = (Date)r.get(0).get(vmName);
+////				logger.debug("last refresh {}, our time {}", rd, md);
+////				Number lockDuration = (Number)r.get(0).get(durationKey);
+////				if ((rd == null) || (lockDuration == null)) {
+////					logger.debug("clearing incomplete lock for {}", id);
+////					// This really should not occur
+////					collection.deleteOne(nDoc);
+////				} else {
+////					// A refresh date in the future should be ignored. Giving a one
+////					// second delay should be enough.
+////					Date expirationDate  = new Date(rd.getTime() + lockDuration.longValue());
+////					Date futureTolerance = new Date(md.getTime() + 1000);
+////					if (futureTolerance.before(rd)) {
+////						logger.debug("clearing bad refresh time lock (in the future) for {}", id);
+////						collection.deleteOne(nDoc);						
+////					} else if (expirationDate.before(md)) {
+////						logger.debug("clearing expired lock for {}", id);
+////						collection.deleteOne(nDoc);
+////					} else {
+////						logger.debug("someone onws the lock ({})", r.get(0).get(ownerKey));
+////						return false;
+////					}
+////				}
+////			}
+////		}
+//		// Garbage collect lock before trying to acquire lock.
+////		garbageCollectLock(id);
+////		try {
+////			logger.debug("trying to acquire physical lock {}", id);
+////			collection.insertOne(new Document()
+////					                 .append("_id",  id)
+////					                 .append(durationKey,duration)
+////					                 .append(ownerKey, vmName));
+////			collection.updateOne(nDoc, new Document().append("$currentDate", new Document().append(lastRefreshKey, true)));
+////			List<Document> r = Iterables.zen(collection.find().filter(nDoc)).toList();
+////			if (r.size() == 0)
+////				return false; // lock was cleared before we could set the refresh time
+////			// Check that we own the lock
+////			return vmName.equals(r.get(0).get(ownerKey));
+////		} catch (MongoException e) {
+////			logger.debug("physical lock acquisition failed {}", e.getMessage());
+////			return false;
+////		}
+//		// Garbage collect lock before trying to acquire lock.
+//		garbageCollectLock(id);
+//		try {
+//			logger.debug("trying to acquire physical lock {} (we:{})", id, vmName);
+//			locks.insert(new Lock(id,duration,vmName));
+//			logger.debug("acquired lock {}", id);
+//			locks.updateById(id, new DBUpdate.Builder().addRawOperation("$currentDate", lastRefreshKey, true));
+//			logger.debug("updated refresh date");
+////			Lock l = locks.collection().findOneById(id);
+////			logger.debug("fetched expected lock : {}", l);
+////			if (l == null)
+////				return false; // lock was cleared before we could set the refresh time
+////			// Check that we own the lock because lock could have been cleared
+////			// if the null date test 
+////			logger.debug("vmname {}, owner {}", vmName, l.owner);
+////			return vmName.equals(l.owner);
+//			return true;
+//		} catch (MongoException e) {
+//			logger.debug("physical lock acquisition failed {}", e.getMessage());
+//			return false;
+//		}	
+//	}
+//	
+//	public void relaseLock(ObjectId id) {
+////		MongoCollection<Document> collection = database.getCollection(LockCollectionName);
+////		Document nDoc = new Document().append("_id", id);
+////		collection.deleteOne(nDoc);
+//		locks.removeById(id);
+//	}
+//	
+//	// This does not check if we own the lock so this may refresh a lock
+//	// that has been taken by someone else. Query should include 
+//	// an owning check.
+//	public void refreshLock(ObjectId id) {
+////		MongoCollection<Document> collection = database.getCollection(LockCollectionName);
+////		Document nDoc = new Document().append("_id", id);		
+////		collection.updateOne(nDoc, new Document().append("$currentDate", new Document().append(lastRefreshKey, true)));
+//		locks.updateById(id, new DBUpdate.Builder().addRawOperation("$currentDate", lastRefreshKey, true));
+//	}
+//	
+//	public void updateLastExecutionDate(CronTabEntry e) {
+//		jobs.updateById(e.getId(), new DBUpdate.Builder().addRawOperation("$currentDate", "lastExecutionDate", true));
+//	}
+//	
+//	public List<CronTabEntry> getJobs() {
+//		// return zen(jobs.collection().find()).toList();
+//		return jobs.all();
+//	}
+//	
+//	public boolean createOrUpdate(CronTabEntry e) {
+//		// Could use the job key as the entry id. This would overwrite the entry. 
+//		// As we identify the job by some name, the name would be the key.
+//		String name = e.getJob().getName();
+//		ObjectId id = getId(name);
+//		// Upsert by id.
+//		// jobs.collection().update(DBQuery.is("_id", id), e, true, false); // upsert=true, multi=false
+//		WriteResult<?,?> r = jobs.upsertById(id, e);
+//		// database.
+//		// throw new RuntimeException();
+//		return ! r.isUpdateOfExisting();
+//	}
+//	
+//	public CronTabEntry getJobByName(String name) {
+//		return jobs.findOne(DBQuery.is("job.name", name));
+//	}
+//
+//	public void updateJobCheckDates() {
+//		jobs.updateMulti(DBQuery.empty(), new DBUpdate.Builder().addRawOperation("$currentDate", "checkDate", true));
+//	}
+//	
+//}
+//
+////
+//// We expect the execution to be a "one at a time" thing and this goes against
+//// multiple play servers so we need some kind of locking.
+////
+//// Provides the locking mechanism for a given process "name".
+//// The process requested the lock is supposed to have some identity.
+//// The application generates an application key by creating an application
+//// document. We use a timed garbage collection that requires that we must use
+//// some centralized clock.
+//// The lock id is the process id, so the processes have a unique id in the DB.
+//// 
+//// 
+////class MDBLock {
+////	
+////	public static final int lockDuration       = 300; // 300s = 5mn
+////	public static final int lockCheckFrequency = lockDuration * 2;
+////	
+////	// String to object id mapping.
+////	// We could use a modulo encoding.
+////	private static final String allowedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXZY0123456789 -_.";
+////	private static Map<Character,Integer> allowedCharMap = null;
+////	
+////	private static ObjectId oid(String s) {
+////		if (allowedCharMap == null) {
+////			allowedCharMap = new HashMap<>();
+////			for (int i = 0; i < allowedChars.length(); i++)
+////				allowedCharMap.put(allowedChars.charAt(i),i+1);
+////		}
+////		// Build a value from the string and encode it in base 16.
+////		BigInteger bi = BigInteger.ZERO;
+////		int base = allowedChars.length() + 1;
+////		for (int i=0; i<s.length(); i++) {
+////			char c = s.charAt(i);
+////			Integer index = allowedCharMap.get(c);
+////			if (index != null)
+////				bi = bi.multiply(BigInteger.valueOf(base)).add(BigInteger.valueOf(index));
+////			else
+////				throw new RuntimeException("illegal char '" + c + "'");
+////		}
+////		String oid = bi.toString(16);
+////		if (oid.length() > 24)
+////			throw new RuntimeException("hexa generation too long for '" + s + "' : " + oid);
+////		oid = "000000000000000000000000000".substring(0, 24 - oid.length()) + oid;
+////		return new ObjectId(oid);
+////	}
+////	
+////	public static MDBLock acquire(String key) {
+////		// try to create a lock document with the given id. If this
+////		// is OK, we have the lock. Otherwise, check the current lock
+////		// time stamp to see if the lock is to be cleared.
+////		ObjectId oid = oid(key);
+////		// Create document in the lock documents. Creating a key for and object relies on the
+////		// object having a 'code' or some kindl of logical identifier. We execute a query
+////		// to find the object id. 
+////		
+////		throw new RuntimeException();
+////	}
+////	
+////	public ObjectId objectId;
+////	
+////	public void refresh() {
+////		// modify the the lock document by adding a time stamp and
+////		// checking for liveliness.
+////		throw new RuntimeException();		
+////	}
+////	
+////	public void release() {
+////		// Destroy the lock document
+////	}
+////	
+////	public ObjectId getOID() { return objectId; }
+////}

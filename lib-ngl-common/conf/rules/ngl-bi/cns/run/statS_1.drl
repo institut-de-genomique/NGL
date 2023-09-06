@@ -1,0 +1,42 @@
+//created on: Nov 21, 2013
+package rules
+
+rule "Copy NovaSeq properties from Container to Run illumina"
+	@nglBI(IP_S_1)
+	@nglSQ(IP_S_1)
+	dialect "java"
+	salience 100
+	no-loop
+	when
+		$run : Run(categoryCode=="illumina", typeCode == "RNVS6000")		
+	then
+		Logger.debug("Copy properties to Run "+$run.code);
+		ContainerSupport cs = MongoDBDAO.findByCode(InstanceConstants.CONTAINER_SUPPORT_COLL_NAME, ContainerSupport.class, $run.containerSupportCode);
+		if(null != cs){
+			if (cs.properties != null) {
+				$run.properties.putAll(cs.properties);			
+			}
+			
+			List<Container> containers = MongoDBDAO.find(InstanceConstants.CONTAINER_COLL_NAME, Container.class, DBQuery.is("support.code", $run.containerSupportCode)).toList();
+			
+			Set<String> flowCellTypes = new TreeSet<String>();
+			for(Container container:containers){
+				for(Content content:container.contents){
+					if(content.properties.containsKey("novaseqFlowcellMode")){
+						flowCellTypes.add((String)(content.properties.get("novaseqFlowcellMode").value));
+					}
+				}
+			}
+			if(flowCellTypes.size() > 0){
+					$run.properties.put("novaseqFlowcellMode", new PropertyListValue(new ArrayList(flowCellTypes)));
+			}
+			
+			MongoDBDAO.update(InstanceConstants.RUN_ILLUMINA_COLL_NAME, Run.class, 
+							DBQuery.is("code", $run.code),
+							DBUpdate.set("properties", $run.properties));
+		}else{
+			Logger.error("ContainerSupport null for "+$run.containerSupportCode);
+		}
+		
+			
+end

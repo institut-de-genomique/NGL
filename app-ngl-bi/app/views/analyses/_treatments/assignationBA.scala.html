@@ -1,0 +1,49 @@
+@()
+ <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+<div ng-repeat="trt in treatmentsFilter() | orderBy: 'controlName' | filter:filterTreatments" class="panel panel-default">
+
+	<div class="panel-heading" role="tab" id="heading{{trt.controlName}}">
+      <h4 class="panel-title">
+        <a role="button" data-toggle="collapse" data-parent="#accordion" data-target="#{{trt.controlName}}" aria-expanded="true" aria-controls="{{trt.controlName}}">
+         <i class="more-less glyphicon glyphicon-plus"></i>
+          {{trt.controlName}}
+        </a>
+      </h4>
+    </div>
+   
+    <div id="{{trt.controlName}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{trt.controlName}}">
+    	<div class="panel-body">
+        <table class="table table-condensed table-hover table-bordered text-center">
+ 		<thead>
+ 			<tr>
+			</tr>
+			<tr>
+ 				<th class="text-center">@Messages("treatments.assignation.assignationBilan.cluster")</th>
+				<th class="text-center">@Messages("treatments.assignation.assignationBilan.otu")</th>
+				<th class="text-center">@Messages("treatments.assignation.assignationBilan.abundance")</th>
+				<th class="text-center">@Messages("treatments.assignation.assignationBilan.abundanceClusterPercent")</th>
+				<th class="text-center">@Messages("treatments.assignation.assignationBilan.abundanceControlPercent")</th>
+				<th class="text-center">@Messages("treatments.assignation.assignationBilan.taxonomy")</th>
+				<th class="text-center">@Messages("treatments.assignation.assignationBilan.idPercent")</th>
+				<th class="text-center">@Messages("treatments.assignation.assignationBilan.matchLength")</th>
+			</tr>
+ 		</thead>
+ 		<tbody>
+ 			<tr ng-repeat="assign in analysis.treatments[treatments.getTreatment().code].read1.assignationBilan.value | filter:{controlName: trt.controlName} | filter:{cluster:'!!'} | orderBy:sorterFunc">
+ 				<td>{{assign.cluster}}</td>
+ 				<td>{{assign.otu}}</td>
+ 				<td>{{assign.abundance | number}}</td>
+ 				<td>{{assign.abundanceClusterPercent | number:2}}</td>
+ 				<td>{{assign.abundanceControlPercent | number:2}}</td>
+ 				<td><div list-resize='getList(assign.taxonomy)' list-resize-min-size='6' below/></td>
+ 				<td>{{assign.idPercent | number:2}} %</td>
+ 				<td>{{assign.matchLength | number:2}} %</td>
+ 			</tr>
+ 		</tbody>
+	 </table>
+	 </div>
+	 </div>
+    </div>
+    </div>
+
+

@@ -1,0 +1,94 @@
+
+->	/	            apinglcommon.Routes
+->	/	            apinglprojects.Routes
+->	/	            apinglreagents.Routes
+->	/	            apinglsq.Routes
+->	/	            apinglbi.Routes
+->	/admin	        ngladmin.Routes
+->  /               nglcommon.Routes  
+
+GET		/scripts/run/:clazz												fr.cea.ig.lfw.controllers.scripts.ScriptController.run(clazz : java.lang.String)
+POST	/scripts/run/:clazz												fr.cea.ig.lfw.controllers.scripts.ScriptController.run(clazz : java.lang.String)
+
+# Home page
+GET     /                           									controllers.main.tpl.Main.home()
+GET     /tpl/js-routes                         							controllers.main.tpl.Main.javascriptRoutes()
+
+#containerSupports tpl
+GET 	/supports/scanner/home											controllers.containers.tpl.ContainerSupports.homeScanner()
+GET 	/supports/:homecode/home										controllers.containers.tpl.ContainerSupports.home(homecode:java.lang.String)
+GET		/supports/:code													controllers.containers.tpl.ContainerSupports.get(code: java.lang.String)
+GET		/tpl/supports/search											controllers.containers.tpl.ContainerSupports.search()
+GET		/tpl/supports/details											controllers.containers.tpl.ContainerSupports.details()
+GET		/tpl/supports/js-routes											controllers.containers.tpl.ContainerSupports.javascriptRoutes()
+
+#containers tpl
+GET 	/containers/:homecode/home										controllers.containers.tpl.Containers.home(homecode:java.lang.String)
+GET		/containers/:code												controllers.containers.tpl.Containers.get(code: java.lang.String)
+GET		/tpl/containers/search											controllers.containers.tpl.Containers.search()
+GET		/tpl/containers/details											controllers.containers.tpl.Containers.details()
+GET		/tpl/containers/new-from-file									controllers.containers.tpl.Containers.newFromFile()
+GET		/tpl/containers/js-routes										controllers.containers.tpl.Containers.javascriptRoutes()
+
+#processes tpl
+GET 	/processes/:homecode/home										controllers.processes.tpl.Processes.home(homecode:java.lang.String)
+GET		/tpl/processes/search/:processTypeCode							controllers.processes.tpl.Processes.search(processTypeCode:java.lang.String)
+GET		/tpl/processes/search-containers								controllers.processes.tpl.Processes.searchContainers()
+GET		/tpl/processes/search-samples									controllers.processes.tpl.Processes.searchSamples()
+GET		/tpl/processes/new/:processTypeCode								controllers.processes.tpl.Processes.newProcesses(processTypeCode:java.lang.String)
+GET		/tpl/processes/assign/:processTypeCode							controllers.processes.tpl.Processes.assignProcesses(processTypeCode:java.lang.String)
+GET		/tpl/processes/js-routes										controllers.processes.tpl.Processes.javascriptRoutes()
+
+#experiments tpl
+GET 	/experiments/:homecode/home																controllers.experiments.tpl.Experiments.home(homecode:java.lang.String)
+GET 	/experiments/:code																		controllers.experiments.tpl.Experiments.get(code:java.lang.String)
+GET		/tpl/experiments/details																controllers.experiments.tpl.Experiments.details()		
+GET		/tpl/experiments/graph																	controllers.experiments.tpl.Experiments.graph()		
+GET		/tpl/experiments/search-containers														controllers.experiments.tpl.Experiments.searchContainers()
+GET		/tpl/experiments/list-containers														controllers.experiments.tpl.Experiments.listContainers()
+GET		/tpl/experiments/get-template/:atomicType/:outputCategoryCode/:experimentCategoryCode/:experimentType			controllers.experiments.tpl.Experiments.getTemplate(atomicType:java.lang.String,outputCategoryCode:java.lang.String, experimentCategoryCode:java.lang.String, experimentType:java.lang.String)
+#GET		/tpl/experiments/create-or-edit-experiment												controllers.experiments.tpl.Experiments.createOrEditExperiment()
+GET		/tpl/experiments/search/:experimentTypeCode												controllers.experiments.tpl.Experiments.search(experimentTypeCode:java.lang.String)
+GET		/tpl/experiments/js-routes																controllers.experiments.tpl.Experiments.javascriptRoutes()		
+
+#samples tpl
+GET 	/samples/:homecode/home										controllers.samples.tpl.Samples.home(homecode:java.lang.String)
+GET		/samples/:code												controllers.samples.tpl.Samples.get(code: java.lang.String)
+GET		/tpl/samples/search											controllers.samples.tpl.Samples.search()
+GET		/tpl/samples/details										controllers.samples.tpl.Samples.details()
+GET		/tpl/samples/js-routes										controllers.samples.tpl.Samples.javascriptRoutes()
+
+#descriptions tpl
+GET		/descriptions/:homecode/home									controllers.descriptions.tpl.Descriptions.home(homecode:java.lang.String)
+GET		/tpl/descriptions/instruments									controllers.descriptions.tpl.Descriptions.instruments()
+GET		/tpl/descriptions/imports										controllers.descriptions.tpl.Descriptions.imports()
+GET		/tpl/descriptions/protocols										controllers.descriptions.tpl.Descriptions.protocols()
+GET		/tpl/descriptions/experiments									controllers.descriptions.tpl.Descriptions.experiments()
+GET		/tpl/descriptions/mappingprojects								controllers.descriptions.tpl.Descriptions.mappingProjects()
+GET		/tpl/descriptions/mappingprojects/new         					controllers.descriptions.tpl.Descriptions.newMappingProjects()
+GET		/tpl/descriptions/processes										controllers.descriptions.tpl.Descriptions.processes()
+GET		/tpl/descriptions/js-routes										controllers.descriptions.tpl.Descriptions.javascriptRoutes()
+GET     /tpl/descriptions/details-protocol                              controllers.descriptions.tpl.Descriptions.detailsProtocol()
+
+
+
+#tags api
+GET 	/printing/:homecode/home										controllers.printing.tpl.Printing.home(homecode:java.lang.String)
+GET		/tpl/printing/js-routes											controllers.printing.tpl.Printing.javascriptRoutes()
+GET		/tpl/printing/tags/display										controllers.printing.tpl.Tags.display()
+
+#NGL-836: Indexes tpl
+GET 	/indexes/:homecode/home										controllers.indexes.tpl.Indexes.home(homecode:java.lang.String)
+GET		/indexes/:code												controllers.indexes.tpl.Indexes.get(code: java.lang.String)
+GET		/tpl/indexes/search											controllers.indexes.tpl.Indexes.search()
+GET		/tpl/indexes/details										controllers.indexes.tpl.Indexes.details()
+GET		/tpl/indexes/js-routes										controllers.indexes.tpl.Indexes.javascriptRoutes()
+
+
+# Map static resources from the /public folder to the /assets URL path
+# GET     /assets/*file               									controllers.Assets.at(path="/public", file)
+GET     /messages.js                									controllers.main.tpl.Main.jsMessages()
+GET     /codes.js        	        									controllers.main.tpl.Main.jsCodes()
+GET		/permissions.js													controllers.main.tpl.Main.jsPermissions()
+GET		/printTag.js													controllers.main.tpl.Main.jsPrintTag()
+GET		/app-url.js														controllers.main.tpl.Main.jsAppURL()

@@ -1,0 +1,42 @@
+package rules
+
+//Regle qui permet de ne pas autoriser la saisie d'un tag secondaire hors menu déroulant 
+//Pour éviter de requeter dans la base on vérifie que la categorie est renseigné car renseigné automatiquement selon la valeur selectionnée dans le menu
+rule "tag pcr validation secondary category tag mandatory if tag secondary is filled "
+	@nglSQ( validations )
+	dialect "java"
+	salience 1000
+	no-loop
+	
+	when
+		Experiment($typeCode:typeCode,$typeCode=="tag-pcr")
+		$contextValidation:ContextValidation()
+		OneToOneContainer($outputContainerUseds:outputContainerUseds, $inputContainerUseds:inputContainerUseds)
+		$outputContainerUsed: OutputContainerUsed(experimentProperties!=null, experimentProperties.get("secondaryTag") != null, experimentProperties.get("secondaryTagCategory") == null) from $outputContainerUseds
+		$inputContainerUsed: InputContainerUsed() from $inputContainerUseds
+	then
+		Logger.debug("Debug secondary category tag mandatory with secondary tag ");
+		$contextValidation.addErrors("Tag secondary","error.validationexp.secondaryCategoryTag",$inputContainerUsed.getCode());
+end
+	
+//Regle qui permet de ne pas autoriser la saisie d'un tag secondaire hors menu déroulant 
+//Pour éviter de requeter dans la base on vérifie que la categorie est renseigné car renseigné automatiquement selon la valeur selectionnée dans le menu
+//Cas qui n'arrive plus gérer au niveau de l'interface
+rule "tag pcr validation secondary tag mandatory if tag category secondary is filled "
+	@nglSQ( validations )
+	dialect "java"
+	salience 1000
+	no-loop
+	
+	when
+		Experiment($typeCode:typeCode,$typeCode=="tag-pcr")
+		$contextValidation:ContextValidation()
+		OneToOneContainer($outputContainerUseds:outputContainerUseds, $inputContainerUseds:inputContainerUseds)
+		$outputContainerUsed: OutputContainerUsed(experimentProperties!=null, experimentProperties.get("secondaryTag") == null, experimentProperties.get("secondaryTagCategory") != null) from $outputContainerUseds
+		$inputContainerUsed: InputContainerUsed() from $inputContainerUseds
+	then
+		Logger.debug("Debug secondary category tag mandatory with secondary tag ");
+		$contextValidation.addErrors("Tag secondary","error.validationexp.secondaryTag",$inputContainerUsed.getCode());
+end
+		
+

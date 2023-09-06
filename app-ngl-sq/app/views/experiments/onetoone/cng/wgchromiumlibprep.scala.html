@@ -1,0 +1,102 @@
+@()
+<!-- FDS 06/03/2017 copie depuis libraryprep.scala pour garder la possibilité d'associer les index via 2 modes
+    => import fichier ... NON 
+	=> selection par plaque  OUI NGL-3142 15/12/2020
+	
+    2 fonctionnements  -main    : strip-8       => tubes, strip-8, 96-well-plate
+                       //NON  -sciclone: 96-well-plate => 96-well-plate
+-->
+<div class="col-md-12 col-lg-12" ng-controller="WgChromiumLibraryPrepCtrl" >
+<!-- 13/03/2017----    suite a reunion NE PAS ENCORE mettre en production le mode sciclone/plaque
+     16/12/2020 : ATTENTION 2 utilisation de    <div ng-if ="(   )" >  => perd le binding avec ng-model 
+  <div ng-if ="( experiment.instrument.outContainerSupportCategoryCode  !== 'tube')" >
+  <form class="form-inline" role="form">
+  	  -- premiere ligne --
+      <div class="row margin-bottom-7">
+         <div class="form-group col-lg-4">          
+              <div ng-switch on="mainService.isEditMode()"> 
+              <div ng-switch-when="false">   
+                   <label for="plateCode" class="control-label">@Messages("experiments.outputContainerSupportCode")</label>
+                   <span class="form-control-static" ng-bind="outputContainerSupport.code"></span>    
+               </div>                           
+               <div ng-switch-when="true">
+                   <label for="plateCode"  class="control-label">@Messages("experiments.outputContainerSupportCode")</label>
+                   <input class="form-control input-sm" type="text" id="plateCode"
+									                    title=@Messages("experiments.outputContainerSupportCode")
+			  							                ng-model="outputContainerSupport.code" />	
+			  </div>
+			  </div>   
+	     </div> 
+         <div class="form-group col-lg-6">
+              <div ng-switch on="mainService.isEditMode()"> 
+              <div ng-switch-when="false">   
+                   <label for="plateStorage" class="control-label">@Messages("experiments.outputContainerSupportStorageCode")</label>
+                   <span class="form-control-static" ng-bind="outputContainerSupport.storageCode"></span> 
+              </div>
+              <div ng-switch-when="true">
+                  <label for="plateStorage" class="control-label">@Messages("experiments.outputContainerSupportStorageCode")</label>
+                  <input class="form-control input-sm" type="text" id="plateStorage" style="width:65%"
+									                   title=@Messages("experiments.outputContainerSupportStorageCode") 
+			 						                   ng-model="outputContainerSupport.storageCode" />	
+			  </div>
+			  </div>   
+	     </div>
+	  </div>
+	  -- 2eme ligne  eventuellement pour import de fichier d'index mais pas encore specifié--
+	  <div class="row margin-bottom-4">
+	  --- 
+         <div class="form-group col-lg-6"  ng-show="button.isShow()">
+             <label for="importFile" class="control-label">Fichier ????</label>
+             <div class="input-group" style="width:50%">
+                <input class="form-control input-sm" type="file" 
+                									 base64-file="file"
+                									 id="importFile"  
+                									 />
+                <span class="input-group-btn">									 
+                     <button class="btn btn-primary" ng-click="button.click()" 
+                                                     ng-disabled="button.isFileSet()" 
+                       title="@Messages("button.import.file")"><i class="fa fa-upload"></i>
+                     </button>     
+                </span> 
+            </div>                         				  
+          </div>
+          ------------ ATTENTION 1 selection par plaque d'index ne peut pas marcher pour des strips !!------
+          16/12/2020 : ATTENTION 2 utilisation de <div ng-if ="(   )" >  => perd le binding avec ng-model 
+          <div ng-if ="( experiment.instrument.outContainerSupportCategoryCode  === '96-well-plate')" >
+          <div class="form-group col-lg-6"  ng-show="selectColOrPlate.isShow()">
+             <label class="control-label">@Messages("experiments.select.startColumnTagPlate")</label>
+             --  manquait class="form-control" --
+             <select class="form-control" ng-model="tagPlateColumn"
+                                          ng-options="column.name for column in columns"
+                                          ng-change="selectColOrPlate.select()">
+             </select>  
+             <select ng-model="tagPlate" ng-options="plate.name for plate in plates" >
+             </select>                        				  
+          </div>
+          </div>
+    </div>
+  </form>
+  </div>	
+  -->
+
+  <!--  NGL-3142 ajout de choix de selection par groupe d'index pour tubes ou strips -->
+  <form class="form-inline margin-bottom-7" role="form">
+     <div class="row margin-bottom-7" ng-show="selectGroup.isShow()">
+        <div class="form-group col-lg-6" >
+          <label for="selectTagGroup" control-label">@Messages("experiments.select.tagGroup")</label>
+          <!--  manquait class="form-control" -->
+          <select class="form-control" ng-model="selectedTagGroup" 
+                                       ng-options="group.name for group in getTagGroups()"
+                                       ng-change="selectGroup.select(selectedTagGroup)"
+                                       id="selectTagGroup" >
+          </select>
+        </div>
+     </div>
+  </form>
+
+  <div class="row margin-bottom-7"></div><!-- seule facon trouvee pour insérer un espace... -->
+
+  <div class="row">
+	<div class="col-md-12 col-lg-12" ultimate-datatable="atmService.data"></div>
+  </div>
+</div>

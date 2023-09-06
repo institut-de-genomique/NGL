@@ -1,0 +1,98 @@
+application.name=NGL Plaques
+index.title = Welcome to NGL Plaques
+
+#Menu
+plates.menu = Plaques
+plates.menu.new=Création
+plates.menu.new_from_file=Création depuis un fichier
+plates.menu.search=Recherche
+
+#Menu
+barcodes.menu = Codes Barres
+barcodes.menu.new=Création
+barcodes.menu.search=Recherche inutilisés
+
+#Manips
+manips.table.code = Code Manip
+manips.table.name  = Nom Manip
+
+#Plaques
+plates.title.search=Recherche de Plaques
+plates.title.new=Création d''une Plaque
+plates.title.new-from-file=Création d''une Plaque
+
+plates.tabs.search = Recherche
+plates.tabs.searchmanips = Recherche Manips
+plates.tabs.searchfile = Choix fichier d''une plaque
+plates.tabs.new = Nouvelle
+
+plates.button.compute = Calcul coordonnées
+plates.button.save = Sauvegarder Plaque
+plates.button.table = Vue Tableau
+plates.button.plate = Vue Plaque
+plates.button.compute = Calcul Position
+plates.button.edit = Editer Plaque
+plates.button.unedit = Désactiver l''édition
+plates.button.delete = Supprimer la plaque
+
+plates.remove.confirm =Pouvez vous confirmer la suppression de la plaque {0} ?
+
+plates.legend = Plaque
+plates.table.code = Code Plaque
+plates.table.well.code = Code Manip
+plates.table.well.name = Nom Manip
+plates.table.well.x = X
+plates.table.well.y = Y
+plates.table.well.yx = Position
+plates.table.nbWells = Nombre de Puits Utilisés
+plates.table.typeName = Type de Manips
+plates.table.materialType = Type de Materiel
+plates.table.materialName = Nom du Materiel
+plates.table.creationDate = Date création
+plates.select.etapemanips = -- sélectionner une étape --
+plates.select.etatmanips = -- sélectionner un état --
+plates.select.project = -- sélectionner un projet --
+plates.select.create.user =  -- sélectionner un créateur --
+
+search.placeholder.regexPlaqueId = Regex pour plaqueId
+search.placeholder.regexMatmanom = Regex pour nom de manip.
+search.placeholder.fromDate = Plaque depuis le (jj/mm/aaaa)
+search.placeholder.toDate = Plaque jusqu''au (jj/mm/aaaa)
+search.placeholder.number = Nombre de codes barres à générer
+
+plates.msg.save.sucess = Sauvegarde réussie
+plates.msg.save.error = Sauvegarde echouée
+plates.msg.details = [détails]
+
+plates.msg.import.error = Import fichier echoué
+plates.msg.import.success = Import fichier réussi
+
+
+plates.msg.delete.error = Suppression echouée
+plates.msg.delete.sucess = Suppression réussie
+
+plates.error.severalsamewellcode = Plusieurs fois la même manip : {0}
+plates.error.wellwithsamecoord = Plusieurs fois les même coordonnées : {0}
+plates.error.typecode.different = Type de manips différent du type de plaque : {0}
+
+plates.code = Code
+plates.typeName = Type
+plates.validQC = Valid QC ?
+plates.validRun = Valid Run ?
+plates.comment = Commentaires
+plates.create.user = Créé par
+plates.modify.user = Modifié par
+
+
+barcodes.tabs.create = Génération de codes barres pour plaques externe
+barcodes.tabs.search = Recherche des codes barres inutilisés
+plates.table.barcode = Codes Barres
+
+valuation.value.TRUE = Oui
+valuation.value.FALSE = Non
+valuation.value.UNSET = -
+
+
+button.search = Rechercher
+button.reset =  Réinitialiser
+button.magic = Générer

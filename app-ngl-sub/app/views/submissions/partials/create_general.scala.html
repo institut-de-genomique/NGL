@@ -1,0 +1,20 @@
+@import views.html.helper._
+@()
+
+<div class="row" ng-hide="!defaultCheck">
+	<div class="col-md-12 col-lg-12">
+		@create_default()
+	</div>
+</div>
+
+<div class="row" ng-hide="!bionanoCheck">
+	<div class="col-md-12 col-lg-12">
+		@create_bionano()
+	</div>
+</div>
+
+<div class="row" ng-hide="!metadataCheck">
+	<div class="col-md-12 col-lg-12">
+		@create_metadata()
+	</div>
+</div>

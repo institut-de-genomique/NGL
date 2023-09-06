@@ -1,0 +1,116 @@
+/*custom bootstrap*/
+
+body {
+	padding-top:50px;
+}
+
+.list-group-item{
+	padding: 7px 10px;
+}
+
+.panel-heading, .panel-footer{
+	padding: 10px 10px;
+}
+
+input[placeholder] { 
+	text-overflow: ellipsis; 
+ }
+
+input[type="radio"] {
+	margin: 1px 0 0;
+}
+
+input[type="checkbox"] {
+	margin: 2px 0 0;
+}
+
+.input-group-btn .btn.btn-default {
+	height:29px; /*compliance with form-control where height:29px*/
+}
+
+/*additionnal class*/
+.text-overflow{
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.plates > .alert {
+	margin-bottom:0px;
+}
+
+.margin-bottom-5 {
+	margin-bottom:5px;
+}
+
+.margin-bottom-5:last-child {
+	margin-bottom:0px;
+}
+
+.margin-bottom-7 {
+	margin-bottom:7px;
+}
+	
+.margin-bottom-7:last-child {
+	margin-bottom:0px;
+}
+
+.draggable{
+	 cursor:move;
+}
+
+.drag, .over{
+	  background-color: #f1f1f1;
+}
+
+/*list-resize directive*/
+.small-litte-icone-transparent {
+	padding-top: 0px;
+	padding-bottom: 0px;
+	padding-left: 0px;
+	padding-right: 0px;
+	border-top-width: 0px;
+	border-bottom-width: 0px;
+	border-left-width: 0px;
+	border-right-width: 0px;
+	height: 14px;
+	background: transparent
+}
+
+.scanner legend{
+	margin-bottom:0px;
+}
+
+.scanner .form-group{
+	margin:0px;
+}
+
+.scanner .input-sm{
+	height: 14px;
+	font-size:8px;
+}
+
+.form-group.required .control-label:after {
+  content:" *";
+  color:red;
+}
+
+.form-group.content .control-label::first-letter {
+  text-decoration: underline;
+}
+
+/* CSS for sub-menus  (26/02/2021)
+   https://stackoverflow.com/questions/18023493/bootstrap-dropdown-sub-menu-missing */
+
+.navbar-nav li:hover > ul.dropdown-menu {
+    display: block;
+}
+.dropdown-submenu {
+    position:relative;
+}
+.dropdown-submenu>.dropdown-menu {
+    top:0;
+    left:100%;
+    margin-top:-6px;
+}
+

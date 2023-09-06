@@ -1,0 +1,17 @@
+@this(menu_ : menu)
+@(code: String)
+
+@scripts() = {
+	<script src="@controllers.sra.bilans.tpl.routes.Bilans.javascriptRoutes" type="text/javascript" charset="utf-8"></script>
+	<script src="@controllers.main.tpl.routes.Main.jsCodes" type="text/javascript" charset="utf-8"></script> 
+    <script src="@routes.Assets.at("lib/datatable/datatable/javascripts/services/ultimate-datatable.js")" type="text/javascript" charset="utf-8"></script>
+    <script src="@routes.Assets.at("ngl-sub/javascripts/bilans/app.js")" type="text/javascript" charset="utf-8"></script>
+    <script src="@routes.Assets.at("lib/lib-frameworkweb/ngl-common/javascripts/controllers/mainctrl.js")" type="text/javascript" charset="utf-8"></script>	
+    <script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/commons.js")" type="text/javascript" charset="utf-8"></script> 
+	<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/bt-input.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@routes.Assets.at("ngl-sub/javascripts/tools/toolsServices.js")" type="text/javascript" charset="utf-8"></script>                             	
+	<script src="@routes.Assets.at("ngl-sub/javascripts/bilans/consultation-ctrl.js")" type="text/javascript" charset="utf-8"></script>                             	
+}
+@views.html.main("bilans.page.title", menu_("bilans."+code), scripts)(views.html.contents.lefttabs())
+
+

@@ -1,0 +1,29 @@
+@(roleForm:Form[models.administration.authorisation.Role],map:Map[String,String], property: String, subProperty: String, isEdit: Boolean)
+@import controllers.authorisation.PermissionHelper
+@implicitField = @{views.html.helper.FieldConstructor(helper.tbformhorizontal.f) }
+
+@helper.form(action = controllers.administration.authorisation.routes.Roles.createOrUpdate() , args = 'class -> "form-horizontal", Symbol("data-toggle") -> "ajax") {
+<legend>New role</legend>   
+@defining(if(!isEdit) ('states->"disabled") else (Symbol("") -> "")){ disabled =>   
+	@helper.tbInputUneditable(roleForm("id"),'hidden->"yes",'_label->"#ID",disabled)
+	@helper.tbInputText(roleForm("label"),'_label->"Label",disabled)
+	<div style="width:400px;height:80px;overflow: auto;">
+	 @if(roleForm("id").value == null || roleForm("id").value == "") {
+		 @** @helper.tbMultipleCheckBox(roleForm("permissions"),Nil,map.toMap,"id",'_label->"Role permissions",disabled) *@
+	 } else {
+	 		@** @helper.tbMultipleCheckBox(roleForm("permissions"), roleForm.get.permissions.map(v => v.id.toString()).toList,map.toMap,"id",'_label->"Role permissions",disabled) *@ <br>
+	 	
+	 }
+	 </div>
+	 
+ <div class="form-actions">
+            @if(isEdit){
+            	<button class="btn btn-primary" type="submit">Save</button>
+            	@if(roleForm("id").value != null && roleForm("id").value != ""){
+            		<a class="btn btn-default" href="#" data-toggle="pilldyn" data-target="#onelement" data-href="@controllers.administration.authorisation.routes.Roles.show(Integer.valueOf(roleForm("id").value))">Cancel</a>
+            	}
+            } else {
+            	<a class="btn btn-primary" href="#" data-toggle="pilldyn" data-target="#onelement" data-href="@controllers.administration.authorisation.routes.Roles.edit(roleForm.get.id)" >Edit</a>
+            }            			
+          </div>
+}}

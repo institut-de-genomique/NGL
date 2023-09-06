@@ -1,0 +1,142 @@
+#created on: Jul 7, 2014
+package birds
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.File;
+import java.io.PrintWriter;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+
+//Selection rules for MD5 out of workflow wf_zip_md5
+rule "Selection rules for MD5 out of workflow"
+	@BirdsRule( selectionRule )
+	dialect 'java'
+	salience 200
+		when
+			$input : InputSpecificationElement(name=="inputRawDataMd5Out", treatmentSpecification.name=="Md5FileOut", project.name == "SRA")
+			$resourcesReferential : ResourcesReferential(name=="nglSubRefMd5")
+			$device : JSONDevice() from $resourcesReferential.referentialDevice
+			$rps : ResourcePropertiesSet(initialized==false, inputSpecificationElement==$input, resourcesReferential==$resourcesReferential)
+		then
+			Logger log = Logger.getLogger("ngl.sub.rules");
+			$rps.initialize();
+			log.debug("Get resources MD5");
+		
+			Set<ResourceProperties> resourceProperties = new HashSet<ResourceProperties>();
+		
+			JSONDevice jsonDevice = new JSONDevice();
+			//Get code submission IP-SUB
+			Set<ResourceProperties> rpSubmissions = $device.httpGetJSON(ProjectProperties.getProperty("server")+"/api/sra/submissions?stateCode=SUB-SRD-IP", "bot");
+			for(ResourceProperties rpSub : rpSubmissions){
+				//Get submission code
+				String codeSubmission = rpSub.getProperty("code");
+				log.debug("Get input md5 for "+codeSubmission);
+				String submissionDirectory = rpSub.getProperty("submissionDirectory");
+				String typeRawDataSubmitted = rpSub.getProperty("typeRawDataSubmitted");
+				
+				if(typeRawDataSubmitted.equals("bionanoRawData")){
+					String analysisCode = rpSub.getProperty("analysisCode");
+					Set<ResourceProperties> rpsRawData = $device.httpGetJSON(ProjectProperties.getProperty("server")+"/api/sra/analyzes/rawDatas?code="+analysisCode,"bot");
+					for(ResourceProperties rawData : rpsRawData){
+							if(rawData.getProperty("md5sumForSubmission").equals("true") && rawData.getProperty("gzipForSubmission").equals("false")){
+								ResourceProperties newRp = new ResourceProperties();
+								newRp.setProperty("fileName",rawData.getProperty("relatifName"));
+								if(rawData.getProperty("location").equals("CCRT")){
+									newRp.setProperty("directory",ProjectProperties.getProperty("tmpDirectory")+File.separator+codeSubmission);
+								}else{
+									newRp.setProperty("directory",rawData.getProperty("directory"));
+								}
+								newRp.setProperty("submissionDirectory",submissionDirectory);
+								newRp.setProperty("analysisCode",analysisCode);
+								newRp.setProperty("typeRawDataSubmitted",typeRawDataSubmitted);
+								newRp.setProperty("code",codeSubmission);
+								newRp.setProperty("outOfWorkflow","true");
+								resourceProperties.add(newRp);
+							}
+					}
+				}else{
+				
+					String experimentCodes = rpSub.getProperty("experimentCodes");
+				
+					String[] tabExperimentCodes = experimentCodes.replaceAll("\"","").split(",");
+					for(int i=0; i<tabExperimentCodes.length; i++){
+						Set<ResourceProperties> rpsRawData = $device.httpGetJSON(ProjectProperties.getProperty("server")+"/api/sra/experiments/rawDatas?code="+tabExperimentCodes[i],"bot");
+						for(ResourceProperties rawData : rpsRawData){
+							if(rawData.getProperty("md5sumForSubmission").equals("true") && rawData.getProperty("gzipForSubmission").equals("false")){
+								ResourceProperties newRp = new ResourceProperties();
+								newRp.setProperty("fileName",rawData.getProperty("relatifName"));
+								if(rawData.getProperty("location").equals("CCRT")){
+									newRp.setProperty("directory",ProjectProperties.getProperty("tmpDirectory")+File.separator+codeSubmission);
+								}else{
+									newRp.setProperty("directory",rawData.getProperty("directory"));
+								}
+								newRp.setProperty("submissionDirectory",submissionDirectory);
+								newRp.setProperty("experimentCode",tabExperimentCodes[i]);
+								newRp.setProperty("code",codeSubmission);
+								newRp.setProperty("typeRawDataSubmitted",typeRawDataSubmitted);
+								newRp.setProperty("outOfWorkflow","true");
+								resourceProperties.add(newRp);
+							}
+						}
+					}
+				}
+			}
+			log.debug("size resources "+resourceProperties.size());
+			$rps.setResourcePropertiesSet(resourceProperties);
+			modify($rps){};
+		
+end
+
+rule "Set parameter for command line md5 out of workflow"
+	@BirdsRule(fsRule)
+	dialect 'java'
+	salience 300
+	no-loop
+		when
+			$treatSpec : TreatmentSpecification(name=="Md5FileOut", project.name=="SRA")
+			$job : Job(treatmentSpecification.name!=null, treatmentSpecification.name == "Md5FileOut")
+		then
+			Logger log = Logger.getLogger("ngl.sub.rules");
+			log.debug("Set parameter for md5 command");
+			//Get input resource
+			JobResource jobResource = $job.getUniqueJobResource("inputRawDataMd5Out");
+			$job.setParameterValue("fileZipped", jobResource.getProperty("submissionDirectory")+File.separator+jobResource.getProperty("fileName"));
+end
+
+rule "POST DONE EXECUTION of md5 : Update MD5 of RawData out of workflow"
+	@BirdsRule( ExecutionService )
+	dialect 'java'
+	salience 200
+	when
+		$executionService : ExecutionService( status == ExecutionService.POST_JOB_EXECUTION_STATUS)
+		$job : Job( treatmentSpecification!=null, treatmentSpecification.name == "Md5FileOut", treatmentSpecification.project.name == "SRA", executionState == Job.DONE_STATUS )
+	then
+		Logger log = Logger.getLogger("ngl.sub.rules");
+		//Get md5 from Job.STDOUT
+		BufferedReader read = new BufferedReader(new FileReader(new File($job.getProperty(Job.STDOUT))));
+		String md5 = read.readLine().split(" ")[0];
+		read.close();
+		//Write in md5 file
+		JobResource jobResource = $job.getUniqueJobResource("inputRawDataMd5Out");
+		String md5FileName = ProjectProperties.getProperty("tmpDirectory")+File.separator+jobResource.getProperty("code")+File.separator+"md5.txt";
+		PrintWriter out = new PrintWriter(new FileWriter(new File(md5FileName),true));
+		out.println(md5+" "+jobResource.getProperty("fileName"));
+		out.close();
+		//Update md5 in NGLSUB for RawData
+		//Raw Data from DB
+		JSONDevice jsonDevice = new JSONDevice();
+		String typeRawDataSubmitted = jobResource.getProperty("typeRawDataSubmitted");
+		if(typeRawDataSubmitted.equals("bionanoRawData")){
+			String JSONRawData = jsonDevice.httpGet(ProjectProperties.getProperty("server")+"/api/sra/analyzes/"+jobResource.getProperty("analysisCode")+"/rawDatas/"+jobResource.getProperty("fileName"),"bot");
+			String JSONRawDataModify = jsonDevice.modifyJSON(JSONRawData, "md5", md5);
+			String JSONRawDataModify2 = jsonDevice.modifyJSON(JSONRawDataModify, "md5sumForSubmission", "false");
+			String jsonResult = jsonDevice.httpPut(ProjectProperties.getProperty("server")+"/api/sra/analyzes/"+jobResource.getProperty("analysisCode")+"/rawDatas/"+jobResource.getProperty("fileName"),JSONRawDataModify2, "bot");
+			log.debug("Result "+jsonResult);
+		}else{
+			String JSONRawData = jsonDevice.httpGet(ProjectProperties.getProperty("server")+"/api/sra/experiments/"+jobResource.getProperty("experimentCode")+"/rawDatas/"+jobResource.getProperty("fileName"),"bot");
+			String JSONRawDataModify = jsonDevice.modifyJSON(JSONRawData, "md5", md5);
+			String JSONRawDataModify2 = jsonDevice.modifyJSON(JSONRawDataModify, "md5sumForSubmission", "false");
+			String jsonResult = jsonDevice.httpPut(ProjectProperties.getProperty("server")+"/api/sra/experiments/"+jobResource.getProperty("experimentCode")+"/rawDatas/"+jobResource.getProperty("fileName"),JSONRawDataModify2, "bot");
+			log.debug("Result "+jsonResult);
+		}
+end

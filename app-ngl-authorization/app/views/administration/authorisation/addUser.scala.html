@@ -1,0 +1,56 @@
+@(formUser:Form[models.administration.authorisation.User],isEdit: Boolean)
+@import controllers.authorisation.PermissionHelper
+@implicitField = @{views.html.helper.FieldConstructor(helper.tbformhorizontal.f) }
+
+@helper.form(action = controllers.administration.authorisation.routes.Users.createOrUpdate() , args = 'class -> "form-horizontal", Symbol("data-toggle") -> "ajax") {
+<legend>New user</legend> 
+@defining(if(!isEdit) ('states->"disabled") else (Symbol("") -> "")){ disabled =>    
+	   @helper.tbInputUneditable(formUser("id"),'hidden->"yes",'_label->"#ID",disabled)
+	   @helper.tbInputText(formUser("login"),'disabledLabel->"true",'_label->"Login",'_help->"Same as CAS login for no technical users.",disabled)
+	   @helper.tbInputText(formUser("firstname"),'_label->"Fistname",disabled)
+	   @helper.tbInputText(formUser("lastname"),'_label->"Lastname",disabled)
+	   @helper.tbInputText(formUser("email"),'_label->"Email",disabled)
+	   @if(formUser("id").value == null || formUser("id").value == "") {
+	   @helper.tbInputPassword(formUser("password"),'_help->"If it's a technical user.",'_label->"Password",disabled)
+	   @helper.tbInputPassword(formUser("confirmpassword"),'_label->"Confrim the password",disabled);
+	   } else{ @if(controllers.authorisation.PermissionHelper.isTechnical(java.lang.Integer.parseInt(formUser("id").value))){
+	   	 @helper.tbInputPassword(formUser("password"),'value->formUser("password").value,'_help->"If it's a technical user.",'_label->"Password",disabled)
+	   	  @helper.tbInputPassword(formUser("confirmpassword"),'_label->"Confrim the password",'value->formUser("confirmpassword").value,disabled);
+	   }else{
+	  		 @helper.tbInputUneditable(formUser("password"),'hidden->"yes",'_label->"",'value->"")
+	    	@helper.tbInputUneditable(formUser("confirmpassword"),'hidden->"yes",'_label->"",'value->"")
+	    	}
+	   }
+	   <div style="width:400px;height:80px;overflow: auto;">
+	   @if(formUser("id").value == null || formUser("id").value == "") {
+		 @helper.tbMultipleCheckBox(formUser("roles"),Nil,play.libs.Scala.asScala(PermissionHelper.getMapRole),"id",'_label->"User roles",disabled)
+	 	} else {
+	   @helper.tbMultipleCheckBox(formUser("roles"), formUser.get.roles.map(v => v.id.toString()).toList,play.libs.Scala.asScala(PermissionHelper.getMapRole()),"id",'_label->"User Roles",disabled) <br>
+	   }
+		</div><br><br>
+		 <div style="width:400px;height:80px;overflow: auto;">
+	   @if(formUser("id").value == null || formUser("id").value == "") {
+		 @helper.tbMultipleCheckBox(formUser("teams"),Nil,play.libs.Scala.asScala(PermissionHelper.getMapTeam()),"id",'_label->"User teams",disabled)
+	 	} else {
+	   @helper.tbMultipleCheckBox(formUser("teams"), formUser.get.teams.map(v => v.id.toString()).toList,play.libs.Scala.asScala(PermissionHelper.getMapTeam()),"id",'_label->"User teams",disabled) <br>
+	   }
+		</div><br><br>
+	  <div style="width:400px;height:80px;overflow: auto;">
+	   @if(formUser("id").value == null || formUser("id").value == "") {
+		 @helper.tbMultipleCheckBox(formUser("applications"),Nil,play.libs.Scala.asScala(PermissionHelper.getMapApplication()),"id",'_label->"User applications",disabled)
+	 	} else {
+	   @helper.tbMultipleCheckBox(formUser("applications"), formUser.get.applications.map(v => v.id.toString()).toList,play.libs.Scala.asScala(PermissionHelper.getMapApplication()),"id",'_label->"User applications",disabled) <br>
+	   }
+		</div>
+	 <div class="form-actions">
+            @if(isEdit){
+            	<button class="btn btn-primary" type="submit">Save</button>
+            	@if(formUser("id").value != null && formUser("id").value != ""){
+            		<a class="btn btn-default" href="#" data-toggle="pilldyn" data-target="#onelement" data-href="@controllers.administration.authorisation.routes.Users.show(Integer.valueOf(formUser("id").value))">Cancel</a>
+            	}
+            } else {
+            	<a class="btn btn-primary" href="#" data-toggle="pilldyn" data-target="#onelement" data-href="@controllers.administration.authorisation.routes.Users.edit(formUser.get.id)" >Edit</a>
+            }            			
+          </div>
+}
+}

@@ -1,0 +1,99 @@
+	<ul class="nav nav-tabs margin-bottom-5" role="tablist" ng-if="plateUtils.isPlate()">
+	  <li class="active"><a href="" role="tab" data-target="#udt" data-toggle="tab">@Messages("experiments.udt.design")</a></li>
+	  <li><a href="" role="tab"  data-target="#plate" data-toggle="tab" ng-click="plateUtils.computePlateCells(atmService)">@Messages("experiments.plate.design")</a></li>  
+	  <li><a href="" role="tab" ng-if="isSource()" data-target="#src_dest" data-toggle="tab">@Messages("experiments.src_dest.sheet")</a></li>
+	</ul>
+	<div class="tab-content" ng-if="plateUtils.isPlate()">
+		<div class="tab-pane active" id="udt">
+		<div class="row">
+			<div class="col-md-12 col-lg-12" ultimate-datatable="atmService.data"></div>
+		</div>
+		</div>
+		<div class="tab-pane" id="plate">
+		<div class="row">
+		<div class="col-md-12 col-lg-12">
+			<h3 ng-bind="plateUtils.getPlateCode()"></h3>
+		</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12 col-lg-12">
+				<table class="table table-bordered table-condensed">
+			       <thead>
+			            <tr>
+			                <th></th>
+			                <th ng-repeat="i in [1,2,3,4,5,6,7,8,9,10,11,12]">{{i}}</th>
+			            </tr>
+			        </thead>
+			        <tbody>
+			            <tr ng-repeat="y in ['A','B','C','D','E','F','G','H']" class="total">
+			                <td><strong>{{y}}</strong></td>
+			                <td class="plates" ng-repeat="x in [1,2,3,4,5,6,7,8,9,10,11,12]" class="browser">
+			                	    <div list-resize="plateUtils.getCellPlateData(y, x)"  list-resize-min-size='3' vertical/>    						    					
+			                 </td>          
+			            </tr>			          
+			        <tbody>			    
+			        </table>						
+			</div>
+		</div>
+		</div>
+		
+		<div class="tab-pane" id="src_dest" ng-if="isSource()">
+		<div class="row">
+		<div class="col-md-4 col-lg-4">
+			<table class="table table-bordered">
+				<thead>
+					<tr>
+						<th>
+							@Messages("experiments.src_dest.inputContainerSupportCode")
+						</th>
+						<th>
+							@Messages("experiments.src_dest.source")
+						</th>
+					</tr>
+					</thead>	
+					<!--  containerSupport et pas container -->
+					<tr ng-model="containerSupport" ng-repeat="containerSupport in getInputContainerSupports() | orderBy track by $index" >
+						<td>
+							{{containerSupport}}
+						</td>
+						<td>
+							{{$index+1}}
+						</td>
+					</tr>
+				</table>
+			</div>
+		<div class="col-md-4 col-lg-4">
+			<table class="table table-bordered">
+				<thead>
+					<tr>
+						<th>
+							@Messages("experiments.src_dest.outputContainerSupportCode")
+						</th>
+						<th>
+							@Messages("experiments.src_dest.dest")
+						</th>
+						<th>
+							@Messages("experiments.src_dest.label")
+						</th>
+					</tr>
+					</thead>	
+					<!--  <tr ng-model="container" ng-repeat="container    in getOutputContainerSupports() | orderBy:'locationOnContainerSupport.code' track by $index" >	-->			
+					<tr ng-model="containerSupport" ng-repeat="containerSupport in getDistinctOutputContainerSupports()  | orderBy track by $index" >
+						<td>
+							{{containerSupport.code}}
+						</td>
+						<td>
+							{{$index+1}}
+						</td>
+						<td>
+							{{container.experimentProperties.workName.value}}
+						</td>
+					</tr>
+				</table>
+			</div>	
+		</div>
+	</div>
+	</div>
+	<div class="row" ng-if="!plateUtils.isPlate()">
+	<div class="col-md-12 col-lg-12" ultimate-datatable="atmService.data" ></div>
+	</div>

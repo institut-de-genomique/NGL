@@ -1,0 +1,18 @@
+@this(menu_ : menu)
+@(code :String)
+
+@scripts() = {
+ 	<script src="@controllers.main.tpl.routes.Main.jsCodes" type="text/javascript" charset="utf-8"></script> 
+	
+	 <script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/commons.js")" type="text/javascript" charset="utf-8"></script> 	 
+     <script src="@routes.Assets.at("lib/datatable/datatable/javascripts/services/datatable2.js")" type="text/javascript" charset="utf-8"></script>                           	 
+	 <script src="@routes.Assets.at("ngl-plates/javascripts/barcodes/app.js")" type="text/javascript" charset="utf-8"></script>
+	 <script src="@routes.Assets.at("ngl-plates/javascripts/barcodes/create-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	 <script src="@routes.Assets.at("ngl-plates/javascripts/barcodes/search-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	 
+	 <script src="@routes.Assets.at("lib/lib-frameworkweb/ngl-common/javascripts/controllers/mainctrl.js")" type="text/javascript" charset="utf-8"></script> 
+	<script src="@controllers.barcodes.tpl.routes.Barcodes.javascriptRoutes" type="text/javascript" charset="utf-8"></script>
+}
+
+@views.html.main("barcodes.title."+code, menu_("barcodes."+code), scripts)(views.html.contents.lefttabs())
+

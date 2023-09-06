@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Declaration xmlns="http://www.genoscope.cns.fr/specification"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.genoscope.cns.fr/specification H:\birdsAdmin.xsd">
+
+	<!-- ResourceType -->
+
+	<ResourceType name="submission">
+		<RequiredProperty propertyName="code" keyProperty="true" />
+		<RequiredProperty propertyName="submissionDirectory" />
+		<RequiredProperty propertyName="submissionDate" />
+	</ResourceType>
+	
+	<ResourceType name="submissionXML">
+		<RequiredProperty propertyName="code" keyProperty="true" />
+		<RequiredProperty propertyName="submissionDirectory" />
+		<RequiredProperty propertyName="submissionDate" />
+		<RequiredProperty propertyName="xmlSubmission" />
+		<RequiredProperty propertyName="xmlStudys" />
+		<RequiredProperty propertyName="xmlSamples" />
+		<RequiredProperty propertyName="xmlExperiments" />
+		<RequiredProperty propertyName="xmlRuns" />
+	</ResourceType>
+	
+	<ResourceType name="releaseXML">
+		<RequiredProperty propertyName="code" keyProperty="true" />
+		<RequiredProperty propertyName="submissionDirectory" />
+		<RequiredProperty propertyName="submissionDate" />
+		<RequiredProperty propertyName="xmlSubmission" />
+	</ResourceType>
+	
+	<ResourceType name="rawData">
+		<RequiredProperty propertyName="fileList"/>
+	</ResourceType>
+	
+	<ResourceType name="submissionZip">
+		<RequiredProperty propertyName="code" keyProperty="true"/>
+		<RequiredProperty propertyName="gzipForSubmission"/>
+		<RequiredProperty propertyName="submissionDirectory"/>
+	</ResourceType>
+	
+	<ResourceType name="submissionCCRT">
+		<RequiredProperty propertyName="code" keyProperty="true"/>
+		<RequiredProperty propertyName="submissionDirectory"/>
+		<RequiredProperty propertyName="relatifName" keyProperty="true"/>
+		<RequiredProperty propertyName="directory"/>
+	</ResourceType>
+	
+	<ResourceType name="rawDataZip">
+		<RequiredProperty propertyName="fileName" keyProperty="true"/>
+		<RequiredProperty propertyName="directory" keyProperty="true"/>
+		<RequiredProperty propertyName="submissionDirectory" keyProperty="true"/>
+		<RequiredProperty propertyName="code"/>
+	</ResourceType>
+
+	<!-- Referential -->
+
+	<Referential name="nglSubRef" device="jsonDevice">
+		<ResourceType name="submission" />
+		<ResourceType name="submissionXML" />
+	</Referential>
+	
+	<Referential name="nglSubRef_processZip" device="jsonDevice">
+		<ResourceType name="submissionZip" />
+		<ResourceType name="rawDataZip" />
+	</Referential>
+	
+	<Referential name="nglSubRef_zip" device="jsonDevice">
+		<ResourceType name="rawDataZip" />
+	</Referential>
+	
+	<Referential name="nglSubRef_processCCRT" device="jsonDevice">
+		<ResourceType name="submissionCCRT" />
+	</Referential>
+	
+	<Referential name="nglSubRefMd5" device="jsonDevice">
+		<ResourceType name="rawDataZip" />
+	</Referential>
+	
+	
+	<Referential name="internalRefSubmission" device="birdsDevice" readOnly="false">
+		<ResourceType name="submission" />
+		<ResourceType name="submissionZip" />
+	</Referential>
+	
+	<Referential name="internalRefRelease" device="birdsDevice" readOnly="false">
+		<ResourceType name="submission" />
+	</Referential>
+	
+	<Referential name="internalRefReleaseXML" device="birdsDevice" readOnly="false">
+		<ResourceType name="releaseXML" />
+	</Referential>
+	
+	<Referential name="internalRefZip" device="birdsDevice" readOnly="false">
+		<ResourceType name="submissionZip" />
+		<ResourceType name="rawDataZip" />
+	</Referential>
+	
+	<Referential name="internalRefMd5" device="birdsDevice" readOnly="false">
+		<ResourceType name="rawDataZip" />
+	</Referential>
+	
+	
+	<!-- Referential Device -->
+	<ReferentialDevice name="jsonDevice" class="fr.genoscope.lis.devsi.birds.api.device.JSONDevice" />
+	<ReferentialDevice name="birdsDevice" class="fr.genoscope.lis.devsi.birds.api.device.InternalReferentialDevice" />
+	
+	<!-- Project by submission type -->
+	<Project name="SRA" workspace="/env/cns/submit_traces/SRA/SNTS_output_xml/NGL-TEST/autoFtp/log" >
+		<ProjectProperty name="ccrt_user" value="scarpelc" />
+	</Project>
+</Declaration>

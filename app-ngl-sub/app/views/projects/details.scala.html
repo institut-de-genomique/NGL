@@ -1,0 +1,56 @@
+@this()
+@()
+@user            = @{ fr.cea.ig.authentication.Authentication.getUser() }
+
+@import views.html.tools._
+
+@column()(value: Html) = {
+	<div class="col-md-4 col-lg-4">
+		@value
+	</div>
+}
+
+
+<!--debut-->
+
+@standard_header("project", "TRUE"){ 
+	<div class="row">
+	<button class="btn btn-default" 
+				data-toggle="modal" data-target="#commentModal" title="@Messages("button.addComment")"><i class="fa fa-comment"></i></button>
+
+	</div>
+}
+
+
+<form class="form-horizontal" name="experimentForm">
+
+<div class="row">
+	@column(){
+	    @* Ecriture des differentes lignes code, state, title, abstract et description :*@
+	    @line("project.createUser", "project.traceInformation.createUser")
+	    @lineDate("project.traceInformation.creationDate")
+	    @lineDate("Date de première soumission", "project.firstSubmissionDate")
+		@labelLine("project.state")
+		@line("project.code")
+		@line("project.accession")
+		@line("project.title")
+		@line("project.description")
+		@line("project.childrenProjectAccessions")
+		<div ng-if="project.idsPubmed != null">@line("project.idsPubmed", "strIdsPubmed") </div>
+		<div ng-if="project.taxonId != null">@line("project.taxonId", "project.taxonId")</div>
+		<div ng-if="project.scientificName != null">@line("project.scientificName", "project.scientificName")</div>
+
+
+	}
+</div>
+
+
+</form>		
+
+
+
+<!-- stopPropagation on checkbox prevent parents default behavior (stop <a> call) -->
+
+<div class="row margin-bottom-7">
+	@partials.commentSection(user)
+</div>

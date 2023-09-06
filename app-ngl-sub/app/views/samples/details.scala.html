@@ -1,0 +1,104 @@
+@this()
+@()
+
+@import views.html.tools._
+
+@user            = @{ fr.cea.ig.authentication.Authentication.getUser() }
+
+@column()(value: Html) = {
+	<div class="col-md-4 col-lg-4">
+		@value
+	</div>
+}
+
+
+
+<!--debut-->
+
+@standard_header("sample", "TRUE"){ 
+  <button class="btn btn-default" 
+				data-toggle="modal" data-target="#commentModal" title="@Messages("button.addComment")"><i class="fa fa-comment"></i></button>
+
+}
+
+ @** XXXXXXXX DETAILS SAMPLE XXXXXXXXXXXXXX **@
+
+<form class="form-horizontal" name="sampleForm">
+
+<div class="row">
+	@column(){
+
+	    @* Ecriture des autres lignes code, state, title, abstract et description :*@
+
+	    @line("sample.createUser", "sample.traceInformation.createUser")
+	    @lineDate("Date de première soumission", "sample.firstSubmissionDate")
+	    @lineDate("sample.traceInformation.creationDate")
+		@line("sample.code")
+		@line("sample.accession")
+		@line("sample.externalId")
+		@labelLine("sample.state")
+		@line("sample.title")
+	}
+</div>
+
+</form>		
+
+<form class="form-horizontal" name="sampleForm2">
+	
+<div class="page-header"/>	
+					
+<div class="row" ng-if="isObjectLinks()">
+	@column(){	
+		@views.html.helper.columnLabelValue(Messages("samples.msg.links")){
+			<p class="form-control-static">{{sample.code}}</p>
+		}	
+	}	
+</div>
+<div class="row" ng-if="!isObjectLinks()">
+	@column(){	
+		@views.html.helper.columnLabelValue(Messages("samples.msg.noLinks")){
+			<p class="form-control-static">{{sample.code}}</p>
+		}	
+	}	
+</div>
+</div>
+
+</form>		
+
+
+<!-- stopPropagation on checkbox prevent parents default behavior (stop <a> call) -->
+<div class="row margin-bottom-7">
+	<div class="col-md-12 col-lg-12">
+		<!-- <ul class="nav nav-tabs margin-bottom-5"> --> 
+		<!-- Intitules des onglets -->
+		<ul  class="nav nav-tabs" ng-if="isObjectLinks()"> 
+			<!--class="active" permet affichage sans avoir à cliquer sur colonne-->
+			<li ng-if="isActiveAnalysis()" class="active"><a  href="#" data-target="#analysis" data-toggle="tab">@Messages("samples.tabs.analysis")</a></li>
+			<li ng-if="isActiveExperiment()" class="active"><a  href="#" data-target="#experiment" data-toggle="tab">@Messages("samples.tabs.experiment")</a></li>
+			<li ng-if="isDataNotActiveExperiment()"><a  href="#" data-target="#experiment" data-toggle="tab">@Messages("samples.tabs.experiment")</a></li>
+			<li><a a href="#" data-target="#run" data-toggle="tab">@Messages("samples.tabs.run")</a></li>
+			<li><a a href="#" data-target="#rawData" data-toggle="tab">@Messages("samples.tabs.rawData")</a></li>
+		</ul>
+	
+
+		
+		<div class="tab-content" ng-if="isObjectLinks()">
+		
+			<div class="tab-pane" ng-class="{'active':isActiveAnalysis()}" id="analysis">
+				<div ultimate-datatable="analysisDT"></div>
+			</div>
+			<div class="tab-pane"  ng-class="{'active':isActiveExperiment()}" id="experiment">
+				<div ultimate-datatable="experimentDT"></div>
+			</div>
+		
+			<div class="tab-pane" id="run">
+				<div ultimate-datatable="runDT"></div>
+			</div>
+			
+			<div class="tab-pane" id="rawData">
+				<div ultimate-datatable="rawDataDT"></div>
+			</div>
+		</div>
+	</div>
+	@partials.commentSection(user)
+</div>

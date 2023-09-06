@@ -1,0 +1,81 @@
+@this()
+@()
+@import views.html.helper._
+
+			   
+@form() = {
+		<!-- <div class="row" >
+			<div class="col-xs-10 col-sm-10 col-md-10 col-lg-10">
+			  <div class="panel panel-default">
+			  <div class="panel-heading">			  	
+				  <h2 class="panel-title">Study</h2>		  	
+			  </div>
+			   <div class="panel-body"> -->
+	@columnSearchForm{
+		@formGroup{
+			<div class="form-control" bt-select  ng-model="createService.form.projectCodes" filter="true" multiple="true" placeholder='@Messages("create.placeholder.projectCodes")' bt-options="project.code as project|formatProjectListLabel for project in createService.lists.getProjects()" required></div>			
+		}
+		@formGroup{
+			<div class="form-control" bt-select ng-model="createService.form.existingStudyType" placeholder='@Messages("create.placeholder.existingStudyType")' bt-options="study.code as study.name for study in createService.sraVariables.existingStudyType" required></div>			
+		}
+		@formGroup{
+			<textarea class="form-control" rows="3" ng-model="createService.form.centerProjectName" placeholder='@Messages("create.placeholder.centerProjectName")' required></textarea>		
+		}			
+		@formGroup{
+			<textarea type="text" class="form-control"  rows="1" ng-model="createService.form.title" placeholder='@Messages("create.placeholder.studiesTitle")' required></textarea>		
+		}
+							
+		@formGroup{
+			<textarea class="form-control" rows="3" ng-model="createService.form.studyAbstract" placeholder='@Messages("create.placeholder.abstractDescription")' required></textarea>		
+		}
+
+		<!-- 		
+		@formGroup{
+			<textarea class="form-control" style="border: 1px solid red" rows="3" ng-model="createService.form.description" placeholder='@Messages("create.placeholder.description")' required></textarea>
+		}
+		-->	
+	}
+	<!--  </div>
+	</div>
+	</div>
+	</div> -->
+	
+}
+	 </div>
+	</div>
+	</div>
+	</div> 
+<div class="row">
+<div class="col-md-12 col-lg-12"  messages="messages"></div>
+</div>
+
+<div class="row"> 
+	<div class="col-md-12 col-lg-12">
+		<div dt-form>	
+			<div class="tab-content">
+				<div class="tab-pane active" id="filters">
+					<form name="studyForm" class="well well-small">
+						<div class="row">
+						@form
+						@columnSearchForm{
+							@formGroup{
+							<div class="btn-toolbar">
+								<button type="submit" title='@Messages("button.save")' ng-disabled="studyForm.$invalid" ng-click="save()" data-toggle="tooltip" class="btn btn-primary" >
+									<i class="fa fa-save"></i>
+								</button>
+								<button title='@Messages("button.reset")' ng-click="reset()" data-toggle="tooltip"  class="btn btn-default">
+									<i class="fa fa-undo"></i>
+								</button>
+															 	
+							</div>	
+							}	
+							
+						}
+						</div>		
+					</form>	
+				</div>
+			</div>
+		</div>
+	</div>
+</div> 
+

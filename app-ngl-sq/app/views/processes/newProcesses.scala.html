@@ -1,0 +1,30 @@
+@this()
+@()
+<div class="row">
+<div class="col-md-12 col-lg-12">
+<div ng-class="newService.messages.clazz" ng-show="newService.messages.text !== undefined">
+	<strong ng-bind="newService.messages.text"></strong><button class="btn btn-link" ng-click="newService.messages.showDetails=!newService.messages.showDetails" ng-show="newService.messages.isDetails">@(Messages("experiments.msg.details"))</button>
+	<div ng-show="newService.messages.showDetails">
+	    <ul>
+    		<li ng-repeat="(key1, value1) in newService.messages.details track by $index">{{key1}}
+    		<ul>
+    			<li ng-repeat="(key2, value2) in value1 track by $index">{{key2}} : {{value2}} </li>
+    		</ul>
+    		</li>
+    	</ul>	
+	</div>
+</div>
+</div>
+</div>
+
+	
+<div class="row SelectContainerProcess">
+<div class="inProgressSpinner" ng-if="getSpinner()">
+	<button class="btn btn-primary btn-lg">
+		<i class="fa fa-spinner fa-spin fa-5x"></i>
+	</button>
+</div>
+	
+<div class="col-md-12 col-lg-12" ultimate-datatable="newService.datatable"></div>
+</div>		
+

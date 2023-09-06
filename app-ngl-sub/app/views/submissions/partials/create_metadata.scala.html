@@ -1,0 +1,18 @@
+@import views.html.helper._
+@()
+
+	<form>
+	
+	@** definition formulaire pour metadonnées simples (study ou sample)**@
+		@formGroup{
+			<div  class="form-control" bt-select  ng-model="form.projCodes" filter="true" multiple = "false" placeholder='@Messages("create.placeholder.projectCodes")' bt-options="project.code as project|formatProjectListLabel for project in lists.getProjects()" required ng-change="refreshSubmissions()"></div>	
+		}
+	
+		@formGroup{
+			<div  class="form-control" bt-select  ng-model="form.studyCode" placeholder='@Messages("create.placeholder.submissions.study")' bt-options="study.code as study.code for study in lists.getSraStudies()" ng-focus="refreshSraStudiesNONE()"></div>			
+		}
+		@formGroup{
+			<div  class="form-control" bt-select  ng-model="form.sampleCodes" multiple = "false" placeholder='@Messages("create.placeholder.submissions.sample")' bt-options="sample.code as sample.code for sample in lists.getSraSamples()" ng-focus="refreshSraSamplesNONE()"></div>			
+		}
+	</form>
+

@@ -1,0 +1,433 @@
+@this(ctx : fr.cea.ig.ngl.NGLApplication)
+@(defaultGroupAccess: String, ouGroupLaboName: String, groupAllAdmins: String)
+@user            = @{ fr.cea.ig.authentication.Authentication.getUser() }
+
+@isCNSInstitute  = @{ "CNS" == ctx.nglConfig().getInstitute() }
+
+@column()(value: Html) = {
+<div class="col-md-4 col-lg-4">
+	@value
+</div>
+}
+
+<div class="row">
+	<div class="col-md-12 col-lg-12 ">
+		<div class="page-header" ng-init="init('@groupAllAdmins', '@isCNSInstitute')">
+			<div class="btn-toolbar pull-right">
+				<button class="btn btn-default" ng-if="mainService.isEditMode()" ng-click="update()"
+					data-toggle="tooltip" title="@Messages(" button.validate")"><i class="fa fa-save"></i>
+					@Messages("button.validate")</button>
+				<button class="btn btn-default" ng-if="mainService.isEditMode()" ng-click="cancel()"
+					data-toggle="tooltip" title="@Messages(" button.cancel")"><i class="fa fa-undo"></i>
+					@Messages("button.cancel")</button>
+				<button class="btn btn-default" ng-if="!mainService.isEditMode()" ng-click="startEditMode()"
+					data-toggle="tooltip" title="@Messages(" button.edit")"><i class="fa fa-edit"></i>
+					@Messages("button.edit")</button>
+				<button class="btn btn-default" 
+				data-toggle="modal" data-target="#commentModal" title="@Messages("button.addComment")"><i class="fa fa-comment"></i></button>
+
+			</div>
+			<h1>
+				{{project.code}}
+				<small>
+					<span ng-bind="project.state.code|codes:'state'"></span>
+				</small>
+			</h1>
+		</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-12 col-lg-12" messages="messages"></div>
+</div>
+
+
+<div class="row margin-bottom-7">
+	<div class="col-md-12 col-lg-12">
+		<ul class="nav nav-tabs margin-bottom-5">
+			<li ng-class="getTabClass('general')"><a href="#" data-target="#general" data-toggle="tab"
+					ng-click="setActiveTab('general')">@Messages("projects.details.general")</a></li>
+			<li ng-class="getTabClass('bioinfoParam')"><a href="#" data-target="#bioinformaticParameters"
+					data-toggle="tab"
+					ng-click="setActiveTab('bioinfoParam')">@Messages("projects.details.bioinformaticParameters")</a>
+			</li>
+			<li ng-class="getTabClass('systemParam')"><a href="#" data-target="#systemParameters" data-toggle="tab"
+					ng-click="setActiveTab('systemParam')">@Messages("projects.details.systemParameters")</a></li>
+			<li ng-if="isGroupAdminMember" ng-class="getTabClass('admin')"><a href="#" data-target="#admin"
+					data-toggle="tab"
+					ng-click="setUsers('@defaultGroupAccess','@ouGroupLaboName', 'admin')">@Messages("projects.details.admin")</a>
+			</li>
+		</ul>
+
+		<form class="form-horizontal">
+
+			<div class="tab-content">
+
+				<div class="tab-pane {{getTabClass('general')}}" id="general">
+
+					<div class="row margin-bottom-7">
+						<div class="col-md-12 col-lg-12">
+							<div class="row">
+								@column() {
+									@views.html.helper.columnLabelValue(Messages("projects.code")){
+										<p class="form-control-static">{{project.code}}</p>
+									}
+
+									@views.html.helper.columnLabelValue(Messages("projects.name")){
+										<p class="form-control-static">{{project.name}}</p>
+									}
+
+									@views.html.helper.columnLabelValue(Messages("projects.state.code")){
+										<p class="form-control-static">{{project.state.code | codes:'state'}}</p>
+									}
+
+									@views.html.helper.columnLabelValue(Messages("projects.type")){
+										<p class="form-control-static">{{project.typeCode | codes:'type'}}</p>
+									}
+
+									@views.html.helper.columnLabelValue(Messages("projects.category.type")){
+										<p class="form-control-static">{{project.categoryCode | codes:'project_cat'}}</p>
+									}
+
+									@views.html.helper.columnLabelValue(Messages("projects.description")){
+										<p class="form-control-static">{{project.description}}</p>
+									}
+
+									@if(isCNSInstitute){
+										@views.html.helper.columnLabelValue(Messages("projects.umbrellaProjectCode")){
+											<a ng-click="openUmbrella(project.umbrellaProjectCode)">
+												<p class="form-control-static">{{umbrellaProjectName}}</p>
+											</a>
+										}
+									}
+								}
+
+
+								@column(){
+									@views.html.helper.columnLabelValue(Messages("projects.traceInformation.creationDate")){
+									<p class="form-control-static">
+										{{project.traceInformation.creationDate | date:'@Messages("date.format")'}}</p>
+									}
+
+									@views.html.helper.columnLabelValue(Messages("projects.traceInformation.createUser")){
+										<p class="form-control-static">{{project.traceInformation.createUser}}</p>
+									}
+
+									@views.html.helper.columnLabelValue(Messages("projects.lastSampleCode")){
+										<p class="form-control-static">{{project.lastSampleCode}}</p>
+									}
+
+									@views.html.helper.columnLabelValue(Messages("projects.nbCharactersInSampleCode")){
+										<div ng-switch on="(mainService.isEditMode() && !project.lastSampleCode)">
+											<p class="form-control-static" ng-switch-when="false">
+												{{project.nbCharactersInSampleCode}}</p>
+											<input type="text" class="form-control" ng-switch-when="true"
+												ng-model="project.nbCharactersInSampleCode">
+										</div>
+									}	
+
+									@if(isCNSInstitute){
+										@views.html.helper.columnLabelValue(Messages("projects.properties.financingSource")){
+											<div ng-switch on="mainService.isEditMode()">
+												<p class="form-control-static" ng-switch-when="false">{{project.properties.financingSource.value}}</p>
+
+												<input type="text" class="form-control" ng-switch-when="true" ng-model="project.properties.financingSource.value">
+											</div>
+										}
+										
+										@views.html.helper.columnLabelValue(Messages("projects.properties.os")){
+											<div ng-switch on="mainService.isEditMode()">
+												<p class="form-control-static" ng-switch-when="false">{{project.properties.os.value}}</p>
+
+												<input type="text" class="form-control" ng-switch-when="true" ng-model="project.properties.os.value">
+											</div>
+										}										
+										
+										@views.html.helper.columnLabelValue(Messages("projects.technicalDescription")){
+											<div ng-switch on="mainService.isEditMode()">
+												<p class="form-control-static" ng-switch-when="false">
+													<a ng-href="data:application/{{project.properties.technicalDescription.extension}};base64,{{project.properties.technicalDescription.value}}" download="{{project.properties.technicalDescription.fullname}}">
+														{{project.properties.technicalDescription.fullname}}
+													</a>
+												</p>
+												<div style="display: inline-flex">
+													<input id="importFile" type="file" class="form-control" base64-file="project.properties.technicalDescription" ng-switch-when="true" />
+													<button class="btn btn-default" ng-click="removeDT()" ng-switch-when="true" data-toggle="tooltip" ng-show="project.properties.technicalDescription !== undefined" title="@Messages("plates.button.delete")"><i class="fa fa-trash-o"></i></button>
+												</div>
+											</div>
+										}
+									}
+								}
+
+								@if(isCNSInstitute){
+									@column(){
+										@views.html.helper.columnLabelValue(Messages("projects.properties.bioProjectManager")){
+											<p class="form-control-static">{{project.properties.bioProjectManager.value}}</p>
+										}	
+
+										@views.html.helper.columnLabelValue(Messages("projects.properties.infoProjectManager")){
+											<p class="form-control-static">{{project.properties.infoProjectManager.value}}</p>
+										}
+										
+										@views.html.helper.columnLabelValue(Messages("projects.genre")){
+											<p class="form-control-static">{{project.properties.genre.value}}</p>
+										}
+									}
+								}
+							</div>
+						</div>
+					</div>
+
+				</div>
+
+				<div class="tab-pane {{getTabClass('bioinfoParam')}}" id="bioinformaticParameters">
+
+					<div class="row margin-bottom-7">
+						<div class="col-md-12 col-lg-12">
+							<div class="row">
+								@column(){
+									@views.html.helper.columnLabelValue(Messages("projects.bioinformaticParameters.biologicalAnalysis")){
+										<div class="checkbox" ng-if="mainService.isEditMode()">
+											<label>
+												<input type="checkbox"
+													ng-model="project.bioinformaticParameters.biologicalAnalysis">&nbsp;
+											</label>
+										</div>
+										<p class="form-control-static" ng-if="!mainService.isEditMode()" ng-switch
+											on="project.bioinformaticParameters.biologicalAnalysis">
+											<i ng-switch-when="true" class="fa fa-check-square-o  fa-lg"></i>
+											<i ng-switch-default class="fa fa-square-o  fa-lg"></i>
+										</p>
+									}
+
+								<div ng-show="showAnalysisType()">
+									@views.html.helper.columnLabelValue(Messages("projects.bioinformaticParameters.analysisType")){
+										<div class="checkbox" ng-if="mainService.isEditMode()" ng-repeat="value in getAnalysisTypes() | orderBy:'name'">
+											<label>
+												<input type="checkbox" ng-model="value.select">{{value.name}}
+											</label>
+										</div>
+										<div class="form-control-static" ng-if="!mainService.isEditMode()" ng-repeat="value in getAnalysisTypes() | orderBy:'name'">
+											<i ng-if="value.select" class="fa fa-check-square-o  fa-lg"/>
+											<i ng-if="!value.select" class="fa fa-square-o  fa-lg"/> {{value.name}}
+										</div>
+									}
+								</div>
+								
+
+								@views.html.helper.columnLabelValue(Messages("projects.bioinformaticParameters.regexBiologicalAnalysis")){
+								<div ng-switch
+									on="mainService.isEditMode() && project.bioinformaticParameters.biologicalAnalysis">
+									<p class="form-control-static" ng-switch-when="false">
+										{{project.bioinformaticParameters.regexBiologicalAnalysis}}</p>
+									<input type="text" class="form-control" ng-switch-when="true"
+										ng-model="project.bioinformaticParameters.regexBiologicalAnalysis">
+								</div>
+								}
+
+								@views.html.helper.columnLabelValue(Messages("projects.bioinformaticParameters.mappingReference")){
+								<div ng-switch on="mainService.isEditMode()">
+									<p class="form-control-static" ng-switch-when="false">
+										{{project.bioinformaticParameters.mappingReference}}</p>
+									<input type="text" class="form-control" ng-switch-when="true"
+										ng-model="project.bioinformaticParameters.mappingReference">
+								</div>
+								}
+
+								@views.html.helper.columnLabelValue(Messages("projects.bioinformaticParameters.fgGroup")){
+								<div ng-switch on="mainService.isEditMode()">
+									<p class="form-control-static" ng-switch-when="false">
+										{{project.bioinformaticParameters.fgGroup}}</p>
+									<input type="text" class="form-control" ng-switch-when="true"
+										ng-model="project.bioinformaticParameters.fgGroup">
+								</div>
+								}
+
+								@views.html.helper.columnLabelValue(Messages("projects.bioinformaticParameters.fgPriority")){
+								<div ng-switch on="mainService.isEditMode()">
+									<p class="form-control-static" ng-switch-when="false">
+										{{project.bioinformaticParameters.fgPriority}}</p>
+									<input type="text" class="form-control" ng-switch-when="true"
+										ng-model="project.bioinformaticParameters.fgPriority">
+								</div>
+								}
+								
+								<div ng-if="mainService.isEditMode() || (!mainService.isEditMode() && project.bioinformaticParameters.fgGroup!=null && project.bioinformaticParameters.fgGroup!='')">
+								@views.html.helper.columnLabelValue(Messages("projects.bioinformaticParameters.localDataDelete")){
+								<div class="checkbox" ng-if="mainService.isEditMode()">
+									<label>
+										<input type="checkbox"
+											ng-model="project.bioinformaticParameters.localDataDelete">&nbsp;
+									</label>
+								</div>
+								<p class="form-control-static" ng-if="!mainService.isEditMode()" ng-switch
+									on="project.bioinformaticParameters.localDataDelete">
+									<i ng-switch-when="true" class="fa fa-check-square-o  fa-lg"></i>
+									<i ng-switch-default class="fa fa-square-o  fa-lg"></i>
+								</p>
+								}
+								</div>
+								
+								<div ng-if="mainService.isEditMode() || (!mainService.isEditMode() && project.bioinformaticParameters.fgGroup!=null && project.bioinformaticParameters.fgGroup!='')">
+								@views.html.helper.columnLabelValue(Messages("projects.bioinformaticParameters.ccrtAutomaticTransfer")){
+								<div class="checkbox" ng-if="mainService.isEditMode()">
+									<label>
+										<input type="checkbox"
+											ng-model="project.bioinformaticParameters.ccrtAutomaticTransfer">&nbsp;
+									</label>
+								</div>
+								<p class="form-control-static"
+									ng-if="!mainService.isEditMode() && project.bioinformaticParameters.fgGroup!=null && project.bioinformaticParameters.fgGroup!=''"
+									ng-switch on="project.bioinformaticParameters.ccrtAutomaticTransfer">
+									<i ng-switch-when="true" class="fa fa-check-square-o  fa-lg"></i>
+									<i ng-switch-default class="fa fa-square-o  fa-lg"></i>
+								</p>
+								}
+								</div>
+								}
+								
+								@if(isCNSInstitute){
+								@column(){
+								<div>		
+									<p> <a class="fa fa-info-circle" style="color:red" ng-click="toggleIsShowInformation()" title="Information" href=""> Information importante concernant le transfert au CCRT</a></p>
+									<div ng-show="isShowInformation">
+		  								<ul>
+										<li><p><U><b>Si groupe France G&eacute;nomique n&#039;est PAS renseign&eacute; :</b></U></p> 
+											<p>Les readsets du projet ne partiront pas au CCRT</p>
+											<p><i>(peu importe si la propri&eacute;t&eacute; "Transfert automatique CCRT" est coch&eacute;e ou non, cette propri&eacute;t&eacute; est ignor&eacute;e)</i></p> 
+										</li>
+										<li><p><U><b>Si groupe France G&eacute;nomique EST renseign&eacute; :</b></U></p> 
+											<ul>
+												<li><p><U><b>ET que "Transfert des donn&eacute;es automatique au CCRT" est coch&eacute; :</b></U></p>
+												<p>les readsets du projet &agrave; l&#039;&eacute;tat <b>"Disponible"</b>, dont <b>la localisation est diff&eacute;rente de CCRT</b>, 
+												et qui ont un <b>tag PROD</b> seront mis <b>automatiquement &agrave; "Transfert CCRT en attente"</b> </p>
+												<p>(<i>en dehors de ces conditions, les readsets resteront &agrave; l'&eacute;tat "Disponible"</i>)</li></p>
+												<li><p><U><b>ET que "Transfert des donn&eacute;es automatique au CCRT" n&#039;est pas coch&eacute; :</b></U></p>
+												<p> les readsets du projet resteront &agrave; l'&eacute;tat "Disponible"
+												 et ne seront pas envoy&eacute;s au CCRT tant que quelqu&#039;un n&#039;a pas fait <b>l&#039;action MANUELLE de changer l&#039;&eacute;tat du readset &agrave; "Transfert CCRT en attente"</b>.</p> 
+												 <p>Cette option est utile si on d&eacute;sire envoyer seulement une partie des readsets au CCRT.</p></li>
+											</ul>
+										</li>
+										<li><p>La propri&eacute;t&eacute; <i>"Suppression des donn&eacute;es locales"</i> est ignor&eacute;e pour le moment au CNS (qu'elle soit coch&eacute;e ou non)</p></li>
+		  								</ul>
+									</div>
+								</div>
+								}
+								}
+							</div>
+						</div>
+							
+					</div>
+
+
+				</div>
+				<div class="tab-pane {{getTabClass('systemParam')}}" id="systemParameters">
+
+					<div class="row margin-bottom-7">
+						<div class="col-md-12 col-lg-12">
+							<div class="row">
+								@column(){
+								<div class="form-group">
+									<label ng-show="project.properties.synchroProj!=undefined"
+										class="col-md-6 col-lg-6 control-label">@Messages("projects.synchroProj")</label>
+									<div class="col-md-6 col-lg-6">
+										<p class="form-control-static"
+											ng-show="project.properties.synchroProj!=undefined" ng-switch
+											on="project.properties.synchroProj.value">
+											<i ng-switch-when="true" class="fa fa-check-square-o  fa-lg"></i>
+											<i ng-switch-default class="fa fa-square-o  fa-lg"></i>
+										</p>
+									</div>
+								</div>
+
+								<!-- TODO EJACOBY AD-->
+								<div ng-show="project.properties.unixGroup.value !== undefined">
+									@views.html.helper.columnLabelValue(Messages("projects.unixGroup")){
+									<div ng-switch on="mainService.isEditMode()">
+										<p class="form-control-static" ng-switch-when="false">
+											{{project.properties.unixGroup.value}}</p>
+										<div ng-switch-when="true">
+											<div bt-select class="form-control"
+												ng-model="project.properties.unixGroup.value"
+												bt-options='v.code as v.code for v in lists.getValues({propertyDefinitionCode:"unixGroup"},"unixGroup")'>
+											</div>
+										</div>
+									</div>
+									}
+								</div>
+								}
+							</div>
+							<div class="row">
+								@column(){
+									<span ng-if="project.properties.qtreeQuota.value.proj != undefined">
+										@views.html.helper.columnLabelValue(Messages("projects.properties.projQtreeQuota")){
+											<div ng-switch on="mainService.isEditMode()">
+												<p class="form-control-static" ng-switch-when="false">
+													{{project.properties.qtreeQuota.value.proj}}</p>
+												<input type="text" class="form-control" ng-switch-when="true"
+													ng-model="project.properties.qtreeQuota.value.proj">
+											</div>
+										}
+									</span>
+
+									<span ng-if="project.properties.qtreeQuota.value.rawdata != undefined">
+										@views.html.helper.columnLabelValue(Messages("projects.properties.rawdataQtreeQuota")){
+											<div ng-switch on="mainService.isEditMode()">
+												<p class="form-control-static" ng-switch-when="false">
+													{{project.properties.qtreeQuota.value.rawdata}}</p>
+												<input type="text" class="form-control" ng-switch-when="true"
+													ng-model="project.properties.qtreeQuota.value.rawdata">
+											</div>
+										}
+									</span>
+
+									<span ng-if="project.properties.qtreeQuota.value.scratch != undefined">
+									@views.html.helper.columnLabelValue(Messages("projects.properties.scratchQtreeQuota")){
+										<div ng-switch on="mainService.isEditMode()">
+											<p class="form-control-static" ng-switch-when="false">
+												{{project.properties.qtreeQuota.value.scratch}}</p>
+											<input type="text" class="form-control" ng-switch-when="true"
+												ng-model="project.properties.qtreeQuota.value.scratch">
+										</div>
+									}
+									</span>
+								}
+							</div>
+							<div class="row" ng-if="project.properties.archiveHistory.value.length > 0">
+								<div class="col-md-3 col-lg-3">
+									<h3>Historique d'archivage</h3>
+									<table class="table table-condensed table-hover table-bordered">
+										<thead>
+											<tr>
+												<th>@Messages("projects.archiveDate")</th>
+												<th>@Messages("projects.action")</th>
+												<th>@Messages("projects.projArchiveId")</th>
+												<th>@Messages("projects.scratchArchiveId")</th>
+												<th>@Messages("projects.rawArchiveId")</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr ng-repeat="archive in project.properties.archiveHistory.value | orderBy: '-date'">
+												<td>{{archive.date| date:'@Messages("datetime.format")'}}</td>
+												<td>{{archive.action}}</td>
+												<td>{{archive.projArchiveId}}</td>
+												<td>{{archive.scratchArchiveId}}</td>
+												<td>{{archive.rawArchiveId}}</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="tab-pane {{getTabClass('admin')}}" id="admin">
+					@partials.details_admin()
+
+				</div>
+		</form>
+	</div>
+	@partials.addModalUser()
+	@partials.addModalAdmin()
+	@partials.deleteModal()
+	@partials.commentSection(user)
+</div>

@@ -1,0 +1,48 @@
+@** FDS NGL-836 19/11/2018 d'apres Samples ... inutilisé pour l'instant car le bouton de selection est desactivé dans indexes/search-ctrl.js **@
+
+@this()
+@()
+
+@import play.mvc.Http.Context
+@import controllers.authorisation.PermissionHelper
+
+@partials.imageModal()
+
+@user            = @{ fr.cea.ig.authentication.Authentication.getUser(Context.current().session()) }
+@writePermission = @{ PermissionHelper.checkPermission(user, "writing") }
+
+<div class="row">
+	<div class="col-md-12 col-lg-12">
+		<div class="page-header">
+			<div class="btn-toolbar pull-right">
+			@if(writePermission){
+				@*    version initiale pas d'edition ni modification
+				   <button class="btn btn-default" ng-if="mainService.isEditMode()" ng-click="save()" data-toggle="tooltip" title="@Messages("button.validate")" ><i class="fa fa-save"></i> @Messages("button.validate")</button>
+				   <button class="btn btn-default" ng-if="mainService.isEditMode()" ng-click="cancel()" data-toggle="tooltip" title="@Messages("button.cancel")" ><i class="fa fa-undo"></i> @Messages("button.cancel")</button>
+				   <button class="btn btn-default" ng-if="!mainService.isEditMode()" ng-click="activeEditMode()" data-toggle="tooltip" title="@Messages("button.edit")" ><i class="fa fa-edit"></i> @Messages("button.edit")</button>
+				*@
+			}
+		</div>
+			@partials.details_header()
+		</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-12 col-lg-12"  messages="messages"></div>
+</div>
+
+@* PAS SAVE pour l'instant...
+<div class="inProgressSpinner" ng-if="isSaveInProgress()">
+	<button class="btn btn-primary btn-lg">
+		<i class="fa fa-spinner fa-spin fa-5x"></i>
+	</button>
+</div>
+*@
+
+<!-- pas de tabs pour les index -->
+
+ <div class="row margin-bottom-7">
+	<div class="col-md-12 col-lg-12">
+	@partials.details_general()
+	</div>
+</div>

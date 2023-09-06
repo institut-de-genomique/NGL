@@ -1,0 +1,24 @@
+@(title: String, nav: String = "", scripts: Html = Html(""))(searchForm: Html)(resultTable: Html)
+
+
+
+@main(title, nav, scripts){
+ <div class="row">  
+  <div class="tabbable tabs-left">
+	<ul id="searchTab" class="nav nav-tabs">
+        <li class="active"><a data-toggle="pill" data-target="#search" href="#">Search</a></li>       
+    </ul>	
+  
+  
+	<div class="tab-content">
+	<div class="tab-pane active" id="search">
+		@searchForm
+		@resultTable
+	</div>
+	<div class="tab-pane fade" id="onelement"></div>
+	<div class="tab-pane fade" id="newelement"></div>	
+  </div>
+  </div>
+ </div>
+	
+}

@@ -1,0 +1,36 @@
+@()
+
+<div class="row" ng-if="run.categoryCode === 'illumina'" ng-controller="RunNGSRGIlluminaCtrl">
+	<div class="col-md-12 col-lg-12">
+		@details_custom_illumina_columns()
+	</div>
+</div>
+<div class="row" ng-if="run.categoryCode === 'mgi'" ng-controller="RunNGSRGMGICtrl">
+	<div class="col-md-12 col-lg-12">
+		@details_custom_mgi_columns()
+	</div>
+</div>
+<div class="row" ng-if="run.categoryCode === 'nanopore'">
+	<div class="col-md-12 col-lg-12">
+		@details_custom_nanopore_columns()
+	</div>
+</div>
+
+<div class="row" ng-if="run.categoryCode === 'opgen'">
+	<div class="col-md-12 col-lg-12">
+		@details_custom_opgen_columns()
+	</div>
+</div>
+
+<div class="row" ng-if="run.categoryCode === 'bionano'">
+	<div class="col-md-12 col-lg-12">
+		@details_custom_bionano_columns()
+	</div>
+</div>
+@**NGL-3967**@
+<div class="row" ng-if="run.categoryCode === 'pacbio'">
+	<div class="col-md-12 col-lg-12">
+		@details_custom_pacbio_columns()
+	</div>
+</div>
+		

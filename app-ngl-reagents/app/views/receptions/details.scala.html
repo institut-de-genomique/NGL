@@ -1,0 +1,63 @@
+@this(ctx : fr.cea.ig.ngl.NGLApplication)
+
+@()
+
+@import play.mvc.Http.Context
+@import controllers.authorisation.PermissionHelper
+
+@user            = @{ ctx.currentUser(); }
+@writePermission = @{ PermissionHelper.checkPermission(user,"writing") }
+
+@header() = {
+	<h1>
+		<span class="mute" ng-bind="reagentReception.code" ></span>
+		<small ng-bind="reagentReception.state.code|codes:'state'" ></small>	
+	</h1>
+}
+
+<div class="row">
+	<div class="col-md-12 col-lg-12">
+		<div class="page-header">
+			<div class="btn-toolbar pull-right">
+				@if(writePermission){
+					<button class="btn btn-default" ng-if="mainService.isEditMode()" ng-click="save()" data-toggle="tooltip" title="@Messages("button.validate")" ><i class="fa fa-save"></i> @Messages("button.validate")</button>
+					<button class="btn btn-default" ng-if="mainService.isEditMode()" ng-click="cancel()" data-toggle="tooltip" title="@Messages("button.cancel")" ><i class="fa fa-undo"></i> @Messages("button.cancel")</button>
+					<button class="btn btn-default" ng-if="!mainService.isEditMode()" ng-click="activeEditMode()" data-toggle="tooltip" title="@Messages("button.edit")" ><i class="fa fa-edit"></i> @Messages("button.edit")</button>		 					
+				}
+			</div>
+			@header
+		</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-12 col-lg-12"  messages="messages"></div>
+</div>
+<div class="inProgressSpinner" ng-if="isSaveInProgress()">
+	<button class="btn btn-primary btn-lg">
+		<i class="fa fa-spinner fa-spin fa-5x"></i>
+	</button>
+</div>
+
+<div class="row margin-bottom-7">
+	<div class="col-md-12 col-lg-12">
+		<ul class="nav nav-tabs" role="tablist">
+			<li role="presentation" class="active">
+				<a href="#" data-target="#general" data-toggle="tab" role="tab">@Messages("reagent.receptions.tabs.general")</a>
+			</li>
+			<li role="presentation">
+				<a href="#" data-target="#workflow" data-toggle="tab" role="tab">@Messages("reagent.receptions.tabs.workflow")</a>
+			</li>  
+		</ul>	
+		<div class="tab-content">
+			<div class="tab-pane {{getTabClass('general')}} active" id="general">
+				@partials.details_general()
+			</div>
+			<div class="tab-pane {{getTabClass('workflow')}}" id="workflow">
+				@partials.details_workflow()
+			</div>
+		  </div>
+	</div>
+</div>
+
+
+

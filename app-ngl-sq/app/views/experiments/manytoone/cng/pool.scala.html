@@ -1,0 +1,32 @@
+@** 01/04/2022 NGL-3593 ajout isCNG **@
+@this(xtox_ : xtox, ctx : fr.cea.ig.ngl.NGLApplication)
+@()
+
+@isCNG  = @{ "CNG" == ctx.nglConfig().getInstitute() }
+<!--  marcherait aussi bien !!! <div ng-init="setIsCNG(true)" ng-controller="XToTubesCtrl">-->
+<div ng-init="setIsCNG(@isCNG)" ng-controller="XToTubesCtrl">
+	<div ng-controller="XToPlatesCtrl">
+	
+	<!-- NGL-3203 ajout information importante / NGL-3443 qq soit état -->
+	<div class="col-md-12 col-lg-12" >
+		<p><a class="fa fa-info-circle" style="color:red" ng-click="toggleIsShowInformation()" title="Information" href=""> Information importante</a></p>
+		<div ng-show="isShowInformation">
+		  <p><b>Attention, il y a un ordre logique pour renseigner les propriétés :</b>
+		  <ol>
+			<li>"% au sein du pool" (déjà renseigné par NGL, mais vous pouvez changer les valeurs, tant que la somme fait 100%)</li>
+			<li>Renseigner "conc. finale" (NGL l'aura pré-remplie si toutes les conc. en entrée sont identiques) (il est possible de NE PAS renseigner de concentration si ça n'a pas de sens dans votre contexte)</li>
+			<li>Renseigner "volume final"</li>
+			<li>NGL calcule "vol engagé" de chaque input (si une conc. finale a été renseignée ET que les input ont des concentrations) sinon à vous de le renseigner</li>
+			<li>NGL calcule "vol tampon" (si un volume final a été renseigné et que les volumes engagés de chaque input ont été calculés par NGL) sinon, à vous de le renseigner (si ça a du sens dans votre contexte)</li>
+		  </ol>
+		  <p>Suite à cette "1ère boucle de calculs",</p>
+		  <ul>
+			<li>vous pouvez modifier <b>% au sein du pool</b> OU <b>conc. finale</b> OU <b>volume final</b> et <u>NGL relance les calculs</u></li>
+			<li><a class="fa fa-exclamation-triangle"></a> si vous modifiez <b>vol engagé</b> OU <b>vol tampon</b> : <u>aucun calcul n'est relancé</u> (vos valeurs sont sûrement incohérentes, précisez votre manip en commentaire)</li>
+		  </ul>
+		</div>
+	</div>
+	
+	@xtox_()
+	</div>
+</div>

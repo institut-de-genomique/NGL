@@ -1,0 +1,1653 @@
+date.format=dd/MM/yyyy
+datetime.format=dd/MM/yyyy HH:mm:ss
+unit.percent = %
+
+#application
+application.name=NGL-BI
+home.title.name=Bienvenue dans NGL-BI
+home.title.help.name=Aide NGL-BI
+
+#home page main
+home.h10.header=Bienvenue {0} sur NGL - Bio Informatique
+home.p.comment=NGL-BI est un LIMS simple et flexible pour le suivi des données bioinformatiques issues du Séquençage de Nouvelle Génération.
+home.a.comment=En savoir plus...
+
+home.runs.ips = Runs en cours de séquençage
+home.runs.iprg = Runs en cours de read generation
+home.runs.iwpv = Runs en attente d''évaluation
+home.runs.keep = Runs à conserver
+home.runs.noValid = Runs Illumina dont il reste au moins un readset à évaluer
+
+active.true = Actif
+active.false = Inactif
+
+
+#page title
+title.runs=Runs
+title.run=Run
+title.archives=Archives
+
+#menu
+
+archives.menu = Archives
+archives.menu.search = Rechercher
+docs.menu = Aide
+
+#page field value
+page.archives.fvalue.archive.0 = Tout
+page.archives.fvalue.archive.1 = Archivés
+page.archives.fvalue.archive.2 = Non Archivés
+
+
+search.form = Formulaire
+search.config = Configuration
+
+search.tab.addcolumns = Colonnes supplémentaires
+search.tab.addfilters = Filtres supplémentaires
+search.tab.filters = Filtres
+search.tab.expSearchMode = Experimental search mode
+
+
+valuation.menu = Evaluation
+valuation.menu.runs = Runs
+valuation.menu.readsets = Readsets
+valuation.menu.analyses = Analyses
+
+valuation.value.TRUE = Oui
+valuation.value.FALSE = Non
+valuation.value.UNSET = -
+sentCCRT.value.TRUE = Oui
+sentCCRT.value.FALSE = Non
+sentCollaborator.value.TRUE = Oui
+sentCollaborator.value.FALSE = Non
+
+boolean.value.TRUE = Oui
+boolean.value.FALSE = Non
+
+
+search.placeholder.taxonCode = Taxon ID
+search.placeholder.ncbiScientificNameRegex = Regex taxon
+search.placeholder.projects = Projets
+search.placeholder.samples = Echantillons
+search.placeholder.sample = Echantillon
+search.placeholder.fromDate = Run depuis le (jj/mm/aaaa)
+search.placeholder.toDate = Run jusqu''au (jj/mm/aaaa)
+search.placeholder.fromCreationDate = Créée depuis le (jj/mm/aaaa)
+search.placeholder.toCreationDate = Créée jusqu''au (jj/mm/aaaa)
+search.placeholder.states = Etats
+search.placeholder.instruments = Instruments
+search.placeholder.types = Types
+search.placeholder.type = Type
+search.placeholder.valid = Evaluation
+search.placeholder.expSearchMode = Warning : Only to use with MongoDB query language
+search.placeholder.readSetCode = Code ReadSet
+
+search.placeholder.run = Code run
+search.placeHolder.run.states = Etats runs
+search.placeHolder.run.types = Types de run
+search.placeholder.run.categories = Catégories run
+search.placeholder.run.valid = Evaluation run
+search.placeholder.run.regexCode = Regex code run
+search.placeholder.readset.states = Etats readset
+search.placeholder.readset.regexCode = Regex code readset
+search.placeholder.readset.types = Types readset (techno)
+search.placeholder.containerSupport = Regex pour code support
+search.placeholder.readset.regexColumn = Regex pour colonne
+search.placeholder.analyse.regexCode = Regex pour le code Analyse
+
+search.placeholder.productionValid = Eval. QC
+search.placeholder.bioinformaticValid  = Eval. bioinfo
+search.placeholder.regexCode = Regex pour le code
+search.placeholder.lanes = Lanes
+search.placeholder.reporting.configuration = Colonnes config.
+search.placeholder.productionResolutions = Résolution QC.
+search.placeholder.bioinformaticResolutions = Résolution bioinfo
+search.placeholder.runLaneResolutions = Résolutions run / lane
+search.placeholder.resolutions = Résolutions
+search.placeholder.valuationRunUser = Run évalué par : 
+search.placeholder.valuationReadSetUser = ReadSet évalué par : 
+search.placeholder.property = Propriété
+search.placeholder.isSentCCRT = Envoyé CCRT ?
+search.placeholder.isSentCollaborator = Envoyé Collaborateur ?
+search.placeholder.sequencingProgramTypes = Type de lectures
+search.placeholder.analyseValuationUser = Analyse évaluée par : 
+search.placeholder.stats.configuration = Configuration
+search.placeholder.treatment = Traitement
+search.placeholder.treatment.type=  Treatment Type 
+search.placeholder.treatment.category= Treatment category
+
+search.placeholder.fromEndRGDate = Fin RG depuis le (jj/mm/aaaa)
+search.placeholder.toEndRGDate = Fin RG jusqu''au (jj/mm/aaaa)
+
+search.placeholder.fromEvalDate = Eval. depuis le (jj/mm/aaaa)
+search.placeholder.toEvalDate = Eval. jusqu''au (jj/mm/aaaa)
+
+search.placeholder.userLogin = Login utilisateur
+search.placeHolder.config.context = Contexte
+
+search.placeholder.fromAbundanceClusterPercentSum= Somme % abundance (extraction ou pcr1 ou pcr2)
+
+button.search = Rechercher
+button.reset = Réinitialiser
+button.validate = Sauvegarder
+button.cancel = Annuler
+button.readsets.show = Voir Readsets
+button.readsets.valuation = Evaluer Readsets
+button.edit = Editer
+button.add = Ajouter
+button.printMode = Mode impression
+button.print = Impression
+button.return = Retour
+button.download.manual = Télécharger le manuel
+
+############
+#
+# RUN
+#
+############
+runs.page.title=Runs
+runs.menu = Runs
+runs.menu.search = Recherche
+runs.menu.state = Changement d''Etat
+runs.menu.valuation = Evaluation
+runs.page.tab.validate = Runs à Evaluer
+runs.page.tab.search = Recherche de Runs
+runs.page.tab.state = Changement d''état de Runs
+run.title = Run
+
+
+runs.code = Code
+runs.type = Type
+runs.nbCycle = Nb Cycles
+runs.flowcellPosition = Position Flowcell
+runs.controlLane = Ligne Contrôle
+runs.flowcellVersion = Version Flowcell
+runs.rtaVersion = Version RTA
+runs.containerSupportCode = Code Flowcell 
+runs.containerSupportCode.warning = Code Flowcell*
+runs.properties.chipIteration = Itération Chip
+runs.intrumentCode = Code Instrument
+runs.intrumentCategoryCode = Catégorie Instrument
+runs.intrumentTypeCode = Type d''Instrument
+runs.state.code = Etat
+runs.keep = A conserver ?
+runs.deleted = Supprimé
+runs.valuation.valid = Valide ?
+runs.valuation.resolutions = Comptes Rendus
+runs.valuation.user = Evalué par
+runs.valuation.date = Date d''Evaluation
+runs.valuation.userdate = Evalué par {0} le {1}  
+runs.valuation.criteria = Critères
+runs.valuation.valid = Valide ?
+
+runs.valuation.comment = Détails évaluation
+
+runs.nbClusterTotal=Nb Clusters (total)
+runs.percentClusterIlluminaFilter=% Clusters filt. (moyenne)
+runs.nbClusterIlluminaFilter=Nb Clusters filt. (total)
+runs.nbBase=Nb Bases (total)
+
+#runs - main
+runs.creationdate=Date de Création
+runs.sequencingStartDate = Date Run
+runs.endOfRG = Date fin RG
+runs.countRS = Nombre de readsets
+# a vérifier
+runs.dispatch=Dispatch
+runs.typeCode = Type
+runs.stateCode = Etat
+runs.lane.valuation.title = Pistes
+runs.lane.valuation.valid = Valide ?
+runs.lane.valuation.resolutions = Comptes Rendus
+
+runs.lane.code = #
+runs.lane.ngsrg_illumina.nbCluster = Nb Clusters
+runs.lane.ngsrg_illumina.percentClusterIlluminaFilter = % Clusters filtrés (illumina)
+runs.lane.ngsrg_illumina.nbClusterIlluminaFilter = Nb Cluster filtrés (illumina)
+runs.lane.ngsrg_illumina.percentClusterInternalAndIlluminaFilter = % Séquences filtrées (interne)
+runs.lane.ngsrg_illumina.nbClusterInternalAndIlluminaFilter = Nb Séquences (filtre illumina + interne)
+runs.lane.ngsrg_illumina.nbBaseInternalAndIlluminaFilter = Nb Bases (filtre illumina + interne)
+runs.lane.ngsrg_illumina.phasing = Phasing
+runs.lane.ngsrg_illumina.prephasing = Prephasing
+runs.lane.ngsrg_illumina.nbCycles = Nb Cycles Utiles
+runs.lane.ngsrg_illumina.seqLossPercent = % Perte après démultiplexage (Imaire)
+runs.lane.ngsrg_illumina.occupiedPatternedWellPercentage = % puits occupés
+runs.lane.ngsrg_illumina.nbMismatch = Nb Mismatch Démultiplexage 
+
+
+runs.ngsrg_nanopore.poreOccupancy = Occupation des pores
+runs.ngsrg_nanopore.poreOccupancyTime = Activité des pores
+runs.ngsrg_nanopore.yieldBasePairs = Rendement
+runs.ngsrg_nanopore.timeAvgQuality = Score qualité
+runs.ngsrg_nanopore.poreMetrics = Métriques des pores
+runs.ngsrg_nanopore.inactivePorePercentage = % pores inactifs
+runs.ngsrg_nanopore.activePorePercentage = % pores actifs
+runs.ngsrg_nanopore.poreNbReadsMin = Nb reads / pore (MIN)
+runs.ngsrg_nanopore.poreNbReadsMax = Nb reads / pore (MAX)
+runs.ngsrg_nanopore.twoBarcodesReadsPercentage = % reads entiers
+runs.ngsrg_nanopore.passReadsPercentage = % reads pass
+runs.ngsrg_nanopore.lostReadsPercentage = % reads non démultiplexés (perte)
+runs.ngsrg_nanopore.poreNbBasesMin = Nb bases / pore (MIN)
+runs.ngsrg_nanopore.poreNbBasesMax = Nb bases / pore (MAX)
+runs.ngsrg_nanopore.poreActivityTimePercentMin = % durée d''activité des pores (MIN)
+runs.ngsrg_nanopore.poreActivityTimePercentMax = % durée d''activité des pores (MAX)
+runs.ngsrg_nanopore.poreActivityTimePercentAvg = % durée d''activité des pores
+runs.ngsrg_nanopore.poreSpeedDistribMin = Vitesse de séquençage des pores (MIN)
+runs.ngsrg_nanopore.poreSpeedDistribMax = Vitesse de séquençage des pores (MAX)
+runs.ngsrg_nanopore.poreSpeedDistribAvg = Vitesse de séquençage des pores
+runs.ngsrg_nanopore.sequencingTime = Durée de séquençage (h)
+
+runs.ngsrg_nanopore.poreQualityAvg = Score Qualité
+runs.ngsrg_nanopore.nbBases1DForward = Nb bases 1D forward
+runs.ngsrg_nanopore.nbBases1DReverse = Nb bases 1D reverse
+runs.ngsrg_nanopore.nbBases2DAll = Nb bases 2D all
+runs.ngsrg_nanopore.nbBases2DPass = Nb bases 2D pass
+runs.ngsrg_nanopore.totalUsefulBases = Nb bases utiles
+runs.ngsrg_nanopore.minknowVersion = Version MinKnow
+
+runs.lane.sav.read1 = Read 1
+runs.lane.sav.read2 = Read 2
+runs.lane.sav.clusterDensity = Density (K/mm2)
+runs.lane.sav.densityPF = % Density PF
+runs.lane.sav.clusterPF = % Cluster PF
+runs.lane.sav.clusterPFSd = % Cluster PF SD
+runs.lane.sav.phasing = % Phasing
+runs.lane.sav.prephasing = % Prephasing
+runs.lane.sav.reads = Reads (M)
+runs.lane.sav.readsPF = Reads PF (M)
+runs.lane.sav.greaterQ30Perc = % >= Q30
+runs.lane.sav.cyclesErrRated = Cycles Err Rated
+runs.lane.sav.alignedPerc = % Alignement
+runs.lane.sav.errorRatePerc = % Error Rate
+runs.lane.sav.errorRatePercSd = % Error Rate SD
+runs.lane.sav.errorRatePercCycle35 = % Error Rate Cycle 35
+runs.lane.sav.errorRatePercCycle75 = % Error Rate Cycle 75
+runs.lane.sav.errorRatePercCycle100 = % Error Rate Cycle 100
+runs.lane.sav.intensityCycle1 = Intensity Cycle 1
+runs.lane.sav.intensityCycle20Perc = % Intensity Cycle 20
+runs.lane.sav.alerts = Alertes
+
+runs.lane.showOrHide = Afficher/Masquer la lane 
+
+runs.readsets.title = Readsets
+runs.primaryDemultiplexing.title = Démultiplexage primaire
+
+runs.modal.header.text = Run status flow
+
+runs.treatments.mapCreationJobId = Molecule Server Id
+runs.treatments.mapCreationJobId.display = Map creation job id
+
+runs.treatments.moleculeQualityReport = Molecule Quality Report
+runs.treatments.moleculeQualityReport.totalDnaGe20kbp = Total DNA (>= 20 kbp) (Gb)
+runs.treatments.moleculeQualityReport.n50Ge20kbp = N50 (>=20kbp) (Mb)
+runs.treatments.moleculeQualityReport.totalDnaGe150kbp = Total DNA (>=150kbp) (Gb)
+runs.treatments.moleculeQualityReport.n50Ge150kbp = N50 (>=150kbp) (Mb)
+runs.treatments.moleculeQualityReport.totalDnaGe150kbpMinSitesGe9 = Total DNA (>=150kbp & minSites>= 9) (Gb)
+runs.treatments.moleculeQualityReport.n50Ge150kbpMinSitesGe9 = N50 (>=150kbp & minSites >=9) (Mb)
+runs.treatments.moleculeQualityReport.enzyme = Enzyme
+runs.treatments.moleculeQualityReport.enzymeRecognitionSequence = Enzyme recognition sequence
+runs.treatments.moleculeQualityReport.labelColor = Label Color
+runs.treatments.moleculeQualityReport.avgLabelDensityGe150kbp = Average label density (>=150kbp) (/100 kbp)
+
+runs.treatments.sav = SAV
+runs.treatments.ngsrg = NGS-RG
+
+#NGL-3481 :
+runs.treatments.quality-control-nanopore = Quality Control Nanopore
+runs.treatments.qualityControl = Quality Control Nanopore
+
+runs.treatments.quality-control-nanopore.cumulativeYield = Cumulative yield
+runs.treatments.quality-control-nanopore.channelActivity = Channel activity
+runs.treatments.quality-control-nanopore.generalMetrics = General metrics
+runs.treatments.quality-control-nanopore.readLength = Read length
+runs.treatments.quality-control-nanopore.basecallingQuality = Basecalling quality
+
+
+runs.treatments.quality-control-nanopore.cumulativeYield.baseRatio0h = Base ratio at 0h 
+runs.treatments.quality-control-nanopore.cumulativeYield.baseRatio12h = Base ratio at 12h 
+runs.treatments.quality-control-nanopore.cumulativeYield.baseRatio24h = Base ratio at 24h 
+runs.treatments.quality-control-nanopore.cumulativeYield.baseRatio36h = Base ratio at 36h 
+runs.treatments.quality-control-nanopore.cumulativeYield.baseRatio48h = Base ratio at 48h 
+runs.treatments.quality-control-nanopore.cumulativeYield.baseRatio60h = Base ratio at 60h
+runs.treatments.quality-control-nanopore.cumulativeYield.baseRatio72h = Base ratio at 72h 
+runs.treatments.quality-control-nanopore.cumulativeYield.readRatio0h  = Read ratio at 0h 
+runs.treatments.quality-control-nanopore.cumulativeYield.readRatio24h = Read ratio at 24h 
+runs.treatments.quality-control-nanopore.cumulativeYield.readRatio48h = Read ratio at 48h 
+runs.treatments.quality-control-nanopore.cumulativeYield.readRatio72h = Read ratio at 72h 
+
+runs.treatments.quality-control-nanopore.channelActivity.activity0h  = Activity at 0h
+runs.treatments.quality-control-nanopore.channelActivity.activity12h = Activity at 12h
+runs.treatments.quality-control-nanopore.channelActivity.activity24h = Activity at 24h
+runs.treatments.quality-control-nanopore.channelActivity.activity36h = Activity at 36h
+runs.treatments.quality-control-nanopore.channelActivity.activity48h = Activity at 48h
+runs.treatments.quality-control-nanopore.channelActivity.activity60h = Activity at 60h
+runs.treatments.quality-control-nanopore.channelActivity.activity72h = Activity at 72h
+
+runs.treatments.quality-control-nanopore.generalMetrics.nbTotalSeq   = Total number of reads
+runs.treatments.quality-control-nanopore.generalMetrics.nbTotalBases = Total number of bases
+runs.treatments.quality-control-nanopore.generalMetrics.meanLength   = Mean length
+runs.treatments.quality-control-nanopore.generalMetrics.n50          = n50 of all reads
+runs.treatments.quality-control-nanopore.generalMetrics.meanQual     = Average basecalling quality
+runs.treatments.quality-control-nanopore.generalMetrics.meanSpeed    = Average sequencing speed
+
+runs.treatments.quality-control-nanopore.generalMetrics.nbTrueSeq        = Number of pass reads
+runs.treatments.quality-control-nanopore.generalMetrics.percentTrueSeq   = Percentage of pass reads
+runs.treatments.quality-control-nanopore.generalMetrics.n50SizeTrue      = n50 of pass reads
+runs.treatments.quality-control-nanopore.generalMetrics.nbTrueBases      = Number of pass bases
+runs.treatments.quality-control-nanopore.generalMetrics.percentTrueBases = Percentage of pass bases
+
+runs.treatments.quality-control-nanopore.generalMetrics.nbFalseSeq        = Number of fail reads
+runs.treatments.quality-control-nanopore.generalMetrics.percentFalseSeq   = Percentage of fail reads
+runs.treatments.quality-control-nanopore.generalMetrics.n50SizeFalse      = n50 of fail reads
+runs.treatments.quality-control-nanopore.generalMetrics.nbFalseBases      = Number of fail bases
+runs.treatments.quality-control-nanopore.generalMetrics.percentFalseBases = Percentage of fail bases
+
+runs.treatments.quality-control-nanopore.readLength.minSizeTrue      = Min size of pass reads
+runs.treatments.quality-control-nanopore.readLength.maxSizeTrue      = Max size of pass reads
+runs.treatments.quality-control-nanopore.readLength.meanSizeTrue     = Mean size of pass reads
+runs.treatments.quality-control-nanopore.readLength.firstQuSizeTrue  = 1st quartile of pass read sizes
+runs.treatments.quality-control-nanopore.readLength.medianSizeTrue   = Median size of pass read sizes
+runs.treatments.quality-control-nanopore.readLength.thirdQuSizeTrue  = 3rd quartile of pass read sizes
+
+
+
+runs.treatments.quality-control-nanopore.readLength.minSizeFalse      = Min size of fail reads
+runs.treatments.quality-control-nanopore.readLength.maxSizeFalse      = Max size of fail reads
+runs.treatments.quality-control-nanopore.readLength.meanSizeFalse     = Mean size of fail reads
+runs.treatments.quality-control-nanopore.readLength.firstQuSizeFalse  = 1st quartile of fail read sizes
+runs.treatments.quality-control-nanopore.readLength.medianSizeFalse   = Median size of fail read sizes
+runs.treatments.quality-control-nanopore.readLength.thirdQuSizeFalse  = 3rd quartile of fail read sizes
+
+runs.treatments.quality-control-nanopore.readLength.nbSeqGt100kb = Nb of reads longer than 100kb
+runs.treatments.quality-control-nanopore.readLength.nbSeqGt75kb  = Nb of reads longer than 75kb
+runs.treatments.quality-control-nanopore.readLength.nbSeqGt50kb  = Nb of reads longer than 50kb
+runs.treatments.quality-control-nanopore.readLength.nbSeqGt20kb  = Nb of reads longer than 20kb
+runs.treatments.quality-control-nanopore.readLength.nbSeqGt10kb  = Nb of reads longer than 10kb
+runs.treatments.quality-control-nanopore.readLength.nbSeqGt5kb   = Nb of reads longer than 5kb
+runs.treatments.quality-control-nanopore.readLength.nbSeqGt1kb   = Nb of reads longer than 1kb
+
+runs.treatments.quality-control-nanopore.readLength.ratioNbSeqGt100kb = Fraction of reads longer than 100kb
+runs.treatments.quality-control-nanopore.readLength.ratioNbSeqGt75kb  = Fraction of reads longer than 75kb
+runs.treatments.quality-control-nanopore.readLength.ratioNbSeqGt50kb  = Fraction of reads longer than 50kb
+runs.treatments.quality-control-nanopore.readLength.ratioNbSeqGt20kb  = Fraction of reads longer than 20kb
+runs.treatments.quality-control-nanopore.readLength.ratioNbSeqGt10kb  = Fraction of reads longer than 10kb
+runs.treatments.quality-control-nanopore.readLength.ratioNbSeqGt5kb   = Fraction of reads longer than 5kb
+runs.treatments.quality-control-nanopore.readLength.ratioNbSeqGt1kb   = Fraction of reads longer than 1kb
+
+runs.treatments.quality-control-nanopore.basecallingQuality.minQualTrue  = Min qscore of pass reads
+runs.treatments.quality-control-nanopore.basecallingQuality.maxQualTrue  = Max qscore of pass reads
+runs.treatments.quality-control-nanopore.basecallingQuality.meanQualTrue = Mean qscore of pass reads
+#runs.treatments.quality-control-nanopore.basecallingQuality.1stQuQualTrue= 1st quartile of pass read qscores # .1 ne passe pas lors de l'appel de la valeur
+
+runs.treatments.quality-control-nanopore.basecallingQuality.firstQuQualTrue= 1st quartile of pass read qscores
+runs.treatments.quality-control-nanopore.basecallingQuality.medianQualTrue = Median qscore of pass read qscores
+runs.treatments.quality-control-nanopore.basecallingQuality.thirdQuQualTrue= 3rd quartile of pass read qscores
+
+runs.treatments.quality-control-nanopore.basecallingQuality.minQualFalse  = Min qscore of fail reads
+runs.treatments.quality-control-nanopore.basecallingQuality.maxQualFalse  = Max qscore of fail reads
+runs.treatments.quality-control-nanopore.basecallingQuality.meanQualFalse = Mean qscore of fail reads
+runs.treatments.quality-control-nanopore.basecallingQuality.firstQuQualFalse= 1st quartile of fail read qscores
+runs.treatments.quality-control-nanopore.basecallingQuality.medianQualFalse = Median qscore of fail read qscores
+runs.treatments.quality-control-nanopore.basecallingQuality.thirdQuQualFalse= 3rd quartile of fail read qscores
+
+runs.treatments.qualityControl.cumulativeYieldPassFailBasesOverTime = Pass/fail over time plot
+runs.treatments.qualityControl.cumulativeYieldPassFailReadsOverTime = Pass/fail over time plot
+runs.treatments.qualityControl.channelActivityFunctionalChannelsOverTime = Functionnal channels over time
+runs.treatments.qualityControl.channelActivitySequencedReadLengthOverTime = Sequenced read length over time
+runs.treatments.qualityControl.channelActivitySequencingSpeedOverTime = Sequencing speed over time
+runs.treatments.qualityControl.channelActivityThroughputOverTime = Throughput over time
+runs.treatments.qualityControl.channelActivityFlowcellActivityMap = Flowcell activity map
+runs.treatments.qualityControl.generalMetricsPassFailInReads = Pass/fail in reads
+runs.treatments.qualityControl.generalMetricsPassFailInBases = Pass/fail in bases
+runs.treatments.qualityControl.readLengthBaseYieldAboveReadLength = Read length distribution
+runs.treatments.qualityControl.readLengthRreadLengthDistribution = Weighted read length distribution
+runs.treatments.qualityControl.readLengthWeightedReadLengthDistribution = Weighted read length distribution
+runs.treatments.qualityControl.basecallingQualityPassFailQualDistribution = Pass/fail qscore distribution
+
+
+runs.treatments.minknowMetrichor = MinKnow-Metrichor
+runs.treatments.minknowBasecalling = MinKnow-Basecalling
+runs.treatments.topIndex = Top Index
+runs.treatments.tilesStats = Stats FC
+runs.treatments.topIndex.tilesStats = Stats FC
+
+runs.treatments.minknow-metrichor.minKnowVersion = Version MinKNOW
+runs.treatments.minknow-metrichor.metrichorVersion = Version Metrichor
+runs.treatments.minknow-metrichor.metrichorWorkflowName = Nom workflow
+runs.treatments.minknow-metrichor.metrichorWorkflowVersion = Version workflow
+runs.treatments.minknow-metrichor.metrichorRunID = Metrichor run ID
+runs.treatments.minknow-metrichor.minknowChannelsWithReads = Channels with Reads
+runs.treatments.minknow-metrichor.minknowEvents = Events in Reads
+runs.treatments.minknow-metrichor.minknowCompleteReads = Complete reads
+runs.treatments.minknow-metrichor.metrichorReadCount = Read count
+runs.treatments.minknow-metrichor.metrichor2DReadsYield = Total yield (bases)
+runs.treatments.minknow-metrichor.metrichorMax2DRead = Longest read (bases)
+runs.treatments.minknow-metrichor.metrichorMax2DQualityScore = Peak quality score
+
+
+runs.treatments.minknow-basecalling.minKnowVersion = Version MinKNOW
+runs.treatments.minknow-basecalling.minknowEvents = Events in Reads
+runs.treatments.minknow-basecalling.minknowCompleteReads = Complete reads
+runs.treatments.minknow-basecalling.basecallerName = Nom basecaller
+runs.treatments.minknow-basecalling.basecallerVersion = Version basecaller
+runs.treatments.minknow-basecalling.configName = Nom fichier config
+
+
+runs.treatments.quality-control-nanopore = MinKnow-Basecalling
+
+run.treatments.sav.default.yieldTotal=Rendement total (Gb)
+run.treatments.sav.default.nonIndexedYieldTotal=Rendement total non indexé (Gb)
+run.treatments.sav.default.Q30PercTotal=% Q30 total
+run.treatments.sav.default.nonIndexedQ30PercTotal=% Q30 total non indexé
+
+runs.treatments.topIndex.unknownIndex.sequence = Index non attendus
+runs.treatments.topIndex.unknownIndex.percent = % séquence / perte
+runs.treatments.topIndex.distance = Distance
+
+# NGL-3967 : ngsrg_runs pacbio :
+runs.treatments.ngsrg_pacbio.percentHifiBases = Pourcentage de bases hifi
+runs.treatments.ngsrg_pacbio.percentHifiReads = Pourcentage de reads hifi
+
+runs.treatments.ngsrg_pacbio.nbReads = Nombre de reads hifi
+runs.treatments.ngsrg_pacbio.nbBases = Nombre de bases hifi
+
+runs.ngsrg_pacbio.demultiplexage = Démultiplexage
+runs.ngsrg_pacbio.lostReadsPercentage = % reads non démultiplexés (perte)
+
+# NGL-3967 : ccs_report_runs pacbio :
+
+runs.treatments.ccsReport = Ccs-Report 
+runs.treatments.ccsReport_pacbio = Ccs-Report 
+runs.treatments.ccsReport_pacbio.legende_1 = General metrics
+runs.treatments.ccsReport_pacbio.zmwsInput = ZMWs input
+runs.treatments.ccsReport_pacbio.zmwsPassFilters = ZMWs pass filters
+runs.treatments.ccsReport_pacbio.zmwsPassFiltersPercent = % ZMWs pass filters
+runs.treatments.ccsReport_pacbio.zmwsFailFilters = ZMWs fail filters
+runs.treatments.ccsReport_pacbio.zmwsFailFiltersPercent = % ZMWs fail filters
+runs.treatments.ccsReport_pacbio.zmwsShortcutFilters = ZMWs shortcut filters
+runs.treatments.ccsReport_pacbio.zmwsShortcutFiltersPercent = % ZMWs shortcut filters
+runs.treatments.ccsReport_pacbio.zmwsWithTandemRepeats = ZMWs with tandem repeats
+runs.treatments.ccsReport_pacbio.zmwsWithTandemRepeatsPercent = % ZMWs with tandem repeats
+
+runs.treatments.ccsReport_pacbio.legende_2 = Exclusive failed counts
+runs.treatments.ccsReport_pacbio.failed = Exclusive failed counts
+runs.treatments.ccsReport_pacbio.failed.belowSnrThreshold = Below SNR threshold
+runs.treatments.ccsReport_pacbio.failed.medianLengthFilter = Median length filter
+runs.treatments.ccsReport_pacbio.failed.lackingFullPasses = Lacking full passes
+runs.treatments.ccsReport_pacbio.failed.heteroduplexInsertions = Heteroduplex insertions
+runs.treatments.ccsReport_pacbio.failed.coverageDrops = Coverage drops
+runs.treatments.ccsReport_pacbio.failed.insufficientDraftCov = Insufficient draft cov
+runs.treatments.ccsReport_pacbio.failed.draftTooDifferent = Draft too different
+runs.treatments.ccsReport_pacbio.failed.draftGenerationError = Draft generation error
+runs.treatments.ccsReport_pacbio.failed.draftAboveMaxLength = Draft above --max-length
+runs.treatments.ccsReport_pacbio.failed.draftBelowMinLength = Draft below --min-length
+runs.treatments.ccsReport_pacbio.failed.readsFailedPolishing = Reads failed polishing
+runs.treatments.ccsReport_pacbio.failed.emptyCoverageWindows = Empty coverage windows
+runs.treatments.ccsReport_pacbio.failed.ccsNotConverge = CCS did not converge
+runs.treatments.ccsReport_pacbio.failed.belowMinimumRq = CCS below minimum RQ
+runs.treatments.ccsReport_pacbio.failed.unknownError = Unknown error
+runs.treatments.ccsReport_pacbio.failed.belowSnrThresholdPercent = % Below SNR threshold
+runs.treatments.ccsReport_pacbio.failed.medianLengthFilterPercent = % Median length filter
+runs.treatments.ccsReport_pacbio.failed.lackingFullPassesPercent = % Lacking full passes
+runs.treatments.ccsReport_pacbio.failed.heteroduplexInsertionsPercent = % Heteroduplex insertions
+runs.treatments.ccsReport_pacbio.failed.coverageDropsPercent = % Coverage drops
+runs.treatments.ccsReport_pacbio.failed.insufficientDraftCovPercent = % Insufficient draft cov
+runs.treatments.ccsReport_pacbio.failed.draftTooDifferentPercent = % Draft too different
+runs.treatments.ccsReport_pacbio.failed.draftGenerationErrorPercent = % Draft generation error
+runs.treatments.ccsReport_pacbio.faied.draftAboveMaxLengthPercent = % Draft above --max-length
+runs.treatments.ccsReport_pacbio.failed.draftBelowMinLengthPercent = % Draft below --min-length
+runs.treatments.ccsReport_pacbio.failed.readsFailedPolishingPercent = % Reads failed polishing
+runs.treatments.ccsReport_pacbio.failed.emptyCoverageWindowsPercent = % Empty coverage windows
+runs.treatments.ccsReport_pacbio.failed.ccsNotConvergePercent = % CCS did not converge
+runs.treatments.ccsReport_pacbio.failed.belowMinimumRqPercent = % CCS below minimum RQ
+runs.treatments.ccsReport_pacbio.failed.unknownErrorPercent = % Unknown error
+
+runs.treatments.ccsReport_pacbio.legende_3 = Additional passing metrics
+runs.treatments.ccsReport_pacbio.pass.zmwsMissingAdapters = ZMWs missing adapters
+runs.treatments.ccsReport_pacbio.pass.zmwsMissingAdaptersPercent = % ZMWs missing adapters
+
+
+# Runs MGI
+runs.treatments.sequencingSummaryMGI = Rapport séquençage MGI
+runs.treatments.demultiplexing = Démultiplexage
+
+runs.lane.ngsrg_mgi.nbCycles = Nb Cycles Utiles
+runs.lane.ngsrg_mgi.nbReads = Nb reads (total)
+runs.lane.ngsrg_mgi.percentESR = %ESR
+runs.lane.ngsrg_mgi.percentQ30 = %q30
+runs.lane.ngsrg_mgi.percentQ20 = %q20
+runs.lane.ngsrg_mgi.percentQ10 = %q10
+runs.lane.ngsrg_mgi.percentN = %N
+runs.lane.ngsrg_mgi.recoverValue = Recover Value
+runs.lane.ngsrg_mgi.percentChipProductivity = %Chip productivity
+runs.lane.ngsrg_mgi.nbBases = Nb bases
+runs.lane.ngsrg_mgi.percentRunon1 = %Runon1
+runs.lane.ngsrg_mgi.percentRunon2 = %Runon2
+runs.lane.ngsrg_mgi.percentLag1 = %Lag1
+runs.lane.ngsrg_mgi.percentLag2 = %Lag2
+runs.lane.ngsrg_mgi.percentErrors = %Errors
+runs.lane.ngsrg_mgi.percentDemulLoss = %DemultiplexingLoss
+
+runs.lanes.treatments.demultiplexingMGI.indexSummary.barcode = barcode
+runs.lanes.treatments.demultiplexingMGI.indexSummary.count = count
+runs.lanes.treatments.demultiplexingMGI.indexSummary.percent = percent
+
+#search
+sequencingProgramType.value.PE = Pair End
+sequencingProgramType.value.SR = Single Read
+
+runs.treatments.images.margin=25
+
+
+
+readsets.treatments.contaminationPCR = Contam. PCR
+readsets.treatments.taxonomyPcrDecontam = Taxonomy (vs PASS)
+############
+#
+# READSETS
+#
+############
+readsets.page.title=Readsets
+readsets.page.tab.validate = Readsets à Evaluer
+readsets.page.tab.search = Recherche de Readsets 
+readsets.page.tab.state = Changement d''état de Readsets
+readsets.page.tab.batch = Modification en masse de Readsets
+
+
+readsets.menu = Readsets
+readsets.menu.search = Recherche
+readsets.menu.state = Changement d''Etat
+readsets.menu.valuation = Evaluation
+readsets.menu.valuation.wheat = Evaluation blé
+readsets.menu.batch = Modification en masse
+
+readsets.archiveId = SSID
+readsets.archiveDate = Date de l''archive
+
+readsets.tabs.general = Général
+readsets.tabs.advanced = Avancé
+readsets.tabs.addinfo = Infos échantillon
+readsets.tabs.workflow = Infos workflow
+readsets.tabs.valuations.history = Historique d''évaluation
+
+#readset properties
+readsets.code = Code
+readsets.runCode = Code du Run
+readsets.laneNumber = Piste
+readsets.projectCode = Projet
+readsets.sampleCode = Echantillon
+readsets.creationdate = Date de Création
+readsets.stateCode = Etat
+readsets.productionValuation.valid = Valide Production ?
+readsets.bioinformaticValuation.valid = Valide BioInfo ?
+
+readsets.productionValuation.comment = Détails évaluation 
+
+readsets.code = Code
+readsets.state.code = Etat
+readsets.productionValuation.valid = Valide QC ?
+readsets.productionValuation.resolutions = Comptes Rendus QC
+readsets.productionValuation.criteria = Critères QC
+readsets.valuation.user = Evalué par
+readsets.valuation.notauthorized = Changement de validation (QC et bioinfo) non autorisé pour un readSet en cours au CCRT (en cours, terminé ou en erreur) : {0}
+
+
+readsets.bioinformaticValuation.valid = Valide BioInfo ?
+readsets.bioinformaticValuation.resolutions = Comptes Rendus BioInfo
+readsets.bioinformaticValuation.criteria = Critères BioInfo
+readsets.runCode = Run
+readsets.runType = Type de Run
+readsets.laneNumber = N° Piste
+readsets.projectCode = Projet
+readsets.sampleCode = Echantillon
+readsets.nbCycles = Nb Cycles
+
+readsets.properties.isSentCCRT = Envoyé CCRT ?
+readsets.properties.isSentCollaborator = Envoyé Collaborateur ?
+
+readsets.sampleOnContainer.percentPerLane = % déposé
+
+readsets.endOfRG = Date fin RG
+readsets.endOfQC = Date fin QC
+
+readsets.primaryTag = Tag Iaire
+
+#treatments properties
+readsets.treatments.contamination.read1_2 = Read 1 + Read 2
+readsets.treatments.contamination.read1 = Read 1
+readsets.treatments.contamination.single = Single
+readsets.treatments.contamination.readsInput = Reads input 
+readsets.treatments.contamination.removedReads = Removed reads
+readsets.treatments.contamination.remainingReads = Remaining reads 
+readsets.treatments.contamination.removedReadsPercent = % removed reads
+readsets.treatments.contamination.remainingNucleotides = Reamining nucleotides
+readsets.treatments.contamination.contadb = PCR contaminant database used
+
+readsets.treatments.duplicates.estimateDuplicatedReads = Estimation de lectures dupliquées
+readsets.treatments.duplicates.estimateDuplicatedReadsPercent = Estimation % lectures dupliquées
+readsets.treatments.duplicates.estimateUniqueReads = Estimation de lectures uniques
+readsets.treatments.duplicates.estimateUniqueReadsPercent = Estimation % lectures uniques
+readsets.treatments.duplicates.observed = observé
+readsets.treatments.duplicates.times = fois
+readsets.treatments.duplicates.read1 = Read 1
+readsets.treatments.duplicates.read2 = Read 2
+readsets.treatments.duplicates.paired = Paired
+readsets.treatments.duplicates.sampleInput = Sample input
+readsets.treatments.duplicates.estimateDuplicatedReadsNTimes = Estimation de lectures dupliquées x+1 fois
+
+readsets.treatments.firstBaseReport.topSurface = Top Surface
+readsets.treatments.firstBaseReport.bottomSurface = Bottom Surface
+readsets.treatments.firstBaseReport.clusterDensityTop = Cluster Density (K/mm²)
+readsets.treatments.firstBaseReport.intensityATop = A intensity
+readsets.treatments.firstBaseReport.intensityCTop = C intensity
+readsets.treatments.firstBaseReport.intensityGTop = G intensity
+readsets.treatments.firstBaseReport.intensityTTop = T intensity
+readsets.treatments.firstBaseReport.focusScoreATop = A Focus Score
+readsets.treatments.firstBaseReport.focusScoreCTop = C Focus Score
+readsets.treatments.firstBaseReport.focusScoreGTop = G Focus Score
+readsets.treatments.firstBaseReport.focusScoreTTop = T Focus Score
+readsets.treatments.firstBaseReport.clusterDensityBottom = Cluster Density (K/mm²)
+readsets.treatments.firstBaseReport.intensityABottom = A intensity
+readsets.treatments.firstBaseReport.intensityCBottom = C intensity
+readsets.treatments.firstBaseReport.intensityGBottom = G intensity
+readsets.treatments.firstBaseReport.intensityTBottom = T intensity
+readsets.treatments.firstBaseReport.focusScoreABottom = A Focus Score
+readsets.treatments.firstBaseReport.focusScoreCBottom = C Focus Score
+readsets.treatments.firstBaseReport.focusScoreGBottom = G Focus Score
+readsets.treatments.firstBaseReport.focusScoreTBottom = T Focus Score
+
+readsets.treatments.global.usefulSequences = Nb Séquences utiles
+readsets.treatments.global.usefulBases = Nb Bases utiles
+readsets.treatments.global.usefulSequencesPercent = % Nb sequences utiles
+
+readsets.treatments.ngsrg_illumina.nbCluster = Nb Séquences valides
+readsets.treatments.ngsrg_illumina.nbBases = Nb Bases
+readsets.treatments.ngsrg_illumina.Q30 = % >= Q30
+readsets.treatments.ngsrg_illumina.qualityScore = Score Qualité moyen
+readsets.treatments.ngsrg_illumina.validSeqPercent = % Séquences valides / piste
+readsets.treatments.ngsrg_illumina.fraction = Fraction de run
+readsets.treatments.ngsrg_illumina.nbReadIllumina = Nb Read Illumina
+readsets.treatments.ngsrg_illumina.percentOccupied = % puits occupés
+
+readsets.treatments.ngsrg_primary.Q30 = % >= Q30 (Imaire)
+readsets.treatments.ngsrg_primary.qualityScore = Score qualité moyen (Imaire)
+readsets.treatments.ngsrg_primary.nbCluster = Nb séquences valides (Imaire)
+readsets.treatments.ngsrg_primary.validSeqPercent = % séquences valides / piste (Imaire)
+readsets.treatments.ngsrg_primary.seqLossPctbetweenImaryAnd2ndaryDmplxing = % Perte entre démultiplexage Imaire et 2ndaire
+
+treatments.nanopore.1DForward = 1D forward
+treatments.nanopore.1DReverse = 1D reverse
+treatments.nanopore.2DAll = 2D all
+treatments.nanopore.2DPass = 2D pass
+treatments.nanopore.useful = Useful
+
+treatments.ngsrg_nanopore.useful = useful
+treatments.ngsrg_nanopore.nbBases = Nb bases
+treatments.ngsrg_nanopore.nbReads = Nb séquences
+treatments.ngsrg_nanopore.basesPercent = % bases
+treatments.ngsrg_nanopore.readsPercent = % séquences
+
+readsets.treatments.ngsrg_nanopore.avgSize = Taille (MOYENNE)
+readsets.treatments.ngsrg_nanopore.maxSize = Taille (MAX)
+readsets.treatments.ngsrg_nanopore.N50 = N50
+readsets.treatments.ngsrg_nanopore.nbReadsOver10kb = Nb séquences > 10kb
+readsets.treatments.ngsrg_nanopore.nbReadsOver30kb = Nb séquences > 30kb
+readsets.treatments.ngsrg_nanopore.nbReadsOver50kb = Nb séquences > 50kb
+readsets.treatments.ngsrg_nanopore.nbReadsOver100kb = Nb séquences > 100kb
+readsets.treatments.ngsrg_nanopore.GCPercent = % GC
+readsets.treatments.ngsrg_nanopore.qualityAvg = Qualité moyenne
+readsets.treatments.ngsrg_nanopore.readsPercent = % Nb sequences
+
+readsets.treatments.ngsrg_nanopore.GCDistribution = GC Distribution
+readsets.treatments.ngsrg_nanopore.readLengthVsreadQuality = Read Length vs Read Quality
+readsets.treatments.ngsrg_nanopore.readLengthDistribution = Read Length Distribution
+readsets.treatments.ngsrg_nanopore.readQualityDistribution = Read Quality Distribution
+readsets.treatments.ngsrg_nanopore.KmersDistribution = Kmers Distribution
+
+readsets.treatments.mapping_nanopore.inputNbReads = Nb séquences échantillonnage
+readsets.treatments.mapping_nanopore.inputNbBases = Nb bases échantillonnage
+readsets.treatments.mapping_nanopore.percentAlignedBasePairs = % paires de bases alignées
+readsets.treatments.mapping_nanopore.percentAlignedReads = % séquences alignées
+readsets.treatments.mapping_nanopore.percentAlignedReadsL100 = % séquences alignées sur 100% de leur longueur
+readsets.treatments.mapping_nanopore.nbAlignedBasePairs = Nb paires de bases alignées
+readsets.treatments.mapping_nanopore.nbAlignedReads = Nb séquences alignées
+readsets.treatments.mapping_nanopore.nbAlignedReadsL100 = Nb séquences alignées sur 100% de leur longueur
+readsets.treatments.mapping_nanopore.nbAlignedReadsID100 = Nb séquences alignées avec 100% d''identité
+readsets.treatments.mapping_nanopore.nbAlignedReadsL100ID100 = Nb séquences alignées sur 100% de leur longueur et avec 100% d''identité
+readsets.treatments.mapping_nanopore.identityPercentageAvg = Moyenne du % d''identité des séquences
+readsets.treatments.mapping_nanopore.readAlignementSizeMax = Taille max d''alignement des séquences
+readsets.treatments.mapping_nanopore.nbLoci = Nb loci
+readsets.treatments.mapping_nanopore.verticalCoverage = Couverture verticale
+readsets.treatments.mapping_nanopore.horizontalCoverage = Couverture horizontale
+
+readsets.treatments.mapping.tabs.read1 = Read 1
+readsets.treatments.mapping.tabs.read2 = Read 2
+readsets.treatments.mapping.tabs.pairs = Données (R1+R2)
+readsets.treatments.mapping.tabs.ref = Référence
+readsets.treatments.mapping.number = Number
+readsets.treatments.mapping.totalReadsPercent = % total reads
+readsets.treatments.mapping.sampleInput = Sample input
+readsets.treatments.mapping.chimericAlignedReads = Chimeric aligned reads
+readsets.treatments.mapping.nonChimericAlignedReads = Non-chimeric aligned reads
+readsets.treatments.mapping.nonChimericAlignedReadsPercent = % Non-chimeric aligned reads
+readsets.treatments.mapping.FRAlignedReads = FR (PE) aligned reads
+readsets.treatments.mapping.FRAlignedReadsPercent = % FR (PE) aligned reads
+readsets.treatments.mapping.RFAlignedReads = RF (MP) aligned reads
+readsets.treatments.mapping.RFAlignedReadsPercent = % RF (MP) aligned reads
+readsets.treatments.mapping.FFAlignedReads = FF aligned reads
+readsets.treatments.mapping.FFAlignedReadsPercent = % FF aligned reads
+readsets.treatments.mapping.RRAlignedReads = RR aligned reads
+readsets.treatments.mapping.RRAlignedReadsPercent = % RR aligned reads
+readsets.treatments.mapping.transAlignedReads = Trans aligned reads
+readsets.treatments.mapping.singleAlignedReads = Single aligned reads
+readsets.treatments.mapping.transAlignedReadsPercent = % Trans aligned reads
+readsets.treatments.mapping.singleAlignedReadsPercent = % Single aligned reads
+readsets.treatments.mapping.reference = Assembly reference
+readsets.treatments.mapping.100percent = 100 %
+readsets.treatments.mapping.MPReadDistanceSeparation =  Distance between MP reads
+readsets.treatments.mapping.PEReadDistanceSeparation = Distance between PE reads
+readsets.treatments.mapping.estimatedPEInsertSize = Estimated PE insert size
+readsets.treatments.mapping.estimatedMPInsertSize = Estimated MP insert size
+readsets.treatments.mapping.readPosition = Errors position in reads
+readsets.treatments.mapping.softwareVersion = Version logiciel
+readsets.treatments.mapping.forwardAlignedReads = Forward aligned reads
+readsets.treatments.mapping.reverseAlignedReads = Reverse aligned reads
+readsets.treatments.mapping.alignedReadsPercent = % Non-chimeric aligned reads
+
+readsets.treatments.merging.mergedReads = Merged reads
+readsets.treatments.merging.medianeSize = Mediane size (bases)
+readsets.treatments.merging.totalSize = Total size (bases)
+readsets.treatments.merging.maxSize = Max size (bases)
+readsets.treatments.merging.minSize = Min size (bases)
+readsets.treatments.merging.avgSize = Average size (bases)
+readsets.treatments.merging.sampleInput = Sample input
+readsets.treatments.merging.overlapDistrib = Overlap distribution
+readsets.treatments.merging.mergedReadsDistrib = Merged reads distribution
+readsets.treatments.merging.mergedReadsPercent = % merged reads
+
+readsets.treatments.sizeEstimatingClean.p1 = P1
+readsets.treatments.sizeEstimatingClean.p2 = P2
+readsets.treatments.sizeEstimatingClean.tabP1genomeHaploidLengthMax = Genome Haploid Length Max
+readsets.treatments.sizeEstimatingClean.tabP2heterozygosityRateMax = Heterozygosity Rate Max
+readsets.treatments.sizeEstimatingClean.summaryFile = Summary File
+readsets.treatments.sizeEstimatingClean.genomeScope = Genome Scope
+
+readsets.treatments.read_quality.adapters = Adapters over-represented : 
+readsets.treatments.read_quality.maxSizeReads = Estimation du nb de lectures de taille
+readsets.treatments.read_quality.maxSizeReadsPercent = Estimation du % de lectures de taille
+readsets.treatments.read_quality.tabs.read1 = Read 1
+readsets.treatments.read_quality.tabs.read2 = Read 2
+readsets.treatments.read_quality.qualScore = Quality scores for each read position
+readsets.treatments.read_quality.nuclDistribution = Distribution of nucleotids for each read position
+readsets.treatments.read_quality.readWithNpercent = Percent of reads with sequenced N
+readsets.treatments.read_quality.readSizeDistribution = Read size distribution
+readsets.treatments.read_quality.adapterContamination = Adapters vs run cycles
+readsets.treatments.read_quality.GCDistribution = Proportion of reads for different values of G+C content 
+readsets.treatments.read_quality.positionN = Position of N in reads
+readsets.treatments.read_quality.suspectedKmers = Suspected Kmers
+readsets.treatments.read_quality.suspectedPrimers = Suspected Primers
+readsets.treatments.read_quality.sampleInput = Sample input
+
+# NGL 3967 pacbio read_quality
+readsets.treatments.read_quality_pacbio.legende_1 = Stats sur les reads
+readsets.treatments.read_quality_pacbio.reads.nbReads = Nombre de reads
+readsets.treatments.read_quality_pacbio.reads.maxSize = Taille maximale des reads
+readsets.treatments.read_quality_pacbio.reads.nbBases = Nombre de bases
+readsets.treatments.read_quality_pacbio.reads.nbReadsOver50kb = Nombre de reads sup à 50kb
+readsets.treatments.read_quality_pacbio.reads.nbReadsOver10kb = Nombre de reads sup à 10kb
+readsets.treatments.read_quality_pacbio.reads.qualityAvg = Qualité moyenne
+readsets.treatments.read_quality_pacbio.reads.avgSize = Taille moyenne des reads
+readsets.treatments.read_quality_pacbio.reads.GCPercent = % de GC
+readsets.treatments.read_quality_pacbio.reads.N50 = N50
+readsets.treatments.read_quality_pacbio.reads.nbReadsOver30kb = Nombre de reads sup à 30kb
+readsets.treatments.read_quality_pacbio.reads.nbReadsOver100kb = Nombre de reads sup à 100kb
+readsets.treatments.read_quality_pacbio.readLengthDistribution = Distribution taille des reads
+readsets.treatments.read_quality_pacbio.GCDistribution = Distribution en GC
+readsets.treatments.read_quality_pacbio.basesCumulativeDistribution = Distribution en bases cumulées 
+readsets.treatments.read_quality_pacbio.readLengthVsreadQuality = Taille de reads Vs qualité des reads
+readsets.treatments.read_quality_pacbio.readQualityDistribution = Distribution de la qualité des reads
+
+# NGL 3967 pacbio mapping
+readsets.treatments.mapping_pacbio.legende_1 = Stats sur les reads
+readsets.treatments.mapping_pacbio.reads.percentAlignedBasePairs = % de bases alignées
+readsets.treatments.mapping_pacbio.reads.verticalCoverage = Couverture verticale
+readsets.treatments.mapping_pacbio.reads.horizontalCoverage = Couverture horizontale
+readsets.treatments.mapping_pacbio.reads.readAlignementSizeMax = Taille maximale des reads alignés
+readsets.treatments.mapping_pacbio.reads.identityPercentageAvg = Moyenne des % d'identité
+readsets.treatments.mapping_pacbio.reads.percentAlignedReadsL100 = % des reads alignés sur 100% de leur longueur
+readsets.treatments.mapping_pacbio.reads.percentAlignedReads = % des reads alignés
+readsets.treatments.mapping_pacbio.reverseAlignedReadsPercent = % alignement reverse
+readsets.treatments.mapping_pacbio.chimericAlignedReads = Reads chimériques alignés
+readsets.treatments.mapping_pacbio.forwardAlignedReadsPercent = % reads alignés en forward
+readsets.treatments.mapping_pacbio.noChimericAlignedReads = Reads non chimériques alignés
+readsets.treatments.mapping_pacbio.identityPercentVsReadAlignedLength = % d'identité VS taille des reads alignés
+readsets.treatments.mapping_pacbio.identityPercentVsReadQuality = % d'identité VS qualité des reads
+readsets.treatments.mapping_pacbio.reverseAlignedReads = Reads alignés en reverse
+readsets.treatments.mapping_pacbio.forwardAlignedReads = Reads alignés en forward
+readsets.treatments.mapping_pacbio.inputNbBases = Nb de bases en entrée
+readsets.treatments.mapping_pacbio.chimericAlignedReadsPercent = % de reads chimériques alignés
+readsets.treatments.mapping_pacbio.inputNbReads = Nb de reads en entrée
+readsets.treatments.mapping_pacbio.noChimericAlignedReadsPercent = % de reads non chimériques alignés
+
+
+readsets.treatments.sortingRibo.tabs.bilan = Bilans
+readsets.treatments.sortingRibo.tabs.taxonRead1 = Taxo. rRNA Read1
+readsets.treatments.sortingRibo.tabs.taxonRead2 = Taxo. rRNA Read2
+readsets.treatments.sortingRibo.tabs.taxonSingle = Taxo. rRNA Single
+readsets.treatments.sortingRibo.tabs.krona = Krona
+
+readsets.treatments.sorting_ribo.taxon = Taxon
+readsets.treatments.sorting_ribo.nbSeq = Nb Seq.
+readsets.treatments.sorting_ribo.Percent = % (vs rRNA tot.)
+readsets.treatments.sorting_ribo.PercentAssigned = % (vs assigned)
+
+
+readsets.treatments.sorting_ribo.software = Version logiciel
+readsets.treatments.sorting_ribo.readsInput = Reads input
+readsets.treatments.sorting_ribo.no_rRNA = No-rRNA
+readsets.treatments.sorting_ribo.rRNA = rRNA
+readsets.treatments.sorting_ribo.rRNAPercent = % rRNA
+readsets.treatments.sorting_ribo.rRNABilan = Bilan rRNA
+readsets.treatments.sorting_ribo.usefulSequences = Useful sequences
+readsets.treatments.sorting_ribo.usefulBases = Useful bases
+readsets.treatments.sorting_ribo.read1 = Read 1
+readsets.treatments.sorting_ribo.read2 = Read 2
+readsets.treatments.sorting_ribo.paired = No-rRNA paired
+readsets.treatments.sorting_ribo.single = Single
+
+readsets.treatments.taxonomy.tabs.bilan = Bilans
+readsets.treatments.taxonomy.tabs.krona = Krona
+readsets.treatments.taxonomy.tabs.phylogeneticTree = Arbre phylogénétique
+readsets.treatments.taxonomy.organism = Organisme
+readsets.treatments.taxonomy.taxonomy = Taxonomie
+readsets.treatments.taxonomy.divisionBilan = Bilan par division
+readsets.treatments.taxonomy.divisionBilan.division = Division
+readsets.treatments.taxonomy.divisionBilan.percent = %
+readsets.treatments.taxonomy.divisionBilan.nbSeq = Nb Seq.
+readsets.treatments.taxonomy.keywordBilan = Bilan par mot-clé
+readsets.treatments.taxonomy.keywordBilan.keyword = Mot-clé
+readsets.treatments.taxonomy.keywordBilan.percent = %
+readsets.treatments.taxonomy.keywordBilan.nbSeq = Nb Seq.
+readsets.treatments.taxonomy.taxonBilan = Bilan par taxon
+readsets.treatments.taxonomy.taxonBilanMitochondrion = Bilan par taxon (Vs mitochondrion database)
+readsets.treatments.taxonomy.taxonBilanPlastid = Bilan par taxon (Vs plastid database)
+readsets.treatments.taxonomy.taxonBilanContamination = Bilan par contaminant (Vs nt database)
+readsets.treatments.taxonomy.taxonBilan.taxon = Taxon
+readsets.treatments.taxonomy.taxonBilan.percent = %
+readsets.treatments.taxonomy.taxonBilan.nbSeq = Nb Seq.
+readsets.treatments.taxonomy.sampleInput = Nb Seq. (échantillonnage)
+readsets.treatments.taxonomy.beginNcbiUrl = http://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Undef&name=
+readsets.treatments.taxonomy.phylogeneticTree = Arbre phylogénétique
+readsets.treatments.taxonomy.krona = Krona
+readsets.treatments.taxonomy.software = Logiciel
+readsets.treatments.taxonomy.databaseVersion = Version Base de données
+readsets.treatments.taxonomy.tabs.pairs = Read1+Read2 merged
+readsets.treatments.taxonomy.tabs.read1 = Read 1
+
+readsets.treatments.trimming.read1 = Read 1
+readsets.treatments.trimming.read2 = Read 2
+readsets.treatments.trimming.sizeRange = Size range
+readsets.treatments.trimming.readsInput = Reads input
+readsets.treatments.trimming.readsOutput = Reads output
+readsets.treatments.trimming.readsTrim = Reads trim.
+readsets.treatments.trimming.readsNoTrim = Reads no trim.
+readsets.treatments.trimming.readsNoTrimPercent = % reads no trim.
+readsets.treatments.trimming.readsTrimPercent = % reads trim.
+readsets.treatments.trimming.nucleotidesTrim = Nucleotide trim.
+readsets.treatments.trimming.trimRejectedShort = Rejected (short)
+readsets.treatments.trimming.trimRejectedLength0 = Rejected (length 0)
+readsets.treatments.trimming.storedPairs = Stored Pairs
+readsets.treatments.trimming.storedSingleton = Stored Singleton
+readsets.treatments.trimming.rejectedPairs = Rejected Pairs
+readsets.treatments.trimming.trimStored = Trim. Stored
+
+readsets.treatments.trimming=Trimming
+readsets.treatments.trimming.nanopore.input=Input
+readsets.treatments.trimming.nanopore.output=Output
+readsets.treatments.trimming.nanopore.trimmed=Trimmed
+readsets.treatments.trimming.nanopore.startTrimmed=Trimmed start
+readsets.treatments.trimming.nanopore.endTrimmed=Trimmed end
+readsets.treatments.trimming.nanopore.bothTrimmed=Trimmed both
+readsets.treatments.trimming.nanopore.inside=Inside
+readsets.treatments.trimming.nanopore.short=Short
+readsets.treatments.trimming.nanopore.name=Name
+readsets.treatments.trimming.nanopore.read=Read
+readsets.treatments.trimming.nanopore.base=Base
+
+
+readsets.treatments.exome.gender = Sex (stat. analyse)
+readsets.treatments.exome.nbReads = Nb reads
+readsets.treatments.exome.mappedReads = Mapped reads
+readsets.treatments.exome.mappedReadsPercent = Percent Mapped reads
+readsets.treatments.exome.pairingPercent = Percent Pairing
+readsets.treatments.exome.duplicatedReads = Duplicated reads
+readsets.treatments.exome.duplicatedReadsPercent = Percent Duplicated Reads
+readsets.treatments.exome.sizeRegionsTiled = Size Regions Tiled
+readsets.treatments.exome.targetPercent = Percent target
+readsets.treatments.exome.percentNT30X = Percent NT 30X
+readsets.treatments.exome.percentNT20X = Percent NT 20X
+readsets.treatments.exome.percentNT10X = Percent NT 10X
+readsets.treatments.exome.percentNT5X = Percent NT 5X
+readsets.treatments.exome.nbRegions0X = Nb regions 0X
+readsets.treatments.exome.regions0XPercent = Percent regions 0X
+readsets.treatments.exome.nbRegionsFullCover = Nb regions full cover
+readsets.treatments.exome.regionsFullCoverPercent = Percent Regions Full Cover
+readsets.treatments.exome.meanCover = Mean cover
+readsets.treatments.exome.medianCover = Median cover
+readsets.treatments.exome.meanCoverUseful = Mean cover useful
+readsets.treatments.exome.sdCover = SD cover
+readsets.treatments.exome.pipelineVersion = Version Pipeline
+
+#treatments names
+readsets.treatments.global = Global
+readsets.treatments.ngsrg = NGS-RG
+readsets.treatments.primaryDemultiplexing = Démultiplexage primaire
+readsets.treatments.duplicatesRaw = Duplicates (vs RAW)
+readsets.treatments.duplicatesClean = Duplicates (vs CLEAN)
+readsets.treatments.duplicatesTrim = Duplicates (vs TRIM)
+readsets.treatments.trimmingStd = Trimming
+readsets.treatments.trimmingVector = Trimming Vecteur
+readsets.treatments.firstBaseReport = First Base Report
+readsets.treatments.merging = Merging
+readsets.treatments.readQualityRaw = Read Quality (vs RAW)
+readsets.treatments.readQualityClean = Read Quality (vs CLEAN)
+readsets.treatments.readQualityTrim = Read Quality (vs TRIM)
+readsets.treatments.readQuality = Read Quality
+readsets.treatments.contaminationColi = Contam. Coli
+readsets.treatments.contaminationVector = Contam. Vecteur
+readsets.treatments.contaminationPhiX = Contam. PhiX
+readsets.treatments.contaminationChicken = Contam. Chicken
+readsets.treatments.contaminationAmplicons = Contam. Amplicons
+readsets.treatments.sortingRibo = Sorting Ribo
+readsets.treatments.mapping = Mapping
+readsets.treatments.taxonomy = Taxonomy 
+readsets.treatments.exome = Exome 
+readsets.treatments.chromium = Chromium 
+readsets.treatments.indexComposition = Répartition des index
+readsets.treatments.sizeEstimatingClean = Estimation taille génome
+
+readsets.treatments.gender.properlyPaired = Properly Paired
+readsets.treatments.gender.notProperlyPaired = Not Properly Paired
+readsets.treatments.gender.unaligned = Unaligned
+readsets.treatments.gender.mq0 = MQ0
+readsets.treatments.gender.mq159 = MQ1-59
+readsets.treatments.gender.mq60 = MQ60
+readsets.treatments.gender.gender = Gender
+readsets.treatments.gender = Gender
+
+readsets.treatments.RNASeq=RNA-Seq
+
+readsets.treatments.rnaSeq.echantillonage=Echantillonage
+readsets.treatments.rnaSeq.sampleInput=Nb reads
+
+readsets.treatments.rnaSeq.nettoyage=Nettoyage
+readsets.treatments.rnaSeq.storedPairsPercent=% both surviving
+readsets.treatments.rnaSeq.storedForwardReadPercent=% R1 only surviving
+readsets.treatments.rnaSeq.storedReverseReadPercent=% R2 only surviving
+readsets.treatments.rnaSeq.rejectedPairsPercent=% dropped
+
+readsets.treatments.rnaSeq.alignGenome=Alignement Genome
+readsets.treatments.rnaSeq.alignedReadsPercent=% mapped reads
+readsets.treatments.rnaSeq.uniqueReadsPercent=% unique mapped reads
+readsets.treatments.rnaSeq.uniqueAlignedReadsPercent=% unique mapped reads of total
+readsets.treatments.rnaSeq.mismatchPercent=% base mismatch
+readsets.treatments.rnaSeq.duplicatedReadsPercent=% duplicated mapped reads
+readsets.treatments.rnaSeq.insertLengthMean=Mean insert length
+readsets.treatments.rnaSeq.insertLengthMeanSd=SD insert length
+readsets.treatments.rnaSeq.1SenseAlignedReadsPercent=% R1 sense
+readsets.treatments.rnaSeq.2SenseAlignedReadsPercent=% R2 sense
+readsets.treatments.rnaSeq.intragenicReadsPercent=% intragenic
+readsets.treatments.rnaSeq.exonicReadsPercent=% exonic
+readsets.treatments.rnaSeq.intergenicReadsPercent=% intergenic
+readsets.treatments.rnaSeq.intronicReadsPercent=% intronic
+readsets.treatments.rnaSeq.mappedEnd2ReadsPercent=% mapped End 2
+readsets.treatments.rnaSeq.mappedEnd1ReadsPercent=% mapped End 1
+readsets.treatments.rnaSeq.nbTranscripts=Nb transcripts 
+readsets.treatments.rnaSeq.nbGenes=Nb genes
+readsets.treatments.rnaSeq.PFAlignedReadsPercent = % PF reads aligned
+
+readsets.treatments.rnaSeq.annotation=Annotation
+readsets.treatments.rnaSeq.nbProteinCodingGenes=Nb protein coding genes
+readsets.treatments.rnaSeq.nbProteinCodingTranscripts=Nb protein coding transcripts
+readsets.treatments.rnaSeq.nbMiRnaGenes=Nb miRNA genes
+readsets.treatments.rnaSeq.nbSnoRnaGenes=Nb snoRNA genes
+readsets.treatments.rnaSeq.nbSnRnaGenes=Nb snRNA genes
+readsets.treatments.rnaSeq.nbProtCodGeneChrY=Nb protein coding genes chrY
+readsets.treatments.rnaSeq.nbProtCodTrscriptChrY=Nb protein coding transcripts chrY
+readsets.treatments.rnaSeq.nblncRnaGenes=Nb lincRNA genes
+readsets.treatments.rnaSeq.nblncRnaTrscripts=Nb lincRNA transcripts
+readsets.treatments.rnaSeq.nbMiRNATranscripts=Nb miRNA transcripts
+readsets.treatments.rnaSeq.nbSnoRNATranscripts=Nb snoRNA transcripts
+readsets.treatments.rnaSeq.nbSnRNATranscripts=Nb snRNA transcripts
+
+readsets.treatments.rnaSeq.alignTranscriptome=Alignement transcriptome
+readsets.treatments.rnaSeq.mappedReadsPercent=% mapped reads
+readsets.treatments.rnaSeq.readLengthMean=mean read length
+readsets.treatments.rnaSeq.adaptersPercent=% adaptateur
+readsets.treatments.rnaSeq.rRnaMappedPercent=% mapped rRNA
+
+
+readsets.treatments.rnaSeq.duplication=Duplication
+readsets.treatments.rnaSeq.transcriptDuplicMappedReadsPerc=% duplicated mapped reads transcriptome
+readsets.treatments.rnaSeq.genomDuplicMappedReadsPerc=% duplicated mapped reads genome
+
+readsets.treatments.rnaSeq.insertSize=Insert Size
+readsets.treatments.rnaSeq.insertsizeMedian=median insert size
+readsets.treatments.rnaSeq.insertsizeMin=min insert size
+readsets.treatments.rnaSeq.insertsizeMax=max insert size
+readsets.treatments.rnaSeq.insertsizeMean=mean insert size
+readsets.treatments.rnaSeq.standardDeviation=standard deviation
+readsets.treatments.rnaSeq.pairOrientation=pair orientation
+readsets.treatments.rnaSeq.widthOf10percent=width of 10 percent
+readsets.treatments.rnaSeq.widthOf20percent=width of 20 percent
+readsets.treatments.rnaSeq.widthOf30percent=width of 30 percent
+readsets.treatments.rnaSeq.widthOf40percent=width of 40 percent
+readsets.treatments.rnaSeq.widthOf50percent=width of 50 percent
+readsets.treatments.rnaSeq.widthOf60percent=width of 60 percent
+readsets.treatments.rnaSeq.widthOf70percent=width of 70 percent
+readsets.treatments.rnaSeq.widthOf80percent=width of 80 percent
+readsets.treatments.rnaSeq.widthOf90percent=width of 90 percent
+readsets.treatments.rnaSeq.widthOf99percent=width of 99 percent
+
+readsets.treatments.rnaSeq.genomeStrand=Genome Strand
+readsets.treatments.rnaSeq.strandForwardPercent=% Strand Forward
+readsets.treatments.rnaSeq.strandReversePercent=% Strand Reverse
+
+runs.treatments.molQualReport.reference=Reference
+runs.treatments.molQualReport.mapRateGe150kbp=Map rate (>=150kbp)
+runs.treatments.molQualReport.effectiveCoverage=Effective coverage
+runs.treatments.molQualReport.moleculeIntegrityNumber=Molecule integrity number
+runs.treatments.molQualReport.positiveLabelVariance=Positive label variance (PLV)
+runs.treatments.molQualReport.negativeLabelVariance=Negative label variance (NLV)
+runs.treatments.molQualReport.basePairsPerPixel=Base pairs per pixel
+runs.treatments.molQualReport.sMin=SMin (Kb)
+runs.treatments.molQualReport.relativeSd=RelativeSD
+runs.treatments.molQualReport.scalingSd=ScalingSD
+runs.treatments.molQualReport.siteSd=SiteSD
+
+readsets.treatments.images.margin=25
+
+readsets.treatments.moleculeQualityReport = Molecule Quality Report
+
+readsets.treatments.minknowMetrichor = MinKnow-Metrichor
+readsets.treatments.minknowBasecalling = MinKnow-Basecalling
+
+readsets.treatments.chromium.softwareVersion=Version logiciel
+readsets.treatments.chromium.barcodeExactMatchRatio=Barcode exact match
+readsets.treatments.chromium.barcodeQ30BaseRatio=Barcode Q30
+readsets.treatments.chromium.bcOnWhitelist=Barcode exact match post correction
+readsets.treatments.chromium.gemCountEstimate=Estimated number of GEMs
+readsets.treatments.chromium.meanBarcodeQscore=Mean quality score
+readsets.treatments.chromium.numberReads=Number of reads
+readsets.treatments.chromium.read1Q30BaseRatio=Q30 of read 1
+readsets.treatments.chromium.read2Q30BaseRatio=Q30 of read 2
+
+readsets.treatments.checkFastqIndex=Check Fastq Index
+readsets.treatments.checkFastqIndex.kmersBilan.kmer=Kmer
+readsets.treatments.checkFastqIndex.kmersBilan.kmerName=Nom Kmer
+readsets.treatments.checkFastqIndex.kmersBilan.kmerNumber=Nb. Kmer
+readsets.treatments.checkFastqIndex.kmersBilan.kmerPercent=Pourcent. Kmer
+readsets.treatments.checkFastqIndex.expectedSequences=Séquences attendues
+filterKmerPercent = Seuil % Kmer
+
+readsets.treatments.ngsrg_mgi.nbReads=Nb reads
+readsets.treatments.ngsrg_mgi.percentage=% déposé
+readsets.treatments.ngsrg_mgi.nbBases=Nb bases
+readsets.treatments.ngsrg_mgi.validSeqPercent=% séquences valides/piste
+
+readsets.treatments.index_composition.sequencing_summary.barcode=Index
+readsets.treatments.index_composition.sequencing_summary.count=Nb occurrences
+readsets.treatments.index_composition.sequencing_summary.percent=% de cet index dans le readset
+
+readsets.treatments.clustersDbAssignation=Clusters Db Assignation
+readsets.files.fullname = Nom du fichier
+readsets.files.typeCode = Type de fichier
+readsets.files.usable = Utilisable
+readsets.files.properties.label = Label
+readsets.files.properties.asciiEncoding = Encodage ASCII
+readsets.files.properties.md5 = Clé codage md5
+readsets.files.properties.collabFileName = Nom fichier collaborateur
+readsets.files.properties.basecallerVersion = Version basecaller 
+readsets.files.properties.basecallerModel = Modèle basecaller
+readsets.files.state = Etat
+readsets.files.state.code = Code
+readsets.files.state.date = Date
+readsets.files.state.user = Utilisateur
+readsets.files.isUsable = Oui
+readsets.files.isNotUsable = Non
+readsets.files.path = Chemin fichiers utiles
+readsets.files.location = Localisation
+
+readsets.modal.header.text = ReadSet status flow
+
+readset.sampleOnContainer.sampleCode = Code d''échantillon
+readset.sampleOnContainer.sampleTypeCode = Type d''échantillon
+readset.sampleOnContainer.sampleCategoryCode = Catégorie d''échantillon
+readset.sampleOnContainer.containerSupportCode = Code support container
+readset.sampleOnContainer.containerCode = Code container
+readset.sampleOnContainer.percentage = Pourcentage
+readset.sampleOnContainer.referenceCollab = Ref. Collaborateur
+readset.properties.refCollabSub = Ref. Collaborateur Submission
+readsets.submissionState = Etat pour la soumission
+readset.sampleOnContainer.percentage = % par piste
+readset.sampleOnContainer.ncbiScientificName=Taxon
+readset.sampleOnContainer.taxonCode=Taxon Id
+readset.sampleOnContainer.loadingReport=Bilan chargement
+readset.sampleOnContainer.loadingReport.time=Temps
+readset.sampleOnContainer.loadingReport.loading=chargement(s)
+readset.sampleOnContainer.qcFlowcell=QC Flowcell
+readset.sampleOnContainer.qcFlowcell.preLoading=réception
+readset.sampleOnContainer.qcFlowcell.postLoading=dépôt
+readset.sampleOnContainer.qcFlowcell.pores=pores
+
+
+readsets.workflow.state = Etat
+readsets.workflow.who = Par
+readsets.workflow.date = Date
+
+readsets.valuation.qc.history.valid = Valide QC ?
+readsets.valuation.qc.history.who = Evalé par
+readsets.valuation.qc.history.date = Date
+readsets.valuation.ba.history.valid = Valide BioInfo ?
+readsets.valuation.ba.history.who = Evalué par
+readsets.valuation.ba.history.date = Date
+############
+#
+# analyses
+#
+############
+analyses.page.title=Analyses
+analyses.menu = Analyses
+analyses.menu.search = Recherche
+analyses.menu.state = Changement d''Etat
+analyses.menu.valuation = Evaluation
+
+analyses.page.tab.validate = Analyses à Evaluer
+analyses.page.tab.search = Recherche d'' Analyses 
+analyses.page.tab.state = Changement d''état d''Analyses
+
+
+analyses.code = Code
+analyses.typeCode = Type
+analyses.masterReadSetCodes = Code ReadSets Maitres
+analyses.readSetCodes = Code ReadSets 
+analyses.projectCodes = Projects
+analyses.sampleCodes = Echantillons
+analyses.state.code = Etat
+analyses.valuation.valid = Valid ?
+analyses.valuation.resolutions = Comptes Rendus
+analyses.valuation.creationDate = Date de création
+analyses.valuation.criteria = Critères éval.
+
+
+analyses.tabs.general = Général
+analyses.tabs.advanced = Avancé
+analyses.tabs.workflow = Infos workflow
+analyses.tabs.valuations.history = Historique d''évaluation
+analyses.workflow.state = Etat
+analyses.workflow.date = Date
+analyses.workflow.who = Par
+analyses.valuation.history.valid = Valide ?
+analyses.valuation.history.who = Evalué par
+analyses.valuation.history.date = Date
+
+
+analyses.valuation.user = Evalué par
+analyses.valuation.comment = Commentaire
+analyses.treatments.mergingBA = Merging
+analyses.treatments.assemblyBA = Assembly
+analyses.treatments.assemblyBA.software = Logiciel
+analyses.treatments.contigFilterBA = Contig Filter
+analyses.treatments.scaffoldingBA = Scaffolding
+analyses.treatments.assemblyFilterBA = Assembly Filter
+analyses.treatments.gapClosingBA = Gap Closing
+analyses.treatments.exome = Exome
+analyses.treatments.RNASeq = RNAseq
+analyses.treatments.ampliconAssignationBA = Clusters Db Assignation Vs Controls
+analyses.files.path  = Chemin
+analyses.files.fullname= Nom du fichier
+analyses.files.typeCode	= Type de fichier
+analyses.files.usable	= Utilisable
+analyses.files.properties.label	= Label
+analyses.files.properties.asciiEncoding	= Encodage ASCII
+analyses.files.properties.md5= Clé codage md5
+analyses.files.isUsable = Oui
+analyses.files.isNotUsable = Non
+
+analyses.treatments.merging_ba.readsInput = Reads input (pairs)
+analyses.treatments.merging_ba.mergedReads = Merged reads
+analyses.treatments.merging_ba.mergedReadsPercent = % merged reads
+analyses.treatments.merging_ba.medianeSize = Mediane size (bases)
+analyses.treatments.merging_ba.avgSize = Average size (bases)
+analyses.treatments.merging_ba.minSize = Min size (bases)
+analyses.treatments.merging_ba.maxSize = Max size (bases)
+
+
+analyses.treatments.assembly_ba.N50Contig = N50 
+analyses.treatments.assembly_ba.N80Contig = N80 
+analyses.treatments.assembly_ba.N90Contig = N90 
+analyses.treatments.assembly_ba.NXContigNb = Number of contigs
+analyses.treatments.assembly_ba.NXContigSize = Size (bases)
+analyses.treatments.assembly_ba.readsUsed = Number of reads used for assembly
+analyses.treatments.assembly_ba.basesUsed = Number of bases used for assembly
+analyses.treatments.assembly_ba.coverageUsed = Coverage used for assembly
+analyses.treatments.assembly_ba.readsAssembled = Number of reads really assembled
+analyses.treatments.assembly_ba.assemblyContigSize = Assembly size (bases)
+analyses.treatments.assembly_ba.assemblyContigNb = Number of contigs
+analyses.treatments.assembly_ba.minContigSize = Smallest contig size (bases)
+analyses.treatments.assembly_ba.maxContigSize = Largest contig size (bases)
+analyses.treatments.assembly_ba.averageContigSize = Average contig size (bases)
+analyses.treatments.assembly_ba.GCpercent = % GC	
+analyses.treatments.assembly_ba.readsAssembledPercent = % of assembled reads
+analyses.treatments.assembly_ba.expectedPoolSizePercent = % expected pool size 
+analyses.treatments.assembly_ba.contigSizeRepartition.size = Size
+analyses.treatments.assembly_ba.contigSizeRepartition.contigNumber = Number of contigs
+analyses.treatments.assembly_ba.contigSizeRepartition.contigPercent = % of contigs
+analyses.treatments.assembly_ba.contigSizeRepartition.cumulativeSize = Cumulative Size (bases)
+analyses.treatments.assembly_ba.contigSizeRepartition.cumulativeSizePercent = % of assembly size
+
+analyses.treatments.contigFilter_ba.storedBases = Nb bases conservées
+analyses.treatments.contigFilter_ba.lostBasesPercent = % bases perdues
+
+#POST FILTRE
+analyses.treatments.assemblyFilter_ba.NXSequenceNb = Number of contigs/scaffolds
+analyses.treatments.assemblyFilter_ba.NXSequenceSize = Size (bases)
+analyses.treatments.assembly_ba.N50Sequence = N50 
+analyses.treatments.assembly_ba.N80Sequence = N80 
+analyses.treatments.assembly_ba.N90Sequence = N90 
+
+analyses.treatments.assemblyFilter_ba.preservedBases = Nb de bases conservés
+analyses.treatments.assemblyFilter_ba.preservedSequences = Nb contigs/scaffolds conservés
+analyses.treatments.assemblyFilter_ba.numberOfN = Nombre de N
+analyses.treatments.assemblyFilter_ba.preservedCoverage = Couverture conservés
+analyses.treatments.assemblyFilter_ba.minSequenceSize = Smallest contigs/scaffolds size (bases)
+analyses.treatments.assemblyFilter_ba.maxSequenceSize = Largest contigs/scaffolds size (bases)
+analyses.treatments.assemblyFilter_ba.averageSequenceSize = Average contigs/scaffolds size (bases)
+analyses.treatments.assemblyFilter_ba.sequenceSizeRepartition.size = size
+analyses.treatments.assemblyFilter_ba.sequenceSizeRepartition.sequenceNumber = number of sequences
+analyses.treatments.assemblyFilter_ba.sequenceSizeRepartition.sequencePercent = % sequences
+analyses.treatments.assemblyFilter_ba.sequenceSizeRepartition.cumulativeSize = Cumulative Size (bases)
+analyses.treatments.assemblyFilter_ba.sequenceSizeRepartition.cumulativeSizePercent = % assembly size (bases)
+
+#POST ASSEMBLAGE
+analyses.treatments.assemblyFilter_ba.assemblySequenceNb = Nb contigs/scaffolds
+analyses.treatments.assemblyFilter_ba.assemblySize = Assembly size (bases)
+
+
+analyses.treatments.assemblyFilter_ba.GCpercent = % GC
+
+treatments.assignation.assignationBilan.cluster=Cluster
+treatments.assignation.assignationBilan.otu=OTU
+treatments.assignation.assignationBilan.abundance=Abundance
+treatments.assignation.assignationBilan.abundanceClusterPercent=Abundance readset %
+treatments.assignation.assignationBilan.abundanceControlPercent=Abundance témoin %
+treatments.assignation.assignationBilan.taxonomy=Taxonomy
+treatments.assignation.assignationBilan.idPercent=% id
+treatments.assignation.assignationBilan.matchLength=% match length
+
+analyses.treatments.scaffolding_ba.N50Scaffold = N50 
+analyses.treatments.scaffolding_ba.N80Scaffold = N80 
+analyses.treatments.scaffolding_ba.N90Scaffold = N90 
+analyses.treatments.scaffolding_ba.NXScaffoldNb = Number of scaffolds
+analyses.treatments.scaffolding_ba.NXScaffoldSize = Size
+analyses.treatments.scaffolding_ba.assemblyScaffoldSize = Assembly size (bases)
+analyses.treatments.scaffolding_ba.assemblyScaffoldNb = Number of scaffolds
+analyses.treatments.scaffolding_ba.minScaffoldSize = Smallest scaffold size (bases)
+analyses.treatments.scaffolding_ba.maxScaffoldSize = Largest scaffold size (bases)
+analyses.treatments.scaffolding_ba.averageScaffoldSize = Average scaffold size (bases)
+analyses.treatments.scaffolding_ba.GCpercent = % GC	
+analyses.treatments.scaffolding_ba.readsAssembledPercent = % of assembled reads
+analyses.treatments.scaffolding_ba.expectedPoolSizePercent = % expected pool size
+analyses.treatments.scaffolding_ba.scaffoldSizeRepartition.size = Size
+analyses.treatments.scaffolding_ba.scaffoldSizeRepartition.scaffoldNumber = Number of scaffolds
+analyses.treatments.scaffolding_ba.scaffoldSizeRepartition.scaffoldPercent = % of scaffolds
+analyses.treatments.scaffolding_ba.scaffoldSizeRepartition.cumulativeSize = Cumulative Size (bases)
+analyses.treatments.scaffolding_ba.scaffoldSizeRepartition.cumulativeSizePercent = % of assembly size
+
+analyses.treatments.scaffolding_ba.numberOfN = Nombre de N
+analyses.treatments.scaffolding_ba.nbPairedSatisfied = Nb Paires satisfaisantes
+analyses.treatments.scaffolding_ba.nbPairedUnsatisfied = Nb Paires non satisfaisantes
+analyses.treatments.scaffolding_ba.nbMappedPairs = Nb paires mappées
+analyses.treatments.scaffolding_ba.nbMappedSequences = Nb séquences mappées 
+analyses.treatments.scaffolding_ba.medianInsertSize = Taille d''insert médiane (bases)
+
+analyses.treatments.gapClosing_ba.actualGapSum = Actual Gap Sum 
+analyses.treatments.gapClosing_ba.extendGapSum = Extend Gap Sum
+analyses.treatments.gapClosing_ba.actualGapCount = Actual Gap Count
+analyses.treatments.gapClosing_ba.finishGapCount = Finish Gap Count
+analyses.treatments.gapClosing_ba.GCpercent = % GC
+analyses.treatments.gapClosing_ba.numberOfN = Nombre de N
+analyses.treatments.gapClosing_ba.percentOfN = % N
+
+analyses.treatments.wholeGenome = Whole Genome
+analyses.treatments.wholeGenome.statAnalysis = Statistiques de l''analyse
+analyses.treatments.wholeGenome.gender= Sex
+analyses.treatments.wholeGenome.coveredGenomeSize = Taille Couv. Genome
+analyses.treatments.wholeGenome.coveragePercent=Couverture %
+analyses.treatments.wholeGenome.n50 = n50
+analyses.treatments.wholeGenome.largestContigSize = Taille + gdContig
+analyses.treatments.wholeGenome.coverageMean = Couv. Moy
+analyses.treatments.wholeGenome.coverageMedian = Couv. Med
+analyses.treatments.wholeGenome.Q1Coverage = Couv. Q1
+analyses.treatments.wholeGenome.iqr = IQR
+analyses.treatments.wholeGenome.outlierPercent = % Outlier
+analyses.treatments.wholeGenome.duplicatedReadsPercent = % Duplicats
+analyses.treatments.wholeGenome.humanReferenceGenome = Version Génome
+analyses.treatments.wholeGenome.pipelineVersion = Version Pipeline
+
+analyses.treatments.wholeGenome.regionPercent=Pourcentage de régions couvertes
+analyses.treatments.wholeGenome.cov5xRegionPercent=% Region 5
+analyses.treatments.wholeGenome.cov10xRegionPercent=% Region 10
+analyses.treatments.wholeGenome.cov20xRegionPercent=% Region 20
+analyses.treatments.wholeGenome.cov30xRegionPercent=% Region 30
+analyses.treatments.wholeGenome.cov40xRegionPercent=% Region 40
+
+analyses.treatments.wholeGenome.noCoveredPercent=Pourcentage de non couverture par chromosome
+analyses.treatments.wholeGenome.chr01NoCovered=Chr1
+analyses.treatments.wholeGenome.chr02NoCovered=Chr2
+analyses.treatments.wholeGenome.chr03NoCovered=Chr3
+analyses.treatments.wholeGenome.chr04NoCovered=Chr4
+analyses.treatments.wholeGenome.chr05NoCovered=Chr5
+analyses.treatments.wholeGenome.chr06NoCovered=Chr6
+analyses.treatments.wholeGenome.chr07NoCovered=Chr7
+analyses.treatments.wholeGenome.chr08NoCovered=Chr8
+analyses.treatments.wholeGenome.chr09NoCovered=Chr9
+analyses.treatments.wholeGenome.chr10NoCovered=Chr10
+analyses.treatments.wholeGenome.chr11NoCovered=Chr11
+analyses.treatments.wholeGenome.chr12NoCovered=Chr12
+analyses.treatments.wholeGenome.chr13NoCovered=Chr13
+analyses.treatments.wholeGenome.chr14NoCovered=Chr14
+analyses.treatments.wholeGenome.chr15NoCovered=Chr15
+analyses.treatments.wholeGenome.chr16NoCovered=Chr16
+analyses.treatments.wholeGenome.chr17NoCovered=Chr17
+analyses.treatments.wholeGenome.chr18NoCovered=Chr18
+analyses.treatments.wholeGenome.chr19NoCovered=Chr19
+analyses.treatments.wholeGenome.chr20NoCovered=Chr20
+analyses.treatments.wholeGenome.chr21NoCovered=Chr21
+analyses.treatments.wholeGenome.chr22NoCovered=Chr22
+analyses.treatments.wholeGenome.chrXNoCovered=ChrX
+analyses.treatments.wholeGenome.chrYNoCovered=ChrY
+
+analyses.treatments.wholeGenome.info=Informations générales
+analyses.treatments.wholeGenome.fastqFiles=ReadSets
+analyses.treatments.wholeGenome.filePath=Path Fichier
+############
+#
+# Balance Sheets
+#
+############
+balanceSheets.page.title = Bilan de production
+
+balanceSheets.menu = Bilans
+balanceSheets.menu.rsillumina = Bilans Illumina
+balanceSheets.menu.rsnanopore = Bilans Nanopore
+
+balanceSheets.export.excel = Export Excel
+balanceSheets.export.pdf = Export PDF
+
+balanceSheets.export.excel.table.general = Général
+balanceSheets.export.excel.table.quarters = Trimestres
+balanceSheets.export.excel.table.sequencingType = Types séquencage
+balanceSheets.export.excel.table.firstTen = 10 premiers projets
+balanceSheets.export.excel.table.projectType = Types échantillon
+balanceSheets.export.excel.table.runType = Bilan mensuel, nb runs
+
+balanceSheets.year = Année run
+balanceSheets.nbBases = Nombre de bases
+balanceSheets.runTypeCode = Type séquençage
+balanceSheets.percentage = Pourcentage
+balanceSheets.nbReadsets = Nombre de Readsets
+balanceSheets.projectCode = Code sous-projet
+balanceSheets.projectName = Nom sous-projet
+balanceSheets.projectType = Type d''échantillon
+balanceSheets.categoryType = Catégorie d''échantillon
+balanceSheets.quarters = Trimestre
+balanceSheets.monthRun = Mois run / Type séquencage
+balanceSheets.sum = Somme : 
+balanceSheets.totalSum = Somme totale de cette annee : 
+balanceSheets.totalTen = Total des 10 premiers projets
+balanceSheets.percentageTotalSum = Pourcentage de la somme totale de l''année
+balanceSheets.quarterBases = Nombre de bases par trimestre
+balanceSheets.yearlyBases = Nombre de bases par année
+balanceSheets.yearlyReadsets = Nombre de readsets par année
+balanceSheets.nbSequencingType = Nombre de bases par type séquençage
+balanceSheets.sequencingType = Type séquençage
+balanceSheets.property = Propriété
+balanceSheets.total.runs = Nombre total de runs
+balanceSheets.value = Valeur
+balanceSheets.noSampleTypeCode = default-sample-cns
+balanceSheets.percentageForTenProjects = Pourcentage sur dix projets
+balanceSheets.percentageForYear = Pourcentage sur cette année
+balanceSheets.nbAborted = Nb. en echec
+balanceSheets.total = Total
+balanceSheets.info.projectType = * Les readsets en cours de Read Generation ont le type d''échantillon ''non défini'' tant que le transfert n''est pas terminé.
+balanceSheets.info.projectType.2 = NB : les types "ADN génomique" et "ADN Métagénomique" sont issus de l''ancien lims ; dans NGL, le type générique "ADN" est utilisé, et la propriété "méta" (oui / non) est distincte, afin de ne pas démultiplier tous les types d'échantillons. Il est prévu de faire évoluer le bilan pour mieux visualiser le meta(G/T/B).
+balanceSheets.danger.noData = Aucune donnée pour cette année
+balanceSheets.sumNoAborting = Total (runs internes hors échec)
+balanceSheets.sumExternal = Total (runs externes)
+
+balanceSheets.export.firstTen = 10Projets
+balanceSheets.export.sequencingType = TypeSeq
+balanceSheets.export.quarters = Trimestre
+balanceSheets.export.projectType = TypeEchantillon
+balanceSheets.export.general.nbBases = Bilan_General_nb_Bases
+balanceSheets.export.general.nbReadSets = Bilan_General_nb_RS
+
+balanceSheets.tab.year = Année 
+balanceSheets.tab.generalBalanceSheets = Bilan général
+balanceSheets.tab.yearlyBalanceSheets = Nombre de bases par an et par technologie
+balanceSheets.tab.sequencingType = Bilan par type séquençage
+#NGL-3420
+balanceSheets.tab.firstTen = Bilan des 10 premiers projets de l''année
+balanceSheets.tab.quarters = Bilan par trimestre
+balanceSheets.tab.projectType = Bilan par type d''échantillon *
+balanceSheets.tab.runType = Bilan mensuel par type séquençage
+
+balanceSheets.january = Janvier
+balanceSheets.february = Février
+balanceSheets.march = Mars
+balanceSheets.april = Avril
+balanceSheets.may = Mai
+balanceSheets.june = Juin
+balanceSheets.july = Juillet
+balanceSheets.august = Août
+balanceSheets.september = Septembre
+balanceSheets.october = Octobre
+balanceSheets.november = Novembre
+balanceSheets.december = Decembre
+
+
+############
+#
+# Stats
+#
+############
+stats.page.title=Statistiques
+stats.menu = Statistiques
+stats.menu.readsets = Readsets
+stats.menu.lanes = Lanes
+stats.page.tab.readsets.select = Selectionner des Readsets
+stats.page.tab.readsets.config = Configuration Statistiques
+stats.page.tab.show = Visualiser les Graphiques
+
+stats.page.tab.lanes.select = Selectionner des Runs
+stats.page.tab.lanes.config = Configuration Statistiques
+
+stats.tabs.charts = Graphiques
+stats.tabs.mean.charts = Graphique moy. par Run
+stats.tabs.lanes.charts = Graphiques par lane
+stats.tabs.exclude = Valeurs exclues
+stats.tabs.query = Requête
+stats.property = Propriété
+
+stats.removedReadsEcoli = % Removed Reads (E. coli)
+stats.bacteria = % Bacteria
+stats.eukaryota = % Eukaryota
+stats.chloroplast = % Chloroplast
+stats.mitochondri = % Mitochondri
+stats.triticum = % Triticum aestivum + triticeae + triticum
+stats.unknownNoHits = % Unknown::No hits
+stats.mergedReads = % Merged reads
+
+stats.export.validSequences = sequences_valides
+stats.export.usefulSequences = sequences_utiles
+stats.export.validSeqPercent = sequences_valides_par_piste
+stats.export.duplicatsPairs = duplicats_pairs
+stats.export.removedReadsEcoli = removed_reads_Ecoli
+stats.export.bacteria = bacteria
+stats.export.eukaryota = eukaryota
+stats.export.chloroplast = chloroplast
+stats.export.mitochondri = mitochondri
+stats.export.triticumTriticeae = triticum_triticeae
+stats.export.unknownNoHits = unknown_no_hits
+stats.export.rRNAR1 = rRNA_R1
+stats.export.estimatedMPInsertSize = estimated_MP_insert_size
+stats.export.mergedReads = merged_reads
+
+stats.typeCode = Type
+stats.property = Propriété
+stats.choice.question = Que souhaitez vous faire ?
+stats.choice.1 = Configuration manuelle
+stats.choice.2 = Utiliser une préconfiguration
+button.query.addbasket = Ajouter la requête dans le panier
+query.title = Titre
+query.form = Paramètres
+query.nbResults = Nombre de Résultats
+
+error.query.empty = Attention! Pas de requête ou de statistiques dans le panier
+error.run.empty = Attention! Pas de runs ou de propriété sélectionnés 
+
+info.query.config = Vous pouvez définir une configuration par défaut
+
+stat.typelabel.zscore = z-score
+stat.typelabel.simplevalue = valeur de la propriété
+
+############
+#
+# COMMON
+#
+############
+
+treatments.context.read1 = Read 1
+treatments.context.read2 = Read 2
+treatments.context.single = Single
+treatments.context.pairs = Pairs
+treatments.context.default = Default
+
+title.report.property.selection = Sélectionnner vos champs
+title.report.property.configuration = Configurer vos champs
+
+#############
+#
+#config tara
+#
+#############
+readsets.sampleOnContainer.properties.taraStation = Station
+readsets.sampleOnContainer.properties.depth = Profondeur
+readsets.sampleOnContainer.properties.porosity = Porosité
+readsets.sampleOnContainer.properties.iteration = Itération
+readsets.sampleOnContainer.properties.percentPerLane = % Déposé
+readsets.sampleOnContainer.properties.sumPercentPerLane = Somme % Déposé
+readsets.treatments.duplicatesRaw.pairs.estimateDuplicatedReadsPercent = % Duplicats Pairs
+readsets.treatments.duplicatesRaw.read1.estimateDuplicatedReadsPercent = % Duplicats R1
+readsets.treatments.duplicatesRaw.read2.estimateDuplicatedReadsPercent = % Duplicats R2
+readsets.treatments.duplicatesRaw.pairs.estimateDuplicatedReadsNTimes.value.9 = % Duplicats ≥11 Pairs
+readsets.treatments.duplicatesRaw.read1.estimateDuplicatedReadsNTimes.value.9 = % Duplicats ≥11 R1
+readsets.treatments.duplicatesRaw.read2.estimateDuplicatedReadsNTimes.value.9 = % Duplicats ≥11 R2
+readsets.treatments.taxonomy.read1.divisionBilan.bacterium = % Bactérie
+readsets.treatments.taxonomy.read1.divisionBilan.eukaryota = % Eucaryote
+readsets.treatments.taxonomy.read1.krona.fungi = % Fungi
+readsets.treatments.sortingRibo.read1.rRNAPercent = % rRNA R1
+readsets.treatments.sortingRibo.read2.rRNAPercent = % rRNA R2
+readsets.treatments.sortingRibo.single.rRNAPercent = % rRNA Single
+filterTaxonBilan=Seuil Taxon (% vs rRNA tot.)
+filterTaxonBilanTaxo=Seuil Taxon (% vs nt)
+filterTaxonBilanMitochondrion=Seuil Taxon (% vs mitochondrion)
+filterTaxonBilanPlastid=Seuil Taxon (% vs plastid)
+filtertaxonBilanContamination=Seuil Taxon (% vs nt)
+
+#property_definition list object
+property_definition.loadingReport = Bilan chargement
+property_definition.qcFlowcell = QC Flowcell
+
+################
+# Descriptions #
+################
+
+descriptions.title = Descriptions
+descriptions.menu = Descriptions
+# Treatments
+descriptions.menu.treatments = Traitements
+
+descriptions.tabs.treatments = Descriptions des Traitements
+
+descriptions.treatments.table.active = Active
+descriptions.treatments.table.category = Treatment Category
+###descriptions.treatments.table.type.category = Type Category
+descriptions.treatments.table.type.name = Treatment Type (Name)
+descriptions.treatments.table.type.code = Treatment Type (Code)
+descriptions.treatments.table.type.names = Treatment Names
+descriptions.treatments.table.type.context.code = Treatment Context Code
+descriptions.treatments.table.properties.definitions.name = Property Definition Name
+descriptions.treatments.table.properties.definitions.code = Property Definition Code
+descriptions.treatments.table.properties.definitions.required = Property Definition Required
+descriptions.treatments.table.properties.definitions.levels.code = Level Code
+descriptions.treatments.table.properties.definitions.value.type = Type propriété
+descriptions.treatments.table.properties.definitions.value.typeObject = Format propriété
+
+# Types
+descriptions.menu.types = Types d''Objets
+
+descriptions.tabs.types = Descriptions des Types
+descriptions.types.tab.types = Types
+descriptions.types.tab.properties = Propriétés
+descriptions.types.tab.properties.content = Propriétés Content
+
+descriptions.types.table.type.object = Type d''Objet
+descriptions.types.table.type.category.name = Category Name
+descriptions.types.table.type.category.code = Category Code
+descriptions.types.table.type.name = Type Name
+descriptions.types.table.type.code = Type Code
+descriptions.types.table.properties.definitions.name = Name
+descriptions.types.table.properties.definitions.code = Code
+descriptions.types.table.properties.definitions.required = Required
+descriptions.types.table.properties.definitions.levels.code = Level Code
+descriptions.types.table.properties.definitions.active = Active
+descriptions.types.table.properties.definitions.value.type = Value Type
+descriptions.types.table.properties.definitions.choice.in.list = Choice In List
+descriptions.types.table.properties.definitions.value.default = Default Value
+descriptions.types.table.properties.definitions.value.possibles = Possible Values
+
+descriptions.select.types.category = Types d''Objet
+
+###############
+#
+#authorisation users
+#
+###############
+authorisation.menu = Administration
+authorisation.menu.userroles = Gestion des roles utilisateurs
+authorisation.userroles.page = Gestion des roles utilisateurs
+authorisation.users.page.tab.search = Recherche des utilisateurs
+
+###############
+#
+#user
+#
+###############
+user.login = Login
+user.roles = Roles
+
+
+error.no.sample.lims=No sample {0} in LIMS
+error.no.sampleOnContainer= No sampleOnContainer for sample {0}
+error.sampleOnContainer.sampleCode = No SampleCode in sampleOnContainer for readset {0}
+error.sampleOnContainer.containerSupportCode = No containerSupportCode in sampleOnContainer for readset {0}
+error.sampleOnContainer.containerCode = No containerCode in sampleOnContainer for readset {0}
+error.sampleOnContainer.properties = No properties in sampleOnContainer for readset {0}
+
+error.hash.not.null=Le hash doit être initialisé vide, valeur trouvée: ''{0}''.
+error.name.not.unique=Il existe déjà une clef pour l''utilisateur ''{0}''.
+error.renew.empty.hash=Le renouvellement a échoué: hash vide.
+error.update.erase.hash=Impossible de remplacer un hash par une valeur vide.
+error.update.replace.hash=Impossible de remplacer un hash manuellement.

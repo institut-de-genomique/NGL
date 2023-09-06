@@ -1,0 +1,7 @@
+@(read: String)
+
+@camelCase(text: String) = @{
+  text.replace('r','R')
+}
+
+<img id='@(read+"_errorPosition")' ng-src='@("data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code]."+read+".errorPosition.value}}")' />

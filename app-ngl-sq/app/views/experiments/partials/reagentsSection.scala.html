@@ -1,0 +1,28 @@
+@(isCNSInstitute: Boolean)
+
+<div ng-init="initInstitute(@isCNSInstitute)" class="row" style="margin-top:15px" ng-controller="ReagentsCtrl">
+<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+<div class="panel panel-default">
+  <!-- Default panel contents -->
+  <div class="panel-heading">@Messages("experiment.reagents")</div>
+  <div class="panel-body">
+  <div class="row">
+	@if(isCNSInstitute) {
+		<form class="form-horizontal">
+			<div class="form-group col-md-12 col-lg-12">
+				<div ng-class="reagentCodeErrorClass" class="col-md-6 col-lg-6">
+				  <div class="col-md-6 col-lg-6">
+						<div class="form-control" bt-select ng-model="workLabelSelected" ng-click="setWorkLabel(workLabelSelected)" type="text" placeholder="@Messages("experiment.placeholder.reagentOrBox.workLabel")"  bt-options="workLabel.name for workLabel in WorkLabels" />
+				  </div>
+				  <button class="btn btn-default" title="@Messages("button.regaent.reception.add")" ng-click="loadWorkLabel()"><i class="fa fa-plus-square"></i></button>
+			  </div>
+		   </div>
+		 </div>
+		   </form>
+		  }
+	 	<div class="col-md-12 col-lg-12" ultimate-datatable="datatableReagent"></div>
+ 	</div>
+  </div>
+</div>
+</div>
+</div>

@@ -1,0 +1,39 @@
+@this(ctx : fr.cea.ig.ngl.NGLApplication, menu_ : menu)
+@(code: String)
+
+@minifyEnabled = @{ true == ctx.nglConfig().isMinified() }
+
+@scripts() = {
+    <script src="@controllers.archives.tpl.routes.ReadSets.javascriptRoutes" type="text/javascript" charset="utf-8"></script> 
+    
+    @if(!minifyEnabled) {
+      <script src="@routes.Assets.at("ngl-bi/javascripts/archives/app.js")" type="text/javascript" charset="utf-8"></script> 
+
+      <script src="@routes.Assets.at("lib/lib-frameworkweb/ngl-common/javascripts/controllers/mainctrl.js")" type="text/javascript" charset="utf-8"></script>
+      <script src="@routes.Assets.at("lib/lib-frameworkweb/ngl-common/javascripts/controllers/commons.js")" type="text/javascript" charset="utf-8"></script>    
+
+      <script src="@routes.Assets.at("lib/datatable/datatable/javascripts/services/ultimate-datatable.js")" type="text/javascript" charset="utf-8"></script> 
+
+      <script src="@routes.Assets.at("ngl-bi/javascripts/archives/controllers.js")" type="text/javascript" charset="utf-8"></script>   
+
+      <script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/commons.js")" type="text/javascript" charset="utf-8"></script>
+      <script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/basket.js")" type="text/javascript" charset="utf-8"></script>
+      <script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/list-resize.js")" type="text/javascript" charset="utf-8"></script>          
+    } else {
+      <script src="@routes.Assets.at("ngl-bi/javascripts/archives/app.min.js")" type="text/javascript" charset="utf-8"></script>
+      
+      <script src="@routes.Assets.at("lib/lib-frameworkweb/ngl-common/javascripts/controllers/mainctrl.min.js")" type="text/javascript" charset="utf-8"></script>
+      <script src="@routes.Assets.at("lib/lib-frameworkweb/ngl-common/javascripts/controllers/commons.min.js")" type="text/javascript" charset="utf-8"></script>    
+
+      <script src="@routes.Assets.at("lib/datatable/datatable/javascripts/services/ultimate-datatable.min.js")" type="text/javascript" charset="utf-8"></script> 
+ 
+      <script src="@routes.Assets.at("ngl-bi/javascripts/archives/controllers.min.js")" type="text/javascript" charset="utf-8"></script>   
+                             
+      <script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/commons.min.js")" type="text/javascript" charset="utf-8"></script>
+      <script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/basket.min.js")" type="text/javascript" charset="utf-8"></script>
+      <script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/list-resize.min.js")" type="text/javascript" charset="utf-8"></script>          
+    }
+    
+}
+
+@views.html.main("archives.page.title", menu_("archives" + code), scripts)(views.html.contents.lefttabs())

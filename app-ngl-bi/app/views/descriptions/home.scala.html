@@ -1,0 +1,27 @@
+@this(menu_ : menu)
+@(code : String)
+
+@import models.laboratory.common.description.ObjectType
+
+@scripts() = {
+    <script src="@controllers.main.tpl.routes.Main.jsCodes" type="text/javascript" charset="utf-8"></script> 
+    <script src="@controllers.main.tpl.routes.Main.jsPermissions" type="text/javascript" charset="utf-8"></script>
+     
+    <script src="@routes.Assets.at("lib/datatable/datatable/javascripts/services/ultimate-datatable.js")" type="text/javascript" charset="utf-8"></script> 
+
+    <script src="@routes.Assets.at("ngl-bi/javascripts/descriptions/app.js")" type="text/javascript" charset="utf-8"></script>
+    
+	<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/commons.js")" type="text/javascript" charset="utf-8"></script> 
+	<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/bt-input.js")" type="text/javascript" charset="utf-8"></script> 
+	<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/list-resize.js")" type="text/javascript" charset="utf-8"></script>
+    <script src="@routes.Assets.at("lib/lib-frameworkweb/ngl-common/javascripts/controllers/mainctrl.js")" type="text/javascript" charset="utf-8"></script>
+    
+    <script src="@routes.Assets.at("ngl-bi/javascripts/descriptions/treatments-service.js")" type="text/javascript" charset="utf-8"></script>
+    <script src="@routes.Assets.at("ngl-bi/javascripts/descriptions/treatments-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+    <script src="@routes.Assets.at("ngl-bi/javascripts/descriptions/types-service.js")" type="text/javascript" charset="utf-8"></script>
+    <script src="@routes.Assets.at("ngl-bi/javascripts/descriptions/types-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+
+    <script src="@controllers.descriptions.tpl.routes.Descriptions.javascriptRoutes" type="text/javascript" charset="utf-8"></script>
+}
+
+@views.html.main("descriptions.title", menu_("descriptions."+code), scripts)(views.html.contents.lefttabs())

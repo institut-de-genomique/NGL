@@ -1,0 +1,114 @@
+@this()
+@()
+
+@import views.html.tools._
+
+@user            = @{ fr.cea.ig.authentication.Authentication.getUser() }
+
+@column()(value: Html) = {
+	<div class="col-md-4 col-lg-4">
+		@value
+	</div>
+}
+
+
+
+<!--debut-->
+
+@standard_header("study", "TRUE"){ 
+  <!-- affichage uniquement si donnee releasable : study avec state.code=SUB_F et date relase > date du jour : voir details.ctrl.js.$scope.isReleasable--> 
+  <button class="btn btn-default"  ng-if="isReleasable('@user')"  ng-click="userRelease()" data-toggle="tooltip" title="@Messages("button.release")" ><i class="fa fa-save"></i> @Messages("button.release")</button>
+  <button class="btn btn-default" 
+				data-toggle="modal" data-target="#commentModal" title="@Messages("button.addComment")"><i class="fa fa-comment"></i></button>
+
+}
+
+
+<form class="form-horizontal" name="studyForm">
+
+<div class="row">
+	@column(){
+		@* Ecriture de la ligne status : *@           
+ 		<div ng-if="visibility=='private'"> @simpleLine(Messages("study.visibility"),Messages("study.private"))</div>
+ 		<div ng-if="visibility=='public'"> @simpleLine(Messages("study.visibility"),Messages("study.public"))</div>
+ 		<div ng-if="visibility=='undefined'"> @simpleLine(Messages("study.visibility"),Messages("study.undefined"))</div>
+
+	    @* Ecriture des autres lignes code, state, title, abstract et description :*@
+
+	    @line("study.createUser", "study.traceInformation.createUser")
+	    @lineDate("study.traceInformation.creationDate")
+	    @lineDate("Date de première soumission", "study.firstSubmissionDate")
+	    @lineDate("study.releaseDate")
+		@line("study.code")
+		@line("study.accession")
+		@line("study.externalId")
+		@labelLine("study.state")
+		@line("study.title")
+		@*@line("study.abstract", "study.studyAbstract") *@ @* nom du champs different de nom de label *@
+		@line("study.locusTagPrefixs", "strLocusTagPrefixs")
+		@line("study.idsPubmed", "strIdsPubmed")
+		@line("study.description")
+	}
+</div>
+
+</form>		
+
+<form class="form-horizontal" name="studyForm2">
+	
+<div class="page-header"/>	
+					
+<div class="row" ng-if="isObjectLinks()">
+	@column(){	
+		@views.html.helper.columnLabelValue(Messages("studies.msg.links")){
+			<p class="form-control-static">{{study.code}}</p>
+		}	
+	}	
+</div>	
+<div class="row" ng-if="!isObjectLinks()">
+	@column(){	
+		@views.html.helper.columnLabelValue(Messages("studies.msg.noLinks")){
+			<p class="form-control-static">{{study.code}}</p>
+		}	
+	}	
+</div>
+</div>
+
+</form>		
+
+
+<!-- stopPropagation on checkbox prevent parents default behavior (stop <a> call) -->
+<div class="row margin-bottom-7">
+	<div class="col-md-12 col-lg-12">
+		<!-- <ul class="nav nav-tabs margin-bottom-5"> --> 
+		<!-- Intitules des onglets -->
+		<ul  class="nav nav-tabs" ng-if="isObjectLinks()"> 
+			<!--class="active" permet affichage sans avoir à cliquer sur colonne-->
+			<li ng-if="isActiveAnalysis()" class="active"><a  href="#" data-target="#analysis" data-toggle="tab">@Messages("studies.tabs.analysis")</a></li>
+			<li ng-if="isActiveExperiment()" class="active"><a  href="#" data-target="#experiment" data-toggle="tab">@Messages("studies.tabs.experiment")</a></li>
+			<li ng-if="isDataNotActiveExperiment()"><a  href="#" data-target="#experiment" data-toggle="tab">@Messages("studies.tabs.experiment")</a></li>
+			<li><a a href="#" data-target="#run" data-toggle="tab">@Messages("studies.tabs.run")</a></li>
+			<li><a a href="#" data-target="#rawData" data-toggle="tab">@Messages("studies.tabs.rawData")</a></li>
+		</ul>
+	
+
+		
+		<div class="tab-content" ng-if="isObjectLinks()">
+		
+			<div class="tab-pane" ng-class="{'active':isActiveAnalysis()}" id="analysis">
+				<div ultimate-datatable="analysisDT"></div>
+			</div>
+			<div class="tab-pane"  ng-class="{'active':isActiveExperiment()}" id="experiment">
+				<div ultimate-datatable="experimentDT"></div>
+			</div>
+		
+			<div class="tab-pane" id="run">
+				<div ultimate-datatable="runDT"></div>
+			</div>
+			
+			<div class="tab-pane" id="rawData">
+				<div ultimate-datatable="rawDataDT"></div>
+			</div>
+		</div>
+	</div>
+	@partials.commentSection(user)
+</div>

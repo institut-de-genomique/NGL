@@ -1,0 +1,10 @@
+@()
+
+ <h1 ng-switch on="readset.productionValuation.valid">		
+ 	<span ng-switch-when="FALSE" class="text-danger">{{readset.code}}</span> 
+ 	<span ng-switch-when="TRUE" class="text-success">{{readset.code}}</span> 
+ 	<span ng-switch-default>{{readset.code}}</span> 
+ 	<small>   
+ 		<span ng-bind="readset.state.code|codes:'state'"></span>
+ 	</small>
+ </h1>		 

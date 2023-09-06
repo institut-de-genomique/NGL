@@ -1,0 +1,136 @@
+@(typeForm: String)
+@user = @{ fr.cea.ig.authentication.Authentication.getUser() }
+
+@column()(value: Html) = {
+<div class="col-md-4 col-lg-4">
+	@value
+</div>
+}
+
+<div class="row">
+	<div class="col-md-12 col-lg-12 ">
+		<div class="page-header" ng-init="init()">
+			<div class="btn-toolbar pull-right">
+				<button class="btn btn-default" ng-if="mainService.isEditMode()" ng-click="update()"
+					data-toggle="tooltip" title="@Messages(" button.validate")"><i class="fa fa-save"></i>
+					@Messages("button.validate")</button>
+				<button class="btn btn-default" ng-if="mainService.isEditMode()" ng-click="cancel()"
+					data-toggle="tooltip" title="@Messages(" button.cancel")"><i class="fa fa-undo"></i>
+					@Messages("button.cancel")</button>
+				<button class="btn btn-default" ng-if="!mainService.isEditMode()" ng-click="startEditMode()"
+					data-toggle="tooltip" title="@Messages(" button.edit")"><i class="fa fa-edit"></i>
+					@Messages("button.edit")</button>
+					<button class="btn btn-default" 
+				data-toggle="modal" data-target="#commentModal" title="@Messages("button.addComment")"><i class="fa fa-comment"></i></button>
+			</div>
+			<h1>
+				<span>{{umbrellaProject.name}}</span>
+			</h1>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-md-12 col-lg-12" messages="messages"></div>
+	</div>
+
+	<div class="row">
+		<div class="col-md-12 col-lg-12">
+			<form class="form-horizontal">
+				<div class="row">
+					@column(){
+						@views.html.helper.columnLabelValue(Messages("umbrellaProjects.name")){
+							<p class="form-control-static">{{umbrellaProject.name}}</p>
+						}
+
+						@views.html.helper.columnLabelValue(Messages("umbrellaProject.typeCode")){
+							<p class="form-control-static">{{umbrellaProject.typeCode | codes:'type'}}</p>
+						}
+
+						@views.html.helper.columnLabelValue(Messages("umbrellaProject.category.type")){
+							<p class="form-control-static">{{umbrellaProject.categoryCode | codes:'umbrella_project_cat'}}</p>
+						}
+
+						@views.html.helper.columnLabelValue(Messages("umbrellaProjects.description")){
+							<p class="form-control-static">{{umbrellaProject.description}}</p>
+						}
+
+						@views.html.helper.columnLabelValue(Messages("umbrellaProjects.applicant")){
+							<p class="form-control-static">{{umbrellaProject.properties.applicant.value}}</p>
+						}
+
+						@views.html.helper.columnLabelValue(Messages("umbrellaProjects.technicalDescription")){
+							<div ng-switch on="mainService.isEditMode()">
+								<p class="form-control-static" ng-switch-when="false">
+									<a ng-href="data:application/{{umbrellaProject.properties.technicalDescription.extension}};base64,{{umbrellaProject.properties.technicalDescription.value}}" download="{{umbrellaProject.properties.technicalDescription.fullname}}">
+										{{umbrellaProject.properties.technicalDescription.fullname}}
+									</a>
+								</p>
+								<div style="display: inline-flex">
+									<input id="importFile" type="file" class="form-control" base64-file="umbrellaProject.properties.technicalDescription" ng-switch-when="true" />
+									<button class="btn btn-default" ng-click="removeDT()" ng-switch-when="true" data-toggle="tooltip" ng-show="umbrellaProject.properties.technicalDescription !== undefined" title="@Messages("plates.button.delete")"><i class="fa fa-trash-o"></i></button>
+								</div>
+							</div>
+						}
+					}
+
+					@column(){
+						@views.html.helper.columnLabelValue(Messages("umbrellaProjects.code")){
+							<p class="form-control-static">{{umbrellaProject.code}}</p>
+						}
+
+						@views.html.helper.columnLabelValue(Messages("umbrellaProjects.limsCode")){
+							<p class="form-control-static">{{umbrellaProject.properties.limsCode.value}}</p>
+						}
+
+						@views.html.helper.columnLabelValue(Messages("umbrellaProjects.traceInformation.creationDate")){
+						<p class="form-control-static">
+							{{umbrellaProject.traceInformation.creationDate | date:'@Messages("date.format")'}}
+						</p>
+						}
+
+						@views.html.helper.columnLabelValue(Messages("umbrellaProjects.traceInformation.createUser")){
+						<p class="form-control-static">
+							{{umbrellaProject.traceInformation.createUser}}
+						</p>
+						}
+					}
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<span ng-if="associatedProjects && associatedProjects.length > 0">
+		<h2>Projets associés</h2>
+
+		<button ng-click="showProjects()" class="btn btn-default" >@Messages("button.projects.show")</button>
+
+		<br /><br />
+
+		<div class="row"> 
+			<div class="col-md-12 col-lg-12">
+			<table class="table table-condensed table-hover table-bordered">
+				<thead>
+					<tr>
+						<th>Code projet</th>
+						<th>Nom projet</th>
+						<th>OS</th>
+						<th>Genre</th>
+						<th>Source financement</th>				
+					</tr>
+				</thead>
+				<tbody>
+					<tr ng-repeat="project in associatedProjects">
+						<td>{{ project.code }}</td>
+						<td>{{ project.name }}</td>
+						<td>{{ project.properties.financingSource.value }}</td>
+						<td>{{ project.genre.name }}</td>
+						<td>{{ project.properties.financingSource.value }}</td>
+					</tr>					
+				</tbody>
+			</table>
+			</div>	
+		</div>
+	</span>
+
+	@partials.commentSection(user)
+</div>

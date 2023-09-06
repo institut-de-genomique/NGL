@@ -1,0 +1,41 @@
+@()
+<div ng-controller="XToPlateCtrl">
+<div class="col-md-12 col-lg-12"  ng-controller="NormalisationCtrl">
+	<div class="row">
+	<div class="col-md-12 col-lg-12">
+	<ul class="list-unstyled">
+	<li>Si <u>mode calcul = volume final fixe</u>,  <strong>renseigner concentration et volume final</strong>, <span class="label label-danger">ne pas renseigner</span> vol engagé et tampon</li>
+	<li>Si <u>mode calcul = volume à engager fixe</u>, <strong>renseigner volume engagé et concentration</strong>, <span class="label label-danger">ne pas renseigner</span> vol final et tampon</li>
+	</ul>	
+	<p ng-if="showWarningUsedContainer" class="alert alert-warning">
+		<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		
+		<b>Attention, le<span ng-if="containersList.length > 1">s</span> container<span ng-if="containersList.length > 1">s</span> <span ng-bind="messageContainerSample"></span></b>
+		<b><span ng-if="containersList.length == 1">a</span><span ng-if="containersList.length > 1">ont</span> déjà été utilisé<span ng-if="containersList.length > 1">s</span> dans une (ou plusieurs expériences), le volume d'entrée affiché ne reflète peut-être pas la réalité, assurez-vous du volume réel restant et procédez ainsi :</b>
+		<button class="btn btn-link" ng-click="showDetailsMsg()">Détails</button>
+		<span ng-show="showDetails">
+			<br />
+			si le volume d'ADN à prélever dépasse le volume restant alors :<br />
+			- changer le mode de calcul en "Volume à engager fixe",<br />
+			- renseigner volume engagé (inférieur ou égal au volume réel restant)<br />
+			- puis calculer la concentration finale ainsi : conc. d'entrée * volume engagé / volume final souhaité, et renseigner conc. finale.<br />
+			NGL calculera le volume final.
+		</span>
+	</p>
+	</div>
+	</div>
+	<div class="row">
+		<div class="col-md-12 col-lg-12">
+			<div  class="alert alert-warning" ng-show="isMissingExtractionNegativeControlsWarning()">
+				Attention témoin négatif d'extraction présent pour cette expérience : <strong>{{missingExtractionNegativeControls}}</strong>. Pensez à les ajouter
+			</div>
+		</div>
+		<div class="col-md-12 col-lg-12" >
+			<div  class="alert alert-warning" ng-show="isMissingPCRNegativeControlsWarning()">
+				Attention témoin négatif PCR présent pour cette expérience : <strong>{{missingPCRNegativeControls}}</strong>. Pensez à les ajouter
+			</div>
+		</div>
+	</div>
+	@views.html.experiments.onetoone.defaults.partials.udtAndPlateDesign()
+</div>
+</div>

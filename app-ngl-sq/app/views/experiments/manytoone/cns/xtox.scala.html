@@ -1,0 +1,258 @@
+@this(inputtubes_ : inputtubes, outputtubes_ : outputtubes, inputplates_ : inputplates, outputplates_ : outputplates)
+
+@()
+
+<!--- FDS 05/10/2016 cree pour gerer le cas des sorties tubes ou plaques et le pooling automatique--->
+
+<div class="col-md-12 col-lg-12" ng-switch="supportCategoryCode">
+<div ng-switch-when="tube">
+	<ul class="nav nav-tabs margin-bottom-5" role="tablist">
+	  <li class="active"><a href="" role="tab" data-target="#tube" data-toggle="tab">@Messages("experiments.pools.design")</a></li>
+	  <li><a href="" role="tab"  data-target="#roadmap" data-toggle="tab" ng-click="atmService.data.updateDatatable()">@Messages("experiments.calculation.sheet")</a></li>  
+	</ul>
+	
+	<div class="tab-content"  >
+		<div class="tab-pane active" id="tube">
+			<div class="row">
+				<div class="col-md-12 col-lg-12">
+					<div class="row">
+						<div class="col-md-10 col-lg-10" ng-if="mainService.isEditMode() && isNewState()">
+						<!-- InputContainers table -->
+						@inputtubes_()
+						</div>
+						<div class="col-md-2 col-lg-2" ng-if="mainService.isEditMode() && isNewState()">
+						<!-- Drop buttons -->	
+			  				<div class="page-header">
+				 				<button class="btn btn-default btn-lg btn-block" ng-click="atmService.data.dropInSelectInputContainer()" 
+				                                                  ng-disabled="!atmService.data.isSelectInputContainers()">
+				 				<i class="fa fa-sign-in fa-2x"></i>
+				 				</button>
+			 				</div>
+						</div>
+					</div>
+					<!-- OutputContainers table -->
+					<div class="row">
+						<div ng-switch="atmService.outputContainerSupportCategoryCode">
+	           				<div ng-switch-when="96-well-plate">
+	           				<div class="col-md-10 col-lg-10 flowcellTable">
+				   			@outputplates_()
+				   			</div>
+							</div>
+							<div ng-switch-when="tube">
+							<div class="col-md-10 col-lg-10 flowcellTable">
+				   			@outputtubes_()
+				   			</div>
+							</div>
+						</div>
+					</div>	
+				</div>
+			</div>
+		</div>		
+		<div class="tab-pane" id="roadmap">
+		<div class="row roadmap">
+			<div class="col-md-12 col-lg-12" ultimate-datatable="atmService.data.datatable"></div>
+		</div>
+		</div>
+	</div>
+</div>
+<div ng-switch-when="96-well-plate">
+	<!--- FDS 25/08/2016 MODIF des colonnes pour cause de chevauchement a l'affichage-->
+	<ul class="nav nav-tabs margin-bottom-5" role="tablist">
+  		<li class="active"><a href="" role="tab" data-target="#plate" data-toggle="tab">@Messages("experiments.pools.design")</a></li>
+  		<li><a href="" role="tab"  data-target="#roadmap" data-toggle="tab" ng-click="atmService.data.updateDatatable()">@Messages("experiments.calculation.sheet")</a></li>
+  		<li><a href="" role="tab"  data-target="#src_dest" data-toggle="tab">@Messages("experiments.src_dest.sheet")</a></li>
+	</ul>
+
+	<div class="tab-content">
+		<div class="tab-pane active" id="plate">
+			<div class="row"  ng-if="mainService.isEditMode() && isNewState()">
+				<div class="col-md-10 col-lg-10"> 
+				@inputplates_()
+				</div>
+				<div class="col-md-2 col-lg-2"> 
+					<div class="page-header">
+			 		 <!-- desactiver si pooling mode libre et rien selectionné OU pooling auto et qq chose selectionné  -->
+			  			<button class="btn btn-default btn-lg btn-block"         
+			          		ng-click="doPooling()"
+			          		ng-disabled="(!atmService.data.isSelectInputContainers() && (poolingMode.code ==='manual'))||(atmService.data.isSelectInputContainers() && (poolingMode.code !=='manual')) ">
+			  			<i class="fa fa-sign-in fa-2x"></i>
+			  			</button>
+						
+			  			<label for="selectPoolMode">Pool Mode</label>
+						<select class="form-control input-sm" id="selectPoolMode"
+							ng-model=poolingMode
+	  						ng-change="setPoolingMode(poolingMode)"		
+							ng-options="mode as mode.name for mode in poolingModes track by mode.code">
+							<option value=poolingMode.value>{{poolingMode.name}}</option>
+						</select>
+							<!--aide image modale sous le select-->
+							<p><a class="fa fa-info-circle" ng-click="showModalHelp()" title="Aide Pool Mode" href=""> Aide Pool Mode</a></p>
+			  				<div class="row">
+							<div id="infoModale" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+ 								<div class="modal-dialog" style="width:65%">
+ 									<div class="modal-content" > 
+										<div class="modal-header">
+											<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+											<h4 class="modal-title"><a class="fa fa-info-circle"> Aide Pool Mode</a></h4>
+										</div>
+										<div class="modal-body" style="padding:0px">
+											<img src="/assets/images/pool_help.png" style="width:100%" />
+										</div>
+										<div class="modal-footer">
+										</div>
+									</div>
+								</div>
+							</div>
+							</div>
+						
+						<div class="form-group col-lg-12"  ng-show="(poolingMode.code !== 'manual')">
+							<!--options de l'algorithme intelligent / visibles uniqt si poolingMode n'est pas "libre"
+							   ???? et  "isNewState() ???????-->
+							<div class="row">&nbsp;</div>
+							<div class="row"><label for samplesProject >Projet des samples</label>
+											 <input type="text" size="4" id="samplesProject" ng-model="samplesProject" ng-change="setSamplesProject(samplesProject)"/>
+							</div>
+							<!--  si on met div class=row l'alignement a gauche est correct mais l'affichage se fait sur 2 lignes !!!-->
+							<div class="checkbox"><label><input  type="checkbox" id="allowNoNegControls" ng-model=allowNoNegControls ng-change="toggleAllowNoNegControls()">
+											 		Autoriser pools sans contrôle négatif</label>
+							</div>
+							<div class="checkbox"><label><input  type="checkbox" id="sortByBID" ng-model=sortByBID ng-change="toggleSortByBID()">
+													Tri par BID</label>
+							</div>
+							<!-- simulation -->
+							<div class="checkbox"><label><input  type="checkbox" id="simulation" ng-model=simulation ng-change="toggleSimulation()">
+													Simulation</label>
+							</div>
+							<!-- abandonné pour l'instant: voir cns/x-to-plates-ctrl.js 
+							<div class="row"><button class="btn btn-default btn-xs" ng-click="deleteAllATMs()">
+											<i class="fa fa-trash-o"></i>
+											</button> Supprimer tous les pools
+							</div>
+							 -->
+						</div>
+	        		</div>
+						<button 
+			       			ng-repeat="supportCode in atmService.data.inputContainerSupports" type="button" 
+				    		ng-class="atmService.data.getPlateBtnClass(supportCode)" 
+				    		ng-click="atmService.data.setCurrentSupportCode(supportCode)">
+							{{supportCode}}
+						</button>	
+				</div>
+			</div>	
+			<div class="row">
+				<div ng-switch="atmService.outputContainerSupportCategoryCode">
+            		<div ng-switch-when="96-well-plate">
+            			<div class="col-md-10 col-lg-10 flowcellTable">
+			   			@outputplates_()
+			   			</div>
+					</div>
+					<div ng-switch-when="tube">
+						<div class="col-md-10 col-lg-10 flowcellTable">
+			   			@outputtubes_()
+			   			</div>
+					</div>
+				</div>
+			</div>
+	</div>
+	
+	<div class="tab-pane" id="roadmap">
+	<div class="row roadmap">
+		<div class="col-md-12 col-lg-12" ultimate-datatable="atmService.data.datatable"></div>
+	</div>
+	</div>
+	
+	
+	<div class="tab-pane" id="src_dest">
+	<div class="row roadmap">
+	<div class="col-md-4 col-lg-4">
+		<table class="table table-bordered">
+			<thead>
+				<tr>
+					<th>
+						@Messages("experiments.src_dest.inputContainerSupportCode")
+					</th>
+					<th>
+						@Messages("experiments.src_dest.source")
+					</th>											
+				</tr>
+				</thead>	
+				<!--  containerSupport et pas container -->			
+				<tr ng-model="containerSupport" ng-repeat="containerSupport in getInputContainerSupports() | orderBy track by $index" >
+					<td>
+						{{containerSupport}}
+					</td>
+					<td>
+						{{$index+1}}
+					</td>									
+				</tr>				
+			</table>
+		</div>
+	<!--  ajout ng-switch car il faut un label dans le cas des tubes en sortie -->
+	<div class="col-md-4 col-lg-4"  ng-switch="atmService.outputContainerSupportCategoryCode">
+	<div ng-switch-when="96-well-plate">
+		<table class="table table-bordered">
+			<thead>
+				<tr>
+					<th>
+						@Messages("experiments.src_dest.outputContainerSupportCode")
+					</th>
+					<th>
+						@Messages("experiments.src_dest.dest")
+					</th>
+					<!-- le label de travail est sur les containers pas les supports...
+					<th>
+						@Messages("experiments.src_dest.label")
+					</th>	
+					 -->										
+				</tr>
+				</thead>				
+				<tr ng-model="containerSupport" ng-repeat="containerSupport in getDistinctOutputContainerSupports()  | orderBy track by $index" >
+					<td>
+						{{containerSupport.code}}
+					</td>
+					<td>
+						{{$index+1}}
+					</td>
+					<!-- le label de travail est sur les containers pas les supports...
+					<td>
+						{{container.experimentProperties.workName.value}}
+					</td>		
+					-->							
+				</tr>				
+			</table>
+		</div>	
+		<div ng-switch-when="tube">
+		<table class="table table-bordered">
+			<thead>
+				<tr>
+					<th>
+						@Messages("experiments.src_dest.outputContainerSupportCode")
+					</th>
+					<th>
+						@Messages("experiments.src_dest.dest")
+					</th>
+					<th>
+						@Messages("experiments.src_dest.label")
+					</th>										
+				</tr>
+				</thead>	
+				<tr ng-model="container" ng-repeat="container in getOutputContainers() | orderBy:'locationOnContainerSupport.code' track by $index" >
+
+					<td>
+						{{container.locationOnContainerSupport.code}}
+					</td>
+					<td>
+						{{$index+1}}
+					</td>
+					<td>
+						{{container.experimentProperties.workName.value}}
+					</td>								
+				</tr>				
+			</table>
+		</div>
+		</div>
+		</div >
+	</div>
+	</div>
+</div>
+</div>

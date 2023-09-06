@@ -1,0 +1,29 @@
+@()
+
+<div class="panel panel-default">
+  <div class="panel-body">
+		<div class="row">
+			<div class="col-md-3 col-lg-3">
+				
+				@views.html.helper.columnLabelValue(Messages("runs.treatments.minknow-metrichor.minKnowVersion")){					
+					<p>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.minKnowVersion.value}}</p>
+				}
+				@views.html.helper.columnLabelValue(Messages("runs.treatments.minknow-metrichor.metrichorVersion")){
+					<p>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.metrichorVersion.value}}</p>
+				}
+				@views.html.helper.columnLabelValue(Messages("runs.treatments.minknow-metrichor.metrichorWorkflowName")){
+					<p>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.metrichorWorkflowName.value}}</p>
+				}
+				@views.html.helper.columnLabelValue(Messages("runs.treatments.minknow-metrichor.metrichorWorkflowVersion")){
+					<p>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.metrichorWorkflowVersion.value}}</p>
+				}
+				@views.html.helper.columnLabelValue(Messages("runs.treatments.minknow-metrichor.metrichorRunID")){
+					<p>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.metrichorRunID.value | number}}</p>
+				}
+				
+			
+			</div>
+		
+		</div>	
+		</div>
+		</div>

@@ -1,0 +1,160 @@
+@this()
+@(isForm: Boolean)
+
+@import views.html.helper._
+@form() = {	
+	@columnSearchForm{
+		@formGroup{
+			<div class="form-control" bt-select  placeholder='@Messages("search.placeholder.projects")' title='@Messages("search.placeholder.projects")'
+				textareaplaceholder='@Messages("search.textarea.placeholder.codesList")'
+				multiple="true" textarea="true" filter="true" 
+				ng-model="searchService.form.projectCodes"
+				bt-options="project.code as project|formatProjectListLabel for project in searchService.lists.getProjects()">
+			</div>				
+		}
+
+		@formGroup{
+			<div class="form-control" bt-select placeholder='@Messages("search.placeholder.codeFgGroup")' title='@Messages("search.placeholder.codeFgGroup")'
+				multiple="true" filter="true"
+				ng-model="searchService.form.fgGroups"    
+				bt-options="bioinfoParam.fgGroup as bioinfoParam.fgGroup for bioinfoParam in searchService.lists.getBioinformaticParameters() | unique:'fgGroup' | orderBy:'fgGroup'">
+			</div>				
+		}
+	}		
+			
+	@columnSearchForm{		
+		@formGroup{
+			<div  class="form-control" bt-select  placeholder='@Messages("search.placeholder.states")' title='@Messages("search.placeholder.states")'
+				multiple="true"
+				ng-model="searchService.form.stateCodes" 
+				bt-options="state.code as state.name for state in searchService.states()" >
+			</div>							
+		}
+	}
+
+	@columnSearchForm{	
+		@formGroup{
+			<input 
+					class="form-control"
+					type="text"
+					ng-model="searchService.form.fromDate"
+					placeholder='@Messages("search.placeholder.fromDate")'
+					title='@Messages("search.placeholder.fromDate")'
+					date-timestamp
+			>					
+		}
+	}	
+	
+	@columnSearchForm{	
+		@formGroup{
+			<input 	class="form-control"
+					type="text"
+					ng-model="searchService.form.toDate"
+					placeholder='@Messages("search.placeholder.toDate")' 
+					title='@Messages("search.placeholder.toDate")'
+					date-timestamp
+			>			
+		}
+	}
+		
+	@columnSearchForm{	
+		@formGroup{
+			<div class="form-control" bt-select placeholder='@Messages("search.placeholder.fgGroup")'  title='@Messages("search.placeholder.fgGroup")'
+				ng-model="searchService.form.isFgGroup" 
+				bt-options="fgGroupValue.code as fgGroupValue.name for fgGroupValue in searchService.lists.get('booleans')">
+			</div>			
+		}
+	}		
+}
+
+@if(isForm) {
+
+<div class="row"> 
+	<div class="col-md-12 col-lg-12" ultimate-datatable="searchService.datatable">
+		<div udt-form>	
+			<ul class="nav nav-tabs margin-bottom-5">
+				<li class="active"><a href="#" data-target="#filters" data-toggle="tab">@Messages("search.tab.filters")</a></li>
+				<li ng-if="searchService.getAddFiltersToForm().length > 0"><a href="#" data-target="#addfilters" data-toggle="tab">@Messages("search.tab.addfilters")</a></li>
+				<li ng-if="searchService.getAddColumnsToForm().length > 0"><a href="#" data-target="#addcolumns" data-toggle="tab">@Messages("search.tab.addcolumns")</a></li>  
+			</ul>
+			<div class="tab-content">
+				<div class="tab-pane active" id="filters">
+					<form class="well well-small">
+						<div class="row">
+						@form
+						@columnSearchForm{
+							@formGroup{
+							<div class="btn-toolbar">
+								<button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="search()" class="btn btn-primary" >
+									<i class="fa fa-search"></i>
+								</button>
+								<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="reset()"  class="btn btn-default">
+									<i class="fa fa-undo"></i>
+								</button>
+															 	
+							</div>	
+							}	
+						}
+						</div>		
+					</form>	
+				</div>
+
+				<div class="tab-pane" id="addfilters">
+					<form class="well well-small">
+							<div class="row">
+								<div class="col-md-2 col-lg-2" ng-repeat="filters in searchService.getAddFiltersToForm()">
+									<div class="form-group" ng-repeat="filter in filters">
+										<div udt-compile="filter.html"></div> <!-- used directive from datatable to compile html -->
+									</div>
+								</div>
+								
+								@columnSearchForm{
+								@formGroup{
+								<div class="btn-toolbar">
+									<button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="search()" class="btn btn-primary" >
+										<i class="fa fa-search"></i>
+									</button>
+									<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="reset()"  class="btn btn-default">
+										<i class="fa fa-undo"></i>
+									</button>
+																	 
+								</div>	
+								}	
+							}
+							</div>			
+						</form>	
+					</div>
+
+				<div class="tab-pane" id="addcolumns">
+					<form class="well well-small">
+							<div class="row">
+							<div class="col-md-2 col-lg-2" ng-repeat="columns in searchService.getAddColumnsToForm()">
+									  <div class="checkbox" ng-repeat="column in columns">
+									<label>
+									  <input type="checkbox" ng-model="column.select"> {{column.groupHeader!=null?column.groupHeader:column.header}}
+									</label>
+								  </div>			
+							 </div>
+							 @columnSearchForm{
+								@formGroup{
+								<div class="btn-toolbar">
+									<button type="submit" title='@Messages("button.add.columns")' data-toggle="tooltip" ng-click="searchService.addColumnsToDatatable()" class="btn btn-primary" >
+										<i class="fa fa-plus"></i>
+									</button>
+									<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="searchService.resetDatatableColumns()"  class="btn btn-default">
+										<i class="fa fa-undo"></i>
+									</button>												 	
+								</div>	
+								}		
+							}
+							</div>			
+						</form>	
+					</div>
+			</div>
+		</div>
+	</div>
+</div> 
+}
+@if(!isForm) {
+	@searchForm()()("searchService.datatable")
+}

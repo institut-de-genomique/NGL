@@ -1,0 +1,21 @@
+@()
+<div class="row">
+	<div class="col-md-6 col-lg-6">
+		<table class="table table-condensed table-hover table-bordered table-striped datatable">
+			<thead>
+				<tr>
+					<th>@Messages("containerSupports.storage.code")</th>
+					<th>@Messages("containerSupports.storage.date")</th>
+					<th>@Messages("containerSupports.storage.who")</th>					
+				</tr>
+			</thead>
+			<tbody>
+				<tr ng-repeat="storage in support.storages | orderBy:'index'">
+					<td ng-bind="storage.code" />
+					<td ng-bind="storage.date|date:'@Messages("datetime.format")'" />
+					<td ng-bind="storage.user" />					
+				</tr>							
+			</tbody>
+		</table>
+	</div>				
+</div>

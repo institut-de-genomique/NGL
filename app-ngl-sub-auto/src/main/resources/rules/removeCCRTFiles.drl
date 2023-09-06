@@ -1,0 +1,77 @@
+#created on: Jul 15, 2014
+package birds
+
+import  fr.genoscope.lis.devsi.birds.impl.factory.ResourcesReferentialServiceFactory;
+import fr.cea.ig.auto.submission.SubmissionServicesFactory;
+import fr.genoscope.lis.devsi.birds.impl.properties.ProjectProperties;
+import fr.cea.ig.auto.submission.SRAFilesUtil;
+
+#Select resource for getCCRTFiles treatment
+rule "select resources from nglsub for removeCCRTFiles treatment"
+	@BirdsRule ( selectionRule )
+	salience 200
+	dialect 'java'
+	no-loop
+	when
+		$input : InputSpecificationElement(name=="inputRmCCRT", treatmentSpecification.name=="removeCCRTFile", project.name == "SRA")
+		$resourcesReferential : ResourcesReferential(name=="nglSubRef_processCCRT") 
+		$device : JSONDevice() from $resourcesReferential.referentialDevice
+		$rps : ResourcePropertiesSet(initialized==false, inputSpecificationElement==$input, resourcesReferential==$resourcesReferential)
+		//$groupJob : Job( treatmentSpecification.specificationGroup == true)
+	then
+		Logger log = Logger.getLogger("ngl.sub.rules");
+		$rps.initialize();
+		
+		//JobResource groupJobResource = $groupJob.getUniqueJobResource("subData");
+		Set<ResourceProperties> resourceProperties = new HashSet<ResourceProperties>();
+		
+		JSONDevice jsonDevice = new JSONDevice();
+		
+		//Get code submission IP-SUB
+		Set<ResourceProperties> rpSubmissions = $device.httpGetJSON(ProjectProperties.getProperty("server")+"/api/sra/submissions?stateCode=F-SUB", "bot");
+		for(ResourceProperties rpSub : rpSubmissions){
+			//Get submission code
+			String codeSubmission = rpSub.getProperty("code");
+			log.debug("Get submission F-SUB "+codeSubmission);
+			String submissionDirectory = rpSub.getProperty("submissionDirectory");
+			Set<ResourceProperties> rpsRawData = jsonDevice.httpGetJSON(ProjectProperties.getProperty("server")+"/api/sra/experiments/rawDatas?submissionCode="+codeSubmission,"bot");
+			boolean isDataCCRT = SRAFilesUtil.isDataCCRT(rpsRawData);
+			log.debug("is DataCCRT "+isDataCCRT);
+			if(isDataCCRT){
+				for(ResourceProperties rp : rpsRawData){
+					if(rp.getProperty("location").equals("CCRT")){
+						
+						ResourceProperties newRp = new ResourceProperties();
+						newRp.setProperty("code",codeSubmission);
+						newRp.setProperty("submissionDirectory",submissionDirectory);
+						newRp.setProperty("relatifName",rp.getProperty("relatifName"));
+						newRp.setProperty("directory",rp.getProperty("directory"));
+						log.debug("location CCR add new RP "+rp.getProperty("relatifName"));
+						resourceProperties.add(newRp);
+					}
+				}
+			}
+		}
+		log.debug("size resources "+resourceProperties.size());
+		$rps.setResourcePropertiesSet(resourceProperties);
+		modify($rps){};
+end
+
+rule "set parameter for removeCCRTFiles"
+	@BirdsRule(fsRule)
+	dialect 'java'
+	salience 300
+	no-loop
+		when
+			$treatSpec : TreatmentSpecification(name=="removeCCRTFile", project.name=="SRA")
+			$job : Job()
+		then
+			Logger log = Logger.getLogger("ngl.sub.rules");
+			log.debug("set parameter value");
+			
+			String filePath = $job.getUniqueJobResource("inputRmCCRT").getProperty("submissionDirectory")+File.separator+$job.getUniqueJobResource("inputRmCCRT").getProperty("relatifName");
+			log.debug("set filePath "+filePath);
+			String fileParam = $job.getParameterValue("fileParam").getValue().replace("%filePath%",filePath);
+			$job.setParameterValue("fileParam", fileParam);
+			
+end

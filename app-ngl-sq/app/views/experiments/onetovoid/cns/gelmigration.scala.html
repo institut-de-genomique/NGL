@@ -1,0 +1,34 @@
+@()
+<div ng-controller="OneToVoidQCCtrl">
+<div class="col-md-12 col-lg-12" ng-controller="OneToVoidGelMigrationCNSCtrl">
+	
+	<div class="row margin-bottom-7" ng-show="button.isShow()">
+	<div class="col-md-5 col-lg-5">
+	<form class="form-horizontal">
+  	<div class="form-group">
+   		<label  class="col-md-3 col-lg-3 control-label">Gel 30 min. : </label>
+		<div class="input-group col-md-9 col-lg-9" >
+		<input id="importFile1" type="file" class="form-control" base64-img="gel1"/>		
+		</div>
+	</div>
+	<div class="form-group">
+   		<label  class="col-md-3 col-lg-3 control-label">Gel 60 min. : </label>
+		<div class="input-group col-md-9 col-lg-9" >
+		<input id="importFile2" type="file" class="form-control" base64-img="gel2"/>		
+		</div>
+	</div>
+	</form>
+	</div>
+	</div>
+
+	
+	<div class="row">
+		<!-- div class="col-md-12 col-lg-12" ultimate-datatable="atmService.data"></div-->
+		
+		<div class="col-md-12 col-lg-12" >
+			@views.html.experiments.onetoone.defaults.partials.udtAndPlateDesign()
+		</div>
+	</div>
+	
+	</div>						
+</div>

@@ -1,0 +1,25 @@
+@(scripts: Html = Html(""))
+
+@import views.html.imports._
+
+ <!--[if lt IE 9]>
+	<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<script src="@helper.getAsset("javascript","json","2.0","json_2.0.js")" type="text/javascript" charset="utf-8"></script>
+<![endif]-->
+
+@ajscript("jquery","1.11.1","jquery_1.11.1.min.js")
+@ajscript("angular","1.4.6","angular_1.4.6.min.js")
+@ajscript("angular","1.4.6","angular-resource_1.4.6.min.js")
+@ajscript("angular","1.4.6","angular-route_1.4.6.min.js")
+@ajscript("angular","1.4.6","angular-sanitize_1.4.6.min.js")
+@ajscript("angular","1.4.6","i18n/angular-locale_fr_1.4.6.js")
+@ajscript("bootstrap","3.3.5","bootstrap_3.3.5.min.js")
+@ajscript("ui-bootstrap","0.12.1","ui-bootstrap-0.12.1.min.js")
+@ajscript("ui-bootstrap","0.12.1","ui-bootstrap-tpls-0.12.1.min.js")
+@ajscript("moment","2.4.0","moment_2.4.0.min.js")
+
+@rscript("lib/datatable/datatable/javascripts/fileSaver/fileSaver.min.js") 
+
+@uscript("/messages.js")
+ 
+@scripts

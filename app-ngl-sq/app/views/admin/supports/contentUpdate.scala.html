@@ -1,0 +1,86 @@
+@()
+
+@import views.html.helper._
+@form() = {
+	@columnSearchForm{			
+		@formGroup{
+			<bt-input  class="form-control"  input-ng-model="searchService.form.codeRegex" textarea-ng-model="searchService.form.codes" placeholder='Codes' ></bt-input>									
+		}
+		
+	}	
+	@columnSearchForm{			
+		@formGroup{
+			<div class="form-control" bt-select ng-model="searchService.form.projectCode" filter="true" placeholder='@Messages("search.placeholder.projects")' bt-options="project.code as project|formatProjectListLabel for project in searchService.lists.getProjects()" ng-change="searchService.resetSampleCodes()"></div>
+		}
+		
+	}
+	@columnSearchForm{			
+		
+		@formGroup{
+			<div class="form-control" bt-select ng-model="searchService.form.sampleCode" filter="true" placeholder='@Messages("search.placeholder.samples")' bt-options="sample.code as sample.code for sample in searchService.lists.getSamples()" ng-focus="searchService.refreshSamples()"></div>			
+		}
+		
+		
+	}
+	@columnSearchForm{			
+		
+		@formGroup{
+			<div class='form-control' bt-select ng-model='searchService.form.contentPropertyNameUpdated' filter='true' placeholder='Property definition code' bt-options='v.code as v.code for v in searchService.getContentPropertyDefinitions()' ng-change="searchService.refreshPropertyDefValuesCodes()"></div>			
+		}
+		
+		
+	}
+	@columnSearchForm{
+		<div class="form-group">
+   			<div ng-show="searchService.lists.get('values').length > 0" class='form-control' bt-select ng-model='searchService.form["contentProperties["+searchService.form.contentPropertyNameUpdated+"]"]' filter='true' placeholder='Property definition value' bt-options='v.code as v.code for v in searchService.lists.get("values")' ></div>
+   			<input ng-show="searchService.lists.get('values').length == 0" type="text"  class='form-control' ng-model='searchService.form["contentProperties["+searchService.form.contentPropertyNameUpdated+"]"]'/>	   
+		</div>
+			
+	}
+				
+}
+
+<div class="inProgressSpinner" ng-if="searchService.isSearchInProgress()">
+	<button class="btn btn-primary btn-lg">
+		<i class="fa fa-spinner fa-spin fa-5x"></i>
+	</button>
+</div>
+
+<!-- @searchForm(form)()("searchService.datatable") -->
+<div class="row">
+	<div class="col-md-12 col-lg-12"  messages="messages"></div>
+</div>
+<div class="row"> 
+<div class="col-md-12 col-lg-12">
+	
+			<form class="well well-small">
+			<div class="row">
+			@form
+			@columnSearchForm{
+				@formGroup{
+				<div class="btn-toolbar">
+					<button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="searchService.search()" class="btn btn-primary" >
+						<i class="fa fa-search"></i>
+					</button>
+					<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="searchService.reset()"  class="btn btn-default">
+						<i class="fa fa-undo"></i>
+					</button>
+												 	
+				</div>	
+				}				
+			}
+			
+			</div>		
+		</form>	
+	
+	
+	</div>
+</div>
+<div class="row"> 
+<div class="col-md-12 col-lg-12" ultimate-datatable="searchService.datatableSQ">
+</div>
+</div>
+<div class="row"> 
+<div class="col-md-12 col-lg-12" ultimate-datatable="searchService.datatableBI">
+</div>
+</div>

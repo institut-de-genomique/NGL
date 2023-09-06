@@ -1,0 +1,42 @@
+#lists api
+GET		/api/projects/types								controllers.projects.api.ProjectTypes.list()
+GET		/api/projects/categories						controllers.projects.api.ProjectCategories.list()
+GET		/api/projects/bionformaticsParameters			controllers.projects.api.ProjectBioinformaticParameters.list()
+
+#project api
+GET    	/api/projects               					controllers.projects.api.Projects.list()
+GET    	/api/projects/:code               				controllers.projects.api.Projects.get(code: java.lang.String)
+HEAD	/api/projects/:code               				controllers.projects.api.Projects.head(code: java.lang.String)
+POST   	/api/projects									controllers.projects.api.Projects.save()
+PUT   	/api/projects/:code 							controllers.projects.api.Projects.update(code: java.lang.String)
+PUT		/api/projects/:code/state						controllers.projects.api.Projects.updateState(code:java.lang.String)
+#DELETE	/api/projects/:code								controllers.projects.api.Projects.delete(code:java.lang.String)
+
+#project comment
+POST	/api/projects/:code/comments					controllers.projects.api.ProjectComments.save(code:java.lang.String)
+PUT		/api/projects/:code/comments/:commentCode	    controllers.projects.api.ProjectComments.update(code:java.lang.String, commentCode:java.lang.String)
+DELETE	/api/projects/:code/comments/:commentCode		controllers.projects.api.ProjectComments.delete(code:java.lang.String, commentCode:java.lang.String)
+
+#umbrellaProject api
+GET    	/api/umbrellaprojects               			controllers.projects.api.UmbrellaProjects.list()
+GET    	/api/umbrellaprojects/:code               		controllers.projects.api.UmbrellaProjects.get(code: java.lang.String)
+HEAD	/api/umbrellaprojects/:code               		controllers.projects.api.UmbrellaProjects.head(code: java.lang.String)
+POST   	/api/umbrellaprojects							controllers.projects.api.UmbrellaProjects.save()
+PUT   	/api/umbrellaprojects/:code 					controllers.projects.api.UmbrellaProjects.update(code: java.lang.String)
+#DELETE	/api/umbrellaprojects/:code						controllers.projects.api.UmbrellaProjects.delete(code:java.lang.String)
+
+#umbrellaproject comment
+POST	/api/umbrellaprojects/:code/comments					controllers.projects.api.UmbrellaProjectComments.save(code:java.lang.String)
+PUT		/api/umbrellaprojects/:code/comments/:commentCode	    controllers.projects.api.UmbrellaProjectComments.update(code:java.lang.String, commentCode:java.lang.String)
+DELETE	/api/umbrellaprojects/:code/comments/:commentCode		controllers.projects.api.UmbrellaProjectComments.delete(code:java.lang.String, commentCode:java.lang.String)
+
+#MembersProject api
+GET		/api/membersprojects/:code						controllers.projects.api.MembersProjects.get(code: java.lang.String)
+POST	/api/membersprojects							controllers.projects.api.MembersProjects.save()
+PUT		/api/membersprojects							controllers.projects.api.MembersProjects.update()
+DELETE	/api/membersprojects/:projectCode/:code/:type	controllers.projects.api.MembersProjects.delete(projectCode: java.lang.String, code: java.lang.String, type: java.lang.String)
+
+GET		/api/usermembersprojects						controllers.projects.api.UserMembersProjects.list()
+GET		/api/usermembersprojects/:code					controllers.projects.api.UserMembersProjects.get(code: java.lang.String)
+
+GET		/api/groupmembersprojects						controllers.projects.api.GroupMembersProjects.list()

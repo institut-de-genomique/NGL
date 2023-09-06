@@ -1,0 +1,92 @@
+@()
+<div ng-controller="OneToVoidQCCtrl" class="col-md-12 col-lg-12">	
+<div ng-controller="OneToVoidBioanalyzerMigrationProfileCNGCtrl">
+
+	<div class="col-md-12 col-lg-12" >
+		<p><a class="fa fa-info-circle" ng-click="toggleIsShowInformation()" title="Information" href=""> Information importante</a></p>
+		<div ng-show="isShowInformation">
+		  <p>Il existe 2 modes d'utilisation pour importer les profils bioanalyzer :
+		  <ul>
+			<li>
+				<b>le mode "semi-automatique"</b>
+				<ol>
+					<li>Renseigner la position de chaque container sur la puce via la colonne position (positions possibles : 1 à 12). Ne pas renseigner 2x la même position. L'expérience doit contenir au maximum 12 containers. <b>SAUVEGARDER</b></li>
+					<li>Puis, via l'onglet Profils, importer les (1 à) 12 images (.JPEG ou .PNG, pas d'autres formats). <i class="fa fa-exclamation-triangle" style="color:#FFE333" aria-hidden="true"></i> Les noms des images doivent respecter cette nomenclature : xxxxxxx_SampleN (N = 1 à 12). <b>SAUVEGARDER</b>. Vérifier que les images se sont bien insérées dans le tableau des containers.</li>
+				</ol>
+			</li>
+			<li>
+				<b>le mode "manuel"</b>
+				<ul>
+					<li>Dans ce cas il n'est PAS nécessaire de renseigner la colonne position.</li>
+					<li>Choisir l'image à importer de chaque container, ligne par ligne, via la colonne Profil de migration</li>
+					<li>S'assurer que les images sont au format .JPEG ou .PNG (pas d'autres formats)</li>
+				</ul>
+			</li>
+		  </ul>
+		</div>
+	</div>
+
+<!-- code venant du CNS GERE BIOANALYZER ET LABCHIP  ET PLAQUE!!!  => supprimer LABCHIP => supprimer PLAQUES... -->
+<div class="row">
+	<ul class="nav nav-tabs margin-bottom-5" role="tablist">
+  	<li class="active"><a href="" role="tab" data-target="#table"" data-toggle="tab" >Tableau</a></li>
+  	<li><a href="" role="tab"  data-target="#profils" data-toggle="tab" >Profils</a></li>  
+	</ul>
+	
+	<div class="tab-content"  >
+		<div class="tab-pane active" id="table">
+			<!--  supression bouton  -->	
+			<div class="row">
+				<div class="col-md-12 col-lg-12" ultimate-datatable="atmService.data"></div>
+			</div>
+		</div>
+		<div class="tab-pane" id="profils" >	
+		<div class="row margin-bottom-7" ng-show="button.isShow()">
+		<div class="col-md-5 col-lg-5">
+		<form class="form-horizontal">
+  		<div class="form-group">
+   			<label  class="col-md-3 col-lg-3 control-label">Profils : </label>
+			<div class="input-group col-md-9 col-lg-9" >
+			<input id="importProfils" type="file" class="form-control" base64-img="profils" multiple=true/>		
+			</div>
+		</div>
+		</form>
+		</div>
+		</div>
+	
+	<!--  supression -->
+	<div class="row">
+	<div class="col-md-6 col-lg-6">
+	<table class="table table-bordered table-condensed datatable">
+				
+	<thead>
+	     <tr>
+	         <th>Source</th>
+	         <th></th>
+	     </tr>
+	</thead>
+	<tbody>
+	    <tr ng-repeat="source in [1,2,3,4,5,6,7,8,9,10,11,12]">
+	        <td><strong>{{source}}</strong></td>
+	        <td>
+	        <div  ng-click="setImage(getProfil(source).value,getProfil(source).fullname,getProfil(source).width,getProfil(source).height)"  
+	        	 ng-show="getProfil(source) !== undefined" > 
+	        	<div data-target="#modalImage" role="button" data-toggle="modal" >
+	        		<a href="#">
+	        		<img ng-src="data:image/{{getProfil(source).extension}};base64,{{getProfil(source).value}}"width="{{getProfil(source).width*0.15}}" height="{{getProfil(source).height*0.15}}"  class="center-block"/>
+	        		</a>
+	        		</div>
+	        	</div>
+	        </td>          
+	    </tr>
+	  
+	</tbody>
+	</table>
+	</div>
+	</div>
+	</div>
+	</div>
+
+</div>
+</div>
+</div>

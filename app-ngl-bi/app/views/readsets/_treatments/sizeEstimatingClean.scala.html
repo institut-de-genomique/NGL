@@ -1,0 +1,62 @@
+<div ng-controller="SizeEstimatingCleanCtrl">
+    <b><u>Liste des readsets</u> :</b>
+    {{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.readsetList.value}}
+
+    <br />
+    <br />
+
+    <table class="table table-condensed table-hover table-bordered">
+        <thead>
+        <tr>
+            <th colspan="2" style="text-align: center">@Messages("readsets.treatments.sizeEstimatingClean.p1")</th>
+            <th colspan="2" style="text-align: center">@Messages("readsets.treatments.sizeEstimatingClean.p2")</th>		
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td><b>@Messages("readsets.treatments.sizeEstimatingClean.genomeScope")</b></td>
+            <td>
+                <div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+                    ng-click="setImage(readset.treatments[treatments.getTreatment().code].pairs.tabP1genomescopeP1.value,'overlapDistrib','',treatments.getTreatment().code,
+                    readset.treatments[treatments.getTreatment().code].pairs.tabP1genomescopeP1.value.width,
+                    readset.treatments[treatments.getTreatment().code].pairs.tabP1genomescopeP1.value.height)">
+                    <a href="#">
+                        <img id="tabP1genomescopeP1" ng-src="data:image/png;base64,{{readset.treatments[treatments.getTreatment().code].pairs.tabP1genomescopeP1.value}}" />
+                    </a>   
+                </div>
+            </td>	
+            <td><b>@Messages("readsets.treatments.sizeEstimatingClean.genomeScope")</b></td>					
+            <td>
+                <div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+                    ng-click="setImage(readset.treatments[treatments.getTreatment().code].pairs.tabP2genomescopeP2.value,'overlapDistrib','',treatments.getTreatment().code,
+                    readset.treatments[treatments.getTreatment().code].pairs.tabP2genomescopeP2.value.width,
+                    readset.treatments[treatments.getTreatment().code].pairs.tabP2genomescopeP2.value.height)">
+                    <a href="#">
+                        <img id="tabP2genomescopeP2" ng-src="data:image/png;base64,{{readset.treatments[treatments.getTreatment().code].pairs.tabP2genomescopeP2.value}}" />
+                    </a>   
+                </div>
+            </td>
+            </tr>
+            <tr>
+                <td><b>@Messages("readsets.treatments.sizeEstimatingClean.tabP1genomeHaploidLengthMax")</b></td>		
+                <td>
+                    {{readset.treatments[treatments.getTreatment().code].pairs.tabP1genomeHaploidLengthMax.value | number}}
+                </td>
+                <td><b>@Messages("readsets.treatments.sizeEstimatingClean.tabP2heterozygosityRateMax")</b></td>
+                <td>
+                    {{readset.treatments[treatments.getTreatment().code].pairs.tabP2heterozygosityRateMax.value | number}} %
+                </td>
+            </tr>
+            <tr>
+                <td><b>@Messages("readsets.treatments.sizeEstimatingClean.summaryFile")</b></td>
+                <td>
+                    <iframe id="p1SummaryFile" class="col-md-12 col-lg-12" ng-bind-src="getTabP1SummaryFile(readset, treatments.getTreatment().code)" style="border:1;height:300px"></iframe> 
+                </td>
+                <td><b>@Messages("readsets.treatments.sizeEstimatingClean.summaryFile")</b></td>
+                <td>
+                    <iframe id="p2SummaryFile" class="col-md-12 col-lg-12" ng-bind-src="getTabP2SummaryFile(readset, treatments.getTreatment().code)" style="border:1;height:300px"></iframe> 
+                </td>
+            </tr>
+        </tbody>		
+    </table>			
+</div>

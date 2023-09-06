@@ -1,0 +1,116 @@
+#created on: Jul 7, 2014
+package birds
+
+import java.util.Date;
+import java.text.SimpleDateFormat;
+
+#Select resource for workflow release
+rule "select resources from nglsub for sendUpdateXML"
+	@BirdsRule ( selectionRule )
+	salience 200
+	dialect 'java'
+	no-loop
+	when
+		$input : InputSpecificationElement(name=="updateToSend", treatmentSpecification.name=="sendUpdateXML", project.name == "SRA")
+		$resourcesReferential : ResourcesReferential(name=="nglSubRef") 
+		$device : JSONDevice() from $resourcesReferential.referentialDevice
+		$rps : ResourcePropertiesSet(initialized==false, inputSpecificationElement==$input, resourcesReferential==$resourcesReferential)
+	then
+		Logger log = Logger.getLogger("ngl.sub.rules");
+		$rps.initialize();
+		Set<ResourceProperties> resourcePropertiesSet = $device.httpGetJSON(ProjectProperties.getProperty("server")+"/api/sra/submissions?stateCode=SUBU-SMD-IW", "bot");
+		log.debug("size resources "+resourcePropertiesSet.size());
+		$rps.addResourcePropertiesSet(resourcePropertiesSet);
+		modify($rps){};
+end
+
+rule "Set submission to SUBU-SMD-IP "
+@BirdsRule( ExecutionService )
+	dialect 'java'
+	salience 500
+	no-loop
+	when
+		$executionService : ExecutionService( status == ExecutionService.PRE_JOB_EXECUTION_STATUS)
+		$job : Job( treatmentSpecification.specificationGroup == false,  treatmentSpecification.name != null , treatmentSpecification.name == "sendUpdateXML")
+	then
+		JobResource jobResource = $job.getUniqueJobResource("updateToSend");
+		String codeSubmission = jobResource.getProperty("code");
+		JSONDevice jsonDevice = new JSONDevice();
+		jsonDevice.httpPut(ProjectProperties.getProperty("server")+"/api/sra/submissions/"+codeSubmission+"/state", "{\"code\":\"SUBU-SMD-IP\"}", "bot");
+end
+
+rule "Define variable lineParmeter for sendUpdateXML specification"
+	@BirdsRule(fsRule)
+	dialect 'java'
+	salience 300
+	no-loop
+    when
+       $treatSpec : TreatmentSpecification(name=="sendUpdateXML", project.name=="SRA")
+       $job : Job()
+    then
+       Logger log = Logger.getLogger("ngl.sub.rules");
+       log.debug("Set parameter for spec sendUpdateXML");
+        updateParameterXML("xmlSubmission",$job, "updateToSend");
+       updateParameterXML("xmlStudys",$job, "updateToSend");
+       updateParameterXML("xmlSamples",$job, "updateToSend");
+       updateParameterXML("xmlExperiments",$job, "updateToSend");
+       updateParameterXML("xmlRuns",$job, "updateToSend");
+       updateParameterXML("xmlProjects",$job, "updateToSend");
+       updateParameterXML("xmlUmbrella",$job, "updateToSend");
+      
+      $job.setParameterValue("listAC",$job.getParameterValue("listAC").getValue().replace("%ebiResult%",$job.getUniqueJobResource("updateToSend").getProperty("ebiResult")));
+       
+       $job.setParameterValue("OptionCD",$job.getParameterValue("OptionCD").getValue().replace("%submissionDirectory%",$job.getUniqueJobResource("updateToSend").getProperty("submissionDirectory")));
+	
+end
+
+rule "POST DONE EXECUTION of sendUpdateXML"
+	@BirdsRule( ExecutionService )
+	dialect 'java'
+	salience 200
+	when
+		$executionService : ExecutionService( status == ExecutionService.POST_JOB_EXECUTION_STATUS)
+		$job : Job( treatmentSpecification!=null, treatmentSpecification.name == "sendUpdateXML", treatmentSpecification.project.name == "SRA", executionState == Job.DONE_STATUS )
+	then
+		Logger log = Logger.getLogger("ngl.sub.rules");
+		//Call service treatment AC files results 
+		JobResource jobResource = $job.getUniqueJobResource("updateToSend");
+		String codeSubmission = jobResource.getProperty("code");
+		
+		JSONDevice jsonDevice = new JSONDevice();
+		try{
+			jsonDevice.httpPut(ProjectProperties.getProperty("server")+"/api/sra/submissions/"+codeSubmission+"/state", "{\"code\":\"SUBU-SMD-F\"}", "bot");
+		}catch(JSONDeviceException e){
+			log.debug("Bad request "+e.getMessage());
+		}
+end
+
+rule "POST ERROR EXECUTION of sendUpdateXML"
+	@BirdsRule( ExecutionService )
+	dialect 'java'
+	salience 200
+	when
+		$executionService : ExecutionService( status == ExecutionService.POST_JOB_EXECUTION_STATUS)
+		$job : Job( treatmentSpecification!=null, treatmentSpecification.name == "sendUpdateXML", treatmentSpecification.project.name == "SRA", executionState == Job.ERROR_STATUS )
+	then
+		Logger log = Logger.getLogger("ngl.sub.rules");
+		JobResource jobResource = $job.getUniqueJobResource("updateToSend");
+		String codeSubmission = jobResource.getProperty("code");
+		JSONDevice jsonDevice = new JSONDevice();
+		try{
+			jsonDevice.httpPut(ProjectProperties.getProperty("server")+"/api/sra/submissions/"+codeSubmission+"/state", "{\"code\":\"SUBU-SMD-FE\"}", "bot");
+		}catch(JSONDeviceException e){
+			log.debug("Bad request "+e.getMessage());
+		}
+		//Send mail error
+		String errorMessage = "Error during executing job for sending meta update data : "+codeSubmission+".\n"+
+			"Command line "+$job.getUnixCommand()+"\n"+
+			"Check outputFile and log \n"+
+			"STDOUT "+$job.getProperty(Job.STDOUT)+"\n"+
+			"STDERR "+$job.getProperty(Job.STDERR)+"\n"+
+			"SCHEDULER STDOUT "+$job.getProperty(JobScheduler.JOB_SCHEDULER_STD_OUTPUT_PATH+JobScheduler.JOB_SCHEDULER_STD_OUTPUT_FILE)+"\n"+
+			"SCHEDULER STDERR "+$job.getProperty(JobScheduler.JOB_SCHEDULER_STD_ERROR_PATH+JobScheduler.JOB_SCHEDULER_STD_ERROR_FILE)+"\n"+
+			"Exception "+$job.getProperty("Exception");
+		
+			SubmissionServicesFactory.getInstance().sendMail("william","ERROR Sending Meta Data Update Submission="+codeSubmission+" JobID="+$job.getId(),errorMessage);
+end

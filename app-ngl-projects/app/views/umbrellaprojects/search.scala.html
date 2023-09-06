@@ -1,0 +1,87 @@
+@(isForm: Boolean)
+
+@import views.html.helper._
+
+@form() = {	
+	@columnSearchForm{
+		@formGroup{
+			<div class="form-control" bt-select placeholder='@Messages("search.placeholder.umbrellaProject")' title='@Messages("search.placeholder.umbrellaProject")'
+				textareaplaceholder='@Messages("search.textarea.placeholder.codesList")'
+				multiple="true" textarea="true" filter="true" 
+				ng-model="searchService.form.names" 
+				bt-options="umbrellaProject.name for umbrellaProject in searchService.lists.getUmbrellaProjects()">
+			</div>
+		}
+	}		
+	@columnSearchForm{
+		@formGroup{
+			<div class="form-control" bt-select placeholder='@Messages("search.placeholder.code")' title='@Messages("search.placeholder.code")'
+				textareaplaceholder='@Messages("search.textarea.placeholder.codesList")'
+				multiple="true" textarea="true" filter="true" 
+				ng-model="searchService.form.codes" 
+				bt-options="umbrellaProject.code for umbrellaProject in searchService.lists.getUmbrellaProjects()">
+			</div>
+		}
+	}		
+}
+
+@if(true) {
+<div class="row"> 
+	<div class="col-md-12 col-lg-12" ultimate-datatable="searchService.datatable">
+		<div udt-form>	
+			<ul class="nav nav-tabs margin-bottom-5">
+				<li class="active"><a href="#" data-target="#filters" data-toggle="tab">@Messages("search.tab.filters")</a></li>
+				<li ng-if="searchService.getAddColumnsToForm().length > 0"><a href="#" data-target="#addcolumns" data-toggle="tab">@Messages("search.tab.addcolumns")</a></li>  
+			</ul>
+			<div class="tab-content">
+				<div class="tab-pane active" id="filters">
+					<form class="well well-small">
+						<div class="row">
+						@form
+						@columnSearchForm{
+							@formGroup{
+							<div class="btn-toolbar">
+								<button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="search()" class="btn btn-primary" >
+									<i class="fa fa-search"></i>
+								</button>
+								<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="reset()"  class="btn btn-default">
+									<i class="fa fa-undo"></i>
+								</button>
+															 	
+							</div>	
+							}	
+						}
+						</div>		
+					</form>	
+				</div>
+
+				<div class="tab-pane" id="addcolumns">
+					<form class="well well-small">
+							<div class="row">
+							<div class="col-md-2 col-lg-2" ng-repeat="columns in searchService.getAddColumnsToForm()">
+									  <div class="checkbox" ng-repeat="column in columns">
+									<label>
+									  <input type="checkbox" ng-model="column.select"> {{column.groupHeader!=null?column.groupHeader:column.header}}
+									</label>
+								  </div>			
+							 </div>
+							 @columnSearchForm{
+								@formGroup{
+								<div class="btn-toolbar">
+									<button type="submit" title='@Messages("button.add.columns")' data-toggle="tooltip" ng-click="searchService.addColumnsToDatatable()" class="btn btn-primary" >
+										<i class="fa fa-plus"></i>
+									</button>
+									<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="searchService.resetDatatableColumns()"  class="btn btn-default">
+										<i class="fa fa-undo"></i>
+									</button>												 	
+								</div>	
+								}		
+							}
+							</div>			
+						</form>	
+					</div>
+			</div>
+		</div>
+	</div>
+</div> 
+}

@@ -1,0 +1,98 @@
+@this(ctx : fr.cea.ig.ngl.NGLApplication)
+@* @this(ctx : fr.cea.ig.play.migration.NGLContext) *@ 
+@* constructeur de la classe *@
+
+@* signature de la methode render: *@
+@(nav: String = "")
+
+@import play.mvc.Http.Context
+@import views.html.ddmenu._
+@import controllers.sra.studies.tpl.routes.Studies
+@import controllers.sra.configurations.tpl.routes.Configurations
+@import controllers.sra.submissions.tpl.routes.Submissions
+@import controllers.sra.documentation.tpl.routes.Documentation
+@import controllers.sra.samples.tpl.routes.Samples
+@import controllers.sra.experiments.tpl.routes.Experiments
+@import controllers.sra.bilans.tpl.routes.Bilans
+@import controllers.sra.projects.tpl.routes.Projects
+@import controllers.sra.analyzes.tpl.routes.Analyzes
+
+
+@* variable de la methode render: *@
+@user = @{ ctx.currentUser() }
+  
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+	<div class="container-fluid">
+		<div class="navbar-header">
+			<a class="navbar-brand" href="@controllers.main.tpl.routes.Main.home()">@ctx.messageEnv("application.name")</a>
+    	</div>
+    	<div class="collapse navbar-collapse">
+    		<ul class="nav navbar-nav">
+    			@ddmenu(nav, "configurations","configurations.menu") {
+				  @ddentry(nav, "configurations.consultation", Configurations.home("consultation"), "configurations.menu.consultation")
+				  @ddentry(nav, "configurations.create"      , Configurations.home("create")      , "configurations.menu.create")					  		  
+				}
+				@ddmenu(nav, "analyzes","analyzes.menu") {
+				  @ddentry(nav, "analyzes.consultation", Analyzes.home("consultation"), "analyzes.menu.consultation")
+				  @ddentry(nav, "analyzes.create"      , Analyzes.home("create")      , "analyzes.menu.create")					  		  
+				}
+				@ddmenu(nav, "studies","studies.menu") {
+    			  @* arg 1 : nav = reperage dans page navigation
+    			     arg 2 : identifiant du sous-menu qui doit commencer par meme nom que menu
+    			     arg 3 : url destination
+    			     arg 4 : texte traduit via Messages
+    			  *@
+				  @ddentry(nav, "studies.consultation", Studies.home("consultation"), "studies.menu.consultation")
+				  @ddentry(nav, "studies.create"      , Studies.home("create")      , "studies.menu.create")	
+				  @ddentry(nav, "studies.update"      , Studies.home("update")      , "studies.menu.update")	
+				  @* ddentry(nav, "studies.release"   , Studies.home("release")     , "studies.menu.release") *@			  
+				}
+    			@ddmenu(nav, "submissions","submissions.menu") {
+				  @ddentry(nav, "submissions.consultation", Submissions.home("consultation"), "submissions.menu.consultation")
+				  @ddentry(nav, "submissions.create"      , Submissions.home("create")      , "submissions.menu.create")					  		  
+				  @ddentry(nav, "submissions.validation"  , Submissions.home("validation")  , "submissions.menu.validation")
+				  @ddentry(nav, "submissions.activate"    , Submissions.home("activate")    , "submissions.menu.activate")
+				}  
+    			@ddmenu(nav, "samples","samples.menu") {
+				  @ddentry(nav, "samples.consultation", Samples.home("consultation"), "samples.menu.consultation")
+				  @ddentry(nav, "samples.create", Samples.home("create"), "samples.menu.create")
+				  @ddentry(nav, "samples.update"      , Samples.home("update")      , "samples.menu.update")	
+				} 	  			
+    			@ddmenu(nav, "experiments","experiments.menu") {
+				  @ddentry(nav, "experiments.consultation", Experiments.home("consultation"), "experiments.menu.consultation")
+				  @ddentry(nav, "experiments.update", Experiments.home("update"), "experiments.menu.update")
+				} 	
+   				@ddmenu(nav, "bilans","bilans.menu") {
+				  @ddentry(nav, "bilans.consultation", Bilans.home("consultation"), "bilans.menu.consultation")
+				} 
+				@ddmenu(nav, "projects","projects.menu") {
+				  @ddentry(nav, "projects.consultation", Projects.home("consultation"), "projects.menu.consultation")
+				  @ddentry(nav, "projects.create", Projects.home("create"), "projects.menu.create")
+				  @ddentry(nav, "projects.update", Projects.home("update"), "projects.menu.update")
+				}
+				
+									
+				<li class="@("active".when(nav == "documentation"))">
+					<a href="@Documentation.home()">@Messages("documentation.menu")</a>
+				</li>	
+			</ul>				
+			<ul class="nav navbar-nav navbar-right">
+				<li>
+				<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" id="user">
+				<i class="fa fa-user"></i> @user <b class="caret"></b></a>
+				<ul class="dropdown-menu" role="menu" aria-labelledby="user">
+						<li><a href="/authentication/logout">@Messages("authentification.dropdown_list.signout")</a></li>
+				</ul>
+				</li>	
+				<!--  NGL-3363 ajout application version / NGL-3446 ajout lien vers notes de version-->
+				<li>
+			    	<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" id="more"><i class="fa fa-ellipsis-v"></i></a>
+			    	<ul class="dropdown-menu" role="menu" aria-labelledby="more">
+				    	<li><a href='http://wiki.cnrgh.fr/wiki/ngldocumentation/view/Documents%20de%20mise%20en%20production/@Messages("application.name")/@ctx.getVersion()'
+  				         target="_blank">&nbsp;&nbsp;Version: @Messages("application.name") @ctx.getVersion()</a></li>
+	  				 </ul>
+				</li>			
+			</ul>
+		</div>
+	</div>		
+</nav>

@@ -1,0 +1,135 @@
+@this()
+@(typeCode: String, media: String)
+<!--C'est bien le typeCode du traitment qui est injecte ici et non le code-->
+	
+@if(typeCode == "ngsrg-illumina") {
+	@_treatments.ngsrg()		
+}
+
+@if(typeCode == "ngsrg-mgi"){
+	@_treatments.ngsrgMGI()
+}
+
+@if(typeCode == "index-composition"){
+	@_treatments.indexComposition()
+}
+
+@if(typeCode == "ngsrg-nanopore"){
+	@_treatments.ngsrgNanopore()
+}
+
+@if(typeCode == "read-quality-nanopore"){
+	@_treatments.readQualityNanopore()
+}
+
+@if(typeCode == "read-quality-pacbio"){
+	@_treatments.readQualityPacbio()
+}
+
+
+@if(typeCode == "duplicates") {
+	@_treatments.duplicates()	
+}
+
+@if(typeCode == "firstBaseReport"){
+	@_treatments.firstBaseReport()
+}
+
+@if(typeCode == "trimming") {
+	@_treatments.trimming()
+}
+
+@if(typeCode == "trimming-nanopore") {
+	@_treatments.trimmingNanopore()
+}
+
+
+@if(typeCode == "merging") {
+	@_treatments.merging()
+}
+
+
+@if(typeCode == "contamination") {
+	@_treatments.contamination()
+}
+
+
+
+@if(typeCode == "sorting-ribo") {
+	@_treatments.sortingRibo()
+}
+
+
+@if(typeCode == "mapping") {
+	@if(media == "screen") {
+		@_treatments.mapping()
+	}
+	@if(media == "print")  {
+		@_treatments.mapping_print()
+	} 
+}
+
+@if(typeCode == "mapping-nanopore"){
+	@_treatments.mappingNanopore()
+}
+
+@if(typeCode == "mapping-pacbio"){
+	@_treatments.mappingPacbio()
+}
+
+@if(typeCode == "read-quality") {
+	@if(media == "screen") {
+		@_treatments.readQuality()
+	}
+	@if(media == "print")  {
+		@_treatments.readQuality_print()
+	} 
+}
+
+@if(typeCode == "taxonomy") {
+	@if(media == "screen") {
+		@_treatments.taxonomy()
+	}
+	@if(media == "print")  {
+		@_treatments.taxonomy_print()
+	}
+}
+
+@if(typeCode == "exome"){
+	@_treatments.exome()
+}
+
+@if(typeCode == "gender"){
+	@_treatments.gender()
+}
+
+@if(typeCode == "minknow-metrichor"){
+	@_treatments.minknowMetrichor()
+}
+@if(typeCode == "minknow-basecalling"){
+	@_treatments.minknowBasecalling()
+}
+
+@if(typeCode == "rna-seq"){
+	@_treatments.rnaSeq()
+}
+
+@if(typeCode == "molecule-quality-report"){
+	@_treatments.moleculeQualityReport()
+}
+
+@if(typeCode == "chromium"){
+	@_treatments.chromium()
+}
+
+@if(typeCode == "clustersdb-assignation"){
+	@_treatments.clusterDbAssignation()
+}
+
+@if(typeCode == "check-fastq-index"){
+	@_treatments.checkFastqIndex()
+}
+
+@if(typeCode == "size-estimating") {
+	@_treatments.sizeEstimatingClean()
+}

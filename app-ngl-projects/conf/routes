@@ -1,0 +1,37 @@
+
+-> / apinglcommon.Routes
+-> / apinglprojects.Routes
+-> / nglcommon.Routes
+
+GET		/scripts/run/:clazz												fr.cea.ig.lfw.controllers.scripts.ScriptController.run(clazz : java.lang.String)
+POST	/scripts/run/:clazz												fr.cea.ig.lfw.controllers.scripts.ScriptController.run(clazz : java.lang.String)
+
+# Home page
+GET     /                           					controllers.main.tpl.Main.home()
+
+
+#project tpl
+GET	   	/projects/:homecode/home						controllers.projects.tpl.Projects.home(homecode: java.lang.String)
+GET	   	/projects/:code									controllers.projects.tpl.Projects.get(code: java.lang.String)
+
+GET		/tpl/projects/details							controllers.projects.tpl.Projects.details()
+GET		/tpl/projects/search/:type						controllers.projects.tpl.Projects.search(type: java.lang.String)
+
+GET		/tpl/projects/js-routes							controllers.projects.tpl.Projects.javascriptRoutes()
+
+
+#umbrellaProject tpl
+
+GET	   	/umbrellaprojects/:homecode/home				controllers.projects.tpl.UmbrellaProjects.home(homecode: java.lang.String)
+GET	   	/umbrellaprojects/:code							controllers.projects.tpl.UmbrellaProjects.get(code: java.lang.String)
+
+GET		/tpl/umbrellaprojects/details/:typeForm			controllers.projects.tpl.UmbrellaProjects.details(typeForm: java.lang.String)
+GET		/tpl/umbrellaprojects/search/:type				controllers.projects.tpl.UmbrellaProjects.search(type: java.lang.String)
+
+GET		/tpl/umbrellaprojects/js-routes					controllers.projects.tpl.UmbrellaProjects.javascriptRoutes()
+
+# Map static resources from the /public folder to the /assets URL path
+# GET     /assets/*file               					controllers.Assets.at(path="/public", file)
+GET     /messages.js                					controllers.main.tpl.Main.jsMessages()
+GET     /codes.js        	        					controllers.main.tpl.Main.jsCodes()
+GET		/permissions.js								    controllers.main.tpl.Main.jsPermissions()

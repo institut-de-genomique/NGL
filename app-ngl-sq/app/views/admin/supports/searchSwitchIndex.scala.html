@@ -1,0 +1,80 @@
+@this()
+
+@()
+
+@import views.html.helper._
+@form() = {
+	@columnSearchForm{			
+		@formGroup{
+			<div class="form-control" bt-select ng-model="searchService.form.projectCode" filter="true" placeholder='@Messages("search.placeholder.projects")' bt-options="project.code as project|formatProjectListLabel for project in searchService.lists.getProjects()" ng-change="searchService.resetSampleCodes()"></div>
+		}
+		
+	}
+	@columnSearchForm{			
+		
+		@formGroup{
+			<div class="form-control" bt-select ng-model="searchService.form.sampleCode" filter="true" placeholder='@Messages("search.placeholder.samples")' bt-options="sample.code as sample.code for sample in searchService.lists.getSamples()" ng-focus="searchService.refreshSamples()"></div>			
+		}
+		
+		
+	}
+	@columnSearchForm{			
+		
+		@formGroup{
+			<div class='form-control' bt-select ng-model='searchService.form["contentProperties[tag]"]' filter='true' placeholder='Tag' bt-options='v.code as v.code for v in searchService.lists.getTags()'></div>			
+		}
+		
+	}
+	@columnSearchForm{			
+		
+	}
+	@columnSearchForm{			
+		
+		
+	}				
+}
+<div class="inProgressSpinner" ng-if="searchService.isSearchInProgress()">
+	<button class="btn btn-primary btn-lg">
+		<i class="fa fa-spinner fa-spin fa-5x"></i>
+	</button>
+</div>
+
+<!-- @searchForm(form)()("searchService.datatable") -->
+<div class="row">
+	<div class="col-md-12 col-lg-12"  messages="messages"></div>
+</div>
+<div class="row"> 
+<div class="col-md-12 col-lg-12">
+	
+			<form class="well well-small">
+			<div class="row">
+			@form
+			@columnSearchForm{
+				@formGroup{
+				<div class="btn-toolbar">
+					<button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="searchService.search()" class="btn btn-primary" >
+						<i class="fa fa-search"></i>
+					</button>
+					<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="searchService.reset()"  class="btn btn-default">
+						<i class="fa fa-undo"></i>
+					</button>
+												 	
+				</div>	
+				}				
+			}
+			
+			</div>		
+		</form>	
+	
+	
+	</div>
+</div>
+<div class="row"> 
+<div class="col-md-12 col-lg-12" ultimate-datatable="searchService.datatableSQ">
+</div>
+</div>
+<!-- NGL-3914 Suppression du tableau BI qui inverse les index entre deux readsets. Procedure et code obsolete si on souhaite remettre cette fonctionnalité alors revoir tous le code -->
+<!-- <div class="row"> 
+<div class="col-md-12 col-lg-12" ultimate-datatable="searchService.datatableBI">
+</div>
+</div> -->

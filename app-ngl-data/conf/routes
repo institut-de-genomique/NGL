@@ -1,0 +1,141 @@
+
+#->  / nglcommon.Routes  
+
+# Home page
+GET     /                           			controllers.Application.index()
+
+GET		/api/description/all					controllers.description.All.save()
+GET		/api/description/init-all    			controllers.description.All.init()
+GET		/api/description/ngl-sq					controllers.description.NGLSeq.save()
+GET		/api/description/ngl-bi					controllers.description.NGLBI.save()
+GET		/api/description/projects				controllers.description.projects.Projects.save()
+
+GET		/api/instance/resolutions				controllers.instance.resolution.Resolutions.save()       
+GET		/api/instance/protocols					controllers.instance.protocol.Protocols.save()
+GET		/api/instance/parameters/printers		controllers.instance.parameters.Printers.save()
+
+#Description state necessite de lancer sans exception les descriptions de bi, sq, project après la description de state
+#A activer uniquement si besoin en prod sinon utiliser all
+#GET		/api/description/commons/states			controllers.description.commons.States.save()
+
+GET		/migrationTaxonSample					controllers.admin.supports.api.MigrationUpdateNCBITaxonSample.migration(code: java.lang.String ?= "all", onlyNull:Boolean ?=false)
+GET		/migrationFungi							controllers.admin.supports.api.MigrationTaxonomyFungi.migration(code: java.lang.String ?= "all")
+
+GET		/scripts/run/:clazz						fr.cea.ig.lfw.controllers.scripts.ScriptController.run(clazz : java.lang.String)
+POST	/scripts/run/:clazz						fr.cea.ig.lfw.controllers.scripts.ScriptController.run(clazz : java.lang.String)
+
+# GET		/migration/primers						controllers.migration.Primers.migration()
+
+# GET		/migrationUnixGroupProject				controllers.migration.MigrationUnixGroupProject.migration(fileName: java.lang.String)
+
+# prototype not implemented
+# GET     /cron/all                               controllers.crontab.CronController.getEntries()
+
+####remove old part (not used anymore)
+#GET		/api/description/ngl-sample				controllers.description.NGLSample.save()
+
+#GET		/api/description/commons/measures		controllers.description.commons.Measures.save()
+#GET		/api/description/commons/levels			controllers.description.commons.Levels.save()
+#GET		/api/description/commons/institutes		controllers.description.commons.Institutes.save()
+
+
+
+#GET		/api/description/samples				controllers.description.samples.Samples.save()
+#GET		/api/description/containers				controllers.description.containers.Containers.save()
+#GET		/api/description/instruments			controllers.description.instruments.Instruments.save()
+#GET		/api/description/experiments			controllers.description.experiments.Experiments.save()
+#GET		/api/description/processes				controllers.description.processes.Processes.save()
+
+#GET		/api/description/runs					controllers.description.runs.Runs.save()
+#GET		/api/description/treatments				controllers.description.runs.Treatments.save()
+
+#GET 	/api/import/updateTara					controllers.instance.ImportDatas.updateTara()
+
+#GET		/migration/process-samples				controllers.migration.MigrationProcessSample.migration()
+#GET		/migration-container-support			controllers.migration.MigrationDataCNS.updateFromExperimentTypeCodesContainerSupport()
+#GET		/migration-container-date				controllers.migration.MigrationDataCNS.updateContainerDate()
+
+#GET		/migration-sequencing-run				controllers.migration.AddSequencingProgramTypeToRun.migration()
+#GET		/migration-vcc							controllers.migration.ValuationCriteriaCodes.migration()
+#GET		/migration-percentage-content			controllers.migration.AddPercentageContent.migration()
+#GET		/migration-runstartdate-opgen-depot		controllers.migration.AddRunStartDateToOpgenDepot.migration()
+
+#GET 	/migration-update-support-plaque		controllers.migration.cns.MigrationUpdateSupportPlaque.migration()
+#GET		/migration-sample_info					controllers.migration.cns.MigrationSampleInformations.migration()
+#GET		/migration-valuation-container			controllers.migration.cns.MigrationValuationContainer.migration()
+
+#GET		/migration-tara							controllers.migration.cns.MigrationTara.migration()
+#GET 	/deleteSample							controllers.migration.cns.MigrationTara.deleteSampleNotInLims()
+
+#GET 	/migration/containers					controllers.migration.MigrationContainerFields.migration()
+
+#GET		/migration-sampleOnInputContainer-process 		 controllers.migration.AddSampleOnInputContainerInProcess.migration()
+#GET		/migrationTaxonSample					@controllers.migration.MigrationUpdateNCBITaxonSample.migration(code: java.lang.String ?= "all", onlyNull:Boolean ?=false)
+
+#GET		/cns/migration-taxonCode				@controllers.migration.cns.MigrationUpdateNCBITaxonSample.migration(fileName: java.lang.String)
+
+#GET		/cns/migration-sampleType				controllers.migration.cns.MigrationSampleType.migration()
+#GET		/cns/migration						    @controllers.migration.cns.MigrationReadSetFileCNS.migration()
+#GET		/cns/migration-spri-select				controllers.migration.cns.MigrationSpriSelect.migration()
+
+
+#GET		/cns/migration-updatesample				controllers.migration.cns.MigrationUpdateSampleProperties.migration()
+#GET		/cns/migration-properties-container		controllers.migration.cns.MigrationContainerProperties.migration()
+#GET		/cns/libprocesstype-ext					controllers.migration.cns.MigrationLibProcessTypeRunExt.migration()
+#GET		/cns/update-content-sample			    controllers.migration.cns.UpdateSampleTypeCodeToContainer.migrationContainer()
+#GET		/cns/update-readset					    controllers.migration.cns.UpdateSampleTypeCodeToContainer.migrationReadset()		
+#GET		/cns/update-lane-content 				controllers.migration.cns.MigrationContentPropertiesContainer.migration()
+#GET		/cns/migration-process-properties		controllers.migration.cns.MigrationProcessusProperties.migration(processTypeCode: java.lang.String, keyProperty: java.lang.String)
+#GET 	/cns/migration-experiment-input-properties		controllers.migration.cns.MigrationInputExperimentProperties.migration(experimentTypeCode: java.lang.String, keyProperty: java.lang.String ?=null, newKeyProperty: java.lang.String)
+#GET 	/cns/migration-experiment-output-properties		controllers.migration.cns.MigrationOutputExperimentProperties.migration(experimentTypeCode: java.lang.String, keyProperty: java.lang.String ?=null, newKeyProperty: java.lang.String)
+#GET 	/cns/migration-experiment-properties-conc		controllers.migration.cns.MigrationExperimentPropertiesConcentration.migration(experimentTypeCode: java.lang.String, newKeyProperty: java.lang.String)
+#GET		/cns/migration-experiment-instrument-properties	controllers.migration.cns.MigrationExperimentInstrumentProperties.migration(experimentTypeCode: java.lang.String, keyProperty:java.lang.String, addToRun:Boolean ?=false)
+#GET		/cns/migration-experiment-protocol-properties	controllers.migration.cns.MigrationExperimentProtocolProperties.migration(experimentTypeCode: java.lang.String, keyProperty:java.lang.String)
+#GET		/cns/migration-experiment-flowcellChemistry		controllers.migration.cns.MigrationExperimentFlowcellChemistry.migration()
+#GET		/cns/migration-readSet-minknowMetrichor	controllers.migration.cns.MigrationReadSetMinknowMetrichor.migration()
+#GET 	/cns/migration-experiment-input-tree-properties		controllers.migration.cns.MigrationInputExperimentPropertiesTreeOfLife.migration(experimentTypeCode: java.lang.String, keyProperty: java.lang.String ?=null, newKeyProperty: java.lang.String)
+
+#GET 	/cns/migration-experiment-error-input				controllers.migration.cns.MigrationPropertiesExperimentErrorInput.migration(experimentTypeCode: java.lang.String, keyProperty: java.lang.String, addToRun:Boolean ?=false)
+#GET 	/cns/migration-container-error-input				controllers.migration.cns.MigrationPropertiesContainerErrorInput.migration(experimentTypeCode: java.lang.String, keyProperty: java.lang.String, previousExperimentTypeCode: java.lang.String ?=null, addToRun:Boolean ?=false)
+
+#GET 	/cns/migration-experiment-input-tree-properties-upgrade	controllers.migration.cns.MigrationInputExperimentPropertiesTreeOfLifeUpgrade.migration(experimentTypeCode: java.lang.String,newKeyProperty: java.lang.String)
+
+#GET 	/cns/migration-readSet-minknowBasecalling		controllers.migration.cns.MigrationReadSetMinknowBasecalling.migration()
+#GET 	/cns/migration-rawData-submission/:projectCode	controllers.migration.cns.MigrationRawDataMd5Submission.migration(projectCode: java.lang.String)
+
+#GET		/cng/migration-sequencing				controllers.migration.cng.AddSequencingProgramType.migration()
+#GET		/cng/migration-content-extended			controllers.migration.cng.MigrationContentExtended.migration()
+#GET		/cng/migration-libprocess				controllers.migration.cng.AddLibProcessTypeCode.migration()
+#GET		/cng/migration-projectcode				controllers.migration.cng.MigrationProjectCodes.migration()
+#GET		/cng/migration-tube-import				controllers.migration.cng.TubeImport.migration()
+#GET		/cng/migration-concentration			controllers.migration.cng.UpdateConcentration.migration()
+#GET		/cng/migration-comments					controllers.migration.cng.MigrationComments.migration()
+#GET		/cng/migration-projectcodes-rds			controllers.migration.cng.MigrationProjectCodesFromReadSets.migration()
+#GET     /cng/migration-lanes                    controllers.migration.cng.MigrationLanes.migration()
+
+#GET     /cng/add-chromium-index                 controllers.migration.cng.AddIndexChromium.addIndex()
+#GET     /cng/migration-sampletype               controllers.migration.cng.MigrationSampleType.migration()
+#GET     /cng/migration-whole-genome             controllers.migration.cng.MigrationAnalysisWholeGenome.migration()
+
+#GET		/cns/migration-transfert-ccrt			controllers.migration.cns.MigrationTransfertCCRT.migration()
+#GET		/cng/migration-transfert-ccrt			controllers.migration.cng.MigrationTransfertCCRT.migration()
+#GET		/cns/migration-error-pool				controllers.migration.cns.MigrationErrorPool.migration()
+#GET		/migration-switch-container			controllers.migration.SwitchContainer.migration()
+
+#GET		/cns/migration-error-flowcellChemistry	controllers.migration.cns.MigrationUpdateFlowcellChemistryNanopore.migration(fileName: java.lang.String)
+#GET 	/cns/migration-projects					controllers.migration.MigrationProjet.migration()
+#GET 	/cns/migration-tara-station				controllers.migration.cns.MigrationSampleTaraStation.migration()
+
+#GET		/cns/migration-readset-nanopore			@controllers.migration.cns.MigrationReadSetNanopore.migration(collectionName: java.lang.String)
+#GET		/cns/migration-readset-nanopore-update-trt	@controllers.migration.cns.MigrationReadSetNanopore.updateMinknowBasecalling(collectionNameRun: java.lang.String, collectionNameReadSet: java.lang.String)
+
+#GET		/migration-quality-score				controllers.migration.MigrationReadSetQualityScore.migration(fileName: java.lang.String)
+
+
+#GET 	/migration-process-properties			controllers.migration.MigrationProcessProperties.migration()
+####
+
+#GET 	/update/readsetfile/:code				controllers.migration.cns.MigrationReadSetFileCNS.updateFileReadSet(code: java.lang.String)
+
+# Map static resources from the /public folder to the /assets URL path
+# GET     /assets/*file               			controllers.Assets.at(path="/public", file)

@@ -1,0 +1,65 @@
+@this(ctx : fr.cea.ig.ngl.NGLApplication, menu_ : menu)
+@(code : String)
+
+@import models.laboratory.common.description.ObjectType
+@import views.html._
+
+@minifyEnabled = @{ true == ctx.nglConfig().isMinified() }
+
+@scripts() = {
+    <script src="@controllers.main.tpl.routes.Main.jsCodes" type="text/javascript" charset="utf-8"></script>
+	<script src="@controllers.main.tpl.routes.Main.jsPermissions" type="text/javascript" charset="utf-8"></script> 
+	   
+	@if(!minifyEnabled) {
+		<script src="@routes.Assets.at("ngl-sq/javascripts/processes/app.js")" type="text/javascript" charset="utf-8"></script> 
+		<script src="@routes.Assets.at("ngl-sq/javascripts/services/dragndrop.js")" type="text/javascript" charset="utf-8"></script> 
+		<script src="@routes.Assets.at("ngl-sq/javascripts/services/propertyDefServices.js")" type="text/javascript" charset="utf-8"></script> 
+		
+		<script src="@routes.Assets.at("lib/datatable/datatable/javascripts/services/ultimate-datatable.js")" type="text/javascript" charset="utf-8"></script> 
+
+		<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/basket.js")" type="text/javascript" charset="utf-8"></script>  
+		<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/commons.js")" type="text/javascript" charset="utf-8"></script>
+		<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/bt-input.js")" type="text/javascript" charset="utf-8"></script> 	
+		<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/list-resize.js")" type="text/javascript" charset="utf-8"></script> 
+
+		<script src="@routes.Assets.at("lib/lib-frameworkweb/ngl-common/javascripts/controllers/mainctrl.js")" type="text/javascript" charset="utf-8"></script> 
+
+		<script src="@routes.Assets.at("ngl-sq/javascripts/processes/services.js")" type="text/javascript" charset="utf-8"></script>  	
+		<script src="@routes.Assets.at("ngl-sq/javascripts/processes/controllers.js")" type="text/javascript" charset="utf-8"></script>
+		<script src="@routes.Assets.at("ngl-sq/javascripts/processes/search-ctrl.js")" type="text/javascript" charset="utf-8"></script>    
+		<script src="@routes.Assets.at("ngl-sq/javascripts/samples/services.js")" type="text/javascript" charset="utf-8"></script>
+		<script src="@routes.Assets.at("ngl-sq/javascripts/containers/services.js")" type="text/javascript" charset="utf-8"></script>
+	} else {
+		<script src="@routes.Assets.at("ngl-sq/javascripts/processes/app.min.js")" type="text/javascript" charset="utf-8"></script> 
+		<script src="@routes.Assets.at("ngl-sq/javascripts/services/dragndrop.min.js")" type="text/javascript" charset="utf-8"></script> 
+		<script src="@routes.Assets.at("ngl-sq/javascripts/services/propertyDefServices.min.js")" type="text/javascript" charset="utf-8"></script> 
+		
+		<script src="@routes.Assets.at("lib/datatable/datatable/javascripts/services/ultimate-datatable.min.js")" type="text/javascript" charset="utf-8"></script>    
+
+		<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/basket.min.js")" type="text/javascript" charset="utf-8"></script>  
+		<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/commons.min.js")" type="text/javascript" charset="utf-8"></script>
+		<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/bt-input.min.js")" type="text/javascript" charset="utf-8"></script> 	
+		<script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/list-resize.min.js")" type="text/javascript" charset="utf-8"></script> 
+
+		<script src="@routes.Assets.at("lib/lib-frameworkweb/ngl-common/javascripts/controllers/mainctrl.min.js")" type="text/javascript" charset="utf-8"></script> 
+
+		<script src="@routes.Assets.at("ngl-sq/javascripts/processes/services.min.js")" type="text/javascript" charset="utf-8"></script>  	
+		<script src="@routes.Assets.at("ngl-sq/javascripts/processes/controllers.min.js")" type="text/javascript" charset="utf-8"></script>
+		<script src="@routes.Assets.at("ngl-sq/javascripts/processes/search-ctrl.min.js")" type="text/javascript" charset="utf-8"></script>    
+		<script src="@routes.Assets.at("ngl-sq/javascripts/samples/services.min.js")" type="text/javascript" charset="utf-8"></script>
+		<script src="@routes.Assets.at("ngl-sq/javascripts/containers/services.min.js")" type="text/javascript" charset="utf-8"></script>
+	}
+
+	<script src="@helper.getAsset("javascripts","cytoscape","3.2.8","cytoscape_3.2.8.min.js")" type="text/javascript" charset="utf-8"></script>
+	<script src="@controllers.processes.tpl.routes.Processes.javascriptRoutes" type="text/javascript" charset="utf-8"></script>   
+}
+
+@css() = {
+	<link rel="preload" href="@routes.Assets.at("ngl-sq/css/commons/commons.css")" as="style" onload="this.onload=null;this.rel='stylesheet'">
+	<noscript><link rel="stylesheet" href="@routes.Assets.at("ngl-sq/css/commons/commons.css")"></noscript> 
+	
+	<link rel="preload" href="@routes.Assets.at("ngl-sq/css/processes/create-processes.css")" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="@routes.Assets.at("ngl-sq/css/processes/create-processes.css")"></noscript> 
+}
+
+@main("processes.title", menu_("processes."+code), scripts, css)(views.html.contents.lefttabs())

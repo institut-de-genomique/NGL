@@ -1,0 +1,75 @@
+//created on: Nov 21, 2013
+package rules
+
+
+rule "Set Lane index properties to ReadSet"
+	@nglBI( F_RG_1 )
+	dialect "java"
+	salience 600
+	no-loop
+	when
+		$readset : ReadSet(typeCode == "default-readset" || typeCode == "rsillumina")		
+	then
+		Logger.debug("Set Lane properties to Readset "+$readset.code);
+		BasicDBObject keys = new BasicDBObject();
+		keys.put("code", 1);
+		keys.put("lanes", 1);
+		Run run = MongoDBDAO.findOne(InstanceConstants.RUN_ILLUMINA_COLL_NAME, Run.class, DBQuery.is("code", $readset.runCode), keys);
+		if(null != run){
+			Treatment laneNGSRG = run.getLane($readset.laneNumber).treatments.get("ngsrg");
+			Treatment readSetNGSRG = $readset.treatments.get("ngsrg");
+			if(laneNGSRG!=null && readSetNGSRG!=null){
+				boolean isUpdate = false;
+				if(null != laneNGSRG.results.get("default").get("nbUsefulCycleReadIndex2")){
+					readSetNGSRG.results.get("default").put("nbUsefulCycleReadIndex2", laneNGSRG.results.get("default").get("nbUsefulCycleReadIndex2"));
+					isUpdate = true;
+				}
+				if(null != laneNGSRG.results.get("default").get("nbUsefulCycleRead2")){
+					readSetNGSRG.results.get("default").put("nbUsefulCycleRead2", laneNGSRG.results.get("default").get("nbUsefulCycleRead2"));
+					isUpdate = true;
+				}
+				if(null != laneNGSRG.results.get("default").get("nbUsefulCycleRead1")){
+					readSetNGSRG.results.get("default").put("nbUsefulCycleRead1", laneNGSRG.results.get("default").get("nbUsefulCycleRead1"));
+					isUpdate = true;
+				}
+				if(null != laneNGSRG.results.get("default").get("nbUsefulCycleReadIndex1")){
+					readSetNGSRG.results.get("default").put("nbUsefulCycleReadIndex1", laneNGSRG.results.get("default").get("nbUsefulCycleReadIndex1"));
+				isUpdate = true;
+				}
+				if(isUpdate){
+					MongoDBDAO.update(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, DBQuery.is("code", $readset.code),  DBUpdate.set("treatments.ngsrg", readSetNGSRG));
+				}
+			}
+		}else{
+			Logger.error("ReadSet Does not exist: "+$readset.runCode);
+		}
+		
+end
+
+rule "Calculate 2DPass.readsPercent for ngsrg-nanopore"
+	@nglBI( F_RG_1 )
+	dialect "java"
+	salience 600
+	no-loop
+	when
+		$readset : ReadSet($treatment : treatments["ngsrg"], $treatment!=null, $treatment.typeCode == "ngsrg-nanopore")
+		$mapValue : Map() from $treatment.results.values()
+		$2DPass : Entry(key=="2DPass") from $mapValue.entrySet()
+		$1DForward : Entry(key=="1DForward") from $mapValue.entrySet()
+	then
+		Logger.debug("Calculate 2DPass.readsPercent");
+		PropertyObjectValue propertyValueTwoD = (PropertyObjectValue)$2DPass.getValue();
+		Map mapPropertyValueTwoD = propertyValueTwoD.getValue();
+		Long twoDPassNbReads = (Long)mapPropertyValueTwoD.get("nbReads");
+		
+		Long oneDForwardNbReads = (Long)((Map)((PropertyValue)$1DForward.getValue()).getValue()).get("nbReads");
+		
+		Double twoDPassReadsPercent = roundValue((double)twoDPassNbReads/oneDForwardNbReads*100);
+		
+		mapPropertyValueTwoD.put("readsPercent", twoDPassReadsPercent);
+		MongoDBDAO.update(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, 
+						DBQuery.is("code", $readset.code),
+						DBUpdate.set("treatments.ngsrg.default.2DPass", propertyValueTwoD));
+		
+end
+

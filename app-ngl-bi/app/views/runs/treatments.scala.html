@@ -1,0 +1,47 @@
+@this()
+@(typeCode: String)
+
+@if(typeCode == "minknow-metrichor") {
+	@_treatments.minknowMetrichor()
+}
+
+@if(typeCode == "minknow-basecalling") {
+	@_treatments.minknowBasecalling()
+}
+
+@if(typeCode == "ngsrg-mgi"){
+	@_treatments.ngsrgMGI()
+}
+
+@if(typeCode == "ngsrg-nanopore") {
+	@_treatments.ngsrgNanopore()
+}
+
+@**NGL3481, il faut indiquer ici le typeCode du traitment et non le code **@
+@if(typeCode == "quality-control-nanopore") {
+	@_treatments.qualityControlNanopore()
+}
+
+@**NGL-3967**@
+@if(typeCode == "ngsrg-pacbio") {
+	@_treatments.ngsrgPacbio()
+}
+@**NGL-3967**@
+@if(typeCode == "ccsreport-pacbio") {
+	@_treatments.ccsReport()
+}
+@**NGL-3967**@
+@if(typeCode == "demultiplexing-pacbio") {
+	@_treatments.demultiplexingPacbio()
+}
+
+
+ 
+
+
+
+
+
+
+
+

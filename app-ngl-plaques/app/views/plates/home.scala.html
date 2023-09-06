@@ -1,0 +1,20 @@
+@this(menu_ : menu)
+@(code :String)
+
+@scripts() = {
+ 	<script src="@controllers.main.tpl.routes.Main.jsCodes" type="text/javascript" charset="utf-8"></script> 
+	
+	 <script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/basket.js")" type="text/javascript" charset="utf-8"></script>                   
+     <script src="@routes.Assets.at("lib/ngl-common/ngl-common/javascripts/services/commons.js")" type="text/javascript" charset="utf-8"></script> 	 
+     <script src="@routes.Assets.at("lib/datatable/datatable/javascripts/services/ultimate-datatable.js")" type="text/javascript" charset="utf-8"></script>                           	 
+	 <script src="@routes.Assets.at("ngl-plates/javascripts/plates/app.js")" type="text/javascript" charset="utf-8"></script>
+	 <script src="@routes.Assets.at("lib/lib-frameworkweb/ngl-common/javascripts/controllers/mainctrl.js")" type="text/javascript" charset="utf-8"></script> 
+	 <script src="@routes.Assets.at("ngl-plates/javascripts/plates/search-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	 <script src="@routes.Assets.at("ngl-plates/javascripts/plates/search-manips-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	 <script src="@routes.Assets.at("ngl-plates/javascripts/plates/from-file-ctrl.js")" type="text/javascript" charset="utf-8"></script>	 
+	 <script src="@routes.Assets.at("ngl-plates/javascripts/plates/details-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+	 <script src="@controllers.plates.tpl.routes.Plates.javascriptRoutes" type="text/javascript" charset="utf-8"></script>
+}
+
+@views.html.main("plates.title."+code, menu_("plates."+code), scripts)(views.html.contents.lefttabs())
+

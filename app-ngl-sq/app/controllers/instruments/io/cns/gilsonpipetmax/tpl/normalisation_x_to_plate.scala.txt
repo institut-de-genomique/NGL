@@ -1,0 +1,52 @@
+@(lines: List[controllers.instruments.io.cns.gilsonpipetmax.GilsonSampleSheetLine],protocolName: String)
+
+
+@import controllers.instruments.io.utils._;
+@import java.text.SimpleDateFormat;
+@import java.lang.String; var count=0; var dnaVol="ADN volume collection"; var bufferVol="tampon volume collection"; var sourceWell="source well collection"; var destWell="destination well collection" 
+
+# ---------------------------------------------------------------------------------------------------------,\u000D\u000A
+# PROTOCOL IDENTIFICATION,\u000D\u000A
+# - This section is REQUIRED.  Necessary for protocol identification.,\u000D\u000A
+#,\u000D\u000A
+#   REQUIRED FIELDS:,\u000D\u000A
+#     protocol-identifier:   The globally unique identifier of the protocol.,\u000D\u000A
+#,\u000D\u000A
+#     WHEN TARGETING FILE (.sqlite),\u000D\u000A
+#       protocol-filename:   The filename of the protocol.,\u000D\u000A
+#,\u000D\u000A
+#   OPTIONAL FIELD:,\u000D\u000A
+#     protocol-name:         The name of the protocol.  For documentation purposes only.,\u000D\u000A
+# ---------------------------------------------------------------------------------------------------------,\u000D\u000A
+protocol-name,protocol-identifier\u000D\u000A
+@protocolName,081e929c-a16d-4a55-8b22-bef1b36a963c\u000D\u000A
+# ---------------------------------------------------------------------------------------------------------,\u000D\u000A
+# PARAMETER SETUP,\u000D\u000A
+# - This section is OPTIONAL.  Any values specified will be altered during the import.,\u000D\u000A
+#,\u000D\u000A
+#   REQUIRED FIELDS:,\u000D\u000A
+#     parameter-name:        The name of the parameter.,\u000D\u000A
+#     parameter-value:       The value of the parameter (altered value).,\u000D\u000A
+# ---------------------------------------------------------------------------------------------------------,\u000D\u000A
+
+parameter-name,parameter-value\u000D\u000A
+
+@for((line) <- lines.sorted){
+	@{count+=1}
+	@if(count==1){
+		@{sourceWell+= ",\""+line.sourcePos}
+		@{dnaVol+= ",\""+line.dnaVol}
+	 	@{bufferVol+= ",\""+line.bufferVol}
+		@{destWell+= ",\""+line.destPos}	
+	}else{
+		@{sourceWell+= ","+line.sourcePos}
+		@{dnaVol+= ","+line.dnaVol}
+	 	@{bufferVol+= ","+line.bufferVol}
+		@{destWell+= ","+line.destPos}	
+	}
+}
+
+@(dnaVol)"\u000D\u000A
+@(destWell)"\u000D\u000A
+@(sourceWell)"\u000D\u000A
+\u000D\u000A@(bufferVol)"\u000D\u000A

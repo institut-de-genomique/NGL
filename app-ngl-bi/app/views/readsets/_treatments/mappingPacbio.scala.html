@@ -1,0 +1,178 @@
+@()
+@**NGL-3967**@
+<div class="row">		
+	<div class="col-md-2 col-lg-2">				  	
+			<table class="table table-condensed table-hover table-bordered">
+				<tbody>
+				<tr>
+					<th>@Messages("readsets.treatments.mapping_pacbio.inputNbBases")</th>
+					<td>
+						{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.inputNbBases.value | number}}
+					</td>
+							
+				</tr>
+				</tbody>
+			</table>
+		</div>					
+	</div>	
+
+<div class="row"> 
+	<div class="col-md-5 col-lg-5">
+	 <table class="table table-condensed table-hover table-bordered">
+		<caption><h3>@Messages("readsets.treatments.mapping_pacbio.legende_1")</h3></caption>
+		<tbody>
+			<tr>
+				<th>@Messages("readsets.treatments.mapping_pacbio.reads.percentAlignedBasePairs")</th>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.reads.percentAlignedBasePairs.value | number:3}}</td>
+			</tr>
+			<tr>
+				<th>@Messages("readsets.treatments.mapping_pacbio.reads.verticalCoverage")</th>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.reads.verticalCoverage.value | number:3}}</td>
+			</tr>
+			<tr>
+				<th>@Messages("readsets.treatments.mapping_pacbio.reads.horizontalCoverage")</th>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.reads.horizontalCoverage.value | number:3}}</td>
+			</tr>
+			<tr>
+				<th>@Messages("readsets.treatments.mapping_pacbio.reads.readAlignementSizeMax")</th>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.reads.readAlignementSizeMax.value | number:3}}</td>
+			</tr>
+			<tr>
+				<th>@Messages("readsets.treatments.mapping_pacbio.reads.identityPercentageAvg")</th>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.reads.identityPercentageAvg.value | number:3}}</td>
+			</tr>
+			<tr>
+				<th>@Messages("readsets.treatments.mapping_pacbio.reads.percentAlignedReadsL100")</th>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.reads.percentAlignedReadsL100.value | number:3}}</td>
+			</tr>
+			<tr>
+				<th>@Messages("readsets.treatments.mapping_pacbio.reads.percentAlignedReads")</th>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.reads.percentAlignedReads.value | number:3}}</td>
+			</tr>
+			
+								
+		</tbody>
+	</table>
+	</div>	
+</div>
+
+<div class="row"> 
+	<div class="col-md-5 col-lg-5">	
+		<table class="table table-condensed table-hover table-bordered">
+		<tbody>
+			<tr>
+				<th>@Messages("readsets.treatments.mapping_pacbio.reverseAlignedReadsPercent")</th>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.reverseAlignedReadsPercent.value | number:3}}</td>
+			</tr>
+			<tr>
+				<th>@Messages("readsets.treatments.mapping_pacbio.chimericAlignedReads")</th>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.chimericAlignedReads.value | number}}</td>
+			</tr>
+			<tr>
+				<th>@Messages("readsets.treatments.mapping_pacbio.forwardAlignedReadsPercent")</th>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.forwardAlignedReadsPercent.value | number:3}}</td>
+			</tr>
+			<tr>
+				<th>@Messages("readsets.treatments.mapping_pacbio.noChimericAlignedReads")</th>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.noChimericAlignedReads.value | number}}</td>
+			</tr>	
+	</div>	
+</div>
+	
+
+
+<div class="row">
+	<div class="col-md-8 col-lg-8">
+	<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+		ng-click="setImage(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.identityPercentVsReadAlignedLength.value,'identityPercentVsReadAlignedLength','',treament.code!=undefined?treament.code:treatments.getTreatment().code,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.identityPercentVsReadAlignedLength.width,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.identityPercentVsReadAlignedLength.height)">
+		 <a href="#">
+		    <img id="default_identityPercentVsReadAlignedLength" ng-src="data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.identityPercentVsReadAlignedLength.value}}" />
+		 </a> 
+	    </div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-8 col-lg-8">
+	<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+		ng-click="setImage(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.identityPercentVsReadQuality.value,'identityPercentVsReadQuality','',treament.code!=undefined?treament.code:treatments.getTreatment().code,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.identityPercentVsReadQuality.width,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.identityPercentVsReadQuality.height)">
+		 <a href="#">
+		    <img id="default_identityPercentVsReadQuality" ng-src="data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.identityPercentVsReadQuality.value}}" />
+		 </a> 
+	    </div>
+	 </div>
+	
+</div>
+	
+			
+<div class="row"> 
+	<div class="col-md-5 col-lg-5">				
+		<table class="table table-condensed table-hover table-bordered">
+		
+		<tbody>			
+			<tr>
+				<th>@Messages("readsets.treatments.mapping_pacbio.reverseAlignedReads")</th>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.reverseAlignedReads.value | number}}</td>
+			</tr>
+			<tr>
+				<th>@Messages("readsets.treatments.mapping_pacbio.forwardAlignedReads")</th>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.forwardAlignedReads.value | number}}</td>
+			</tr>
+			<tr>
+				<th>@Messages("readsets.treatments.mapping_pacbio.inputNbBases")</th>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.inputNbBases.value | number}}</td>
+			</tr>
+			<tr>
+				<th>@Messages("readsets.treatments.mapping_pacbio.chimericAlignedReadsPercent")</th>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.chimericAlignedReadsPercent.value | number:3}}</td>
+			</tr>
+			<tr>
+				<th>@Messages("readsets.treatments.mapping_pacbio.inputNbReads")</th>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.inputNbReads.value | number}}</td>
+			</tr>
+			<tr>
+				<th>@Messages("readsets.treatments.mapping_pacbio.noChimericAlignedReadsPercent")</th>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.noChimericAlignedReadsPercent.value | number:3}}</td>
+			</tr>
+								
+		</tbody>
+	</table>
+	</div>	
+</div>
+
+
+
+
+<!-- Image -->
+
+
+
+<div class="row">
+	<div class="col-md-8 col-lg-8">
+	<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+		ng-click="setImage(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.identityPercentVsReadQuality.value,'identityPercentVsReadQuality','',treament.code!=undefined?treament.code:treatments.getTreatment().code,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.identityPercentVsReadQuality.width,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.identityPercentVsReadQuality.height)">
+		 <a href="#">
+		    <img id="default_identityPercentVsReadQuality" ng-src="data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.identityPercentVsReadQuality.value}}" />
+		 </a> 
+	    </div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-8 col-lg-8">
+	<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+		ng-click="setImage(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.identityPercentVsReadAlignedLength.value,'identityPercentVsReadAlignedLength','',treament.code!=undefined?treament.code:treatments.getTreatment().code,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.identityPercentVsReadAlignedLength.width,
+		readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.identityPercentVsReadAlignedLength.height)">
+		 <a href="#">
+		    <img id="default_identityPercentVsReadAlignedLength" ng-src="data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.identityPercentVsReadAlignedLength.value}}" />
+		 </a> 
+	    </div>
+	 </div>
+	
+</div>
+

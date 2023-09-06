@@ -1,0 +1,207 @@
+@this(ctx : fr.cea.ig.ngl.NGLApplication)
+
+@import play.mvc.Http.Context
+@import controllers.authorisation.PermissionHelper
+@import views.html.helper._
+
+@user            = @{ ctx.currentUser() }
+@adminPermission = @{ PermissionHelper.checkPermission(user, "admin") }
+
+@formCategories() = {
+    <form class="well well-small">
+        <div class="row">
+            @columnSearchForm{
+                @formGroup{
+                <div bt-select placeholder='@Messages("descriptions.select.instruments.category")' class="form-control" filter="true" multiple="true"
+                    ng-model="searchService.tabs.categories.form.categoryCodes"
+                    bt-options="category.code as category.name for category in searchService.tabs.categories.lists.categories()"
+                    ng-change="searchService.tabs.categories.form.codes=null">
+                </div>
+                }
+            }
+            @columnSearchForm{
+                @formGroup{
+                <div bt-select placeholder='@Messages("descriptions.select.instruments.type")' class="form-control" filter="true" multiple="true"
+                    ng-model="searchService.tabs.categories.form.codes"
+                    bt-options="type.code as type.name for type in searchService.tabs.categories.lists.types()">
+                </div>
+                }
+            }
+            @columnSearchForm{
+                @formGroup{
+                <div class="btn-toolbar">
+                    <button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="searchService.searchCategories()" class="btn btn-primary" >
+                        <i class="fa fa-search"></i>
+                    </button>
+                    <button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="resetCategoriesForm()"  class="btn btn-default">
+                        <i class="fa fa-undo"></i>
+                    </button>
+                                                    
+                </div>	
+                }
+            }
+        </div>
+    </form>
+}
+<div ng-init="setIsAdmin(@adminPermission)">
+    @formInstruments() = {
+    <form class="well well-small">
+        <div class="row">
+            @columnSearchForm{
+            @formGroup{
+            <div bt-select placeholder='@Messages("descriptions.select.instruments.category")' class="form-control"
+                filter="true" multiple="true" ng-model="searchService.tabs.instruments.form.categoryCodes"
+                bt-options="category.code as category.name for category in searchService.tabs.instruments.lists.categories()"
+                ng-change="searchService.tabs.instruments.form.typeCodes=null">
+            </div>
+            }
+            }
+            @columnSearchForm{
+            @formGroup{
+            <div bt-select placeholder='@Messages("descriptions.select.instruments.type")' class="form-control"
+                filter="true" multiple="true" ng-model="searchService.tabs.instruments.form.typeCodes"
+                bt-options="type.code as type.name for type in searchService.tabs.instruments.lists.types()"
+                ng-change="searchService.tabs.instruments.form.codes=null">
+            </div>
+            }
+            }
+            @columnSearchForm{
+            @formGroup{
+            <div bt-select placeholder='@Messages("descriptions.select.instruments.name")' class="form-control"
+                filter="true" multiple="true" ng-model="searchService.tabs.instruments.form.codes"
+                bt-options="instrument.code as instrument.name for instrument in searchService.tabs.instruments.lists.instruments()">
+            </div>
+            }
+            }
+            @columnSearchForm{
+            @formGroup{
+            <div class="btn-toolbar">
+                <button type="submit" title='@Messages("button.search")' data-toggle="tooltip"
+                    ng-click="searchService.searchInstruments()" class="btn btn-primary">
+                    <i class="fa fa-search"></i>
+                </button>
+                <button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="resetInstrumentsForm()"
+                    class="btn btn-default">
+                    <i class="fa fa-undo"></i>
+                </button>
+
+            </div>
+            }
+            }
+        </div>
+    </form>
+    }
+
+    @formProperties() = {
+    <form class="well well-small">
+        <div class="row">
+            @columnSearchForm{
+            @formGroup{
+            <div bt-select placeholder='@Messages("descriptions.select.properties.type")' class="form-control"
+                filter="true" multiple="true" ng-model="searchService.tabs.properties.form.codes"
+                bt-options="type.code as type.name for type in searchService.tabs.properties.lists.types()">
+            </div>
+            }
+            }
+            @columnSearchForm{
+            @formGroup{
+            <div class="btn-toolbar">
+                <button type="submit" title='@Messages("button.search")' data-toggle="tooltip"
+                    ng-click="searchService.searchProperties()" class="btn btn-primary">
+                    <i class="fa fa-search"></i>
+                </button>
+                <button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="resetPropertiesForm()"
+                    class="btn btn-default">
+                    <i class="fa fa-undo"></i>
+                </button>
+
+            </div>
+            }
+            }
+        </div>
+    </form>
+    }
+
+    @formSupportCategories() = {
+    <form class="well well-small">
+        <div class="row">
+            @columnSearchForm{
+            @formGroup{
+            <div bt-select placeholder='@Messages("descriptions.select.support.categories.type")' class="form-control"
+                filter="true" multiple="true" ng-model="searchService.tabs.supportCategories.form.codes"
+                bt-options="type.code as type.name for type in searchService.tabs.supportCategories.lists.types()">
+            </div>
+            }
+            }
+            @columnSearchForm{
+            @formGroup{
+            <div class="btn-toolbar">
+                <button type="submit" title='@Messages("button.search")' data-toggle="tooltip"
+                    ng-click="searchService.searchSupportCategories()" class="btn btn-primary">
+                    <i class="fa fa-search"></i>
+                </button>
+                <button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="resetSupportCategoriesForm()"
+                    class="btn btn-default">
+                    <i class="fa fa-undo"></i>
+                </button>
+
+            </div>
+            }
+            }
+        </div>
+    </form>
+    }
+
+    <div class="row">
+        <div class="col-md-12 col-lg-12" messages="messages"></div>
+    </div>
+    <div class="row">
+
+        <div class="col-md-12 col-lg-12">
+            <ul class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="active">
+                    <a href="#" data-target="#categories" data-toggle="tab"
+                        role="tab">@Messages("descriptions.instruments.tab.categories")</a>
+                </li>
+                <li role="presentation">
+                    <a href="#" data-target="#instruments" data-toggle="tab"
+                        role="tab">@Messages("descriptions.instruments.tab.instruments")</a>
+                </li>
+                <li role="presentation">
+                    <a href="#" data-target="#properties" data-toggle="tab"
+                        role="tab">@Messages("descriptions.instruments.tab.properties")</a>
+                </li>
+                <li role="presentation">
+                    <a href="#" data-target="#supportCategories" data-toggle="tab"
+                        role="tab">@Messages("descriptions.instruments.tab.support.categories")</a>
+                </li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane fade in active" id="categories">
+                    @formCategories
+                    <div ultimate-datatable="searchService.tabs.categories.datatable">
+                        <div udt-form></div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="instruments">
+                    @formInstruments
+                    <div ultimate-datatable="searchService.tabs.instruments.datatable">
+                        <div udt-form></div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="properties">
+                    <div class="alert alert-warning">@Messages("descriptions.info.export.properties.definitions.value.possibles")</div>
+                    @formProperties
+                    <div ultimate-datatable="searchService.tabs.properties.datatable">
+                        <div udt-form></div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="supportCategories">
+                    @formSupportCategories
+                    <div ultimate-datatable="searchService.tabs.supportCategories.datatable">
+                        <div udt-form></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>

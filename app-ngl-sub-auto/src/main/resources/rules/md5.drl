@@ -1,0 +1,62 @@
+#created on: Jul 7, 2014
+package birds
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.File;
+import java.io.PrintWriter;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+
+rule "Set parameter for command line md5"
+	@BirdsRule(fsRule)
+	dialect 'java'
+	salience 300
+	no-loop
+		when
+			$treatSpec : TreatmentSpecification(name=="Md5File", project.name=="SRA")
+			$job : Job(treatmentSpecification.name!=null, treatmentSpecification.name == "Md5File")
+		then
+			Logger log = Logger.getLogger("ngl.sub.rules");
+			log.debug("Set parameter for md5 command");
+			//Get input resource
+			JobResource jobResource = $job.getUniqueJobResource("inputRawDataMd5");
+			$job.setParameterValue("fileZipped", ProjectProperties.getProperty("tmpDirectory")+File.separator+jobResource.getProperty("code")+File.separator+jobResource.getProperty("fileName"));
+end
+
+rule "POST DONE EXECUTION of md5 : Update MD5 of RawData"
+	@BirdsRule( ExecutionService )
+	dialect 'java'
+	salience 200
+	when
+		$executionService : ExecutionService( status == ExecutionService.POST_JOB_EXECUTION_STATUS)
+		$job : Job( treatmentSpecification!=null, treatmentSpecification.name == "Md5File", treatmentSpecification.project.name == "SRA", executionState == Job.DONE_STATUS )
+	then
+		Logger log = Logger.getLogger("ngl.sub.rules");
+		//Get md5 from Job.STDOUT
+		BufferedReader read = new BufferedReader(new FileReader(new File($job.getProperty(Job.STDOUT))));
+		String md5 = read.readLine().split(" ")[0];
+		read.close();
+		//Write in md5 file
+		JobResource jobResource = $job.getUniqueJobResource("inputRawDataMd5");
+		String md5FileName = ProjectProperties.getProperty("tmpDirectory")+File.separator+jobResource.getProperty("code")+File.separator+"md5.txt";
+		PrintWriter out = new PrintWriter(new FileWriter(new File(md5FileName),true));
+		out.println(md5+" "+jobResource.getProperty("fileName"));
+		out.close();
+		//Update md5 in NGLSUB for RawData
+		//Raw Data from DB
+		JSONDevice jsonDevice = new JSONDevice();
+		String typeRawDataSubmitted = jobResource.getProperty("typeRawDataSubmitted");
+		if(typeRawDataSubmitted.equals("bionanoRawData")){
+			String JSONRawData = jsonDevice.httpGet(ProjectProperties.getProperty("server")+"/api/sra/analyzes/"+jobResource.getProperty("analysisCode")+"/rawDatas/"+jobResource.getProperty("fileName"),"bot");
+			String JSONRawDataModify = jsonDevice.modifyJSON(JSONRawData, "md5", md5);
+			String JSONRawDataModify2 = jsonDevice.modifyJSON(JSONRawDataModify, "md5sumForSubmission", "false");
+			String jsonResult = jsonDevice.httpPut(ProjectProperties.getProperty("server")+"/api/sra/analyzes/"+jobResource.getProperty("analysisCode")+"/rawDatas/"+jobResource.getProperty("fileName"),JSONRawDataModify2, "bot");
+			log.debug("Result "+jsonResult);
+		}else{
+			String JSONRawData = jsonDevice.httpGet(ProjectProperties.getProperty("server")+"/api/sra/experiments/"+jobResource.getProperty("experimentCode")+"/rawDatas/"+jobResource.getProperty("fileName"),"bot");
+			String JSONRawDataModify = jsonDevice.modifyJSON(JSONRawData, "md5", md5);
+			String JSONRawDataModify2 = jsonDevice.modifyJSON(JSONRawDataModify, "md5sumForSubmission", "false");
+			String jsonResult = jsonDevice.httpPut(ProjectProperties.getProperty("server")+"/api/sra/experiments/"+jobResource.getProperty("experimentCode")+"/rawDatas/"+jobResource.getProperty("fileName"),JSONRawDataModify2, "bot");
+			log.debug("Result "+jsonResult);
+		}
+end

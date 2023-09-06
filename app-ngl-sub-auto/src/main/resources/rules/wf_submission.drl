@@ -1,0 +1,52 @@
+#created on: Jul 15, 2014
+package birds
+
+import  fr.genoscope.lis.devsi.birds.impl.factory.ResourcesReferentialServiceFactory;
+import fr.cea.ig.auto.submission.SubmissionServicesFactory;
+import fr.genoscope.lis.devsi.birds.impl.properties.ProjectProperties;
+
+#Select resource for workflow submission
+rule "select resources from nglsub"
+	@BirdsRule ( selectionRule )
+	salience 200
+	dialect 'java'
+	no-loop
+	when
+		$input : InputSpecificationElement(name=="subData", treatmentSpecification.name=="WF_Submission", project.name == "SRA")
+		$resourcesReferential : ResourcesReferential(name=="nglSubRef") 
+		$device : JSONDevice() from $resourcesReferential.referentialDevice
+		$rps : ResourcePropertiesSet(initialized==false, inputSpecificationElement==$input, resourcesReferential==$resourcesReferential)
+	then
+		Logger log = Logger.getLogger("ngl.sub.rules");
+		$rps.initialize();
+		Set<ResourceProperties> resourcePropertiesSet = $device.httpGetJSON(ProjectProperties.getProperty("server")+"/api/sra/submissions?stateCode=SUB-SRD-IW", "bot");
+		log.debug("size resources "+resourcePropertiesSet.size());
+		$rps.addResourcePropertiesSet(resourcePropertiesSet);
+		modify($rps){};
+end
+
+
+#Transfert ressources to internal referential
+rule "add resources submission to internal referential internalRefSubmission for first step of submission workflown"
+    @BirdsRule( ExecutionService )
+    salience 200
+	dialect 'java'
+	no-loop 
+	when
+	    $executionService : ExecutionService( status == ExecutionService.JOB_PROCESSING_STATUS, caught==false )
+	    $j : Job( treatmentSpecification.name!=null, treatmentSpecification.name =="WF_Submission" , treatmentSpecification.specificationGroup == true )
+	then
+	    Logger log = Logger.getLogger("ngl.sub.rules");
+	    log.debug("transfert resource for WF_Submission");
+	  	$j.groupTransferInputResourcesToInternalReferential("subData", "internalRefSubmission",$j.getId());
+	  	//Get submission code
+	  	String codeSubmission = $j.getUniqueJobResource("subData").getProperty("code");
+	  	JSONDevice jsonDevice = new JSONDevice();
+	  	//Set new State
+	  	String newState = "{\"code\":\"SUB-SRD-IP\"}";
+	  	//Call PUT update with submission modified
+	  	log.debug("Call PUT "+ProjectProperties.getProperty("server")+"/api/sra/submissions/"+codeSubmission+"/state");
+	  	log.debug("With JSON "+newState);
+	  	jsonDevice.httpPut(ProjectProperties.getProperty("server")+"/api/sra/submissions/"+codeSubmission+"/state", newState,"bot");
+	  	
+end

@@ -1,0 +1,176 @@
+#format date
+datetime.format=dd/MM/yyyy HH:mm:ss
+datetime-hour.format=dd/MM/yyyy HH:mm
+date.format=dd/MM/yyyy
+
+
+#page field label
+page.search.label.search = Recherche
+
+docs.menu = Aide
+
+
+#validation error
+error.compatibility.typecodeProperty = "{0}" ne doit pas être renseignée pour un échantillon dont le type ("{1}") est différent de "amplicon"
+error.valuenotauthorized = Valeur non autorisée : {0}
+error.badtype = Mauvais type : {0} / {1}
+error.notactive = Propriété non active 
+error.notdefined = Propriété non définie
+error.required = Propriété obligatoire
+error.propertytype = Mauvais type de propriété : {0}. Type attendu {1} / Type trouvé {2}
+error.codenotunique = Le code {0} n''est pas unique.
+error.idnotunique = L''id {0} existe déja.
+error.badformat = Le format du champ n''est pas valide.
+error.notunique = La valeur {0} de la propriété {1} n''est pas unique.
+error.codeNotFound= L''objet {0} de type {1} n''a pas été trouvé
+error.codenotexists= Le code {0} du type {1} n''existe pas
+error.codenotupdated = Le code ne peut être mis a jour
+error.notexists= L''objet avec le code {0} n''existe pas.
+error.userexist = Utilisateur introuvable.
+error.severalresult= Plus d''un objet avec le code {0}.
+error.badstate = L''etat {0} n''est pas autorisé.
+error.badsizearray = Mauvaise taille de tableau ({0} au lieu de {1})
+error.badsizefield = La propriété {0} a une valeur ({1}) qui dépasse la taille maximale autorisée de {2}
+error.objectexist = L''object de type {0} avec le code {1} existe déjà.
+error.validationexp.samplenotbelongtoproject= Le code sample {0} n''appartient pas au projet {1}
+error.codedouble = Code en double {0}
+error.readset.masterRSCodeNotPresent = Le code readset {0} n''est pas dans les readsets généraux.
+error.validationexp.percentperoutputcontainerdefault= "Le pourcentage total à déposer dans le container est différent de 100% (il vaut  {0}%)."
+error.validationexp.emptyoutputcontainer="La lane {0} ne possède aucun content."
+error.validationexp.emptycontainer="Il n''y a aucun container dans l''expérience"
+error.validationexp.manytagCategory="Plusieurs catégories d''index sont présentes."
+error.validationexp.manySecondaryTagCategory="Plusieurs catégories de tag secondaire sont présentes."
+error.validationexp.sameSample="Les containers non indexés ({0},{1}) n''appartiennent pas au même échantillon"
+error.validationexp.noTagSampleWithTagSample="Présence de containers NON indéxés avec des containers indexés"
+error.validationexp.noSecondaryTagForSameTag="Pour une séquence de tag donnée, présence de container avec tag 2ndaire et de container sans tag 2ndaire"
+error.validationexp.noSecondaryTagSampleWithSecondaryTagSample="Présence de containers SANS tag secondaire et de containers AVEC tag secondaire"
+error.validationexp.tagcategory.notvalid = La category de tag n''est pas valide pour l''index {0} du container {1}
+error.validationexp.tagNotExist = Le tag {0} n''existe pas pour le container {1}
+error.validationexp.samelibprocesstypecode="Les containers non indexés ({0},{1}) n''ont pas le même type de processus de banque ({2},{3})"
+error.validationexp.samefromexperimenttypecode="Les containers non indexés ({0},{1}) ne proviennent pas du même type d''experience ({2},{3})"
+error.validationexp.noTagForSecondaryTag="Container avec tag secondaire SANS tag primaire non autorisé en prep FC (classique ou ordonnée)"
+error.validationexp.outputTagWithInputTag="Tag déjà renseigné en entrée. Ne pas renseigner le tag de sortie pour le container {0}"
+error.validationexp.noUniqueIndexInExpectedPrimaryTag = Les index ne sont pas uniques dans liste tags
+error.validationexp.duplicateinputcontainers="Le container {0} a été déposé plusieurs fois en position {1}"
+error.validationexp.badcontrolprepaflowcell="La piste contrôle {0} n’est pas cohérente avec le contenant sortie choisi {1}"
+error.validationexp.badoutputprepaflowcell="Le contenant sortie {0} n’est pas compatible avec l’instrument choisi {1}"
+error.validationexp.badmesuredconcentrationsolutionstock="La concentration initiale du contenant d'entrée {0} n'a pas une valeur correcte(elle vaut {1} au lieu de {2})"
+error.validationexp.mandatoryrunstartdate="La date réelle de dépôt est obligatoire. Par défaut, elle sera équivalente à la date de création "
+error.validationexp.mandatoryconcentrationunit="L''unité de concentration est obligatoire pour le container {0}"
+error.validationexp.manytagSize="Plusieurs tailles d''index sont présentes"
+error.validationexp.sameTagSequence="Séquence identique ({1}) en position {0}"
+error.validationexp.sameconcentration="La concentration du container {0} n''est pas homogène avec celles des autres containers (elle vaut {1} nM)"
+error.validationexp.outputvolumenotnull="La saisie du volume de sortie est obligatoire pour le container {0}"
+error.validationexp.outputvolumenotnull.light="La saisie du volume de sortie est obligatoire"
+error.validationexp.outputconcentrationnotnull="La saisie de la concentration de sortie est obligatoire pour le container {0}"
+error.validationexp.outputconcentrationnotnull.light="La saisie de la concentration de sortie est obligatoire"
+error.validationexp.outputconcentrationnotnegative="Container {0} : La concentration finale ne peut pas être négative ; veuillez vérifier la méthode de calcul utilisée"
+error.validationexp.outputvolumelow="Le volume de sortie saisi doit etre supérieur à {0} pour le container {1}"
+error.validationexp.codewithbadchar= "Le champ {0} contient des caractères interdits"
+error.validationexp.oneInputSupport="Le type d''expérience {0} n''accepte qu''un seul support en entrée"
+error.validationexp.notAllInputContainer="Le support {0} n'est pas complet"
+error.validationexp.containerSupportCodeMustContainString = "Le code flowcell {0} ne correspond pas au motif {1}"
+error.validationexp.manyInputSupport ="Le Container {0} est le seul container IN de l''experience"
+error.validationexp.atomicTransfertMethod.null = "L'ATM est null"
+error.validationexp.inputContainer.categoryCode.notequals = "Le categoryCode du container {0} n'est pas le même que celui dans la collection CONTAINER"
+error.validationexp.inputContainer.contents.sizenotequals = "Le nombre de contents du container {0} n'est pas le même que celui dans la collection CONTAINER"
+error.validationexp.inputContainer.percentage = "Le pourcentage de container en entrée doit être : 0 < x <= 100"
+error.validationexp.inputContainerSupportCodes = "La valeur de la liste n'est pas correcte"
+error.validationexp.outputContainerSupportCodes = La valeur de la liste n'est pas correcte
+error.validationexp.comments.null = Le commentaire est null
+error.validationexp.status.empty = Vous devez renseigner le statut avant de terminer l''expérience
+error.validationexp.container.alreadyused = Le container {0} est déjà en cours d''utilisation
+error.validationexp.inputcontainer.moreThanOneContent= Le container {0} a plus d''un content et ne peut être utilisé pour cette expérience
+error.validationexp.support.alreadyused = Le support {0} est déjà en cours d''utilisation
+# FDS 30/08/2019 pas "en cours d'utilisation" car le message ne correspond pas dans certains cas...
+error.validationexp.sample.alreadyused = Le sample {0} est déjà utilisé
+error.validationexp.sample.duplicated = Le sample {0} est déjà déclaré pour cette expérience
+error.validationexp.inputContainer.state.code = Le container {0} n''a pas le bon état (A-*).
+# FDS 06/08/2019 jamais utilisee...error.validation.container.inputProcesses.notnull = "Le container est associé à un processus"
+error.validationexp.secondaryTag="Container {0} : Incohérence : Catégorie tag 2ndaire renseignée SANS valeur de tag 2ndaire"
+error.validationexp.secondaryCategoryTag="Container {0} : La catégorie Tag 2ndaire est obligatoire quand une valeur de tag 2ndaire est renseignée"
+error.validationexp.tagcategory.null="La catégorie Tag est obligatoire quand une valeur de tag est renseignée"
+error.validationexp.samePosition.fluoroskan="Position identique sur plan de plaque fluoroskan {0}{1}"
+error.validationexp.sameChipIteration="Itération Chip {0} déjà utilisé avec la puce {1}"
+
+error.receptionfile.taxonCode.diff = "Le code taxon est différent du sample parent {0} <> {1}"
+error.receptionfile.referenceCollab.diff = "La réf. collaborateur est différente du sample parent {0} <> {1}"
+error.receptionfile.sampleAliquotCode.incorrectpattern= Le Code Aliquot {0} est incorrect (ne correspond ni à un pattern barcode de tube ni à un pattern barcode de plaque)
+error.project.noanalysis = Le type d''analyse {0} n''est pas présent dans le projet
+
+error.receptionfile.expectedPrimaryTags.doubleValue= Les index dans la liste {0} ne sont pas uniques
+error.receptionfile.expectedPrimaryTags.errorSorting = Les index dans la liste {0} ne sont pas triés
+error.receptionfile.expectedPrimaryTags.errorFirstTag = Le tag {0} n'est pas le premier de la liste triée
+
+error.invalid.collabFileName = Le nom de fichier collaborateur {0} est invalide
+
+#directive messages
+msg.details = [détails]
+msg.success.save = Sauvegarde réussie.
+msg.error.save = Erreur de sauvegarde.
+msg.success.remove = Suppression réussie.
+msg.error.remove =  Erreur de suppression.
+msg.success.get = Chargement réussie.
+msg.error.get =  Erreur de chargement.
+msg.notFound = Code inexistant
+msg.internalError = Erreur interne
+msg.error.double = Impossible de sélectionner deux fois la même propriété
+msg.error.create = Erreur sur la création vérifiez les champs de saisie
+
+#authentification
+authentification.dropdown_list.username=Nom
+authentification.dropdown_list.profile=Profil
+authentification.dropdown_list.signout=Se déconnecter
+
+boolean.true = Oui
+boolean.false = Non
+boolean.unset = ---
+boolean.TRUE = Oui
+boolean.FALSE = Non
+
+valuation.TRUE = Oui
+valuation.FALSE = Non
+valuation.UNSET = ---
+
+status.TRUE = OK
+status.FALSE = KO
+status.UNSET = ---
+
+bt-select.here = taper ici (regex) ou code exact entre //
+bt-select.here.long = taper ici une partie du nom ou du code ; taper entre // pour respecter la casse (MAJ min)
+
+search.placeholder.reporting.configuration = Sélect. colonnes config.
+search.placeholder.regexColumn = Recherche colonne
+search.tab.aggregateSearchMode = Aggregate query
+
+#button
+button.addbasket = Ajouter au panier
+button.search = Rechercher
+button.reset = Réinitialiser
+button.validate = Sauvegarder
+button.cancel = Annuler
+button.edit = Editer
+button.import.file = Import fichier
+button.printMode = Imprimer
+button.print = Imprimer
+button.delete = Supprimer
+button.exportCSV = Export CSV
+button.add.columns = Ajouter colonne(s)
+
+error.file.not.found=Fichier non trouvé {0}
+error.file.null=Absence de fichier
+
+error.validationsub.release.false=La soumission {0} ne correspond pas à une soumission pour release
+error.parse.ebi.release.receipt=Absence de la ligne RECEIPT ... pour  {0} dans fichier {1}
+error.parse.ebi.release.exception=Exception lecture fichier release : {0}
+
+error.directory.release.exist=Le repertoire {0} existe déjà !!! (soumission concurrente ?) pour la soumission {1}
+error.directory.release.create=Impossible de creer le répertoire {0} pour la soumission {1}
+error.experiment.mulitple.submission=Experiment {0} utilisé par plusieurs objets submissions
+
+error.rawData.activate.CNS.archive = Le fichier {0} n''existe pas sur les disques et Projet {1} avec archive=true et localisation du readset {2} au CNS
+error.rawData.activate.CNS.notArchive = Le fichier {0} n''existe pas sur les disques et Projet {1} avec archive=false et localisation du readset {2} au CNS
+error.rawData.activate.location=localisation inconnue {0} pour le fichier {1}
+error.rawData.activate.md5=valeur de md5=null alors que donnée déjà zippée pour {0}
+
+

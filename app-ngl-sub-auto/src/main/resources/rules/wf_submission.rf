@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<process xmlns="http://drools.org/drools-5.0/process"
+         xmlns:xs="http://www.w3.org/2001/XMLSchema-instance"
+         xs:schemaLocation="http://drools.org/drools-5.0/process drools-processes-5.0.xsd"
+         type="RuleFlow" name="fr.cea.ig.auto.submission.WorkflowSubmission" id="fr.cea.ig.auto.submission.WorkflowSubmission" package-name="birds" >
+
+  <header>
+    <imports>
+      <import name="fr.genoscope.lis.devsi.birds.impl.model.Birds" />
+    </imports>
+  </header>
+
+  <nodes>
+    <start id="1" name="Start" x="404" y="59" width="48" height="48" />
+    <end id="2" name="End" x="439" y="543" width="48" height="48" />
+    <actionNode id="5" name="transfertRawData" x="360" y="219" width="162" height="55" >
+        <action type="expression" dialect="java" >Birds.generateJobs("transfertRawData", "SRA", (org.drools.spi.ProcessContext)kcontext);</action>
+    </actionNode>
+  </nodes>
+
+  <connections>
+    <connection from="5" to="2" />
+    <connection from="1" to="5" />
+  </connections>
+
+</process>

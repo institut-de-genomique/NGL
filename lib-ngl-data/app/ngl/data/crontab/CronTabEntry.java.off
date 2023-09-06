@@ -1,0 +1,54 @@
+//package ngl.data.crontab;
+//
+//import java.util.Date;
+//
+//public class CronTabEntry extends RawMongoObject {
+//	
+//	private CronSchedule def;
+//	private Job          job;
+//	private Date         lastExecutionDate;
+//	private Date         checkDate;
+//	
+//	public CronTabEntry() {
+//	}
+//	
+//	public CronTabEntry(CronSchedule def, Job job) {
+//		this.def = def;
+//		this.job = job;
+//		lastExecutionDate = null;
+//	}
+//	
+//	public void setSchedule(CronSchedule schedule) {
+//		def = schedule;
+//	}
+//	
+//	public CronSchedule getSchedule() {
+//		return def;
+//	}
+//	
+//	public Job getJob() { 
+//		return job;
+//	}
+//	
+//	public void setJob(Job job) {
+//		this.job = job;
+//	}
+//	
+//	public Date getLastExecutionDate() {
+//		return lastExecutionDate;
+//	}
+//	
+//	public void setLastEecutionDate(Date date) {
+//		lastExecutionDate = date;
+//	}
+//	
+//	public Date getCheckDate() {
+//		return checkDate;
+//	}
+//	
+//	public void setCheckDate(Date date) {
+//		checkDate = date;
+//	}
+//	
+//}
+//

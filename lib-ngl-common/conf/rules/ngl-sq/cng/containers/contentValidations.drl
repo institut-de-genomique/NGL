@@ -1,0 +1,34 @@
+//FDS 13/11/2019
+//    03/12/2019 cette regle de validation s'applique dans des cas ou la propriete sampleAliquoteCode a ete replie de facon hardcodee par copie de containerCode
+//               et pas uniquement pour les receptions config ou sampleAliquoteCode apparait explicitement
+//               => etre moins stringent dans le patter=> remplacer par {7} par *
+package rules
+
+rule "Check sampleAliquoteCode pattern"
+	@nglSQ( validations )
+	dialect "java"
+	salience 1000
+	no-loop
+    when
+    	$contextValidation:ContextValidation()
+    	Container($code:code)
+    	Content(properties != null, $sampleAliquoteCode:properties.get("sampleAliquoteCode"), $sampleAliquoteCode != null )
+	then
+		//Check sampleAliquoteCode patterns
+		Pattern p1 = Pattern.compile("[A-Z,0-9]*", Pattern.DOTALL);             // pattern de tube 
+		Pattern p2 = Pattern.compile("[A-Z,0-9]*_[A-H][1-9]", Pattern.DOTALL);  // pattern de puit de plaque 96 (position sur 3chars: _Nx)
+		Pattern p3 = Pattern.compile("[A-Z,0-9]*_[A-H]1[0-2]", Pattern.DOTALL); // pattern de puit de plaque 96 (position sur 4chars: _Nxy)
+		
+		Matcher m1 = p1.matcher($sampleAliquoteCode.value.toString());
+		Matcher m2 = p2.matcher($sampleAliquoteCode.value.toString());
+		Matcher m3 = p3.matcher($sampleAliquoteCode.value.toString());
+		
+		if ( m1.matches() ) { Logger.debug("Check sampleAliquoteCode pattern :'"+ $sampleAliquoteCode.value +"' match [A-Z,0-9]*");}
+		if ( m2.matches() ) { Logger.debug("Check sampleAliquoteCode pattern :'"+ $sampleAliquoteCode.value +"' match [A-Z,0-9]*_[A-H][1-9]");}
+		if ( m3.matches() ) { Logger.debug("Check sampleAliquoteCode pattern :'"+ $sampleAliquoteCode.value +"' match [A-Z,0-9]*_[A-H]1[0-2]");}
+			
+		if ( ! m1.matches() && ! m2.matches() && ! m3.matches() ){
+			Logger.error("Check sampleAliquoteCode pattern :'"+ $sampleAliquoteCode.value +"' NOT match [A-Z,0-9]* / [A-Z,0-9]*_[A-H][1-9] / [A-Z,0-9]*_[A-H]1[0-2]");
+			$contextValidation.addErrors("Container "+$code, "error.receptionfile.sampleAliquotCode.incorrectpattern", $sampleAliquoteCode.value.toString());
+		}
+	end

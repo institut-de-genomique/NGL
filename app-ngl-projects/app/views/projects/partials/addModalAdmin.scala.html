@@ -1,0 +1,32 @@
+@()
+
+
+<div class="row">
+	<!-- Modal -->
+	<div class="modal fade" id="addAdminModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	  <div class="modal-dialog">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+	        <h2 class="modal-title">@Messages("admin.group.title.add")</h2>
+	      </div>
+	      <div class="modal-body">
+	      		<div class="row">
+	      			 <div class="col-md-12 col-lg-12">
+						 <h4>@Messages("admin.group.question.add")</h4>
+						 <div ng-repeat="user in form.usersLabo">
+						 	<li>{{user}}</li>
+						 </div>
+					 </div>
+	      		</div>	
+	      </div>
+		      <div class="modal-footer">
+		          <button class="btn btn-danger" ng-click="addAdminToGroup()" >@Messages("group.question.yes")</i></button>
+		          <button type="button" class="btn btn-default" data-dismiss="modal">@Messages("group.question.no")</button>							      
+		      </div>
+	    </div><!-- /.modal-content -->
+	  </div><!-- /.modal-dialog -->
+	</div><!-- /.modal -->
+</div>
+
+	

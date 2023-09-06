@@ -1,0 +1,517 @@
+@()
+
+@formCumulativeYield() = {
+	<div class="row">
+	<div class="col-md-10 col-lg-10">
+		<br/>
+		<strong>Base Ratio :</strong>
+		<table class="table table-condensed table-hover table-bordered">
+			<thead>
+				<tr>
+					<th>@Messages("runs.treatments.quality-control-nanopore.cumulativeYield.baseRatio0h")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.cumulativeYield.baseRatio12h")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.cumulativeYield.baseRatio24h")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.cumulativeYield.baseRatio36h")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.cumulativeYield.baseRatio48h")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.cumulativeYield.baseRatio60h")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.cumulativeYield.baseRatio72h")</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>{{run.treatments.qualityControl.default.cumulativeYield.value.baseRatio0h  | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.cumulativeYield.value.baseRatio12h | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.cumulativeYield.value.baseRatio24h | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.cumulativeYield.value.baseRatio36h | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.cumulativeYield.value.baseRatio48h | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.cumulativeYield.value.baseRatio60h | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.cumulativeYield.value.baseRatio72h | number:2}}</td>
+				</tr>	
+			</tbody>
+		</table>
+		<br/>
+		
+        <div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+			ng-click="setImage(run.treatments.qualityControl.default.cumulativeYieldPassFailBasesOverTime.value,'cumulativeYieldPassFailBasesOverTime','','qualityControl',
+			run.treatments.qualityControl.default.cumulativeYieldPassFailBasesOverTime.width,
+			run.treatments.qualityControl.default.cumulativeYieldPassFailBasesOverTime.height)">
+			<strong>Pass/fail over time plot :</strong>
+			<a href="#">
+		    	<img id="default_cumulativeYieldPassFailBasesOverTime" ng-src="data:image/png;base64,{{run.treatments.qualityControl.default.cumulativeYieldPassFailBasesOverTime.value}}" />
+		 	</a> 
+	 	</div>
+	
+		<br/>
+		<strong>Read Ratio :</strong>
+		<table class="table table-condensed table-hover table-bordered">
+			<thead>
+				<tr>
+					<th>@Messages("runs.treatments.quality-control-nanopore.cumulativeYield.readRatio0h")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.cumulativeYield.readRatio24h")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.cumulativeYield.readRatio48h")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.cumulativeYield.readRatio72h")</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>{{run.treatments.qualityControl.default.cumulativeYield.value.readRatio0h  | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.cumulativeYield.value.readRatio24h | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.cumulativeYield.value.readRatio48h | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.cumulativeYield.value.readRatio72h | number:2}}</td>
+				</tr>	
+			</tbody>
+		</table>
+		<br/>
+		<br/>	
+		
+
+		<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+			ng-click="setImage(run.treatments.qualityControl.default.cumulativeYieldPassFailReadsOverTime.value,'cumulativeYieldPassFailReadsOverTime','','qualityControl',
+			run.treatments.qualityControl.default.cumulativeYieldPassFailReadsOverTime.width,
+			run.treatments.qualityControl.default.cumulativeYieldPassFailReadsOverTime.height)">
+			<strong>Pass/fail over time plot :</strong>
+			<a href="#">
+		    	<img id="default_cumulativeYieldPassFailReadsOverTime" ng-src="data:image/png;base64,{{run.treatments.qualityControl.default.cumulativeYieldPassFailReadsOverTime.value}}" />
+		 	</a> 
+	 	</div>
+    			
+	</div>
+	</div>
+}
+
+@formChannelActivity() = {
+	<div class="row">
+	<div class="col-md-10 col-lg-10">
+		<br/>
+		<strong>Activity :</strong>
+		<table class="table table-condensed table-hover table-bordered">
+			<thead>
+				<tr>
+					<th>@Messages("runs.treatments.quality-control-nanopore.channelActivity.activity0h")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.channelActivity.activity12h")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.channelActivity.activity24h")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.channelActivity.activity36h")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.channelActivity.activity48h")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.channelActivity.activity60h")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.channelActivity.activity72h")</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>{{run.treatments.qualityControl.default.channelActivity.value.activity0h}}</td>
+					<td>{{run.treatments.qualityControl.default.channelActivity.value.activity12h}}</td>
+					<td>{{run.treatments.qualityControl.default.channelActivity.value.activity24h}}</td>
+					<td>{{run.treatments.qualityControl.default.channelActivity.value.activity36h}}</td>
+					<td>{{run.treatments.qualityControl.default.channelActivity.value.activity48h}}</td>
+					<td>{{run.treatments.qualityControl.default.channelActivity.value.activity60h}}</td>
+					<td>{{run.treatments.qualityControl.default.channelActivity.value.activity72h}}</td>
+				</tr>	
+			</tbody>
+		</table>
+		<br/>
+		<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+			ng-click="setImage(run.treatments.qualityControl.default.channelActivityFunctionalChannelsOverTime.value,'channelActivityFunctionalChannelsOverTime','','qualityControl',
+			run.treatments.qualityControl.default.channelActivityFunctionalChannelsOverTime.width,
+			run.treatments.qualityControl.default.channelActivityFunctionalChannelsOverTime.height)">
+			<strong>Functionnal channels over time :</strong>
+			<a href="#">
+		    	<img id="default_channelActivityFunctionalChannelsOverTime" ng-src="data:image/png;base64,{{run.treatments.qualityControl.default.channelActivityFunctionalChannelsOverTime.value}}" />
+		 	</a> 
+	 	</div>
+		<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+			ng-click="setImage(run.treatments.qualityControl.default.channelActivitySequencedReadLengthOverTime.value,'channelActivitySequencedReadLengthOverTime','','qualityControl',
+			run.treatments.qualityControl.default.channelActivitySequencedReadLengthOverTime.width,
+			run.treatments.qualityControl.default.channelActivitySequencedReadLengthOverTime.height)">
+			<strong>Sequenced read length over time : </strong>
+			<a href="#">
+		    	<img id="default_channelActivitySequencedReadLengthOverTime" ng-src="data:image/png;base64,{{run.treatments.qualityControl.default.channelActivitySequencedReadLengthOverTime.value}}" />
+		 	</a> 
+	 	</div>
+			<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+			ng-click="setImage(run.treatments.qualityControl.default.channelActivitySequencingSpeedOverTime.value,'channelActivitySequencingSpeedOverTime','','qualityControl',
+			run.treatments.qualityControl.default.channelActivitySequencingSpeedOverTime.width,
+			run.treatments.qualityControl.default.channelActivitySequencingSpeedOverTime.height)">
+			<strong>Sequencing speed over time :</strong>
+			<a href="#">
+		    	<img id="default_channelActivitySequencingSpeedOverTime" ng-src="data:image/png;base64,{{run.treatments.qualityControl.default.channelActivitySequencingSpeedOverTime.value}}" />
+		 	</a> 
+	 	</div>
+		<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+			ng-click="setImage(run.treatments.qualityControl.default.channelActivityThroughputOverTime.value,'channelActivityThroughputOverTime','','qualityControl',
+			run.treatments.qualityControl.default.channelActivityThroughputOverTime.width,
+			run.treatments.qualityControl.default.channelActivityThroughputOverTime.height)">
+			<strong>Throughput over time : </strong>
+			<a href="#">
+		    	<img id="default_channelActivityThroughputOverTime" ng-src="data:image/png;base64,{{run.treatments.qualityControl.default.channelActivityThroughputOverTime.value}}" />
+		 	</a> 
+	 	</div>
+		<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+			ng-click="setImage(run.treatments.qualityControl.default.channelActivityFlowcellActivityMap.value,'channelActivityFlowcellActivityMap','','qualityControl',
+			run.treatments.qualityControl.default.channelActivityFlowcellActivityMap.width,
+			run.treatments.qualityControl.default.channelActivityFlowcellActivityMap.height)">
+			<strong>Flowcell activity map : </strong>
+			<a href="#">
+		    	<img id="default_channelActivityFlowcellActivityMap" ng-src="data:image/png;base64,{{run.treatments.qualityControl.default.channelActivityFlowcellActivityMap.value}}" />
+		 	</a> 
+	 	</div>	
+	</div> 
+	</div>
+}
+
+@formGeneralMetrics() = {
+	<div class="row">
+	<div class="col-md-10 col-lg-10">
+		<br/>
+		<strong>General metrics :</strong>
+		<table class="table table-condensed table-hover table-bordered">
+			<thead>
+				<tr>
+					<th>@Messages("runs.treatments.quality-control-nanopore.generalMetrics.nbTotalSeq")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.generalMetrics.nbTotalBases")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.generalMetrics.meanLength")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.generalMetrics.n50")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.generalMetrics.meanQual")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.generalMetrics.meanSpeed")</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>{{run.treatments.qualityControl.default.generalMetrics.value.nbTotalSeq}}</td>
+					<td>{{run.treatments.qualityControl.default.generalMetrics.value.nbTotalBases}}</td>
+					<td>{{run.treatments.qualityControl.default.generalMetrics.value.meanLength}}</td>
+					<td>{{run.treatments.qualityControl.default.generalMetrics.value.n50}}</td>
+					<td>{{run.treatments.qualityControl.default.generalMetrics.value.meanQual | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.generalMetrics.value.meanSpeed | number:2}}</td>
+				</tr>	
+			</tbody>
+		</table>
+		<br/>
+		<strong>Pass reads/pass bases :</strong>
+		<table class="table table-condensed table-hover table-bordered">
+			<thead>
+				<tr>
+					<th>@Messages("runs.treatments.quality-control-nanopore.generalMetrics.nbTrueSeq")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.generalMetrics.percentTrueSeq")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.generalMetrics.n50SizeTrue")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.generalMetrics.nbTrueBases")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.generalMetrics.percentTrueBases")</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>{{run.treatments.qualityControl.default.generalMetrics.value.nbTrueSeq }}</td>
+					<td>{{run.treatments.qualityControl.default.generalMetrics.value.percentTrueSeq | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.generalMetrics.value.n50SizeTrue}}</td>
+					<td>{{run.treatments.qualityControl.default.generalMetrics.value.nbTrueBases}}</td>
+					<td>{{run.treatments.qualityControl.default.generalMetrics.value.percentTrueBases | number:2}}</td>
+				</tr>	
+			</tbody>
+		</table>
+		<br/>
+		<strong>Fail reads/fail bases :</strong>
+		<table class="table table-condensed table-hover table-bordered">
+			<thead>
+				<tr>
+					<th>@Messages("runs.treatments.quality-control-nanopore.generalMetrics.nbFalseSeq")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.generalMetrics.percentFalseSeq")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.generalMetrics.n50SizeFalse")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.generalMetrics.nbFalseBases")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.generalMetrics.percentFalseBases")</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>{{run.treatments.qualityControl.default.generalMetrics.value.nbFalseSeq}}</td>
+					<td>{{run.treatments.qualityControl.default.generalMetrics.value.percentFalseSeq | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.generalMetrics.value.n50SizeFalse}}</td>
+					<td>{{run.treatments.qualityControl.default.generalMetrics.value.nbFalseBases}}</td>
+					<td>{{run.treatments.qualityControl.default.generalMetrics.value.percentFalseBases | number:2}}</td>
+				</tr>	
+			</tbody>
+		</table>
+		<br/>
+
+		<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+			ng-click="setImage(run.treatments.qualityControl.default.generalMetricsPassFailInReads.value,'generalMetricsPassFailInReads','','qualityControl',
+			run.treatments.qualityControl.default.generalMetricsPassFailInReads.width,
+			run.treatments.qualityControl.default.generalMetricsPassFailInReads.height)">
+			<strong>Pass/fail in reads :</strong>
+			<a href="#">
+		    	<img id="default_generalMetricsPassFailInReads" ng-src="data:image/png;base64,{{run.treatments.qualityControl.default.generalMetricsPassFailInReads.value}}" />
+		 	</a> 
+	 	</div>
+	    <br/>
+		<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+			ng-click="setImage(run.treatments.qualityControl.default.generalMetricsPassFailInBases.value,'generalMetricsPassFailInBases','','qualityControl',
+			run.treatments.qualityControl.default.generalMetricsPassFailInBases.width,
+			run.treatments.qualityControl.default.generalMetricsPassFailInBases.height)">
+			<strong>Pass/fail in bases :</strong>
+			<a href="#">
+		    	<img id="default_generalMetricsPassFailInBases" ng-src="data:image/png;base64,{{run.treatments.qualityControl.default.generalMetricsPassFailInBases.value}}" />
+		 	</a> 
+	 	</div>
+	
+	</div>
+	</div>
+}
+
+@formReadLength() = {
+	<div class="row">
+	<div class="col-md-10 col-lg-10">
+
+		<br/>
+		<strong>Pas reads/Pass read sizes :</strong>
+
+		<table class="table table-condensed table-hover table-bordered">
+			<thead>
+				<tr>
+					<th>@Messages("runs.treatments.quality-control-nanopore.readLength.minSizeTrue")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.readLength.maxSizeTrue")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.readLength.meanSizeTrue")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.readLength.firstQuSizeTrue")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.readLength.medianSizeTrue")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.readLength.thirdQuSizeTrue")</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>{{run.treatments.qualityControl.default.readLength.value.minSizeTrue      | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.readLength.value.maxSizeTrue      | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.readLength.value.meanSizeTrue     | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.readLength.value.firstQuSizeTrue  | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.readLength.value.medianSizeTrue | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.readLength.value.thirdQuSizeTrue  | number:2}}</td>
+				</tr>	
+			</tbody>
+		</table>
+		<br/>
+		<br/>
+		<strong>Fail reads/Fail read sizes :</strong>
+		<table class="table table-condensed table-hover table-bordered">
+			<thead>
+				<tr>
+					<th>@Messages("runs.treatments.quality-control-nanopore.readLength.minSizeFalse")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.readLength.maxSizeFalse")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.readLength.meanSizeFalse")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.readLength.firstQuSizeFalse")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.readLength.medianSizeFalse")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.readLength.thirdQuSizeFalse")</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>{{run.treatments.qualityControl.default.readLength.value.minSizeFalse      | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.readLength.value.maxSizeFalse      | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.readLength.value.meanSizeFalse     | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.readLength.value.firstQuSizeFalse  | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.readLength.value.medianSizeFalse | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.readLength.value.thirdQuSizeFalse  | number:2}}</td>
+				</tr>	
+			</tbody>
+		</table>
+		<br/>
+		<br/>
+		<strong>Nb of reads longer than.. :</strong>
+		<table class="table table-condensed table-hover table-bordered">
+			<thead>
+				<tr>
+					<th>@Messages("runs.treatments.quality-control-nanopore.readLength.nbSeqGt100kb")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.readLength.nbSeqGt75kb")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.readLength.nbSeqGt50kb")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.readLength.nbSeqGt20kb")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.readLength.nbSeqGt10kb")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.readLength.nbSeqGt5kb")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.readLength.nbSeqGt1kb")</th>
+
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>{{run.treatments.qualityControl.default.readLength.value.nbSeqGt100kb | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.readLength.value.nbSeqGt75kb  | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.readLength.value.nbSeqGt50kb  | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.readLength.value.nbSeqGt20kb  | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.readLength.value.nbSeqGt10kb  | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.readLength.value.nbSeqGt5kb   | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.readLength.value.nbSeqGt1kb   | number:2}}</td>
+
+				</tr>	
+			</tbody>
+		</table>
+		<br/>
+		<br/>
+		<strong>Fraction of reads longer than.. :</strong>
+		<table class="table table-condensed table-hover table-bordered">
+			<thead>
+				<tr>
+					<th>@Messages("runs.treatments.quality-control-nanopore.readLength.ratioNbSeqGt100kb")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.readLength.ratioNbSeqGt75kb")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.readLength.ratioNbSeqGt50kb")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.readLength.ratioNbSeqGt20kb")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.readLength.ratioNbSeqGt10kb")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.readLength.ratioNbSeqGt5kb")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.readLength.ratioNbSeqGt1kb")</th>
+
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>{{run.treatments.qualityControl.default.readLength.value.ratioNbSeqGt100kb | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.readLength.value.ratioNbSeqGt75kb  | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.readLength.value.ratioNbSeqGt50kb  | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.readLength.value.ratioNbSeqGt20kb  | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.readLength.value.ratioNbSeqGt10kb  | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.readLength.value.ratioNbSeqGt5kb   | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.readLength.value.ratioNbSeqGt1kb   | number:2}}</td>
+
+				</tr>	
+			</tbody>
+		</table>
+		<br/>
+		<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+			ng-click="setImage(run.treatments.qualityControl.default.readLengthBaseYieldAboveReadLength.value,'readLengthBaseYieldAboveReadLength','','qualityControl',
+			run.treatments.qualityControl.default.readLengthBaseYieldAboveReadLength.width,
+			run.treatments.qualityControl.default.readLengthBaseYieldAboveReadLength.height)">
+			<strong>Base yield above a given read length :</strong>
+			<a href="#">
+		    	<img id="default_readLengthBaseYieldAboveReadLength" ng-src="data:image/png;base64,{{run.treatments.qualityControl.default.readLengthBaseYieldAboveReadLength.value}}" />
+		 	</a> 
+	 	</div>
+		<br/>
+		<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+			ng-click="setImage(run.treatments.qualityControl.default.readLengthRreadLengthDistribution.value,'readLengthRreadLengthDistribution','','qualityControl',
+			run.treatments.qualityControl.default.readLengthReadLengthDistribution.width,
+			run.treatments.qualityControl.default.readLengthReadLengthDistribution.height)">
+			<strong>Read length distribution :</strong>
+			<a href="#">
+		    	<img id="default_readLengthRreadLengthDistribution" ng-src="data:image/png;base64,{{run.treatments.qualityControl.default.readLengthReadLengthDistribution.value}}" />
+		 	</a> 
+	 	</div>
+		<br/>
+		<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+			ng-click="setImage(run.treatments.qualityControl.default.readLengthWeightedReadLengthDistribution.value,'readLengthWeightedReadLengthDistribution','','qualityControl',
+			run.treatments.qualityControl.default.readLengthWeightedReadLengthDistribution.width,
+			run.treatments.qualityControl.default.readLengthWeightedReadLengthDistribution.height)">
+			<strong>Weighted read length distribution :</strong>
+			<a href="#">
+		    	<img id="default_readLengthWeightedReadLengthDistribution" ng-src="data:image/png;base64,{{run.treatments.qualityControl.default.readLengthWeightedReadLengthDistribution.value}}" />
+		 	</a> 
+	 	</div>
+	</div>
+	</div>			
+}
+
+@formBasecallingQuality() = {
+	<div class="row">
+	<div class="col-md-10 col-lg-10">
+		<br/>
+		<strong>Pass reads/Pass read qscores :</strong>
+		<table class="table table-condensed table-hover table-bordered">
+			<thead>
+				<tr>
+					<th>@Messages("runs.treatments.quality-control-nanopore.basecallingQuality.minQualTrue")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.basecallingQuality.maxQualTrue")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.basecallingQuality.meanQualTrue")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.basecallingQuality.firstQuQualTrue")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.basecallingQuality.medianQualTrue")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.basecallingQuality.thirdQuQualTrue")</th>
+					
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>{{run.treatments.qualityControl.default.basecallingQuality.value.minQualTrue | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.basecallingQuality.value.maxQualTrue | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.basecallingQuality.value.meanQualTrue| number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.basecallingQuality.value.firstQuQualTrue | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.basecallingQuality.value.medianQualTrue | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.basecallingQuality.value.thirdQuQualTrue | number:2}}</td>
+					
+				</tr>	
+			</tbody>
+		</table>
+		<br/>
+		<strong>Fail reads/Fail read qscores :</strong>
+		<table class="table table-condensed table-hover table-bordered">
+			<thead>
+				<tr>
+					<th>@Messages("runs.treatments.quality-control-nanopore.basecallingQuality.minQualFalse")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.basecallingQuality.maxQualFalse")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.basecallingQuality.meanQualFalse")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.basecallingQuality.firstQuQualFalse")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.basecallingQuality.medianQualFalse")</th>
+					<th>@Messages("runs.treatments.quality-control-nanopore.basecallingQuality.thirdQuQualFalse")</th>
+				
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>{{run.treatments.qualityControl.default.basecallingQuality.value.minQualFalse  | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.basecallingQuality.value.maxQualFalse | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.basecallingQuality.value.meanQualFalse | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.basecallingQuality.value.firstQuQualFalse | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.basecallingQuality.value.medianQualFalse | number:2}}</td>
+					<td>{{run.treatments.qualityControl.default.basecallingQuality.value.thirdQuQualFalse | number:2}}</td>
+					
+				</tr>	
+			</tbody>
+		</table>
+		<br/>	
+		<br/>
+			<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+			ng-click="setImage(run.treatments.qualityControl.default.basecallingQualityPassFailQualDistribution.value,'basecallingQualityPassFailQualDistribution','','qualityControl',
+			run.treatments.qualityControl.default.basecallingQualityPassFailQualDistribution.width,
+			run.treatments.qualityControl.default.basecallingQualityPassFailQualDistribution.height)">
+			<strong>Pass/fail qscore distribution :</strong>
+			<a href="#">
+		    	<img id="default_basecallingQualityPassFailQualDistribution" ng-src="data:image/png;base64,{{run.treatments.qualityControl.default.basecallingQualityPassFailQualDistribution.value}}" />
+		 	</a> 
+	 	</div>
+		<br/>
+		
+			
+	</div>
+	</div>			
+}
+
+
+<div class="col-md-12 col-lg-12">
+    <ul class="nav nav-tabs" role="tablist">
+        <li role="presentation" class="active">
+            <a href="#" data-target="#cumulativeYield" data-toggle="tab" role="tab">@Messages("runs.treatments.quality-control-nanopore.cumulativeYield")</a>
+        </li>
+        <li role="presentation">
+            <a href="#" data-target="#channelActivity" data-toggle="tab" role="tab">@Messages("runs.treatments.quality-control-nanopore.channelActivity")</a>
+        </li>
+        <li role="presentation">
+            <a href="#" data-target="#generalMetrics" data-toggle="tab" role="tab">@Messages("runs.treatments.quality-control-nanopore.generalMetrics")</a>
+        </li> 
+       <li role="presentation">
+            <a href="#" data-target="#readLength" data-toggle="tab" role="tab">@Messages("runs.treatments.quality-control-nanopore.readLength")</a>
+        </li> 
+      <li role="presentation">
+            <a href="#" data-target="#basecallingQuality" data-toggle="tab" role="tab">@Messages("runs.treatments.quality-control-nanopore.basecallingQuality")</a>
+        </li> 
+    </ul>	
+    <div class="tab-content">
+        <div class="tab-pane fade in active" id="cumulativeYield">
+            @formCumulativeYield
+        </div>
+        <div class="tab-pane" id="channelActivity">
+            @formChannelActivity
+        </div>
+       <div class="tab-pane" id="generalMetrics">
+            @formGeneralMetrics
+        </div>
+       <div class="tab-pane" id="readLength">
+            @formReadLength
+        </div>
+       <div class="tab-pane" id="basecallingQuality">
+            @formBasecallingQuality
+        </div>
+
+      </div>
+</div>
+
+
+

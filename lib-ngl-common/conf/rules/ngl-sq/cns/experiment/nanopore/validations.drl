@@ -1,0 +1,23 @@
+//created on: Apr 21, 2015
+package rules
+
+
+rule "Validation tag output"
+	@nglSQ( validations )
+	dialect "java"
+	salience 1000
+	no-loop
+    when
+    $experiment:Experiment($typeCode:typeCode,$typeCode=="nanopore-pcr" || $typeCode=="nanopore-barcode-ligation" || $typeCode=="nanopore-fragmentation" || $typeCode=="nanopore-library")
+    $atomicTransfert: OneToOneContainer($outputContainerUseds: outputContainerUseds, $outputContainerUseds!=null, $inputContainerUseds: inputContainerUseds, $inputContainerUseds!=null)
+    $outputContainerUsed: OutputContainerUsed($experimentProperties: experimentProperties, $experimentProperties!=null) from $outputContainerUseds
+    $outputTag : PropertySingleValue() from $experimentProperties.get("tag")
+    $inputContainerUsed: InputContainerUsed($contents:contents) from $inputContainerUseds
+    $content : Content($properties: properties, $properties!=null) from $contents
+    $inputTag : PropertySingleValue() from $properties.get("tag")
+    $contextValidation:ContextValidation($errors : errors)
+    eval($outputTag != null && $inputTag != null )
+    then
+		Logger.debug("Error outputTag with inputTag");  
+		$contextValidation.addErrors("tag","error.validationexp.outputTagWithInputTag", $inputContainerUsed.code);  
+end

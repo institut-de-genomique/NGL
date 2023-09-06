@@ -1,0 +1,39 @@
+@()
+
+<div class="row">
+	<div class="col-md-10 col-lg-10">
+		<table class="table table-condensed table-hover table-bordered">
+			<thead>
+				<tr>
+					<th>@Messages("readsets.files.fullname")</th>
+					<th>@Messages("readsets.files.typeCode")</th>
+					<th>@Messages("readsets.files.usable")</th>
+					<th>@Messages("readsets.files.properties.label")</th>
+					<th>@Messages("readsets.files.properties.asciiEncoding")</th>
+					<th>@Messages("readsets.files.properties.md5")</th>
+					<th>@Messages("readsets.files.properties.collabFileName")</th>
+					
+					<th ng-if="readset.typeCode === 'rsnanopore'">@Messages("readsets.files.properties.basecallerVersion")</th>
+					<th ng-if="readset.typeCode === 'rsnanopore'">@Messages("readsets.files.properties.basecallerModel")</th>
+				
+				</tr>
+			</thead>
+			<tbody>
+				<tr ng-repeat="file in readset.files">
+					<td>{{file.fullname}}</td>
+					<td>{{file.typeCode}}</td>
+					<td ng-if="file.usable == true">@Messages("readsets.files.isUsable")</td>
+					<td ng-if="file.usable == false">@Messages("readsets.files.isNotUsable")</td>
+					<td>{{file.properties.label.value}}</td>
+					<td>{{file.properties.asciiEncoding.value}}</td>
+					<td>{{file.properties.md5.value}}</td>
+					<td>{{file.properties.collabFileName.value}}</td>
+					
+					<td ng-if="readset.typeCode === 'rsnanopore'">{{file.properties.basecallerVersion.value}}</td>
+					<td ng-if="readset.typeCode === 'rsnanopore'">{{file.properties.basecallerModel.value}}</td>
+					
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>

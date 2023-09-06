@@ -1,0 +1,85 @@
+@this()
+@()
+
+@import views.html.helper._
+@import play.mvc.Http.Context
+
+    <div class="col-md-12 col-lg-7">
+        <div class="row">
+            <div class="row">
+                <div class="col-md-12 col-lg-12"  messages="warningMessage"></div>
+            </div>
+            <div class="row">
+            
+                <div class="col-md-12 col-lg-12"  messages="messages"></div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 col-lg-12"  messages="validationMessage"></div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h1 class="panel-title" ng-bind="mappingProjectTabTitle"> </h1>
+                </div>
+                <div class="panel-body">
+                    @formGroup{
+    
+                    <div class="form-group required {{getHasErrorClass('experimentForm', 'protocolCode')}}">
+                        <label
+                            class="col-md-6 col-lg-6 control-label">@Messages("descriptions.mapping.projects.parent.code")</label>
+                        <div class="col-pt-6 col-lg-4 ">
+                            <div ng-required=true bt-select
+                                placeholder='@Messages("descriptions.mapping.projects.parent.code")' class="form-control"
+                                filter="true" ng-model="newService.entry.parent"
+                                bt-options="project.code  as project|formatProjectListLabel for project in newService.lists.getProjects()">
+                            </div>
+                        </div>
+                    </div>
+                    @columnSearchForm{
+
+                    @formGroup{
+                    <div class="btn-toolbar affix-top">
+                        <button type="submit" title='@Messages("button.search")' data-toggle="tooltip"
+                            ng-disabled="!isClickable()" ng-click="upload()" class="btn btn-primary" ng-model="save">
+                            <i class="fa fa-save"></i>
+                        </button>
+                        <button title='@Messages("button.reset")' data-toggle="tooltip"
+                            ng-click="resetCreateMappingProjectForm()" class="btn btn-default">
+                            <i class="fa fa-undo"></i>
+                        </button>
+                    </div>
+                    }
+                    }
+                }
+    
+                    @formGroup{
+                    <div class="form-group required {{getHasErrorClass('experimentForm', 'protocolCode')}} " 
+>
+                        <label
+                            class="col-md-6 col-lg-6 control-label">@Messages("descriptions.mapping.projects.child.code")</label>
+                        <div class="col-md-6 col-lg-4">
+                            <div ng-required=true bt-select
+                                placeholder='@Messages("descriptions.mapping.projects.child.code")' class="form-control"
+                                filter="true" ng-model="newService.entry.child"
+                                bt-options="project.code  as project|formatProjectListLabel for project in newService.lists.getProjects()">
+                            </div>
+                        </div>
+                    </div>
+                    }
+                    @formGroup{
+                    <div class="form-group required {{getHasErrorClass('experimentForm', 'protocolCode')}}">
+                        <label
+                            class="col-md-6 col-lg-6 control-label"  style="padding-top:2%;">@Messages("descriptions.mapping.comment.jira")</label>
+                        <div class="col-md-6 col-lg-4" style="padding-top:3%;">
+                            <textarea class="form-control " placeholder='@Messages("descriptions.mapping.comment.jira")'
+                                ng-model="newService.entry.comment"></textarea>
+                        </div>
+                    </div>
+                    }
+                </div>
+            </div>
+            <div ultimate-datatable="newService.datatable">
+                <div udt-form></div>
+            </div>
+        </div>
+    </div>
+    

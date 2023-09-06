@@ -1,0 +1,31 @@
+//FDS  01/06/2022 NGL-3852
+package rules
+
+//list any import classes here.
+
+
+//declare any global variables here
+
+
+
+rule "Check sample code pattern"
+	@nglSQ( validations )
+	///  @nglSQ( sampleCreation )   plutot ici ???
+	dialect "java"
+	salience 900
+	no-loop
+    when
+        $sample : Sample($code:code, $code!=null)
+        $contextValidation:ContextValidation()	
+    then
+    	Logger.debug("Check sample code : "+ $code);  	
+       	// Le code ne doit contenir que des chiffres, lettres  PAS DE "_"
+       	// minuscules autorisées !!!???? pas de taille max definie
+       	Pattern p1 = Pattern.compile("[A-Za-z0-9]*", Pattern.DOTALL);
+       	Matcher m1 = p1.matcher($code);
+       	//if( !$code.matches("[A-Za-z0-9]*") ){
+       	if ( ! m1.matches() ){
+       		Logger.error("Check sample code pattern :'"+ $code +"' NOT match "+ p1);
+       		$contextValidation.addErrors("Sample '"+$code+"'", "error.receptionfile.sampleCode.incorrectpattern", $code, p1);
+	 	}
+	end

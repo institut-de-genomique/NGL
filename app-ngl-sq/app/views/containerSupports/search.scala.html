@@ -1,0 +1,88 @@
+@()
+
+@import views.html.helper._
+
+@** FDS 23/11/2020 remise en forme de l'ordre des attributs...
+                   NGL-3152 ajout des titles manquants sur bt-input => va sur 'icone d'ouverture des textarea => messages spécifiques ajoutés 
+                   ajout des autres titles manquants  title=placehoder  **@
+
+@form() = {
+	@columnSearchForm{
+		@formGroup{
+			<div class="form-control" bt-select placeholder='@Messages("search.placeholder.projects")' title='@Messages("search.title.projects")'
+			     textareaplaceholder='@Messages("search.textarea.placeholder.codesList")'
+			     multiple="true" textarea="true" filter="true"
+			     ng-model="searchService.form.projectCodes"
+			     bt-options="project.code as project|formatProjectListLabel for project in searchService.lists.getProjects()" 
+			     ng-change="searchService.resetSampleCodes()">
+			</div>
+		}
+		@formGroup{
+			<div class="form-control" bt-select placeholder='@Messages("containerSupports.select.state")' title='@Messages("containerSupports.select.state")' 
+			     multiple="true" filter="true"
+			     ng-model="searchService.form.stateCodes" 
+			     bt-options="stateCode.code as stateCode.name for stateCode in searchService.lists.getStates()" auto-select>
+			</div>
+		}
+	}
+	@columnSearchForm{
+		@formGroup{
+			<div class="form-control" bt-select placeholder='@Messages("search.placeholder.samples")' title='@Messages("search.title.samples")'
+			     textareaplaceholder='@Messages("search.textarea.placeholder.codesList")'
+			     multiple="true" textarea="true" filter="true"
+			     ng-model="searchService.form.sampleCodes"
+			     bt-options="sample.code as sample.code for sample in searchService.lists.getSamples()" 
+			     ng-focus="searchService.refreshSamples()">
+			</div>			
+		}
+		@formGroup{  
+		    @*** utiliser l'input classique et pas le bt-input car pas besoin de la textarea de saisie ici ***@      
+			<input class="form-control" type="text"  placeholder='@Messages("search.placeholder.storage")' title='@Messages("search.placeholder.storage")'
+			       ng-model="searchService.form.storageCodeRegex" >
+		}
+	}
+	@columnSearchForm{
+		@formGroup{
+			<div class="form-control" bt-select placeholder='@Messages("containerSupports.table.categoryCode")' title='@Messages("containerSupports.table.categoryCode")'
+			     multiple="true" 
+			     ng-model="searchService.form.containerSupportCategories" 
+			     bt-options="CategorySupport.code as CategorySupport.name for CategorySupport in searchService.lists.getContainerSupportCategories()" auto-select>
+			</div>			
+		}
+		@formGroup{
+			<bt-input class="form-control" placeholder='@Messages("search.placeholder.containerSupport")' title='@Messages("search.title.containerSupports.textarea")'
+			           input-ng-model="searchService.form.codeRegex" 
+			           textarea-ng-model="searchService.form.codes"
+			           textarea-placeholder-ng-model='@Messages("search.textarea.placeholder.codesList")'>
+			</bt-input>
+		}
+	}
+	@columnSearchForm{
+		@formGroup{
+			@** ne pas mettre la directive date-timestamp dans ce cas **@
+			<input class="form-control" type="text"  placeholder='@Messages("containerSupports.placeholder.fromDate")' title='@Messages("containerSupports.placeholder.fromDate")'
+			       ng-model="searchService.form.fromDate">
+		}
+		@formGroup{
+			<div class="form-control" bt-select  placeholder='@Messages("containers.select.fromTransformationTypeCodes")' title='@Messages("containers.select.fromTransformationTypeCodes")'
+			     multiple="true"
+			     ng-model="searchService.form.fromTransformationTypeCodes" 
+				 bt-options="expType.code as expType.name for expType in searchService.lists.get('transformation',true)">
+			</div>
+		}
+	}
+	@columnSearchForm{
+		@formGroup{
+			@** ne pas mettre la directive date-timestamp dans ce cas **@
+			<input class="form-control" type="text"  placeholder='@Messages("containerSupports.placeholder.toDate")' title='@Messages("containerSupports.placeholder.toDate")'  
+			       ng-model="searchService.form.toDate" >
+		}
+		@formGroup{
+			<input class="form-control" type="text" placeholder='@Messages("containerSupports.table.createUser")' title='@Messages("containerSupports.placeholder.user")'
+			       ng-model="searchService.form.createUser" 
+			       typeahead="user.name as user.name for user in searchService.lists.getUsers() | filter:$viewValue | limitTo:20" >	
+		}
+	}
+}
+
+@searchForm(form)()("searchService.datatable")

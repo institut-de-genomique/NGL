@@ -1,0 +1,155 @@
+package ngl.data.crontab;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.inject.Singleton;
+
+import org.apache.xmlbeans.impl.xb.xmlconfig.Nsconfig;
+
+import akka.actor.Cancellable;
+import scala.concurrent.duration.FiniteDuration;
+import sun.util.resources.cldr.aa.CalendarData_aa_ER;
+
+//
+// - Server date
+// Cron dates are defined using the server calendar so all dates
+// should use the server calendar.
+// Mongo uses UTC dates which does not mean much, the only problem
+// is that the job runners agree on some definition of the date as it is
+// the real thing. Each job definition must then take care of specifying the 
+// date interpretation.
+// 
+
+//interface IProgram extends Runnable {
+//	String mId(); // mongo object id
+//}
+//
+//class ScheduledProgram {
+//	IProgram       program;
+//	FiniteDuration delay;
+//	FiniteDuration interval;
+//	Cancellable    c;
+//}
+
+
+
+// Check crontab definition against the current table. We can probably simply
+// update the definition blindly as we do not assume removal.
+
+// Cool idea would be that the crontab is defined in a collection so
+// it becomes pretty simple to check if something needs to be started.
+// The crontab is then responsible for running processes that are defined in the
+// database. The job definition is a single class to build by injection.
+// The other way around is to synchronize job execution.
+// Job execution can be done by any number of server but each job should
+// not be ran more than an global declaration.
+// We could then use the jobs defined in the data base. The other way around being
+// that the jobs are ran in each process but check the last execution to see if
+// the current process has to run the job. We use the centralized database definition
+// to synchronize the servers jobs execution.
+// @Singleton
+//public class CronTab {
+//
+//	// Should enforce hard singleton
+//	
+//	private List<ScheduledProgram> programs = new ArrayList<>();
+//	public NGLContext          ctx;
+//	
+//	// Run the lock background cleaning. 
+//	public void start() {
+//		ctx.akkaSystem().scheduler().schedule(
+//			FiniteDuration.create(                         0, TimeUnit.SECONDS),
+//			FiniteDuration.create(MDBLock.lockCheckFrequency, TimeUnit.SECONDS),
+//            new LockCleaner(), 
+//            ctx.akkaSystem().dispatcher());
+//		String vmName = java.lang.management.ManagementFactory.getRuntimeMXBean().getName();
+//	}
+//	
+//	// The program list is defined for a given server. We could use a shared
+//	// table but this requires that we're able to uniquely identify servers.
+//	// No idea if it's worth the work. We use the program definition id instead of
+//	// generating an id and that's a plus.
+//	public void scheduleProgram(IProgram program, FiniteDuration delay, FiniteDuration interval) {
+//		ScheduledProgram sp = new ScheduledProgram();
+//		programs.add(sp);
+//		sp.c = ctx.akkaSystem().scheduler().schedule(
+//				delay,
+//                interval, 
+//                program, 
+//                ctx.akkaSystem().dispatcher());
+//	}
+//	
+//	public Runnable guard(IProgram p) {
+//		return () -> {
+//			MDBLock lock = MDBLock.acquire(p.mId());
+//			if (lock == null)
+//				return;
+//			// Run a timer to keep the lock alive
+//			Cancellable refresher = ctx.akkaSystem().scheduler().schedule(
+//					FiniteDuration.create(MDBLock.lockDuration, TimeUnit.SECONDS),
+//					FiniteDuration.create(MDBLock.lockDuration, TimeUnit.SECONDS),
+//	                new LockRefresher(lock.getOID()), 
+//	                ctx.akkaSystem().dispatcher());
+//			try {
+//				p.run();
+//			} finally {
+//				refresher.cancel();
+//				lock.release();
+//			}
+//		};
+//	}
+//	
+//}
+
+// Define the cron tab entries.
+// We can provide a cron like format.
+//   -- minutes hours day-of-month month day-of-week
+// The cron process itself will check every minute the crontab that is supposedly
+// small so it should not be e big deal.
+// No locking of the cron tab reading.
+// Date interpretation is relative to the server time which is a problem
+// as the date would be interpreted in the client (which is a NGL app).
+//class CronDate {
+//	int minute, hour, day, month;
+//	public CronDate(int minute, int hour, int day, int month) {
+//		this.minute  = minute;
+//		this.hour    = hour;
+//		this.day     = day;
+//		this.month   = month;
+//	}
+//}
+
+// We must be able to compute the previous and the next execution from that 
+// format.
+// We suppose that we have:
+//   the current date
+//   the last execution date
+//   the cron entry
+// We only have to compute the last expected date.
+//   if (current date > last expected date) and (last execution date < last expected date)
+//     execute
+//
+// If the current date is mm-hh-dd-MM-JJ
+// We can have the last execution time that could be set to some better
+// format than a raw date.
+// Suppose that we use a list of mm-hh-dd-MM.
+// Any combination is possible but the missing value has to be set
+// to something.
+// Cron * means that the value set is taken in full. There is no
+// missing value.
+//   00-00-01-[01-12]
+//   [5,10,15]-[5,17]-[1,8,15,22,29]-[2,4,6,8,10]
+// The list is a full cartesian product that is simply a way to generate the
+// list of execution dates.
+// Given the list of dates, we create the current date in the same format and
+// look for the previous date. If we are the first of the list, then we take the last.
+// Given the current date in mm-hh-dd-MM, we apply the lookup to each category.
+// 
+//
+
+
+
+

@@ -1,0 +1,90 @@
+@this()
+@()
+@user            = @{ fr.cea.ig.authentication.Authentication.getUser() }
+
+@import views.html.tools._
+
+@column()(value: Html) = {
+	<div class="col-md-4 col-lg-4">
+		@value
+	</div>
+}
+
+
+<!--debut-->
+
+@standard_header("analysis", "TRUE"){ 
+	<div class="row">
+	<button class="btn btn-default" 
+				data-toggle="modal" data-target="#commentModal" title="@Messages("button.addComment")"><i class="fa fa-comment"></i></button>
+
+	</div>
+}
+
+
+<form class="form-horizontal" name="experimentForm">
+
+<div class="row">
+	@column(){
+	    @* Ecriture des differentes lignes code, state, title, abstract et description :*@
+	    @lineDate("analysis.traceInformation.creationDate")
+	    @lineDate("Date de première soumission", "analysis.firstSubmissionDate")
+	  	@line("analysis.code")
+		@labelLine("analysis.state")
+		@line("analysis.projectCodes")
+		@line("analysis.accession")
+		@line("analysis.title")
+		@line("analysis.description")
+		@line("analysis.sampleAccession")
+		@line("analysis.studyAccession")
+	}
+</div>
+
+
+</form>		
+
+<form class="form-horizontal" name="experimentForm2">
+	
+<div class="page-header"/>	
+					
+<div class="row" ng-if="isRawData()">
+	@column(){	
+		@views.html.helper.columnLabelValue(Messages("analysis.listRawData")){
+			<p class="form-control-static">{{analysis.code}}</p>
+		}	
+	}	
+</div>	
+<div class="row" ng-if="!isRawData()">
+	@column(){	
+		@views.html.helper.columnLabelValue(Messages("analysis.noListRawData")){
+			<p class="form-control-static">{{analysis.code}}</p>
+		}	
+	}	
+</div>	
+</div>
+
+</form>		
+
+
+<!-- stopPropagation on checkbox prevent parents default behavior (stop <a> call) -->
+
+
+
+<div class="row margin-bottom-7">
+	<div class="col-md-12 col-lg-12">
+		<ul class="nav nav-tabs margin-bottom-5" ng-if="isRawData()">
+			<!--class="active" permet affichage sans avoir à cliquer sur colonne-->
+			<li class="active"><a a href="#" data-target="#rawData" data-toggle="tab">@Messages("studies.tabs.rawData")</a></li>
+		</ul>
+		<div class="tab-content" ng-if="isRawData()">
+			<div class="tab-pane active" id="rawData">
+				<div ultimate-datatable="rawDataDT"></div>
+			</div>
+		</div>
+	</div>
+	@partials.commentSection(user)
+</div>
+
+
+
+

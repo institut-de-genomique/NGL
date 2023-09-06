@@ -1,0 +1,75 @@
+@this()
+@()
+@import views.html.helper._
+
+@form() = {
+
+	@columnSearchForm{
+		@formGroup{
+			@** ceci est un commentaire
+			**@
+			<div class="form-control" bt-select  ng-model="createService.form.projectCodes" filter="true" multiple="true" placeholder='@Messages("create.placeholder.projectCodes")' bt-options="project.code as project|formatProjectListLabel for project in createService.lists.getProjects()" required></div>	
+		}
+		@** 
+		"create.placeholder.strategySample" est definit dans le fichier /conf/messages.
+		La variable createService.sraVariables.strategySample est initialise dans /public/javascripts/configurations/services.js
+		au niveau de createService et initListService
+		**@
+		@formGroup{
+			<div class="form-control" bt-select ng-model="createService.form.strategySample" placeholder='@Messages("create.placeholder.strategySample")' bt-options="strategySample.code as strategySample.name for strategySample in createService.sraVariables.strategySample" required></div>			
+		}	
+		@formGroup{
+			<div class="form-control" bt-select ng-model="createService.form.strategyStudy" placeholder='@Messages("create.placeholder.strategyStudy")' bt-options="strategyStudy.code as strategyStudy.name for strategyStudy in createService.sraVariables.strategyStudy" required></div>			
+		}												
+	
+		@formGroup{
+			<div class="form-control" bt-select ng-model="createService.form.librarySelection" placeholder='@Messages("create.placeholder.librarySelection")' bt-options="librarySelection.code as librarySelection.name for librarySelection in createService.sraVariables.librarySelection" required></div>			
+		}
+		@formGroup{
+			<div class="form-control" bt-select ng-model="createService.form.libraryStrategy" placeholder='@Messages("create.placeholder.libraryStrategy")' bt-options="libraryStrategy.code as libraryStrategy.name for libraryStrategy in createService.sraVariables.libraryStrategy" required></div>			
+		}
+		@formGroup{
+			<div class="form-control" bt-select ng-model="createService.form.librarySource" placeholder='@Messages("create.placeholder.librarySource")' bt-options="librarySource.code as librarySource.name for librarySource in createService.sraVariables.librarySource" required></div>			
+		}	
+		@formGroup{
+			<textarea class="form-control" rows="2" ng-model="createService.form.libraryConstructionProtocol" placeholder='@Messages("create.placeholder.libraryConstructionProtocol")' ></textarea>
+		}	
+	}
+
+	
+}
+
+<div class="row">
+<div class="col-md-12 col-lg-12"  messages="messages"></div>
+</div>
+
+<div class="row"> 
+	<div class="col-md-12 col-lg-12">
+		<div dt-form>	
+			<div class="tab-content">
+				<div class="tab-pane active" id="filters">
+					<form name="configurationForm" class="well well-small">
+						<div class="row">
+						@form
+						@columnSearchForm{
+							@formGroup{
+							<div class="btn-toolbar">
+								<button type="submit" title='@Messages("button.save")' ng-disabled="configurationForm.$invalid" ng-click="save()" data-toggle="tooltip" class="btn btn-primary" >
+									<i class="fa fa-save"></i>
+								</button>
+								<button title='@Messages("button.reset")' ng-click="reset()" data-toggle="tooltip"  class="btn btn-default">
+									<i class="fa fa-undo"></i>
+								</button>						 	
+							</div>	
+							}	
+						}
+						</div>		
+					</form>	
+				</div>
+			</div>
+		</div>
+	</div>
+</div> 
+
+
+

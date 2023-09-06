@@ -1,0 +1,162 @@
+q#created on: Jul 7, 2014
+package birds
+
+rule "get input inputRawDataZip resources from NGL referential for zip"
+@BirdsRule ( selectionRule )
+dialect 'java'
+ salience 200
+ //no-loop
+	when
+		$input : InputSpecificationElement(name=="inputRawDataZip", treatmentSpecification.name!=null, treatmentSpecification.name=="ZipFile", project.name == "SRA")
+		$resourcesReferential : ResourcesReferential(name=="nglSubRef_zip")
+		$referentialDevice : JSONDevice () from $resourcesReferential.referentialDevice
+		$rps : ResourcePropertiesSet(initialized==false, inputSpecificationElement==$input, resourcesReferential==$resourcesReferential)
+		$groupJob : Job( treatmentSpecification.specificationGroup == true)
+	then
+        Logger log = Logger.getLogger("ngl.sub.rules");
+        //log.debug("group internal referential device resources query from referential " + $resourcesReferential.getName());
+        log.debug("get resource for zip");
+        $rps.initialize();
+        
+       	Set<ResourceProperties> resourceProperties = new HashSet<ResourceProperties>();
+        
+        JobResource groupJobResource = $groupJob.getUniqueJobResource("inputZipMd5");
+        
+        String typeRawDataSubmitted = groupJobResource.getProperty("typeRawDataSubmitted");
+        if(typeRawDataSubmitted.equals("bionanoRawData")){
+        	String analysisCode = groupJobResource.getProperty("analysisCode");
+        	Set<ResourceProperties> rpsRawData = $referentialDevice.httpGetJSON(ProjectProperties.getProperty("server")+"/api/sra/analyzes/rawDatas?code="+analysisCode,"bot");
+        	Set<ResourceProperties> rpsRawDataFilter = SRAFilesUtil.filterByGzipForSubmission(rpsRawData);
+        	for(ResourceProperties rpRawDataFilter : rpsRawDataFilter)
+				{
+					ResourceProperties newRp = new ResourceProperties();
+					newRp.setProperty("fileName",rpRawDataFilter.getProperty("relatifName"));
+					if(rpRawDataFilter.getProperty("location").equals("CCRT")){
+						//newRp.setProperty("directory",groupJobResource.getProperty("submissionDirectory"));
+						newRp.setProperty("directory",ProjectProperties.getProperty("tmpDirectory")+File.separator+groupJobResource.getProperty("code"));
+					}else{
+						newRp.setProperty("directory",rpRawDataFilter.getProperty("directory"));
+					}
+					newRp.setProperty("submissionDirectory",groupJobResource.getProperty("submissionDirectory"));
+					newRp.setProperty("typeRawDataSubmitted",groupJobResource.getProperty("typeRawDataSubmitted"));
+					newRp.setProperty("analysisCode",analysisCode);
+					newRp.setProperty("code",groupJobResource.getProperty("code"));
+					newRp.setProperty("idGroupJob",""+$groupJob.getId());
+					resourceProperties.add(newRp);
+				}
+        }else{
+        	String[] tabExperimentCodes = groupJobResource.getProperty("experimentCodes").split(",");
+       	 	for(int i=0; i<tabExperimentCodes.length; i++){
+        
+				Set<ResourceProperties> rpsRawData = $referentialDevice.httpGetJSON(ProjectProperties.getProperty("server")+"/api/sra/experiments/rawDatas?code="+tabExperimentCodes[i],"bot");
+				Set<ResourceProperties> rpsRawDataFilter = SRAFilesUtil.filterByGzipForSubmission(rpsRawData);
+		
+				for(ResourceProperties rpRawDataFilter : rpsRawDataFilter)
+				{
+					ResourceProperties newRp = new ResourceProperties();
+					newRp.setProperty("fileName",rpRawDataFilter.getProperty("relatifName"));
+					if(rpRawDataFilter.getProperty("location").equals("CCRT")){
+						//newRp.setProperty("directory",groupJobResource.getProperty("submissionDirectory"));
+						newRp.setProperty("directory",ProjectProperties.getProperty("tmpDirectory")+File.separator+groupJobResource.getProperty("code"));
+					}else{
+						newRp.setProperty("directory",rpRawDataFilter.getProperty("directory"));
+					}
+					newRp.setProperty("submissionDirectory",groupJobResource.getProperty("submissionDirectory"));
+					newRp.setProperty("typeRawDataSubmitted",groupJobResource.getProperty("typeRawDataSubmitted"));
+					newRp.setProperty("experimentCode",tabExperimentCodes[i]);
+					newRp.setProperty("code",groupJobResource.getProperty("code"));
+					newRp.setProperty("idGroupJob",""+$groupJob.getId());
+					resourceProperties.add(newRp);
+				}
+			}
+		}
+		$rps.setResourcePropertiesSet(resourceProperties);
+		modify($rps) {};
+end
+
+
+rule "Set parameter for command line Zip"
+	@BirdsRule(fsRule)
+	dialect 'java'
+	salience 300
+	no-loop
+		when
+			$treatSpec : TreatmentSpecification(name=="ZipFile", project.name=="SRA")
+			$job : Job(treatmentSpecification.name!=null, treatmentSpecification.name == "ZipFile")
+		then
+			Logger log = Logger.getLogger("ngl.sub.rules");
+			log.debug("Set parameter for zip command");
+			//Get input resource
+			JobResource jobResource = $job.getUniqueJobResource("inputRawDataZip");
+			JobResource jobResourceSub = $job.getUniqueJobResource("inputSubZip");
+			$job.setParameterValue("fileToZip", jobResource.getProperty("directory")+File.separator+jobResource.getProperty("fileName"));
+			//$job.setParameterValue("endArg", ">"+jobResource.getProperty("submissionDirectory")+File.separator+jobResource.getProperty("fileName")+".gz");
+			$job.setParameterValue("endArg", ">"+ProjectProperties.getProperty("tmpDirectory")+File.separator+jobResourceSub.getProperty("code")+File.separator+jobResource.getProperty("fileName")+".gz");
+end
+
+rule "POST DONE EXECUTION of zip : Update relatifName of RawData"
+	@BirdsRule( ExecutionService )
+	dialect 'java'
+	salience 200
+	when
+		$executionService : ExecutionService( status == ExecutionService.POST_JOB_EXECUTION_STATUS)
+		$job : Job( treatmentSpecification!=null, treatmentSpecification.name == "ZipFile", treatmentSpecification.project.name == "SRA", executionState == Job.DONE_STATUS )
+	then
+		Logger log = Logger.getLogger("ngl.sub.rules");
+		//Raw Data from DB
+		JobResource jobResource = $job.getUniqueJobResource("inputRawDataZip");
+		String typeRawDataSubmitted = jobResource.getProperty("typeRawDataSubmitted");
+		JSONDevice jsonDevice = new JSONDevice();
+		if(typeRawDataSubmitted.equals("bionanoRawData")){
+			String JSONRawData = jsonDevice.httpGet(ProjectProperties.getProperty("server")+"/api/sra/analyzes/"+jobResource.getProperty("analysisCode")+"/rawDatas/"+jobResource.getProperty("fileName"),"bot");
+			log.debug("Result JSON RawData"+JSONRawData);
+			String JSONRawDataModify = jsonDevice.modifyJSON(JSONRawData, "relatifName", jobResource.getProperty("fileName")+".gz");
+			log.debug("Result JSON RawDataModify"+JSONRawDataModify);
+			String JSONRawDataModify2 = jsonDevice.modifyJSON(JSONRawDataModify, "extention", "fastq.gz");
+			log.debug("Result JSON RawDataModify"+JSONRawDataModify2);
+			String JSONRawDataModify3 = jsonDevice.modifyJSON(JSONRawDataModify2, "gzipForSubmission", "false");
+			log.debug("Result JSON RawDataModify"+JSONRawDataModify3);
+			String jsonResult = jsonDevice.httpPut(ProjectProperties.getProperty("server")+"/api/sra/analyzes/"+jobResource.getProperty("analysisCode")+"/rawDatas/"+jobResource.getProperty("fileName"),JSONRawDataModify3, "bot");
+			log.debug("Result "+jsonResult);
+		}else{
+			String JSONRawData = jsonDevice.httpGet(ProjectProperties.getProperty("server")+"/api/sra/experiments/"+jobResource.getProperty("experimentCode")+"/rawDatas/"+jobResource.getProperty("fileName"),"bot");
+			log.debug("Result JSON RawData"+JSONRawData);
+			String JSONRawDataModify = jsonDevice.modifyJSON(JSONRawData, "relatifName", jobResource.getProperty("fileName")+".gz");
+			log.debug("Result JSON RawDataModify"+JSONRawDataModify);
+			String JSONRawDataModify2 = jsonDevice.modifyJSON(JSONRawDataModify, "extention", "fastq.gz");
+			log.debug("Result JSON RawDataModify"+JSONRawDataModify2);
+			String JSONRawDataModify3 = jsonDevice.modifyJSON(JSONRawDataModify2, "gzipForSubmission", "false");
+			log.debug("Result JSON RawDataModify"+JSONRawDataModify3);
+			String jsonResult = jsonDevice.httpPut(ProjectProperties.getProperty("server")+"/api/sra/experiments/"+jobResource.getProperty("experimentCode")+"/rawDatas/"+jobResource.getProperty("fileName"),JSONRawDataModify3, "bot");
+			log.debug("Result "+jsonResult);
+		}
+end
+
+rule "add resources in internalRefMd5 to fire md5"
+	@BirdsRule( addResources ) 
+	dialect 'java'
+	salience 200
+	when
+		$flag : Flag ( done == false ) 
+		$output : OutputSpecificationElement(treatmentSpecification.name == "ZipFile")
+	  	$referential : ResourcesReferential ( name == "internalRefMd5" )
+		$resourceSet : ResourceSet( ioSpecificationElement == $output )
+		$job : Job(treatmentSpecification!=null, treatmentSpecification.name == "ZipFile")
+	then
+		Logger log = Logger.getLogger("ngl.sub.rules");
+		log.debug("Add resources rules for sendXML from file "+$job.getProperty(Job.STDOUT));
+		JobResource jobResource = $job.getUniqueJobResource("inputRawDataZip");
+		JobResource outputResource = $resourceSet.createJobResource($output.getResourceType(),$referential.getName());
+		ResourceProperties resourceProperties = outputResource.getResourceProperties();
+	  	resourceProperties.setProperty("fileName",jobResource.getProperty("fileName")+".gz");
+	  	resourceProperties.setProperty("directory",jobResource.getProperty("directory"));
+	  	resourceProperties.setProperty("experimentCode",jobResource.getProperty("experimentCode"));
+	  	resourceProperties.setProperty("analysisCode",jobResource.getProperty("analysisCode"));
+	  	resourceProperties.setProperty("typeRawDataSubmitted",jobResource.getProperty("typeRawDataSubmitted"));
+	  	resourceProperties.setProperty("submissionDirectory",jobResource.getProperty("submissionDirectory"));
+	  	JobResource jobResourceSub = $job.getUniqueJobResource("inputSubZip");
+	  	resourceProperties.setProperty("code",jobResourceSub.getProperty("code"));
+		$flag.setDone(true);
+		modify($flag){};
+		modify($resourceSet){};
+end

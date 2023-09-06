@@ -1,0 +1,542 @@
+@this(menu_ : menu)
+@()
+<!-- utilise le main de common -->
+@views.html.main("documentation.page.title",menu_("documentation")) {
+<div class="jumbotron">
+	<h1>@Messages("documentation.page.title")</h1>
+</div>
+<div class="panel panel-default">
+	<div class="panel-heading" bgcolor="red"">	
+		<h3>@Messages("documentation.ebi.title")</h3>
+	</div>
+	<div class="panel-body">
+		<ul>
+			<li><a href="http://www.ebi.ac.uk/ena/submit/read-submission">@Messages("documentation.sra.url")</a></li>																				
+			<li><a href="http://www.ebi.ac.uk/ena/submit/metadata-model">@Messages("documentation.metatadata.url")</a></li>																				
+		</ul>
+		<xmp>
+	
+		</xmp>	
+	</div>
+	<div class="panel-heading">
+		<h3>@Messages("documentation.creationSubmission")</h3>
+	</div>
+	<div class="panel-body">
+		<ul>			
+			Le menu creation de l'onglet Submission permet de distinguer 3 types de soumission en mode CREATION :
+			
+			<li><h4><strong>Soumission d'un study ou d'un sample sans données brutes  :</strong><h4></li>	
+			Il est possible dans NGL-SUB de creer un study (menu creation de l'onglet Study) et de le soumettre sans données brutes associées.
+			Ce type de soumission ne necessite pas de configuration de soumission.
+			On peut également créer un sample et le soumettre sans données brutes en prevision d'une utilisation pour une soumission de type bionano.
+			<strong>
+		    Attention, le sous-menu Création des samples ne doit etre utilisé qu'en prévision d'une soumission de données brutes bionano. Pour toutes 
+			les soumissions de données brutes autre que bionano, les samples seront automatiquement crées sur la base de la configuration de soumission. 
+			</strong>
+			<li><h4><strong>Soumission des données Bionano :</strong><h4></li>
+			Ce type de soumission sert exclusivement à la soumission des données brutes de type bionano. Elle ne necessite pas de configuration de soumission.
+			Elle necessite de creer une analyse (menu creation de l'onglet Analysis), un sample et de fournir la liste des readsets bionano.
+		
+			<li><h4><strong>Soumission des données Illumina, nanopore ou mgi :</strong><h4></li>
+			Ce type de soumission necessite de creer une configuration de soumission (menu creation de l'onglet Configuration). Cette configuration indique à NGL-SUB comment construire les samples
+			de la soumission correspondant aux readsets fournits par l'utilisateur. Elle permet egalement à l'utilisateur d'indiquer des valeurs 
+			obligatoires pour construire les experiments de la soumission. 	
+		</ul>
+		<ul></ul>
+	</div>
+	
+	
+	<div class="panel-heading">
+		<h3>@Messages("documentation.configuration")</h3>
+	</div>
+	<div class="panel-body">
+		<ul>
+			<li><h4>Strategy study: @Messages("documentation.mandatory").  @Messages("documentation.possible.values") :</h4> 
+				<ul>
+					<li><strong>STRATEGY_CODE_STUDY</strong> : Utilisation d'un code_study réferancant un study crée dans NGL-SUB. (study ayant deja été soumis à l'EBI ou non).</li>
+					<li><strong>STRATEGY_AC_STUDY</strong>   : Utilisation d'un numéros d'accession de study (de la forme ERP... ou PRJ..), cad d'un study soumis  à l'EBI (par le genoscope ou des collaborateurs).</li>
+                </ul>
+           	</li>		
+			<li><h4>Strategy sample : @Messages("documentation.mandatory").  @Messages("documentation.possible.values") :</h4> 
+				<ul>
+					<li><strong>STRATEGY_CODE_SAMPLE_TAXON</strong>     : Construction d'un objet sample par code projet et par taxon.</li>
+					<li><strong>STRATEGY_CODE_SAMPLE_REFCOLLAB</strong> : Construction d'un objet sample par code projet, taxon et par referenceCollaborateur.</li>
+					<li><strong>STRATEGY_CODE_SAMPLE_BANK</strong>      : Construction d'un objet sample par code projet, par taxon et par banque (libProcessTypeCodeVal dans NGL).</li>
+					<li><strong>STRATEGY_AC_SAMPLE</strong>             : Pas de construction de sample pour la soumission. Utilisation d'un numeros d'accession de sample (de la forme ERS ou SAM) ou bien utilisation d'un fichier de correspondance 'FILE_USER_REFCOLLAB_TO_AC'. <br/>
+					Le fichier FILE_USER_REFCOLLAB_TO_AC indique pour chaque referenceCollaborateur ou refCollabSub, le numeros d'accession du sample (ERS... ou SAM...) et/ou le numeros d'accession du study (ERP... ou PRJ...)à utiliser pour la soumission. <br>
+					Dans le cas d'une strategie 'STRATEGY_AC_SAMPLE' et d'une utilisation du fichier 'FILE_USER_REFCOLLAB_TO_AC',  le champ readset.sampleOnContainer.refCollab ou la proprieté readset.properties.refCollabSub doit etre renseigne dans NGL pour les readsets à soumettre.
+
+                </ul>
+           	</li>
+           	
+           	
+           	<li><h4><a id="libraryStrategy"></a></h4>
+				<h4>Library strategy : @Messages("documentation.mandatory"). @Messages("documentation.possible.values") :</h4> 
+				<ul>
+					<li><strong>WGS</strong> : Random sequencing of the whole genome</li>
+					<li><strong>WGA</strong> : Whole Genome Amplification followed by random sequencing. (see pubmed 1631067,8962113 for details)</li>
+					<li><strong>WXS</strong> : Random sequencing of exonic regions selected from the genome</li>
+					<li><strong>RNA-Seq</strong> : Random sequencing of whole transcriptome</li>
+					<li><strong>ssRNA-seq</strong> : Strand-specific RNA sequencing.</li>
+					<li><strong>miRNA-Seq</strong> : Micro RNA sequencing strategy designed to capture post-transcriptional RNA elements and include non-coding functional elements. (see pubmed 21787409 for details)</li>
+					<li><strong>ncRNA-Seq</strong> : Capture of other non-coding RNA types, including post-translation modification types such as snRNA (small nuclear RNA) or snoRNA (small nucleolar RNA), or expression regulation types such as siRNA (small interfering RNA) or piRNA/piwi/RNA (piwi-interacting RNA).</li>
+					<li><strong>FL-cDNA</strong> : Full-length sequencing of cDNA templates</li>
+					<li><strong>EST</strong> : Single pass sequencing of cDNA templates</li>
+					<li><strong>Hi-C</strong> : Chromosome Conformation Capture technique where a biotin-labeled nucleotide is incorporated at the ligation junction, enabling selective purification of chimeric DNA ligation junctions followed by deep sequencing.</li>
+					<li><strong>ATAC-seq</strong> : Assay for Transposase-Accessible Chromatin (ATAC) strategy is used to study genome-wide chromatin accessibility. alternative method to DNase-seq that uses an engineered Tn5 transposase to cleave DNA and to integrate primer DNA sequences into the cleaved genomic DNA.</li>
+					<li><strong>WCS</strong> : Random sequencing of a whole chromosome or other replicon isolated from a genome</li>
+					<li><strong>RAD-Seq</strong> : </li>
+					<li><strong>CLONE</strong> : Genomic clone based (hierarchical) sequencing</li>
+					<li><strong>POOLCLONE</strong> : Shotgun of pooled clones (usually BACs and Fosmids)</li>
+					<li><strong>AMPLICON</strong> : Sequencing of overlapping or distinct PCR or RT-PCR products</li>
+					<li><strong>CLONEEND</strong> : Clone end (5', 3', or both) sequencing</li>
+					<li><strong>FINISHING</strong> : Sequencing intended to finish (close) gaps in existing coverage</li>
+					<li><strong>ChIP-Seq</strong> : Direct sequencing of chromatin immunoprecipitates</li>
+					<li><strong>MNase-Seq</strong> : Direct sequencing following MNase digestion</li>
+					<li><strong>DNase-Hypersensitivity</strong> : Sequencing of hypersensitive sites, or segments of open chromatin that are more readily cleaved by DNaseI</li>
+					<li><strong>Bisulfite-Seq</strong> : Sequencing following treatment of DNA with bisulfite to convert cytosine residues to uracil depending on methylation status</li>
+					<li><strong>CTS</strong> : Concatenated Tag Sequencing</li>
+					<li><strong>MRE-Seq</strong> : Methylation-Sensitive Restriction Enzyme Sequencing strategy</li>
+					<li><strong>MeDIP-Seq</strong> : Methylated DNA Immunoprecipitation Sequencing strategy</li>
+					<li><strong>MBD-Seq</strong> : Direct sequencing of methylated fractions sequencing strategy</li>
+					<li><strong>Tn-Seq</strong> : Quantitatively determine fitness of bacterial genes based on how many times a purposely seeded transposon gets inserted into each gene of a colony after some time.</li>
+					<li><strong>VALIDATION</strong> : CGHub special request: Independent experiment to re-evaluate putative variants.</li>
+					<li><strong>FAIRE-seq</strong> : Formaldehyde Assisted Isolation of Regulatory Elements. Reveals regions of open chromatin.</li>
+					<li><strong>SELEX</strong> : Systematic Evolution of Ligands by Exponential enrichment</li>
+					<li><strong>RIP-Seq</strong> : Direct sequencing of RNA immunoprecipitates (includes CLIP-Seq, HITS-CLIP and PAR-CLIP).</li>
+					<li><strong>ChIA-PET</strong> : Direct sequencing of proximity-ligated chromatin immunoprecipitates.</li>
+					<li><strong>Synthetic-Long-Read</strong> : binning and barcoding of large DNA fragments to facilitate assembly of the fragment</li>
+					<li><strong>Targeted-Capture</strong> : Enrichment of a targeted subset of loci.</li>
+					<li><strong>Tethered Chromatin Conformation Capture</strong> </strong> :</li>
+					<li><strong>OTHER</strong> : Library strategy not listed</li>
+				</ul>
+			</li>
+			<li><h4><a id="librarySource"></a></h4>
+				<h4>Library source : @Messages("documentation.mandatory"). @Messages("documentation.possible.values") : </h4> 
+				<ul>
+					<li><strong>GENOMIC</strong> : Genomic DNA (includes PCR products from genomic DNA)</li>
+					<li><strong>TRANSCRIPTOMIC</strong> : Transcription products or non genomic DNA (EST, cDNA, RT-PCR,screened libraries)</li>
+					<li><strong>METAGENOMIC</strong> : Mixed material from metagenome</li>
+					<li><strong>METATRANSCRIPTOMIC</strong> : Transcription products from community targets</li>
+					<li><strong>SYNTHETIC</strong> : Synthetic DNA</li>
+					<li><strong>VIRAL RNA</strong> : Viral RNA</li>
+					<li><strong>OTHER</strong> : Other, unspecified, or unknown library source material</li>
+				</ul>
+			</li>
+			<li><h4><a id="librarySelection"></a></h4>
+				<h4>Library selection : @Messages("documentation.mandatory"). @Messages("documentation.possible.values") :</h4> 
+				<ul>
+					<li><strong>RANDOM</strong>: No selection or random</li> 
+					<li><strong>PCR</strong> : Target selection and enrichment via PCR</li>
+					<li><strong>RANDOM PCR</strong> : Source material was selected by randomly generated primers.</li>
+					<li><strong>RT-PCR</strong> : Selection by reverse transcription PCR.</li>
+					<li><strong>HMPR</strong> : Hypo-methylated partial restriction digest</li>
+					<li><strong>MF</strong> : Methyl Filtrated</li>
+					<li><strong>repeat fractionation</strong> : Selection for less repetitive (and more gene rich) sequence through Cot filtration (CF) or other fractionation techniques based on DNA kinetics.</li> 
+					<li><strong>size fractionation</strong> : Physical selection of size appropriate targets.</li>
+					<li><strong>MSLL</strong> : Methylation Spanning Linking Library</li>
+					<li><strong>cDNA</strong>: PolyA selection or enrichment for messenger RNA(mRNA). complementary DNA.</li> 
+					<li><strong>cDNA_randomPriming</strong>: </li> 
+					<li><strong>cDNA_oligo_dT</strong>: </li> 
+					<li><strong>PolyA</strong>: PolyA selection or enrichment for messenger RNA (mRNA); should replace cDNA enumeration.</li> 
+					<li><strong>Oligo-dT</strong>: enrichment of messenger RNA (mRNA) by hybridization to Oligo-dT.</li>
+					<li><strong>Inverse rRNA</strong>: depletion of ribosomal RNA by oligo hybridization.</li>
+					<li><strong>Inverse rRNA selection</strong>: depletion of ribosomal RNA by inverse oligo hybridization.</li>
+					<li><strong>ChIP</strong> : Chromatin immunoprecipitation</li>
+					<li><strong>ChIP-Seq</strong>: Chromatin immunoPrecipitation, reveals binding sites of specific proteins, typically transcription factors (TFs) using antibodies to extract DNA fragments bound to the target protein.</li>
+					<li><strong>Mnase</strong> : Micrococcal Nuclease (Mnase) digestion</li>
+					<li><strong>Dnase</strong> : Deoxyribonuclease (MNase) digestion</li> 
+					<li><strong>Hybrid Selection</strong> : Selection by hybridization in array or solution.</li>
+					<li><strong>Reduced Representation</strong> : Reproducible genomic subsets, often generated by restriction fragment size selection, containing a manageable number of loci to facilitate re-sampling.</li>
+					<li><strong>Restriction Digest</strong> : DNA fractionation using restriction enzymes.</li>
+					<li><strong>5-methylcytidine antibody</strong> : Selection of methylated DNA fragments using an antibody raised against 5-methylcytosine or 5-methylcytidine (m5C).</li>
+					<li><strong>MBD2 protein methyl-CpG binding domain</strong> :  Enrichment by methyl-CpG binding domain.</li>
+					<li><strong>CAGE</strong> : Cap-analysis gene expression.</li> 
+					<li><strong>RACE</strong> : Rapid Amplification of cDNA Ends.</li>  
+					<li><strong>MDA</strong> : Multiple Displacement Amplification, a non-PCR based DNA amplification technique that amplifies a minute quantifies of DNA to levels suitable for genomic analysis.</li> 
+					<li><strong>padlock probes capture method</strong> : Targeted sequence capture protocol covering an arbitrary set of nonrepetitive genomics targets. An example is capture bisulfite sequencing using padlock probes (BSPP).</li> 
+					<li><strong>other</strong> : Other library enrichment, screening, or selection process.</li>
+					<li><strong>unspecified</strong> : Library enrichment, screening, or selection is not specified.</li>
+				</ul>
+			</li>
+			<li><h4>Library protocol : @Messages("documentation.optionnal").</h4></li>
+			<li><h4>Study type : @Messages("documentation.mandatory"). @Messages("documentation.possible.values") :</h4>
+				<ul>
+					<li><strong>Whole Genome Sequencing</strong> : Sequencing of a single organism.</li>
+					<li><strong>Metagenomics</strong> : Sequencing of a community.</li> 
+					<li><strong>Transcriptome Analysis</strong> : Sequencing and characterization of transcription elements.</li>
+					<li><strong>Resequencing</strong> : Sequencing of a sample with respect to a reference.</li>                 
+					<li><strong>Epigenetics</strong> : Cellular differentiation study.</li>  
+					<li><strong>Synthetic Genomics</strong> : Sequencing of modified, synthetic, or transplanted genomes.</li>
+					<li><strong>Forensic or Paleo-genomics</strong> :  Sequencing of recovered genomic material.</li>
+					<li><strong>Gene Regulation Study</strong> : Study of gene expression regulation.</li> 
+					<li><strong>Cancer Genomics</strong> : Study of cancer genomics.</li> 
+					<li><strong>Population Genomics</strong> : Study of populations and evolution through genomics.</li>
+					<li><strong>RNASeq : RNA sequencing study.</strong></li>
+					<li><strong>Exome Sequencing</strong> : The study investigates the exons of the genome.</li>
+					<li><strong>Pooled Clone Sequencing</strong> : The study is sequencing clone pools (BACs, fosmids, other constructs).</li>
+					<li><strong>Other</strong> : Study type not listed.</li>
+				</ul> 
+			</li>
+		</ul>
+		<xmp>
+	
+		</xmp>	
+	</div>
+		
+	<div class="panel-heading">
+		<h3>@Messages("documentation.userFileReadSet")</h3>
+	</div>
+	<div class="panel-body">	
+		<ul>
+		<li><h4>utilité du fichier :</h4>
+		Il permet d'indiquer une liste predefinie de ReadSetCode à soumettre.
+		<li><h4>Format du fichier :</h4>
+		En colonnes délimitées par le caractère '|'. La premiere ligne du fichier permet de definir la legende (type-information de chaque colonne) <br> 
+		tandis que les lignes suivantes du fichier correspondent aux valeurs. <br>
+		Les lignes commencant par le caractère '#' sont ignorées (commentaires).<br> 
+		La legende doit obligatoirement comporter le champ "readSetCode".<br>
+		<li><h4>Type d'informations pouvant apparaitre dans le fichier :</h4>
+		<ul>
+			<li><strong>readSetCode</strong> :        Code du readSet.
+		</ul>		
+		<li><h4>Exemple de fichier :</h4>
+		#-------------------------------<br>
+		readSetCode<br>
+		#-------------------------------<br>
+		BAT_AAQOSW_1_C37T3ACXX.IND25<br>
+		BAT_ABAOSW_2_C39B2ACXX.IND30<br>
+		
+	
+	</div>	
+
+	<div class="panel-heading">
+		<h3>@Messages("documentation.userFileRefCollabToAc")</h3>
+	</div>
+	<div class="panel-body">		
+		<ul>
+		<li><h4>utilité du fichier :</h4>	
+		Il permet de donner les correspondance entre les references collaborateur
+		et les identifiants des objets 'sample' et/ou 'study' deja soumis.  
+		Dans le cas d'une strategie 'STRATEGY_AC_SAMPLE' avec utilisation du fichier 'FILE_USER_REFCOLLAB_TO_AC'  le champ readset.sampleOnContainer.refCollab ou la proprieté readset.properties.refCollabSub doit etre renseigne dans NGL pour les readsets à soumettre.
+		Attention : Si la propriété refCollabSub est definie dans vos readsets, c'est la valeur de refCollabSub qu'il faut indiquer dans le fichier userFileRefCollabToAc puisque
+		refCollabSub remplace refCollab dans les soumissions.
+		<li><h4>Format du fichier :</h4>
+		En colonnes délimitées par le caractère '|'. La premiere ligne du fichier permet de definir la legende (type-information de chaque colonne) <br>
+		tandis que les lignes suivantes du fichier correspondent aux valeurs.<br> 
+		Les lignes commencant par le caractère '#' sont ignorées (commentaires).<br> 
+		La legende doit obligatoirement comporter le champ "refCollab"
+		<li><h4>Type d'informations pouvant apparaitre dans le fichier :</h4>
+		<ul>
+			<li><strong>refCollab</strong> : RefCollabSub si renseigné dans NGL ou Reference Collaborateur dans NGL (clone dans ancien lims).
+			<li><strong>sample_id</strong> : identifiant du sample à l'EBI (de la forme ERS.. ou SAM...) 
+			<li><strong>study_id</strong>  : Identifiant du study à l'EBI (de la forme ERP.. ou PRJ..)
+		</ul>	
+
+		<li><h4>Exemple de fichier :</h4>
+
+		#------------------------------------<br>
+		refCollab|sample_id|study_id         <br>
+		#------------------------------------<br>
+		IROO-C3-0001|ERS154526|ERP001583<br>
+		IROO-D6-0003|ERS154528|PRJEB3139<br>
+		IROO-D6-0005|SAMEA2012641|PRJEB3139<br>
+		IROO-E5-5146|SAMEA2012642|ERP001583<br>
+	<br/>
+	
+	<li><h4>Autre exemple de fichier :</h4>
+
+		#--------------------------<br>
+		refCollab|sample_id        <br>
+		#--------------------------<br>
+		IROO-C3-0001|SAMEA2012637<br>
+		IROO-D6-0002|ERS154527<br>
+		IROO-D6-0003|SAMEA2012639<br>
+		IROO-D6-0004|ERS154529<br>
+	
+	<br/>	
+	</div>		
+	
+	
+	<div class="panel-heading">
+		<h3>@Messages("documentation.userFileExperiment")</h3>
+	</div>
+	<div class="panel-body">		
+		<ul>
+		<li><h4>utilité du fichier :</h4>	
+		Il permet à l'utilisateur de surcharger les champs editables des experiments.
+		<li><h4>Format du fichier :</h4>
+		En colonnes délimitées par le caractère '|'. La premiere ligne du fichier permet de definir la legende (type-information de chaque colonne) <br>
+		tandis que les lignes suivantes du fichier correspondent aux valeurs.<br> 
+		Les lignes commencant par le caractère '#' sont ignorées (commentaires).<br> 
+		La legende doit obligatoirement comporter le champ "experiment_code"
+		
+		Attention, les champs study_ac et sample_ac sont autorisées dans le fichier userFileExperiment uniquement pour une mise à jour des experiments à l'EBI
+		dans le menu 'Modidier à l'EBI'. Ces champs ne sont pas autorisées dans le menu 'consultation'
+	
+		
+		<li><h4>Type d'informations pouvant apparaitre dans le fichier :</h4>
+		<ul>
+			<li><strong>experiment_code</strong>  : code de l'experiment (champ obligatoire)
+			<li><strong>library_strategy</strong> : champ contraint voir <a href="#libraryStrategy">valeurs possibles de library strategy</a>			 		
+			<li><strong>library_source</strong>   : champ contraint voir <a href="#librarySource">valeurs possibles de library source</a>
+			<li><strong>library_selection</strong>: champ contraint voir <a href="#librarySelection">valeurs possibles de library selection</a>
+			<li><strong>title</strong>  : champ libre  ( en Anglais et sans accents ! )
+			<li><strong>library_construction_protocol</strong>  : champ libre ( en Anglais et sans accents ! )
+			<li><strong>library_layout_nominal_length</strong>  : entier
+			<li><strong>spot_length</strong>  : entier
+			<li><strong>last_base_coordonnee</strong>  : entier
+			<li><strong>study_ac</strong> : champ contraint : String commencant par ERP. (autorisée uniquement dans 'Modidier à l'EBI')
+			<li><strong>sample_ac</strong> : champ contraint : String commencant par ERS. (autorisée uniquement dans 'Modidier à l'EBI')
+		</ul>	
+
+		
+		<li><h4>Exemple de fichier :</h4>
+<xmp>
+#--------------------------------------------------------------------------------------------------
+experiment_code|library_strategy|library_source|library_selection|library_construction_protocol    
+#--------------------------------------------------------------------------------------------------
+exp_BIL_AABOSW_1_C4VJ6ACXX.IND2|cloneend   |genomic |cage|my protocol
+exp_AKL_SOSA_3_624Y1AAXX       |wga        |genomic |cage|my protocol 2  
+		
+</xmp>
+	
+		<li><h4>Autre exemple de fichier :</h4>
+<xmp>
+#----------------------------------------------------------------------------------------
+experiment_code|library_layout_nominal_length|title|spot_length|last_base_coordonnee     
+#----------------------------------------------------------------------------------------
+exp_AKL_VOSA_5_624Y1AAXX     |45| my title |55|103
+exp_AKL_SOSW_8_D14FJACXX.IND6|48|          |58|110
+
+
+</xmp>
+	</div>		
+	
+	<div class="panel-heading">
+		<h3>@Messages("documentation.userFileSample")</h3>
+	</div>
+	<div class="panel-body">		
+		<ul>
+		<li><h4>utilité du fichier :</h4>	
+		Il permet à l'utilisateur de surcharger les champs editables des samples.
+		<li><h4>Format du fichier :</h4>
+		En colonnes délimitées par le caractère '|'. La premiere ligne du fichier permet de definir la legende (type-information de chaque colonne) <br>
+		tandis que les lignes suivantes du fichier correspondent aux valeurs.<br> 
+		Les lignes commencant par le caractère '#' sont ignorées (commentaires).<br> 
+		La legende doit obligatoirement comporter le champ "sample_code"
+		<li><h4>Type d'informations pouvant apparaitre dans le fichier :</h4>
+		<ul>
+			<li><strong>sample_code</strong>  : code du sample (champ obligatoire)
+			<li><strong>titre</strong>  : champ libre ( en Anglais et sans accents ! )
+			<li><strong>description</strong>  : champ libre ( en Anglais et sans accents ! )
+			<li><strong>anonymized_name</strong>  : champ libre ( en Anglais et sans accents ! )
+			<li><strong>attributes</strong>  : champ avec syntaxe contrainte : voir <a href="#attributes">syntaxe pour le champ attributes</a>
+		</ul>	
+
+		
+		<li><h4>Exemple de fichier :</h4>
+<xmp>
+#----------------------------------------------------------
+sample_code|title|description|anonymized_name|attributes
+#----------------------------------------------------------
+sample_AKL_3702_epiRiL_99 | my title to replace that of the database  | my description| my anonymized name | "<SAMPLE_ATTRIBUTE><TAG>Strain</TAG><VALUE>myStrain</VALUE></SAMPLE_ATTRIBUTE>"
+sample_AKL_3702_MEJ07| | my title 2 | "my description 2"| my anonymized name 2 | 
+
+
+</xmp>
+	</div>
+	
+	<div class="panel-heading">
+		<h4><a id="attributes"></a></h4>
+		<h3>@Messages("documentation.sampleAttributes")</h3>
+	</div>
+		<div class="panel-body">
+		<ul>		
+		<li><h4>utilité du champ :</h4>	
+		Depuis le 01/06/2023, ce champs est obligatoire et doit comporter les tags "collection date" et "geographic location" qui permettent
+		une location spatio-temporelle de l'echantillon.<br>
+		L'EBI reconnait un ensemble fini de caracteristiques pour le sample (ex: title, description, code, taxonId, ...).<br>
+		Si le sample doit etre decrit plus precisement (a l'aide de propriétés qui n'apparaissent pas dans les differents champs du sample),<br>
+		il est possible de definir ses propres attributs (ex Strain, Clone, Note, altitude...) dans 
+		le champ attributes, en utilisant les balises autorisées.<br>
+		On peut definir plusieurs "attributes" dans ce champ.<br>
+		
+		<li><h4>Balises autorisées dans le champ attributes :</h4>
+		- SAMPLE_ATTRIBUTE <br>
+		- TAG              <br>
+		- VALUE            <br>
+		- UNITS            <br>
+		
+	
+		<li><h4>2 exemples de champs attributes :</h4>
+		</ul>
+		<xmp>
+	   "<SAMPLE_ATTRIBUTE><TAG>collection date</TAG><VALUE>2023-06-01</VALUE></SAMPLE_ATTRIBUTE>
+        <SAMPLE_ATTRIBUTE><TAG>geographic location (country and/or sea)</TAG><VALUE>Japan</VALUE></SAMPLE_ATTRIBUTE>
+        <SAMPLE_ATTRIBUTE><TAG>Strain</TAG><VALUE>ABBA</VALUE></SAMPLE_ATTRIBUTE>
+	    <SAMPLE_ATTRIBUTE><TAG>Depth</TAG><VALUE>200</VALUE><UNITS>m</UNITS></SAMPLE_ATTRIBUTE>
+	    <SAMPLE_ATTRIBUTE><TAG>Sample Collection Device</TAG><VALUE>high volume peristaltic pump [HVP-PUMP]</VALUE></SAMPLE_ATTRIBUTE>
+	   "       	
+       
+	   
+	   "<SAMPLE_ATTRIBUTE><TAG>collection date</TAG><VALUE>2023-06-12</VALUE></SAMPLE_ATTRIBUTE>
+        <SAMPLE_ATTRIBUTE><TAG>geographic location (country and/or sea)</TAG><VALUE>France</VALUE></SAMPLE_ATTRIBUTE>
+       "
+        </xmp>	
+        
+  			
+    </div>	
+    
+    
+    
+    
+ 	<div class="panel-heading">
+		<h3>Corrections et validation des données de soumission avant de demarrer la soumission :</h3>
+	</div>
+	<div class="panel-body">
+		<ul>	
+ 		<xmp>
+Il est important de vérifier les taxonId des samples avant chaque soumission. 
+Le taxonId indiqué dans le sample a été renseigné dans NGL à la reception du projet. 
+Il est possible qu'au moment de la soumission, on souhaite soumettre avec un autre taxonId, ou un taxonId plus précis.
+L'EBI autorise la soumission d'un sample uniquement si son taxonId correspond à une feuille, et non un noeud, de l'arbre taxonomique. 
+La vérification de cette contrainte peut etre réalisée à l'url </xmp> <a href="https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi"> NCBI taxonomy</a>  
+<xmp>Si le taxonId du sample est erroné, l'utilisateur ne peut pas le modifier. Il devra 
+- faire un ticket JIRA avec le project "Support Sequençage CNS" et le composant "NGL-SQ", en indiquant le materiel qui doit etre modifié pour son taxonId
+- faire un ticket JIRA avec le project "Support Sequençage CNS" et le composant "NGL-SUB", en indiquant le code de la soumission à supprimer.
+- recréer sa soumission.
+
+
+		</xmp>
+		</ul>
+	</div>	
+			
+	<div class="panel-heading">
+		<h3>Modifier des données à l'EBI (update des données) :</h3>
+	</div>
+	<div class="panel-body">
+		<ul>	
+ 		<xmp>
+Après une première soumission des données brutes à l'EBI, on peut avoir besoin de mettre à  jour les métadonnées pour corriger un titre d'experience ou de sample, 
+un résumé de study ou sa description, ou encore ajouter des locus_tag ou un identifiant PUBMED (référence bibliographique)
+L'interface de NGL-SUB propose les sous-menus "Modifier à l'EBI" qui permettent de modifier les champs autorisés des métadonnées 
+et de les mettre   à jour sur le serveur de l'EBI.
+Attention un objet study, project, experiment ou sample n'est modifiable a l'EBI, que si l'objet a déjà été soumis à l'EBI (il possede alors un numeros d'accession) et qu'il n'est pas en cours de soumission (soumission pour update ou release).
+Les champs date des métadonnées ne sont pas des champs autorisés pour une modification à  l'EBI. 
+		</xmp>
+		</ul>
+	</div>		  
+	<div class="panel-heading">
+		<h3>Ajouter une réference bibliographique ou un locus_tag à un projet :</h3>
+	</div>
+	<div class="panel-body">
+		<ul>	
+ 		<xmp>
+Pour des raisons techniques propres à l'EBI, Les identifiants PUBMED et locus_tag ne peuvent pas etre renseignés à la création du study.
+L'ajout d'une réference bibliographique se fait en ajoutant un identifiant PUBMED dans le project. Cette ajout se 
+fait en passant par le menu "Study ou Project" et le sous-menu "Modifier à l'EBI". De la meme facon l'ajout d'un locus_tag
+passe par le menu "Study ou Project" et le sous-menu "Modifier à l'EBI".
+
+		</xmp>
+		</ul>
+	</div>		      
+	<div class="panel-heading">
+		<h3>Mettre les données dans le domaine public (Release) :</h3>
+	</div>
+	<div class="panel-body">
+		<ul>	
+ 		<xmp>
+Les soumissions autres que les projects umbrella sont toujoures réalisées en mode confidentiel. C'est le status du study, privé ou public, qui determine la visibilité de tous les experiments et runs rattachés à ce study.
+Le study soumis par defaut en confidentiel sera mis dans le domaine public par l'EBI au bout de 2 ans. 
+L'utilisateur peut toutefois mettre ses données dans le domaine public avant cette échéance; Il lui suffit d'aller sur la vue 
+détaillée du study (menu consultation des study puis épingler le study pour accédér à la vue détaillée), et de cliquer sur le bouton release.
+Le bouton release est visible en haut  à droite de la page, si le study est privé, s'il n'est pas en cours de soumission (update ou release en cours).
+Attention  à bien verifier que toutes les donnés liées au study (affichées en bas de la page detail) peuvent bien etre mises dans le domaine public, avant de releaser le study.
+		</xmp>
+		</ul>
+	</div>		  
+	<div class="panel-heading">
+		<h3>Repousser la date de confidentialité du study (pour le conserver plus longtemps en privé) :</h3>
+	</div>
+	<div class="panel-body">
+		<ul>	
+ 		<xmp>
+Tant que le study est privé, l'utilisateur peut repousser sa date de confidentialité, en passant par le menu "Study ou Project" et le sous-menu "Modifier à l'EBI".
+Le champs releaseDate est éditable, et il est possible de repousser la date de release de 2 ans à compter de la date du jour. Un study qui n'aurait plus que 1 mois de confidentialité,
+peut ainsi etre bloqué 2 ans dans le domaine privé. 
+		</xmp>
+		</ul>
+	</div>	
+    <div class="panel-heading">
+  		<h3>Contact pour les questions, problemes, ou évolutions dans NGL-SUB :</h3>
+	</div>
+	<div class="panel-body">
+		<ul>	
+ 		<xmp>
+Les questions ou problemes relatifs à NGL-SUB doivent faire l'objet d'un ticket JIRA en indiquant le projet "Support Sequençage CNS" et le composant "NGL-SUB". 
+		</xmp>
+		</ul>
+	</div>	
+	
+    <div class="panel-heading">
+  		<h3>Visibilités des données à l'EBI :</h3>
+	</div>
+	<div class="panel-body">
+		<ul>	
+ 		<xmp>
+	
+		Les url de l'EBI https://www.ebi.ac.uk/ena/browser/view/  et https://www.ebi.ac.uk/ena/browser/api/xml/ permettent de visualiser les données publiques.
+
+		Ex : voir le study ERP108623 à l'EBI      :  https://www.ebi.ac.uk/ena/browser/api/xml/ERP108623
+		Ex : voir le project PRJEB26620 à l'EBI   :  https://www.ebi.ac.uk/ena/browser/api/xml/PRJEB26620
+		Attention le locusTagPrefixs n'apparait pas dans le study.xml. Il devrait figurer dans le project.xml mais l'EBI a décidé de ne pas le faire apparaitre.
+		
+		Ex : voir le sample ERS329497 à l'EBI     :  https://www.ebi.ac.uk/ena/browser/api/xml/ERS329497
+		Ex : voir le sample SAMEA2189650 à l'EBI  :  https://www.ebi.ac.uk/ena/browser/api/xml/SAMEA2189650
+		Ex : voir l'experiment ERX1380201 à l'EBI :  https://www.ebi.ac.uk/ena/browser/api/xml/ERX1380201
+		</xmp>
+		</ul>
+	</div>		
+		    			
+	<div class="panel-heading">
+		<h3>@Messages("documentation.visibiliteEBI_study")</h3>
+	</div>
+	<br/>
+	<div class="panel-body">		
+		<img src="/assets/images/visibiliteEbi_study.png" />
+	<xmp>
+	
+	
+	</xmp>
+	</div>
+	
+
+
+	
+	<div class="panel-heading">
+		<h3>@Messages("documentation.visibiliteEBI_sample")</h3>
+	</div>
+	<br/>
+	<div class="panel-body">
+		<img src="/assets/images/visibiliteEbi_sample.png" />
+		<xmp>
+	
+	
+		</xmp>	
+	</div>
+	
+	<div></div>
+	
+	<div class="panel-heading">
+		<h3>@Messages("documentation.modeleSRA")</h3>
+	</div>
+	
+	<div class="panel-body">
+		<img src="/assets/images/sra_model_umbrella.png" />
+		<xmp>
+	
+	
+		</xmp>		
+	</div>
+}

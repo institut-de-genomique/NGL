@@ -1,0 +1,76 @@
+//created on: Nov 21, 2013
+package rules
+
+//analysis.treatments.contigFilterBA.pairs.lostBasesPercent=
+// ((analysis.treatments.assemblyBA.pairs.assemblyContigSize - analysis.treatments.contigFilterBA.pairs.storedBases) 
+// / analysis.treatments.assemblyBA.pairs.assemblyContigSize) * 100
+
+rule "Calculate lostBasesPercent for contigFilterBA treatment"
+	@nglBI( BPA_ContigFilter_1 )
+	dialect "java"
+	salience 600
+	no-loop
+	when
+		$analysis : Analysis ( $treatmentCFBA : treatments["contigFilterBA"], $treatmentCFBA != null, $treatmentABA : treatments["assemblyBA"], $treatmentABA != null)
+		$mapValueCFBA : Map() from $treatmentCFBA.results["pairs"]
+		$mapValueABA : Map() from $treatmentABA.results["pairs"]
+		$assemblyContigSize : Entry(key=="assemblyContigSize") from $mapValueABA.entrySet()
+		$storedBases : Entry(key=="storedBases") from $mapValueCFBA.entrySet()
+	then
+		Logger.debug("Calculate lostBasesPercent for analysis "+$analysis.code);
+		Integer storedBases = (Integer)((PropertyValue)$storedBases.getValue()).value;
+		Integer assemblyContigSize = (Integer)((PropertyValue)$assemblyContigSize.getValue()).value;
+		Double lostBasesPercent = roundValue((double)(assemblyContigSize - storedBases)/assemblyContigSize*100);
+		//Create new PropertyValue
+		PropertySingleValue propertylostBasesPercent = new PropertySingleValue(lostBasesPercent);
+		//Update analysis
+		
+		MongoDBDAO.update(InstanceConstants.ANALYSIS_COLL_NAME, Analysis.class, 
+			DBQuery.is("code", $analysis.code),  
+			DBUpdate.set("treatments.contigFilterBA.pairs.lostBasesPercent", propertylostBasesPercent));
+		
+end
+
+
+rule "Set ReadSet properties to Analysis"
+	@nglBI( BPA_SetReadSetProperties_1 )
+	dialect "java"
+	salience 600
+	no-loop
+	when
+		$analysis : Analysis ( $masterReadSetCode : masterReadSetCodes.get(0) )		
+	then
+		Logger.debug("Set ReadSet properties to Analysis "+$analysis.code);
+		BasicDBObject keys = new BasicDBObject();
+		keys.put("sampleOnContainer.properties.taxonSize", 1);
+		keys.put("treatments.global.default.usefulBases", 1);
+		keys.put("treatments.contaminationColi.pairs.removedReadsPercent", 1);
+		keys.put("treatments.contaminationPhiX.pairs.removedReadsPercent", 1);
+		keys.put("treatments.duplicatesRaw.pairs.estimateDuplicatedReadsPercent", 1);
+		ReadSet readSet = MongoDBDAO.findOne(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, DBQuery.is("code", $masterReadSetCode), keys);
+		if(null != readSet){
+			ReadSetProperties readSetProperties = new ReadSetProperties();
+			readSetProperties.code = $masterReadSetCode;
+			readSetProperties.properties.put("sampleOnContainerTaxonSize", readSet.sampleOnContainer.properties.get("taxonSize"));
+			if(readSet.treatments.get("global")!=null){
+				readSetProperties.properties.put("globalDefaultUsefulBases", readSet.treatments.get("global").results.get("default").get("usefulBases"));
+			}
+			Logger.debug("Contamination Coli "+readSet.treatments.get("contaminationColi"));
+			Logger.debug("Contamination PhiX "+readSet.treatments.get("contaminationPhiX"));
+			if(readSet.treatments.get("contaminationColi")!=null){
+				readSetProperties.properties.put("contaminationColiPairsRemovedReadsPercent", readSet.treatments.get("contaminationColi").results.get("pairs").get("removedReadsPercent"));
+			}else if(readSet.treatments.get("contaminationPhiX")!=null){
+				readSetProperties.properties.put("contaminationPhiXPairsRemovedReadsPercent", readSet.treatments.get("contaminationPhiX").results.get("pairs").get("removedReadsPercent"));
+			}
+			if(readSet.treatments.get("duplicatesRaw")!=null){
+				readSetProperties.properties.put("duplicatesRawPairsEstimateDuplicatedReadsPercent", readSet.treatments.get("duplicatesRaw").results.get("pairs").get("estimateDuplicatedReadsPercent"));
+			}
+		
+			MongoDBDAO.update(InstanceConstants.ANALYSIS_COLL_NAME, Analysis.class, DBQuery.is("code", $analysis.code),  DBUpdate.set("masterReadSetProperties", java.util.Arrays.asList(readSetProperties)));
+		}else{
+			Logger.error("ReadSet Does not exist: "+$masterReadSetCode);
+		}		
+end
+
+
+

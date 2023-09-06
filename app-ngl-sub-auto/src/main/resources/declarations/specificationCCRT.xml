@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+	
+<Specification xmlns="http://www.genoscope.cns.fr/specification"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.genoscope.cns.fr/specification
+H:\birdsSpec.xsd">
+
+	<Treatment name="WF_CCRT" checkIfNewTreatmentAlreadyPerformed="true" ruleFlowId="fr.cea.ig.auto.submission.CCRT">
+		<ExecutableSpecification>
+			<Executable />
+		</ExecutableSpecification>
+		<ParametersSpecification />
+		<InputsSpecification>
+			<InputElement name="inputCCRT" count="1" resourceType="submissionCCRT">
+				<Referential name="nglSubRef_processCCRT" />			
+			</InputElement>
+		</InputsSpecification>
+	</Treatment>
+
+	<!-- Treatment for file transfert  -->
+	<Treatment name="getCCRTFile" useJobScheduler="true" checkIfNewTreatmentAlreadyPerformed="true">
+	
+		<ExecutableSpecification commandSyntaxStrategyName="default">
+			<Executable path="rsync" user="cnsnglapps" host="kon.cnrgh.fr"/>
+			<Slurm job="rsyncJob" part="normal"/>
+		</ExecutableSpecification>
+		
+		<ParametersSpecification>
+			<KeyValueElement key="-e" value="gsissh %userCCRT%@cobalt.ccc.cea.fr:%ccrtFileName%" parameterName="gsisshParam"/>
+			<LineElement line="-vptL" parameterName="rsyncParam"/>
+			<LineElement line="%filePath%" parameterName="endArg"/>
+		</ParametersSpecification>
+		
+		<InputsSpecification>
+			<InputElement name="inputGetCCRT" count="1" resourceType="submissionCCRT">
+				<Referential name="internal_nglSubRef_processCCRT"/>
+			</InputElement>
+		</InputsSpecification>
+		<OutputsSpecification>
+			<OutputElement name="outputGetCCRT" resourceType="submissionCCRT">
+				<Referential name="internalRefTouchCCRT" />
+			</OutputElement>
+		</OutputsSpecification>
+	</Treatment>
+	
+	<Treatment name="touchFileCCRT" useJobScheduler="false" checkIfNewTreatmentAlreadyPerformed="true">
+	
+		<ExecutableSpecification commandSyntaxStrategyName="default">
+			<Executable path="touch"/>
+		</ExecutableSpecification>
+		
+		<ParametersSpecification>
+			<LineElement line="%filePath%" parameterName="endArg"/>
+		</ParametersSpecification>
+		
+		<InputsSpecification>
+			<InputElement name="inputTouchCCRT" count="1" resourceType="submissionCCRT">
+				<Referential name="internalRefTouchCCRT"/>
+			</InputElement>
+		</InputsSpecification>
+		<OutputsSpecification>
+			<OutputElement name="outputTouchCCRT" resourceType="linkCCRT">
+				<Referential name="internalRefLinkCCRT" />
+			</OutputElement>
+		</OutputsSpecification>
+	</Treatment>
+	
+	<Treatment name="linkFileCCRT" useJobScheduler="false" checkIfNewTreatmentAlreadyPerformed="true">
+	
+		<ExecutableSpecification commandSyntaxStrategyName="default">
+			<Executable path="ln"/>
+		</ExecutableSpecification>
+		
+		<ParametersSpecification>
+			<KeyValueElement key="-s" value="%fileToLink%" parameterName="fileToLink"/>
+			<LineElement line=">%linkFike%" parameterName="endArg" />
+		</ParametersSpecification>
+		
+		<InputsSpecification>
+			<InputElement name="inputLinkFile" count="1" resourceType="linkCCRT">
+				<Referential name="internalRefLinkCCRT"/>
+			</InputElement>
+		</InputsSpecification>		
+	</Treatment>
+	
+	<!-- Treatment : call NGL SUB services to create xml files to send to EBI -->
+	<!-- <Treatment name="removeCCRTFile" useJobScheduler="false" checkIfNewTreatmentAlreadyPerformed="true">
+		<ExecutableSpecification commandSyntaxStrategyName="default">
+			<Executable path="rm"/>
+		</ExecutableSpecification>
+			
+		<ParametersSpecification>
+			<KeyValueElement key="-f" value="%filePath%" parameterName="fileParam"/>
+		</ParametersSpecification>
+		
+		
+		<InputsSpecification>
+			<InputElement name="inputRmCCRT" count="1" resourceType="submissionCCRT">
+				<Referential name="nglSubRef_processCCRT"/>
+			</InputElement>
+		</InputsSpecification>
+	</Treatment> -->
+	
+	
+</Specification>

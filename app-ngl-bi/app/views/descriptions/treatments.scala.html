@@ -1,0 +1,49 @@
+@this()
+@()
+@import views.html.helper._
+
+@formTreatments = {
+    <form class="well well-small">
+        <div class="row">
+
+           @columnSearchForm{
+                @formGroup{
+                <div bt-select placeholder='@Messages("search.placeholder.treatment.category")' class='form-control' multiple=true
+                     ng-model="searchService.form.categoryNames"
+                     bt-options="treatmentCategory.code as treatmentCategory.name for treatmentCategory in searchService.lists.categories()">
+                </div>
+                }
+            }
+            @columnSearchForm{
+                @formGroup{
+                <div bt-select placeholder='@Messages("search.placeholder.treatment.type")' class='form-control' multiple=true textarea="true"
+                     ng-model="searchService.form.names"
+                     bt-options="treatmentType.name for treatmentType in searchService.lists.types()">
+                </div>
+                }
+            }
+            @columnSearchForm{
+                @formGroup{
+                <div class="btn-toolbar">
+                    <button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="search()" class="btn btn-primary" >
+                        <i class="fa fa-search"></i>
+                    </button>
+                    <button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="reset()"  class="btn btn-default">
+                        <i class="fa fa-undo"></i>
+                    </button> 
+                </div>	
+                }
+            }
+        </div>
+    </form>
+}
+
+<div class="row">
+	<div class="col-md-12 col-lg-12"  messages="messages"></div>
+</div>
+<div class="row"> 
+	@formTreatments
+	<div class="col-md-12 col-lg-12" ultimate-datatable="searchService.datatable">
+		<div udt-form></div>
+	</div>
+</div>

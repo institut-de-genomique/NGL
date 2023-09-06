@@ -1,0 +1,45 @@
+@()
+@**NGL-4235**@
+
+<div class="row">
+	<div class="col-md-12 col-lg-12">
+		<p><a class="fa fa-exclamation-triangle" style="color:red" ng-click="toggleShowConsigne()" title="Consignes" href=""> Consignes</a></span></p>
+		<div ng-show="isShowConsigne">
+			
+<p><B>Attention, <U>les informations spatio-temporelles du sample sont maintenant obligatoires</U> et doivent apparaitre dans le champ attributes.</p>
+<p>Ajouter à minima les informations suivantes :</B> </p>
+
+<p><i>&lt;SAMPLE_ATTRIBUTE&gt;&lt;TAG&gt;geographic location (country and&#47;or sea)&lt;&#47;TAG&gt;&lt;VALUE&gt;France&lt;&#47;VALUE&gt;&lt;&#47;SAMPLE_ATTRIBUTE&gt;</i></p>
+<p><i>&lt;SAMPLE_ATTRIBUTE&gt;&lt;TAG&gt;collection date&lt;&#47;TAG&gt;&lt;VALUE&gt;yyyy-mm-dd&lt;&#47;VALUE&gt;&lt;&#47;SAMPLE_ATTRIBUTE&gt;</i></p>
+
+<p><B>Pour préciser la région où l'échantillon a été collecté, vous pouvez utiliser le tag suivant :</B></p>
+
+<p><i>&lt;SAMPLE_ATTRIBUTE&gt;&lt;TAG&gt;geographic location (region and locality)&lt;&#47;TAG&gt;&lt;VALUE&gt;YYYYY&lt;&#47;VALUE&gt;&lt;&#47;SAMPLE_ATTRIBUTE&gt;</i></p>
+
+<p>En l'abscence d'une ou plusieurs valeurs de ces 2 champs (pour les échantillons antérieurs à 2023), vous pouvez utiliser les valeurs d'exceptions suivantes:</p>
+
+<ul>
+	<li><B>missing: data agreement established pre-2023</B> (si soumissions de projets internes)</li>
+	<li><B>missing: third party data</B> (si soumissions pour le compte d'un colllaborateur)</li>
+</ul>
+
+<p><B>Exemple 1 :</B></p>
+
+<p><i>&lt;SAMPLE_ATTRIBUTE&gt;&lt;TAG&gt;geographic location (country and&#47;or sea)&lt;&#47;TAG&gt;&lt;VALUE&gt;France&lt;&#47;VALUE&gt;&lt;&#47;SAMPLE_ATTRIBUTE&gt;</i></p>
+<p><i>&lt;SAMPLE_ATTRIBUTE&gt;&lt;TAG&gt;geographic location (region and locality)&lt;&#47;TAG&gt;&lt;VALUE&gt;Banyuls-sur-mer&lt;&#47;VALUE&gt;&lt;&#47;SAMPLE_ATTRIBUTE&gt;</i></p>
+<p><i>&lt;SAMPLE_ATTRIBUTE&gt;&lt;TAG&gt;collection date&lt;&#47;TAG&gt;&lt;VALUE&gt;2021-06-01&lt;&#47;VALUE&gt;&lt;&#47;SAMPLE_ATTRIBUTE&gt;</i></p>
+
+<p><B>Exemple 2 :</B></p>
+
+<p><i>&lt;SAMPLE_ATTRIBUTE&gt;&lt;TAG&gt;geographic location (country and&#47;or sea)&lt;&#47;TAG&gt;&lt;VALUE&gt;France&lt;&#47;VALUE&gt;&lt;&#47;SAMPLE_ATTRIBUTE&gt;</i></p>
+<p><i>&lt;SAMPLE_ATTRIBUTE&gt;&lt;TAG&gt;collection date&lt;&#47;TAG&gt;&lt;VALUE&gt;missing: data agreement established pre-2023&lt;&#47;VALUE&gt;&lt;&#47;SAMPLE_ATTRIBUTE&gt;</i></p>
+
+<p><B>Exemple 3 :</B></p>
+
+<p><i>&lt;SAMPLE_ATTRIBUTE&gt;&lt;TAG&gt;geographic location (country and&#47;or sea)&lt;&#47;TAG&gt;&lt;VALUE&gt;missing: third party data&lt;&#47;VALUE&gt;&lt;&#47;SAMPLE_ATTRIBUTE&gt;</i></p>
+<p><i>&lt;SAMPLE_ATTRIBUTE&gt;&lt;TAG&gt;collection date&lt;&#47;TAG&gt;&lt;VALUE&gt;2021-06-01&lt;&#47;VALUE&gt;&lt;&#47;SAMPLE_ATTRIBUTE&gt;</i></p>
+
+		</div>
+	</div>
+</div>
+@**END NGL-4235**@

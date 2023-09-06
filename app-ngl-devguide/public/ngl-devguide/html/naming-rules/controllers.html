@@ -1,0 +1,576 @@
+<section id="controllers">
+<div class="page-header">
+<h1>Controllers</h1>
+</div>
+<p>
+La mission du controlleur est de traiter les demandes du client. Le controlleur va donc recevoir une requête, il va la traiter et il va renvoyer une réponse au client.
+La réponse au client peut être soit des données ou soit une vue. 
+</p>
+<hr>
+<h3>1. Le package pour la ressource primaire</h3>
+<p>
+Nous développons des applications web qui doivent appliquer les principes issues de l'architecture REST. 
+REST est une architecture qui se focalise sur la ressource. 
+Pour mettre en oeuvre cette approche, il faut créer un package au nom de la ressource primaire <code>controllers.&lt;resourcenames&gt;</code>.
+<br/><br/>
+Pour faciliter la mise en oeuvre de l'architecture REST nous nous appuions sur le framework javascript AngularJS qui permet de faire une séparation entre l'affichage des données et leur traitement (chargement, mise à jour, etc.).
+Cette séparation se retrouve dans l'organisation du code où nous avons 2 sous packages techniques :
+<p>
+<ul>
+<li>Le sous-package <strong>api</strong> <code>controllers.&lt;resourcenames&gt;.api</code> qui va contenir le ou les controllers pour la gestion des données (recherche, chargement, sauvegarde, mise à jour, etc.).</li>
+<li>Le sous-package <strong>tpl</strong> <code>controllers.&lt;resourcenames&gt;.tpl</code> qui va contenir le ou les controllers pour la gestion des vues.</li>
+</ul>
+
+<div class="example">
+   <div id="accordion" class="accordion">
+                <div class="accordion-group">
+                  <div class="accordion-heading">
+                    <a data-target="#collapse1" data-parent="#accordion" data-toggle="collapse" class="accordion-toggle collapsed">
+                     Rechercher des hôtels et afficher les détails d'un hôtel.
+                    </a>
+                  </div>
+                  <div class="accordion-body collapse" id="collapse1">
+                    <div class="accordion-inner">
+                      <p>L'objectif ici est de rechercher des hôtels et d'en afficher les détails. La ressource primaire est donc <b>hotels</b>. Il faut alors créer les packages suivants : </p>
+                      <ul>
+                      <li><code>controllers.hotels.api</code></li>
+                      <li><code>controllers.hotels.tpl</code></li>
+                      </ul>                      
+                    </div>
+                  </div>
+                </div>
+                <div class="accordion-group">
+                  <div class="accordion-heading">
+                    <a data-target="#collapse2" data-parent="#accordion" data-toggle="collapse" class="accordion-toggle collapsed">
+                      Afficher l'ensemble des chambres d'un hotel et les administrer.
+                    </a>
+                  </div>
+                  <div class="accordion-body collapse" id="collapse2">
+                    <div class="accordion-inner">
+                      <p>L'objectif ici est de gérer les chambres d'un hotel. La ressource primaire est également <b>hotels</b>. 
+                      En effet l'objectif ici n'est pas d'avoir une vision de toutes les chambres de tous les hotels en même temps. 
+                      On ne se focalise que sur un hotel en particulier donc la ressource primaire est <b>hotel</b> et les chambres sont une <b>ressource secondaire</b>. 
+                      La ressource secondaire sera donc <b>bedrooms</b>.
+                      </p>
+                      <p>Les packages seront :</p>
+                      <ul>
+                      <li><code>controllers.hotels.api</code></li>
+                      <li><code>controllers.hotels.tpl</code></li>
+                      </ul>
+                      
+                      <div class="alert">
+						<strong>Warning :</strong>
+						REST dans la théorie accepte une infinité de sous-niveaux pour une ressource primaire mais il est recommandé de ne pas avoir plus de 3 sous-niveaux.
+					   </div>
+                          
+                    </div>
+                  </div>
+                </div>
+                <div class="accordion-group">
+                  <div class="accordion-heading">
+                    <a data-target="#collapse3" data-parent="#accordion" data-toggle="collapse" class="accordion-toggle collapsed">
+                      Faire une réservation d'hotel, rechercher des réservations et afficher les détails d'une réservation.
+                      </a>
+                  </div>
+                  <div class="accordion-body collapse" id="collapse3">
+                    <div class="accordion-inner">
+                      <p>L'objectif ici est de rechercher des réservations et les administrer mais d'un point de vue global pas pour un hôtel en particulier. 
+                      On peut supposer que cette fonctionnalité est pour le SAV du site de réservation et donc la ressource primaire est <b>bookings</b>. 
+                      Il faut alors créer les packages suivants : </p>
+                      <ul>
+                      <li><code>controllers.bookings.api</code></li>
+                      <li><code>controllers.bookings.tpl</code></li>
+                      </ul>
+                       <div class="alert alert-info">
+						<strong>Remarque :</strong>
+						Pour définir la ressource primaire il faut bien se demander quel est l'objectif du développement mais il faut toujours avoir une vision globale de l'application pour savoir vers quoi l'on souhaite aller.
+					   </div>                      
+                    </div>
+                  </div>
+                </div>
+              </div>
+</div>
+
+<hr>
+<h3>2. Le sous-package api</h3>
+<p>
+L'architecture <strong>REST</strong> est focaliser sur la ressource et applique les verbes HTTP (POST, GET, DELETE, PUT) à une ressource. 
+Pour rappel, ses verbes permettent :
+</p>
+<ul>
+<li>GET : retrouver une ressource</li>
+<li>POST : créer une ressource</li>
+<li>PUT : mettre à jour une ressource</li>
+<li>DELETE : supprimer une ressource</li>
+</ul>
+
+<p>
+Le code pour créer et mettre à jour une ressource est quasiment le même à l'exception de la clé primaire à générer. En partant de ce principe nous fusionnons les verbes POST et PUT.
+</p>
+<ul>
+<li>GET : retrouver une ressource et rechercher des ressources</li>
+<li>POST : créer et mettre à jour une ressource</li>
+<li>DELETE : supprimer une ressource</li>
+</ul>
+<p>
+Pour pouvoir faire ses actions, il faut créer un controlleur pour notre ressource. Ce controlleur aura au final maximum 4 méthodes publiques. 
+Ses méthodes seront ensuites accèder par le client via les routes.
+</p>
+
+<ul>
+<li><strong>list()</strong> : permet de renvoyer une liste de ressource avec ou non des critères de filtrage (search).</li>
+<li><strong>get(:id)</strong> : permet de charger un élément à partir de son identifiant.</li>
+<li><strong>save()</strong> : permet de sauvegarder un élément. La sauvegarde correspond à une création ou une mise à jour</li>
+<li><strong>delete(:id)</strong> : permet de supprimer un élément à partir de son identifiant.</li>
+</ul>
+<pre class="prettyprint linenums">
+package controllers.&lt;resourcenames&gt;.api;
+
+import play.mvc.Result;
+import controllers.CommonController;
+
+public class &lt;ResourceNames&gt; extends CommonController {
+	
+	public static Result list(){
+		List&lt;ResourceName&gt; results = ...;
+		return ok(Json.toJson(result));
+	}
+		
+	public static Result get(String code){
+		ResourceName result = ...;
+		return ok(Json.toJson(result));
+	}
+	
+	public static Result save(String code){
+		ResourceName result = ...;
+		return ok(Json.toJson(result));
+	}
+	
+	public static Result delete(String code){
+		...		
+		return ok();
+	}
+}
+</pre>
+
+
+<div class="alert alert-info">
+<strong>Remarque :</strong>
+Les 3 premières méthodes retournent du <strong>JSON</strong>.
+</div>
+
+<div class="alert alert-info">
+<strong>Remarque :</strong>
+Le controlleur hérite de <code>controllers.CommonController</code> qui est une classe avec des méthodes communes à tous les controlleurs dans le cadre de NGL.
+</div>
+
+<div class="example">
+   <div id="accordion2" class="accordion">
+                <div class="accordion-group">
+                  <div class="accordion-heading">
+                    <a data-target="#collapse4" data-parent="#accordion2" data-toggle="collapse" class="accordion-toggle collapsed">
+                     Rechercher des hôtels et afficher les détails d'un hôtel.
+                    </a>
+                  </div>
+                  <div class="accordion-body collapse" id="collapse4" >
+                    <div class="accordion-inner">
+                            <pre class="prettyprint linenums">
+package controllers.hotels.api;
+
+public class Hotels extends CommonController {
+	//recherche d'hotels
+	public static Result list(){
+		List&lt;Hotel&gt; results = ...;
+		return ok(Json.toJson(result));
+	}
+	//chargement d'un hotel par son identifiant	
+	public static Result get(String code){
+		Hotel result = ...;
+		return ok(Json.toJson(result));
+	}									
+}
+							</pre>             
+                    </div>
+                  </div>
+                </div>
+                <div class="accordion-group">
+                  <div class="accordion-heading">
+                    <a data-target="#collapse5" data-parent="#accordion2" data-toggle="collapse" class="accordion-toggle collapsed">
+                      Afficher l'ensemble des chambres d'un hotel et les administrer.
+                    </a>
+                  </div>
+                  <div class="accordion-body collapse" id="collapse5" >
+                    <div class="accordion-inner">
+                            <pre class="prettyprint linenums">
+package controllers.hotels.api;
+
+public class Bedrooms extends CommonController {
+	//recherche des chambres d'un hotel
+	public static Result list(String hotelCode){
+		List&lt;Bedroom&gt; results = ...;
+		return ok(Json.toJson(result));
+	}
+	//chargement d'une chambre par son identifiant	
+	public static Result get(String code){
+		Bedroom result = ...;
+		return ok(Json.toJson(result));
+	}
+	//creation et mise à jour d'une chambre
+	public static Result save(String code){
+		Bedroom result = ...;
+		return ok(Json.toJson(result));
+	}
+	//suppression d'une chambre
+	public static Result delete(String code){
+		...		
+		return ok();
+	}																											
+}
+							</pre> 
+							<div class="alert alert-info">
+							<strong>Remarque :</strong>
+							Le controlleur <code>Bedrooms</code> est dans le package <code>controllers.hotels.api</code> qui est le même que le controlleur <code>Hotels</code> car c'est une ressource secondaire.
+							</div>       
+                    </div>
+                  </div>
+                </div>
+                <div class="accordion-group">
+                  <div class="accordion-heading">
+                    <a data-target="#collapse6" data-parent="#accordion2" data-toggle="collapse" class="accordion-toggle collapsed">
+                      Faire une réservation d'hotel, rechercher des réservations et afficher les détails d'une réservation.
+                      </a>
+                  </div>
+                  <div class="accordion-body collapse" id="collapse6" >
+                    <div class="accordion-inner">
+                            <pre class="prettyprint linenums">
+package controllers.bookings.api;
+
+public class Bookings extends CommonController {
+	//recherche des réservation
+	public static Result list(){
+		List&lt;Booking&gt; results = ...;
+		return ok(Json.toJson(result));
+	}
+	//chargement d'une réservation par son identifiant	
+	public static Result get(String code){
+		Booking result = ...;
+		return ok(Json.toJson(result));
+	}
+	//creation et mise à jour d'une réservation
+	public static Result save(String code){
+		Booking result = ...;
+		return ok(Json.toJson(result));
+	}
+	//suppression d'une réservation
+	public static Result delete(String code){
+		...		
+		return ok();
+	}																											
+}
+							</pre>                   
+                    </div>
+                  </div>
+                </div>
+              </div>
+</div>
+
+<h4>2.1. Le formulaire de recherche</h4>
+
+<p>Lors d'une recherche, il est souvent utile d'avoir une classe qui corresponde au formulaire de recherche pour mapper facilement la réquete HTTP. 
+Il serait tentant de mettre cette classe dans la partie modèle car elle contient des champs provenant de la partie métier <b>mais c'est une fausse bonne idée</b>. 
+En effet, un formulaire de recherche implique souvent des champs issues de différents objets métier et est très spécifique à une interface, il est donc préférable de laisser cet objet proche du controlleur.
+</p>
+<p>Pour le nommer, on utilisera le nom de la ressource au pluriel que l'on recherche suffixé avec le mot clé <b>SearchForm</b> : <code>&lt;ResourceNames&gt;sSearchForm</code>.</p>
+
+<div class="example">
+   <div id="accordion21" class="accordion">
+                <div class="accordion-group">
+                  <div class="accordion-heading">
+                    <a data-target="#collapse41" data-parent="#accordion21" data-toggle="collapse" class="accordion-toggle collapsed">
+                     Rechercher des hôtels et afficher les détails d'un hôtel.
+                    </a>
+                  </div>
+                  <div class="accordion-body collapse" id="collapse41" >
+                    <div class="accordion-inner">
+                       <code>controllers.hotels.api.HotelsSearchForm</code>
+                    </div>
+                  </div>
+                </div>               
+                <div class="accordion-group">
+                  <div class="accordion-heading">
+                    <a data-target="#collapse61" data-parent="#accordion21" data-toggle="collapse" class="accordion-toggle collapsed">
+                      Faire une réservation d'hotel, rechercher des réservations et afficher les détails d'une réservation.
+                      </a>
+                  </div>
+                  <div class="accordion-body collapse" id="collapse61" >
+                    <div class="accordion-inner">
+                       <code>controllers.bookings.api.BookingsSearchForm</code>
+                    </div>
+                  </div>
+                </div>
+              </div>
+</div>
+<div class="alert">
+<strong>Warning : </strong>
+La création de cette classe n'est pas systématique. 
+Dans de rare cas, l'utilisation d'une classe provenant du modèle est envisageable si la recherche se limite aux champs de la ressource cible.
+</div>
+<hr>
+
+<h3>3. Le sous-package tpl</h3>
+<p>
+Ce sous-package va contenir le ou les controlleurs qui vont renvoyer les vues au client.
+</p>
+<p>
+Il y a 3 types de méthodes dans un controlleur de vue :
+</p>
+<ul>
+<li>Celles qui renvoient la page d'accueil de la ressource primaire.</li>
+<li>Celles qui renvoient les templates appelées par <b>AngularJS</b> pour mettre en forme les données.</li>
+<li>Celles qui renvoient les routes inverses pour le javascripts</li>
+</ul>
+
+<h4>3.1. Page d'accueil de la ressource primaire</h4>
+
+<p>
+Le but de ces vues est de charger la configuration pour AngularJS pour qu'ensuite celui-ci puisse appeler le second type de vue pour mettre en forme les données.
+Il y a 2 méthodes dans le controlleur pour charger la configuration AngularJS. Les 2 méthodes appellent la même vue <code>home.scala.html</code>.
+</p>
+<ul>
+<li>Une lorsque l'on vient d'un menu <code>home(String homecode)</code>.</li>
+<li>Une lorsque l'on saisie directement un code ou un identifiant d'une ressource <code>get(String code)</code>.</li>
+</ul>
+
+<pre>
+package controllers.&lt;resourcenames&gt;.tpl;
+
+import controllers.CommonController;
+import play.mvc.Result;
+
+public class &lt;ResourceNames&gt; extends CommonController {
+	//pour le clique sur un menu
+	public static Result home(String homecode){		
+		return ok(views.html.&lt;resourcenames&gt;.home.render(homecode));
+	}
+	//pour le chargement d'une ressource via son code ou identifiant	
+	public static Result get(String code){
+		return ok(views.html.&lt;resourcenames&gt;.home.render("search"));
+	}
+}
+</pre>
+
+<div class="alert alert-info">
+<strong>Remarque : </strong>
+AngularJS permet de faire des <b><i>single page application</i></b>. Nous ne l'utilisons pas pour faire ce type d'application mais nous faisons plutôt du <b><i>single page by resource application</i></b>, c'est à dire que nous avons une page d'acceuil par ressource primaire.
+</div>
+
+<h4>3.2. Vues chargées par AngularJS</h4>
+<p>
+Ces vues ont pour mission de mettre en forme les données (tableau de résultats, afficher un détail, etc.). 
+Elles sont appelées par AngularJS en fonction des actions de l'utilisateur. 
+Dans le controlleur, il y a une méthode par page à afficher. 
+Par exemple si il y a une page de recherche et une page de détails alors il y a 2 méthodes qui renvoie chacune une vue différente.
+</p>
+<ul>
+<li>la première méthode consiste à afficher la recherche des hôtels donc il dois y avoir une méthode <code>search()</code>.</li>
+<li>le seconde consiste à afficher les détails d'une ressource donc il y aura également une methode <code>details()</code>. 
+</li>
+</ul>
+<pre>
+package controllers.&lt;resourcenames&gt;.tpl;
+
+import controllers.CommonController;
+
+import play.mvc.Result;
+
+public class &lt;ResourceNames&gt; extends CommonController {
+	//vue de la recherche		
+	public static Result search(){		
+		return ok(views.html.&lt;resourcenames&gt;.search.render());
+	}
+	//vue des details	
+	public static Result details(){
+		return ok(views.html.&lt;resourcenames&gt;.details.render());
+	}
+}
+</pre>
+
+<div class="alert alert-info">
+<strong>Remarque : </strong>
+Le nom des méthodes doit correspondre au nom de la vue. La définition du nom du vue sera faîte dans le chapitre suivant.
+</div>
+
+<h4>3.3. Route inverse pour le Javascript</h4>
+<p>Le framework Play permet d'appeler des URL depuis du code javascript en passant par son mécanisme de reverse routing. 
+Le reverse routing consiste de manière simple à utiliser le nom d'une méthode d'un controlleur pour générer une URL. 
+Ceci permet de changer l'url sans forcément impacter les templates. 
+Pour pouvoir utilser cela il faut demander à Play de générer le javascript et ceci se fait à partir de la méthode <code>javascriptRoutes()</code> du controlleur de vue.</p>
+
+<pre>
+package controllers.&lt;resourcenames&gt;.tpl;
+
+import controllers.CommonController;
+
+import play.mvc.Result;
+
+public class &lt;ResourceNames&gt; extends CommonController {
+	//generation du reverse routing javascript		
+	public static Result javascriptRoutes() {
+	    response().setContentType("text/javascript");
+	  	    return ok(  	    		
+	  	      Routes.javascriptRouter("jsRoutes",
+	  	        // Routes	  	  
+	  	      )	  	      
+		    );
+	}
+}
+</pre>
+<div class="example">
+   <div id="accordion3" class="accordion">
+                <div class="accordion-group">
+                  <div class="accordion-heading">
+                    <a data-target="#collapse7" data-parent="#accordion3" data-toggle="collapse" class="accordion-toggle collapsed">
+                     Rechercher des hôtels et afficher les détails d'un hôtel.
+                    </a>
+                  </div>
+                  <div class="accordion-body collapse" id="collapse7" >
+                    <div class="accordion-inner">
+                            <pre class="prettyprint linenums">
+package controllers.hotels.tpl;
+
+import controllers.CommonController;
+
+import play.Routes;
+import play.mvc.Result;
+
+public class Hotels extends CommonController {
+	
+	public static Result home(String homecode){		
+		return ok(views.html.hotels.home.render(homecode));
+	}
+		
+	public static Result get(String code){
+		return ok(views.html.hotels.home.render("search"));
+	}
+	
+	public static Result search(){		
+		return ok(views.html.hotels.search.render());
+	}
+		
+	public static Result details(){
+		return ok(views.html.hotels.details.render());
+	}
+	
+	public static Result javascriptRoutes() {
+	    response().setContentType("text/javascript");
+	  	    return ok(  	    		
+	  	      Routes.javascriptRouter("jsRoutes",
+	  	        // Routes
+	  	    		controllers.hotels.tpl.routes.javascript.Hotels.home(),
+	  	    		controllers.hotels.tpl.routes.javascript.Hotels.details(),
+	  	    		controllers.hotels.api.routes.javascript.Hotels.get(),
+	  	    		controllers.hotels.api.routes.javascript.Hotels.list(),
+	  	    		controllers.hotels.api.routes.javascript.Bedrooms.get(),
+	  	    		controllers.hotels.api.routes.javascript.Bedrooms.list(),
+	  	    		controllers.hotels.api.routes.javascript.Bedrooms.save(),
+	  	    		controllers.hotels.api.routes.javascript.Bedrooms.delete()
+	  	      )	  	      
+		    );
+	}
+}
+							</pre>  
+<div class="alert alert-info">
+<strong>Remarque : </strong>
+La méthode javascriptRoutes() contient également le reverse routing pour les chambres.
+</div>							           
+                    </div>
+                  </div>
+                </div>
+                <div class="accordion-group">
+                  <div class="accordion-heading">
+                    <a data-target="#collapse8" data-parent="#accordion3" data-toggle="collapse" class="accordion-toggle collapsed">
+                      Afficher l'ensemble des chambres d'un hotel et les administrer.
+                    </a>
+                  </div>
+                  <div class="accordion-body collapse" id="collapse8" >
+                    <div class="accordion-inner">
+                            <pre class="prettyprint linenums">
+package controllers.hotels.tpl;
+
+import controllers.CommonController;
+import play.mvc.Result;
+
+public class Bedrooms extends CommonController {
+	
+	public static Result list(){		
+		return ok(views.html.hotels.bedrooms.list.render());
+	}
+		
+	public static Result details(){
+		return ok(views.html.bookings.details.render());
+	}	
+}
+       						</pre>
+       						<div class="alert alert-info">
+<strong>Remarque : </strong>
+Le controlleur <code>Bedrooms</code> n'a pas de méthode <code>home()</code> car celle-çi est dans le controlleur de la ressource principale <code>Hotels</code>.
+</div>	
+                    </div>
+                  </div>
+                </div>
+                <div class="accordion-group">
+                  <div class="accordion-heading">
+                    <a data-target="#collapse9" data-parent="#accordion3" data-toggle="collapse" class="accordion-toggle collapsed">
+                      Faire une réservation d'hotel, rechercher des réservations et afficher les détails d'une réservation.
+                      </a>
+                  </div>
+                  <div class="accordion-body collapse" id="collapse9" >
+                    <div class="accordion-inner">
+                            <pre class="prettyprint linenums">
+package controllers.bookings.tpl;
+
+import controllers.CommonController;
+import play.Routes;
+import play.mvc.Result;
+
+public class Bookings extends CommonController {
+	
+	public static Result home(String homecode){		
+		return ok(views.html.bookings.home.render(homecode));
+	}
+		
+	public static Result get(String code){
+		return ok(views.html.bookings.home.render("search"));
+	}
+	
+	public static Result search(){		
+		return ok(views.html.bookings.search.render());
+	}
+		
+	public static Result details(){
+		return ok();
+	}
+	
+	public static Result javascriptRoutes() {
+	    response().setContentType("text/javascript");
+	  	    return ok(  	    		
+	  	      Routes.javascriptRouter("jsRoutes",
+	  	        // Routes
+	  	    		controllers.bookings.tpl.routes.javascript.Bookings.home(),
+	  	    		controllers.bookings.tpl.routes.javascript.Bookings.details(),
+	  	    		controllers.bookings.api.routes.javascript.Bookings.get(),
+	  	    		controllers.bookings.api.routes.javascript.Bookings.list(),
+	  	    		controllers.bookings.api.routes.javascript.Bookings.get(),
+	  	    		controllers.bookings.api.routes.javascript.Bookings.save(),
+	  	    		controllers.bookings.api.routes.javascript.Bookings.delete()
+	  	      )	  	      
+		    );
+	}
+}                            
+							</pre>                   
+                    </div>
+                  </div>
+                </div>
+              </div>
+</div>
+</section>

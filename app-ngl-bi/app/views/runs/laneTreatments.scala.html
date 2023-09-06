@@ -1,0 +1,260 @@
+@this()
+@(code: String) 
+
+@if(code == "ngsrg-illumina") {
+<div ng-controller="LanesNGSRGIlluminaCtrl" ng-init="init()">
+	<div ultimate-datatable="lanesNGSRG"></div>
+</div>
+} 
+
+@if(code == "ngsrg-mgi") {
+	<div ng-controller="LanesNGSRGMGICtrl" ng-init="init()" style="overflow-x: auto">
+		<div ultimate-datatable="lanesNGSRG"></div>
+	</div>
+} 
+
+@if(code == "sequencing-summary-mgi") {
+	<div ng-controller="SequencingSummaryMGICtrl as ctrl">
+		<ul class="nav nav-tabs margin-bottom-5">
+			<li ng-repeat="lane in run.lanes" ng-init="ctrl.tab=1" ng-class="{active:(ctrl.tab === lane.number)}">
+				<a href ng-click="ctrl.tab = lane.number">Lane {{lane.number}}</a>
+			</li>
+		</ul>
+		<div ng-repeat="lane in run.lanes" ng-show="ctrl.tab === lane.number">
+			<iframe id="{{lane.number}}_default_sequencingSummary" class="col-md-12 col-lg-12" ng-bind-src="getSequencingSummary(lane)" style="border:1;height:800px"></iframe> 
+		</div>
+	</div>
+}
+
+@if(code == "demultiplexing-mgi") {
+	<div class="col-md-10 col-lg-10">
+		<div ng-repeat="lane in run.lanes" class="row" style="overflow-x: auto">
+			<h4><span class="label label-info">Lane {{lane.number}}</span></h4>
+			<div ng-controller="LanesDemultiplexingMGICtrl">
+				<div ultimate-datatable="lanesDemultiplexing[lane.number]"></div>
+			</div>
+		</div>
+	</div>
+}
+
+@if(code == "sav") {
+
+
+<div ng-controller="LanesSAVCtrl" ng-init="init()">
+	<div class="row">
+		<div class="col-md-6 col-lg-7">
+			<table class="table table-condensed table-hover table-bordered">
+				<thead>
+					<tr>
+						<th colspan="4" class="text-center">@Messages("run.title")</th>
+					</tr>
+					<tr>
+						<th>@Messages("run.treatments.sav.default.yieldTotal")</th>
+						<th>@Messages("run.treatments.sav.default.nonIndexedYieldTotal")</th>
+						<th>@Messages("run.treatments.sav.default.Q30PercTotal")</th>
+						<th>@Messages("run.treatments.sav.default.nonIndexedQ30PercTotal")</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>{{run.treatments.sav.default.yieldTotal.value | number:2}}</td>
+						<td>{{run.treatments.sav.default.nonIndexedYieldTotal.value | number:2}}</td>
+						<td>{{run.treatments.sav.default.Q30PercTotal.value | number:2}}</td>
+						<td>{{run.treatments.sav.default.nonIndexedQ30PercTotal.value | number:2}}</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<div ultimate-datatable="lanesSAVR1" style="overflow-x: auto"></div>
+	<div ultimate-datatable="lanesSAVR2" style="overflow-x: auto"></div>
+</div>
+
+}
+@if(code == "topindex"){
+
+@**<div> Dans views.runs.laneTreatments.scala.html avec code == topIndex : </div> **@
+<div ng-controller="TopIndexCtrl"">
+<div class=row>
+<ul class="nav nav-tabs margin-bottom-5">
+	<li class="active"><a href="#" data-target="#topIndex" data-toggle="tab">@Messages("runs.treatments.topIndex")</a></li>
+	<li><a href="#" data-target="#tilesStats" data-toggle="tab">@Messages("runs.treatments.tilesStats")</a></li>    
+</ul>
+<div class="tab-content">
+	
+
+	<div class="tab-pane active" id="topIndex" >
+		<div class="col-md-10 col-lg-10">
+			<div ng-repeat="lane in run.lanes" class="row" style="overflow-x: auto">
+				<h4><span class="label label-info">Lane {{lane.number}}</span></h4>	
+				<div class="col-md-10 col-lg-10" >
+					<div class="tab-content">
+						<div class="tab-pane active">		
+	  						<div ultimate-datatable="tab_datatablesTopIndex[{{lane.number-1}}]"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	@**
+	<div class="tab-pane active" id="topIndex" >
+		<div class="col-md-10 col-lg-10">
+			<div ng-repeat="lane in run.lanes" class="row" style="overflow-x: auto">
+				<h4><span class="label label-info">Lane {{lane.number}}</span></h4>
+				<table class="table table-condensed table-hover table-bordered">
+					<thead>
+						<tr>
+							<th>@Messages("runs.treatments.topIndex.unknownIndex.sequence")</th>
+							<th>@Messages("runs.treatments.topIndex.unknownIndex.percent")</th>
+							<th ng-if="existIndexName(lane)" ng-repeat="value in lane.treatments.topIndex.default.varIndex.value | unique:'expectedIndexName' | orderBy:'expectedIndexName'">
+								@Messages("runs.treatments.topIndex.distance") / {{value.expectedIndexName}}
+							</th>
+							<th ng-if="!existIndexName(lane)" ng-repeat="value in lane.treatments.topIndex.default.varIndex.value | unique:'expectedIndexSequence' | orderBy:'expectedIndexSequence'">
+								@Messages("runs.treatments.topIndex.distance") / {{value.expectedIndexSequence}}
+							</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="unknownIndex in lane.treatments.topIndex.default.unknownIndex.value">
+							<td ng-if="unknownIndex.name!=null">{{unknownIndex.sequence}} ({{unknownIndex.name}})</td>
+							<td ng-if="unknownIndex.name==null">{{unknownIndex.sequence}}</td>
+							<td>{{unknownIndex.percent | number:2}}</td>
+							<td ng-if="existIndexName(lane)" ng-repeat="value in lane.treatments.topIndex.default.varIndex.value | filter:{unknownIndexSequence:unknownIndex.sequence} | orderBy:'expectedIndexName'">
+								{{value.distanceFromExpectedIndex | number}}
+							</td>
+							<td ng-if="!existIndexName(lane)" ng-repeat="value in lane.treatments.topIndex.default.varIndex.value | filter:{unknownIndexSequence:unknownIndex.sequence} | orderBy:'expectedIndexSequence'">
+								{{value.distanceFromExpectedIndex | number}}
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+	**@
+	<div class="tab-pane" id="tilesStats">
+		<div class="col-md-14 col-lg-14">
+		    <div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+		ng-click="setImage(run.treatments.topIndex.default.tilesStats.value,'tilesStats','','topIndex',
+		run.treatments.topIndex.default.tilesStats.width,
+		run.treatments.topIndex.default.tilesStats.height)">
+		 <a href="#">
+		    <img id="default_tilesStats" ng-src="data:image/png;base64,{{run.treatments.topIndex.default.tilesStats.value}}" />
+		 </a> 
+	    </div>
+		    
+	    </div>
+	 </div>
+	</div>
+		
+</div>
+</div>
+}
+
+@if(code == "molecule-quality-report") {
+	<table class="table table-condensed table-hover table-bordered">
+		<thead>
+			<tr>
+				<th>#</th>
+				<th>@Messages("runs.treatments.moleculeQualityReport.totalDnaGe20kbp")</th>
+				<th>@Messages("runs.treatments.moleculeQualityReport.n50Ge20kbp")</th>
+				<th>@Messages("runs.treatments.moleculeQualityReport.totalDnaGe150kbp")</th>
+				<th>@Messages("runs.treatments.moleculeQualityReport.n50Ge150kbp")</th>
+				<th>@Messages("runs.treatments.moleculeQualityReport.totalDnaGe150kbpMinSitesGe9")</th>
+				<th>@Messages("runs.treatments.moleculeQualityReport.n50Ge150kbpMinSitesGe9")</th>
+				<th>@Messages("runs.treatments.moleculeQualityReport.enzyme")</th>
+				<th>@Messages("runs.treatments.moleculeQualityReport.enzymeRecognitionSequence")</th>
+				<th>@Messages("runs.treatments.moleculeQualityReport.labelColor")</th>
+				<th>@Messages("runs.treatments.moleculeQualityReport.avgLabelDensityGe150kbp")</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr ng-repeat="lane in run.lanes">
+				<td>
+					{{lane.number}}
+				</td>
+				
+				<td ng-repeat-start="treatment in lane.treatments" ng-if="treatment.code == 'moleculeQualityReport'">
+					{{ convertValueServices.convertValue(treatment.default.totalDnaGe20kbp.value, "pb", "Gb") | number : 2 }}
+				</td>
+					
+				<td ng-if="treatment.code == 'moleculeQualityReport'">
+					{{ convertValueServices.convertValue(treatment.default.n50Ge20kbp.value, "pb", "Mb")  | number : 2 }}
+				</td>
+
+				<td ng-if="treatment.code == 'moleculeQualityReport'">
+					{{ convertValueServices.convertValue(treatment.default.totalDnaGe150kbp.value, "pb", "Gb") | number : 2 }}
+				</td>
+
+				<td ng-if="treatment.code == 'moleculeQualityReport'">
+					{{ convertValueServices.convertValue(treatment.default.n50Ge150kbp.value, "pb", "Mb") | number : 2 }}
+				</td>
+
+				<td ng-if="treatment.code == 'moleculeQualityReport'">
+					{{ convertValueServices.convertValue(treatment.default.totalDnaGe150kbpMinSitesGe9.value, "pb", "Gb") | number : 2 }}
+				</td>
+
+				<td ng-if="treatment.code == 'moleculeQualityReport'">
+					{{ convertValueServices.convertValue(treatment.default.n50Ge150kbpMinSitesGe9.value, "pb", "Mb") | number : 2 }}
+				</td>
+
+				<td ng-if="treatment.code == 'moleculeQualityReport'">
+					{{treatment.default.enzyme.value}}
+				</td>
+
+				<td ng-if="treatment.code == 'moleculeQualityReport'">
+					{{treatment.default.enzymeRecognitionSequence.value}}
+				</td>
+
+				<td ng-if="treatment.code == 'moleculeQualityReport'">
+					{{treatment.default.labelColor.value}}
+				</td>
+
+				<td ng-repeat-end ng-if="treatment.code == 'moleculeQualityReport'">
+					{{ treatment.default.avgLabelDensityGe150kbp.value | number : 2 }}
+				</td>
+			</tr>
+		</tbody>
+	</table>
+}
+
+@if(code == "map-creation-job-id") {
+	<table class="table table-condensed table-hover table-bordered" style="width: 50%">
+		<thead>
+			<tr>
+				<th>#</th>
+				<th>@Messages("runs.treatments.mapCreationJobId.display")</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr ng-repeat="lane in run.lanes">
+				<td ng-repeat-start="treatment in lane.treatments" ng-if="treatment.code == 'mapCreationJobId'">
+					{{lane.number}}
+				</td>
+				
+				<td ng-repeat-end ng-if="treatment.code == 'mapCreationJobId'">
+					<div ng-switch on="mainService.isEditMode() && isIPS()">
+						<div class="col-md-9 col-lg-9" ng-switch-when="false">
+							<div class="form-group">
+								{{ treatment.default.mapCreationJobId.value }}
+							</div>
+						</div>
+						<div class="col-md-9 col-lg-9" ng-switch-when="true">
+							<div class="form-group">
+								<input class="form-control" ng-model="treatment.default.mapCreationJobId.value" />
+							</div>
+						</div>
+					</div>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+}
+
+@column()(value: Html) = {
+	<div class="col-md-3 col-lg-3">
+		@value
+	</div>
+}

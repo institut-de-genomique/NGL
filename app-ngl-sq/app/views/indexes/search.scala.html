@@ -1,0 +1,190 @@
+@*** FDS NGL-836
+==> voir ParameterSearchForm.java pour les ng-model
+NOTE: pour bt-select la propriété "title", apparait sur le bouton fleche de selection !!! => ne pas en mettre
+      pour bt-input  la propriété "title", apparait sur le bouton textarea !!!
+      c'est le placeholder qui est automatiquement le title du champ input
+***@
+
+@this()
+@()
+
+@import views.html.helper._
+@form() = {
+
+	@*** col 1 ***@
+	@columnSearchForm{
+	   @**    | limitTo:20  pose pb...getTags() pas de param-> tous **@
+		@formGroup{
+			<div class="form-control" bt-select  multiple="true" filter="true" 
+				ng-model="searchService.form.names" bt-options="tag.name as tag.name for tag in searchService.lists.getTags()"
+				placeholder='@Messages("indexes.placeholder.name")'>
+			</div>
+		}
+		
+		@formGroup{
+			<bt-input class="form-control" placeholder='@Messages("indexes.placeholder.name")' title='@Messages("indexes.title.name.textarea")'
+				input-ng-model="searchService.form.nameRegex" 
+				textarea-ng-model="searchService.form.names" 
+				textarea-placeholder-ng-model='@Messages("search.textarea.placeholder.labelsList")'>
+			</bt-input>
+		}
+		
+		@formGroup{
+			<bt-input class="form-control" placeholder='@Messages("indexes.placeholder.code")' title='@Messages("indexes.title.code.textarea")'
+				input-ng-model="searchService.form.codeRegex" 
+				textarea-ng-model="searchService.form.codes"
+				textarea-placeholder-ng-model='@Messages("search.textarea.placeholder.codesList")'>
+			</bt-input>
+		}
+	}
+	
+	@*** col 2 ***@
+	@columnSearchForm{
+	
+		@formGroup{
+			<bt-input class="form-control" placeholder='@Messages("indexes.placeholder.sequence")' title='@Messages("indexes.title.sequence.textarea")'
+				input-ng-model="searchService.form.sequenceRegex" 
+				textarea-ng-model="searchService.form.sequences" 
+				textarea-placeholder-ng-model='@Messages("search.textarea.placeholder.sequencesList")'>
+			</bt-input>
+		}	
+		
+		@formGroup{
+			<bt-input class="form-control" placeholder='@Messages("indexes.placeholder.shortName")' title='@Messages("indexes.title.shortName.textarea")'
+				input-ng-model="searchService.form.shortNameRegex" 
+				textarea-ng-model="searchService.form.shortNames" 
+				textarea-placeholder-ng-model='@Messages("search.textarea.placeholder.shortnamesList")'>
+			</bt-input>
+		}
+		
+		@formGroup{
+			<input class="form-control" type="text" 
+				ng-model="searchService.form.size" 
+				placeholder='@Messages("indexes.placeholder.size")' title='@Messages("indexes.placeholder.size")'/>
+		}
+
+	}
+	@*** col 3 ***@
+	@columnSearchForm{
+		@** il n'y a pas de name pour categoryCode...**@
+		@formGroup{
+			<div class="form-control" bt-select  multiple="true"
+				ng-model="searchService.form.categoryCodes" bt-options="tagCategory.code for tagCategory in searchService.lists.getTagCategories()"
+				placeholder='@Messages("indexes.placeholder.categoryCodes")'>
+			</div>
+		}
+		
+		@formGroup{
+			<div class="form-control" bt-select  multiple="true" 
+				ng-model="searchService.form.typeCodes" bt-options="tagType.code as tagType.name for tagType in searchService.lists.getTagTypes()"
+				placeholder='@Messages("indexes.placeholder.typeCodes")'>
+			</div>
+		}
+		
+		@** il n'y a pas de code pour les groupes...**@
+		@formGroup{
+			<div class="form-control" bt-select  multiple="true"  filter="true" 
+				ng-model="searchService.form.groupNames" bt-options="group.name for group in searchService.lists.getTagGroupNames()"
+				placeholder='@Messages("indexes.placeholder.groupNames")'>
+			</div>
+		}
+
+	}
+	@*** col-4 ***@
+	@columnSearchForm{	
+		@formGroup{
+			<input class="form-control" type="text" 
+				ng-model="searchService.form.fromDate" 
+				placeholder='@Messages("indexes.placeholder.fromDate")' title='@Messages("indexes.placeholder.fromDate")'/>
+		}
+		
+		@formGroup{
+			<input class="form-control" type="text" 
+				ng-model="searchService.form.supplierNameRegex" 
+				placeholder='@Messages("indexes.placeholder.supplierName")' title='@Messages("indexes.placeholder.supplierName")'/>
+		}
+	}
+	
+	@*** col-5  ***@
+	@columnSearchForm{
+		@formGroup{
+			<input class="form-control" type="text" 
+				ng-model="searchService.form.toDate" 
+				placeholder='@Messages("indexes.placeholder.toDate")' title='@Messages("indexes.placeholder.toDate")'/>
+		}
+		
+		@formGroup{
+			<input class="form-control" type="text" 
+				ng-model="searchService.form.createUser" typeahead="user.name as user.name for user in searchService.lists.getUsers() | filter:$viewValue | limitTo:20" 
+				placeholder='@Messages("indexes.placeholder.createUser")' title='@Messages("indexes.placeholder.createUser")'/>
+		}
+	}
+}
+
+@buttons() = {
+	@formGroup{
+		<div class="form-control" bt-select ng-model="searchService.reportingConfigurationCode" ng-change="searchService.updateColumn()" placeholder="@Messages("search.placeholder.reporting.configuration")" bt-options="valid.code as valid.name for valid in searchService.lists.get('reportConfigs')" ng-if="searchService.lists.get('reportConfigs').length > 0"></div>
+	}	
+}
+
+
+<div class="row"> 
+<div class="col-md-12 col-lg-12" ultimate-datatable="searchService.datatable">
+<div udt-form>
+	<ul class="nav nav-tabs margin-bottom-5">
+	   	<li class="active"><a href="#" data-target="#filters" data-toggle="tab">@Messages("search.tab.filters")</a></li>
+	   	<li ng-if="searchService.getAddFiltersToForm().length > 0"><a href="#" data-target="#addfilters" data-toggle="tab">@Messages("search.tab.addfilters")</a></li>
+	</ul>
+			
+	<div class="tab-content">
+		<div class="tab-pane active" id="filters">
+			<form class="well well-small">
+			<div class="row">
+			@form
+			@columnSearchForm{
+				@formGroup{
+				<div class="btn-toolbar">
+					<button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="search()" class="btn btn-primary" >
+						<i class="fa fa-search"></i>
+					</button>
+					<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="reset()"  class="btn btn-default">
+						<i class="fa fa-undo"></i>
+					</button>
+				</div>
+				}
+				@formGroup{
+					@buttons
+				}
+			}
+			</div>
+			</form>	
+		</div>
+	
+		<!-- pour l'instant il n'y a pas de filtres additionnels -->
+		<div class="tab-pane" id="addfilters">
+		<form class="well well-small">
+				<div class="row">
+					<div class="col-md-2 col-lg-2" ng-repeat="filters in searchService.getAddFiltersToForm()">
+						<div class="form-group" ng-repeat="filter in filters">
+							<div udt-compile="filter.html"></div> <!-- used directive from datatable to compile html -->
+						</div>
+					</div>
+					@columnSearchForm{
+						@formGroup{
+						<div class="btn-toolbar">
+							<button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="search()" class="btn btn-primary" >
+								<i class="fa fa-search"></i>
+							</button>
+							<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="reset()"  class="btn btn-default">
+								<i class="fa fa-undo"></i>
+							</button>							 	
+						</div>	
+						}
+					}
+				</div>			
+			</form>	
+		</div>
+	</div>
+</div>
+</div>
+</div>

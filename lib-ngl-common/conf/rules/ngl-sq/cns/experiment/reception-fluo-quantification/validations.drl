@@ -1,0 +1,81 @@
+//created on: Apr 21, 2015
+package rules
+
+declare InputContainerFluo
+	code : String
+	lineFluo : String
+	columnFluo : String
+	
+end
+
+rule "validation concentration final mandatory if not non quantifiable"
+	@nglSQ( validations )
+	dialect "java"
+	salience 1000
+	no-loop
+    when
+	Experiment($typeCode:typeCode,$typeCode=="reception-fluo-quantification")
+	$contextValidation:ContextValidation()
+	State($stateCode:code=="F")
+	OneToVoidContainer($inputContainerUseds:inputContainerUseds)
+    InputContainerUsed($code:code, experimentProperties != null, $method:experimentProperties.get("calculationMethod"),$concentration1:experimentProperties.get("concentration1")) from $inputContainerUseds
+	eval($method !=null && !"Non quantifiable".equals($method.value) && ($concentration1 == null || $concentration1.value == null)) 
+	then
+		Logger.debug("Debug mandatory concentration if not non quantifiable "+$method.value);
+		$contextValidation.addErrors("Concentration finale","error.validationexp.outputconcentrationnotnull", $code);
+	end
+
+
+rule "validation concentration final not negative"
+	@nglSQ( validations )
+	dialect "java"
+	salience 1000
+	no-loop
+    when
+	Experiment($typeCode:typeCode,$typeCode=="reception-fluo-quantification")
+	$contextValidation:ContextValidation()
+	State($stateCode:code=="F")
+	OneToVoidContainer($inputContainerUseds:inputContainerUseds)
+	InputContainerUsed($code:code,$experimentProperties : experimentProperties,$experimentProperties!=null) from $inputContainerUseds
+	$concentration1 : PropertyValue() from $experimentProperties.get("concentration1")
+	eval($concentration1 != null && convertPVToDouble($concentration1) < 0) 
+	then
+		Logger.debug("Debug not negative concentration");
+		$contextValidation.addErrors("Concentration finale","error.validationexp.outputconcentrationnotnegative", $code);
+end
+
+rule "init InputContainerFluo"
+	@nglSQ( validations )
+	dialect "java"
+	salience 1000
+	no-loop
+    when
+	Experiment($typeCode:typeCode,$typeCode=="reception-fluo-quantification" || $typeCode=="fluo-quantification",$atomics:atomicTransfertMethods,$atomics!=null)
+    AtomicTransfertMethod($inputContainerUseds:inputContainerUseds) from $atomics
+    $containerUsed:InputContainerUsed($code:code, $instProp: instrumentProperties, $instProp!=null, $instProp.get("fluoroskanLine")!=null, $instProp.get("fluoroskanColumn")!=null) from $inputContainerUseds
+    not InputContainerFluo(code==$code)
+    then
+    InputContainerFluo inputContainerFluo =new InputContainerFluo($code,(String)((PropertyValue)$instProp.get("fluoroskanLine")).getValue(),
+    															(String)((PropertyValue)$instProp.get("fluoroskanColumn")).getValue());
+   // Logger.debug("Container Fluo "+$code);
+    insert(inputContainerFluo);
+end
+
+
+
+rule "check no same position fluoroskan plate"
+    @nglSQ( validations )
+	dialect "java"
+	salience 1000
+	no-loop
+    when
+    	$experiment:Experiment($typeCode:typeCode,$typeCode=="reception-fluo-quantification" || $typeCode=="fluo-quantification")
+	   	$contextValidation:ContextValidation() 
+	    InputContainerFluo($line:lineFluo, $column:columnFluo,$line!=null,$column!=null)
+	   	$inputContainers:Set(empty==false) from collect(InputContainerFluo(lineFluo==$line,columnFluo==$column))
+	   	eval($inputContainers.size()>1)
+    then
+    	Logger.debug("error same position fluoroskan plate");
+    
+    	$contextValidation.addErrors($typeCode,"error.validationexp.samePosition.fluoroskan",$line,$column);
+end

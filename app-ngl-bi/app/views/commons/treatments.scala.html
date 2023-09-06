@@ -1,0 +1,10 @@
+@()
+
+<!-- deja essayer avec une directive ne marche pas -->
+<ul class="nav nav-pills margin-bottom-7">
+	<li ng-repeat="treament in treatments.getTreatments() track by $index" ng-class="treament.clazz"><a href="#" ng-click="treatments.activeTreatment(treament)">{{treament.name}}</a></li>		   		
+</ul>
+<div class="tab-content">
+	<div class="tab-pane active" ng-include="treatments.getTreatment().url"></div>		
+ </div>
+  	

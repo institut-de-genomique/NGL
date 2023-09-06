@@ -1,0 +1,204 @@
+//Rules for validation
+package rules
+
+declare SourceInfo
+	value : String
+	supportCodes : Set 	
+end
+
+declare SourceSupportInfo
+	supportCode : String
+	sources : Set 	
+end
+
+// 01/02/2017 janus-and-cBot devient janus-and-cBotV2 
+// 09/08/2017 NGL1550 passage a 8 sources
+rule "Init SourceInfo for janus+cbot v2"
+    @nglSQ( validations )
+	dialect "java"
+	salience 1000
+	no-loop
+    when
+    	$experiment:Experiment($typeCode:typeCode, $typeCode=="prepa-fc-ordered", instrument.typeCode == "janus-and-cBotV2")    	
+    then
+    	Logger.debug("Init SourceInfo for janus+cbotV2");
+    	SourceInfo sourceInfo1 = new SourceInfo("1",new TreeSet());
+	    insert(sourceInfo1);
+	    SourceInfo sourceInfo2 = new SourceInfo("2",new TreeSet());
+	    insert(sourceInfo2);
+	    SourceInfo sourceInfo3 = new SourceInfo("3",new TreeSet());
+	    insert(sourceInfo3);
+	    SourceInfo sourceInfo4 = new SourceInfo("4",new TreeSet());
+	    insert(sourceInfo4);
+	    SourceInfo sourceInfo5 = new SourceInfo("5",new TreeSet());
+	    insert(sourceInfo5);
+	    SourceInfo sourceInfo6 = new SourceInfo("6",new TreeSet());
+	    insert(sourceInfo6);
+	    SourceInfo sourceInfo7 = new SourceInfo("7",new TreeSet());
+	    insert(sourceInfo7);
+	    SourceInfo sourceInfo8 = new SourceInfo("8",new TreeSet());
+	    insert(sourceInfo8);
+end
+
+// 01/02/2017 janus-and-cBot devient janus-and-cBotV2 
+// 14/02/2017 correction bug par E.Jacobi Ok car pas besoin de source ici
+rule "Init SourceSupportInfo for janus+cbot v2"
+    @nglSQ( validations )
+	dialect "java"
+	salience 900
+	no-loop
+    when
+    	$experiment:Experiment($typeCode:typeCode, $typeCode=="prepa-fc-ordered", instrument.typeCode == "janus-and-cBotV2") 
+    	$atomicTransfert: ManyToOneContainer()
+    	$container: InputContainerUsed() from $atomicTransfert.inputContainerUseds
+    	not SourceSupportInfo($container.locationOnContainerSupport.code==supportCode)   	
+    then
+    	Logger.debug("Init SourceSupportInfo for janus+cbot v2");
+    	SourceSupportInfo sourceSupportInfo = new SourceSupportInfo($container.locationOnContainerSupport.code,new TreeSet());
+    	insert(sourceSupportInfo);
+end
+
+// 01/02/2017 janus-and-cBot devient janus-and-cBotV2 
+// 14/02/2017 PB si $instrumentProperties.source null !! correction par E. Jacobi
+// instrumentProperties.source.value  --> source est une map et pas une property de instrumentProperties !!!!!!
+
+rule "add supportcode for source"
+    @nglSQ( validations )
+	dialect "java"
+	salience 900
+	no-loop
+    when
+    	$experiment:Experiment($typeCode:typeCode,$typeCode=="prepa-fc-ordered", instrument.typeCode == "janus-and-cBotV2")
+    	$atomicTransfert: ManyToOneContainer()
+    	$container: InputContainerUsed($instrumentProperties:instrumentProperties, $instrumentProperties!=null) from $atomicTransfert.inputContainerUseds
+    	//source est une cle de  $instrumentProperties--> utiliser+ get
+    	$source : PropertyValue() from $instrumentProperties.get("source")
+    	$sourceInfo : SourceInfo(convertPVToString($source)==value)
+    then
+    	Logger.debug("find sourceInfo for "+$sourceInfo+"..."+$sourceInfo.getSupportCodes().size());
+    	$sourceInfo.getSupportCodes().add($container.locationOnContainerSupport.code);
+    	modify($sourceInfo){};
+end
+
+// 01/02/2017 janus-and-cBot devient janus-and-cBotV2 
+// 14/02/2017 PB si $instrumentProperties.source null !! 
+rule "add source for supportcode"
+    @nglSQ( validations )
+	dialect "java"
+	salience 900
+	no-loop
+    when
+    	$experiment:Experiment($typeCode:typeCode,$typeCode=="prepa-fc-ordered", instrument.typeCode == "janus-and-cBotV2")
+    	$atomicTransfert: ManyToOneContainer($inputContainers : inputContainerUseds, $inputContainers.size()!=0)
+    	//FDS TEST $container: InputContainerUsed($source: instrumentProperties.source.value) from $inputContainers
+    	$container: InputContainerUsed($instrumentProperties:instrumentProperties, $instrumentProperties!=null, $source: instrumentProperties.source.value) from $inputContainers
+    	$sourceSupportInfo : SourceSupportInfo($container.locationOnContainerSupport.code==supportCode)
+    then
+    	Logger.debug("find sourceSupportInfo for "+$container.locationOnContainerSupport.code+"..."+$sourceSupportInfo.getSources().size());
+    	$sourceSupportInfo.getSources().add($source);
+    	modify($sourceSupportInfo){};
+end
+
+rule "check nb support for one source"
+// c-a-d: plusieurs plaques indiquées comme meme position de départ pour Janus...
+    @nglSQ( validations )
+	dialect "java"
+	salience 700
+	no-loop
+    when
+    	$sourceInfo : SourceInfo($source:value, supportCodes.size() > 1 )
+    	$contextValidation:ContextValidation()    		
+    then
+    	$contextValidation.addErrors("source",	"plusieurs supports "+$sourceInfo.getSupportCodes()+" ont la meme source : "+$source);	
+end
+
+rule "check nb source for one support"
+// c-a-d: meme plaque indiquée a differentes positions de départ pour Janus...
+    @nglSQ( validations )
+	dialect "java"
+	salience 700
+	no-loop
+    when
+    	$sourceSupportInfo : SourceSupportInfo($supportCode : supportCode, sources.size() > 1)
+    	$contextValidation:ContextValidation()    		
+    then
+    	$contextValidation.addErrors("source",	"plusieurs sources "+$sourceSupportInfo.getSources()+" pour un meme support : "+$supportCode);    		
+end
+
+
+//  01/02/2017 NGL-1141: Les proprietes stripCode et cbotFile des CbotV2 ne peuvent pas etre rendues obligatoires dans tous les cas...
+//  - pas mis dans obligatoire dans instruments => rendre obligatoire ici
+//  - regle a declencher uniqt pour l'etat terminé (F)
+//  - GA=> plus simple de mettre le code de controle dans la partie when...
+//  - GA=> Drools ne fait pas le typage automatique comme java1.8=> cast explicite necessaire !!
+
+rule "check cbotFile and strip"
+    @nglSQ( validations )
+	dialect "java"
+	salience 1000
+	no-loop
+    when
+    	State (code == 'F')
+    	Experiment(typeCode =="prepa-fc-ordered", (instrument.typeCode == "janus-and-cBotV2")||(instrument.typeCode == "cBotV2"), $instrumentProperties:instrumentProperties)
+    	$contextValidation:ContextValidation() 
+    then
+        Logger.debug("rule: check cbotFile and stripCode...");
+       
+    	if ($instrumentProperties.containsKey("stripCode")){
+    		PropertySingleValue stripCode = (PropertySingleValue) $instrumentProperties.get("stripCode");
+    		if(StringUtils.isBlank((String)stripCode.value)){
+    		    //Logger.debug("CAS stripCode blank");
+    			$contextValidation.addErrors("instrumentProperties.stripCode", "error.required"); 
+    		}
+    	}else{
+    	    //Logger.debug("cas stripCode manquant !!!");
+    		$contextValidation.addErrors("instrumentProperties.stripCode", "error.required");
+    	}
+    	
+    	if ($instrumentProperties.containsKey("cbotFile")){
+    		PropertySingleValue cbotFile = (PropertySingleValue) $instrumentProperties.get("cbotFile");
+    		if (StringUtils.isBlank((String)cbotFile.value)){
+ 				//Logger.debug("CAS cbotFile blank");
+    			$contextValidation.addErrors("instrumentProperties.cbotFile", "error.required"); 
+    		}
+    	}else{
+    	    //Logger.debug("cas cbotFile manquant !!!");
+    		$contextValidation.addErrors("instrumentProperties.cbotFile", "error.required");
+    	}
+    	
+end     
+
+// 13/02/2017 Check when using Janus if more than one input in each lane 
+//            This rule may have to be removed later if/when new programs for Janus are written..
+rule "Check too many inputs in lane"
+    @nglSQ( validations )
+	dialect "java"
+	salience 900
+	no-loop
+    when
+    	$experiment:Experiment($typeCode:typeCode, $typeCode=="prepa-fc-ordered", instrument.typeCode == "janus-and-cBotV2")
+    	$atomicTransfert: ManyToOneContainer($inputContainers : inputContainerUseds, $inputContainers.size() >1 , $position : viewIndex.toString())
+    	$contextValidation:ContextValidation() 
+    then
+    	Logger.debug("rule: Check too many inputs in lane "+$position+ ": nb inputContainers=" +$inputContainers.size() );
+    	// Meilleur mais pas consistant avec autres message similaires...$contextValidation.addErrors("Une seule librairie par lane pour le Janus:", "Lane "+$position);
+    	$contextValidation.addErrors("Position["+$position+"]","Un seul container par lane pour le Janus");
+end   
+
+// 23/01/2019  When using Novaseq Cbot on Board =>  all lanes must have same content
+/*  TODO !!!!
+rule "All lanes with same contents for Novaseq on cBot on Board"
+ 
+    @nglSQ( validations )
+	dialect "java"
+	salience 900
+	no-loop
+   when
+   		// !!! ajouter SuperNova et autres NovaSeq6000 !!!!!!
+    	$experiment:Experiment($typeCode:typeCode, $typeCode=="prepa-fc-ordered", (instrument.Code == "cBot-interne-MarieCurix-A" || instrument.Code == "cBot-interne-MarieCurix-B"))
+   		$contextValidation:ContextValidation()
+    then
+  		$contextValidation.addErrors("TEST", "MarieCurix");
+end
+*/
+ 

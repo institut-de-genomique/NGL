@@ -1,0 +1,358 @@
+@this(ctx : fr.cea.ig.ngl.NGLApplication)
+@()
+
+
+<!-- work with atmDragAndDrop2 -->
+<table class="table" >
+	<thead>
+		<tr ng-if="!atmService.data.isAllATMViewClose">
+			<th colspan="{{12 + inputContainerProperties.length}}">
+				@Messages("experiments.inputs")
+			</th>
+			
+			<th colspan="{{4 + outputContainerProperties.length}}">
+				@Messages("experiments.outputs")
+			</th>												
+		</tr>
+		<tr ng-if="!atmService.data.isAllATMViewClose">
+			<th>
+			</th>
+			<th>
+				<button ng-click="atmService.data.hideAllATM()"  ng-if="!atmService.data.isAllATMViewClose" class="btn btn-default btn-xs"><i class="fa fa-eye-slash"></i></button>
+				<button ng-click="atmService.data.showAllATM()"  ng-if="atmService.data.isAllATMViewClose"  class="btn btn-default btn-xs"><i class="fa fa-eye"></i></button>	
+				<!-- 04/05/2017 NGL-1197 ajout bouton copie volume pour CHAQUE ATM 
+				     26/09/2017 suppression car mise par erreur
+				<button class="btn btn-default btn-xs btn-block"  ng-click="copyVolumeToEngaged()" 
+				                                                  data-toggle="tooltip" title="@Messages("experiments.button.plate.copyVolumeTo") volume engag&eacute;"
+				                                                  ng-show="isNewState()">
+					<i class="fa fa-files-o"></i>	
+				</button>	
+				-->		
+			</th>
+			<th>
+				@Messages("containers.table.code")
+			</th>
+			<th>
+				@Messages("containers.table.supportCategoryCode")
+			</th>
+			<th>
+				@Messages("containers.table.fromTransformationTypeCodes")
+			</th>						
+			<th>
+				@Messages("containers.table.project_sample")
+			</th>						
+			<th>
+				@Messages("containers.table.tags")
+			</th>			
+			<th><!-- NGL-2211 ajout size -->
+				@Messages("containers.table.size") (pb)
+			</th>
+			<th>
+				@Messages("containers.table.state.code")
+			</th>
+			<th>
+				@Messages("containers.table.volume") (µL)
+			</th>
+			<th>
+				@Messages("containers.table.concentration")
+			</th>				
+			<th>
+				@Messages("containers.table.percentageInsidePool")
+			</th>
+			<th ng-repeat="property in inputContainerProperties track by $index">
+				{{property.name}}<span ng-if="property.displayMeasureValue"> ({{property.displayMeasureValue.value}})</span>
+			</th>
+			<th>
+				@Messages("containers.table.code")
+			</th>
+			<th>
+				@Messages("containers.table.concentration")
+			</th>
+			<th>
+				@Messages("containers.table.concentration.unit")
+			</th>
+			<th>
+				@Messages("containers.table.volume") (µL)
+			</th>			
+			<th ng-repeat="property in outputContainerProperties track by $index">
+				{{property.name}}<span ng-if="property.displayMeasureValue"> ({{property.displayMeasureValue.value}})</span>
+			</th>
+			<th>
+				@Messages("containers.table.storageCode")
+			</th>		
+		</tr>
+		<tr ng-if="atmService.data.isAllATMViewClose" colspan="12">
+			<th>
+			</th>
+			<th>
+				<button ng-click="atmService.data.hideAllATM()"  ng-if="!atmService.data.isAllATMViewClose" class="btn btn-default btn-xs"><i class="fa fa-eye-slash"></i></button>
+				<button ng-click="atmService.data.showAllATM()"  ng-if="atmService.data.isAllATMViewClose" class="btn btn-default btn-xs"><i class="fa fa-eye"></i></button>							
+			</th>
+		</tr>
+		
+		<!-- 27/10/2016 TR pour CNG uniquement-->
+		<tr ng-if="!atmService.data.isAllATMViewClose">
+			<th colspan="12"></th> <!--  DIFFERENT DE outputplates-->
+			<th ng-repeat="property in inputContainerProperties track by $index"></th>
+			<th>
+			  <!--  Pour des tubes permet de mettre un motif commun...-->
+               <div ng-switch on="mainService.isEditMode()"> 
+               <div ng-switch-when="false">   
+                   <span class="form-control-static" ng-bind="outputContainer.supportCode"></span>    
+               </div>                           
+               <div ng-switch-when="true">
+                   <input class="form-control input-sm" type="text" id="plateCode"
+									                    ng-change="updateOuputContainers(atmService.data.atm,'supportCode',outputContainer.supportCode)"
+			  							                ng-model="outputContainer.supportCode" />	
+			   </div>
+			   </div>   
+			</th>			
+			<!-- DIFFERENT DE outputplates<th colspan="2"></th> -->
+			<th>
+               <div ng-switch on="mainService.isEditMode()"> 
+               <div ng-switch-when="false">   
+                   <span class="form-control-static" ng-bind="outputContainer.concentration"></span>    
+               </div>                           
+               <div ng-switch-when="true">
+                   <input class="form-control input-sm" type="text" id="concentration"
+									                    ng-change="updateOuputContainers(atmService.data.atm,'concentration',outputContainer.concentration)"
+			  							                ng-model="outputContainer.concentration" />	
+			   </div>
+			   </div> 
+			</th>
+			<th>
+               <div ng-switch on="mainService.isEditMode()"> 
+               <div ng-switch-when="false">   
+                   <span class="form-control-static" ng-bind="outputContainer.conc_unit"></span>    
+               </div>                           
+               <div ng-switch-when="true">
+               	   <select class="form-control input-sm" 
+								ng-change="updateOuputContainers(atmService.data.atm, 'conc_unit', outputContainer.conc_unit)"
+								ng-model="outputContainer.conc_unit">
+							      <option value="nM">nM</option> 
+							      <option value="ng/µl">ng/µl</option>	
+					</select>	
+			   </div>
+			   </div> 
+			</th>
+			<th>
+               <div ng-switch on="mainService.isEditMode()"> 
+               <div ng-switch-when="false">   
+                   <span class="form-control-static" ng-bind="outputContainer.volume"></span>    
+               </div>                           
+               <div ng-switch-when="true">
+                   <input class="form-control input-sm" type="text" id="volume"
+									                    ng-change="updateOuputContainers(atmService.data.atm,'volume',outputContainer.volume)"
+			  							                ng-model="outputContainer.volume" />	
+			   </div>
+			   </div> 
+			</th>			
+			<th ng-repeat="property in outputContainerProperties track by $index"></th>
+			<th>
+               <div ng-switch on="mainService.isEditMode()"> 
+               <div ng-switch-when="false">   
+                   <span class="form-control-static" ng-bind="outputContainer.supportStorageCode"></span> 
+               </div>
+               <div ng-switch-when="true">
+                  <input class="form-control input-sm" type="text" id="plateStorageCode"
+									                   ng-change="updateOuputContainers(atmService.data.atm,'supportStorageCode',outputContainer.supportStorageCode)"
+			 						                   ng-model="outputContainer.supportStorageCode" />	
+			   </div>
+			   </div>   
+			</th>		
+		</tr>
+<thead>
+
+
+<tbody ng-repeat="atm in atmService.data.atm | orderBy:'viewIndex' track by $index" 	
+	ng-switch="atmService.data.getATMViewMode(atm, $index)">
+	
+	<tr ng-switch-when="empty">
+		<td>			
+			<span class="label label-black" ng-bind="'ATM ' + atm.viewIndex"></span>
+		</td>
+		<td> 
+			<button class="btn btn-default btn-xs"  ng-click="atmService.data.toggleATM($index)" ng-switch="atmService.data.atmViewOpen[$index]">
+				<i ng-switch-when="true" class="fa fa-eye-slash"></i>
+				<i ng-switch-when="false" class="fa fa-eye"></i>
+			</button>			
+		</td>
+		<td colspan="12"></td>
+	</tr>
+	
+	<tr ng-switch-when="compact" >	
+		<td  class="compactColumn">
+			<span class="label label-black" ng-bind="'ATM ' + atm.viewIndex"></span>
+		</td >
+		<td class="compactColumn"> 					
+			<button class="btn btn-default btn-xs"  ng-click="atmService.data.toggleATM($index)">
+				<!--  i class="fa fa-eye-slash"></i-->
+				<i class="fa fa-eye"></i>
+			</button>			
+		</td>	
+		<td colspan="12" >
+			<!-- NGL-2876 réouverture changer :  orderBy:'code' ==> orderBy:atmService.sortByColumn -->
+			<span ng-repeat="inputContainerUsed in atm.inputContainerUseds | orderBy:atmService.sortByColumn track by $index"  class="compactText"
+				ng-model="inputContainerUsed" draggable drag="dragInProgress">
+				{{inputContainerUsed.code}} / {{inputContainerUsed.percentage}}%;<br/>
+			</span>
+		</td>
+	</tr>
+	
+	<!-- NGL-2876 réouverture changer :  orderBy:'code' ==> orderBy:atmService.sortByColumn -->
+	<tr ng-switch-when="open" ng-repeat="inputContainerUsed in atm.inputContainerUseds | orderBy:atmService.sortByColumn track by $index">	
+			<td rowspan="{{atm.inputContainerUseds.length}}" ng-if="$index === 0">
+				<span class="form-control-static label label-black" ng-bind="'ATM ' + atm.viewIndex"></span>
+			</td>
+			<td rowspan="{{atm.inputContainerUseds.length}}" ng-if="$index === 0">
+				<!-- ng-if add a new child scope so we need to use $parent.$parent.$index -->
+				<button class="btn btn-default btn-xs btn-block"  ng-click="atmService.data.toggleATM($parent.$parent.$index)">
+					<i class="fa fa-eye-slash"></i>
+					<!-- i class="fa fa-eye"></i-->
+				</button>
+				<button class="btn btn-default btn-xs btn-block"  ng-click="atmService.data.deleteATM(atm)" ng-show="isNewState()">
+					<i class="fa fa-trash-o"></i>
+					<!-- i class="fa fa-eye"></i-->
+				</button>
+				<!-- 03/05/2017 NGL-1197 ajout bouton copie volume pour CHAQUE ATM 
+				     26/09/2017 suppression car mise par erreur
+				<button class="btn btn-default btn-xs btn-block"  ng-click="copyVolumeToEngaged($parent.$parent.$index)" 
+				                                                  data-toggle="tooltip" title="@Messages("experiments.button.plate.copyVolumeTo")  volume engag&eacute;"
+				                                                  ng-show="isNewState()">
+					<i class="fa fa-files-o"></i>
+				</button>		
+                -->				
+			</td>	
+				<td>
+					{{inputContainerUsed.code}}
+				</td>
+				<td>
+					{{inputContainerUsed.locationOnContainerSupport.categoryCode | codes:'container_support_cat'}}
+				</td>
+				<td>
+					<div list-resize='inputContainerUsed.fromTransformationTypeCodes | unique | codes:"type"' list-resize-min-size='5' below vertical>
+				</td>
+				<td>
+					<div list-resize="inputContainerUsed.contents | collect:'projectCode+&quot; / &quot;+sampleCode'" list-resize-min-size="5" vertical>																					
+				</td>						
+				<td>
+					<div list-resize='inputContainerUsed.contents | getArray:"properties.tag.value"| unique' list-resize-min-size='5' below vertical>															
+				</td>		
+				<td><!--  NGL-2211 ajout size -->	
+					{{inputContainerUsed.size.value}}
+				</td>
+				<td>
+					{{inputContainerUsed.state.code | codes:'state'}}
+				</td>
+				<td>
+					{{inputContainerUsed.volume.value}}
+				</td>
+				<td>
+					{{inputContainerUsed.concentration.value | number}} {{inputContainerUsed.concentration.unit}}
+				</td> 							
+				<td>
+					<div ng-switch on="mainService.isEditMode()">						
+						<p class="form-control-static" ng-switch-when="false" ng-bind="inputContainerUsed.percentage | number" />						 
+						<div ng-switch-when="true">
+							<input class="form-control input-sm" 
+								type="text"
+								ng-model="inputContainerUsed.percentage"
+								ng-change="update(atm, inputContainerUsed, 'inputContainerUseds['+$index+'].percentage')" 
+								title='@Messages("containers.table.percentage")'
+								udt-html-filter="number" 
+								/>									
+						</div>
+					</div>
+				</td>
+				<td ng-repeat="property in inputContainerProperties track by $index"
+					ng-class="valuationService.valuationCriteriaClass(inputContainerUsed, experiment.status.criteriaCode, 'experimentProperties.'+property.code+'.value')"
+					>
+					<div ng-switch on="mainService.isEditMode()">						
+						<p class="form-control-static" ng-switch-when="false" ng-bind="inputContainerUsed.experimentProperties[property.code].value | number" />						 
+						<div ng-switch-when="true">
+				
+							<input class="form-control input-sm" type="text"  
+							ng-model="inputContainerUsed.experimentProperties[property.code].value" 
+							ng-change="update(atm, inputContainerUsed, 'inputContainerUseds['+$parent.$index+'].experimentProperties.'+property.code+'.value')"																		
+							udt-html-filter="number"
+							/>
+						</div>
+					</div>	
+				</td>
+				<td rowspan="{{atm.inputContainerUseds.length}}" ng-if="$index === 0">	
+					<div ng-switch on="mainService.isEditMode()">						
+						<p class="form-control-static" ng-switch-when="false" ng-bind="atm.outputContainerUseds[0].locationOnContainerSupport.code" />						 
+						<div ng-switch-when="true">
+							<input class="form-control input-sm" type="text" title='@Messages("containers.table.supportCode")'							
+							ng-model="atm.outputContainerUseds[0].locationOnContainerSupport.code"
+							ng-change="update(atm, outputContainerUseds[0], 'outputContainerUseds[0].locationOnContainerSupport.code')"								   			
+			   				/>										
+						</div>
+					</div>	
+					
+				</td>
+				
+				<td rowspan="{{atm.inputContainerUseds.length}}" ng-if="$index === 0">
+					<div ng-switch on="mainService.isEditMode()">						
+						<p class="form-control-static" ng-switch-when="false" ng-bind="atm.outputContainerUseds[0].concentration.value" />						 
+						<div ng-switch-when="true">
+							<input class="form-control input-sm" type="text" title="Messages("containers.table.concentration")"									
+							ng-model="atm.outputContainerUseds[0].concentration.value"
+							ng-change="update(atm, outputContainerUseds[0], 'outputContainerUseds[0].concentration.value')"
+				   			udt-html-filter="number"								   			
+			   				/>										
+						</div>
+					</div>						
+				</td>
+				<td rowspan="{{atm.inputContainerUseds.length}}" ng-if="$index === 0">
+					<div ng-switch on="mainService.isEditMode()">						
+						<p class="form-control-static" ng-switch-when="false" ng-bind="atm.outputContainerUseds[0].concentration.unit" />						 
+						<div ng-switch-when="true">
+							
+							<select class="form-control input-sm" ng-model="atm.outputContainerUseds[0].concentration.unit" 
+								ng-change="update(atm, outputContainerUseds[0], 'outputContainerUseds[0].concentration.unit')">
+							      <option value="nM">nM</option> 
+							      <option value="ng/µl">ng/µl</option>	
+							</select>
+															
+						</div>
+					</div>						
+				</td>
+				<td rowspan="{{atm.inputContainerUseds.length}}" ng-if="$index === 0">
+					<div ng-switch on="mainService.isEditMode()">						
+						<p class="form-control-static" ng-switch-when="false" ng-bind="atm.outputContainerUseds[0].volume.value" />						 
+						<div ng-switch-when="true">
+							<input class="form-control input-sm" type="text" title="Messages("containers.table.volume")"									
+							ng-model="atm.outputContainerUseds[0].volume.value"
+							ng-change="update(atm, outputContainerUseds[0], 'outputContainerUseds[0].volume.value')"
+				   			udt-html-filter="number"								   			
+			   				/>										
+						</div>
+					</div>						
+				</td>
+				<td  rowspan="{{atm.inputContainerUseds.length}}"  ng-if="$parent.$index === 0" 
+					ng-class="valuationService.valuationCriteriaClass(atm.outputContainerUseds[0], experiment.status.criteriaCode, 'experimentProperties.'+property.code+'.value')"
+					ng-repeat="property in outputContainerProperties track by $index">
+					<div ng-switch on="mainService.isEditMode()">						
+						<p class="form-control-static" ng-switch-when="false" ng-bind="atm.outputContainerUseds[0].experimentProperties[property.code].value" />						 
+						<div ng-switch-when="true">
+						<input class="form-control input-sm" type="text"  
+						ng-model="atm.outputContainerUseds[0].experimentProperties[property.code].value"
+						ng-change="update(atm, outputContainerUseds[0], 'outputContainerUseds[0].experimentProperties.'+property.code+'.value')"
+						/>
+						</div>
+						</div>									
+				</td>
+				<td rowspan="{{atm.inputContainerUseds.length}}" ng-if="$index === 0">
+					<div ng-switch on="mainService.isEditMode()">						
+						<p class="form-control-static" ng-switch-when="false" ng-bind="atm.outputContainerUseds[0].locationOnContainerSupport.storageCode" />						 
+						<div ng-switch-when="true">
+							<input class="form-control input-sm" type="text" title="Messages("containers.table.storageCode")"									
+							ng-model="atm.outputContainerUseds[0].locationOnContainerSupport.storageCode"
+				   			/>										
+						</div>
+					</div>						
+				</td>												
+		</tr>					
+	</tbody>	
+</table>

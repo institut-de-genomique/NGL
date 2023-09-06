@@ -1,0 +1,66 @@
+@this()
+@()
+@import views.html.helper._
+
+@formTypes() = {
+}
+
+@formProperties() = {
+	@columnSearchForm{
+		@formGroup{	
+			<div bt-select class="form-control" placeholder="@Messages("descriptions.select.propertydefinitions.names")"  title='@Messages("descriptions.select.propertydefinitions.names")'
+			textarea="true" filter="true" multiple="true" textareaplaceholder='@Messages("search.textarea.placeholder.labelsList")'
+			ng-model="searchService.tabs.properties.form.names"  
+			bt-options="propertDefinition.name for propertDefinition in searchService.tabs.properties.lists.properties()">
+			</div>
+		}		
+	}
+	@columnSearchForm{
+		@formGroup{
+			<div bt-select class="form-control" placeholder="@Messages("descriptions.select.import.types.names")"  title='@Messages("descriptions.select.import.types.names")'
+			textarea="true" multiple="true" textareaplaceholder='@Messages("search.textarea.placeholder.labelsList")'
+			ng-model="searchService.tabs.properties.form.typeNames"
+			bt-options="importType.name for importType in searchService.tabs.properties.lists.types()">
+			</div>				
+		}		
+	}
+	@columnSearchForm{
+		@formGroup{
+		<div class="btn-toolbar">
+			<button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="searchService.searchProperties()" class="btn btn-primary" >
+				<i class="fa fa-search"></i>
+			</button>
+			<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="resetPropertiesForm()"  class="btn btn-default">
+				<i class="fa fa-undo"></i>
+			</button>
+											
+		</div>	
+		}
+	}
+}
+
+<div class="col-md-12 col-lg-12">
+    <ul class="nav nav-tabs" role="tablist">
+        <li role="presentation" class="active">
+            <a href="#" data-target="#types" data-toggle="tab" role="tab">@Messages("descriptions.imports.tab.types")</a>
+        </li>
+        <li role="presentation">
+            <a href="#" data-target="#properties" data-toggle="tab" role="tab">@Messages("descriptions.imports.tab.properties")</a>
+        </li> 
+    </ul>	
+    <div class="tab-content">
+        <div class="tab-pane fade in active" id="types">
+            @formTypes
+            <div  ultimate-datatable="searchService.tabs.types.datatable">
+                <div udt-form></div>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="properties">
+            <div class="alert alert-warning">@Messages("descriptions.info.export.properties.definitions.value.possibles")</div>
+            @formProperties
+            <div ultimate-datatable="searchService.tabs.properties.datatable">
+                <div udt-form></div>
+            </div>
+        </div>
+    </div>
+</div>

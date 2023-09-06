@@ -1,0 +1,62 @@
+/* FDS ajout..*/
+
+package fr.cea.ig.ngl.dao.parameters;
+
+import java.util.Arrays;
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import fr.cea.ig.ngl.dao.api.APIException;
+import fr.cea.ig.ngl.dao.api.APISemanticException;
+import fr.cea.ig.ngl.dao.api.APIValidationException;
+import fr.cea.ig.ngl.dao.api.GenericAPI;
+import models.laboratory.parameter.Parameter;
+//import validation.ContextValidation;
+
+
+@Singleton
+public class ParametersAPI extends GenericAPI<ParametersDAO, Parameter> {
+
+	private final ParametersAPI paramApi;
+	
+	@Inject
+	public ParametersAPI(ParametersDAO dao, ParametersAPI paramApi) {
+		super(dao);
+		this.paramApi= paramApi;
+		
+		// TODO Auto-generated constructor stub
+	}
+
+	@Override
+	protected List<String> authorizedUpdateFields() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	protected List<String> defaultKeys() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Parameter create(Parameter input, String currentUser) throws APIValidationException, APIException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Parameter update(Parameter input, String currentUser) throws APIException, APIValidationException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Parameter update(Parameter input, String currentUser, List<String> fields) throws APIException, APIValidationException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}

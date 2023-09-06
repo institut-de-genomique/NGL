@@ -1,0 +1,34 @@
+@(inputs: Html = Html(""), formAttrs : Html = Html(""))(buttons: Html = Html(""))(datatableName: String = "datatable",  initMethod: String = "init()")
+
+@import views.html.helper._
+
+<div class="row" ng-init="@initMethod"> 
+<div class="col-md-12 col-lg-12" ultimate-datatable="@datatableName">
+
+	@if(inputs.body != ""){
+	<div udt-form>
+	<form class="well well-small" @formAttrs>
+		<div class="row">
+		@inputs
+		@columnSearchForm{
+			@formGroup{
+			<div class="btn-toolbar">
+				<button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="search()" class="btn btn-primary" >
+					<i class="fa fa-search"></i>
+				</button>
+				<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="reset()"  class="btn btn-default">
+					<i class="fa fa-undo"></i>
+				</button>
+											 	
+			</div>	
+			}	
+			@formGroup{
+				@buttons
+			}
+		}
+		</div>
+	</form>	
+	</div>
+	}
+</div>
+</div>

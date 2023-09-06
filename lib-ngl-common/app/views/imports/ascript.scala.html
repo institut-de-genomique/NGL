@@ -1,0 +1,7 @@
+@(contentType:String, lib:String, version:String, file:String)
+
+@*
+ * Import a javascript library.
+ *@
+
+<script src="@helper.getAsset(contentType,lib,version,file)" type="text/javascript" charset="utf-8"></script>

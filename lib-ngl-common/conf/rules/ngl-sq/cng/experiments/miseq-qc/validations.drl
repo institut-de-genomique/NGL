@@ -1,0 +1,73 @@
+//created on: Aug 6, 2014
+//Rules for calculations
+package rules
+
+
+rule "Miseq-qc Init object ATMInfo in WM"
+	@nglSQ( validations )
+	dialect "java"
+	salience 700
+	no-loop
+    when
+    Experiment($typeCode : typeCode, $typeCode=="miseq-qc")
+    not ATMInfo("1"==position)
+    then
+    
+    ATMInfo ATMInfo = new ATMInfo("1",new ArrayList(), new ArrayList(),false,false, new ArrayList(), new HashSet());
+    insert(ATMInfo);
+    
+	end
+
+	
+rule "Miseq-qc Init objects ContentInfo in WM"
+		@nglSQ( validations )
+	dialect "java"
+	salience 600
+	no-loop
+    when
+    $atomicTransfert: OneToVoidContainer($inputContainers : inputContainerUseds, $inputContainers.size()!=0)
+	$container : InputContainerUsed( $contents : contents,$contents!=null) from $inputContainers
+	$content : Content() from $contents	 
+	$ATMInfo : ATMInfo("1"==position)
+    then
+   
+    String tag="VIDE";
+    String libProcessTypeCode="VIDE";
+    String tagCategory="VIDE";
+    Integer tagRealSize = 0;
+    String sequence = "VIDE";
+    String fromCode="VIDE";
+    
+    //ajout propriété pour etre coherent avec modif regle commune manyToOne double index
+    String secondaryTag="VIDE";
+    String secondaryTagCategory="VIDE";
+    Integer secondaryTagRealSize = 0;
+    String secondarySequence="VIDE";
+    String concatSequence="VIDE";
+    
+    if($content.properties.containsKey("tag")){
+    	tag=$content.properties.get("tag").value.toString();
+    	Index index=MongoDBDAO.findOne(InstanceConstants.PARAMETER_COLL_NAME, Index.class, DBQuery.in("typeCode", "index-illumina-sequencing","index-nanopore-sequencing","index-pacbio-sequencing").is("code", tag));
+    	if(index != null){
+    		sequence = index.sequence;
+    		tagRealSize = index.sequence.length();
+    	}else{
+    		Logger.debug("Can't find index "+tag+" in collection "+InstanceConstants.PARAMETER_COLL_NAME);
+    	}
+    }
+    if($content.properties.containsKey("tagCategory")) tagCategory=$content.properties.get("tagCategory").value.toString();
+
+	if($content.properties.containsKey("libProcessTypeCode")){
+		libProcessTypeCode=$content.properties.get("libProcessTypeCode").value.toString();
+	}
+
+	if($container.fromTransformationTypeCodes!=null && $container.fromTransformationTypeCodes.size()>0)
+		fromCode=$container.fromTransformationTypeCodes.iterator().next();
+	
+
+	ContentInfo contentInfo= new ContentInfo("1",$container.code,tag,tagCategory,secondaryTag, secondaryTagCategory,$content.sampleCode, tagRealSize, sequence, secondaryTagRealSize, secondarySequence, concatSequence,libProcessTypeCode,fromCode,$container.fromPurificationTypeCode,$container.fromTransfertTypeCode);
+	Logger.debug("Content Info Position : "+$atomicTransfert.line+ ", Sample Code :"+$content.sampleCode + ", Container Code :"+$container.code+", Tag :"+tag +", tagCategory :"+tagCategory+", size :"+tagRealSize+", sequence :"+sequence + ",libProcessTypeCode :"+libProcessTypeCode+", fromExperimentTypeCode :"+fromCode);
+    $ATMInfo.getContentInfos().add(contentInfo);
+	insert(contentInfo);
+	
+    end	

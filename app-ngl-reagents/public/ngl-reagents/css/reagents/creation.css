@@ -1,0 +1,36 @@
+.saveAndEditButtons{
+	margin-top: 15px;
+	margin-bottom: 7.5px;
+	margin-left: 7.5px
+}
+.toolbar{
+	margin-bottom: 20px
+}
+
+.active-checkbox{
+	margin-top:8px;
+}
+
+.declaration-title{
+	margin-right:20px;
+}
+
+/*overriding bootstrap https://github.com/twbs/bootstrap/issues/518 
+To set the good size and position of the close button in a nav-tab
+*/
+.nav-tabs > li .close {
+ 	margin: -2px 0 0 10px;
+	font-size: 15px;
+}
+
+.box-error{
+	color:red;
+}
+
+.help-block{
+	min-height: 0px;
+}
+
+.bord{
+	border:1px dotted black;
+}

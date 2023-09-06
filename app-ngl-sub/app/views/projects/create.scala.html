@@ -1,0 +1,83 @@
+@this()
+@()
+@import views.html.helper._
+@user            = @{ fr.cea.ig.authentication.Authentication.getUser() }
+
+			   
+@form() = {
+		<!-- <div class="row" >
+			<div class="col-xs-10 col-sm-10 col-md-10 col-lg-10">
+			  <div class="panel panel-default">
+			  <div class="panel-heading">			  	
+				  <h2 class="panel-title">Study</h2>		  	
+			  </div>
+			   <div class="panel-body"> -->
+	@columnSearchForm{
+		@**
+	    @formGroup{
+			<textarea type="text" class="form-control"  rows="1" ng-model="form.name" placeholder='@Messages("create.placeholder.umbrellaName")' required></textarea>		
+		}
+		**@
+		@formGroup{
+			<textarea type="text" class="form-control"  rows="1" ng-model="form.title" placeholder='@Messages("create.placeholder.umbrellaTitle")' required></textarea>		
+		}
+
+		@formGroup{
+			<textarea class="form-control" rows="3" ng-model="form.description" placeholder='@Messages("create.placeholder.umbrellaDescription")' required></textarea>
+		}
+		
+		@formGroup{
+			<textarea class="form-control" rows="3" ng-model="form.stringChildProjects" placeholder='@Messages("create.placeholder.stringUmbrellaChild")' ></textarea>
+		}
+		@formGroup{
+			<textarea class="form-control" rows="3" ng-model="form.strIdsPubmed" placeholder='@Messages("create.placeholder.strIdsPubmed")' ></textarea>
+		}
+		@formGroup{
+			<textarea class="form-control" rows="3" ng-model="form.strTaxonId" placeholder='@Messages("create.placeholder.strTaxonId")' ></textarea>
+		}
+	}
+
+	
+}
+	 </div>
+	</div>
+	</div>
+	</div> 
+<div class="row">
+<div class="col-md-12 col-lg-12"  messages="messages"></div>
+</div>
+@** XXXXXXXX CREATE PROJECT XXXXXXXXXXXXXX **@
+
+<!--La directive ng-init est appel� au chargement de la page et dans le controlleur javascript on definit la methode
+qui permet d'installer $user dans le scope-->
+<span ng-init="setUserInScope('@user')"></span>
+
+<div class="row"> 
+	<div class="col-md-12 col-lg-12">
+		<div dt-form>	
+			<div class="tab-content">
+				<div class="tab-pane active" id="filters">
+					<form name="umbrellaForm" class="well well-small">
+						<div class="row">
+						@form
+						@columnSearchForm{
+							@formGroup{
+							<div class="btn-toolbar">
+								<button type="submit" title='@Messages("button.save")' ng-disabled="projectForm.$invalid" ng-click="save()" data-toggle="tooltip" class="btn btn-primary" >
+									<i class="fa fa-save"></i>
+								</button>
+								<button title='@Messages("button.reset")' ng-click="reset()" data-toggle="tooltip"  class="btn btn-default">
+									<i class="fa fa-undo"></i>
+								</button>
+															 	
+							</div>	
+							}	
+						}
+						</div>		
+					</form>	
+				</div>
+			</div>
+		</div>
+	</div>
+</div> 
+

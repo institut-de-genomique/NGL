@@ -1,0 +1,102 @@
+@()
+@import views.html.helper._
+
+@column()(value: Html) = {
+	<div class="col-md-4 col-lg-4 col-xs-4">
+		@value
+	</div>
+}
+
+<form class="form-horizontal">
+	<div class="row">
+		@column(){
+			@columnLabelValue(Messages("reagent.receptions.table.code")){
+				<p class="form-control-static" ng-bind="reagentReception.code" />
+			}
+            @columnLabelValue(Messages("reagent.receptions.table.catalog.name")){
+				<p class="form-control-static" ng-bind="reagentReception.catalog.name" />
+			}
+            @columnLabelValue(Messages("reagent.receptions.table.catalogRefCode")){
+				<p class="form-control-static" ng-bind="reagentReception.catalogRefCode" />
+			}
+            @columnLabelValue(Messages("reagent.receptions.table.batchNumber")){
+				<p class="form-control-static" ng-bind="reagentReception.batchNumber" />
+			}
+            @columnLabelValue(Messages("reagent.receptions.table.fromProviderId")){
+				<p class="form-control-static" ng-bind="reagentReception.fromProviderId" />
+			}
+            @columnLabelValue(Messages("reagent.receptions.table.expirationDate")){
+				<div ng-switch on="isEditMode()">
+					<p ng-switch-when="false"  class="form-control-static" ng-bind="reagentReception.expirationDate|date:'@Messages("date.format")'" />	
+					<input ng-switch-when="true" class="form-control" udt-html-filter="date" type="text" ng-model="reagentReception.expirationDate" placeholder="@Messages("date.format.french")">
+				</div>
+			}
+			@columnLabelValue(Messages("reagent.receptions.table.workLabel")){
+				<div ng-switch on="isEditMode()">
+					<p ng-switch-when="false"  class="form-control-static" ng-bind="reagentReception.workLabel" />	
+					<input ng-switch-when="true" class="form-control" type="text" ng-model="reagentReception.workLabel">
+				</div>
+			}
+			@columnLabelValue(Messages("reagent.receptions.table.comments")){
+				<p class="form-control-static" ng-bind-html="convertToBr(reagentReception.comments)" />	
+				<div ng-switch on="isEditMode()">
+					<input ng-switch-when="true" class="form-control" type="text" ng-model="reagentReception.newComment">
+				</div>
+			}
+		}
+		
+		@column(){
+            @columnLabelValue(Messages("reagent.receptions.table.receptionDate")){
+				<p class="form-control-static" ng-bind="reagentReception.receptionDate|date:'@Messages("date.format")'" />
+			}
+            @columnLabelValue(Messages("reagent.receptions.table.catalogKit.name")){
+				<p class="form-control-static" ng-bind="reagentReception.catalogKit.name" />
+			}
+            @columnLabelValue(Messages("reagent.receptions.table.catalogKit.catalogRefCode")){
+				<p class="form-control-static" ng-bind="reagentReception.catalogKit.catalogRefCode" />
+			}
+            @columnLabelValue(Messages("reagent.receptions.table.catalogKit.experimentTypeCodes")){
+				<p class="form-control-static">
+					{{ reagentReception.catalogKit.experimentTypeCodes|codes:'type'|arrayToString }}
+				</p>
+			}
+            @columnLabelValue(Messages("reagent.receptions.table.providerCode")){
+				<p class="form-control-static" ng-bind="reagentReception.providerCode" />
+			}
+            @columnLabelValue(Messages("reagent.receptions.table.storageConditions")){
+				<p class="form-control-static" ng-bind="getStorageConditions(reagentReception)" />
+			}
+            @columnLabelValue(Messages("reagent.receptions.table.category")){
+				<p class="form-control-static" ng-bind="reagentReception.category" />
+			}
+			@columnLabelValue(Messages("reagent.receptions.import.type.code")){
+				<p class="form-control-static" ng-bind="importTypeLabel(reagentReception.importTypeCode)" />
+			}
+			@columnLabelValue(Messages("reagent.receptions.type.code")){
+				<p class="form-control-static" ng-bind="typeLabel(reagentReception.typeCode)" />
+			}
+		}
+		
+		@column(){
+            @columnLabelValue(Messages("reagent.receptions.table.traceInformation.createUser")){
+				<p class="form-control-static" ng-bind="reagentReception.traceInformation.createUser" />
+			}
+            @columnLabelValue(Messages("reagent.receptions.table.traceInformation.creationDate")){
+				<p class="form-control-static" ng-bind="reagentReception.traceInformation.creationDate|date:'@Messages("date.format")'" />
+			}
+            @columnLabelValue(Messages("reagent.receptions.table.startUseDate")){
+				<div ng-switch on="isEditMode()">
+					<p ng-switch-when="false"  class="form-control-static" ng-bind="reagentReception.startUseDate|date:'@Messages("date.format")'" />	
+					<input ng-switch-when="true" class="form-control" udt-html-filter="date" type="text" ng-model="reagentReception.startUseDate" placeholder="@Messages("date.format.french")">
+				</div>
+			}
+            @columnLabelValue(Messages("reagent.receptions.table.endUseDate")){
+				<div ng-switch on="isEditMode()">
+					<p ng-switch-when="false"  class="form-control-static" ng-bind="reagentReception.endUseDate|date:'@Messages("date.format")'" />	
+					<input ng-switch-when="true" class="form-control" udt-html-filter="date" type="text" ng-model="reagentReception.endUseDate" placeholder="@Messages("date.format.french")">
+				</div>
+			}
+		}
+	</div>
+
+</form>

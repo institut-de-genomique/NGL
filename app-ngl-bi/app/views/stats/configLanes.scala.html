@@ -1,0 +1,21 @@
+@this()
+
+@import views.html.helper._
+
+<div class="row"> 
+<div class="col-md-12 col-lg-12" >
+<form class="well well-small">
+		<div class="row">
+		
+		@columnSearchForm{
+			@formGroup{
+					<div  class="form-control" bt-select ng-model="statsConfigService.treatmentType" placeholder="@Messages("search.placeholder.treatment")" bt-options="trt.names as trt.code for trt in statsConfigService.lists.getTreatmentTypes()" ng-change="statsConfigService.refreshProperty()"></div>	
+					<div  class="form-control" bt-select ng-model="statsConfigService.property" placeholder="@Messages("search.placeholder.property")" bt-options="prop.code as prop.code for prop in statsConfigService.properties"></div>	
+							
+			}
+		}		
+		
+		</div>
+	</form>	
+</div>
+</div>

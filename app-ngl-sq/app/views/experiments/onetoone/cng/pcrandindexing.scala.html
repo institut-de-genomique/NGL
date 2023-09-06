@@ -1,0 +1,92 @@
+@()
+<!-- 01/08/2017 duplication depuis libraryprep.scala.html
+     2 cas * Hiseq2000/4000 => import fichier
+	       * X5 => selection 1 colonne de départ pour plaque predefinie
+-->
+<div class="col-md-12 col-lg-12" ng-controller="PcrAndIndexingCtrl">
+  <form class="form-inline margin-bottom-7" role="form">
+  	  <!-- premiere ligne -->
+      <div class="row margin-bottom-7">
+         <div class="form-group col-lg-5">          
+              <div ng-switch on="mainService.isEditMode()"> 
+              <div ng-switch-when="false">   
+                   <label for="plateCode" class="control-label">@Messages("experiments.outputContainerSupportCode")</label>
+                   <span class="form-control-static" ng-bind="outputContainerSupport.code"></span>    
+               </div>                           
+               <div ng-switch-when="true">
+                   <label for="plateCode"  class="control-label">@Messages("experiments.outputContainerSupportCode")</label>
+                   <input class="form-control input-sm" type="text" id="plateCode"
+									                    title=@Messages("experiments.outputContainerSupportCode")
+			  							                ng-model="outputContainerSupport.code" />	
+			  </div>
+			  </div>   
+	     </div> 
+         <div class="form-group col-lg-6">
+              <div ng-switch on="mainService.isEditMode()"> 
+              <div ng-switch-when="false">   
+                   <label for="plateStorage" class="control-label">@Messages("experiments.outputContainerSupportStorageCode")</label>
+                   <span class="form-control-static" ng-bind="outputContainerSupport.storageCode"></span> 
+              </div>
+              <div ng-switch-when="true">
+                  <label for="plateStorage" class="control-label">@Messages("experiments.outputContainerSupportStorageCode")</label>
+                  <input class="form-control input-sm" type="text" id="plateStorage" style="width:65%"
+									                   title=@Messages("experiments.outputContainerSupportStorageCode") 
+			 						                   ng-model="outputContainerSupport.storageCode" />	
+			  </div>
+			  </div>   
+	     </div>
+	  </div>  
+	  <!-- 2eme ligne -->
+	  <div class="row margin-bottom-7"><!-- margin bottom pas pris en compte!!! -->
+         <div class="form-group col-lg-5"  ng-show="button.isShow()">
+             <label for="importFile" class="control-label">Fichier Workbook</label>
+             <div class="input-group" style="width:50%">
+                <input class="form-control input-sm" type="file" 
+                									 base64-file="file"
+                									 id="importFile"  
+                									 />
+                <span class="input-group-btn">
+                     <button class="btn btn-primary" ng-click="button.click()" 
+                                                     ng-disabled="button.isFileSet()" 
+                                                     title="@Messages("button.import.file")"><i class="fa fa-upload"></i>
+                     </button>     
+                </span> 
+            </div>                         				  
+          </div>
+          <div class="form-group col-lg-6"  ng-show="selectColOrPlate.isShow()">
+             <label class="control-label">@Messages("experiments.select.startColumnTagPlate")</label>
+             <!--  manquait class="form-control" -->
+             <select class="form-control" ng-model="tagPlate" 
+                                          ng-options="plate.name for plate in plates"
+                                          ng-change="selectColOrPlate.select()">
+             </select> 
+             <select class="form-control" ng-model="tagPlateColumn" 
+                                          ng-options="column.name for column in columns"
+                                          ng-change="selectColOrPlate.select()" >
+             </select>
+        </div> 
+    </div>
+    
+    <!--NGL-1350 3eme ligne // Masquer cette fonctionnalité pour l'instant
+        15/10/2019 correction pour le jour ou sera demandee=> ajout ng-change
+    <div class="row margin-bottom-7" ng-show="selectGroup.isShow()">
+        <div class="form-group col-lg-5"  >
+          <label for="selectTagGroup" control-label">@Messages("experiments.select.tagGroup")</label>
+          --  manquait class="form-control" --
+          <select class="form-control" ng-model="selectedTagGroup" 
+                                       ng-options="group.name for group in getTagGroups()"
+                                       ng-change="selectGroup.select(selectedTagGroup)"
+                                       id="selectTagGroup">
+          </select>
+        </div>
+    </div>
+    -->
+  </form>	
+
+  <!-- NGL-2014 ajout onglets -->	
+  <div class="row margin-bottom-7">
+	<div class="col-md-12 col-lg-12" >
+  		@views.html.experiments.onetoone.defaults.partials.udtAndPlateDesign()
+  	</div>
+  </div>
+</div>

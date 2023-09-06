@@ -1,0 +1,395 @@
+//created on: Aug 6, 2014
+//Rules for validation
+package rules
+
+//Règles revue selon ticket NGL-2270 : Gestion double tag.
+// Les règles doivent permettre le pool d'un simple tag et/ou d'un double tag
+
+//tagWithSecondary : list all tag name with secondary tag in current ATM
+//secondaryTag : check if exist a secondaryTag in current ATM
+//primaryTag : check if exist a primaryTag in current ATM
+declare ATMInfo	
+	position : String
+	contentInfos : List 
+	tagWithSecondary : List
+	secondaryTag : Boolean
+	primaryTag : Boolean
+	expectedPrimaryTagsList : List
+	expectedPrimaryTagsSet : Set
+end
+
+declare ContentInfo
+	position : String
+	containerCode : String 
+	tag : String 
+	tagCategory : String 
+	secondaryTag : String
+	secondaryTagCategory : String
+	sampleCode : String
+	tagRealSize : Integer
+	sequence : String
+	secondaryTagRealSize : Integer
+	secondarySequence : String
+	concatSequence : String
+	libProcessTypeCode :String
+	fromTransformationTypeCode : String
+	fromPurificationTypeCode : String
+	fromTransfertTypeCode : String
+end
+
+rule "Debug validations"
+	@nglSQ( validations )
+	dialect "java"
+	salience 1000
+	no-loop
+    when
+	eval(true)
+    then
+		Logger.debug("Rules annotation @nglSQ(validations)");    
+	end
+
+rule "Init object ATMInfo in WM"
+	@nglSQ( validations )
+	dialect "java"
+	salience 800
+	no-loop
+    when
+    Experiment($typeCode : typeCode, $typeCode!="opgen-depot")
+    $atomicTransfert: ManyToOneContainer($position : viewIndex.toString())
+    not ATMInfo($position==position)
+    then
+    
+    ATMInfo ATMInfo = new ATMInfo($position,new ArrayList(), new ArrayList(),false,false, new ArrayList(), new HashSet());
+    Logger.debug("Lane Info Position :"+$position);
+    insert(ATMInfo);
+    
+	end
+
+
+
+
+//Récupération de toutes les informations des contents d'une ATM afin de pouvoir les comparer et de s'assurer de la cohérence du pool
+//Il est nécessaire d'initialiser à vide tous les paramètres afin d'identifier les cas simple tag et double tag 
+rule "Init objects ContentInfo in WM"
+		@nglSQ( validations )
+	dialect "java"
+	salience 600
+	no-loop
+    when
+    $atomicTransfert: ManyToOneContainer($position:viewIndex.toString(),$inputContainers : inputContainerUseds, $inputContainers.size()!=0)
+	$container : InputContainerUsed( $contents : contents,$contents!=null) from $inputContainers
+	$content : Content() from $contents	 
+	$ATMInfo : ATMInfo($position==position)
+	$contextValidation:ContextValidation()
+    then
+   
+    String tag="VIDE";
+    String secondaryTag="VIDE";
+    String libProcessTypeCode="VIDE";
+    String tagCategory="VIDE";
+    String secondaryTagCategory="VIDE";
+    Integer tagRealSize = 0;
+    String sequence = "VIDE";
+    Integer secondaryTagRealSize = 0;
+    String secondarySequence="VIDE";
+    String concatSequence="VIDE";
+    String fromCode="VIDE";
+    
+    //Check secondaryTag info
+	if($content.properties.containsKey("secondaryTag")){
+		secondaryTag=$content.properties.get("secondaryTag").value.toString();
+		Index secondaryIndex=MongoDBDAO.findOne(InstanceConstants.PARAMETER_COLL_NAME, Index.class, DBQuery.in("typeCode", "index-illumina-sequencing","index-nanopore-sequencing","index-mgi-sequencing","index-pacbio-sequencing").is("code", secondaryTag));
+		if(secondaryIndex != null){
+    		secondarySequence = secondaryIndex.sequence;
+    		concatSequence=secondarySequence;
+    		secondaryTagRealSize = secondaryIndex.sequence.length();
+    		$ATMInfo.setSecondaryTag(true);
+    	}else{
+    		Logger.debug("Can't find index "+secondaryTag+" in collection "+InstanceConstants.PARAMETER_COLL_NAME);
+    		$contextValidation.addErrors("Position["+$position+"]",	"error.validationexp.tagNotExist",secondaryTag, $container.getCode());
+    	}
+	}
+	if($content.properties.containsKey("secondaryTagCategory")) secondaryTagCategory=$content.properties.get("secondaryTagCategory").value.toString();
+	
+    
+    if($content.properties.containsKey("tag")){
+    	tag=$content.properties.get("tag").value.toString();
+    	Index index=MongoDBDAO.findOne(InstanceConstants.PARAMETER_COLL_NAME, Index.class, DBQuery.in("typeCode", "index-illumina-sequencing","index-nanopore-sequencing","index-mgi-sequencing","index-pacbio-sequencing").is("code", tag));
+    	if(index != null){
+    		sequence = index.sequence;
+    		tagRealSize = index.sequence.length();
+    		if(concatSequence.equals("VIDE")) 
+    			concatSequence=sequence;
+    		else 
+    			concatSequence+=sequence;
+    		$ATMInfo.setPrimaryTag(true);
+    	}else{
+    		Logger.debug("Can't find index "+tag+" in collection "+InstanceConstants.PARAMETER_COLL_NAME);
+    		$contextValidation.addErrors("Position["+$position+"]",	"error.validationexp.tagNotExist",tag, $container.getCode());
+    	}
+    }
+    if($content.properties.containsKey("tagCategory")) tagCategory=$content.properties.get("tagCategory").value.toString();
+
+	
+	if(!tag.equals("VIDE") && !secondaryTag.equals("VIDE")) $ATMInfo.getTagWithSecondary().add((String)sequence);
+	
+	if($content.properties.containsKey("libProcessTypeCode")){
+		libProcessTypeCode=$content.properties.get("libProcessTypeCode").value.toString();
+	}
+
+	if($container.fromTransformationTypeCodes!=null && $container.fromTransformationTypeCodes.size()>0)
+		fromCode=$container.fromTransformationTypeCodes.iterator().next();
+	
+	if($content.properties.containsKey("expectedPrimaryTags")){
+		String[] tabExpectedPrimaryTags = $content.properties.get("expectedPrimaryTags").value.toString().split(",");
+		for(int i=0; i<tabExpectedPrimaryTags.length; i++){
+			if(!tabExpectedPrimaryTags[i].equals("")){
+				$ATMInfo.getExpectedPrimaryTagsList().add(tabExpectedPrimaryTags[i]);
+				$ATMInfo.getExpectedPrimaryTagsSet().add(tabExpectedPrimaryTags[i]);
+			}
+		}
+	}
+
+	ContentInfo contentInfo= new ContentInfo($atomicTransfert.viewIndex.toString(),$container.code,tag,tagCategory,secondaryTag, secondaryTagCategory, $content.sampleCode, tagRealSize, sequence, secondaryTagRealSize, secondarySequence, concatSequence, libProcessTypeCode,fromCode,$container.fromPurificationTypeCode,$container.fromTransfertTypeCode);
+	Logger.debug("Content Info Position : "+$atomicTransfert.viewIndex.toString()+ ", Sample Code :"+$content.sampleCode + ", Container Code :"+$container.code+", Tag :"+tag +", tagCategory :"+tagCategory+", secondaryTag :"+secondaryTag+", secondaryTagCategory :"+secondaryTagCategory+", size :"+tagRealSize+", sequence :"+sequence + ", secondaryTagRealSize : "+secondaryTagRealSize+", secondarySequence : "+secondarySequence+", concatSequence : "+concatSequence+", libProcessTypeCode :"+libProcessTypeCode+", fromTransformationTypeCode :"+fromCode);
+    $ATMInfo.getContentInfos().add(contentInfo);
+    Logger.debug("ATM info position : "+$ATMInfo.getPosition()+", contentInfos size : "+$ATMInfo.getContentInfos().size()+", secondaryTag : "+$ATMInfo.getSecondaryTag()+", primaryTag : "+ $ATMInfo.getPrimaryTag()+", tagWithSecondary : "+$ATMInfo.getTagWithSecondary().size());
+	insert(contentInfo);
+	modify($ATMInfo){};
+    end
+
+//Règle qui vérifie qu'il n'y ai pas deux fois le même container sur la même lane
+//$containerCodes : Set(empty==false, size >= 1) from accumulate( InputContainerUsed($containerCode:code) from $inputContainers,
+//	                         init( HashSet result = new HashSet(); HashSet containers=new HashSet(); ),
+//                              action( if(!containers.contains($containerCode)){ containers.add($containerCode); } 
+//                              				else if(!result.contains($containerCode)) { result.add($containerCode);} ),
+//                            reverse( result.remove($containerCode); ),
+//                          result( result) )
+ //$containerDuplicate : String() from $containerCodes
+ rule "Container duplicate in Lane"
+	@nglSQ( validations )
+	dialect "java"
+	salience 500
+	no-loop
+    when
+    	  ATMInfo($position:position)
+    	  ManyToOneContainer($position==viewIndex.toString(),$inputContainers : inputContainerUseds)
+    	  $icu1 : InputContainerUsed($containerCode:code) from $inputContainers
+    	  $icu2 : InputContainerUsed(this != $icu1, code == $containerCode) from $inputContainers
+    	 $contextValidation:ContextValidation()
+    then
+    	Logger.debug("Error duplicate lane : "+$icu1.getCode());
+ 		//$contextValidation.addErrors("Position["+$position+"]",	"error.validationexp.duplicateinputcontainers",$containerDuplicate, $position);
+ 		$contextValidation.addErrors("Position["+$position+"]",	"error.validationexp.duplicateinputcontainers",$icu1.getCode(), $position);
+    end
+
+
+//Si pas de tag ni de tag secondaire alors les samples doivent etre identiques
+rule "For Tag vide same sample"
+	@nglSQ (validations )
+	dialect "java"
+	salience 400
+	no-loop
+    when
+    	   $contentInfo1 : ContentInfo($tag :tag, $tag=="VIDE",$secondaryTag :secondaryTag, $secondaryTag=="VIDE", $sampleCode :sampleCode,$position:position,$containerCode1:containerCode)
+           $contentInfo2 : ContentInfo(this != $contentInfo1, tag == $tag, secondaryTag == $secondaryTag, position==$position, sampleCode!=$sampleCode,$containerCode2:containerCode)
+           $contextValidation:ContextValidation()
+    then
+    	List<String> containers=new ArrayList<String>();
+    	containers.add($containerCode1);
+    	containers.add($containerCode2);
+    	Collections.sort(containers);
+    	Logger.debug("Tag error "+$contentInfo1 + " position "+$position);
+    	$contextValidation.addErrors("Position["+$position+"]",	"error.validationexp.sameSample",containers.get(0),containers.get(1));    	
+    end
+
+//Si un tag est déclaré alors la présence de tag est obligatoire pour tous les content qu'il soit simple ou double
+rule "No Tag with Tag "
+	@nglSQ (validations )
+	dialect "java"
+	salience 400
+	no-loop
+    when
+    	   $contentInfo1 : ContentInfo($tag :tag, $tag=="VIDE",$sampleCode :sampleCode,$position:position,$containerCode1:containerCode)
+           $contentInfo2 : ContentInfo(this != $contentInfo1, tag != $tag, position==$position, $containerCode2:containerCode)
+           $contextValidation:ContextValidation()
+    then
+    	Logger.debug("Position["+$position+"] No Tag with Tag");
+    	$contextValidation.addErrors("Position["+$position+"]",	"error.validationexp.noTagSampleWithTagSample");    	
+    end
+
+//Si un tag secondaire est déclaré sans tag primaire alors tous les content ne présentant pas de tag primaire doivent avoir un tag secondaire    
+rule "No secondary Tag with secondary Tag "
+	@nglSQ (validations )
+	dialect "java"
+	salience 400
+	no-loop
+    when
+    	   $contentInfo1 : ContentInfo($tag :tag, $tag=="VIDE", $secondaryTag:secondaryTag, $secondaryTag=="VIDE", $sampleCode :sampleCode,$position:position,$containerCode1:containerCode)
+           $contentInfo2 : ContentInfo(this != $contentInfo1, tag == $tag, secondaryTag != $secondaryTag, position==$position, $containerCode2:containerCode)
+           $contextValidation:ContextValidation()
+    then
+    	Logger.debug("Position["+$position+"] No secondary Tag with secondary Tag");
+    	$contextValidation.addErrors("Position["+$position+"]",	"error.validationexp.noSecondaryTagSampleWithSecondaryTagSample");    	
+    end
+
+//Si un tag donné est déclaré avec un tag secondaire alors tous les tag de code identique doivent avoir un tag secondaire
+rule "Check all same tag with secondary tag"
+	@nglSQ (validations )
+	dialect "java"
+	salience 301
+	no-loop
+    when
+    	   $atm : ATMInfo($position:position,$tagWithSecondary:tagWithSecondary)
+    	   $seqTag : String() from $tagWithSecondary
+    	   $contentInfo : ContentInfo(sequence==$seqTag, $secondaryTag:secondaryTag, $secondaryTag=="VIDE",position==$position)
+    	   $contextValidation:ContextValidation()
+    then
+    	Logger.debug("Position["+$position+"] No secondary tag for same tag");
+    	Logger.debug("Sequence "+$tagWithSecondary.size());
+    	$contextValidation.addErrors("Position["+$position+"]",	"error.validationexp.noSecondaryTagForSameTag");    	
+    end
+
+//Ne pas permettre d'avoir un mélange de category de tag sur le tag primaire
+rule "Many TagCategory on same position"
+	@nglSQ (validations )
+	dialect "java"
+	salience 300
+	no-loop
+when
+	 ATMInfo($position:position)
+     $tagCategories : Set(empty==false, size > 1) from accumulate( ContentInfo ( tag!="VIDE",$tagCategory : tagCategory,$position==position),
+                        collectSet( $tagCategory) )
+	  $contextValidation:ContextValidation($errors : errors)
+then
+	Logger.debug("TagCategory error "+ $tagCategories.size()+" position "+$position);
+    $contextValidation.addErrors("Position["+$position+"]",	"error.validationexp.manytagCategory", $position);
+end
+
+//Ne pas permettre d'avoir un mélange de categorie de tag secondaire pour tous les contents qui ne présentent que le tag secondaire (pas de tag primaire)
+rule "Many TagCategory on same position for secondary tag"
+	@nglSQ (validations )
+	dialect "java"
+	salience 300
+	no-loop
+when
+	 ATMInfo($position:position)
+     $tagCategories : Set(empty==false, size > 1) from accumulate( ContentInfo ( tag=="VIDE", secondaryTag!="VIDE",$secondaryTagCategory : secondaryTagCategory,$position==position),
+                        collectSet( $secondaryTagCategory) )
+	  $contextValidation:ContextValidation($errors : errors)
+then
+	
+	Logger.debug("Many SecondaryTagCategory error "+ $tagCategories.size()+" position "+$position);
+    $contextValidation.addErrors("Position["+$position+"]",	"error.validationexp.manySecondaryTagCategory", $position);
+end
+
+//Ne pas autoriser de taille différente de tag uniquement pour les tags primaires
+rule "Same tag size"
+	@nglSQ (validations )
+	dialect "java"
+	salience 301
+	no-loop
+when
+	 ATMInfo($position:position)
+     $tagRealSizes : Set(empty==false, size > 1) from accumulate( ContentInfo ( tag!="VIDE", $tagRealSize : tagRealSize, $position==position),
+                        collectSet( $tagRealSize) )
+	  $contextValidation:ContextValidation($errors : errors)
+then
+	Logger.debug("Tag squence error "+ $tagRealSizes+" position "+$position);
+    $contextValidation.addErrors("Position["+$position+"]",	"error.validationexp.manytagSize", $position);
+end
+
+//Comparaison concatSequence pour prise en compte des tags secondaires 
+rule "No Same concat sequence "
+	@nglSQ (validations )
+	dialect "java"
+	salience 302
+	no-loop
+when
+	 ATMInfo($position:position, $contentInfos:contentInfos)
+     $concatSequences : Set(empty==false, size != $contentInfos.size()) from accumulate( ContentInfo ( $concatSequence : concatSequence, $concatSequence!="VIDE", $position==position),
+                        collectSet( $concatSequence) )
+      $concatSeq : String() from $concatSequences
+      $results : List(size>1) from accumulate( ContentInfo($s:concatSequence, $tag:tag, $secondaryTag:secondaryTag, $concatSeq==$s) from $contentInfos, collectList($secondaryTag+"-"+$tag+":"+$s))
+	  $contextValidation:ContextValidation($errors : errors)
+then
+	Logger.debug("Tag sequence error "+ $concatSequences+" and "+$contentInfos.size()+" position "+$position);
+    $contextValidation.addErrors("Position["+$position+"]",	"error.validationexp.sameTagSequence", $position, $results);
+end
+
+//S'assurer que le libProcessTypeCode est le même pour des pools sans tag ni tag secondaire
+rule "Same liprocessTypeCode for tag VIDE"
+	@nglSQ (validations )
+	dialect "java"
+	salience 220
+	no-loop
+    when
+    	   $contentInfo1 : ContentInfo($tag :tag, $tag=="VIDE",$secondaryTag:secondaryTag,$secondaryTag=="VIDE",$sampleCode :sampleCode,$position:position,$containerCode1:containerCode, $libProcessTypeCode :libProcessTypeCode, $libProcessTypeCode!="VIDE", fromPurificationTypeCode!= "rrna-depletion")
+           $contentInfo2 : ContentInfo(this != $contentInfo1, tag == $tag, secondaryTag == $secondaryTag, position==$position, sampleCode==$sampleCode, $libProcessTypeCode !=libProcessTypeCode, $libProcessTypeCode2:libProcessTypeCode, $containerCode2:containerCode, fromPurificationTypeCode!= "rrna-depletion")
+           $contextValidation:ContextValidation()
+    then
+    	Logger.debug("LibProcessTypeCode error "+$contentInfo1 + " position "+$position);
+    	List<String> containers=new ArrayList();
+    	containers.add($containerCode1);
+    	containers.add($containerCode2);
+    	Collections.sort(containers);
+    	List<String> libProcessTypeCodes=new ArrayList<String>();
+    	libProcessTypeCodes.add($libProcessTypeCode);
+    	libProcessTypeCodes.add($libProcessTypeCode2);
+    	Collections.sort(libProcessTypeCodes);
+    	$contextValidation.addErrors("Position["+$position+"]",	"error.validationexp.samelibprocesstypecode",containers.get(0),containers.get(1), libProcessTypeCodes.get(0),libProcessTypeCodes.get(1));    	
+    end
+
+//S'assurer que le fromTransformationTypeCodes est le même pour des pools sans tag ni tag secondaire    
+rule "Same fromTransformationTypeCodes for tag VIDE and same libprocesstypeCode"
+	@nglSQ (validations )
+	dialect "java"
+	salience 210
+	no-loop
+    when
+    	   $contentInfo1 : ContentInfo($tag :tag, $tag=="VIDE",$secondaryTag:secondaryTag,$secondaryTag=="VIDE",$sampleCode :sampleCode,$position:position,$containerCode1:containerCode, $fromTransformationTypeCode:fromTransformationTypeCode,$libProcessTypeCode :libProcessTypeCode)
+           $contentInfo2 : ContentInfo(this != $contentInfo1, tag == $tag, secondaryTag == $secondaryTag, position==$position, sampleCode==$sampleCode, $libProcessTypeCode ==libProcessTypeCode, $fromTransformationTypeCode!=fromTransformationTypeCode, $containerCode2:containerCode,$fromTransformationTypeCode2:fromTransformationTypeCode)
+           $contextValidation:ContextValidation()
+    then
+    	Logger.debug("LibProcessTypeCode error "+$contentInfo1 + " position "+$position);
+    	List<String> containers=new ArrayList<String>();
+    	containers.add($containerCode1);
+    	containers.add($containerCode2);
+    	Collections.sort(containers);
+    	List<String> fromTransformationTypeCode=new ArrayList<String>();
+    	fromTransformationTypeCode.add($fromTransformationTypeCode);
+    	fromTransformationTypeCode.add($fromTransformationTypeCode2);
+    	Collections.sort(fromTransformationTypeCode);
+    	$contextValidation.addErrors("Position["+$position+"]",	"error.validationexp.samefromexperimenttypecode", containers.get(0),containers.get(1),fromTransformationTypeCode.get(0),fromTransformationTypeCode.get(1));    	
+    end
+
+//Regle specifique prepFC et prepFC ordonnee : ne pas deposer un container avec un tag secondaire sans tag primaire 
+ rule "No tag with secondary tag for prep FC"
+	@nglSQ (validations )
+	dialect "java"
+	salience 200
+	no-loop
+    when
+    	 Experiment(typeCode=="prepa-flowcell" || typeCode=="prepa-fc-ordered")
+    	 ATMInfo($position:position)
+    	 ContentInfo($tag :tag, $tag=="VIDE",$secondaryTag:secondaryTag,$secondaryTag!="VIDE",position==$position)
+    	 $contextValidation:ContextValidation()
+    then
+    	Logger.debug("No tag with secondary tag for prep FC position "+$position);
+    	$contextValidation.addErrors("Position["+$position+"]",	"error.validationexp.noTagForSecondaryTag", $position);
+    end
+    
+// Regle specifique pool MGI : verifie unicite des index sur un ATM des index dans expectedPrimaryTags
+rule "Unique index expectedPrimaryTags in MGI"
+	@nglSQ (validations )
+	dialect "java"
+	salience 200
+	no-loop
+	when
+		Experiment(typeCode=="mgi-pool")
+		ATMInfo($position:position, $expectedPrimaryTagsList : expectedPrimaryTagsList, $expectedPrimaryTagsSet : expectedPrimaryTagsSet, $expectedPrimaryTagsSet.size()!=$expectedPrimaryTagsList.size())
+		$contextValidation:ContextValidation()
+	then
+		Logger.debug("No unique index in expectedPrimaryTag "+$position);
+		$contextValidation.addErrors("Position["+$position+"]",	"error.validationexp.noUniqueIndexInExpectedPrimaryTag");
+end

@@ -1,0 +1,53 @@
+@()
+<div class="row">
+	<div class="col-md-10 col-lg-10 col-xs-12">
+		<table class="table table-condensed table-hover table-bordered">
+	 		<thead>
+				<tr>
+					<th>@Messages("readsets.treatments.exome.nbReads")</th>
+					<th>@Messages("readsets.treatments.exome.mappedReads")</th>
+					<th>@Messages("readsets.treatments.exome.mappedReadsPercent")</th>
+					<th>@Messages("readsets.treatments.exome.pairingPercent")</th>
+					<th>@Messages("readsets.treatments.exome.duplicatedReads")</th>
+					<th>@Messages("readsets.treatments.exome.duplicatedReadsPercent")</th>
+					<th>@Messages("readsets.treatments.exome.sizeRegionsTiled")</th>		
+					<th>@Messages("readsets.treatments.exome.targetPercent")</th>
+					<th>@Messages("readsets.treatments.exome.percentNT30X")</th>	
+					<th>@Messages("readsets.treatments.exome.percentNT20X")</th>	
+					<th>@Messages("readsets.treatments.exome.percentNT10X")</th>	
+					<th>@Messages("readsets.treatments.exome.percentNT5X")</th>	
+					<th>@Messages("readsets.treatments.exome.nbRegions0X")</th>	
+					<th>@Messages("readsets.treatments.exome.regions0XPercent")</th>	
+					<th>@Messages("readsets.treatments.exome.nbRegionsFullCover")</th>	
+					<th>@Messages("readsets.treatments.exome.regionsFullCoverPercent")</th>	
+					<th>@Messages("readsets.treatments.exome.meanCover")</th>	
+					<th>@Messages("readsets.treatments.exome.medianCover")</th>	
+					<th>@Messages("readsets.treatments.exome.sdCover")</th>	
+	 			</tr>
+	 		</thead>
+	 		<tbody>
+	 			<tr>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.nbReads.value | number}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.mappedReads.value | number}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.mappedReadsPercent.value | number:2}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.pairingPercent.value | number:2}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.duplicatedReads.value | number}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.duplicatedReadsPercent.value | number:2}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.sizeRegionsTiled.value | number}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.targetPercent.value | number:2}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.percentNT30X.value | number:2}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.percentNT20X.value | number:2}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.percentNT10X.value | number:2}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.percentNT5X.value | number:2}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.nbRegions0X.value | number}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.regions0XPercent.value | number:2}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.nbRegionsFullCover.value | number}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.regionsFullCoverPercent.value | number:2}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.meanCover.value | number:2}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.medianCover.value | number}}</td>
+	 				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.sdCover.value | number:2}}</td>
+				</tr>
+	 		</tbody>
+	 	</table>
+	</div>
+</div>
