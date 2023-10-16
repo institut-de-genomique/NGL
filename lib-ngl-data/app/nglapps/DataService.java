@@ -82,7 +82,7 @@ public class DataService {
 
 	public void saveProjectData(Map<String,List<ValidationError>> errors) {
 		data.getProjectService().main(errors);
-		data.getUmbrellaProjectService().main(errors);
+		//data.getUmbrellaProjectService().main(errors);
 	}
 
 	public void saveRunData(Map<String,List<ValidationError>> errors) {

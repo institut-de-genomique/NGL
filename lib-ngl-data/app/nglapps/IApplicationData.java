@@ -13,7 +13,7 @@ import services.description.experiment.AbstractExperimentService;
 import services.description.instrument.AbstractInstrumentService;
 import services.description.process.AbstractProcessService;
 import services.description.project.AbstractProjectService;
-import services.description.project.AbstractUmbrellaProjectService;
+// import services.description.project.AbstractUmbrellaProjectService;
 import services.description.run.AbstractRunService;
 import services.description.run.AbstractTreatmentService;
 import validation.ContextValidation;
@@ -33,7 +33,7 @@ public interface IApplicationData {
 	AbstractExperimentService getExperimentService();
 	AbstractProcessService    getProcessService();
 	AbstractProjectService    getProjectService();
-	AbstractUmbrellaProjectService getUmbrellaProjectService();
+	//AbstractUmbrellaProjectService getUmbrellaProjectService();
 	AbstractRunService        getRunService();
 
 	AbstractTreatmentService getTreatmentService();

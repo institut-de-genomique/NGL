@@ -17,7 +17,7 @@ import services.description.instrument.InstrumentServiceCNG;
 import services.description.process.AbstractProcessService;
 import services.description.process.ProcessServiceCNG;
 import services.description.project.AbstractProjectService;
-import services.description.project.AbstractUmbrellaProjectService;
+// import services.description.project.AbstractUmbrellaProjectService;
 import services.description.project.ProjectServiceCNG;
 import services.description.run.AbstractRunService;
 import services.description.run.AbstractTreatmentService;
@@ -123,9 +123,9 @@ public class CNGApplicationData implements IApplicationData {
 		return ctx -> {};
 	}
 
-	@Override
-	public AbstractUmbrellaProjectService getUmbrellaProjectService() {
-		throw new RuntimeException("not implemented");
-	}
+	// @Override
+	// public AbstractUmbrellaProjectService getUmbrellaProjectService() {
+	// 	throw new RuntimeException("not implemented");
+	// }
 	
 }

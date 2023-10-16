@@ -17,7 +17,7 @@ import services.description.instrument.InstrumentServiceCNS;
 import services.description.process.AbstractProcessService;
 import services.description.process.ProcessServiceCNS;
 import services.description.project.AbstractProjectService;
-import services.description.project.AbstractUmbrellaProjectService;
+// import services.description.project.AbstractUmbrellaProjectService;
 import services.description.project.ProjectServiceCNS;
 import services.description.run.AbstractRunService;
 import services.description.run.AbstractTreatmentService;
@@ -169,9 +169,9 @@ public class TestApplicationData implements IApplicationData {
 		throw new RuntimeException("not implemented");		
 	}
 
-    @Override
-    public AbstractUmbrellaProjectService getUmbrellaProjectService() {
-       throw new RuntimeException("not implemented");		
-    }
+    // @Override
+    // public AbstractUmbrellaProjectService getUmbrellaProjectService() {
+    //    throw new RuntimeException("not implemented");		
+    // }
 
 }

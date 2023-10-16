@@ -22,9 +22,9 @@ import services.description.instrument.InstrumentServiceCNS;
 import services.description.process.AbstractProcessService;
 import services.description.process.ProcessServiceCNS;
 import services.description.project.AbstractProjectService;
-import services.description.project.AbstractUmbrellaProjectService;
+// import services.description.project.AbstractUmbrellaProjectService;
 import services.description.project.ProjectServiceCNS;
-import services.description.project.UmbrellaProjectServiceCNS;
+// import services.description.project.UmbrellaProjectServiceCNS;
 import services.description.run.AbstractRunService;
 import services.description.run.AbstractTreatmentService;
 import services.description.run.RunServiceCNS;
@@ -93,10 +93,10 @@ public class CNSApplicationData implements IApplicationData {
 		return new ProjectServiceCNS();
 	}
 
-	@Override
-	public AbstractUmbrellaProjectService getUmbrellaProjectService() {
-		return new UmbrellaProjectServiceCNS();
-	}
+	// @Override
+	// public AbstractUmbrellaProjectService getUmbrellaProjectService() {
+	// 	return new UmbrellaProjectServiceCNS();
+	// }
 
 	@Override
 	public AbstractRunService getRunService() {
