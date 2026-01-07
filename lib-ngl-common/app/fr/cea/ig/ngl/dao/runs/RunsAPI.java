@@ -183,7 +183,9 @@ public class RunsAPI extends GenericAPI<RunsDAO, Run> {
 		sampleList.forEach(s -> {
 			s.setProcessesToLaunchDate(new Date());
 
-			MongoDBDAO.update(InstanceConstants.SAMPLE_COLL_NAME, s);
+			if (s.getProcessesToLaunchDate() != null) {
+				MongoDBDAO.update(InstanceConstants.SAMPLE_COLL_NAME, s);
+			}
 		});
 
 		dao.deleteObject(code);

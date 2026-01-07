@@ -3,28 +3,27 @@
 @(nav: String = "")
 
 @import play.mvc.Http.Context
+@import controllers.authorisation.PermissionHelper
+
 
 @user = @{ ctx.currentUser() }
 @isCNSInstitute  = @{ "CNS" == ctx.nglConfig().getInstitute() }
 @isCNGInstitute  = @{ "CNG" == ctx.nglConfig().getInstitute() }
+@role = @{ PermissionHelper.getRole(user) }
+
   <!-- Navbar
     ================================================== -->
 		
 <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
 	<div class="container-fluid">
 		<div class="navbar-header">
-			<a class="navbar-brand" href="@controllers.main.tpl.routes.Main.home()">@ctx.messageEnv("application.name")</a>
+			<!-- NGL-4344  couleur differente PROD/NOPROD -->
+			<a class="navbar-brand @("noprod".when( "PROD" != ctx.nglConfig().nglEnv() ))" href="@controllers.main.tpl.routes.Main.home()">@ctx.messageEnv("application.name")</a>
     	</div>
     	
     	<div class="collapse navbar-collapse">
     		
     		<ul class="nav navbar-nav">
-				<li class="dropdown @("active".when(nav.startsWith("projects")))">
-					<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" id="projects">@Messages("projects.menu")<b class="caret"></b></a>
-					<ul class="dropdown-menu" role="menu" aria-labelledby="projects">
-						<li class="@("active".when(nav == "projects.search"))"><a href="@controllers.projects.tpl.routes.Projects.home("search")">@Messages("projects.menu.search")</a></li>	
-					</ul>
-				</li>
 				@if(isCNSInstitute){
 					<li class="dropdown @("active".when(nav.startsWith("umbrellaProjects")))">	
 						<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" id="umbrellaProjects">@Messages("umbrellaProjects.menu")<b class="caret"></b></a>
@@ -33,15 +32,21 @@
 						</ul>
 					</li>
 				}
+				<li class="dropdown @("active".when(nav.startsWith("projects")))">
+					<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" id="projects">@Messages("projects.menu")<b class="caret"></b></a>
+					<ul class="dropdown-menu" role="menu" aria-labelledby="projects">
+						<li class="@("active".when(nav == "projects.search"))"><a href="@controllers.projects.tpl.routes.Projects.home("search")">@Messages("projects.menu.search")</a></li>	
+					</ul>
+				</li>
 				@if(isCNSInstitute){
-				<li class="dropdown @("active".when(nav.startsWith("help")))">
-	  				<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" id="help">@Messages("docs.menu")<b class="caret"></b></a>
-	  				<ul class="dropdown-menu" role="menu" aria-labelledby="help">
-	  						@if(isCNSInstitute){
-	  							@menuhelpCNS()
-	  						}
-	  				</ul>
-			    </li>
+					<li class="dropdown @("active".when(nav.startsWith("help")))">
+						<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" id="help">@Messages("docs.menu")<b class="caret"></b></a>
+						<ul class="dropdown-menu" role="menu" aria-labelledby="help">
+								@if(isCNSInstitute){
+									@menuhelpCNS()
+								}
+						</ul>
+					</li>
 				}
 
 			</ul>
@@ -53,8 +58,19 @@
 					</a>
 					<ul class="dropdown-menu" role="menu" aria-labelledby="user">
 						<li><a href="/authentication/logout">@Messages("authentification.dropdown_list.signout")</a></li>
+						<li><a>@role</a></li>
 					</ul>
-				</li>				
+				</li>
+				<!--  NGL-3439 ajout application version / NGL-3446 ajout lien vers notes de version-->
+				<li>
+					<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" id="more"><i class="fa fa-ellipsis-v"></i></a>
+					<ul class="dropdown-menu" role="menu" aria-labelledby="more">
+						<!--  <li>&nbsp;&nbsp;Version: @Messages("application.name") @Messages("application.version")</li>-->
+						<li><a href='http://wiki.cnrgh.fr/wiki/ngldocumentation/view/Documents%20de%20mise%20en%20production/@Messages("application.name")/@ctx.getVersion()'
+  				         target="_blank">&nbsp;&nbsp;Version: @Messages("application.name") @ctx.getVersion()</a></li>
+					</ul>
+				</li>
+			
 			</ul>
 			
 		</div>

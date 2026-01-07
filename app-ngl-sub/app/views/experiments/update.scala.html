@@ -1,6 +1,7 @@
 @this()
 @()
 @import views.html.helper._
+@import views.html.tools.controleTaxon
 
 @user            = @{ fr.cea.ig.authentication.Authentication.getUser() }
 
@@ -9,46 +10,88 @@
 	@columnSearchForm{
 		@formGroup{
 			<div class="form-control" bt-select  ng-model="form.projCodes" filter="true" multiple="true" placeholder='@Messages("consultation.placeholder.projectCodes")' bt-options="project.code as project|formatProjectListLabel for project in lists.getProjects()"></div>	
-		}	
-									
-	}
-	@columnSearchForm{
-		@formGroup{				
-			<bt-input  class="form-control"  input-ng-model="form.codeRegex" textarea-ng-model="form.codes" 
-			title='@Messages("consultation.textarea-placeholder.experimentCodes")' 
-			textarea-placeholder-ng-model='@Messages("consultation.textarea-placeholder.experimentCodes")' 
-			placeholder='@Messages("consultation.placeholder.experimentCodes")' >
-			</bt-input>								
-		}
+		}		
+		
 		@formGroup{
-			<bt-input  class="form-control"  input-ng-model="form.accessionRegex" textarea-ng-model="form.accessions" 
-			title='@Messages("consultation.textarea-placeholder.experimentAccessions")'
-			textarea-placeholder-ng-model='@Messages("consultation.textarea-placeholder.experimentAccessions")'
-			placeholder='@Messages("consultation.placeholder.experimentAccessions")' >
+			<bt-input  class="form-control"  input-ng-model="form.codeRegex" textarea-ng-model="form.codes" 
+			title='@Messages("consultation.textarea-placeholder-title.experimentCodes")' 
+			textarea-placeholder-ng-model='@Messages("consultation.textarea-placeholder-title.experimentCodes")' 
+			placeholder='@Messages("consultation.textarea-placeholder.experimentCodes")' >
 			</bt-input>									
 		}
+
 		@formGroup{
-			<input type="text" class="form-control" ng-model="form.studyIdentifier" placeholder='@Messages("consultation.placeholder.studyIdentifier")' >	
-		}	
-		@formGroup{
-			<input type="text" class="form-control" ng-model="form.sampleIdentifier" placeholder='@Messages("consultation.placeholder.sampleIdentifier")' >	
+			<bt-input  class="form-control"  input-ng-model="form.accessionRegex" textarea-ng-model="form.accessions" 
+			title='@Messages("consultation.textarea-placeholder-title.experimentAccessions")' 
+			textarea-placeholder-ng-model='@Messages("consultation.textarea-placeholder-title.experimentAccessions")' 
+			placeholder='@Messages("consultation.textarea-placeholder.experimentAccessions")' >
+			</bt-input>									
 		}
-	
 	}
 	
-	
-	@columnSearchForm{
+	@columnSearchForm{		
+		@formGroup{
+			<bt-input  class="form-control"  input-ng-model="form.studyCodeRegex" textarea-ng-model="form.studyCodes" 
+			title='@Messages("consultation.textarea-placeholder-title.studyCodes")' 
+			textarea-placeholder-ng-model='@Messages("consultation.textarea-placeholder-title.studyCodes")' 
+			placeholder='@Messages("consultation.textarea-placeholder.studyCodes")' >
+			</bt-input>									
+		}
+
+		@formGroup{
+			<bt-input  class="form-control"  input-ng-model="form.studyIdentifierRegex" textarea-ng-model="form.studyIdentifiers" 
+			title='@Messages("consultation.textarea-placeholder-title.studyIdentifiers")' 
+			textarea-placeholder-ng-model='@Messages("consultation.textarea-placeholder-title.studyIdentifiers")' 
+			placeholder='@Messages("consultation.textarea-placeholder.studyIdentifiers")' >
+			</bt-input>									
+		}			
+		
+		@formGroup{
+			<bt-input  class="form-control"  input-ng-model="form.sampleCodeRegex" textarea-ng-model="form.sampleCodes" 
+			title='@Messages("consultation.textarea-placeholder-title.sampleCodes")' 
+			textarea-placeholder-ng-model='@Messages("consultation.textarea-placeholder-title.sampleCodes")' 
+			placeholder='@Messages("consultation.textarea-placeholder.sampleCodes")' >
+			</bt-input>									
+		}
+
+		@formGroup{
+			<bt-input  class="form-control"  input-ng-model="form.sampleIdentifierRegex" textarea-ng-model="form.sampleIdentifiers" 
+			title='@Messages("consultation.textarea-placeholder-title.sampleIdentifiers")' 
+			textarea-placeholder-ng-model='@Messages("consultation.textarea-placeholder-title.sampleIdentifiers")' 
+			placeholder='@Messages("consultation.textarea-placeholder.sampleIdentifiers")' >
+			</bt-input>									
+		}						
+    }
+
+	@columnSearchForm{	
+		@formGroup{
+			<input type="text" class="form-control" ng-model="form.createUser" placeholder='@Messages("consultation.placeholder.createUser")' >	
+		}				
+
+		@formGroup{
+			<bt-input  class="form-control"  input-ng-model="form.submissionCodeRegex" textarea-ng-model="form.submissionCodes" 
+			title='@Messages("consultation.textarea-placeholder-title.submissionCodes")' 
+			textarea-placeholder-ng-model='@Messages("consultation.textarea-placeholder-title.submissionCodes")' 
+			placeholder='@Messages("consultation.textarea-placeholder.submissionCodes")' >
+			</bt-input>									
+		}					
+    }
+
+
+	@columnSearchForm{			
 		@formGroup{
 			<div>
-			<label>@Messages("userFileExperiment")</label> 
+			<label>@Messages("userFileExperiment.txt")</label> 
 			<input type="file"  id="idUserFileExperiment" base64-file="form2.userFileExperiment"/>
 			</div>
-		}
-	}	
-	
-	@columnSearchForm{
+		}	
+		<br><br><br>
+		@formGroup{
+			<div class="checkbox"><label><input type="checkbox" ng-model="form3.noCheckTaxonSampleCollab"/>désactiver la vérification des taxonCodes des samples des collaborateurs</label></div>
+			<div>@controleTaxon()</div>
+		}					
 	}
-			
+		
 	@columnSearchForm{
 		@formGroup{
 			<div class="tab-pane active" id="filters">
@@ -67,26 +110,17 @@
 		</div>
 	
 		}													
-	}
-	
-
-	@columnSearchForm{
 	}	
-	@columnSearchForm{
-	}
-	@columnSearchForm{
-	}
-
-
-
 
 	@formGroup{
 		<div class="btn-toolbar">
-			<button type="submit" title='@Messages("button.submitUpdate")'  ng-click="submit()" data-toggle="tooltip" class="btn btn-primary" >
+			<button type="submit" title='@Messages("button.submitUpdate")' ng-disabled="! isClickable()"  ng-click="submit()" data-toggle="tooltip" class="btn btn-primary" >
 				<i class="fa fa-save"></i>
 			</button>	
 		</div>				
-	}		
+	}	
+	
+
 }
 
 
@@ -100,15 +134,14 @@
 qui permet d'installer $user dans le scope-->
 
 <span ng-init="setUserInScope('@user')"></span>
-@**
-Inutile car spinner qui peut etre geré directement dans le datatable
+
 <!--Pour affichage d'un spinner-->
 <div class="inProgressSpinner" ng-if="treeLoadInProgress">
 <button class="btn btn-primary btn-lg">
 <i class="fa fa-spinner fa-spin fa-5x"></i>
 </button>
 </div>	
-**@
+
 
 <div class="row"> 
 	<div class="col-md-12 col-lg-12" ultimate-datatable="experimentsDT">

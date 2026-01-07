@@ -7,7 +7,7 @@ import fr.cea.ig.ngl.dao.sra.SubmissionDAO;
 import javax.inject.Inject;
 
 import models.sra.submit.sra.instance.Submission;
-import sra.api.submission.SubmissionNewAPITools;
+import sra.api.SubmissionNewAPITools;
 
 /*
  * Ne marche pas  !!!!!
@@ -24,6 +24,7 @@ import sra.api.submission.SubmissionNewAPITools;
 */
 
 //utiliser directement la methode SubmissionNewAPITools.rollbackSubmission recopiée ici pour pouvoir etre utilise sur prod pas encore dans nouveau workflow.
+@Deprecated
 public class InactiveSubmissionAndCleanDatabase extends ScriptWithArgs<InactiveSubmissionAndCleanDatabase.MyParam> {
 	private final SubmissionDAO         submissionDAO;
 	private final SubmissionNewAPITools submissionNewAPITools;

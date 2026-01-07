@@ -91,7 +91,7 @@ public class AnalysisAPITest {
 	public void testGetByCode() {
 		String randomCode = UUID.randomUUID().toString();
 		
-		Analysis analysis = AnalysisFactory.getRandomAnalysis();
+		Analysis analysis = AnalysisFactory.getRandomAnalysis(false);
 		analysis.code = randomCode;
 		
 		when(analysesDAO.findByCode(randomCode)).thenReturn(analysis);
@@ -106,7 +106,7 @@ public class AnalysisAPITest {
 	public void testCreateValid() {
 		String randomCode = UUID.randomUUID().toString();
 
-		Analysis analysis = AnalysisFactory.getRandomAnalysis();
+		Analysis analysis = AnalysisFactory.getRandomAnalysis(false);
 		analysis.code = randomCode;
 
 		/*
@@ -114,7 +114,7 @@ public class AnalysisAPITest {
 		 * 		analysis.projectCodes = new ArrayList<>();
 		 */
 		analysis.projectCodes = new TreeSet<>();
-		ReadSet readset = ReadsetFactory.getRandomReadset(true, new Date());
+		ReadSet readset = ReadsetFactory.getRandomReadset(true, new Date(), 1);
 
 
 		when(readSetDAO.findByCode(analysis.masterReadSetCodes.get(0))).thenReturn(readset);
@@ -135,14 +135,9 @@ public class AnalysisAPITest {
 	}
 	
 	@Test
-	public void testCreateInvalid() {
-		String randomCode = UUID.randomUUID().toString();
-		
-		// On tente de créer une analyse avec un _id déjà existant.
+	public void testCreateInvalidIdExists() {		
 		Analysis analysis = mock(Analysis.class);
-		analysis._id = "1234";
-		analysis.code = randomCode;
-		analysis.masterReadSetCodes = new ArrayList<>();
+		analysis = AnalysisFactory.fillRandomAnalysis(analysis, true);
 		
 		when(analysesDAO.saveObject(analysis)).thenReturn(analysis);
 		
@@ -161,6 +156,11 @@ public class AnalysisAPITest {
 		}
 		
 		assertNull(analysisCreateAPI);
+	}
+
+	@Test
+	public void testCreateInvalidValidationError() {
+		// TODO
 	}
 
 	@Test
@@ -183,7 +183,7 @@ public class AnalysisAPITest {
 	}
 	
 	@Test
-	public void testUpdateInvalid() {
+	public void testUpdateInvalidNotExists() {
 		Analysis analysis = mock(Analysis.class);
 		analysis.code = "1234";
 		
@@ -207,9 +207,14 @@ public class AnalysisAPITest {
 	}
 
 	@Test
+	public void testUpdateInvalidValidationError() {
+
+	}
+
+	@Test
 	public void testUpdatePartialValid() {
 		Analysis analysis = mock(Analysis.class);
-		analysis = AnalysisFactory.fillRandomAnalysis(analysis);
+		analysis = AnalysisFactory.fillRandomAnalysis(analysis, false);
 		
 		when(analysesDAO.findByCode(analysis.code)).thenReturn(analysis);
 
@@ -240,7 +245,7 @@ public class AnalysisAPITest {
 	@Test
 	public void testUpdatePartialInvalid() {
 		Analysis analysis = mock(Analysis.class);
-		analysis = AnalysisFactory.fillRandomAnalysis(analysis);
+		analysis = AnalysisFactory.fillRandomAnalysis(analysis, false);
 
 		when(analysesDAO.findByCode(analysis.code)).thenReturn(null);
 		when(analysesDAO.getElementClass()).thenReturn(Analysis.class);
@@ -266,7 +271,7 @@ public class AnalysisAPITest {
 
 	@Test
 	public void testUpdateStateValid() {
-		Analysis analyse = AnalysisFactory.getRandomAnalysis();
+		Analysis analyse = AnalysisFactory.getRandomAnalysis(false);
 
 		State state = new State();
 		state.code = "N";
@@ -284,7 +289,7 @@ public class AnalysisAPITest {
 	
 	@Test
 	public void testUpdateStateInvalid() {
-		Analysis analyse = AnalysisFactory.getRandomAnalysis();
+		Analysis analyse = AnalysisFactory.getRandomAnalysis(false);
 		
 		State state = new State();
 		state.code = "N";
@@ -308,7 +313,7 @@ public class AnalysisAPITest {
 
 	@Test
 	public void testUpdatePropertiesValid() {
-		Analysis analyse = AnalysisFactory.getRandomAnalysis();
+		Analysis analyse = AnalysisFactory.getRandomAnalysis(false);
 
 		when(analysesDAO.findByCode(analyse.code)).thenReturn(analyse);
 
@@ -324,7 +329,7 @@ public class AnalysisAPITest {
 	
 	@Test
 	public void testUpdatePropertiesInvalid() {
-		Analysis analyse = AnalysisFactory.getRandomAnalysis();
+		Analysis analyse = AnalysisFactory.getRandomAnalysis(false);
 		Map<String, PropertyValue> properties = new HashMap<>();
 		boolean exceptFired = false;
 
@@ -347,7 +352,7 @@ public class AnalysisAPITest {
 		Valuation valuation = ValuationFactory.getRandomValuation();
 
 		Analysis analyse = mock(Analysis.class);
-		analyse = AnalysisFactory.fillRandomAnalysis(analyse);
+		analyse = AnalysisFactory.fillRandomAnalysis(analyse, false);
 
 		when(this.analysesDAO.findByCode(analyse.code)).thenReturn(analyse);
 
@@ -368,7 +373,7 @@ public class AnalysisAPITest {
 	@Test
 	public void testValuationInvalidEmptyValuationParameter() {
 		Analysis analyse = mock(Analysis.class);
-		analyse = AnalysisFactory.fillRandomAnalysis(analyse);
+		analyse = AnalysisFactory.fillRandomAnalysis(analyse, false);
 
 		boolean exceptFired = false;
 
@@ -393,7 +398,7 @@ public class AnalysisAPITest {
 		Valuation valuation = ValuationFactory.getRandomValuation();
 
 		Analysis analyse = mock(Analysis.class);
-		analyse = AnalysisFactory.fillRandomAnalysis(analyse);
+		analyse = AnalysisFactory.fillRandomAnalysis(analyse, false);
 
 		boolean exceptFired = false;
 

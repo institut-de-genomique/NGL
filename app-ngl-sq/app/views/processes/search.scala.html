@@ -1,7 +1,8 @@
-@this()
+@this(ctx : fr.cea.ig.ngl.NGLApplication)
 @()
-
 @import views.html.helper._
+
+@isCNSInstitute  = @{ "CNS" == ctx.nglConfig().getInstitute() }
 
 @** FDS 24/11/2020 remise en forme de l'ordre des attributs...
                    NGL-3152 ajout des titles manquants sur bt-input => va sur 'icone d'ouverture des textarea => messages spécifiques ajoutés 
@@ -73,7 +74,7 @@
 		@formGroup{
 			<bt-input class="form-control" placeholder='@Messages("search.placeholder.ncbiScientificName")' title='@Messages("search.title.ncbiScientificName.textarea")'
 					  input-ng-model="searchService.form.ncbiScientificNameRegex" 
-					  textarea-ng-model="searchService.form.ncbiScientificNameRegexs"
+					  textarea-ng-model="searchService.form.ncbiScientificNames"
 					  textarea-placeholder-ng-model='@Messages("search.textarea.placeholder.labelsList")'>
 			</bt-input>
 		}
@@ -144,6 +145,18 @@
 		<div class="tab-content">
 		<div class="tab-pane active" id="filters">
 			<form class="well well-small">
+				@if(isCNSInstitute){
+					<div class="row" style="margin-bottom: 20px;">
+						@columnSearchForm{	
+							@formGroup{
+								<div class='form-control' bt-select filter='true' ng-model='searchService.form.umbrellaCodes' 
+										placeholder='Nom umbrella' multiple='true' ng-change='selectProjetsFromUmbrellas()' 
+										bt-options='umbrellaProject.code as umbrellaProject.name for umbrellaProject in searchService.lists.getUmbrellaProjects()'>
+								</div>
+							}
+						}
+					</div>
+				}
 			<div class="row">
 			@form
 			@columnSearchForm{

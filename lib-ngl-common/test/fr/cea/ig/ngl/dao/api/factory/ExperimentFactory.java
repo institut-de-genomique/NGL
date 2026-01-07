@@ -213,6 +213,72 @@ public final class ExperimentFactory {
 		
 		return e;
 	}
+	
+	public static Experiment getRandomExperimentFluoQuantifiable() {
+		Experiment e = new Experiment();
+		e.typeCode = "fluo-quantification";
+		e.code = "FLUO-QUANTIFICATION-20170620_072934EEJ";
+		
+		e.state = StateFactory.getFinishState();
+
+		new ArrayList<AtomicTransfertMethod>();
+		
+		OneToVoidContainer atm = new OneToVoidContainer();
+		atm.line = "1";
+		atm.column = "1";
+		LocationOnContainerSupport locs = new LocationOnContainerSupport();
+		locs.code = "26K730K23";
+		locs.categoryCode = "tube";
+		locs.line = "1";
+		locs.column = "1";
+		InputContainerUsed icu = new InputContainerUsed();
+		icu.code = "26K730K23";
+		icu.locationOnContainerSupport = locs;
+		icu.newConcentration = new PropertySingleValue(5, "ng/µL");
+		icu.newQuantity = new PropertySingleValue(5, "ng");
+		icu.newVolume = new PropertySingleValue(1, "µL");
+		icu.experimentProperties = new HashMap<>();
+		icu.experimentProperties.put("calculationMethod", new PropertySingleValue("HS 1 seul"));
+		atm.inputContainerUseds = Arrays.asList(icu);
+		List<AtomicTransfertMethod> atmList = Arrays.asList(atm);
+		
+		e.atomicTransfertMethods = atmList;
+		
+		return e;
+	}
+	
+	public static Experiment getRandomExperimentFluoNotQuantifiable() {
+		Experiment e = new Experiment();
+		e.typeCode = "fluo-quantification";
+		e.code = "FLUO-QUANTIFICATION-20170620_072934EEJ";
+		
+		e.state = StateFactory.getFinishState();
+
+		new ArrayList<AtomicTransfertMethod>();
+		
+		OneToVoidContainer atm = new OneToVoidContainer();
+		atm.line = "1";
+		atm.column = "1";
+		LocationOnContainerSupport locs = new LocationOnContainerSupport();
+		locs.code = "26K730K23";
+		locs.categoryCode = "tube";
+		locs.line = "1";
+		locs.column = "1";
+		InputContainerUsed icu = new InputContainerUsed();
+		icu.code = "26K730K23";
+		icu.locationOnContainerSupport = locs;
+		icu.newConcentration = null;
+		icu.newQuantity = null;
+		icu.newVolume = null;
+		icu.experimentProperties = new HashMap<>();
+		icu.experimentProperties.put("calculationMethod", new PropertySingleValue("Non quantifiable"));
+		atm.inputContainerUseds = Arrays.asList(icu);
+		List<AtomicTransfertMethod> atmList = Arrays.asList(atm);
+		
+		e.atomicTransfertMethods = atmList;
+		
+		return e;
+	}
 
 	/**
 	 * Méthode permettant de générer un code expérience aléatoire en gardant le format "NANOPORE-DEPOT-ANNEE MOIS JOUR_CHAINE RANDOM 9 CARACTERES".

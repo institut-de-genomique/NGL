@@ -1,0 +1,21 @@
+@()
+@**NGL-4708**@
+
+<div class="row">
+	<div class="col-md-12 col-lg-12">
+		<p><a class="fa fa-exclamation-triangle" style="color:red" ng-click="toggleShowConsigne()" title="Consignes pour les attributs du study ou project" href=""> Consignes pour les attributs du study ou project</a></span></p>
+		<div ng-show="isShowConsigne">
+			
+<p>Les attributs d'un project (ou study) ou d'un umbrella project sont facultatifs et doivent etre renseignés seulement dans le cadre de certains projets collaboratifs comme ATLANTECO<p>
+<p>Les attributs sont exprimés sous la forme d'un texte HTML de la forme suivante<p>
+<p><i>&lt;PROJECT_ATTRIBUTE&gt;&lt;TAG&gt;NomDuTag&lt;&#47;TAG&gt;&lt;VALUE&gt;Valeur&lt;&#47;VALUE&gt;&lt;&#47;PROJECT_ATTRIBUTE&gt;</i></p>
+
+<p><B>Exemple pour les study d'ATLANTECO :</B></p>
+
+<p><i>&lt;PROJECT_ATTRIBUTE&gt;&lt;TAG&gt;Funding Acknowledgement&lt;&#47;TAG&gt;&lt;VALUE&gt;This research has received funding from the European Union's Horizon 2020 Research and Innovation Programme under grant agreement No 862923 (project AtlantECO). This output reflects only the author's view and the European Union cannot be held responsible for any use that may be made of the information contained therein. (https://cordis.europa.eu/project/id/862923)&lt;&#47;VALUE&gt;&lt;&#47;PROJECT_ATTRIBUTE&gt;</i></p>
+<p><i>&lt;PROJECT_ATTRIBUTE&gt;&lt;TAG&gt;Data Policy&lt;&#47;TAG&gt;&lt;VALUE&gt;The AtlantECO Consortium relies on the fair, open and inclusive collaboration among its Partners, and the exploitation of jointly owned results, which is governed by the adoption of AtlantECO's Data Sharing and Publication Best Practices (https://doi.org/10.5281/zenodo.7791092).&lt;&#47;VALUE&gt;&lt;&#47;PROJECT_ATTRIBUTE&gt;</i></p>
+
+		</div>
+	</div>
+</div>
+@**END NGL-4235**@

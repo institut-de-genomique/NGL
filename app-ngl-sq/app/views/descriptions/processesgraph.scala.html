@@ -1,0 +1,38 @@
+@this()
+@()
+@import views.html.helper._
+
+@form() = {
+	<div class="col-md-12 col-lg-12">
+	<div class="row">
+		@columnFormGroup{
+			<div bt-select  class="form-control"  placeholder="@Messages("experiments.select.experimentType")"
+				 ng-model="searchService.form.experimentTypeCode" 
+				 bt-options="experimentType.code as experimentType.name for experimentType in searchService.lists.getExperimentTypes()" ></div>
+		}
+		@columnFormGroup{
+            <div class="btn-toolbar">
+                <button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="addProccessesTab()" class="btn btn-primary" >
+                    <i class="fa fa-search"></i>
+                </button>
+                <button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="reset()"  class="btn btn-default">
+                    <i class="fa fa-undo"></i>
+                </button>						 	
+            </div>
+		}
+	</div>
+	</div>
+}
+
+<div class="row"> 
+<div class="col-md-12 col-lg-12">
+	<form class="well well-small">
+	<div class="row">
+		@form			
+	</div>		
+	</form>		
+</div>
+</div>
+
+<div class="alert alert-info" ng-if="hasMoreThan2Graphs()">@Messages("descriptions.info.processes.graph")</div>
+<div id="graphs" class="row"></div>

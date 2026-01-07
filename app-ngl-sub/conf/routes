@@ -8,6 +8,8 @@ GET		/											    controllers.main.tpl.Main.home()
 
 #GET    /sra/scripts/noRest/:clazz/:method				fr.cea.ig.lfw.controllers.scripts.ScriptController.noRest(clazz : java.lang.String, method : java.lang.String)
 GET		/sra/scripts/run/:clazz							fr.cea.ig.lfw.controllers.scripts.ScriptController.run(clazz : java.lang.String)
+PUT		/sra/scripts/run/:clazz							fr.cea.ig.lfw.controllers.scripts.ScriptController.run(clazz : java.lang.String)
+POST	/sra/scripts/run/:clazz							fr.cea.ig.lfw.controllers.scripts.ScriptController.run(clazz : java.lang.String)
 
 #------------
 # Submission
@@ -21,9 +23,19 @@ GET		/tpl/sra/submissions/details					controllers.sra.submissions.tpl.Submission
 GET		/tpl/sra/submissions/validation				    controllers.sra.submissions.tpl.Submissions.validation()
 GET		/tpl/sra/submissions/js-routes					controllers.sra.submissions.tpl.Submissions.javascriptRoutes()
 #PUT	/api/sra/submissions/:submissionCode/activate	controllers.sra.submissions.api.Submissions.activate(submissionCode : java.lang.String)
-PUT		/api/sra/submissions/createFromStudyRelease/:studyCode  controllers.sra.submissions.api.Submissions.createFromStudyRelease(studyCode : java.lang.String)
+PUT		/api/sra/submissions/createFromStudyRelease/:studyCode    controllers.sra.submissions.api.Submissions.createFromStudyRelease(studyCode : java.lang.String)
+PUT		/api/sra/submissions/createFromSampleRelease/:sampleCode  controllers.sra.submissions.api.Submissions.createFromSampleRelease(sampleCode : java.lang.String)
 PUT		/api/sra/submissions/createForUpdate/           controllers.sra.submissions.api.Submissions.createForUpdate()
 PUT		/api/sra/submissions/createFromUmbrella         controllers.sra.submissions.api.Submissions.createFromUmbrella()
+PUT		/api/sra/submissions/createFromStudy            controllers.sra.submissions.api.Submissions.createFromStudy()
+PUT		/api/sra/submissions/createFromSample           controllers.sra.submissions.api.Submissions.createFromSample()
+PUT		/api/sra/submissions/createFromTolid            controllers.sra.submissions.api.Submissions.createFromTolid()
+
+
+GET		/tpl/sra/submissions/delete			            controllers.sra.submissions.tpl.Submissions.delete()
+DELETE	/api/sra/submissions                            controllers.sra.submissions.api.Submissions.delete(submissionCode : java.lang.String)
+
+####PUT		/api/sra/submissions/delete/:submissionCode     controllers.sra.submissions.api.Submissions.delete(submissionCode : java.lang.String)
 
 
 
@@ -37,6 +49,7 @@ PUT		/api/sra/submissions/:code 							controllers.sra.submissions.api.Submissio
 # todo verifier s'il faut prefixer de api pour updateState
 PUT		/api/sra/submissions/:code/state				controllers.sra.submissions.api.Submissions.updateState(code:java.lang.String)
 POST	/api/sra/submissions                            controllers.sra.submissions.api.Submissions.save()
+####POST	/api/sra/submissions                            controllers.sra.submissions.api.Submissions.createFromTolid()
 GET		/api/sra/submissions							controllers.sra.submissions.api.Submissions.list()
 GET		/api/sra/submissions/:code						controllers.sra.submissions.api.Submissions.get(code: java.lang.String)
 
@@ -46,6 +59,7 @@ GET		/api/sra/submissions/:code						controllers.sra.submissions.api.Submissions
 # Traitement des AC et mise a jour du status de l'objet submission :
 #PUT	/api/sra/submissions/:code/ebiAc					controllers.sra.submissions.api.Submissions.treatmentAc(code: java.lang.String) 
 #PUT	/api/sra/submissions/:code/release					controllers.sra.submissions.api.Submissions.treatmentRelease(code: java.lang.String) 
+PUT		/api/sra/submissions/:code/validateAndUpdateState	controllers.sra.submissions.api.Submissions.validateAndUpdateState(code:java.lang.String)
 
 
 #-----------------
@@ -130,6 +144,7 @@ GET		/sra/studies/:homeCode/home					controllers.sra.studies.tpl.Studies.home(ho
 #http://localhost:9000/api/sra/studies?datatable=true&paginationMode=local&projCode=BCZ
 GET		/api/sra/studies							controllers.sra.studies.api.Studies.list()
 POST	/api/sra/studies							controllers.sra.studies.api.Studies.save()
+#PUT		/api/sra/studies/createFromStudyCreationForm  controllers.sra.studies.api.Studies.createFromStudyCreationForm()
 GET		/tpl/sra/studies/create					    controllers.sra.studies.tpl.Studies.create()
 GET		/tpl/sra/studies/update					    controllers.sra.studies.tpl.Studies.update()
 ###release fait dans menu details mais si on fait un menu release dedié alors prevoir url:
@@ -196,29 +211,30 @@ GET		/tpl/sra/samples/details				    controllers.sra.samples.tpl.Samples.details
 GET		/api/sra/samples/:code						controllers.sra.samples.api.Samples.get(code: java.lang.String)
 GET		/sra/samples/:code							controllers.sra.samples.tpl.Samples.get(code: java.lang.String)
 GET		/tpl/sra/samples/consultation	        	controllers.sra.samples.tpl.Samples.consultation()
+# Attention : batchUpdate() doit etre avant update, sinon on n'entre pas dans batchUpdate.
+PUT		/api/sra/samples/batch                      controllers.sra.samples.api.Samples.batchUpdate()
 PUT		/api/sra/samples/:code						controllers.sra.samples.api.Samples.update(code: java.lang.String)
+
 #PUT	/api/sra/samples/internal/:code				controllers.sra.samples.api.SamplesInternal.update(code: java.lang.String)
 POST	/api/sra/samples/userFile		  			controllers.sra.samples.api.Samples.loadUserFileSample()
 
 
 
 #http://localhost:9000/api/sra/samples?codeRegex=sample_BCM_4932_OS_564&datatable=true&paginationMode=local ok
-#http://localhost:9000/api/sra/samples?projCodes=BRI&=true&atatable=true&paginationMode=local ok 
+#http://localhost:9000/api/sra/samples?projCodes=BRI&datatable=true&paginationMode=local ok 
 #http://localhost:9000/api/sra/samples?accessionRegex=ERS1082367&datatable=true&paginationMode=local ok 
-
 #http://localhost:9000/api/sra/studies?projCodes=ARC&datatable=true&paginationMode=local ok
 #http://localhost:9000/api/sra/samples?projCodes=AXY&datatable=true&paginationMode=local  ok
-#http://localhost:9000/api/sra/experiments?pseudoStateCodes=pseudo_ebiKnown&datatable=true&paginationMode=local
-#http://localhost:9000/api/sra/experiments/exp_BYQ_AAACOSDA_4_C9GL9ACXX.12BA217/rawDatas/BYQ_AAACOSDA_4_1_C9GL9ACXX.12BA217_clean.fastq.gz
-#http://localhost:9000/api/sra/experiments/rawDatas?code=exp_BYQ_AAACOSDA_4_C9GL9ACXX.12BA217
-#http://localhost:9000/api/sra/experiments/rawDatas?runCode=run_BYQ_AAACOSDA_4_C9GL9ACXX.12BA217
-#http://localhost:9000/api/sra/experiments/rawDatas?submissionCode=CNS_BYQ_AWF_24RF4HJFI
-#http://localhost:9000/api/sra/analyzes?code=ANALYSIS_72FE46AAD 
-#http://localhost:9000/api/sra/analyzes/ANALYSIS_72FE46AAD/rawDatas/CHE_AH_NLRS_1_ENFK-VL6L-PRPG-TNWU_A.bnx.gz ok
+#http://localhost:9000/api/sra/experiments?pseudoStateCodes=pseudo_ebiKnown&datatable=true&paginationMode=local  trop gros
+#http://localhost:9000/api/sra/experiments/exp_BYQ_AAACOSDA_4_C9GL9ACXX.12BA217/rawDatas/BYQ_AAACOSDA_4_1_C9GL9ACXX.12BA217_clean.fastq.gz ok
+#http://localhost:9000/api/sra/experiments/rawDatas?code=exp_BYQ_AAACOSDA_4_C9GL9ACXX.12BA217 ok 
+#http://localhost:9000/api/sra/experiments/rawDatas?runCode=run_BYQ_AAACOSDA_4_C9GL9ACXX.12BA217 ok 
+#http://localhost:9000/api/sra/experiments/rawDatas?submissionCode=CNS_BYQ_AWF_24RF4HJFI ok 
+#http://localhost:9000/api/sra/analyzes?code=es_omd  ok 
+#http://localhost:9000/api/sra/analyzes/es_omd/rawDatas/BRD_BL_DLS_2_FVAD-ALOL-PTOY-JNWU_A.bnx.gz ok
 #http://localhost:9000/api/sra/analyzes/rawDatas?submissionCode=GSC_CHE_72FE47FSC ok
 #http://localhost:9000/api/sra/analyzes/rawDatas?code=ANALYSIS_72FE46AAD ok
 #http://localhost:9000/api/sra/experiments?projCodes=BIL&stateCodes=SUB-N&stateCodes=SUB-F ok 
-#http://localhost:9000/api/sra/analyzes?projCodes=BIL&stateCodes=SUB-N&stateCodes=SUB-F bug => ne semble pas tenir compte du state.
 
 #####PUT		/api/sra/samples/:code 							controllers.sra.samples.api.Samples.update(code: java.lang.String) 
 
@@ -236,7 +252,8 @@ DELETE	/api/sra/samples/:code/comments/:commentCode		controllers.sra.samples.api
 #-------------
 GET		/sra/experiments/:homeCode/home				controllers.sra.experiments.tpl.Experiments.home(homeCode: java.lang.String)
 GET		/sra/experiments/:code						controllers.sra.experiments.tpl.Experiments.get(code: java.lang.String)
-GET		/api/sra/experiments						controllers.sra.experiments.api.Experiments.list()
+GET		/api/sra/experiments                        controllers.sra.experiments.api.Experiments.list()
+PUT		/api/sra/experiments/batch                  controllers.sra.experiments.api.Experiments.batchUpdate()
 GET		/api/sra/experiments/rawDatas				controllers.sra.experiments.api.ExperimentsRawDatas.list()
 GET		/api/sra/experiments/readSpecs				controllers.sra.experiments.api.ExperimentsReadSpecs.list()
 GET		/api/sra/experiments/:code					controllers.sra.experiments.api.Experiments.get(code: java.lang.String)
@@ -277,8 +294,13 @@ DELETE	/api/sra/experiments/:code/rawDatas/:relatifName	controllers.sra.experime
 #-----------------
 
 
-#--------
-#GET    	/api/readsets	                 		controllers.readsets.api.ReadSets.list()
+#-----------------------
+# SRA Readsets (NGL-SUB)
+#-----------------------
+#http://localhost:9000/api/sra/readsets/BGC_FOSW_8_C3PWEACXX.IND6  ok
+GET         /api/sra/readsets                       controllers.sra.readsets.api.Readsets.list()
+GET		    /api/sra/readsets/:code					controllers.sra.readsets.api.Readsets.get(code: java.lang.String)
+GET		    /sra/readsets/:code						controllers.sra.readsets.tpl.Readsets.get(code: java.lang.String)
 
 #---------
 # projects from ngl-common
@@ -300,7 +322,6 @@ GET		/sra/bilans/:homeCode/home				controllers.sra.bilans.tpl.Bilans.home(homeCo
 #GET	/sra/bilans/:code						controllers.sra.bilans.tpl.Bilans.get(code: java.lang.String)
 GET		/tpl/sra/bilans/js-routes				controllers.sra.bilans.tpl.Bilans.javascriptRoutes()
 GET		/tpl/sra/bilans/consultation	        controllers.sra.bilans.tpl.Bilans.consultation()
-
 
 
 

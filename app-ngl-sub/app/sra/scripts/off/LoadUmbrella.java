@@ -6,13 +6,14 @@ package sra.scripts.off;
 import javax.inject.Inject;
 
 import sra.scripts.utils.DateTools;
+import sra.services.XmlToSra;
 import fr.cea.ig.lfw.controllers.scripts.buffered.Script;
 import fr.cea.ig.lfw.utils.Iterables;
 import fr.cea.ig.ngl.NGLApplication;
 import models.laboratory.common.instance.State;
 import models.laboratory.common.instance.TraceInformation;
 import play.libs.Json;
-import services.XmlToSra;
+import services.sra.SraException;
 import validation.ContextValidation;
 
 import static ngl.refactoring.state.SRASubmissionStateNames.SUB_F;
@@ -25,7 +26,6 @@ import java.io.IOException;
 import java.util.Date;
 import fr.cea.ig.ngl.dao.sra.ProjectDAO;
 import models.sra.submit.sra.instance.Project;
-import models.sra.submit.util.SraException;
 
 
 /*
@@ -45,7 +45,7 @@ public class LoadUmbrella extends Script<LoadUmbrella.MyParams> {
 // le service injecte projectAPI
 
 
-	private final ProjectDAO            projectDAO;
+	// private final ProjectDAO            projectDAO;
 	private final NGLApplication        app;
 
 	
@@ -54,7 +54,7 @@ public class LoadUmbrella extends Script<LoadUmbrella.MyParams> {
 				ProjectDAO         projectDAO,
 				NGLApplication     app
 				) {
-		this.projectDAO = projectDAO;
+		// this.projectDAO = projectDAO;
 		this.app = app;
 
 
@@ -126,11 +126,12 @@ public class LoadUmbrella extends Script<LoadUmbrella.MyParams> {
 				//throw new SraValidationException(contextValidation);
 			} else {
 				println("Pas de probleme pour le project " + project.accession);
-				projectDAO.save(project);
+				//projectDAO.save(project);
 			}
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+		
 	}
 	
 	@Override

@@ -9,6 +9,27 @@
 @user            = @{ ctx.currentUser() }
 @writePermission = @{ PermissionHelper.checkPermission(user, "writing") }
 
+<!-- ----------------------------------------------------------------------------- -->
+<!-- Modal to display image in full size -->
+	<div id="myImageModal" class="modal fade"  tabindex="-1" role="dialog"
+		aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog" style="margin-left:{{modalLeft}}px">
+    		<div class="modal-content" style="width:{{modalWidth+2}}px">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h3 class="modal-title">{{analysis.code}}</h3>	
+					<h4 id="myModalLabel">{{modalTitle}}</h4>
+				</div>
+				<div class="modal-body" style="padding:0px">
+					<img ng-src="data:image/png;base64,{{modalImage}}" style="width:{{modalWidth}}px; height:{{modalHeight}}px;" />
+				</div>
+				<div class="modal-footer">
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	
 @column()(value: Html) = {
 	<div class="col-md-4 col-lg-4">
 		@value
@@ -35,7 +56,6 @@
 				}
 			</div>
 		 <h1 ng-switch on="analysis.valuation.valid">		
-
 		 	<span ng-switch-when="FALSE" class="text-danger">{{analysis.code}}</span> 
 		 	<span ng-switch-when="TRUE" class="text-success">{{analysis.code}}</span> 
 		 	<span ng-switch-default>{{analysis.code}}</span> 
@@ -55,7 +75,8 @@
 <div class="col-md-12 col-lg-12">
 	<ul class="nav nav-tabs margin-bottom-5">
 		<li ng-class="getTabClass('general')"><a href="#" data-target="#general" data-toggle="tab" ng-click="setActiveTab('general')">@Messages("analyses.tabs.general")</a></li>
-		<li ng-class="getTabClass('advanced')"><a href="#" data-target="#advanced" data-toggle="tab" ng-click="setActiveTab('advanced')">@Messages("analyses.tabs.advanced")</a></li>    
+		<li ng-class="getTabClass('advanced')"><a href="#" data-target="#advanced" data-toggle="tab" ng-click="setActiveTab('advanced')">@Messages("analyses.tabs.advanced")</a></li>
+		<li ng-class="getTabClass('samples')"><a href="#" data-target="#samples" data-toggle="tab" ng-click="setActiveTab('samples')">@Messages("analyses.tabs.samples")</a></li>    
 		<li ng-class="getTabClass('workflow')"><a href="#" data-target="#workflow" data-toggle="tab" ng-click="setActiveTab('workflow')">@Messages("analyses.tabs.workflow")</a></li>
 		<li ng-class="getTabClass('valuations')"><a href="#" data-target="#valuations" data-toggle="tab" ng-click="setActiveTab('valuations')">@Messages("analyses.tabs.valuations.history")</a></li>
 	</ul>
@@ -73,8 +94,7 @@
 		        		</workflow-chart-->
 		        		
 		        		<p class="form-control-static" ng-bind="analysis.state.code|codes:'state'"></p>
-					}
-					
+					}					
 					@views.html.helper.columnLabelValue(Messages("analyses.valuation.valid")){
 						<div ng-switch on="isEditMode()">
 							<p class="form-control-static" ng-switch-when="false" ng-bind="analysis.valuation.valid|codes:'valuation'"/>
@@ -103,11 +123,61 @@
 					@views.html.helper.columnLabelValue(Messages("analyses.masterReadSetCodes")){
 						<div class="form-control-static" list-resize="analysis.masterReadSetCodes|unique" list-resize-min-size='5' />						
 					}
+					<!--NGL-4756-->
+					@views.html.helper.columnLabelValue(Messages("analyses.readSetCodes")){
+					<p></p>
+					<p ng-if="analysis.readSetCodes.length <= 5" ng-repeat="readSetCode in analysis.readSetCodes|unique">
+						<a href="javascript:void(0)" ng-click="showReadSet(readSetCode);" >{{readSetCode}}</a>
+					</p>
+					<p ng-if="analysis.readSetCodes.length > 5" list-resize="analysis.readSetCodes|unique" list-resize-min-size='5'></p>					}
+					<div ng-if="devono_assembly">
+						@views.html.helper.columnLabelValue(Messages("analyses.properties.curator")){
+							<div ng-switch on="isEditMode()">
+								<p class="form-control-static" ng-switch-when="false">{{analysis.properties.curator.value}}</p>
+								<div ng-switch-when="true">
+									<input type="text" class="form-control" ng-model="analysis.properties.curator.value" typeahead="user.name as user.name for user in lists.getUsers() | filter:$viewValue | limitTo:20"  placeholder='@Messages("search.placeholder.curator")' title='@Messages("search.placeholder.curator")'>
+								</div>
+							</div>
+						}
+						@views.html.helper.columnLabelValue(Messages("analyses.properties.reviewer")){
+							<div ng-switch on="isEditMode()">
+								<p class="form-control-static" ng-switch-when="false">{{analysis.properties.reviewer.value}}</p>
+								<div ng-switch-when="true">
+									<input type="text" class="form-control" ng-model="analysis.properties.reviewer.value" typeahead="user.name as user.name for user in lists.getUsers() | filter:$viewValue | limitTo:20"  placeholder='@Messages("search.placeholder.reviewer")' title='@Messages("search.placeholder.reviewer")'>
+								</div>
+							</div>
+						}
+						@views.html.helper.columnLabelValue(Messages("analyses.properties.tolid")){
+							<div ng-switch on="isEditMode()">
+								<p class="form-control-static" ng-switch-when="false">{{analysis.properties.tolid.value}}</p>
+								<div ng-switch-when="true">
+									<input type="text" class="form-control" ng-model="analysis.properties.tolid.value" placeholder='@Messages("search.placeholder.tolid")' title='@Messages("search.placeholder.tolid")'>
+								</div>
+							</div>
+						}
+						@views.html.helper.columnLabelValue(Messages("analyses.state.code")){
+							<div ng-switch on="isEditMode()">
+								<p class="form-control-static" ng-switch-when="false" ng-bind="analysis.properties.state.value|codes:'value'"></p>
+								<div ng-switch-when="true">
+									<div class='form-control' bt-select ng-model='analysis.properties.state.value' 
+											bt-options="stateProperty.code as stateProperty.code|codes:'value' for stateProperty in stateProperties">
+									</div>
+								</div>
+							</div>
+						}
+
+						<div ng-if ="analysis.properties.primaryAssemblyProjectAccession.value">
 					
-					@views.html.helper.columnLabelValue(Messages("analyses.readSetCodes")){			
-						<div class="form-control-static" list-resize="analysis.readSetCodes|unique" list-resize-min-size='5' />																		
-					}
-					
+							@views.html.helper.columnLabelValue(Messages("analyses.properties.primaryAssemblyProjectAccession")){
+								<div ng-switch on="isEditMode()">
+									<p class="form-control-static" ng-switch-when="false">{{analysis.properties.primaryAssemblyProjectAccession.value}}</p>
+									<div ng-switch-when="true">
+										<input type="text" class="form-control" ng-model="analysis.properties.primaryAssemblyProjectAccession.value" placeholder='@Messages("search.placeholder.primaryAssemblyProjectAccession")' title='@Messages("search.placeholder.primaryAssemblyProjectAccession")'>
+									</div>
+								</div>
+							}
+						</div>
+					</div>
 				}
 				</div>
 				
@@ -168,6 +238,32 @@
 		</div>	
 		
 	</div>
+	<div class="tab-pane {{getTabClass('samples')}}" id="samples">
+		<div class="row">
+			<div class="col-md-4 col-lg-4">
+					<table class="table table-condensed table-hover table-bordered">
+					<thead>
+							<tr>
+								<th>@Messages("analyses.sample.code")</th>
+								<th>@Messages("analyses.sample.taxonCode")</th>
+								<th>@Messages("analyses.sample.ncbiScientificName")</th>
+								<th>@Messages("analyses.sample.properties.collabScientificName")</th>
+								<th>@Messages("analyses.sample.properties.WoRMSCode")</th>								
+							</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="sample in samples">
+							<td>{{sample.code}}</td>
+							<td>{{sample.taxonCode}}</td>
+							<td>{{sample.ncbiScientificName}}</td>
+							<td>{{sample.properties.collabScientificName.value}}</td>
+							<td>{{sample.properties.WoRMSCode.value}}</td>
+						</tr>
+					</tbody>
+					</table>
+				</div>
+		</div>
+	</div>
 	<div class="tab-pane {{getTabClass('workflow')}}" id="workflow">
 	<div class="row">
 		<div class="col-md-4 col-lg-4">
@@ -220,9 +316,14 @@
 </div>
 </div>
 </div>
-<div class="row">	
+
+<div>
+	<toggle-buttons buttons="buttonList"></toggle-buttons>
+</div>
+  
+<div class="row" style="position: relative;">	
 	<div class="col-md-12 col-lg-12">
 		@views.html.commons.treatments()
 	</div>
-</div>	
+</div>
 

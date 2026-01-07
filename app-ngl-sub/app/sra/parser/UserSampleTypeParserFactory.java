@@ -3,9 +3,8 @@ package sra.parser;
 import java.util.Map;
 
 import models.sra.submit.sra.instance.UserSampleType;
-import models.sra.submit.util.SraException;
-//import play.Logger;
-import services.IUserObjectFactory;
+import services.sra.SraException;
+import sra.services.IUserObjectFactory;
 
 public class UserSampleTypeParserFactory implements IUserObjectFactory<UserSampleType> {
 	

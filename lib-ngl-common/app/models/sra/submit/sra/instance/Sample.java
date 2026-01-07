@@ -6,18 +6,18 @@ import java.util.Date;
 
 import org.apache.commons.lang.StringUtils;
 
-import fr.cea.ig.ngl.dao.api.sra.AbstractSampleAPI;
-import fr.cea.ig.ngl.dao.api.sra.SampleAPI;
+import controllers.sra.api.AbstractSampleAPI;
+import controllers.sra.api.SampleAPI;
 import models.laboratory.common.description.ObjectType;
 import models.utils.InstanceConstants;
+import services.sra.SraValidationHelper;
 import validation.ContextValidation;
 import validation.common.instance.CommonValidationHelper;
-import validation.sra.SraValidationHelper;
 import validation.utils.ValidationHelper;
 
 public class Sample extends AbstractSample {
 	
-	private static final play.Logger.ALogger logger = play.Logger.of(Sample.class);
+	// private static final play.Logger.ALogger logger = play.Logger.of(Sample.class);
 	
 	// SampleType
 	//public String alias;         // required mais remplacé par code herité de DBObject
@@ -28,8 +28,7 @@ public class Sample extends AbstractSample {
 	public String title;           // required next soon 
 	public String anonymizedName;      // not required.
 	public String description;  
- 	@Deprecated
-	public String clone;             // champs qui doit apparaitre dans datatable mais qui apparaitra dans le xml dans attributes  
+
 	//public String refCollab;       // champs qui doit apparaitre dans datatable mais qui apparaitra dans le xml dans attributes  
 	//public String accession;       // numeros d'accession attribué par ebi champs mis dans AbstractSample
  	//public String externalId = null;
@@ -38,9 +37,13 @@ public class Sample extends AbstractSample {
 	//public State state; //= new State();// Reference sur "models.laboratory.common.instance.state" mis dans lAbstractSample
 	//public TraceInformation traceInformation = new TraceInformation(); champs mis dans AbstractSample
 
-	// Representation sous forme de string de listSampleAttributes , pour affichage et edition dans datatable. facultatif
+	public Date releaseDate; 
+	// public boolean consolidatedPublicStatus : dans classe parente.
+	// Representation sous forme de string de listSampleAttributes , pour affichage et edition dans datatable. 
 	public String attributes;
-	
+	// NGL-4593
+    public String dropBox;
+    
 	public Sample() {
 		super(AbstractSample.sampleType);
 	}
@@ -58,16 +61,16 @@ public class Sample extends AbstractSample {
 		//NGL-4235 : on veut laisser passer des samples invalides, sans attributes, qui pourront etre completes à la validation. 
 		switch (contextValidation.getMode()) {
 		case CREATION:
-			SraValidationHelper   .validateAttributes (contextValidation,"attributes", this.attributes);
+			SraValidationHelper   .validateSampleAttributes (contextValidation,"attributes", this.attributes);
 			break;
 		case DELETE:
-			SraValidationHelper   .validateAttributes (contextValidation,"attributes", this.attributes);
+			SraValidationHelper   .validateSampleAttributes (contextValidation,"attributes", this.attributes);
 			break;
 		case UPDATE:
-			SraValidationHelper   .newValidateAttributesRequired (contextValidation,"attributes", this.attributes);
+			SraValidationHelper   .validateSampleAttributesRequired (contextValidation,"attributes", this.attributes);
 			break;
 		case NOT_DEFINED:
-			SraValidationHelper   .validateAttributes (contextValidation,"attributes", this.attributes);
+			SraValidationHelper   .validateSampleAttributes (contextValidation,"attributes", this.attributes);
 			break;
 		}
 		CommonValidationHelper.validateTraceInformationRequired(contextValidation, traceInformation);
@@ -88,9 +91,9 @@ public class Sample extends AbstractSample {
 		if(sampleAPI.dao_checkObjectExist("code", code)) {
 			contextValidation.addError("code", code + " existe deja dans la base de données et MODE CREATION");
 		}
-		boolean copy = false;
+		// boolean copy = false;
 		if (contextValidation.getObject("copy")!= null && (boolean) contextValidation.getObject("copy")) {
-			copy = true;
+			// copy = true;
 		}
 // On peut avoir un import de study soumis hors NGL-SUB		
 //		if(! copy) {
@@ -144,7 +147,9 @@ public class Sample extends AbstractSample {
 		case DELETE:
 			validateDelete(contextValidation);
 			break;
-		default: // autre cas undefined notamment
+		case NOT_DEFINED:
+			break;
+		default: // autre cas 
 			contextValidation.addError("ERROR", "contextValidation.getMode() != de CREATION, UPDATE ou DELETE (undefined ?)");
 			break;	
 		} 

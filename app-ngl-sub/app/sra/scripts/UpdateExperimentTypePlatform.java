@@ -7,8 +7,9 @@ import java.util.List;
 
 import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
+
+import controllers.sra.api.ExperimentAPI;
 import fr.cea.ig.lfw.controllers.scripts.buffered.ScriptNoArgs;
-import fr.cea.ig.ngl.dao.api.sra.ExperimentAPI;
 import models.sra.submit.sra.instance.Experiment;
 
 
@@ -54,6 +55,7 @@ public class UpdateExperimentTypePlatform extends ScriptNoArgs {
 			for (Experiment experiment: iterable) {
 				if (StringUtils.isNotBlank(experiment.typePlatform)) {
 					experiment.typePlatform = experiment.typePlatform.toLowerCase();
+					experiment.traceInformation.modifyUser = "ngsrg";
 					experimentAPI.dao_saveObject(experiment);
 					cp++;
 				}	

@@ -22,6 +22,20 @@ angular.module('home').controller('OneToVoidPCRGelMigrationCNSCtrl',['$scope', '
 				
 		});			
 	};
+
+	$scope.$on('refresh', function(e) {	
+		// On récupère la config du datatable à l'écran.
+		var dtConfig = $scope.atmService.data.getConfig();
+
+		// On met à jour la condition d'affichage de la poubelle individuelle du tableau des containers : à l'état new uniquement et pas en mode édit.
+		dtConfig.remove.active = ($scope.isEditModeAvailable() && $scope.isNewState());
+
+		// On met à jour la config du datatable à l'écran qu'on vient de modifier.
+		$scope.atmService.data.setConfig(dtConfig);
+
+		// Refresh de l'expérience affichée à l'écran.
+		$scope.atmService.refreshViewFromExperiment($scope.experiment);
+	});
 	
 	$scope.$watch("gel",function(imgNew, imgOld){
 		if(imgNew){			

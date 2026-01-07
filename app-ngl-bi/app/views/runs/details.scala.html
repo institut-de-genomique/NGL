@@ -1,5 +1,4 @@
 @this(ctx : fr.cea.ig.ngl.NGLApplication)
-@* @this(ctx : fr.cea.ig.play.migration.NGLContext) *@
 @()
 
 @import play.mvc.Http.Context
@@ -69,8 +68,9 @@
 
 
 <div class="tab-content">
-			<div class="tab-pane {{getTabClass('general')}}" id="general">
-			@partials.details_general()
+			<div class="tab-pane {{getTabClass('general')}}" id="general" >
+			@** NGL-4649 passer ctx en param  **@
+			@partials.details_general(ctx)
 			</div>
 			<div class="tab-pane {{getTabClass('workflow')}}" id="workflow">
 				<div class="row">

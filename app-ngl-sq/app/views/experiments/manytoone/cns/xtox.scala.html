@@ -1,60 +1,132 @@
-@this(inputtubes_ : inputtubes, outputtubes_ : outputtubes, inputplates_ : inputplates, outputplates_ : outputplates)
+@this(inputtubes_ : inputtubes, outputtubes_ : outputtubes, inputplates_ : inputplates, outputplates_ : outputplates, outputmodebuttons_ : views.html.experiments.manytoone.defaults.partials.outputmodebuttons)
 
 @()
-
 <!--- FDS 05/10/2016 cree pour gerer le cas des sorties tubes ou plaques et le pooling automatique--->
 
 <div class="col-md-12 col-lg-12" ng-switch="supportCategoryCode">
-<div ng-switch-when="tube">
+<div ng-switch-when="tube"><!-- les inputs ne sont pas QUE des plaques: si mélange on passe ici (comment ???) -->
 	<ul class="nav nav-tabs margin-bottom-5" role="tablist">
 	  <li class="active"><a href="" role="tab" data-target="#tube" data-toggle="tab">@Messages("experiments.pools.design")</a></li>
 	  <li><a href="" role="tab"  data-target="#roadmap" data-toggle="tab" ng-click="atmService.data.updateDatatable()">@Messages("experiments.calculation.sheet")</a></li>  
 	</ul>
 	
 	<div class="tab-content"  >
-		<div class="tab-pane active" id="tube">
-			<div class="row">
-				<div class="col-md-12 col-lg-12">
+		<div class="tab-pane active" id="tube"><!-- onglet 1-->
+			<div class="row" ng-if="mainService.isEditMode() && isNewState()">
+
+				<!-- InputContainers table -->
+				<div class="col-md-10 col-lg-10">
+					@inputtubes_()
+				</div>
+				<!-- NG-5175  -->
+				<div class="col-md-2 col-lg-2">
+					<!-- Drop buttons -->	
+					<div class="page-header">
+						<button class="btn btn-default btn-lg btn-block" id="pool" title="Pool"     
+							ng-click="doPooling()"
+							ng-disabled="isNotReadyPooling()">
+							<i class="fa fa-sign-in fa-2x"></i>
+						</button>
+					</div>
+
+					<label for="selectPoolMode">Pool Mode</label>
+					<select class="form-control input-sm" id="selectPoolMode"
+							ng-model=poolingMode
+							ng-change="setPoolingMode(poolingMode)"		
+							ng-options="mode as mode.name for mode in poolingModes track by mode.code">
+							<option value=poolingMode.value>{{poolingMode.name}}</option>
+					</select>
+
+					<!--aide image modale sous le select-->
+					<!-- NGL-5175 modification nom de la modale + ajout parametre dans showModalHelp -->
+					<p><a class="fa fa-info-circle" ng-click="showModalHelp('#infoModalePoolMode')" title="Aide Pool Mode" href=""> Aide Pool Mode</a></p>
 					<div class="row">
-						<div class="col-md-10 col-lg-10" ng-if="mainService.isEditMode() && isNewState()">
-						<!-- InputContainers table -->
-						@inputtubes_()
-						</div>
-						<div class="col-md-2 col-lg-2" ng-if="mainService.isEditMode() && isNewState()">
-						<!-- Drop buttons -->	
-			  				<div class="page-header">
-				 				<button class="btn btn-default btn-lg btn-block" ng-click="atmService.data.dropInSelectInputContainer()" 
-				                                                  ng-disabled="!atmService.data.isSelectInputContainers()">
-				 				<i class="fa fa-sign-in fa-2x"></i>
-				 				</button>
-			 				</div>
+						<div id="infoModalePoolMode" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+							<div class="modal-dialog" style="width:65%">
+								<div class="modal-content" > 
+									<div class="modal-header">
+										<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+										<h4 class="modal-title"><a class="fa fa-info-circle"> Aide Pool Mode</a></h4>
+									</div>
+									<div class="modal-body" style="padding:0px">
+										<img src="/assets/images/pool_help.png" style="width:100%" />
+									</div>
+									<div class="modal-footer">
+										<!-- empty footer -->	
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
-					<!-- OutputContainers table -->
-					<div class="row">
-						<div ng-switch="atmService.outputContainerSupportCategoryCode">
-	           				<div ng-switch-when="96-well-plate">
-	           				<div class="col-md-10 col-lg-10 flowcellTable">
-				   			@outputplates_()
-				   			</div>
-							</div>
-							<div ng-switch-when="tube">
-							<div class="col-md-10 col-lg-10 flowcellTable">
-				   			@outputtubes_()
-				   			</div>
-							</div>
+					
+					<!-- choix ouput mode uniquement en sortie en plaque 
+						Tous les boutons sont désactivés si au moins un puit a été généré ( on ne change rien en cours de pooling !!!!) -->
+					<!-- NGL-5175 creation d'un partial pour les boutons de choix et parametrage de l'outputmode -->
+					<div class="row" ng-if="plateUtils.isPlate()">
+						@outputmodebuttons_()
+					</div>
+
+					<!-- ng-if => un peu mieux que ng-show !!!!!!!! -->
+					<div class="form-group col-lg-12"  ng-if="poolingMode.code !== 'manual'">
+						<!--options de l'algorithme intelligent / visibles uniqt si poolingMode n'est pas "libre"-->
+						<br/>
+						<div class="row">
+							<!-- Ajout label; si l'ajout est en dehors de de row l'alignement est incorrect...-->
+							<label>Paramétrage du pool intelligent</label><br/>
+							<label for samplesProject >Projet des samples</label>
+							<input type="text" size="4" id="samplesProject" ng-model="samplesProject" ng-change="setSamplesProject(samplesProject)"/>
 						</div>
-					</div>	
+						<!--  si on met div class=row l'alignement a gauche est correct mais l'affichage se fait sur 2 lignes !!!-->
+						<div class="checkbox">
+							<label><input type="checkbox" id="allowNoNegControls" ng-model=allowNoNegControls ng-change="toggleAllowNoNegControls()">
+								Autoriser pools sans contrôle négatif
+							</label>
+						</div>
+						<div class="checkbox">
+							<label><input type="checkbox" id="sortByBID" ng-model=sortByBID ng-change="toggleSortByBID()">
+								Tri par BID
+							</label>
+						</div>
+						<!-- simulation -->
+						<div class="checkbox">
+							<label><input type="checkbox" id="simulation" ng-model=simulation ng-change="toggleSimulation()">
+								Simulation
+							</label>
+						</div>
+					</div>
+			
+					<!-- Pas de plaques a pooler si input tubes ou mixte -->
+
 				</div>
+	
 			</div>
-		</div>		
-		<div class="tab-pane" id="roadmap">
-		<div class="row roadmap">
-			<div class="col-md-12 col-lg-12" ultimate-datatable="atmService.data.datatable"></div>
+			<!-- OutputContainers table -->
+			<div class="row">
+				<div ng-switch="atmService.outputContainerSupportCategoryCode">
+					<!-- output plaque -->
+					<div ng-switch-when="96-well-plate">
+						<div class="col-md-10 col-lg-10 flowcellTable">
+							@outputplates_()
+						</div>
+					</div>
+					<!-- output tubes -->
+					<div ng-switch-when="tube">
+						<div class="col-md-10 col-lg-10 flowcellTable">
+							@outputtubes_()
+						</div>
+					</div>
+				</div>
+			</div>	
 		</div>
+
+		<div class="tab-pane" id="roadmap"><!-- onglet 2-->
+			<div class="row roadmap">
+				<div class="col-md-12 col-lg-12" ultimate-datatable="atmService.data.datatable"></div>
+			</div>
 		</div>
-	</div>
-</div>
+	</div><!--fin tab-content -->
+</div><!-- fin swich tubes -->
+
 <div ng-switch-when="96-well-plate">
 	<!--- FDS 25/08/2016 MODIF des colonnes pour cause de chevauchement a l'affichage-->
 	<ul class="nav nav-tabs margin-bottom-5" role="tablist">
@@ -64,195 +136,214 @@
 	</ul>
 
 	<div class="tab-content">
-		<div class="tab-pane active" id="plate">
+		<div class="tab-pane active" id="plate"><!-- onglet 1-->
+			
 			<div class="row"  ng-if="mainService.isEditMode() && isNewState()">
+				<!-- InputContainers table -->
 				<div class="col-md-10 col-lg-10"> 
-				@inputplates_()
+					@inputplates_()
 				</div>
-				<div class="col-md-2 col-lg-2"> 
+				<div class="col-md-2 col-lg-2">
+					<!-- Drop buttons -->	
 					<div class="page-header">
-			 		 <!-- desactiver si pooling mode libre et rien selectionné OU pooling auto et qq chose selectionné  -->
-			  			<button class="btn btn-default btn-lg btn-block"         
+
+						<!-- 20/08/2025 creation isNotReadyPooling() dans x-to-plates-ctrl.js pour les cas ou le pooling n'est pas possible
+						  ng-disabled="( (poolingMode.code ==='manual') && ( !atmService.data.isSelectInputContainers() || ( outputMode === undefined) ) ) ||
+							             ( (poolingMode.code !=='manual') && atmService.data.isSelectInputContainers() ) "
+						-->
+			  			<button class="btn btn-default btn-lg btn-block" id="pool" title="Pool"     
 			          		ng-click="doPooling()"
-			          		ng-disabled="(!atmService.data.isSelectInputContainers() && (poolingMode.code ==='manual'))||(atmService.data.isSelectInputContainers() && (poolingMode.code !=='manual')) ">
-			  			<i class="fa fa-sign-in fa-2x"></i>
+			          		ng-disabled="isNotReadyPooling()">
+			  				<i class="fa fa-sign-in fa-2x"></i>
 			  			</button>
-						
-			  			<label for="selectPoolMode">Pool Mode</label>
-						<select class="form-control input-sm" id="selectPoolMode"
+					</div>
+
+			  		<label for="selectPoolMode">Pool Mode</label>
+					<select class="form-control input-sm" id="selectPoolMode"
 							ng-model=poolingMode
 	  						ng-change="setPoolingMode(poolingMode)"		
 							ng-options="mode as mode.name for mode in poolingModes track by mode.code">
 							<option value=poolingMode.value>{{poolingMode.name}}</option>
-						</select>
-							<!--aide image modale sous le select-->
-							<p><a class="fa fa-info-circle" ng-click="showModalHelp()" title="Aide Pool Mode" href=""> Aide Pool Mode</a></p>
-			  				<div class="row">
-							<div id="infoModale" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
- 								<div class="modal-dialog" style="width:65%">
- 									<div class="modal-content" > 
-										<div class="modal-header">
-											<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-											<h4 class="modal-title"><a class="fa fa-info-circle"> Aide Pool Mode</a></h4>
-										</div>
-										<div class="modal-body" style="padding:0px">
-											<img src="/assets/images/pool_help.png" style="width:100%" />
-										</div>
-										<div class="modal-footer">
-										</div>
+					</select>
+					
+					<!--aide image modale sous le select-->
+					<!-- NGL-5175 modification nom de la modale + ajout parametre dans showModalHelp -->
+					<p><a class="fa fa-info-circle" ng-click="showModalHelp('#infoModalePoolMode')" title="Aide Pool Mode" href=""> Aide Pool Mode</a></p>
+					<div class="row">
+						<div id="infoModalePoolMode" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+							<div class="modal-dialog" style="width:65%">
+								<div class="modal-content" > 
+									<div class="modal-header">
+										<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+										<h4 class="modal-title"><a class="fa fa-info-circle"> Aide Pool Mode</a></h4>
+									</div>
+									<div class="modal-body" style="padding:0px">
+										<img src="/assets/images/pool_help.png" style="width:100%" />
+									</div>
+									<div class="modal-footer">
+										<!-- empty footer -->	
 									</div>
 								</div>
 							</div>
-							</div>
-						
-						<div class="form-group col-lg-12"  ng-show="(poolingMode.code !== 'manual')">
-							<!--options de l'algorithme intelligent / visibles uniqt si poolingMode n'est pas "libre"
-							   ???? et  "isNewState() ???????-->
-							<div class="row">&nbsp;</div>
-							<div class="row"><label for samplesProject >Projet des samples</label>
-											 <input type="text" size="4" id="samplesProject" ng-model="samplesProject" ng-change="setSamplesProject(samplesProject)"/>
-							</div>
-							<!--  si on met div class=row l'alignement a gauche est correct mais l'affichage se fait sur 2 lignes !!!-->
-							<div class="checkbox"><label><input  type="checkbox" id="allowNoNegControls" ng-model=allowNoNegControls ng-change="toggleAllowNoNegControls()">
-											 		Autoriser pools sans contrôle négatif</label>
-							</div>
-							<div class="checkbox"><label><input  type="checkbox" id="sortByBID" ng-model=sortByBID ng-change="toggleSortByBID()">
-													Tri par BID</label>
-							</div>
-							<!-- simulation -->
-							<div class="checkbox"><label><input  type="checkbox" id="simulation" ng-model=simulation ng-change="toggleSimulation()">
-													Simulation</label>
-							</div>
-							<!-- abandonné pour l'instant: voir cns/x-to-plates-ctrl.js 
-							<div class="row"><button class="btn btn-default btn-xs" ng-click="deleteAllATMs()">
-											<i class="fa fa-trash-o"></i>
-											</button> Supprimer tous les pools
-							</div>
-							 -->
 						</div>
-	        		</div>
-						<button 
-			       			ng-repeat="supportCode in atmService.data.inputContainerSupports" type="button" 
+					</div>
+					
+					<!-- choix ouput mode uniquement en sortie en plaque 
+						Tous les boutons sont désactivés si au moins un puit a été généré ( on ne change rien en cours de pooling !!!!) -->
+					<!-- NGL-5175 creation d'un partial pour les boutons de choix et parametrage de l'outputmode -->
+					<div class="row" ng-if="plateUtils.isPlate()">
+						@outputmodebuttons_()
+					</div>
+
+					<!-- ng-if => un peu mieux que ng-show !!!!!!!! -->
+					<div class="form-group col-lg-12"  ng-if="poolingMode.code !== 'manual'">
+						<!--options de l'algorithme intelligent / visibles uniqt si poolingMode n'est pas "libre"-->
+						<br/>
+						<div class="row">
+							<!-- Ajout label; si l'ajout est en dehors de de row l'alignement est incorrect...-->
+							<label>Paramétrage du pool intelligent</label><br/>
+							<label for samplesProject >Projet des samples</label>
+							<input type="text" size="4" id="samplesProject" ng-model="samplesProject" ng-change="setSamplesProject(samplesProject)"/>
+						</div>
+						<!--  si on met div class=row l'alignement a gauche est correct mais l'affichage se fait sur 2 lignes !!!-->
+						<div class="checkbox">
+							<label><input type="checkbox" id="allowNoNegControls" ng-model=allowNoNegControls ng-change="toggleAllowNoNegControls()"/>
+								Autoriser pools sans contrôle négatif
+							</label>			 		
+						</div>
+						<div class="checkbox">
+							<label><input type="checkbox" id="sortByBID" ng-model=sortByBID ng-change="toggleSortByBID()">
+								Tri par BID
+							</label>
+						</div>
+						<!-- simulation -->
+						<div class="checkbox">
+							<label><input type="checkbox" id="simulation" ng-model=simulation ng-change="toggleSimulation()"/>
+								Simulation
+							</label>
+						</div>
+					</div>
+
+					<!-- plaques a pooler -->
+					<br/>
+					<div id="listePlates">
+						<button type="button" 
+			       			ng-repeat="supportCode in atmService.data.inputContainerSupports" 
 				    		ng-class="atmService.data.getPlateBtnClass(supportCode)" 
 				    		ng-click="atmService.data.setCurrentSupportCode(supportCode)">
 							{{supportCode}}
-						</button>	
+						</button>
+					</div>
 				</div>
-			</div>	
+			</div>
+			<!-- OutputContainers table -->
 			<div class="row">
 				<div ng-switch="atmService.outputContainerSupportCategoryCode">
+					<!-- output plaque -->
             		<div ng-switch-when="96-well-plate">
             			<div class="col-md-10 col-lg-10 flowcellTable">
-			   			@outputplates_()
+			   				@outputplates_()
 			   			</div>
 					</div>
+					<!-- output tubes -->
 					<div ng-switch-when="tube">
 						<div class="col-md-10 col-lg-10 flowcellTable">
-			   			@outputtubes_()
+			   				@outputtubes_()
 			   			</div>
 					</div>
 				</div>
 			</div>
-	</div>
-	
-	<div class="tab-pane" id="roadmap">
-	<div class="row roadmap">
-		<div class="col-md-12 col-lg-12" ultimate-datatable="atmService.data.datatable"></div>
-	</div>
-	</div>
-	
-	
-	<div class="tab-pane" id="src_dest">
-	<div class="row roadmap">
-	<div class="col-md-4 col-lg-4">
-		<table class="table table-bordered">
-			<thead>
-				<tr>
-					<th>
-						@Messages("experiments.src_dest.inputContainerSupportCode")
-					</th>
-					<th>
-						@Messages("experiments.src_dest.source")
-					</th>											
-				</tr>
-				</thead>	
-				<!--  containerSupport et pas container -->			
-				<tr ng-model="containerSupport" ng-repeat="containerSupport in getInputContainerSupports() | orderBy track by $index" >
-					<td>
-						{{containerSupport}}
-					</td>
-					<td>
-						{{$index+1}}
-					</td>									
-				</tr>				
-			</table>
 		</div>
-	<!--  ajout ng-switch car il faut un label dans le cas des tubes en sortie -->
-	<div class="col-md-4 col-lg-4"  ng-switch="atmService.outputContainerSupportCategoryCode">
-	<div ng-switch-when="96-well-plate">
-		<table class="table table-bordered">
-			<thead>
-				<tr>
-					<th>
-						@Messages("experiments.src_dest.outputContainerSupportCode")
-					</th>
-					<th>
-						@Messages("experiments.src_dest.dest")
-					</th>
-					<!-- le label de travail est sur les containers pas les supports...
-					<th>
-						@Messages("experiments.src_dest.label")
-					</th>	
-					 -->										
-				</tr>
-				</thead>				
-				<tr ng-model="containerSupport" ng-repeat="containerSupport in getDistinctOutputContainerSupports()  | orderBy track by $index" >
-					<td>
-						{{containerSupport.code}}
-					</td>
-					<td>
-						{{$index+1}}
-					</td>
-					<!-- le label de travail est sur les containers pas les supports...
-					<td>
-						{{container.experimentProperties.workName.value}}
-					</td>		
-					-->							
-				</tr>				
-			</table>
-		</div>	
-		<div ng-switch-when="tube">
-		<table class="table table-bordered">
-			<thead>
-				<tr>
-					<th>
-						@Messages("experiments.src_dest.outputContainerSupportCode")
-					</th>
-					<th>
-						@Messages("experiments.src_dest.dest")
-					</th>
-					<th>
-						@Messages("experiments.src_dest.label")
-					</th>										
-				</tr>
-				</thead>	
-				<tr ng-model="container" ng-repeat="container in getOutputContainers() | orderBy:'locationOnContainerSupport.code' track by $index" >
+	
+		<div class="tab-pane" id="roadmap"><!-- onglet 2-->
+			<div class="row roadmap">
+				<div class="col-md-12 col-lg-12" ultimate-datatable="atmService.data.datatable"></div>
+			</div>
+		</div>
+	
+		<div class="tab-pane" id="src_dest"><!-- onglet 3-->
+			<div class="row roadmap"><!-- ??? pourquoi cette class roadmap ici ??????-->
+				<!-- SOURCE -->
+				<div class="col-md-4 col-lg-4">
+					<table class="table table-bordered">
+						<thead>
+							<tr>
+								<th>
+									@Messages("experiments.src_dest.inputContainerSupportCode")
+								</th>
+								<th>
+									@Messages("experiments.src_dest.source")
+								</th>											
+							</tr>
+						</thead>	
+						<!--  containerSupport et pas container -->			
+						<tr ng-model="containerSupport" ng-repeat="containerSupport in getInputContainerSupports() | orderBy track by $index" >
+							<td>
+								{{containerSupport}}
+							</td>
+							<td>
+								{{$index+1}}
+							</td>									
+						</tr>				
+					</table>
+				</div>
 
-					<td>
-						{{container.locationOnContainerSupport.code}}
-					</td>
-					<td>
-						{{$index+1}}
-					</td>
-					<td>
-						{{container.experimentProperties.workName.value}}
-					</td>								
-				</tr>				
-			</table>
-		</div>
-		</div>
+				<!-- DESTINATION -->
+				<!--  ajout ng-switch car il faut un label dans le cas des tubes en sortie -->
+				<div class="col-md-4 col-lg-4"  ng-switch="atmService.outputContainerSupportCategoryCode">
+				<div ng-switch-when="96-well-plate">
+					<table class="table table-bordered">
+						<thead>
+							<tr>
+								<th>
+									@Messages("experiments.src_dest.outputContainerSupportCode")
+								</th>
+								<th>
+									@Messages("experiments.src_dest.dest")
+								</th>										
+							</tr>
+						</thead>				
+						<tr ng-model="containerSupport" ng-repeat="containerSupport in getDistinctOutputContainerSupports()  | orderBy track by $index" >
+							<td>
+								{{containerSupport.code}}
+							</td>
+							<td>
+								{{$index+1}}
+							</td>						
+						</tr>				
+					</table>
+				</div>	
+				<div ng-switch-when="tube">
+					<table class="table table-bordered">
+						<thead>
+							<tr>
+								<th>
+									@Messages("experiments.src_dest.outputContainerSupportCode")
+								</th>
+								<th>
+									@Messages("experiments.src_dest.dest")
+								</th>
+								<th>
+									@Messages("experiments.src_dest.label")
+								</th>										
+							</tr>
+						</thead>	
+						<tr ng-model="container" ng-repeat="container in getOutputContainers() | orderBy:'locationOnContainerSupport.code' track by $index" >
+							<td>
+								{{container.locationOnContainerSupport.code}}
+							</td>
+							<td>
+								{{$index+1}}
+							</td>
+							<td>
+								{{container.experimentProperties.workName.value}}
+							</td>								
+						</tr>				
+					</table>
+				</div>
+			</div>
 		</div >
-	</div>
-	</div>
-</div>
+		</div>
+	</div><!--fin tab-content -->
+</div><!-- fin swich plates-->
 </div>

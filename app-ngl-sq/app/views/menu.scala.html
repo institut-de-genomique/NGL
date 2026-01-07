@@ -12,20 +12,21 @@
 @import controllers.descriptions.tpl.routes.Descriptions 
 
 @import views.html.helper.formGroup
-@import views.html.ddmenu._
+@import views.html.ddmenu._ 
 
 @user            = @{ ctx.currentUser() }
 @writePermission = @{ PermissionHelper.checkPermission(user, "writing") }
 @adminPermission = @{ PermissionHelper.checkPermission(user, "admin") }
 @isCNSInstitute  = @{ "CNS" == ctx.nglConfig().getInstitute() }
 @isCNGInstitute  = @{ "CNG" == ctx.nglConfig().getInstitute() }
+@role = @{ PermissionHelper.getRole(user) }
 @always          = @{ true }
-
 
 <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
 	<div class="container-fluid">
 		<div class="navbar-header">
-			<a class="navbar-brand" href="@controllers.main.tpl.routes.Main.home()">@ctx.messageEnv("application.name")</a>
+			<!-- NGL-4285  couleur differente PROD/NOPROD -->
+			<a class="navbar-brand @("noprod".when( "PROD" != ctx.nglConfig().nglEnv() ))" href="@controllers.main.tpl.routes.Main.home()">@ctx.messageEnv("application.name")</a>
     	</div>
     	<div class="collapse navbar-collapse">
     		<ul class="nav navbar-nav">
@@ -95,7 +96,8 @@
 	  							@menuhelpCNG()
 	  						}
 	  				</ul>
-
+				</li>
+				
 				@ddmenu(nav,"descriptions","descriptions.menu") {
 					@ddentry(nav,	"descriptions.instruments",	Descriptions.home("instruments"),	"descriptions.menu.instruments")
 					@ddentry(nav,	"descriptions.imports",	Descriptions.home("imports"),	"descriptions.menu.imports")
@@ -105,6 +107,7 @@
 						@ddentry(nav,	"descriptions.mapping.projects",	Descriptions.home("mappingprojects"),	"descriptions.menu.mapping.projects")
 					}
 					@ddentry(nav,	"descriptions.processes",	Descriptions.home("processes"),	"descriptions.menu.processes")
+					@ddentry(nav,	"descriptions.processes.graph",	Descriptions.home("processesgraph"),	"descriptions.menu.processes.graph")
 				}
 				
 				@if(adminPermission){
@@ -123,6 +126,7 @@
 					<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" id="user"><i class="fa fa-user"></i> @user <b class="caret"></b></a>
 					<ul class="dropdown-menu" role="menu" aria-labelledby="user">
 						<li><a href="/authentication/logout">@Messages("authentification.dropdown_list.signout")</a></li>
+						<li><a>@role</a></li>
 					</ul>
 				</li>
 				<!--  NGL-3363 ajout application version / NGL-3446 ajout lien vers notes de version-->

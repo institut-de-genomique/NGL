@@ -109,6 +109,7 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 		switch(importTypeCode) {
 			case "illumina-depot-reagents-reception": return "Réception réactifs dépôt Illumina";
 			case "nanopore-reagents-reception": return "Réception réactifs Nanopore";
+			case "pacbio-reagents-reception": return "Réception réactifs PacBio";
 			default: return importTypeCode;
 		}
 	};
@@ -118,6 +119,7 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 		switch(typeCode) {
 			case "illumina-depot-reagent": return "Réactif Dépôt Illumina";
 			case "nanopore-reagent": return "Réactif Nanopore";
+			case "pacbio-reagent": return "Réactifs PacBio";
 			default: return typeCode;
 		}
 	};

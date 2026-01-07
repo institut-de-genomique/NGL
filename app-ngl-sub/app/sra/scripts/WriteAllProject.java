@@ -10,13 +10,13 @@ import java.util.List;
 import javax.inject.Inject;
 //import org.mongojack.DBQuery;
 
+import controllers.sra.api.AbstractStudyAPI;
+import controllers.sra.api.ProjectAPI;
+import controllers.sra.api.SubmissionAPI;
 import fr.cea.ig.lfw.controllers.scripts.buffered.Script;
 import fr.cea.ig.ngl.NGLApplication;
-import fr.cea.ig.ngl.dao.api.sra.AbstractStudyAPI;
-import fr.cea.ig.ngl.dao.api.sra.ProjectAPI;
-import fr.cea.ig.ngl.dao.api.sra.SubmissionAPI;
 import models.sra.submit.sra.instance.Project;
-import services.XmlServices;
+import sra.services.XmlServices;
 
 
 /*
@@ -30,11 +30,11 @@ import services.XmlServices;
 public class WriteAllProject extends Script<WriteAllProject.MyParam> {
 //	private static final play.Logger.ALogger logger = play.Logger.of(Debug_BDA.class);
 
-	private final SubmissionAPI     submissionAPI;
+	// private final SubmissionAPI     submissionAPI;
 	private final ProjectAPI        projectAPI;
 //	private final NGLApplication    app;
     private final XmlServices       xmlServices;
-    private final AbstractStudyAPI  abstStudyAPI;
+    // private final AbstractStudyAPI  abstStudyAPI;
 
     @Inject
 	public WriteAllProject(SubmissionAPI     submissionAPI,
@@ -43,9 +43,9 @@ public class WriteAllProject extends Script<WriteAllProject.MyParam> {
 					 AbstractStudyAPI  abstStudyAPI,
 					 NGLApplication    app) {
 
-		this.submissionAPI     = submissionAPI;
+		// this.submissionAPI     = submissionAPI;
 		this.projectAPI        = projectAPI;
-		this.abstStudyAPI      = abstStudyAPI;
+		// this.abstStudyAPI      = abstStudyAPI;
 
 //		this.app               = app;
 		this.xmlServices       = xmlServices;

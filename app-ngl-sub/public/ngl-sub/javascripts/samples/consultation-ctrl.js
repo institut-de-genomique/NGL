@@ -154,13 +154,13 @@ angular.module('home').controller('ConsultationCtrl', ['$http', '$scope', '$rout
 			//$scope.treeLoadInProgress = true;
 			//console.log("$scope.messages = ", $scope.messages);
 			//console.log("Dans consultation-ctr.search, avec user", user);
-			if (! $scope.form.externalIdRegex  && 
-				! $scope.form.externalIds      &&
-				! $scope.form.accessionRegex   && 
-				! $scope.form.accessions       && 
-				! $scope.form.codeRegex        &&
-				! $scope.form.codes            &&
-				! $scope.form.pseudoStateCodes &&
+			if (! $scope.form.identifierRegex      && 
+				! $scope.form.identifiers          &&
+				! $scope.form.submissionCodeRegex  && 
+				! $scope.form.submissionCodes      &&
+				! $scope.form.codeRegex            &&
+				! $scope.form.codes                &&
+				! $scope.form.pseudoStateCodes     &&
 				! $scope.form.projCodes ) {
 					//console.log("Aucun parametre => envoyer message erreur");
 					$scope.messages.setError(Messages("AbsenceSearchParameter"));
@@ -257,8 +257,11 @@ angular.module('home').controller('ConsultationCtrl', ['$http', '$scope', '$rout
 		$scope.isShowConsigne=false;
 		$scope.toggleShowConsigne=function(){
 			//console.log("TOGGLE search-ctrl.js");
-		if ( $scope.isShowConsigne===false) { $scope.isShowConsigne=true}
-		else {$scope.isShowConsigne=false}
+			if ( $scope.isShowConsigne===true) { 
+				$scope.isShowConsigne=false
+			} else {
+				$scope.isShowConsigne=true
+			}
 		};
 		
 	}

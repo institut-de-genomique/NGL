@@ -1,0 +1,132 @@
+@()
+<div ng-init="treatmentCode='genomeContigsScaffolding'">
+<div class="row">
+<div class="col-md-13 col-lg-13">
+	 <br/>
+   <br />
+    <br />
+	<br/>
+    <b>Readsets used : </b>
+    {{analysis.treatments[treatmentCode].pairs.readsetsused.value}}
+    <br />
+    <br />
+   <b>Result directory : </b>
+    {{analysis.treatments[treatmentCode].pairs.resultDirectory.value}}
+    <br />
+    <br />
+	 <strong></strong>
+	 <br/><br/>  
+	 <table class="table table-condensed table-hover table-bordered">
+		<thead>
+		<tr>
+			<!--th>@Messages("analyses.treatments.genomeContigsScaffolding.buscoScore")</th> 
+			<th>@Messages("analyses.treatments.genomeContigsScaffolding.scoreBuscoEuk")</th> 
+			<th>@Messages("analyses.treatments.genomeContigsScaffolding.scoreBuscoTaxon")</th> 
+			<th>@Messages("analyses.treatments.genomeContigsScaffolding.taxonBusco")</th> 
+			<th>@Messages("analyses.treatments.genomeContigsScaffolding.merquryScore")</th> 
+			<th>@Messages("analyses.treatments.genomeContigsScaffolding.completion")</th--> 
+			<th>@Messages("analyses.treatments.genomeContigsScaffolding.cumulativeSize")</th> 
+			<th>@Messages("analyses.treatments.genomeContigsScaffolding.n50")</th>
+			<th>@Messages("analyses.treatments.genomeContigsScaffolding.n90")</th>
+			<th>@Messages("analyses.treatments.genomeContigsScaffolding.l50")</th>		
+			<th>@Messages("analyses.treatments.genomeContigsScaffolding.l90")</th>						
+			<th>@Messages("analyses.treatments.genomeContigsScaffolding.auN")</th>						
+			<th>@Messages("analyses.treatments.genomeContigsScaffolding.maxSize")</th>
+			<th>@Messages("analyses.treatments.genomeContigsScaffolding.nbscaffolds")</th>
+			<th>@Messages("analyses.treatments.genomeContigsScaffolding.gapnumber")</th>
+			<th>@Messages("analyses.treatments.genomeContigsScaffolding.softwareVersion")</th> 
+					
+				
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<!--td>{{analysis.treatments[treatmentCode].pairs.buscoScore.value }}</td>
+			<td>{{analysis.treatments[treatmentCode].pairs.scoreBuscoEuk.value}}</td>
+			<td>{{analysis.treatments[treatmentCode].pairs.scoreBuscoTaxon.value}}</td>
+			<td>{{analysis.treatments[treatmentCode].pairs.taxonBusco.value}}</td>
+			<td>{{analysis.treatments[treatmentCode].pairs.merquryScore.value}}</td>	
+			<td>{{analysis.treatments[treatmentCode].pairs.completion.value }}</td-->	
+			<td>{{analysis.treatments[treatmentCode].pairs.cumulativeSize.value | number}}</td>	
+			<td>{{analysis.treatments[treatmentCode].pairs.n50.value | number}}</td>	
+			<td>{{analysis.treatments[treatmentCode].pairs.n90.value | number}}</td>
+			<td>{{analysis.treatments[treatmentCode].pairs.l50.value | number}}</td>	
+			<td>{{analysis.treatments[treatmentCode].pairs.l90.value | number}}</td>
+			<td>{{analysis.treatments[treatmentCode].pairs.auN.value | number}}</td>
+			<td>{{analysis.treatments[treatmentCode].pairs.maxSize.value | number}}</td>
+			<td>{{analysis.treatments[treatmentCode].pairs.nbscaffolds.value | number}}</td>
+			<td>{{analysis.treatments[treatmentCode].pairs.gapnumber.value | number}}</td>
+			<td>{{analysis.treatments[treatmentCode].pairs.softwareVersion.value }}</td>	
+
+		</tr>						
+	</tbody>
+	 </table>
+ </div>	
+
+ <br/>
+
+ <div class="row">
+	<div class="col-md-5 col-lg-5" ng-if="analysis.treatments[treatmentCode].pairs.reads.value !== undefined" >
+		 <div class="scroll-container"> 
+		 <table class="table table-condensed table-hover table-bordered">
+		 <thead>
+				<tr>
+					<th>@Messages("analyses.treatments.genomeContigsScaffolding.reads.nbreads")</th> 
+					<th>@Messages("analyses.treatments.genomeContigsScaffolding.reads.cumulativeSize")</th> 
+					<th>@Messages("analyses.treatments.genomeContigsScaffolding.reads.coverage")</th>
+				</tr> 
+			</thead>
+			<tbody>
+				<tr ng-repeat="value in analysis.treatments[treatmentCode].pairs.reads.value">	
+					<td>{{value.nbreads | number}}</td>
+					<td>{{value.cumulativeSize | number}}</td>	
+					<td>{{value.coverage | number:2}}</td>
+				   </tr>
+			</tbody>
+		 </table>
+		 </div> 
+	</div>	
+</div>
+
+<br/>
+
+<div class="row">
+	<div class="col-md-5 col-lg-5" ng-if="analysis.treatments[treatmentCode].pairs.reads.value !== undefined" >
+		 <div class="scroll-container"> 
+		 <table class="table table-condensed table-hover table-bordered">
+		 <thead>
+				<tr>
+					<th>@Messages("analyses.treatments.genomeContigsScaffolding.lr_reads.nbreads")</th> 
+					<th>@Messages("analyses.treatments.genomeContigsScaffolding.lr_reads.cumulativeSize")</th> 
+					<th>@Messages("analyses.treatments.genomeContigsScaffolding.lr_reads.coverage")</th>
+				</tr> 
+			</thead>
+			<tbody>
+				<tr ng-repeat="value in analysis.treatments[treatmentCode].pairs.lr_reads.value">	
+					<td>{{value.nbreads | number}}</td>
+					<td>{{value.cumulativeSize | number}}</td>	
+					<td>{{value.coverage | number:2}}</td>
+				   </tr>
+			</tbody>
+		 </table>
+		 </div> 
+	</div>	
+</div>
+
+<br/>
+
+<div class="row">
+    <div class="col-md-3 col-lg-3">
+	    <div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+	    ng-click="setImage(analysis.treatments[treament.code!=undefined?treament.code:treatmentCode].pairs.contactMap.value,'contactMap','',treament.code!=undefined?treament.code:treatmentCode,
+	    analysis.treatments[treament.code!=undefined?treament.code:treatmentCode].pairs.contactMap.width,
+	    analysis.treatments[treament.code!=undefined?treament.code:treatmentCode].pairs.contactMap.height)">
+		 <a href="#">
+		    <img id="Contact map" ng-src="data:image/png;base64,{{analysis.treatments[treament.code!=undefined?treament.code:treatmentCode].pairs.contactMap.value}}" />
+		    <p>@Messages("analyses.treatments.genomeContigsScaffolding.contactMap")</p>
+		 </a>   
+	    </div>
+    </div>
+</div> 
+</div>
+</div>

@@ -199,12 +199,14 @@ angular.module('home').controller('LibNormalizationCtrl',['$scope', '$parse', '$
 				dynamic:true,
 			},
 			// ajout boutons 11/09/2018
+			// NGL-5145 ajout buttonCopyPositionajouter + le test du type de sortie 22/07/2025
 			otherButtons: {
-                active: ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F')),
-                complex:true,
+                active: ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F') && ($scope.experiment.instrument.outContainerSupportCategoryCode !== "tube")),
+				complex:true,
                 template:''
                 	+$scope.plateUtils.templates.buttonLineMode()
                 	+$scope.plateUtils.templates.buttonColumnMode()
+					+$scope.plateUtils.templates.buttonCopyPosition()
 			}
 	}; // fin struct datatableConfig
 	
@@ -327,15 +329,15 @@ angular.module('home').controller('LibNormalizationCtrl',['$scope', '$parse', '$
 			});		 
 	}
 
-	// ajout pour NGL-2225 gestion des plaques en sortie
+	// avait disparu !!!
 	var updateATM = function(experiment){
-		if(experiment.instrument.outContainerSupportCategoryCode !== "tube"){
+		if(experiment.instrument.outContainerSupportCategoryCode!=="tube"){
 			experiment.atomicTransfertMethods.forEach(function(atm){
 				atm.line = atm.outputContainerUseds[0].locationOnContainerSupport.line;
 				atm.column = atm.outputContainerUseds[0].locationOnContainerSupport.column;
 			});
 		}		
-	};
+	}
 	
 	$scope.$on('save', function(e, callbackFunction) {	
 		console.log("call event save");

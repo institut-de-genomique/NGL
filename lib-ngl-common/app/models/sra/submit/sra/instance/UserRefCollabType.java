@@ -1,23 +1,33 @@
 package models.sra.submit.sra.instance;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class UserRefCollabType {
-	private String alias = null;
+	private String refCollabName = null;
 	private String studyAc = null;
 	private String sampleAc = null;
 	
 	public UserRefCollabType() {
 	}
 	
+	@JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+	public UserRefCollabType(@JsonProperty("alias") String alias, @JsonProperty("studyAc") String studyAc, @JsonProperty("sampleAc") String sampleAc) {
+		this.refCollabName    = alias;
+		this.studyAc  = studyAc;
+		this.sampleAc = sampleAc;
+	}	
+	
 	public UserRefCollabType(String alias) {
-		this.setAlias(alias);
+		this.setRefCollabName(alias);
 	}
 
-	public String getAlias() {
-		return alias;
+	public String getRefCollabName() {
+		return refCollabName;
 	}
 
-	public void setAlias(String alias) {
-		this.alias = alias;
+	public void setRefCollabName(String alias) {
+		this.refCollabName = alias;
 	}
 
 	public String getStudyAc() {
@@ -36,6 +46,21 @@ public class UserRefCollabType {
 		this.sampleAc = sampleAc;
 	}
 	
+	@Override
+	public boolean equals(Object autre) {
+		if (autre == null) {
+			return false;
+		}
+		if (this.getClass() != autre.getClass()) { 
+			return false;
+		}
+		UserRefCollabType autreUserRefCollabType = (UserRefCollabType) autre;
+		return this.refCollabName.equals(autreUserRefCollabType.refCollabName);
+	}
 	
+	@Override
+	public int hashCode() {
+		return refCollabName.hashCode();
+	}
 	
 }

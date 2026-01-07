@@ -1,5 +1,8 @@
-@this()
+@this(ctx : fr.cea.ig.ngl.NGLApplication)
 @(isForm: Boolean)
+@import views.html.helper._
+
+@isCNSInstitute  = @{ "CNS" == ctx.nglConfig().getInstitute() }
 
 @import views.html.helper._
 @form() = {	
@@ -80,6 +83,18 @@
 			<div class="tab-content">
 				<div class="tab-pane active" id="filters">
 					<form class="well well-small">
+						@if(isCNSInstitute){
+							<div class="row" style="margin-bottom: 20px;">
+								@columnSearchForm{	
+									@formGroup{
+										<div class='form-control' bt-select filter='true' ng-model='searchService.form.umbrellaCodes' 
+												placeholder='Nom umbrella' multiple='true' ng-change='selectProjetsFromUmbrellas()' 
+												bt-options='umbrellaProject.code as umbrellaProject.name for umbrellaProject in searchService.lists.getUmbrellaProjects()'>
+										</div>
+									}
+								}
+							</div>
+						}
 						<div class="row">
 						@form
 						@columnSearchForm{

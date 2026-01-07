@@ -108,6 +108,44 @@ angular.module('commonsServices', []).
     				status :     [{code:"TRUE",  name:Messages("status.TRUE")},
     				              {code:"FALSE", name:Messages("status.FALSE")},
     				              {code:"UNSET", name:Messages("status.UNSET")}],
+					originDKB : [{code:"MI-Roscoff_Pilot",name:"MI-Roscoff_Pilot"},
+								 {code:"MI-GolfeDuLion",name:"MI-GolfeDuLion"},
+								 {code:"MI-DIVE-SEA_DINARD",name:"MI-DIVE-SEA_DINARD"},
+								 {code:"MI-DIVESEA_ENDOUME",name:"MI-DIVESEA_ENDOUME"},
+								 {code:"MI-Kanameco",name:"MI-Kanameco"},
+								 {code:"MI-CGFS_2024",name:"MI-CGFS_2024"},
+								 {code:"MI-KARUBENTHOS_3", name:"MI-KARUBENTHOS_3"},
+								 {code:"MI-IBTS_2025",name:"MI-IBTS_2025"},
+								{code:"MI-EVOHE_2025",name:"MI-EVOHE_2025"},
+								 {code:"AMB",name:"AMB"},
+								 {code:"ST-Marseille_Pilot",name:"ST-Marseille_Pilot"},
+								 {code:"ST-Banyuls",name:"ST-Banyuls"},
+								 {code:"ST-Villefranche",name:"ST-Villefranche"},
+								 {code:"ST-Ifremer",name:"ST-Ifremer"},
+								 {code:"ST-Roscoff",name:"ST-Roscoff"},
+								 {code:"CC-Roscoff",name:"CC-Roscoff"},
+								 {code:"CC-Ifremer",name:"CC-Ifremer"}],
+					genre : [{code: "Collaboratif", name: "Collaboratif"},
+							{code: "Projet Propre", name: "Projet Propre"},
+							{code: "UMR", name: "UMR"},
+							{code: "Payant privé", name: "Payant privé"},
+							{code: "Payant académique", name: "Payant académique"},
+							{code: "EPGV", name: "EPGV"},
+							{code: "projet ANR", name: "projet ANR"},
+							{code: "ANR collaboratif", name: "ANR collaboratif"},
+							{code: "FG-Collaboratif", name: "FG-Collaboratif"},
+							{code: "FG-Propre", name: "FG-Propre"},
+							{code: "FG-couts partages", name: "FG-couts partages"},
+							{code: "projet propre", name: "projet propre"},
+							{code: "collab AP EPGV", name: "collab AP EPGV"},
+							{code: "collaboratif AP", name: "collaboratif AP"},
+							{code: "collaboratif hors AP", name: "collaboratif hors AP"},
+							{code: "collab/payant", name: "collab/payant"},
+							{code: "CNG", name: "CNG"},
+							{code: "payant", name: "payant"},
+							{code: "payant PM", name: "payant PM"},
+							{code: "couts partages", name: "couts partages"},
+							{code: "couts partages CEA", name: "couts partages CEA"}],
     				booleans :   [{code:"true",  name:Messages("boolean.TRUE")}, 
     				              {code:"false", name:Messages("boolean.FALSE")}],
     				// FDS ne marche que ici !!!! valeurs en dur
@@ -476,7 +514,13 @@ angular.module('commonsServices', []).
     			getContainerSupports : function(){return results['containerSupports'];},
     			getContainerCategories : function(){return results['containerCategories'];},
     			getExperimentCategories : function(){return results['experimentCategories'];},
-    			getExperimentTypes : function(){return results['experimentTypes'];},
+    			getExperimentTypes : function(params, key){
+					key = (key)?key:'experimentTypes';
+    				if(results[key] === undefined){
+    					refresh.experimentTypes(params, key);
+    				}
+    				return results[key];
+				},
 				getMapParameter : function(){return results['mapParameter'];},
     			getStates : function(){return results['states'];},
     			getRuns : function(){return results['runs'];},
@@ -601,6 +645,8 @@ angular.module('commonsServices', []).
     				return results[key];
     			},
     			getValuations : function(){return results['valuations'];},
+				getGenre : function(){return results['genre'];},
+				getOriginDKB : function(){return results['originDKB'];},
     			getTagTypes : function(){return results['tagTypes'];},  // FDS 22/11/2018 ajout; liste en dur 
     			getTagCategories : function(key){    // FDS 29/11/2018 ajout; version dynamique
     				key = (key)?key:'tagCategories';
@@ -616,10 +662,11 @@ angular.module('commonsServices', []).
     				}
     				return results[key];
     			},
-    			getContext : function(params,key){
+				// correction avec A.Protat pour NGL-5241
+				getContext : function(params, key){
     				key = (key)?key:'context';
     				if(results[key] === undefined){
-    					refresh.tags(params, key); // pourquoi refresh tags ??????????   mise en comm change rien pour recherge tags (effets ailleurs ??)
+						refresh.context(params,key); 
     				}
     				return results[key];
     			},
@@ -2067,4 +2114,23 @@ angular.module('commonsServices', []).
 					return additionalColumn.header && headerRegex.test(additionalColumn.header);
 				}
 			}
-		});
+		})
+		.factory('projectSearchFromUmbrella', ['$http', function($http) {
+			return {
+				search : function(umbrellaCodes) {
+					var projCodes = [];
+
+					for (var i = 0; i < umbrellaCodes.length; i++) {
+						$http.get(jsRoutes.controllers.projects.api.Projects.list().url + "?umbrellaCodes=" + umbrellaCodes[i]).success(function(data) {
+							for (var j = 0; j < data.length; j++) {
+								projCodes.push(data[j].code);
+							}
+						}).error(function(err){
+							console.log(err);
+						}); 
+					}
+
+					return projCodes;
+				}
+			}
+		}]);

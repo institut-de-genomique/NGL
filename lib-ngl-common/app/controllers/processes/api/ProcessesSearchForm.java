@@ -35,9 +35,10 @@ public class ProcessesSearchForm extends DBObjectListForm<Process> {
 	public String supportCode;
 	public String supportCodeRegex;
 	public Set<String> supportCodes;
+	public List<String> umbrellaCodes;
 
 	public String ncbiScientificNameRegex;
-	public Set<String> ncbiScientificNameRegexs;
+	public Set<String> ncbiScientificNames;
 	
 	public String containerCode;
 	public String containerCodeRegex;
@@ -125,18 +126,8 @@ public class ProcessesSearchForm extends DBObjectListForm<Process> {
 			queryElts.add(DBQuery.regex("sampleOnInputContainer.ncbiScientificName", Pattern.compile(this.ncbiScientificNameRegex)));
 		}
 
-		if(CollectionUtils.isNotEmpty(this.ncbiScientificNameRegexs)) {
-			DBQuery.Query queryTmp = DBQuery.empty();
-			Iterator<String> iterator = this.ncbiScientificNameRegexs.iterator();
-
-			while (iterator.hasNext()) {
-				String ncbiNameLoop = iterator.next();
-				queryTmp.or(
-					DBQuery.regex("sampleOnInputContainer.ncbiScientificName", Pattern.compile(ncbiNameLoop))
-				);
-			}
-
-			queryElts.add(queryTmp);
+		if(CollectionUtils.isNotEmpty(this.ncbiScientificNames)) {
+			queryElts.add(DBQuery.in("sampleOnInputContainer.ncbiScientificName", this.ncbiScientificNames));
 		}
 
 		if (StringUtils.isNotBlank(this.typeCode)) {

@@ -3,22 +3,18 @@ package sra.scripts;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.Date;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
 import javax.xml.parsers.ParserConfigurationException;
 
+import controllers.sra.api.SubmissionAPI;
 import fr.cea.ig.lfw.controllers.scripts.buffered.ScriptNoArgs;
-import fr.cea.ig.ngl.dao.api.sra.SubmissionAPI;
 import models.sra.submit.sra.instance.EbiIdentifiers;
 import models.sra.submit.sra.instance.Sample;
 import models.sra.submit.sra.instance.Study;
-import models.sra.submit.util.SraException;
 import play.libs.ws.WSClient;
-import play.libs.ws.WSRequest;
-import play.libs.ws.WSResponse;
-import services.SraEbiAPI;
-import services.XmlToSra;
+import services.sra.SraException;
+import sra.services.SraEbiAPI;
+import sra.services.XmlToSra;
 
 /*
  * Script à utiliser pour recharger les md5 d'une soumission a partir de NGL.
@@ -30,42 +26,42 @@ import services.XmlToSra;
  *
  */
 public class TestGetEbiAccessionExternalId extends ScriptNoArgs {
-	private static final play.Logger.ALogger logger = play.Logger.of(TestGetEbiAccessionExternalId.class);
-	private final SubmissionAPI     submissionAPI;
+	// private static final play.Logger.ALogger logger = play.Logger.of(TestGetEbiAccessionExternalId.class);
+	// private final SubmissionAPI     submissionAPI;
 	private final SraEbiAPI ebiAPI;
-	private final WSClient ws;
+	// private final WSClient ws;
 	
 	@Inject
 	public TestGetEbiAccessionExternalId(SubmissionAPI submissionAPI,
 				SraEbiAPI        ebiAPI,
 				WSClient      ws
 				) {
-		this.submissionAPI = submissionAPI;
+		// this.submissionAPI = submissionAPI;
 		this.ebiAPI        = ebiAPI;
-		this.ws            = ws;
+		// this.ws            = ws;
 
 		
 	}
 
-	private String ebiBrowserXml(String ac) {
-		String url = String.format("https://www.ebi.ac.uk/ena/browser/api/xml/%s?download=true", ac);
-		//logger.debug("ebiXml -- url : {}", url);
-		//ws.url(https://www.ebi.ac.uk/ena/submit/drop-box/samples/$ac?format=xml);
-		WSRequest wr = ws.url(url);
-		//wr.setAuth("Webin-9", "Axqw16nI");
-		CompletionStage<WSResponse> homePage = wr.get();		
-		CompletionStage<String> xml = 
-			homePage.thenApplyAsync(response -> {
-			//logger.info("response XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"+response.getBody());
-			return response.getBody();
-		});
-		try {
-			String doc = xml.toCompletableFuture().get();
-			return doc;
-		} catch (InterruptedException | ExecutionException e) {
-			throw new RuntimeException(e);
-		}	
-	}
+	// private String ebiBrowserXml(String ac) {
+	// 	String url = String.format("https://www.ebi.ac.uk/ena/browser/api/xml/%s?download=true", ac);
+	// 	//logger.debug("ebiXml -- url : {}", url);
+	// 	//ws.url(https://www.ebi.ac.uk/ena/submit/drop-box/samples/$ac?format=xml);
+	// 	WSRequest wr = ws.url(url);
+	// 	//wr.setAuth("Webin-9", "Axqw16nI");
+	// 	CompletionStage<WSResponse> homePage = wr.get();		
+	// 	CompletionStage<String> xml = 
+	// 		homePage.thenApplyAsync(response -> {
+	// 		//logger.info("response XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"+response.getBody());
+	// 		return response.getBody();
+	// 	});
+	// 	try {
+	// 		String doc = xml.toCompletableFuture().get();
+	// 		return doc;
+	// 	} catch (InterruptedException | ExecutionException e) {
+	// 		throw new RuntimeException(e);
+	// 	}	
+	// }
 	
 	
 	public Sample EbiFetchSample(String accession, Date submissionDate) throws IOException, SraException, ParserConfigurationException, ParseException {		
@@ -122,7 +118,7 @@ public class TestGetEbiAccessionExternalId extends ScriptNoArgs {
 		printfln("user accession " + user_id_study + ", ebiAccession = " + study.accession + ", ebiExternalId = " + study.externalId );
 
 		String user_id_project ="PRJEB29999";
-		EbiIdentifiers ebiIdentifiers = ebiAPI.EbiBrowserFetchEbiIdentifiers(user_id_project);
+		EbiIdentifiers ebiIdentifiers = ebiAPI.ebiBrowserFetchEbiIdentifiers(user_id_project);
 		printfln("user accession " + user_id_project + ", ebiAccession = " + ebiIdentifiers.getAccession() + ", ebiExternalId = " + ebiIdentifiers.getExternalId() );
 
 	}

@@ -1,12 +1,18 @@
-@this()
+@this(ctx : fr.cea.ig.ngl.NGLApplication)
 @()
-
 @import views.html.helper._
+
+@isCNSInstitute  = @{ "CNS" == ctx.nglConfig().getInstitute() }
+
 @form() = {
 
 	@columnSearchForm{
 		@formGroup{
-			<div class="form-control" bt-select ng-model="searchService.form.projectCodes" multiple="true" textarea="true" filter="true" placeholder='@Messages("search.placeholder.projects")' bt-options="project.code as project|formatProjectListLabel for project in searchService.lists.getProjects()" ng-change="searchService.resetSampleCodes()"></div>			
+			<div class="form-control" bt-select placeholder='@Messages("search.placeholder.projects")' title='@Messages("search.placeholder.projects")'
+				textarea="true" multiple="true"  filter="true" textareaplaceholder='@Messages("search.textarea.placeholder.codesList")'
+				ng-model="searchService.form.projectCodes"  bt-options="project.code as project|formatProjectListLabel for project in searchService.lists.getProjects()" 
+				ng-change="searchService.resetSampleCodes()">
+			</div>			
 		
 		}
 		@formGroup{
@@ -16,7 +22,11 @@
 	}
 	@columnSearchForm{
 		@formGroup{
-			<div class="form-control" bt-select ng-model="searchService.form.sampleCodes" multiple="true" textarea="true" filter="true" placeholder='@Messages("search.placeholder.samples")' bt-options="sample.code as sample.code for sample in searchService.lists.getSamples()" ng-focus="searchService.refreshSamples()"></div>			
+			<div class="form-control" bt-select  placeholder='@Messages("search.placeholder.samples")' title='@Messages("search.placeholder.samples")'
+				multiple="true" textarea="true" filter="true" textareaplaceholder='@Messages("search.textarea.placeholder.codesList")'
+				ng-model="searchService.form.sampleCodes"  bt-options="sample.code as sample.code for sample in searchService.lists.getSamples()" 
+				ng-focus="searchService.refreshSamples()">
+			</div>			
 		
 		}
 		@formGroup{
@@ -27,8 +37,11 @@
 	}
 	@columnSearchForm{
 		@formGroup{					
-			<bt-input class='form-control' textarea="true" input-ng-model="searchService.form.regexCode"  textarea-ng-model="searchService.form.regexCodes" placeholder='@Messages("search.placeholder.analyse.regexCode")'>
-			
+			<bt-input class='form-control' placeholder='@Messages("search.placeholder.analyse.regexCode")' title='@Messages("search.placeholder.analyse.regexCode")'
+				textarea-placeholder-ng-model='@Messages("search.textarea.placeholder.codesList")'
+				input-ng-model="searchService.form.regexCode"  
+				textarea-ng-model="searchService.form.regexCodes" >
+			</bt-input>
 		}
 		
 		@formGroup{	
@@ -43,7 +56,11 @@
 		}
 
 		@formGroup{		
-			<bt-input class='form-control' textarea="true" input-ng-model="searchService.form.regexReadSetCode"  textarea-ng-model="searchService.form.readSetCodes" placeholder='@Messages("search.placeholder.readset.regexCode")'>
+			<bt-input class='form-control' placeholder='@Messages("search.placeholder.readset.regexCode")' title='@Messages("search.placeholder.readset.regexCode")'
+				textarea-placeholder-ng-model='@Messages("search.textarea.placeholder.codesList")'
+				input-ng-model="searchService.form.regexReadSetCode"  
+				textarea-ng-model="searchService.form.readSetCodes">
+			</bt-input>
 		}				
 	}	
 	
@@ -59,7 +76,7 @@
 }
 
 @buttons() = {
-	<div class="form-control" bt-select ng-model="searchService.reportingConfigurationCode" ng-change="searchService.updateColumn()" placeholder="@Messages("search.placeholder.reporting.configuration")" bt-options="valid.code as valid.name for valid in searchService.lists.get('reportConfigs')" ng-if="searchService.lists.get('reportConfigs').length > 0"></div>
+	<div class="form-control" bt-select ng-model="searchService.reportingConfigurationCode" ng-change="searchService.updateColumn()" placeholder="@Messages("search.placeholder.reporting.configuration")" bt-options="valid.code as valid.name for valid in searchService.lists.get('reportConfigs')"></div>
 }
 
 <div class="row"> 
@@ -73,6 +90,18 @@
 			<div class="tab-content">
 				<div class="tab-pane active" id="filters">
 					<form class="well well-small">
+						@if(isCNSInstitute){
+							<div class="row" style="margin-bottom: 20px;">
+								@columnSearchForm{	
+									@formGroup{
+										<div class='form-control' bt-select filter='true' ng-model='searchService.form.umbrellaCodes' 
+												placeholder='Nom umbrella' multiple='true' ng-change='selectProjetsFromUmbrellas()' 
+												bt-options='umbrellaProject.code as umbrellaProject.name for umbrellaProject in searchService.lists.getUmbrellaProjects()'>
+										</div>
+									}
+								}
+							</div>
+						}
 						<div class="row">
 						@form
 						@columnSearchForm{
@@ -127,23 +156,32 @@
 		<form class="well well-small">
 			<div class="row">
 			<div class="col-md-2 col-lg-2" ng-repeat="columns in searchService.getAddColumnsToForm()">
-			  		<div class="checkbox" ng-repeat="column in columns">
+			  		<div class="checkbox" ng-repeat="column in columns | additionalColumnsFilter:regexColumn">
 				    <label>
-				      <input type="checkbox" ng-model="column.select"> {{column.header}}
+				      <input type="checkbox" ng-model="column.select"> {{column.groupHeader!=null?column.groupHeader:column.header}}
 				    </label>
 				  </div>			
 			 </div>
 			 @columnSearchForm{
 				@formGroup{
 				<div class="btn-toolbar">
-					<button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="searchService.addColumnsToDatatable()" class="btn btn-primary" >
+					<button type="submit" title='@Messages("button.add.columns")' data-toggle="tooltip" ng-click="searchService.addColumnsToDatatable()" class="btn btn-primary" >
 						<i class="fa fa-plus"></i>
 					</button>
 					<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="searchService.resetDatatableColumns()"  class="btn btn-default">
 						<i class="fa fa-undo"></i>
 					</button>												 	
 				</div>	
-				}					
+				}
+				@formGroup{
+				<input type="text" class="form-control" ng-model="regexColumn" placeholder='@Messages("search.placeholder.analyse.regexColumn")'>
+				}
+				@formGroup{
+				<div ng-if="searchService.lists.getContext().length > 0" class="form-control" bt-select ng-model="searchService.contextValue" placeholder="@Messages("search.placeHolder.config.context")" 
+					bt-options="context.code as context.name for context in searchService.lists.getContext()" 
+					ng-change="searchService.updateAdditionnalColumnContext()">
+				</div>			
+				}				
 			}
 			</div>			
 		</form>	

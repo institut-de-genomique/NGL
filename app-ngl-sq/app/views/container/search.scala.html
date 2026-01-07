@@ -1,12 +1,24 @@
-@this()
+@this(ctx : fr.cea.ig.ngl.NGLApplication)
 @()
-
 @import views.html.helper._
+
+@isCNSInstitute  = @{ "CNS" == ctx.nglConfig().getInstitute() }
 
 @** FDS 24/11/2020 remise en forme de l'ordre des attributs...
                    NGL-3152 ajout des titles manquants sur bt-input => va sur 'icone d'ouverture des textarea => messages spécifiques ajoutés 
                    ajout des autres titles manquants  title=placehoder  **@
 @form() = {
+	@if(isCNSInstitute){
+		<div class="row" style="margin-bottom: 10px; padding-left: 9px">
+			@columnSearchForm{	
+				<div class='form-control' bt-select filter='true' ng-model='searchService.form.umbrellaCodes' 
+								placeholder='Nom umbrella' multiple='true' ng-change='selectProjetsFromUmbrellas()' 
+								bt-options='umbrellaProject.code as umbrellaProject.name for umbrellaProject in searchService.lists.getUmbrellaProjects()'>
+				</div>
+			}
+		</div>
+	}
+	
 	@columnSearchForm{			
 		@formGroup{
 			<div class="form-control" bt-select placeholder='@Messages("search.placeholder.projects")' title='@Messages("search.placeholder.projects")'
@@ -69,7 +81,7 @@
 		@formGroup{
 			<bt-input class="form-control" placeholder='@Messages("search.placeholder.ncbiScientificName")' title='@Messages("search.title.ncbiScientificName.textarea")'
 					  input-ng-model="searchService.form.ncbiScientificNameRegex" 
-					  textarea-ng-model="searchService.form.ncbiScientificNameRegexs"
+					  textarea-ng-model="searchService.form.ncbiScientificNames"
 					  textarea-placeholder-ng-model='@Messages("search.textarea.placeholder.labelsList")'>
 			</bt-input>
 		}
@@ -106,6 +118,11 @@
 	}
 	@columnSearchForm{
 		@formGroup{
+			<div style="height: 30px">
+			</div>
+		}
+
+		@formGroup{
 		<input class="form-control" type="text" placeholder='@Messages("containers.placeholder.fromDate")' title='@Messages("containers.placeholder.fromDate")' date-timestamp 
 		       ng-model="searchService.form.fromDate" >
 		}
@@ -125,6 +142,11 @@
 		}
 	}
 	@columnSearchForm{	
+		@formGroup{
+			<div style="height: 30px">
+			</div>
+		}
+		
 		@formGroup{
 			<input class="form-control" type="text" placeholder='@Messages("containers.placeholder.toDate")' title='@Messages("containers.placeholder.toDate")' date-timestamp 
 			       ng-model="searchService.form.toDate" >
@@ -149,10 +171,9 @@
 		<div class="form-control" auto-select bt-select placeholder='@Messages("search.placeholder.reporting.configuration")' title='@Messages("search.placeholder.reporting.configuration")'
 		     ng-model="searchService.reportingConfigurationCode" 
 		     ng-change="searchService.updateColumn()"
-		     bt-options="valid.code as valid.name for valid in searchService.lists.get('reportConfigs')" 
-		     ng-if="searchService.lists.get('reportConfigs').length > 0">
+		     bt-options="valid.code as valid.name for valid in searchService.lists.get('reportConfigs')">
 		</div>
-	}	
+	}
 }
 <!-- @searchForm(form)()("searchService.datatable") -->
 
@@ -241,13 +262,13 @@
 	<div class="tab-pane" id="addcolumns">
 		<form class="well well-small">
 			<div class="row">
-			<div class="col-md-2 col-lg-2" ng-repeat="columns in searchService.getAddColumnsToForm()">
-			  		<div class="checkbox" ng-repeat="column in columns | additionalColumnsFilter:regexColumn">
-				    <label>
-				      <input type="checkbox" ng-model="column.select"> {{column.header}}
-				    </label>
-				  </div>			
-			</div>
+				<div class="col-md-2 col-lg-2" ng-repeat="columns in searchService.getAddColumnsToForm()">
+					<div class="checkbox" ng-repeat="column in columns | additionalColumnsFilter:regexColumn">
+				  <label>
+					<input type="checkbox" ng-model="column.select"> {{column.groupHeader!=null?column.groupHeader:column.header}}
+				  </label>
+				</div>			
+		   </div>
 			 @columnSearchForm{
 				@formGroup{
 				<div class="btn-toolbar">

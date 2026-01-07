@@ -41,6 +41,7 @@
 			<li ng-class="getTabClass('general')"><a href="#" data-target="#general" data-toggle="tab" ng-click="setActiveTab('general')">@Messages("samples.tabs.general")</a></li>
 			<li ng-class="getTabClass('treeoflife')"><a href="#" data-target="#treeoflife" data-toggle="tab" ng-click="initGraph()">@Messages("samples.tabs.treeoflife")</a></li>
 			<li ng-if="sample.processes !== null && sample.processes !== undefined && sample.processes.length > 0" ng-class="getTabClass('workflow')"><a href="#" data-target="#workflow" data-toggle="tab" ng-click="setActiveTab('workflow')">@Messages("samples.tabs.workflow")</a></li>
+			<li ng-class="getTabClass('resolutionhistory')"><a href="#" data-target="#resolutionhistory" data-toggle="tab" ng-click="setActiveTab('resolutionhistory')">@Messages("samples.tabs.resolutionhistory")</a></li>
 		</ul>
 		<div class="tab-content" >
 			<div class="tab-pane {{getTabClass('general')}}" id="general">
@@ -51,6 +52,9 @@
 			</div>
 			<div class="tab-pane {{getTabClass('workflow')}}"  id="workflow">
 				@partials.details_workflow()
+			</div>
+			<div class="tab-pane {{getTabClass('resolutionhistory')}}" id="resolutionhistory">
+				@partials.details_resolutionhistory()
 			</div>
 		</div>
 	</div>

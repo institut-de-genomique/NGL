@@ -81,6 +81,20 @@ angular.module('home').controller('OneToVoidChipMigrationCNSCtrl',['$scope', '$p
 		});	
 	
 	};
+
+	$scope.$on('refresh', function(e) {	
+		// On récupère la config du datatable à l'écran.
+		var dtConfig = $scope.atmService.data.getConfig();
+
+		// On met à jour la condition d'affichage de la poubelle individuelle du tableau des containers : à l'état new uniquement et pas en mode édit.
+		dtConfig.remove.active = ($scope.isEditModeAvailable() && $scope.isNewState());
+
+		// On met à jour la config du datatable à l'écran qu'on vient de modifier.
+		$scope.atmService.data.setConfig(dtConfig);
+
+		// Refresh de l'expérience affichée à l'écran.
+		$scope.atmService.refreshViewFromExperiment($scope.experiment);
+	});
 	
 	$scope.updatePropertyFromUDT = function(value, col){
 		console.log("update from property : "+col.property);
@@ -145,6 +159,9 @@ angular.module('home').controller('OneToVoidChipMigrationCNSCtrl',['$scope', '$p
 			pos = atm.inputContainerUseds[0].locationOnContainerSupport.line+atm.inputContainerUseds[0].locationOnContainerSupport.column;
 		}else if("agilent-2100-bioanalyzer" === $scope.experiment.instrument.typeCode){
 			pos = $parse('inputContainerUseds[0].instrumentProperties.chipPosition.value')(atm);			
+		}else if("femto-pulse" === $scope.experiment.instrument.typeCode){
+			var properties = atm.inputContainerUseds[0].instrumentProperties;
+			if(properties) { pos = properties.femtopulseLine.value + properties.femtopulseColumn.value; }
 		}
 		var img = $parse('inputContainerUseds[0].experimentProperties.migrationProfile')(atm);
 		if(pos && img)this[pos] = img;
@@ -152,26 +169,40 @@ angular.module('home').controller('OneToVoidChipMigrationCNSCtrl',['$scope', '$p
 	
 	var internalProfils = profilsMap;
 	$scope.getProfil=function(line, column){
-		if("labchip-gx" === $scope.experiment.instrument.typeCode){
-			return internalProfils[line+column];
-		}else if("agilent-2100-bioanalyzer" === $scope.experiment.instrument.typeCode){
-			return internalProfils[line];					
+		switch($scope.experiment.instrument.typeCode) {
+			case "labchip-gx": return internalProfils[line+column];
+			case "agilent-2100-bioanalyzer": return internalProfils[line];
+			case "femto-pulse": return internalProfils[line+column];
 		}
 	};
 	
 	$scope.$watch("profils",function(newValues, oldValues){
-		if(newValues){			
+		if(newValues){	
+			$scope.messages.clear();
 			var _profilsMap = {};
+			var duplicatedPos = [];
 			angular.forEach(newValues, function(img){
 				var pos = null;
 				if("labchip-gx" === $scope.experiment.instrument.typeCode){
 					var pos = img.fullname.match(/_([A-H]\d+)\./)[1];					
 				}else if("agilent-2100-bioanalyzer" === $scope.experiment.instrument.typeCode){
 					var pos = img.fullname.match(/_Sample(\d+)\./)[1];					
+				}else if("femto-pulse" === $scope.experiment.instrument.typeCode){
+					var pos = img.fullname.match(/\d{4} \d{2} \d{2} \d{2}H \d{2}M ([A-H]\d\d?) /)[1];	 				
 				}
-				if(pos && img)this[pos] = img;
+
+				if(this[pos] !== undefined) {
+					duplicatedPos.push(pos);
+					delete this[pos];
+				} else if(pos && img) {
+					this[pos] = img;
+				}
 							
 			}, _profilsMap);
+
+			if(duplicatedPos.length > 0) {
+				$scope.messages.setError(Messages("experiment.msg.import.femto.pulse.profil.position.duplication", duplicatedPos));
+			}
 			
 			internalProfils = _profilsMap;
 			
@@ -181,6 +212,9 @@ angular.module('home').controller('OneToVoidChipMigrationCNSCtrl',['$scope', '$p
 					pos = dr.data.inputContainerUsed.locationOnContainerSupport.line+dr.data.inputContainerUsed.locationOnContainerSupport.column;
 				}else if("agilent-2100-bioanalyzer" === $scope.experiment.instrument.typeCode){
 					pos = $parse('inputContainerUsed.instrumentProperties.chipPosition.value')(dr.data);			
+				}else if("femto-pulse" === $scope.experiment.instrument.typeCode){
+					var properties = dr.data.inputContainerUsed.instrumentProperties;
+					pos = properties.femtopulseLine.value + properties.femtopulseColumn.value;					
 				}
 				if(pos)	$parse('inputContainerUsed.experimentProperties.migrationProfile').assign(dr.data, this[pos]);
 			}, _profilsMap);
@@ -196,7 +230,35 @@ angular.module('home').controller('OneToVoidChipMigrationCNSCtrl',['$scope', '$p
 	
 	
 	var columns = $scope.atmService.data.getColumnsConfig();
+
+	columns.push({
+		"header" : Messages("containers.table.fromPurificationTypeCode"),
+		"property": "inputContainer.fromPurificationTypeCode",
+		"filter":"codes:'type'",
+		"order" : true,
+		"edit" : false,
+		"hide" : true,
+		"type" : "text",
+		"position" : 4.1,
+		"extraHeaders" : {
+			0 : Messages("experiments.inputs")
+		}
+	});
 	
+	columns.push({
+		"header" : Messages("containers.table.fromTransfertTypeCode"),
+		"property": "inputContainer.fromTransfertTypeCode",
+		"filter":"codes:'type'",
+		"order" : true,
+		"edit" : false,
+		"hide" : true,
+		"type" : "text",
+		"position" : 4.2,
+		"extraHeaders" : {
+			0 : Messages("experiments.inputs")
+		}
+	});
+
 	columns.push({
 			"header" : Messages("containers.table.concentration.shortLabel"),
 			"property": "inputContainerUsed.concentration.value",
@@ -348,9 +410,18 @@ angular.module('home').controller('OneToVoidChipMigrationCNSCtrl',['$scope', '$p
 	
 	$scope.importButton = {
 		isShow:function(){
-			return ("labchip-gx" === $scope.experiment.instrument.typeCode  && !$scope.mainService.isEditMode() 
-					&& ($scope.isInProgressState() || Permissions.check("admin")))
-			},
+			return isValidInstrumentType() && isInValidState();
+
+			//---
+
+			function isValidInstrumentType() {
+				return ("labchip-gx" === $scope.experiment.instrument.typeCode) || ("femto-pulse" === $scope.experiment.instrument.typeCode);
+			}
+
+			function isInValidState() {
+				return !$scope.mainService.isEditMode() && ($scope.isInProgressState() || Permissions.check("admin"))
+			}
+		},
 		isFileSet:function(){
 			return ($scope.file === undefined)?"disabled":"";
 		},

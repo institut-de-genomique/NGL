@@ -2,3 +2,7 @@
 GET		/api/projects								controllers.projects.api.Projects.list()
 GET		/api/projects/:code							controllers.projects.api.Projects.get(code: java.lang.String)
 GET		/api/projects/bionformaticsParameters		controllers.projects.api.ProjectBioinformaticParameters.list()
+
+#umbrellaProject api
+GET    	/api/umbrellaprojects               			controllers.projects.api.UmbrellaProjects.list()
+GET    	/api/umbrellaprojects/:code               		controllers.projects.api.UmbrellaProjects.get(code: java.lang.String)

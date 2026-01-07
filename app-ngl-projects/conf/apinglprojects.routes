@@ -3,6 +3,28 @@ GET		/api/projects/types								controllers.projects.api.ProjectTypes.list()
 GET		/api/projects/categories						controllers.projects.api.ProjectCategories.list()
 GET		/api/projects/bionformaticsParameters			controllers.projects.api.ProjectBioinformaticParameters.list()
 
+# project bionformaticsParameters
+GET		/api/projects/:code/bionformaticParameters		controllers.projects.api.ProjectBioinformaticParameters.get(code: java.lang.String)
+POST	/api/projects/:code/bionformaticParameters		controllers.projects.api.ProjectBioinformaticParameters.save(code: java.lang.String)
+PUT		/api/projects/:code/bionformaticParameters		controllers.projects.api.ProjectBioinformaticParameters.update(code: java.lang.String)
+DELETE	/api/projects/:code/bionformaticParameters		controllers.projects.api.ProjectBioinformaticParameters.delete(code: java.lang.String)
+
+# project systemParameters
+GET		/api/projects/:code/systemParameters		    controllers.projects.api.ProjectSystemParameters.get(code: java.lang.String)
+POST	/api/projects/:code/systemParameters		    controllers.projects.api.ProjectSystemParameters.save(code: java.lang.String)
+PUT		/api/projects/:code/systemParameters		    controllers.projects.api.ProjectSystemParameters.update(code: java.lang.String)
+DELETE	/api/projects/:code/systemParameters		    controllers.projects.api.ProjectSystemParameters.delete(code: java.lang.String)
+POST	/api/projects/:code/systemParameters/archiveHistory		    controllers.projects.api.ProjectSystemParameters.saveArchiveEntry(code: java.lang.String)
+
+# project analysisTypes
+HEAD	/api/projects/:code/analysisTypes		    	controllers.projects.api.ProjectAnalysisTypes.head(code: java.lang.String)
+POST	/api/projects/:code/analysisTypes		    	controllers.projects.api.ProjectAnalysisTypes.save(code: java.lang.String)
+PUT		/api/projects/:code/analysisTypes			    controllers.projects.api.ProjectAnalysisTypes.update(code: java.lang.String)
+DELETE	/api/projects/:code/analysisTypes			    controllers.projects.api.ProjectAnalysisTypes.delete(code: java.lang.String)
+
+# project nbCharactersInSampleCode
+PUT		/api/projects/:code/nbCharactersInSampleCode    controllers.projects.api.ProjectNbCharsInSamples.update(code: java.lang.String)
+
 #project api
 GET    	/api/projects               					controllers.projects.api.Projects.list()
 GET    	/api/projects/:code               				controllers.projects.api.Projects.get(code: java.lang.String)

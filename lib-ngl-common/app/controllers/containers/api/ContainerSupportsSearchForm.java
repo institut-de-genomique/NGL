@@ -45,7 +45,7 @@ public class ContainerSupportsSearchForm extends DBObjectListForm<ContainerSuppo
 	public List<String> users;
 	public String storageCodeRegex;     //  23/05/2016 FDS ajout
 	public String storageCode;          //  23/05/2016 FDS ajout
-	
+	public List<String> umbrellaCodes;
 	// No information available about why and how the deprecation is to be done
 	// @Deprecated
 	public Map<String, List<String>> properties = new HashMap<>();

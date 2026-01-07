@@ -181,8 +181,39 @@ public class Output extends AbstractOutput {
 		
 		String[] inputContainerSupportCodes = experiment.inputContainerSupportCodes.toArray(new String[0]);
 		Arrays.sort(inputContainerSupportCodes);
-		for(int i = 0; i < inputContainerSupportCodes.length ; i++){
-			sources.put(inputContainerSupportCodes[i], "Source_"+(i+1)); // HARDCODED "Source_" 
+
+		/*  NGL-5049 Pool: l'utilisateur peut changer l'ordre des 3 plaques en entrée =>  atmService.data.inputContainerSupports
+		    probleme c'est dans le javascrit !!!! refaire cette liste autrement !!
+			String[] inputContainerSupportCodes =  experiment.atomicTransfertMethods.get(0).inputContainerUseds.get(0).code;
+
+			c'est experiment.atomicTransfertMethods.viewIndex qui donne l'ordre dans lequel les plaques ont été utilisées...
+		*/
+		if ((inputContainerSupportCodes.length == 3) && ( experiment.atomicTransfertMethods.size() == 32)) {
+			// parcourir les 32 atomicTransfertMethods (0->31)
+			String regex = "[_]"; // pour splitter le inputContainer Code "<plaque>_<position>"
+
+			experiment.atomicTransfertMethods.forEach(atm -> {
+
+				if ( atm.viewIndex == 1)  {
+					InputContainerUsed icu=atm.inputContainerUseds.get(0);
+					String[] icuCode=icu.code.split(regex);
+					sources.put(icuCode[0], "Source_1"); 
+				} else if ( atm.viewIndex == 16) {
+					InputContainerUsed icu=atm.inputContainerUseds.get(0);
+					String[] icuCode=icu.code.split(regex);
+					sources.put(icuCode[0], "Source_2"); 
+				} else if ( atm.viewIndex == 32) {
+					InputContainerUsed icu=atm.inputContainerUseds.get(0);
+					String[] icuCode=icu.code.split(regex);
+					sources.put(icuCode[0], "Source_3");  
+				}
+			});
+		} else {
+			// old code
+		
+			for(int i = 0; i < inputContainerSupportCodes.length ; i++){
+				sources.put(inputContainerSupportCodes[i], "Source_"+(i+1)); // HARDCODED "Source_" 
+			}
 		}
 		return sources;
 	}

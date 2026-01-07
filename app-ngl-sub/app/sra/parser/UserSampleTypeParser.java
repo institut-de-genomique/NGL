@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import models.sra.submit.sra.instance.UserSampleType;
-import models.sra.submit.util.SraException;
+import services.sra.SraException;
 
 
 public class UserSampleTypeParser {

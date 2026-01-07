@@ -304,7 +304,7 @@ angular.module('home').controller('CNGAliquotingCtrl',['$scope', '$parse', 'atmT
 	if($scope.experiment.instrument.inContainerSupportCategoryCode !== "tube"){
 		datatableConfigTubeConfig.columns.push({
 			"header" : Messages("containers.table.supportCode"),
-			"property" : "inputContainer.code",
+			"property" : "inputContainer.support.code",
 			"order" : true,
 			"edit" : false,
 			"hide" : true,
@@ -316,7 +316,7 @@ angular.module('home').controller('CNGAliquotingCtrl',['$scope', '$parse', 'atmT
 	} else {
 		datatableConfigTubeConfig.columns.push({
 			"header" : Messages("containers.table.code"),
-			"property" : "inputContainer.support.code",
+			"property" : "inputContainer.code",
 			"order" : true,
 			"edit" : false,
 			"hide" : true,

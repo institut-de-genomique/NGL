@@ -45,6 +45,7 @@
 									<tr>
 										<th></th>
 										<th>@Messages("containers.table.code")</th>
+										<th>@Messages("containers.table.sampleCodes")</th>
 										<th>@Messages("containers.table.percentage")</th>
 										<th>@Messages("containers.table.secondaryTags")</th>
 										<th>@Messages("containers.table.tags")</th>
@@ -64,6 +65,7 @@
 										</button>
 									</td>
 									<td>{{container.code}}</td>
+									<td><div list-resize='container.sampleCodes' list-resize-min-size='3'></div></td>
 									<td class="col-sm-1"><input
 										class="form-control input-small valueInput" type="text"
 										ng-model="container.percentage"

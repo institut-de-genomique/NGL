@@ -16,12 +16,14 @@
 @version         = @{ ctx.nglConfig().getApplicationVersion() }
 @isCNSInstitute  = @{ "CNS" == ctx.nglConfig().getInstitute() }
 @isCNGInstitute  = @{ "CNG" == ctx.nglConfig().getInstitute() }
+@role = @{ PermissionHelper.getRole(user) }
 
 @user = @{ ctx.currentUser() }  
 <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
 	<div class="container-fluid">
 		<div class="navbar-header">
-			<a class="navbar-brand" href="@controllers.main.tpl.routes.Main.home()">@ctx.messageEnv("application.name")</a>
+			<!-- NGL-4344 couleur differente PROD/NOPROD -->
+			<a class="navbar-brand @("noprod".when( "PROD" != ctx.nglConfig().nglEnv() ))" href="@controllers.main.tpl.routes.Main.home()">@ctx.messageEnv("application.name")</a>
     	</div>
     	<div class="collapse navbar-collapse">
     		<ul class="nav navbar-nav">
@@ -39,16 +41,34 @@
 						@** @ddme(nav, writePermission, "receptions.create",   Receptions.home("create"),   "reagent.receptions.menu.create") *@
 						@ddme(nav, writePermission, "receptions.new",		 Receptions.home("new"),	  "reagent.receptions.menu.new_from_file")
 					  }
+
+					<li class="dropdown @("active".when(nav.startsWith("help")))">
+	  					<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" id="help">@Messages("docs.menu")<b class="caret"></b></a>
+	  					<ul class="dropdown-menu" role="menu" aria-labelledby="help">
+	  						<li><a href="@routes.Assets.at("ngl-reagents/documentation/cns/NGL-Reagents_doc_utilisateurs_mars 2021.pdf")"		 target="_blank">@Messages("reagents.menu.doc.global")</a></li>
+							<li><a href="@routes.Assets.at("ngl-reagents/documentation/cns/Guide_utilisation_NGL-Reagents_reception_reactifs.pdf")"	 target="_blank">@Messages("reagents.menu.doc.guide_receptif")</a></li>
+	  					</ul>
+					</li>
 				}
+
+				
 			</ul>
 
 			<ul class="nav navbar-nav navbar-right">
 				<li>
-				<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" id="user">
-				<i class="fa fa-user"></i> @user <b class="caret"></b></a>
-				<ul class="dropdown-menu" role="menu" aria-labelledby="user">
+					<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" id="user"><i class="fa fa-user"></i> @user <b class="caret"></b></a>
+					<ul class="dropdown-menu" role="menu" aria-labelledby="user">
 						<li><a href="/authentication/logout">@Messages("authentification.dropdown_list.signout")</a></li>
-				</ul>
+						<li><a>@role</a></li>
+					</ul>
+				</li>
+				<!--  NGL-3438 ajout application version et lien vers notes de version-->
+				<li>
+					<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" id="more"><i class="fa fa-ellipsis-v"></i></a>
+					<ul class="dropdown-menu" role="menu" aria-labelledby="more">
+						<li><a href='http://wiki.cnrgh.fr/wiki/ngldocumentation/view/Documents%20de%20mise%20en%20production/@Messages("application.name")/@ctx.getVersion()'
+							target="_blank">&nbsp;&nbsp;Version: @Messages("application.name") @ctx.getVersion()</a></li>
+					</ul>
 				</li>				
 			</ul>
 		</div>

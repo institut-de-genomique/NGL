@@ -20,6 +20,7 @@ public class ReportingConfiguration extends DBObject implements IValidation, ITr
 	
 	public QueryConfiguration queryConfiguration;
 	
+	public Boolean active = Boolean.TRUE;
 	
 	
 	@Override

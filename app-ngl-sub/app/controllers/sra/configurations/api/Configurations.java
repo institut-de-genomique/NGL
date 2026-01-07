@@ -8,16 +8,16 @@ import org.apache.commons.lang3.StringUtils;
 
 import controllers.NGLAPIController;
 import controllers.QueryFieldsForm;
+import controllers.sra.api.ConfigurationAPI;
 import fr.cea.ig.authentication.Authenticated;
 import fr.cea.ig.authorization.Authorized;
 import fr.cea.ig.ngl.NGLApplication;
 import fr.cea.ig.ngl.dao.api.APIException;
 import fr.cea.ig.ngl.dao.api.APIValidationException;
-import fr.cea.ig.ngl.dao.api.sra.ConfigurationAPI;
-import models.sra.submit.util.SraCodeHelper;
 import models.sra.submit.sra.instance.Configuration;
 import play.data.Form;
 import play.mvc.Result;
+import services.sra.SraCodeHelper;
 import views.components.datatable.DatatableForm;
 import fr.cea.ig.ngl.dao.sra.ConfigurationDAO;
 
@@ -25,17 +25,17 @@ import fr.cea.ig.ngl.dao.sra.ConfigurationDAO;
 public class Configurations extends NGLAPIController<ConfigurationAPI, ConfigurationDAO, Configuration> {
 
 
-	private static final play.Logger.ALogger logger = play.Logger.of(Configurations.class);
+	// private static final play.Logger.ALogger logger = play.Logger.of(Configurations.class);
 
 	private final Form<Configuration>                configurationForm;
-	private final Form<ConfigurationsUrlParamForm>   configurationsUrlParamForm;
+	// private final Form<ConfigurationsUrlParamForm>   configurationsUrlParamForm;
 
 
 	@Inject
 	public Configurations(NGLApplication app, ConfigurationAPI api, SraCodeHelper sraCodeHelper) {
 		super(app, api, ConfigurationsSearchForm.class);
 		this.configurationForm          = app.formFactory().form(Configuration.class);
-		this.configurationsUrlParamForm = app.formFactory().form(ConfigurationsUrlParamForm.class);
+		// this.configurationsUrlParamForm = app.formFactory().form(ConfigurationsUrlParamForm.class);
 	}	
 
 
@@ -123,12 +123,12 @@ public class Configurations extends NGLAPIController<ConfigurationAPI, Configura
 		//En mode copy, on veut que tous les champs de l'object input soient recopiés, on passe donc par un update sans
 		// queryFieldsForm
 
-		boolean copy = false;
+		// boolean copy = false;
 		if (queryFieldsForm.fields == null) {	
 			return api().update(userConfiguration, getCurrentUser(), false);
 		} 
 		if(queryFieldsForm.fields.contains("copy")) {
-			copy = true;
+			// copy = true;
 			queryFieldsForm.fields.remove("copy");
 			return api().update(userConfiguration, getCurrentUser(), true);
 		} 

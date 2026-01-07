@@ -25,7 +25,10 @@
 	<div class="col-md-6 col-lg-6">
 	<form class="form-horizontal">
   	<div class="form-group">
-   		<label  class="col-md-4 col-lg-4 control-label">WellTable LabChip_GX : </label>
+		<div ng-switch="experiment.instrument.typeCode">
+			<label  class="col-md-4 col-lg-4 control-label" ng-switch-when="femto-pulse">Femto Pulse_Smear Analysis Result : </label>
+			<label  class="col-md-4 col-lg-4 control-label" ng-switch-default>WellTable LabChip_GX : </label>
+		</div>
 		<div class="input-group col-md-8 col-lg-8" >
 		<input id="importFile" type="file" class="form-control" base64-file="file">
 		<span class="input-group-btn">
@@ -58,7 +61,7 @@
 	
 	<div class="row">
 		<div class="col-md-12 col-lg-12">
-	<table class="table table-bordered table-condensed datatable" ng-if="('labchip-gx' === experiment.instrument.typeCode)">
+	<table class="table table-bordered table-condensed datatable" ng-if="'labchip-gx' === experiment.instrument.typeCode">
 				
 	<thead>
 	     <tr>
@@ -121,6 +124,40 @@
 </table>
 	</div>
 	</div>
+
+	<div class="row">
+		<div class="col-md-12 col-lg-12">
+	<table class="table table-bordered table-condensed datatable" ng-if="'femto-pulse' === experiment.instrument.typeCode">
+				
+	<thead>
+	     <tr>
+	         <th></th>
+	         <th ng-repeat="i in [1,2,3,4,5,6,7,8,9,10,11,12]">{{i}}</th>
+	     </tr>
+	</thead>
+	<tbody>
+	    <tr ng-repeat="line in ['A','B','C','D','E','F','G','H']">
+	        <td><strong>{{line}}</strong></td>
+	        
+	        <td ng-repeat="column in [1,2,3,4,5,6,7,8,9,10,11,12] track by $index">
+	        
+	        <div  ng-click="setImage(getProfil(line,column).value,getProfil(line,column).fullname,getProfil(line,column).width,getProfil(line,column).height)"  
+	        	 ng-show="getProfil(line,column) !== undefined" > 
+	        	<div data-target="#modalImage" role="button" data-toggle="modal" >
+	        		<a href="#">
+	        		<img ng-src="data:image/{{getProfil(line,column).extension}};base64,{{getProfil(line,column).value}}"width="{{getProfil(line,column).width*0.15}}" height="{{getProfil(line,column).height*0.15}}"  class="center-block"/>
+	        		</a>
+	        		</div>
+	        	</div>
+	                		        	    						    					
+	        </td>          
+	    </tr>
+	  
+	<tbody>				 
+</table>
+	</div>
+	</div>
+
 	</div>
 	
 	<div class="tab-pane" id="plate" ng-if="plateUtils.isPlate()">

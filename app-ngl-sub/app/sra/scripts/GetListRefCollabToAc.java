@@ -4,10 +4,10 @@ import java.io.File;
 
 import javax.inject.Inject;
 
+import controllers.sra.api.SubmissionAPI;
 import fr.cea.ig.lfw.controllers.scripts.chunked.ScriptWithArgs;
-import fr.cea.ig.ngl.dao.api.sra.SubmissionAPI;
 import models.sra.submit.sra.instance.Submission;
-import services.Tools;
+import sra.services.Tools;
 
 /*
  * Script à utiliser pour recharger les md5 d'une soumission a partir de NGL.
@@ -45,12 +45,12 @@ public class GetListRefCollabToAc extends ScriptWithArgs<GetListRefCollabToAc.My
 			println("Pas de soumission dans la base pour le code '"+ args.code + "'");
 			return;
 		}
-		if(submission.mapUserRefCollab == null || submission.mapUserRefCollab.size()==0) {
+		if(submission.userRefCollabs == null || submission.userRefCollabs.size()==0) {
 			println("Pas de champs refCollab pour la soumission '"+ args.code + "'");
 			return;
 		}
 		File outputFile = new File (args.pathFileOut);
-		Tools.writeUserRefCollabToAc(submission.mapUserRefCollab, outputFile);
+		Tools.writeUserRefCollabToAc(submission.userRefCollabs, outputFile);
 		println("Ecriture du fichier " + outputFile.getPath() );
 	}
 	

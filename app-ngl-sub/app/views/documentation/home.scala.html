@@ -18,29 +18,67 @@
 	
 		</xmp>	
 	</div>
+		</div>
+		
+		
+	<div class="panel-heading">
+		<h3>@Messages("documentation.dropBox")</h3>
+	</div>
+	<div class="panel-body">
+		<ul>
+		La majorite de nos soumissions de données brutes est réalisée sur notre dropBox (ou compte) 'Webin-9' à l'EBI.
+		De nouveaux projets comme Atlasea, nécessite de soumettre dans une dropBox de l'EBI partagée avec nos collaborateurs. Ce compte partagé
+		nous permet de soumettre les données brutes d'Atlasea, et permet aux collaborateurs en charge du prélèvement des échantillons de soumettre 
+		leurs données (samples) sur ce meme compte. 
+		La notion de dropBox a ainsi été introduite dans ngl-sub pour permettre aux utilisateurs de choisir parmis une liste predefinie de dropBox,
+		le compte qui sera utilisé pour réaliser sa soumission. Par defaut, c'est la dropBox 'Webin-9' qui est toujours séléctionné dans nos interfaces.		
+		</ul>		
+	</div>
+				
+
 	<div class="panel-heading">
 		<h3>@Messages("documentation.creationSubmission")</h3>
 	</div>
 	<div class="panel-body">
+		<h4>On distingue plusieurs types de soumission en mode CREATION :</h4>
 		<ul>			
-			Le menu creation de l'onglet Submission permet de distinguer 3 types de soumission en mode CREATION :
-			
-			<li><h4><strong>Soumission d'un study ou d'un sample sans données brutes  :</strong><h4></li>	
-			Il est possible dans NGL-SUB de creer un study (menu creation de l'onglet Study) et de le soumettre sans données brutes associées.
+			<li><h4><strong>Soumission de metadata sans données brutes (project umbrella, study ou sample)  : </strong><h4></li>
 			Ce type de soumission ne necessite pas de configuration de soumission.
-			On peut également créer un sample et le soumettre sans données brutes en prevision d'une utilisation pour une soumission de type bionano.
+			<ul>
+				<li><h5>NGL-SUB propose dans le menu <strong>Umbrella Project</strong>, un sous-menu <strong>Creer un project umbrella à l'EBI </strong>qui permet à l'utilisateur 
+				en sauvant les informations de son umbrella de soumettre celui-ci directement à l'EBI, sans étape de validation ou de démarrage d'une soumission.<h5></li> 		
+				<li><h5>NGL-SUB propose dans le menu <strong>Study ou Project</strong>, un sous-menu <strong>Creation d'un study à l'EBI </strong>qui permet à l'utilisateur 
+				en sauvant les informations de son study de soumettre celui-ci directement à l'EBI, sans étape de validation ou de démarrage d'une soumission.<h5></li> 		
+				<li><h5>NGL-SUB propose dans le menu <strong>Sample</strong>, un sous-menu <strong>Creation d'un sample à l'EBI </strong>qui permet à l'utilisateur 
+				en sauvant les informations de son sample et de soumettre celui-ci directement à l'EBI, sans étape de validation ou de démarrage d'une soumission. 		
+            </ul>
 			<strong>
-		    Attention, le sous-menu Création des samples ne doit etre utilisé qu'en prévision d'une soumission de données brutes bionano. Pour toutes 
-			les soumissions de données brutes autre que bionano, les samples seront automatiquement crées sur la base de la configuration de soumission. 
-			</strong>
-			<li><h4><strong>Soumission des données Bionano :</strong><h4></li>
-			Ce type de soumission sert exclusivement à la soumission des données brutes de type bionano. Elle ne necessite pas de configuration de soumission.
-			Elle necessite de creer une analyse (menu creation de l'onglet Analysis), un sample et de fournir la liste des readsets bionano.
+		    	Attention, le sous-menu Création des samples doit etre utilisé en prévision d'une soumission de données brutes bionano, 
+            	ou si on souhaite créer un sample commun pour la soumission des assemblages et des données brutes. 
+            </strong>
+            Pour les soumissions de données brutes autre que bionano, si la configuration de soumission indique une strategy 
+            'STRATEGY_CODE_SAMPLE_TAXON', 'STRATEGY_CODE_SAMPLE_REFCOLLAB', 'STRATEGY_CODE_SAMPLE_BANK', 
+            les samples seront crées automatiquement, sans avoir à passer par ce menu 'Création d'un sample à l'EBI. <h5></li>
+			<br/>
 		
-			<li><h4><strong>Soumission des données Illumina, nanopore ou mgi :</strong><h4></li>
+			<li><h4><strong>Soumission des données Bionano (menu Submission puis sous-menu Création) : </strong><h4></li>
+			Ce type de soumission sert exclusivement à la soumission des données brutes de type bionano. Elle ne necessite pas de configuration de soumission.
+			Elle necessite de creer une analyse qui reférence un sample et un study (menu creation de l'onglet Analysis) puis dans le menu de ''création d'une soumission bionano' 
+			de fournir la liste des readsets bionano et le fichier userFilecmap.txt. Les fichiers de données associés aux readsets bionano sont stockés dans NGL au niveau des readsets, et 
+			seront automatiquement associés à la soumission en sélectionnant les readsets. Les fichiers *.cmap associés à une soumission bionano ne sont actuellement pas stockés dans NGL.
+			Le fichier userFilePathcmap.txt permet d'indiquer le chemin sur le fileSystème ou ngl-sub pourra recuperer et traiter ces données.
+			<br/>
+			
+			<li><h4><strong>Soumission des données Illumina, nanopore, mgi ou pacbio (menu Submission puis sous-menu Création) :</strong><h4></li>
 			Ce type de soumission necessite de creer une configuration de soumission (menu creation de l'onglet Configuration). Cette configuration indique à NGL-SUB comment construire les samples
 			de la soumission correspondant aux readsets fournits par l'utilisateur. Elle permet egalement à l'utilisateur d'indiquer des valeurs 
 			obligatoires pour construire les experiments de la soumission. 	
+			<br/>
+			
+			<li><h4><strong>Soumission des données brutes Atlasea  (menu Submission puis sous-menu Création) : </strong><h4></li>
+			Le menu de création d'une soumission comporte un sous-menu dédié aux séquences brutes Atlasea, qui permet de simplifier la soumission des readsets Atlasea.  
+			Ce développement limite considérablement les risques d’erreur, en déterminant automatiquement, à partir d'un tolid, les séquences à soumettre, le project rawData à utiliser, 
+			et les configurations de soumission à utiliser. On notera que les readsets Atlasea doivent avoir une refCollabSub correspondant à un identifiant de sample public à l'EBI.
 		</ul>
 		<ul></ul>
 	</div>
@@ -183,7 +221,22 @@
 	
 		</xmp>	
 	</div>
-		
+	
+			
+	<div class="panel-heading">
+		<h3>@Messages("documentation.userFilePathcmap")</h3>
+	</div>
+	<div class="panel-body">	
+		<ul>
+		<li><h4>utilité du fichier :</h4>
+		Il permet d'indiquer le chemin des fichiers *.cmap à prendre en compte pour une soumission bionano.
+		<li><h4>Format du fichier :</h4>
+		Chaque ligne contient le chemin absolue permettant d'accéder à un fichier cmap.
+		<li><h4>Exemple de fichier :</h4>
+		/env/cns/submit_traces/SRA/SNTS_output_xml/NGL/bionano/TEST/B_rapa_V2_BspQI_EXP_REFINEFINAL1.cmap<br>
+        /env/cns/submit_traces/SRA/SNTS_output_xml/NGL/bionano/TEST/B_rapa_V2_DLE_EXP_REFINEFINAL1.cmap<br>
+	</div>	
+	
 	<div class="panel-heading">
 		<h3>@Messages("documentation.userFileReadSet")</h3>
 	</div>
@@ -211,7 +264,7 @@
 	</div>	
 
 	<div class="panel-heading">
-		<h3>@Messages("documentation.userFileRefCollabToAc")</h3>
+		<h3>@Messages("documentation.userFileRefCollabToEbiIdentifier")</h3>
 	</div>
 	<div class="panel-body">		
 		<ul>
@@ -219,7 +272,7 @@
 		Il permet de donner les correspondance entre les references collaborateur
 		et les identifiants des objets 'sample' et/ou 'study' deja soumis.  
 		Dans le cas d'une strategie 'STRATEGY_AC_SAMPLE' avec utilisation du fichier 'FILE_USER_REFCOLLAB_TO_AC'  le champ readset.sampleOnContainer.refCollab ou la proprieté readset.properties.refCollabSub doit etre renseigne dans NGL pour les readsets à soumettre.
-		Attention : Si la propriété refCollabSub est definie dans vos readsets, c'est la valeur de refCollabSub qu'il faut indiquer dans le fichier userFileRefCollabToAc puisque
+		Attention : Si la propriété refCollabSub est definie dans vos readsets, c'est la valeur de refCollabSub qu'il faut indiquer dans le fichier userFileRefCollabToEbiIdentifier puisque
 		refCollabSub remplace refCollab dans les soumissions.
 		<li><h4>Format du fichier :</h4>
 		En colonnes délimitées par le caractère '|'. La premiere ligne du fichier permet de definir la legende (type-information de chaque colonne) <br>
@@ -271,7 +324,7 @@
 		Les lignes commencant par le caractère '#' sont ignorées (commentaires).<br> 
 		La legende doit obligatoirement comporter le champ "experiment_code"
 		
-		Attention, les champs study_ac et sample_ac sont autorisées dans le fichier userFileExperiment uniquement pour une mise à jour des experiments à l'EBI
+		Attention, les champs study_id et sample_id sont autorisées dans le fichier userFileExperiment uniquement pour une mise à jour des experiments à l'EBI
 		dans le menu 'Modidier à l'EBI'. Ces champs ne sont pas autorisées dans le menu 'consultation'
 	
 		
@@ -286,8 +339,8 @@
 			<li><strong>library_layout_nominal_length</strong>  : entier
 			<li><strong>spot_length</strong>  : entier
 			<li><strong>last_base_coordonnee</strong>  : entier
-			<li><strong>study_ac</strong> : champ contraint : String commencant par ERP. (autorisée uniquement dans 'Modidier à l'EBI')
-			<li><strong>sample_ac</strong> : champ contraint : String commencant par ERS. (autorisée uniquement dans 'Modidier à l'EBI')
+			<li><strong>study_id</strong> : champ contraint : String commencant par ERP ou PRJ. (autorisé uniquement dans 'Modidier à l'EBI')
+			<li><strong>sample_id</strong> : champ contraint : String commencant par ERS ou SRS ou SAM. (autorisé uniquement dans 'Modidier à l'EBI')
 		</ul>	
 
 		
@@ -355,7 +408,9 @@ sample_AKL_3702_MEJ07| | my title 2 | "my description 2"| my anonymized name 2 |
 		<ul>		
 		<li><h4>utilité du champ :</h4>	
 		Depuis le 01/06/2023, ce champs est obligatoire et doit comporter les tags "collection date" et "geographic location" qui permettent
-		une location spatio-temporelle de l'echantillon.<br>
+		une location spatio-temporelle de l'echantillon.<br><br>
+		<strong>La liste des pays reconnus dans le champs 'geographic location' est disponible <a href="https://www.insdc.org/submitting-standards/geo_loc_name-qualifier-vocabulary/">ici</a></strong><br><br>
+		<strong>Les interfaces qui proposent de renseigner le champs attributes des samples contiennent des instructions pour remplir ce champs, qu'il est vivement conseille de consulter.</strong><br><br>		
 		L'EBI reconnait un ensemble fini de caracteristiques pour le sample (ex: title, description, code, taxonId, ...).<br>
 		Si le sample doit etre decrit plus precisement (a l'aide de propriétés qui n'apparaissent pas dans les differents champs du sample),<br>
 		il est possible de definir ses propres attributs (ex Strain, Clone, Note, altitude...) dans 
@@ -368,28 +423,78 @@ sample_AKL_3702_MEJ07| | my title 2 | "my description 2"| my anonymized name 2 |
 		- VALUE            <br>
 		- UNITS            <br>
 		
-	
-		<li><h4>2 exemples de champs attributes :</h4>
+		<li><h4>2 exemples de champs attributes du sample:</h4>
 		</ul>
 		<xmp>
-	   "<SAMPLE_ATTRIBUTE><TAG>collection date</TAG><VALUE>2023-06-01</VALUE></SAMPLE_ATTRIBUTE>
+	   '<SAMPLE_ATTRIBUTE><TAG>collection date</TAG><VALUE>2023-06-01</VALUE></SAMPLE_ATTRIBUTE>
         <SAMPLE_ATTRIBUTE><TAG>geographic location (country and/or sea)</TAG><VALUE>Japan</VALUE></SAMPLE_ATTRIBUTE>
         <SAMPLE_ATTRIBUTE><TAG>Strain</TAG><VALUE>ABBA</VALUE></SAMPLE_ATTRIBUTE>
 	    <SAMPLE_ATTRIBUTE><TAG>Depth</TAG><VALUE>200</VALUE><UNITS>m</UNITS></SAMPLE_ATTRIBUTE>
 	    <SAMPLE_ATTRIBUTE><TAG>Sample Collection Device</TAG><VALUE>high volume peristaltic pump [HVP-PUMP]</VALUE></SAMPLE_ATTRIBUTE>
-	   "       	
+	   '       	
        
-	   
-	   "<SAMPLE_ATTRIBUTE><TAG>collection date</TAG><VALUE>2023-06-12</VALUE></SAMPLE_ATTRIBUTE>
+	   '<SAMPLE_ATTRIBUTE><TAG>collection date</TAG><VALUE>2023-06-12</VALUE></SAMPLE_ATTRIBUTE>
         <SAMPLE_ATTRIBUTE><TAG>geographic location (country and/or sea)</TAG><VALUE>France</VALUE></SAMPLE_ATTRIBUTE>
-       "
+       '
         </xmp>	
         
   			
     </div>	
     
     
+</xmp>
+	</div>
+	
+	<div class="panel-heading">
+		<h4><a id="attributes"></a></h4>
+		<h3>@Messages("documentation.projectAttributes")</h3>
+	</div>
+		<div class="panel-body">
+		<ul>		
+		<li><h4>utilité du champ :</h4>	
+        Ce champs est facultatif et il est renseigne pour des projets collaboratifs comme AtlantECO<br><br>
+		<strong>Les interfaces qui proposent de renseigner le champs attributes des projects contiennent des instructions pour remplir ce champs, qu'il est vivement conseille de consulter.</strong><br><br>		
+		L'EBI reconnait un ensemble fini de caracteristiques pour le project (ex: title, description, ...).<br>
+		Si le project (ou study) doit etre decrit plus precisement (a l'aide de propriétés qui n'apparaissent pas dans les differents champs du study),<br>
+		il est possible de definir ses propres attributs  dans 
+		le champ attributes, en utilisant les balises autorisées.<br>
+		On peut definir plusieurs "attributes" dans ce champ.<br>
+		
+		<li><h4>Balises autorisées dans le champ attributes :</h4>
+		- PROJECT_ATTRIBUTE <br>
+		- TAG              <br>
+		- VALUE            <br>
+		- UNITS            <br>
+		
+		<li><h4>Un exemple de champs attributes des projects AtlantECO:</h4>
+		</ul>
+		<xmp>
+	'
+	<PROJECT_ATTRIBUTE>
+		<TAG>Funding Acknowledgement</TAG>
+		<VALUE>This research has received funding from the European Union's Horizon 2020 Research and Innovation Programme under grant agreement No 862923 (project AtlantECO). This output reflects only the author's view and the European Union cannot be held responsible for any use that may be made of the information contained therein. (https://cordis.europa.eu/project/id/862923)</VALUE>
+	</PROJECT_ATTRIBUTE>
+	<PROJECT_ATTRIBUTE>
+		<TAG>Data Policy</TAG>
+		<VALUE>The AtlantECO Consortium relies on the fair, open and inclusive collaboration among its Partners, and the exploitation of jointly owned results, which is governed by the adoption of AtlantECO's Data Sharing and Publication Best Practices (https://doi.org/10.5281/zenodo.7791092).</VALUE>
+	</PROJECT_ATTRIBUTE>
+	'       	
+        </xmp>	
+        	
+    </div>	
     
+    <div class="panel-heading">
+		<h3>Ajouter une réference bibliographique ou un locus_tag à un projet :</h3>
+	</div>
+	<div class="panel-body">
+		<ul>	
+ 		<xmp>
+Les identifiants PUBMED et/ou les locus_tag peuvent maintenant etre renseignés à la création du study. Mais ils peuvent aussi etre renseignés lors d'une mise à jour à l'
+EBI. Si plusieurs identifiants pubmed doivent etre indiqués, il faut les séparer par une ",". Si plusieurs locus_tag doivent etre indiqués, ils seront séparés par un ','. 
+
+		</xmp>
+		</ul>
+	</div>		          
     
  	<div class="panel-heading">
 		<h3>Corrections et validation des données de soumission avant de demarrer la soumission :</h3>
@@ -419,7 +524,7 @@ La vérification de cette contrainte peut etre réalisée à l'url </xmp> <a hre
 		<ul>	
  		<xmp>
 Après une première soumission des données brutes à l'EBI, on peut avoir besoin de mettre à  jour les métadonnées pour corriger un titre d'experience ou de sample, 
-un résumé de study ou sa description, ou encore ajouter des locus_tag ou un identifiant PUBMED (référence bibliographique)
+un résumé de study ou sa description, ou encore ajouter des locus_tag (en les séparerant par une ',' si plusieurs) ou un identifiant PUBMED (entier correspondant à une référence bibliographique)
 L'interface de NGL-SUB propose les sous-menus "Modifier à l'EBI" qui permettent de modifier les champs autorisés des métadonnées 
 et de les mettre   à jour sur le serveur de l'EBI.
 Attention un objet study, project, experiment ou sample n'est modifiable a l'EBI, que si l'objet a déjà été soumis à l'EBI (il possede alors un numeros d'accession) et qu'il n'est pas en cours de soumission (soumission pour update ou release).
@@ -427,20 +532,7 @@ Les champs date des métadonnées ne sont pas des champs autorisés pour une mod
 		</xmp>
 		</ul>
 	</div>		  
-	<div class="panel-heading">
-		<h3>Ajouter une réference bibliographique ou un locus_tag à un projet :</h3>
-	</div>
-	<div class="panel-body">
-		<ul>	
- 		<xmp>
-Pour des raisons techniques propres à l'EBI, Les identifiants PUBMED et locus_tag ne peuvent pas etre renseignés à la création du study.
-L'ajout d'une réference bibliographique se fait en ajoutant un identifiant PUBMED dans le project. Cette ajout se 
-fait en passant par le menu "Study ou Project" et le sous-menu "Modifier à l'EBI". De la meme facon l'ajout d'un locus_tag
-passe par le menu "Study ou Project" et le sous-menu "Modifier à l'EBI".
 
-		</xmp>
-		</ul>
-	</div>		      
 	<div class="panel-heading">
 		<h3>Mettre les données dans le domaine public (Release) :</h3>
 	</div>

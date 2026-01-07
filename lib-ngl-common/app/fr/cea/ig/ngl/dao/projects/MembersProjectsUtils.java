@@ -35,7 +35,11 @@ public class MembersProjectsUtils {
 		return names.stream().map(n->new GroupMembers(n)).collect(Collectors.toList());
 	}
 	
-	public static List<UserMembers> convertListMapValue(List<Map<String, String>> attributeValues, ArrayList<String>... groupList) {
-		return attributeValues.stream().map(av->new UserMembers(av.get(MembersProjectsUtils.samAccountName),av.get(MembersProjectsUtils.displayName), groupList.length == 1 ? groupList[0] : null)).collect(Collectors.toList());
+	public static List<UserMembers> convertListMapValue(List<Map<String, String>> attributeValues, ArrayList<String> groupList) {
+		return attributeValues.stream().map(av->new UserMembers(av.get(MembersProjectsUtils.samAccountName),av.get(MembersProjectsUtils.displayName), groupList)).collect(Collectors.toList());
+	}	
+
+	public static List<UserMembers> convertListMapValue(List<Map<String, String>> attributeValues) {
+		return attributeValues.stream().map(av->new UserMembers(av.get(MembersProjectsUtils.samAccountName),av.get(MembersProjectsUtils.displayName))).collect(Collectors.toList());
 	}	
 }

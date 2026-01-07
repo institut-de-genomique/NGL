@@ -1,10 +1,22 @@
 package services.instance.balancesheet;
 
+import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.mongojack.DBQuery;
 
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
+
 import fr.cea.ig.MongoDBDAO;
+import fr.cea.ig.ngl.NGLConfig;
+import mail.MailServiceException;
+import mail.MailServices;
 import models.laboratory.balancesheet.instance.BalanceSheet;
 import models.laboratory.balancesheet.instance.Computation;
 import models.utils.InstanceConstants;
@@ -34,7 +46,12 @@ public final class BalanceSheetUtils {
 			new ComputationRequest(Collection.RUNS),
 			new ComputationRequest(Collection.RUNS, Match.create("state.code", DBQuery::is, "FE-S"))
 	};
-	
+	public static final ComputationRequest[] DEFAULT_PACBIO_REQUESTS = new ComputationRequest[] {
+		new ComputationRequest(Collection.READSETS, Method.SUM, "treatments.readQuality.default.reads.value.nbBases"),
+		new ComputationRequest(Collection.RUNS),
+		new ComputationRequest(Collection.RUNS, Match.create("state.code", DBQuery::is, "FE-S")),
+		new ComputationRequest(Collection.RUNS, Match.create("instrumentUsed.code", DBQuery::regex, Pattern.compile("^EXT.+")))
+	};
 	public static final BalanceSheet findBalanceSheet(String year, String type) {
 		return MongoDBDAO.findOne(InstanceConstants.BALANCE_SHEET_COLL_NAME, BalanceSheet.class, DBQuery.and(DBQuery.is("year", year), DBQuery.is("type", type)));
 	}
@@ -43,6 +60,7 @@ public final class BalanceSheetUtils {
 		switch(type) {
 		case SEQ_ILLUMINA: return DEFAULT_ILLUMINA_REQUESTS;
 		case SEQ_NANOPORE: return DEFAULT_NANOPORE_REQUESTS;
+		case SEQ_PACBIO: return DEFAULT_PACBIO_REQUESTS;
 		default: return new ComputationRequest[]{};
 		}
 	}
@@ -78,10 +96,12 @@ public final class BalanceSheetUtils {
 			case READSETS: switch(type) {
 				case SEQ_ILLUMINA: return "rsillumina";
 				case SEQ_NANOPORE: return "rsnanopore";
+				case SEQ_PACBIO: return "rspacbio";
 			}
 			case RUNS: switch(type) {
 				case SEQ_ILLUMINA: return "illumina";
 				case SEQ_NANOPORE: return "nanopore";
+				case SEQ_PACBIO: return "pacbio";
 			}
 		}
 		return null;
@@ -92,6 +112,26 @@ public final class BalanceSheetUtils {
 		computation.by.sequencingTypes.clear();
 		computation.by.sampleTypes.clear();
 		computation.by.projects.clear();
+	}
+	
+	private static final String EXPEDITEUR_KEY = "reporting.email.from";
+
+	private static final String DESTINATAIRES_KEY = "reporting.email.to";
+
+	private static final String ENV_KEY = "ngl.env";
+	
+	public static void sendSuccessMail(MailServices mailServices, NGLConfig nglConfig, String subject, String message) throws MailServiceException, UnsupportedEncodingException {
+		Config config = ConfigFactory.load();
+		final String EXPEDITEUR = config.getString(EXPEDITEUR_KEY);
+		final Set<String> DESTINATAIRES = Stream.of(config.getString(DESTINATAIRES_KEY).split(",")).collect(Collectors.toSet());
+		final String ENVIRONMENT = config.getString(ENV_KEY);
+		final String INSTITUTE = nglConfig.getInstitute();
+		final String isoMessage = new String(message.getBytes(), "iso-8859-1");
+
+		String infoMessage = "<b>" + isoMessage + "</b><br/>";
+		String infoSubject = "[NGL-DATA] [" + ENVIRONMENT + "] [" + INSTITUTE + "] " + subject;
+		
+		mailServices.sendMail(EXPEDITEUR, DESTINATAIRES, infoSubject, infoMessage);
 	}
 
 	/**
@@ -171,7 +211,7 @@ public final class BalanceSheetUtils {
 	 */
 	public static enum Type {
 
-		SEQ_ILLUMINA("bi-illumina"), SEQ_NANOPORE("bi-nanopore");
+		SEQ_ILLUMINA("bi-illumina"), SEQ_NANOPORE("bi-nanopore"),SEQ_PACBIO("bi-pacbio");
 
 		public final String value;
 
@@ -183,6 +223,7 @@ public final class BalanceSheetUtils {
 			switch(type) {
 			case "bi-illumina": return SEQ_ILLUMINA;
 			case "bi-nanopore": return SEQ_NANOPORE;
+			case "bi-pacbio" : return SEQ_PACBIO;
 			default: return null;
 			}
 		}

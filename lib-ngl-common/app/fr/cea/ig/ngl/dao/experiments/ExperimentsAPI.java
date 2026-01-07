@@ -211,7 +211,9 @@ public class ExperimentsAPI extends GenericAPI<ExperimentsDAO, Experiment> {
 			sampleList.forEach(s -> {
 				s.setProcessesToLaunchDate(new Date());
 
-				MongoDBDAO.update(InstanceConstants.SAMPLE_COLL_NAME, s);
+				if (s.getProcessesToLaunchDate() != null) {
+					MongoDBDAO.update(InstanceConstants.SAMPLE_COLL_NAME, s);
+				}
 			});
 		}
 		

@@ -32,14 +32,16 @@ import models.laboratory.common.instance.TBoolean;
 import models.laboratory.common.instance.TraceInformation;
 import models.laboratory.common.instance.TransientState;
 import models.laboratory.common.instance.Valuation;
-import models.laboratory.common.instance.property.PropertyObjectValue;
 import models.laboratory.common.instance.property.PropertySingleValue;
 import models.laboratory.container.instance.Container;
 import models.laboratory.container.instance.Content;
 import models.laboratory.parameter.index.IlluminaIndex;
 import models.laboratory.parameter.index.Index;
+import models.laboratory.project.instance.Applicant;
 import models.laboratory.project.instance.BioinformaticParameters;
 import models.laboratory.project.instance.Project;
+import models.laboratory.project.instance.SystemParameters;
+import models.laboratory.project.instance.SystemParameters.QtreeQuota;
 import models.laboratory.project.instance.UmbrellaProject;
 import models.laboratory.run.description.ReadSetType;
 import models.laboratory.run.description.TreatmentType;
@@ -84,11 +86,9 @@ public class LimsCNSDAO {
 	
 	private static final String PROJECT_STATE_CODE_IP = "IP";
 	private static final String PROJECT_STATE_CODE_F   = "F";
+	private static final String PROJECT_STATE_CODE_N   = "N";
 	//protected static final String PROJECT_PROPERTIES_FG_GROUP = "fgGroup";
 	// EJACOBY: AD
-	protected static final String PROJECT_PROPERTIES_UNIX_GROUP = "unixGroup";
-	protected static final String PROJECT_PROPERTIES_SYNCHRO_PROJ = "synchroProj";
-	protected static final String QTREE_QUOTA = "qtreeQuota";
 	protected static final String NGSRG_CODE                  = "ngsrg";
 	protected static final String GLOBAL_CODE                 = "global";
 	protected static final String IMPORT_CATEGORY_CODE        = "sample-import";
@@ -238,6 +238,14 @@ public class LimsCNSDAO {
 		return null;
 	}
 
+	private boolean isOS(String comm) {
+		return comm.startsWith("LOC") ||
+		comm.startsWith("ANR") ||
+		comm.startsWith("EUR") ||
+		comm.startsWith("IA") ||
+		comm.equals("LIFEPATH");
+	}
+
 	public List<UmbrellaProject> findUmbrellaProjectToCreate(final ContextValidation contextError) {
 		List<UmbrellaProject> result = jdbcTemplate.query("SELECT * FROM Projetini", NO_ARG,
 						(resulSet, rowNumber) -> {
@@ -250,14 +258,17 @@ public class LimsCNSDAO {
 
 							String commProjetInit = resulSet.getString("pricom");
 
+							String descProjetInit = resulSet.getString("prinom");
+
 							int codeProjet = resulSet.getInt("prico");
 
-							if (codeProjet != 0) {
+							if (codeProjet != 0) {		
 								jdbcTemplate.query("SELECT * FROM Projetgeneral p, Projetini pi WHERE p.prgco = pi.prgco AND pi.prico = ?", new Object[] { codeProjet },
 									(resulSetCommProj, rowNumberCommProj) -> {
 										String commProjet = resulSetCommProj.getString("prgnoml");
 
-										umbrellaProject.description = "Commentaire projet initalisé : " + ((commProjetInit == null || commProjetInit.equals("NULL")) ? "" : commProjetInit) + " ; " +
+										umbrellaProject.description = "Description projet initialisé : " + ((descProjetInit == null || descProjetInit.equals("NULL")) ? "" : descProjetInit) + " ; " + 
+															"Commentaire projet initalisé : " + ((commProjetInit == null || commProjetInit.equals("NULL")) ? "" : commProjetInit) + " ; " +
 															"Nom projet général : " + resulSetCommProj.getString("prgnom") + " ; " +
 															"Description projet général : " + ((commProjet == null || commProjet.equals("NULL")) ? "" : commProjet);
 
@@ -271,7 +282,7 @@ public class LimsCNSDAO {
 							TraceInformation ti = new TraceInformation(Constants.NGL_DATA_USER);
 
 							Date dateCreation = new Date(); // Par défaut à aujourd'hui, ça permet que si une erreur arrive on n'a pas une date null.
-							String dateBaseLims = resulSet.getString("priddp");
+							String dateBaseLims = resulSet.getString("pridc");
 
 							try {
 								dateCreation = new SimpleDateFormat("yyyy-MM-dd").parse(dateBaseLims);
@@ -319,9 +330,20 @@ public class LimsCNSDAO {
 
 								jdbcTemplate.query("SELECT * FROM Collab WHERE colnum = ?", new Object[] { codeApplicant },
 									(resulSetDemandeur, rowNumberRespInf) -> {
-										String demandeur = resulSetDemandeur.getString("colNom");
+										String nomDemandeur = resulSetDemandeur.getString("colnom");
+										String prenomDemandeur = resulSetDemandeur.getString("colpren");
+										String affiliationDemandeur = resulSetDemandeur.getString("colorig");
 
-										umbrellaProject.properties.put("applicant", new PropertySingleValue(demandeur));
+										Applicant applicant = new Applicant();
+										applicant.id = codeApplicant;
+										applicant.affiliation = affiliationDemandeur;
+										applicant.nom = nomDemandeur;
+										applicant.prenom = prenomDemandeur;
+
+										List<Applicant> applicants = new ArrayList<>();
+										applicants.add(applicant);
+										
+										umbrellaProject.applicants = applicants;
 
 										return null;
 									});
@@ -358,21 +380,13 @@ public class LimsCNSDAO {
 							project.bioinformaticParameters.ccrtAutomaticTransfer=true;
 					}
 
-					String unixGroup = rs.getString("groupenom");
-					if (unixGroup == null) {
-						project.properties.put(PROJECT_PROPERTIES_UNIX_GROUP, new PropertySingleValue(UNIX_GROUP_DEFAULT));
-					} else {
-						project.properties.put(PROJECT_PROPERTIES_UNIX_GROUP, new PropertySingleValue(unixGroup));
-					}
-
-					project.properties.put(PROJECT_PROPERTIES_SYNCHRO_PROJ, new PropertySingleValue(Boolean.TRUE));
-					
-					Map<String, Object> map = new HashMap<>();
-					map.put("proj", 0);
-					map.put("rawdata", 0);
-					map.put("scratch", 100);
-
-					project.properties.put(QTREE_QUOTA, new PropertyObjectValue(map));
+					project.systemParameters = new SystemParameters();
+					project.systemParameters.synchroProj = Boolean.TRUE;
+					QtreeQuota qtreeQuota = new QtreeQuota();
+					qtreeQuota.proj = 0;
+					qtreeQuota.rawdata = 0;
+					qtreeQuota.scratch = 100;
+					project.systemParameters.qtreeQuota = qtreeQuota;
 
 					project.categoryCode = PROJECT_CATEGORY_CODE;
 
@@ -381,7 +395,7 @@ public class LimsCNSDAO {
 						project.state = new State(PROJECT_STATE_CODE_F,Constants.NGL_DATA_USER);
 					}else {
 						project.state = new State(); 
-						project.state.code = PROJECT_STATE_CODE_IP;
+						project.state.code = PROJECT_STATE_CODE_N;
 						project.state.user = contextError.getUser();
 						project.state.date = new Date();
 					}
@@ -405,6 +419,82 @@ public class LimsCNSDAO {
 							UmbrellaProject umbrellaProject = MongoDBDAO.find(InstanceConstants.UMBRELLA_PROJECT_COLL_NAME, UmbrellaProject.class, DBQuery.is("properties.limsCode.value", umbrellaCode)).toList().get(0);
 							
 							project.umbrellaProjectCode = umbrellaProject.code;
+
+							project.description = resulSet.getString("prscom");
+
+							TraceInformation ti = new TraceInformation(Constants.NGL_DATA_USER);
+
+							Date dateModification = new Date(); // Par défaut à aujourd'hui, ça permet que si une erreur arrive on n'a pas une date null.
+							String dateModifBaseLims = resulSet.getString("prsdm");
+
+							try {
+								dateModification = new SimpleDateFormat("yyyy-MM-dd").parse(dateModifBaseLims);
+							} catch (ParseException e) {
+								Logger.info("Date de modification non trouvée pour le projet : " + project.code);
+							}
+
+							ti.modifyDate = dateModification;
+
+							int idUserModify = resulSet.getInt("percom");
+
+							if (idUserModify != 0) {
+								jdbcTemplate.query("SELECT * FROM Perint WHERE perco = ?", new Object[] { idUserModify },
+									(resulSetUserModify, rowNumberUserModify) -> {
+										String userModify = resulSetUserModify.getString("perlog");
+
+										ti.modifyUser = userModify;
+
+										return null;
+									}); 
+							} else {
+								ti.modifyUser = Constants.NGL_DATA_USER;
+							}							
+
+							project.traceInformation.modifyDate = ti.modifyDate;
+							project.traceInformation.modifyUser = ti.modifyUser;
+
+							String commProjetInit = resulSet.getString("pricom");
+
+							if (commProjetInit != null) {
+								commProjetInit = commProjetInit.trim();
+								if (isOS(commProjetInit)) {
+								
+									commProjetInit = commProjetInit.replaceAll("\n", ",");
+									
+									String[] splitPointVirgule = commProjetInit.split(";");
+									commProjetInit = commProjetInit.replace(commProjetInit, splitPointVirgule[0]);
+
+									String[] splitVirgule = commProjetInit.split(",");
+
+									if (splitVirgule.length >= 2 && !isOS(splitVirgule[1])) {
+										commProjetInit = commProjetInit.replace(commProjetInit, splitVirgule[0]);
+									}
+
+									String[] splitEspace = commProjetInit.split(" ");
+
+									if (splitEspace.length >= 2 && isOS(splitEspace[1])) {
+										commProjetInit = splitEspace[0] + "," + splitEspace[1];
+									}
+
+									commProjetInit = commProjetInit.replace(" + ", "+");
+
+									splitEspace = commProjetInit.split(" ");
+
+									if (splitEspace.length >= 2 && !isOS(splitEspace[1])) {
+										commProjetInit = commProjetInit.replace(commProjetInit, splitEspace[0]);
+									}
+
+									String[] splitPlus = commProjetInit.split("\\+");
+
+									if (splitPlus.length >= 2 && !isOS(splitPlus[1])) {
+										commProjetInit = commProjetInit.replace(commProjetInit, splitPlus[0]);
+									}
+
+									PropertySingleValue propOS = new PropertySingleValue(commProjetInit);
+
+									project.properties.put("os", propOS);
+								} 
+							} 
 							
 							// Responsable bio
 							int idRespBio = resulSet.getInt("perco");
@@ -454,15 +544,6 @@ public class LimsCNSDAO {
 								Logger.error("Genre non trouvé pour le projet '" + project.code + "'");
 							}
 
-							// Commentaire
-							String comment = resulSet.getString("prscom");
-
-							if (comment != null) {
-								project.comments = new ArrayList<Comment>();
-								Comment commentObj = new Comment(comment, Constants.NGL_DATA_USER);
-								project.comments.add(commentObj);
-							}
-
 							return null;
 			});
 		});
@@ -470,6 +551,7 @@ public class LimsCNSDAO {
 		return result;
 	}
 
+	// Utilisé uniquement pour la reprise lors de la MEP. A supprimer après.
 	public void setProjectUmbrellaAndGenreAndCommentsOfProjectList(List<Project> result) {
 		result.forEach(project -> {
 			jdbcTemplate.query("SELECT * FROM Projet p, Projetini pi WHERE p.prsco = ? AND p.prico = pi.prico", new Object[] { project.code },
@@ -479,6 +561,83 @@ public class LimsCNSDAO {
 							UmbrellaProject umbrellaProject = MongoDBDAO.find(InstanceConstants.UMBRELLA_PROJECT_COLL_NAME, UmbrellaProject.class, DBQuery.is("properties.limsCode.value", umbrellaCode)).toList().get(0);
 							
 							project.umbrellaProjectCode = umbrellaProject.code;	
+
+							project.description = resulSet.getString("prscom");
+
+							String commProjetInit = resulSet.getString("pricom");
+
+							if (commProjetInit != null) {
+								commProjetInit = commProjetInit.trim();
+
+								if (isOS(commProjetInit)) {
+									commProjetInit = commProjetInit.replaceAll("\n", ",");
+									
+									String[] splitPointVirgule = commProjetInit.split(";");
+									commProjetInit = commProjetInit.replace(commProjetInit, splitPointVirgule[0]);
+
+									String[] splitVirgule = commProjetInit.split(",");
+
+									if (splitVirgule.length >= 2 && !isOS(splitVirgule[1])) {
+										commProjetInit = commProjetInit.replace(commProjetInit, splitVirgule[0]);
+									}
+
+									String[] splitEspace = commProjetInit.split(" ");
+
+									if (splitEspace.length >= 2 && isOS(splitEspace[1])) {
+										commProjetInit = splitEspace[0] + "," + splitEspace[1];
+									}
+
+									commProjetInit = commProjetInit.replace(" + ", "+");
+
+									splitEspace = commProjetInit.split(" ");
+
+									if (splitEspace.length >= 2 && !isOS(splitEspace[1])) {
+										commProjetInit = commProjetInit.replace(commProjetInit, splitEspace[0]);
+									}
+
+									String[] splitPlus = commProjetInit.split("\\+");
+
+									if (splitPlus.length >= 2 && !isOS(splitPlus[1])) {
+										commProjetInit = commProjetInit.replace(commProjetInit, splitPlus[0]);
+									}
+
+									PropertySingleValue propOS = new PropertySingleValue(commProjetInit);
+
+									project.properties.put("os", propOS);
+								} 
+							} 
+
+							// Responsable bio
+							int idRespBio = resulSet.getInt("perco");
+
+							if (idRespBio != 0) {
+								jdbcTemplate.query("SELECT * FROM Perint WHERE perco = ?", new Object[] { idRespBio },
+									(resulSetRespBio, rowNumberRespBio) -> {
+										String respBio = resulSetRespBio.getString("perlog");
+
+										project.properties.put("bioProjectManager", new PropertySingleValue(respBio));
+
+										return null;
+									}); 
+							} else {
+								Logger.error("Responsable bio non trouvé pour le projet '" + project.code + "'");
+							}
+							
+							// Responsable info
+							int idRespInf = resulSet.getInt("percoi");
+
+							if (idRespInf != 0) {
+								jdbcTemplate.query("SELECT * FROM Perint WHERE perco = ?", new Object[] { idRespInf },
+									(resulSetRespInf, rowNumberRespInf) -> {
+										String respInf = resulSetRespInf.getString("perlog");
+
+										project.properties.put("infoProjectManager", new PropertySingleValue(respInf));
+
+										return null;
+									});
+							} else {
+								Logger.error("Responsable info non trouvé pour le projet '" + project.code + "'");
+							}
 
 							// Genre
 							int idGenre = resulSet.getInt("genco");
@@ -496,17 +655,9 @@ public class LimsCNSDAO {
 								Logger.error("Genre non trouvé pour le projet '" + project.code + "'");
 							}
 
-							String comment = resulSet.getString("prscom");
-
-							if (comment != null) {
-								project.comments = new ArrayList<Comment>();
-								Comment commentObj = new Comment(comment, Constants.NGL_DATA_USER);
-								project.comments.add(commentObj);
-							}
-
 							MongoDBDAO.update(InstanceConstants.PROJECT_COLL_NAME, project);
 							
-							return null;
+							return null; 
 			});
 		});
 	}

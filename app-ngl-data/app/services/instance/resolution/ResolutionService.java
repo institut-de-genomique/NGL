@@ -2,8 +2,13 @@ package services.instance.resolution;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.apache.commons.collections4.ListUtils;
 
 import fr.cea.ig.MongoDBDAO;
 import models.laboratory.experiment.description.ExperimentType;
@@ -28,28 +33,37 @@ public class ResolutionService {
 	
 	private static final play.Logger.ALogger logger = play.Logger.of(ResolutionService.class);
 	
-	private static HashMap<String, ResolutionCategory> resolutionCategories; 
+	
+	private static HashMap<String, ResolutionCategory> resolutionCategories;
 
-	public static void saveResolutionsCNG(ContextValidation ctx) {
-		resolutionCategories = createResolutionCategoriesCNG();
+	
+	public static void saveResolutionsSQCNG(ContextValidation ctx) {
+		logger.info("Début Resolutions SQ CNG...");
+		resolutionCategories = createResolutionCategoriesSQCNG();
 
-		createRunResolutionCNG(ctx); 
-		createReadSetResolutionCNG(ctx); 
-		// FDS 15/01: no Analysis Resolutions ???
+		
 		createIlluminaPrepFCDepotResolutionCNG(ctx);
 		createPrepPcrFreeResolutionCNG(ctx);
 		createQCMiseqResolutionCNG(ctx);
-		createExperimentResolution(ctx); // ajoute les resolutions par defaut sur toutes les experiences
+		createExperimentResolution(ctx); 
 		createProcessResolutionCNG(ctx);
 		createContainerResolutionCNG(ctx);		
+		logger.info("...Fin Resolutions SQ CNG");
+	}
+
+	public static void saveResolutionsBICNG(ContextValidation ctx) {
+		logger.info("Début Resolutions BI CNG...");
+		resolutionCategories = createResolutionCategoriesBICNG();
+
+		createRunResolutionCNG(ctx); 
+		createReadSetResolutionCNG(ctx); 
+		logger.info("...Fin Resolutions BI CNG");
 	}
 	
-	public static void saveResolutionsCNS(ContextValidation ctx) {
-		resolutionCategories = createResolutionCategoriesCNS();
-		
-		createRunResolutionCNS(ctx); 
-		createReadSetResolutionCNS(ctx); 
-		createAnalysisResolutionCNS(ctx); 
+	public static void saveResolutionsSQCNS(ContextValidation ctx) {
+		logger.info("Début Resolutions SQ CNS...");
+		resolutionCategories = createResolutionCategoriesSQCNS();
+		 
 		createOpgenDepotResolutionCNS(ctx);
 		createPurifPrecipitationResolutionCNS(ctx);
 		createDepotNanoporeResolutionCNS(ctx);
@@ -58,12 +72,37 @@ public class ResolutionService {
 		createDepotBionanoResolutionCNS(ctx);
 		createSamplePrepResolutionCNS(ctx);
 		createGelMigrationResolutionCNS(ctx);
+		createFragmentationResolutionCNS(ctx);
+		createLibraryResolutionCNS(ctx);
 		createExperimentResolution(ctx); // ajoute les resolutions par defaut sur toutes les experiences
 		createProcessResolutionCNS(ctx);
 		createContainerResolutionCNS(ctx);
+		createSampleResolutionCNS(ctx);
+		logger.info("...Fin Resolutions SQ CNS");
+	}
+
+	public static void saveResolutionsBICNS(ContextValidation ctx) {
+		logger.info("Début Resolutions BI CNS...");
+		resolutionCategories = createResolutionCategoriesBICNS();
+		
+		createRunResolutionCNS(ctx); 
+		createReadSetResolutionCNS(ctx); 
+		createAnalysisResolutionCNS(ctx); 
+		logger.info("...FIN Resolutions BI CNS...");
 	}
 	
-	public static HashMap<String, ResolutionCategory> createResolutionCategoriesCNG() {	
+	
+
+	public static HashMap<String, ResolutionCategory> createResolutionCategoriesSQCNG() {	
+		HashMap<String, ResolutionCategory> resoCategories = new HashMap<>();
+		
+		// Experiment
+		resoCategories.put("Default",  new ResolutionCategory("Default",                   (short)  0));
+		
+		return resoCategories;
+	}
+
+	public static HashMap<String, ResolutionCategory> createResolutionCategoriesBICNG() {	
 		HashMap<String, ResolutionCategory> resoCategories = new HashMap<>();
 		
 		// Run
@@ -84,16 +123,27 @@ public class ResolutionService {
 		resoCategories.put("Sample",   new ResolutionCategory("Problème échantillon",      (short) 55));
 		resoCategories.put("LIMS",     new ResolutionCategory("Problème déclaration LIMS", (short) 60));
 		resoCategories.put("Info",     new ResolutionCategory("Informations",              (short) 65));
+	
 		
-		// Analysis
 		
-		// Experiment
+		return resoCategories;
+	}
+
+	public static HashMap<String, ResolutionCategory> createResolutionCategoriesSQCNS() {
+		HashMap<String, ResolutionCategory> resoCategories = new HashMap<>();
+		
+		//Sample
+		resoCategories.put("VALID",  new ResolutionCategory("Valide",                    (short) 10));
+		resoCategories.put("ABANDON",  new ResolutionCategory("Abandon",                    (short) 20));
+		resoCategories.put("STANDBY",      new ResolutionCategory("Stand-by",                 (short) 30));
+		resoCategories.put("TEST",      new ResolutionCategory("Test",                 (short) 40));
+		//Experiment	
 		resoCategories.put("Default",  new ResolutionCategory("Default",                   (short)  0));
 		
 		return resoCategories;
 	}
 
-	public static HashMap<String, ResolutionCategory> createResolutionCategoriesCNS() {
+	public static HashMap<String, ResolutionCategory> createResolutionCategoriesBICNS() {
 		HashMap<String, ResolutionCategory> resoCategories = new HashMap<>();
 		
 		//Run
@@ -116,6 +166,7 @@ public class ResolutionService {
 		resoCategories.put("MERG",     new ResolutionCategory("Problème merging",          (short) 45));
 		resoCategories.put("Info",     new ResolutionCategory("Informations",              (short) 50));
 		resoCategories.put("dsBioN",   new ResolutionCategory("Dataset BIONANO",           (short) 60));//DatasetBionano
+		resoCategories.put("PROD",     new ResolutionCategory("Gestion PROD",              (short) 55));
 		
 		//Analysis
 		resoCategories.put("BA-MERG",  new ResolutionCategory("Merging",                   (short) 10));
@@ -124,8 +175,7 @@ public class ResolutionService {
 		resoCategories.put("SCAFF",    new ResolutionCategory("Scaffolding",               (short) 40));
 		resoCategories.put("GAP",      new ResolutionCategory("Gap Closing",               (short) 50));
 		
-		//Experiment	
-		resoCategories.put("Default",  new ResolutionCategory("Default",                   (short)  0));
+		
 		
 		return resoCategories;
 	}
@@ -226,8 +276,11 @@ public class ResolutionService {
 				"RHSX",
 				"RMISEQ",
 				"RNEXTSEQ500",
-				"RNVS6000"    // NGL-1730 ajout 14/12/2017
-				);
+				"RNVS6000",    // NGL-1730 ajout 14/12/2017
+				"RNVSXP",      // NGL-4376 ajout 13/11/2023
+				"RREVIO",      // NGL-4359 (12/01/2023 !!) oubli
+				"RMINION",     // NGL-XXXX (25/02/2025 !!) oubli
+				"RPROMETHION");// NGL-XXXX (25/02/2025 !!) oubli				);
 		
 		MongoDBDAO.deleteByCode(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class, "runReso");
 		InstanceHelpers.save(ctx,InstanceConstants.RESOLUTION_COLL_NAME,r, false);
@@ -294,6 +347,7 @@ public class ResolutionService {
 		
 		// PbM
 		l.addAll(rList(getResolutionCategory("PbM"),
+				newResolution("Test Bi",   "testbi"),
 				newResolution("Indéterminé", "PbM-indetermine"),
 				newResolution("Chiller",     "PbM-chiller"),
 				newResolution("Pelletier",   "PbM-pelletier"),
@@ -374,7 +428,8 @@ public class ResolutionService {
 				"RNVS6000",
 				"RPROMETHION",
 				"RSAPHYR", //BioNano
-				"RIRYS" // BioNano
+				"RIRYS", // BioNano
+				"RREVIO" // NGL-4359
 				);
 		
 		MongoDBDAO.deleteByCode(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class, "runReso");
@@ -459,6 +514,11 @@ public class ResolutionService {
 				newResolution("problème échantillon",        "BioN-echantillon"),
 				newResolution("problème MQR",        "BioN-MQR"),
 				newResolution("assemblage",          "BioN-assemblage")));
+		
+		l.addAll(rList(getResolutionCategory("PROD"),
+				newResolution("Redo nécessaire",   "PROD-redoRequired"),
+				newResolution("Pas de redo à faire",          "PROD-noNeedToRedo"),
+				newResolution("RS de reprise",          "PROD-redoneReadset")));
 
 		ResolutionConfiguration r = new ResolutionConfiguration();
 		r.code           = "readSetReso";
@@ -468,7 +528,8 @@ public class ResolutionService {
 				"default-readset",
 				"rsillumina",
 				"rsnanopore",
-				"rsbionano"
+				"rsbionano",
+				"rspacbio" // NGL-4359
 				);
 		
 		MongoDBDAO.deleteByCode(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class, "readSetReso");
@@ -538,6 +599,7 @@ public class ResolutionService {
 		MongoDBDAO.deleteByCode(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class,r.code);
 		// JacksonDBCollection 'distinct' return type is a raw List, this produces a warning
 		// with javac but not with eclipse.
+		@SuppressWarnings("unchecked")
 		List<String> typeCodes = 
 				MongoDBDAO.getCollection(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class)
 				          .distinct("typeCodes");
@@ -713,39 +775,112 @@ public class ResolutionService {
 	
 	
 	private static void createSamplePrepResolutionCNS(ContextValidation ctx) {
-		List<Resolution> l = new ArrayList<>();
+		List<Resolution> samplePrepResolutions = rList(getResolutionCategory("Default"),
+			getDefaultResolutionCNS(),
+			newResolution("Inversion containers suspectée", "suspected-containers-switch"));	
+
+		ResolutionConfiguration samplePrepResConf = new ResolutionConfiguration();
+		samplePrepResConf.code           = "expSamplePrepReso";
+		samplePrepResConf.resolutions    = samplePrepResolutions;
+		samplePrepResConf.objectTypeCode = "Experiment";
+		samplePrepResConf.typeCodes = Arrays.asList(
+				"sample-prep-exp"
+				);		
 		
-		l.addAll(rList(getResolutionCategory("Default"),
+		MongoDBDAO.deleteByCode(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class, samplePrepResConf.code);
+		InstanceHelpers.save(ctx, InstanceConstants.RESOLUTION_COLL_NAME,samplePrepResConf, false);
+
+		List<Resolution> hicPrepResolutions = rList(getResolutionCategory("Default"),
+			getDefaultResolutionCNS(),
+			newResolution("Inversion containers suspectée", "suspected-containers-switch"));	
+
+		ResolutionConfiguration hicPrepResConf = new ResolutionConfiguration();
+		hicPrepResConf.code           = "expPrepHiCReso";
+		hicPrepResConf.resolutions    = hicPrepResolutions;
+		hicPrepResConf.objectTypeCode = "Experiment";
+		hicPrepResConf.typeCodes = Arrays.asList(
+				"hi-c-prep"
+				);		
+		
+		MongoDBDAO.deleteByCode(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class, hicPrepResConf.code);
+		InstanceHelpers.save(ctx, InstanceConstants.RESOLUTION_COLL_NAME,hicPrepResConf, false);
+
+		List<Resolution> dnaRnaExtractionResolutions = rList(getResolutionCategory("Default"),
 				getDefaultResolutionCNS(),
 				newResolution("Tube cassé dans cryobroyeur", "broken-tube-in-freezer-mill"),
 				newResolution("Tube vide",                   "empty-tube"),
-				newResolution("Colonne élution bouchée",     "elution-column-blocked")));
+				newResolution("Colonne élution bouchée",     "elution-column-blocked"));
 
-		ResolutionConfiguration r = new ResolutionConfiguration();
-		r.code           = "expExtractionDNARNAReso";
-		r.resolutions    = l;
-		r.objectTypeCode = "Experiment";
-		r.typeCodes = Arrays.asList(
+		ResolutionConfiguration dnaRnaExtractioResConf = new ResolutionConfiguration();
+		dnaRnaExtractioResConf.code           = "expExtractionDNARNAReso";
+		dnaRnaExtractioResConf.resolutions    = dnaRnaExtractionResolutions;
+		dnaRnaExtractioResConf.objectTypeCode = "Experiment";
+		dnaRnaExtractioResConf.typeCodes = Arrays.asList(
 				"dna-rna-extraction"
 				);		
 		
-		MongoDBDAO.deleteByCode(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class, r.code);
-		InstanceHelpers.save(ctx, InstanceConstants.RESOLUTION_COLL_NAME,r, false);
+		MongoDBDAO.deleteByCode(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class, dnaRnaExtractioResConf.code);
+		InstanceHelpers.save(ctx, InstanceConstants.RESOLUTION_COLL_NAME,dnaRnaExtractioResConf, false);
 		
-		l = new ArrayList<>();
+		List<Resolution> grindingResolutions = rList(getResolutionCategory("Default"),
+				getDefaultResolutionCNS(),
+				newResolution("Inversion containers suspectée", "suspected-containers-switch"));	
 
-		l.addAll(getDefaultResolutionCNS());	
-
-		r = new ResolutionConfiguration();
-		r.code           = "expBroyageReso";
-		r.resolutions    = l;
-		r.objectTypeCode = "Experiment";
-		r.typeCodes = Arrays.asList(
+		ResolutionConfiguration grindingResConf = new ResolutionConfiguration();
+		grindingResConf.code           = "expBroyageReso";
+		grindingResConf.resolutions    = grindingResolutions;
+		grindingResConf.objectTypeCode = "Experiment";
+		grindingResConf.typeCodes = Arrays.asList(
 				"grinding"
 				);
 		
-		MongoDBDAO.deleteByCode(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class, r.code);
-		InstanceHelpers.save(ctx, InstanceConstants.RESOLUTION_COLL_NAME,r, false);	
+		MongoDBDAO.deleteByCode(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class, grindingResConf.code);
+		InstanceHelpers.save(ctx, InstanceConstants.RESOLUTION_COLL_NAME,grindingResConf, false);	
+
+		List<Resolution> totalRnaExtractionResolutions = rList(getResolutionCategory("Default"),
+				getDefaultResolutionCNS(),
+				newResolution("Inversion containers suspectée", "suspected-containers-switch"));	
+
+		ResolutionConfiguration totalRnaExtractionResConf = new ResolutionConfiguration();
+		totalRnaExtractionResConf.code           = "expExtractionArnTotalReso";
+		totalRnaExtractionResConf.resolutions    = totalRnaExtractionResolutions;
+		totalRnaExtractionResConf.objectTypeCode = "Experiment";
+		totalRnaExtractionResConf.typeCodes = Arrays.asList(
+				"total-rna-extraction"
+				);
+		
+		MongoDBDAO.deleteByCode(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class, totalRnaExtractionResConf.code);
+		InstanceHelpers.save(ctx, InstanceConstants.RESOLUTION_COLL_NAME,totalRnaExtractionResConf, false);
+		
+		List<Resolution> dnaExtractionResolutions = rList(getResolutionCategory("Default"),
+				getDefaultResolutionCNS(),
+				newResolution("Inversion containers suspectée", "suspected-containers-switch"));	
+
+		ResolutionConfiguration dnaExtractionResConf = new ResolutionConfiguration();
+		dnaExtractionResConf.code           = "expExtractionAdnReso";
+		dnaExtractionResConf.resolutions    = dnaExtractionResolutions;
+		dnaExtractionResConf.objectTypeCode = "Experiment";
+		dnaExtractionResConf.typeCodes = Arrays.asList(
+				"dna-extraction"
+				);
+		
+		MongoDBDAO.deleteByCode(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class, dnaExtractionResConf.code);
+		InstanceHelpers.save(ctx, InstanceConstants.RESOLUTION_COLL_NAME,dnaExtractionResConf, false);
+
+		List<Resolution> hpmDnaExtractionResolutions = rList(getResolutionCategory("Default"),
+				getDefaultResolutionCNS(),
+				newResolution("Inversion containers suspectée", "suspected-containers-switch"));	
+
+		ResolutionConfiguration hpmDnaExtractionResConf = new ResolutionConfiguration();
+		hpmDnaExtractionResConf.code           = "expExtractionAdnHpmReso";
+		hpmDnaExtractionResConf.resolutions    = hpmDnaExtractionResolutions;
+		hpmDnaExtractionResConf.objectTypeCode = "Experiment";
+		hpmDnaExtractionResConf.typeCodes = Arrays.asList(
+				"hmw-dna-extraction"
+				);
+		
+		MongoDBDAO.deleteByCode(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class, hpmDnaExtractionResConf.code);
+		InstanceHelpers.save(ctx, InstanceConstants.RESOLUTION_COLL_NAME,hpmDnaExtractionResConf, false);
 	}
 	
 	private static void createGelMigrationResolutionCNS(ContextValidation ctx) {
@@ -770,6 +905,72 @@ public class ResolutionService {
 		
 		MongoDBDAO.deleteByCode(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class, r.code);
 		InstanceHelpers.save(ctx, InstanceConstants.RESOLUTION_COLL_NAME,r, false);
+	}
+
+	private static void createFragmentationResolutionCNS(ContextValidation ctx) {
+		List<Resolution> resolutions = new ArrayList<>();
+		
+		resolutions.addAll(rList(resolutionCategories.get("Default"),
+				getDefaultResolutionCNS(),
+				newResolution("Refragmentation PacBio", "pacbio-refragmentation")));
+		
+		ResolutionConfiguration r = new ResolutionConfiguration();
+		r.code           = "expFragmentationReso";
+		r.resolutions    = resolutions;
+		r.objectTypeCode = "Experiment";
+		r.typeCodes = Arrays.asList(
+				"fragmentation"
+				);
+		
+		MongoDBDAO.deleteByCode(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class, r.code);
+		InstanceHelpers.save(ctx, InstanceConstants.RESOLUTION_COLL_NAME,r, false);
+	}
+
+	private static void createLibraryResolutionCNS(ContextValidation ctx) {
+		List<Resolution> bqRnaNonIndexResolutions = rList(getResolutionCategory("Default"),
+				getDefaultResolutionCNS(),
+				newResolution("Inversion containers suspectée", "suspected-containers-switch"));	
+
+		ResolutionConfiguration bqRnaNonIndexResConf = new ResolutionConfiguration();
+		bqRnaNonIndexResConf.code           = "expBanqueRNANonIndexReso";
+		bqRnaNonIndexResConf.resolutions    = bqRnaNonIndexResolutions;
+		bqRnaNonIndexResConf.objectTypeCode = "Experiment";
+		bqRnaNonIndexResConf.typeCodes = Arrays.asList(
+				"rna-illumina-library"
+				);
+		
+		MongoDBDAO.deleteByCode(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class, bqRnaNonIndexResConf.code);
+		InstanceHelpers.save(ctx, InstanceConstants.RESOLUTION_COLL_NAME,bqRnaNonIndexResConf, false);	
+
+		List<Resolution> bqRnaResolutions = rList(getResolutionCategory("Default"),
+				getDefaultResolutionCNS(),
+				newResolution("Inversion containers suspectée", "suspected-containers-switch"));	
+
+		ResolutionConfiguration bqRnaResConf = new ResolutionConfiguration();
+		bqRnaResConf.code           = "expBanqueRNAReso";
+		bqRnaResConf.resolutions    = bqRnaResolutions;
+		bqRnaResConf.objectTypeCode = "Experiment";
+		bqRnaResConf.typeCodes = Arrays.asList(
+				"rna-illumina-indexed-library"
+				);
+		
+		MongoDBDAO.deleteByCode(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class, bqRnaResConf.code);
+		InstanceHelpers.save(ctx, InstanceConstants.RESOLUTION_COLL_NAME,bqRnaResConf, false);
+
+		List<Resolution> bqDnaResolutions = rList(getResolutionCategory("Default"),
+				getDefaultResolutionCNS(),
+				newResolution("Inversion containers suspectée", "suspected-containers-switch"));	
+
+		ResolutionConfiguration bqDnaResConf = new ResolutionConfiguration();
+		bqDnaResConf.code           = "expBanqueDNAIlluminaIndexReso";
+		bqDnaResConf.resolutions    = bqDnaResolutions;
+		bqDnaResConf.objectTypeCode = "Experiment";
+		bqDnaResConf.typeCodes = Arrays.asList(
+				"dna-illumina-indexed-library"
+				);
+		
+		MongoDBDAO.deleteByCode(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class, bqDnaResConf.code);
+		InstanceHelpers.save(ctx, InstanceConstants.RESOLUTION_COLL_NAME,bqDnaResConf, false);
 	}
 	
 	// FDS 05/02/2016 -- JIRA NGL-894 experience processus X5
@@ -823,6 +1024,7 @@ public class ResolutionService {
 				newResolution("Attente retour collaborateur pour la suite","next-experiments-waiting-for-collab"),
 				newResolution("Arrêt - réorientation manip",         "stop-reor-manip"),
 				newResolution("Arrêt - abandon",                     "stop-abandon"),
+				newResolution("Arrêt - abandon pb profil",      	  "stop-abandon-pb-profil"),
 				newResolution("Arrêt - pb broyage",                  "stop-pb-broyage"),
 				newResolution("Arrêt - pb cryobroyeur",              "stop-pb-cryobroyeur"),
 				newResolution("Arrêt - pb extraction ADN/ARN",       "stop-pb-extraction"),
@@ -840,7 +1042,8 @@ public class ResolutionService {
 				newResolution("Arrêt - erreur déclaration",          "stop-pb-declaration"),
 				newResolution("Arrêt - Rendement trop faible",       "stop-pb-yield-too-low"),
 				newResolution("Arrêt - pour séquençage Sanger",      "stop-seq-sanger"),
-				newResolution("Arrêt - erreur manip",                "stop-pb-experiment")));
+				newResolution("Arrêt - erreur manip",                "stop-pb-experiment"),
+				newResolution("Arrêt - tube sacrifié pour QC Hi-C",                "stop-tube-used-for-hi-c-qc")));
 		
 		ResolutionConfiguration r = new ResolutionConfiguration();
 		r.code           = "processReso";
@@ -913,7 +1116,10 @@ public class ResolutionService {
 		
 		l.addAll(rList(getResolutionCategory("Default"),
 				newResolution("Epuisé",                "empty"),
-				newResolution("Renvoyé collaborateur", "return-collab")));
+				newResolution("Renvoyé collaborateur", "return-collab"),
+				newResolution("Jeté",                  "trash")   // NGL-5230
+				));
+
 		
 		ResolutionConfiguration r = new ResolutionConfiguration();
 		r.code           = "containerReso";
@@ -935,13 +1141,64 @@ public class ResolutionService {
 				newResolution("Renvoyé collaborateur", "return-collab"),
 				newResolution("Problème manip", "experimental-problem"),
 				newResolution("Jamais reçu", "never-received"),
-				newResolution("Non valide mais forcé en prod", "invalid-to-continue")
+				newResolution("Non valide mais forcé en prod", "invalid-to-continue"),
+				newResolution("Tube ouvert à réception", "open-tube-received"),
+				newResolution("Abandon sample", "sample-abandon"),
+				newResolution("Voir commentaire container", "detailed-in-comment"),
+				newResolution("Inversion taxons", "taxon-switch")
 				));
 		
 		ResolutionConfiguration r = new ResolutionConfiguration();
 		r.code           = "containerReso";
 		r.resolutions    = l;
 		r.objectTypeCode = "Container";
+		
+		MongoDBDAO.deleteByCode(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class, r.code);
+		InstanceHelpers.save(ctx, InstanceConstants.RESOLUTION_COLL_NAME,r, false);
+		
+		
+	}
+	
+	private static void createSampleResolutionCNS(ContextValidation ctx) {
+		List<Resolution> resolutions = Stream.of(
+					rList(getResolutionCategory("VALID"),
+						newResolution("Disponible", "available"),
+						newResolution("Assemblage soumis", "assembly-submitted"),
+						newResolution("Terminé", "finished"),
+						newResolution("Reséquençage demandé", "resequencing-request")
+					),
+					rList(getResolutionCategory("ABANDON"),
+						newResolution("Déjà en cours chez concurrent", "already-in-progress-with-competitor"),
+						newResolution("Problème manip", "manip-problem"),
+						newResolution("Perte à réception", "reception-problem"),
+						newResolution("Hors ZEE", "outside-zee"),
+						newResolution("ABANDON Autre à préciser en commentaire", "other-detailed-in-comment"),
+						newResolution("Demande de rééchantillonnage", "stop-resampling-request")
+					),
+					rList(getResolutionCategory("STANDBY"),
+						newResolution("Att feu vert pour séquencage LR", "waiting-go-for-long-read-seq"),
+						newResolution("Att feu vert pour séquencage Hi-C", "waiting-go-for-hi-c"),
+						newResolution("Att feu vert pour séquencage ARN", "waiting-go-for-rna"),
+						newResolution("Doublon", "duplicate"),
+						newResolution("Attente validation taxo", "waiting-taxonomist-validation"),
+						newResolution("Absence Méthodo", "waiting-appropriate-protocol"),
+						newResolution("Echec Méthodo", "failed-protocol"),
+						newResolution("Attente décision concurrent", "waiting-competitor-discussion"),
+						newResolution("Demande de rééchantillonage", "resampling-request"),
+						newResolution("Attente décision génome supplémentaire", "waiting-additionnal-genome-decision"),
+						newResolution("STDBY Autre à préciser en commentaire", "waiting-other-detailed-in-comment")
+					),
+					rList(getResolutionCategory("TEST"),
+							newResolution("Test", "dedicated-to-test"),
+							newResolution("Test interne Genoscope", "dedicated-to-CNS-test")
+						)	
+				).flatMap(Collection::stream)
+                .collect(Collectors.toList());
+		
+		ResolutionConfiguration r = new ResolutionConfiguration();
+		r.code           = "sampleReso";
+		r.resolutions    = resolutions;
+		r.objectTypeCode = "Sample";
 		
 		MongoDBDAO.deleteByCode(InstanceConstants.RESOLUTION_COLL_NAME, ResolutionConfiguration.class, r.code);
 		InstanceHelpers.save(ctx, InstanceConstants.RESOLUTION_COLL_NAME,r, false);

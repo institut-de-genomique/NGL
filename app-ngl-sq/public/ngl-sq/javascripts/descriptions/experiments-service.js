@@ -41,6 +41,22 @@
                             "hide":true,
                             "position":3,
                             "type":"boolean"    
+                        },
+                        {
+                            "header":Messages("descriptions.experiments.table.type.category.name"),
+                            "property":"category.name",
+                            "order":true,
+                            "hide":true,
+                            "position":4,
+                            "type":"text"    
+                        },
+                        {
+                            "header":Messages("descriptions.experiments.table.type.shortCode"),
+                            "property":"shortCode",
+                            "order":true,
+                            "hide":true,
+                            "position":5,
+                            "type":"text"    
                         }
                     ];    
                 } 
@@ -149,6 +165,24 @@
                             "filter": "getArray:'value'",
                             "render":"<div list-resize='cellValue' list-resize-min-size='5' vertical>",
                             "hide":true
+                        },
+                        {
+                            "header":Messages("descriptions.experiments.table.properties.definitions.value.displayUnit"),
+                            "property":"saveMeasureValue.code",
+                            "order":true,
+                            "hide":true,
+                            "position":13,
+                            "type":"text",
+                            "mergeCells":true
+                        },
+                        {
+                            "header":Messages("descriptions.experiments.table.properties.definitions.value.saveUnit"),
+                            "property":"displayMeasureValue.code",
+                            "order":true,
+                            "hide":true,
+                            "position":14,
+                            "type":"text",
+                            "mergeCells":true
                         }
                     ];          
                 }
@@ -537,6 +571,8 @@
                     row.defaultValue = propDef.defaultValue;
                     row.possibleValues = propDef.possibleValues;
                     row.displayFormat = propDef.displayFormat;
+                    row.saveMeasureValue = propDef.saveMeasureValue;
+                    row.displayMeasureValue = propDef.displayMeasureValue;
                     row.displayOrder = propDef.displayOrder;
                     row.choiceInList = propDef.choiceInList;
                     return row;
@@ -559,7 +595,9 @@
                         return {
                             name: rawExperimentType.name,
                             code: rawExperimentType.code,
-                            active: rawExperimentType.active
+                            active: rawExperimentType.active,
+                            category: rawExperimentType.category,
+                            shortCode: rawExperimentType.shortCode
                         };
                     },
                     atomicTransfertMethod : function(rawExperimentTypeNode){
@@ -1006,4 +1044,338 @@
             };
         return searchService;				
     }
-]);                                
+ ]).factory('descriptionsExperimentsGraphService', [ '$q', '$http', 'mainService', '$parse', '$filter',  'messages', 'lists', 
+    function($q, $http, mainService, $parse, $filter, messages, lists) {
+
+        var isInit = false;
+		
+        var initListService = function() {
+            if(!isInit) {
+                lists.refresh.experimentTypes({categoryCode: "transformation"}, "expTransfo");
+            }
+        };
+
+        var newNode = function(experimentNode) {
+            return  {experimentType:experimentNode.experimentType, parentNodes:(experimentNode.previousExperimentTypes)?experimentNode.previousExperimentTypes:[], childNodes:[]};
+        };
+
+        var toggleSpinner = function(treeLoadInProgress) {
+            var panelBodyDiv = document.getElementById("transformationExpGraph");
+            return treeLoadInProgress ? addSpinner(panelBodyDiv) : deleteSpinner(panelBodyDiv);
+
+            //---
+            function addSpinner(panelBodyDiv) {
+                var inProgressSpinnerDiv = document.createElement("div");
+                inProgressSpinnerDiv.classList.add("inProgressSpinner");
+                inProgressSpinnerDiv.id = "progressSpinner";
+    
+                var button = document.createElement("button");
+                button.classList.add("btn", "btn-primary", "btn-lg");
+    
+                var icon = document.createElement("i");
+                icon.classList.add("fa", "fa-spinner", "fa-spin", "fa-5x");
+    
+                button.appendChild(icon);
+                inProgressSpinnerDiv.appendChild(button);
+    
+                panelBodyDiv.prepend(inProgressSpinnerDiv);
+            };
+    
+            function deleteSpinner(panelBodyDiv) {
+                var inProgressSpinnerDiv = document.getElementById("progressSpinner");
+                if(panelBodyDiv.firstChild === inProgressSpinnerDiv) {
+                    panelBodyDiv.removeChild(panelBodyDiv.firstChild);
+                }
+            }
+
+        };
+
+        var highlightSelectedNodeAndNeighbours = function(node) {
+            cy.elements().difference(node.incomers()).difference(node.outgoers()).not(node).addClass('semitransp');
+            node.addClass('highlightSelected');
+            node.incomers().addClass('highlight');
+            node.outgoers().addClass('highlight');
+        }
+
+        var removeHighlight = function(cyInstance) {
+            cy.elements().removeClass('highlightSelected highlight semitransp');  
+        }
+
+        var computeGraphNodes = function(expNodes) {
+            var graphNodes = {};
+            createNodeForEachExpNodes(expNodes);
+            setChildNodesForParentNodes(expNodes);
+            return graphNodes;
+
+            //---
+            function createNodeForEachExpNodes(expNodes) {
+                expNodes.forEach(function(experimentNode) {
+                    graphNodes[experimentNode.experimentType.code] = newNode(experimentNode);
+                });
+            }
+
+            function setChildNodesForParentNodes(expNodes) {
+                expNodes.forEach(function(experimentNode) {
+                    graphNodes[experimentNode.experimentType.code].parentNodes.forEach(function(parent) {
+                        graphNodes[parent.code].childNodes.push(this);
+                    }, experimentNode.experimentType) 
+                });
+            }
+        };
+
+        var computeGraphElements = function(graphNodes, processExperimentTypes) {
+            var graphElements = [];
+            computeNodes(graphNodes, processExperimentTypes, graphElements);
+            computeEdges(graphNodes, processExperimentTypes, graphElements);
+            return graphElements;
+
+            //---
+            function isTransfoExperiment(experimentType) {
+                return experimentType.category.code === 'transformation';
+            }
+
+            function getFaveColor(processExperimentTypes, key) {
+                var blueColor = '#6FB1FC';
+                var greyColor = '#BDBDBD';
+                if(processExperimentTypes === undefined) return blueColor;
+                else if(processExperimentTypes.get(key)[0] > -1) return blueColor;
+                else return greyColor;
+            }
+
+            function computeNodes(graphNodes, processExperimentTypes, graphElements) {
+                for(var key in graphNodes) {
+                    if(processExperimentTypes === undefined || processExperimentTypes.get(key) !== undefined) {
+                        var currentExperimentType = graphNodes[key].experimentType;
+                        if(isTransfoExperiment(currentExperimentType)) {
+                            setupGraphNodeData(graphElements, currentExperimentType, processExperimentTypes, key);
+                        }
+                    }
+                }
+
+                //---
+                function setupGraphNodeData(graphElements, currentExperimentType, processExperimentTypes, key) {
+                    currentExperimentType.id = currentExperimentType.code;
+                    currentExperimentType.label = currentExperimentType.name;
+                    currentExperimentType.faveColor = getFaveColor(processExperimentTypes, key);
+                    currentExperimentType.faveShape="ellipse";
+                    graphElements.push({"data":currentExperimentType,"group":"nodes"});
+                }
+            }
+
+            function computeEdges(graphNodes, processExperimentTypes, graphElements) {
+                for(var key in graphNodes){
+                    if(processExperimentTypes === undefined || processExperimentTypes.get(key) !== undefined) {
+                        var currentNode = graphNodes[key];
+                        var currentExperimentType = graphNodes[key].experimentType;
+                        if(isTransfoExperiment(currentExperimentType)) {
+                            createParentChildsEdge(graphElements, currentNode, processExperimentTypes, key);
+                        }
+                    }
+                }
+
+                //---
+                function createParentChildsEdge(graphElements, currentNode, processExperimentTypes, key) {
+                    angular.forEach(currentNode.childNodes, function(childNode) {
+                        var childExperimentType = childNode;
+                        if(isTransfoExperiment(childExperimentType) 
+                            && (processExperimentTypes === undefined
+                                    || (processExperimentTypes.get(childExperimentType.code) !== undefined && isDiffPositionIsOne(processExperimentTypes, key, childExperimentType.code)))) {
+                            var currentExperimentType = this;
+                            setupGraphEdgeData(graphElements, currentExperimentType, childExperimentType, processExperimentTypes, key);
+                        }
+                    },currentExperimentType);
+
+                    //---
+                    function isDiffPositionIsOne(processExperimentTypes, keyParent, keyChild) {
+                        return processExperimentTypes.get(keyParent).some(function(parentPos) {
+                            return processExperimentTypes.get(keyChild).some(function(childPos) {
+                                    return (childPos - parentPos === 1);
+                            });
+                        });		
+                    }
+
+                    function setupGraphEdgeData(graphElements, currentExperimentType, childExperimentType, processExperimentTypes, key) {
+                        var edge = {
+                            "id":currentExperimentType.code+"-"+childExperimentType.code,
+                            "source":currentExperimentType.code,
+                            "target":childExperimentType.code       
+                        }
+                        var faveColor = getFaveColor(processExperimentTypes, key);
+                        edge.faveColor=faveColor;
+                        graphElements.push({"data":edge,"group":"edges"})	
+                    }
+                }
+            }
+        };
+
+        var cy;
+
+        var initCytoscape = function(graphElements) {
+            var asynchGraph = function() {
+                return $q(function(resolve, reject) {
+                    setTimeout(function() {
+                        cy = 
+                            cytoscape({
+                                container: document.getElementById('cy'),
+                                boxSelectionEnabled: false,
+                                autounselectify: true,
+                                wheelSensitivity: 0.1, //NGL-4082 ajout
+                                layout: {
+                                    name: 'dagre',
+                                    directed:true,
+                                    padding:5,
+                                    spacingFactor:0.8,
+                                    animate : false
+                                },
+                                style: cytoscape.stylesheet()
+                                    .selector('node')
+                                        .css({
+                                        'shape': 'data(faveShape)',
+                                        'width': '190',
+                                        'label': 'data(label)',
+                                        'text-valign': 'center',
+                                        'background-color': 'data(faveColor)',
+                                        'color': '#fff',
+                                        'font-size':11,  
+                                        })
+                                    .selector(':selected')
+                                        .css({
+                                        'border-width': 3,
+                                        'border-color': '#333'
+                                        })
+                                    .selector('edge')
+                                        .css({
+                                        'curve-style': 'bezier',
+                                        'opacity': 0.666,
+                                        'width': '3',
+                                        'label': 'data(label)',
+                                        'color': '#000',
+                                        'font-size':11,
+                                        'font-weight': 'bold',
+                                        'target-arrow-shape': 'triangle',
+                                        'source-arrow-shape': 'circle',
+                                        'line-color': 'data(faveColor)',
+                                        'source-arrow-color': 'data(faveColor)',
+                                        'target-arrow-color': 'data(faveColor)'
+                                        })
+                                    .selector('.faded')
+                                    .css({
+                                        'opacity': 0.25,
+                                        'text-opacity': 0
+                                        })
+                                    .selector('node.highlight')
+                                    .selector('node.highlightSelected')
+                                    .css({
+                                        'border-color': '#0D0000',
+                                        'border-width': 3
+                                    })
+                                    .selector('node.semitransp')
+                                    .css({
+                                        'opacity': '0.5'
+                                    })
+                                    .selector('edge.highlight')
+                                    .css({
+                                        'mid-target-arrow-color': '#FFF'
+                                    })
+                                    .selector('edge.semitransp')
+                                    .css({
+                                        'opacity': '0.2'
+                                    })
+                                ,
+                                elements : graphElements
+                            });
+                        cy.on('tap', 'node', function(evt) {
+                            const target = evt.target;
+                            highlightSelectedNodeAndNeighbours(target);
+                        });
+                        cy.on('click',function(evt) {
+                            removeHighlight(cy);   
+                        });
+                        cy.ready(function(evt) {	
+                            toggleSpinner(false);
+                        });
+                    });	
+                }, 1);
+            };
+            asynchGraph();
+        };
+
+        function displayGraph(expNodes) {
+            var graphNodesData = computeGraphNodes(expNodes.data);
+            var graphElements  = computeGraphElements(graphNodesData);
+            initCytoscape(graphElements);
+        }
+
+        var graphSearchService = {
+            lists : lists,
+
+            getExperimentTypes : function() {
+                var experimentTypes = this.lists.getExperimentTypes({categoryCode: "transformation"}, "expTransfo");
+                return $filter('orderBy')(experimentTypes,'name');
+            },
+
+            search : function() {
+                mainService.setForm(this.form);				
+            },
+
+            resetForm : function() {					
+                this.form = {};				
+            },
+
+            searchNode : function(selectedExperimentTypeCode) {
+                if(selectedExperimentTypeCode) {
+                    var node = cy.$('[id="' + selectedExperimentTypeCode + '"]');
+                    if(node) {
+                        removeHighlight(cy);
+                        highlightSelectedNodeAndNeighbours(node);
+                    }
+                }
+            },
+
+            resetGraph : function() {
+                cy.batch(function() {
+                    removeHighlight(cy);
+                });
+            },
+
+            initGraph : function() {
+                if(!isInit) {
+                    toggleSpinner(true);
+                    $http.get(jsRoutes.controllers.experiments.api.ExperimentTypeNodes.list().url,{service:this}).then(function(expNodes) {
+                        displayGraph(expNodes);
+                    });
+                    isInit=true;
+                }
+            },
+
+            setRouteParams:function($routeParams) {
+                var count = 0;
+                for(var p in $routeParams) {
+                    count++;
+                    break;
+                }
+                if(count > 0) {
+                    this.isRouteParam = true;
+                    this.form = $routeParams;
+                }
+            },
+
+            init : function($routeParams) {
+                initListService();
+                this.initGraph();
+                
+                if(angular.isDefined(mainService.getForm())) {
+                    graphSearchService.form = mainService.getForm();
+                } else {
+                    graphSearchService.resetForm();						
+                }
+                
+                if(angular.isDefined($routeParams)) {
+                    this.setRouteParams($routeParams);
+                }	
+            }
+        };
+        
+        return graphSearchService;
+	}
+]);                

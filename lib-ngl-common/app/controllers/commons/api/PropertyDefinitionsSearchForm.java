@@ -15,6 +15,8 @@ public class PropertyDefinitionsSearchForm extends ListForm {
 	public List<String> names;
 	public String typeName;
 	public List<String> typeNames;
+	public String typeCode;
+	public List<String> typeCodes;
 	
 	public String levelCode;
 	

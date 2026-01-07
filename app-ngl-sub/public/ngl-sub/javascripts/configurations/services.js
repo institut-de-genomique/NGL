@@ -31,6 +31,13 @@
 				.success(function(data) {
 					createService.sraVariables.librarySource = data;																					
 				});
+				$http.get(jsRoutes.controllers.sra.api.Variables.list().url, {params:{type:'legendeDropBox'}})
+				.success(function(data) {
+					createService.sraVariables.legendeDropBox = data;	
+					createService.form.dropBox="Webin-9";         // pour avoir Webin-9 pré-séléctionné
+					createService.form.legendeDropBox="Webin-9";  // pour avoir Webin-9 pré-séléctionné																		
+					//console.log("createService.sraVariables", createService.sraVariables);																			
+				});
 				
 				isInit=true;
 			}
@@ -163,6 +170,16 @@ var getColumns = function(){
 						choiceInList:true,
 						//listStyle:'bt-select',
 						possibleValues:'consultationService.sraVariables.librarySource',
+					});	
+		columns.push({property:"dropBox",
+						header: Messages("configuration.dropBox"),
+						type :"String",
+						hide:true,
+						edit:true,
+						order:false,
+						choiceInList:true,
+						//listStyle:'bt-select',
+						possibleValues:'consultationService.sraVariables.dropBox',
 					});	
 		columns.push({property:"libraryConstructionProtocol",
 						 header: Messages("configuration.libraryConstructionProtocol"),

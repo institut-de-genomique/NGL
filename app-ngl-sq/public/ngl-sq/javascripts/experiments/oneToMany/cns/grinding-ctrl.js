@@ -8,7 +8,7 @@ angular.module('home').controller('GrindingCtrl',['$scope', '$parse', 'atmToGene
 			columns:[   
 					 {
 			        	 "header":Messages("containers.table.code"),
-			        	 "property":"inputContainer.support.code",
+			        	 "property":"inputContainer.code",
 			        	 "order":true,
 						 "edit":false,
 						 "hide":true,
@@ -19,6 +19,17 @@ angular.module('home').controller('GrindingCtrl',['$scope', '$parse', 'atmToGene
 					 {
 						"header":Messages("containers.table.projectCodes"),
 						"property":"inputContainer.projectCodes",
+						"order":false,
+						"edit":false,
+						"hide":false,
+						"type":"text",						
+						"position":2,
+						"render":"<div list-resize='cellValue' list-resize-min-size='3'>",
+						"extraHeaders":{0:Messages("experiments.inputs")}
+					},
+					{
+						"header":Messages("containers.table.sampleCodes"),
+						"property":"inputContainer.sampleCodes",
 						"order":false,
 						"edit":false,
 						"hide":false,
@@ -50,7 +61,7 @@ angular.module('home').controller('GrindingCtrl',['$scope', '$parse', 'atmToGene
 			order:{
 				mode:'local', //or 
 				active:true,
-				by:'inputContainer.code'
+				by:'inputContainer.sampleCodes'
 			},
 			remove:{
 				active: ($scope.isEditModeAvailable() && $scope.isNewState()),
@@ -91,7 +102,7 @@ angular.module('home').controller('GrindingCtrl',['$scope', '$parse', 'atmToGene
 			columns:[   
 					 {
 			        	 "header":Messages("containers.table.code"),
-			        	 "property":"inputContainer.support.code",
+			        	 "property":"inputContainer.code",
 			        	 "order":true,
 						 "edit":false,
 						 "hide":true,
@@ -122,41 +133,51 @@ angular.module('home').controller('GrindingCtrl',['$scope', '$parse', 'atmToGene
 			 			"render":"<div list-resize='cellValue' list-resize-min-size='3'>",
 			        	"extraHeaders":{0:Messages("experiments.inputs")}
 				     },
-
-				     //NGL-3394 Suppression pour HPM
-				    /* {
-			        	 "header":Messages("containers.table.fromTransformationTypeCodes"),
-			        	 "property":"inputContainer.fromTransformationTypeCodes",
-			        	 "filter" : "unique | codes:'type'",
-			        	 "order":true,
-						 "edit":false,
-						 "hide":true,
-			        	 "type":"text",
-			        	 "mergeCells" : true,
-			 			 "render":"<div list-resize='cellValue' list-resize-min-size='3'>",
-			        	 "position":4,
-			        	 "extraHeaders":{0:Messages("experiments.inputs")}
-			         },*/
-			        /* {
-			        	 "header":Messages("containers.table.volume") + " (µL)",
-			        	 "property":"inputContainerUsed.volume.value",
-			        	 "order":true,
-						 "edit":false,
-						 "hide":true,
-			        	 "type":"number",
-			        	 "position":6,
-			        	 "extraHeaders":{0:Messages("experiments.inputs")}
-			         },
-			         {
-			        	 "header":Messages("containers.table.quantity") + " (ng)",
-			        	 "property":"inputContainerUsed.quantity.value",
-			        	 "order":true,
-						 "edit":false,
-						 "hide":true,
-			        	 "type":"number",
-			        	 "position":7,
-			        	 "extraHeaders":{0:Messages("experiments.inputs")}
-			         },*/
+					 {
+						"header":Messages("containers.table.volume") + " (µL)",
+						"property":"inputContainerUsed.volume.value",
+						"order":true,
+						"edit":false,
+						"hide":true,
+						"type":"number",
+						"mergeCells" : true,
+						"position":4,
+						"extraHeaders":{0:Messages("experiments.inputs")}
+					},
+					{
+						"header":Messages("containers.table.quantity"),
+						"property":"inputContainerUsed.quantity.value",
+						"order":true,
+						"edit":false,
+						"hide":true,
+						"type":"number",
+						"mergeCells" : true,
+						"position":5,
+						"extraHeaders":{0:Messages("experiments.inputs")}
+					},
+					{
+						"header":Messages("containers.table.quantity.unit"),
+						"property":"inputContainerUsed.quantity.unit",
+						"order":true,
+						"edit":false,
+						"hide":true,
+						"type":"text",
+						"mergeCells" : true,
+						"position":6,
+						"extraHeaders":{0:Messages("experiments.inputs")}
+					},
+					{
+						"header":Messages("containers.properties.eukNbCells"),
+						"property":"properties.eukNbCells.value",
+						"order":true,
+						"url":"'/api/containers/'+inputContainer.code",
+						"edit":false,
+						"hide":true,
+						"type":"number",
+						"mergeCells" : true,
+						"position":6.5,
+						"extraHeaders":{0:Messages("experiments.inputs")}
+					},		
 			         {
 			        	 "header":Messages("containers.table.state.code"),
 			        	 "property":"inputContainer.state.code",
@@ -167,9 +188,19 @@ angular.module('home').controller('GrindingCtrl',['$scope', '$parse', 'atmToGene
 			        	 "filter":"codes:'state'",
 			        	 "position":7,
 			        	 "extraHeaders":{0:Messages("experiments.inputs")}
-			         },			        	        
+			         },		      
+					 {
+						"header":Messages("containers.table.quantitySortie") + " (mg)",
+						"property":"outputContainerUsed.quantity.value",
+						"order":true,
+						"edit":true,
+						"hide":true,
+						"type":"number",
+						"position":50,
+						"extraHeaders":{0:Messages("experiments.outputs")}
+					},
 			         {
-			        	 "header":Messages("containers.table.volume")+" (µL)",
+			        	 "header":Messages("containers.table.volumeSortie")+" (µL)",
 			        	 "property":"outputContainerUsed.volume.value",
 			        	 "order":true,
 						 "edit":true,
@@ -177,7 +208,7 @@ angular.module('home').controller('GrindingCtrl',['$scope', '$parse', 'atmToGene
 						 "type":"number",
 			        	 "position":51,
 			        	 "extraHeaders":{0:Messages("experiments.outputs")}
-			         },
+					},		          
 			         {
 			        	 "header":Messages("containers.table.code"),
 			        	 "property":"outputContainerUsed.code",
@@ -219,7 +250,7 @@ angular.module('home').controller('GrindingCtrl',['$scope', '$parse', 'atmToGene
 			order:{
 				mode:'local', //or 
 				active:true,
-				by:'inputContainer.code'
+				by:'inputContainer.sampleCodes'
 			},
 			remove:{
 				active:false,
@@ -256,56 +287,64 @@ angular.module('home').controller('GrindingCtrl',['$scope', '$parse', 'atmToGene
 			extraHeaders:{
 				number:1,
 				dynamic:true,
+			},
+			otherButtons: {
+				active: true,
+				complex:true,
+				template:  ''
+					+'<div class="btn-group" style="margin-left:5px">'
+						+'<button class="btn btn-default" ng-click="copyVolumeInToInput()" data-toggle="tooltip" title="'+Messages("experiments.button.plate.copyVolumeToInput")+'"  ng-disabled="!isEditMode()"><i class="fa fa-files-o" aria-hidden="true"></i> '+Messages("experiments.button.plate.copyVolumeToInput.title")+'</button>'                	                	
+					+'</div>'
+					+'<div class="btn-group" style="margin-left:5px">'
+						+'<button class="btn btn-default" ng-click="copyQuantityInToInput()" data-toggle="tooltip" title="'+Messages("experiments.button.plate.copyQuantity.title")+'"  ng-disabled="!isEditMode()"><i class="fa fa-files-o" aria-hidden="true"></i> '+Messages("experiments.button.plate.copyQuantity")+'</button>'                	                	
+					+'</div>'
 			}
 
 	};	
-	
-	
-	
-	/* $scope.updateInputVolume = function(experiment){
-		for(var i=0 ; i < experiment.atomicTransfertMethods.length ; i++){
-			var atm = experiment.atomicTransfertMethods[i];
-			
-			var volume = {input:0};
-			
-			angular.forEach(atm.outputContainerUseds, function(output){
-				this.input += Number(output.volume.value);
-			}, volume);
-			
-			if(angular.isNumber(volume.input)){
-				$parse('inputContainerUseds[0].experimentProperties["inputVolume"]').assign(atm, {value:volume.input, unit:"µL"});
-			}
-			//atm.inputContainerUseds[0].experimentProperties["inputVolume"] = {value:volume.input, unit:"µL"};
-		}				
-	}; 
-	
-	
-	/**
-	 * Update concentration. Copy input concentration to all outputs
-	 */
-	/*$scope.updateConcentration = function(experiment){
-		
-		for(var j = 0 ; j < experiment.atomicTransfertMethods.length && experiment.atomicTransfertMethods != null; j++){
-			var atm = experiment.atomicTransfertMethods[j];
-			if(atm.inputContainerUseds[0].concentration !== null 
-					&& atm.inputContainerUseds[0].concentration !== undefined){
-				var concentration = atm.inputContainerUseds[0].concentration;				
-				for(var i = 0 ; i < atm.outputContainerUseds.length ; i++){
-					$parse("outputContainerUseds["+i+"].concentration").assign(atm, concentration);
+
+	$scope.copyVolumeInToInput = function(){
+		var data = $scope.atmService.$atmToSingleDatatable.data.displayResult; 
+
+		data.forEach(function(value){
+			if (value.data.inputContainerUsed.volume && value.data.inputContainerUsed.volume.value !== null) { 
+				if (!value.data.inputContainerUsed.experimentProperties) {
+					value.data.inputContainerUsed.experimentProperties = {}
 				}
+				
+				if (!value.data.inputContainerUsed.experimentProperties.grindingInputVolume) {
+					value.data.inputContainerUsed.experimentProperties.grindingInputVolume = {}
+				}
+
+				value.data.inputContainerUsed.experimentProperties.grindingInputVolume.value = value.data.inputContainerUsed.volume.value;
 			}
-			
-		}		
-	}; */
+		});
+	};
+
+	$scope.copyQuantityInToInput = function() {
+		var data = $scope.atmService.$atmToSingleDatatable.data.displayResult;
+
+		data.forEach(function(value) {
+			if (value.data.inputContainerUsed.quantity && value.data.inputContainerUsed.quantity.value !== null) { 
+				if (!value.data.inputContainerUsed.experimentProperties) {
+					value.data.inputContainerUsed.experimentProperties = {}
+				}
+
+				if (value.data.inputContainerUsed.experimentProperties && !value.data.inputContainerUsed.experimentProperties.grindingInputQuantity) {
+					value.data.inputContainerUsed.experimentProperties.grindingInputQuantity = {};
+				}
+				
+				value.data.inputContainerUsed.experimentProperties.grindingInputQuantity.value = value.data.inputContainerUsed.quantity.value;
+			}
+		});
+	};
 	
 	$scope.$on('save', function(e, callbackFunction) {	
 		console.log("call event save on tube-to-tubes");
+		
 		$scope.atmService.viewToExperiment($scope.experiment);
-		//$scope.updateInputVolume($scope.experiment);
-		//$scope.updateConcentration($scope.experiment);
+
 		$scope.$emit('childSaved', callbackFunction);
 	});
-	
 	
 	$scope.$on('refresh', function(e) {
 		console.log("call event refresh on tube-to-tubes");
@@ -319,7 +358,6 @@ angular.module('home').controller('GrindingCtrl',['$scope', '$parse', 'atmToGene
 		dtConfig = $scope.atmService.data.datatableConfig.getConfig();
 		dtConfig.edit.active = ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F'));
 		dtConfig.edit.showButton = ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F'));
-		//dtConfig.remove.active = ($scope.isEditModeAvailable() && $scope.isNewState());
 		dtConfig.edit.byDefault = false;
 		$scope.atmService.data.datatableConfig.setConfig(dtConfig);
 		
@@ -367,7 +405,7 @@ angular.module('home').controller('GrindingCtrl',['$scope', '$parse', 'atmToGene
 	//defined default output unit
 	atmService.defaultOutputUnit = {
 			volume : "µL",
-			quantity:"ng"
+			quantity:"mg"
 	}
 	atmService.experimentToView($scope.experiment, $scope.experimentType);
 	

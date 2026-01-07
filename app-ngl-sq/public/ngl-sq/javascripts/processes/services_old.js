@@ -17,10 +17,12 @@ angular.module('ngl-sq.processesServices', []).factory('processesSearchService',
 			});
 			lists.refresh.processTypes();
 			lists.refresh.reportConfigs({
-				pageCodes : [ "processes-addcolumns" ]
+				pageCodes : [ "processes-addcolumns" ], 
+				active:true
 			}, "processes-addcolumns");
 			lists.refresh.filterConfigs({
-				pageCodes : [ "processes-search-addfilters" ]
+				pageCodes : [ "processes-search-addfilters" ], 
+				active:true
 			}, "processes-search-addfilters");
 
 			$http.get(jsRoutes.controllers.processes.api.ProcessTypes.list().url, {

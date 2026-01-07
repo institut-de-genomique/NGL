@@ -77,6 +77,7 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 	};  
 
 	var saveInProgress = false;
+	var samplePropertyDefinitionForOrder = {};
 	var samplePropertyDefinitionMap = {};
 	var init = function(){
 		$scope.messages = messages();
@@ -86,6 +87,7 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 		
 		$http.get(jsRoutes.controllers.samples.api.Samples.get($routeParams.code).url).then(function(response) {
 			$scope.sample = response.data;
+			
 
 			if ($scope.sample.technicalComments) {
 				$scope.techComSample = $scope.sample.technicalComments.map(function(comment) { return comment.comment });
@@ -96,13 +98,20 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 				tabService.addTabs({label:$scope.sample.code,href:jsRoutes.controllers.samples.tpl.Samples.get($scope.sample.code).url,remove:true});
 				tabService.activeTab($scope.getTabs(1));
 			}
-			$scope.lists.refresh.resolutions({"objectTypeCode":"Sample"}, "sampleResolutions");
+			$scope.lists.refresh.resolutions({"objectTypeCode":"Sample"});
 			if(undefined === mainService.get('sampleActiveTab')){
 				mainService.put('sampleActiveTab', 'general');
 			
 			}else if('treeoflife' ===  mainService.get('sampleActiveTab')){
 				$scope.initGraph();
 			}
+
+			$http.get(jsRoutes.controllers.commons.api.PropertyDefinitions.list().url,{params:{'typeCode':$scope.sample.importTypeCode}}).then(function(response) {
+			
+				response.data.forEach(function(pdef){
+						this[pdef.code]=pdef;
+				}, samplePropertyDefinitionForOrder);
+			});
 			
 		});
 		
@@ -110,15 +119,64 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 			
 			response.data.forEach(function(pdef){
 					this[pdef.code]=pdef;
-			}, samplePropertyDefinitionMap);
-		
+			}, samplePropertyDefinitionMap);	
 		});
+		
+		
 	}
 	init();
+
+	$scope.hasProperties = function(property) {
+		if ($scope.sample) {
+			var properties = Object.keys($scope.sample.properties)
+			var containsProperty  = properties.some(function(p) {
+				return p === property
+			});
+				return containsProperty ;
+
+		}
+		return false;
+	};
+
+	var FORBIDDEN_PROPERTIES = ["ncbiClass","ncbiPhylum"]
+
+	$scope.isAllowedProperty = function(property) {
+		for(var i =0 ; i<FORBIDDEN_PROPERTIES.length;i++){
+			if(FORBIDDEN_PROPERTIES[i] == property){
+				return false;
+			}
+		}
+		return true;
+	}
+	$scope.$watch(function () {
+		return $scope.sample && $scope.sample.properties && Object.keys(samplePropertyDefinitionForOrder).length > 0;
+	}, function (isReady) {
+		if (isReady) {
+	var entries = Object.entries($scope.sample.properties);
+	entries.sort(function(a, b) {
+		var keyA = a[0];
+		var keyB = b[0];
+		var orderA = (samplePropertyDefinitionForOrder[keyA] && samplePropertyDefinitionForOrder[keyA].displayOrder != null)
+			? samplePropertyDefinitionForOrder[keyA].displayOrder
+			: Infinity;
+		var orderB = (samplePropertyDefinitionForOrder[keyB] && samplePropertyDefinitionForOrder[keyB].displayOrder != null)
+			? samplePropertyDefinitionForOrder[keyB].displayOrder
+			: Infinity;
+		return orderA - orderB;
+	});
+	var ordered = {};
+	entries.forEach(function(entry) {
+		ordered[entry[0]] = entry[1];
+	});
+	$scope.orderedSampleProperties = ordered;
+}
+	});
+
 	
 	$scope.getSamplePropertyDefinitionValueType = function(key){
 		var propertyDef = samplePropertyDefinitionMap[key];
 		if(propertyDef){
+			console.log(propertyDef)
 			return propertyDef.valueType;
 		}
 		return null;

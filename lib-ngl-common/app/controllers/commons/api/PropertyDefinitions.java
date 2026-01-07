@@ -43,6 +43,9 @@ public class PropertyDefinitions extends APICommonController<PropertyDefinition>
 					);
 		}  else if (propertyDefinitionsSearch.levelCode != null) {
 			values = PropertyDefinition.find.get().findUnique(Level.CODE.valueOf(propertyDefinitionsSearch.levelCode));
+		}
+		else if (propertyDefinitionsSearch.typeCode != null) {
+			values = PropertyDefinition.find.get().findByTypeCode(propertyDefinitionsSearch.typeCode);
 		} else {
 			values = PropertyDefinition.find.get().findUnique();
 		}

@@ -153,12 +153,12 @@ angular.module('home').controller('UpdateCtrl',
 		//console.log("$scope.messages = ", $scope.messages);
 		//$scope.treeLoadInProgress = true;
 		
-		if (! $scope.form.externalIdRegex && 
-			! $scope.form.externalIds     &&
-		    ! $scope.form.accessionRegex  && 
-			! $scope.form.accessions      && 
-			! $scope.form.codeRegex       &&
-			! $scope.form.codes           &&
+		if (! $scope.form.identifierRegex  && 
+			! $scope.form.identifiers      &&
+			! $scope.form.codeRegex        &&
+			! $scope.form.codes            &&
+			! $scope.form.submissionCodeRegex  &&
+			! $scope.form.submissionCodes  &&
 			! $scope.form.projCodes  ) {
 			//console.log("Aucun parametre => envoyer message erreur");
 			$scope.reset(); // a mettre avant setError car annule messages
@@ -270,73 +270,36 @@ angular.module('home').controller('UpdateCtrl',
 		if(! tab_samples || tab_samples.length < 1) {
 			$scope.reset();
 			$scope.messages.setError(Messages("AbsenceDonneePourUpdate"));
-			console.log("$scope.messages = ", $scope.messages);
+			//console.log("$scope.messages = ", $scope.messages);
 			throw(Messages("AbsenceDonneePourUpdate"));
 		}
 		//console.log("taille de tab_samples: ", tab_samples.length);
-		
-		// declencher creation d'un objet submission pour update :
-		
+
+		// declencher creation d'un objet submission pour update :		
 		var args = {
 			project     : null,
 			study       : null,
 			samples     : tab_samples,
 			experiments : []
 		};
-		
+		$scope.samplesDT.setSpinner(true);
 		// declencher creation d'un objet submission pour update :
 		$http.put(jsRoutes.controllers.sra.submissions.api.Submissions.createForUpdate().url, args)
 		.success(function(data) { 
-			$scope.samplesDT.setSpinner(true);
-
-			console.log("yyyyyyyy dans success, data = ", data); 	
+			//console.log("yyyyyyyy dans success, data = ", data); 	
 			var submission = data;
-			var submissionCode = data.code;
-			var submissionState = angular.copy(data.state);				
-			submissionState.code = "SUBU-SMD-IW";
-			// $scope.messages.setSuccess("La soumission " + submissionCode
-			// + " pour la mise a jour à l'EBI des données du tableau est en
-			// cours de traitement");
-			$http.put(jsRoutes.controllers.sra.submissions.api.Submissions.updateState(submissionCode).url, submissionState)
-			.success(function(data) { 
-			// Pas de recuperation d'erreur si requete ci-dessous :
-			//$http.put(jsRoutes.controllers.sra.submissions.api.Submissions.updateState(submissionCode).url, "toto")
-			//.success(function(data) { 
-				console.log("zzzzzzzzzzzz dans success, data=", data);
-				var submissionCode = data.code;
-				$scope.messages.setSuccess("La soumission " + submissionCode + " pour la mise a jour à l'EBI des données du tableau est en cours de traitement"); 
-				// rafraichissement tableau avec nouveaux status:
-				var tab_codes = [];
-				$scope.samplesDT = datatable(samplesDTConfig);
-				$scope.samplesDT.setColumnsConfig(services.getSampleColumns());
-				for(var i= 0; i < tab_samples.length; i++){
-					tab_codes.push(tab_samples[i].code);
-				}
-				$scope.samplesDT.search({codes:tab_codes});		
-			}).error(function(error) {
-				// testé avec sample deja dans soumission => ok  
-				 console.log("ZZZZZZZZZZZZZZ dans error,  error= ", error);
-				 $scope.messages.addDetails(error);
-				 $scope.messages.setError("Probleme pour le changement de status de la soumission");
-				 // var submissionCode = error.data.code;
-				 //$scope.messages.setError("Soumission " + submissionCode + " qui n'a pas pu
-				 // etre mise dans le bon etat, mais sample sauve dans base avec ses
-				 // modifications");
-				 //$scope.treeLoadInProgress = false;
-				 $scope.samplesDT.setSpinner(false);
-
-
-			});
+			//var submissionCode = data.code;
+			//var submissionState = angular.copy(data.state);				
+			$scope.messages.setSuccess("Les samples du tableau ont bien été mis à jour à l'EBI via la soumission "  + submission.code + " voir ebiReport " + submission.submissionDirectory + "/" + submission.ebiResult);
+			$scope.samplesDT.setSpinner(false); 
 		}).error(function(error) {
-			console.log("YYYYYYYYYYYYYYYYYYYYYYYYY dans error ");
-				console.log("error = ", error);
-				$scope.messages.addDetails(error); 
-				$scope.messages.setError("Erreur creation de la soumission"); 
-				//$scope.treeLoadInProgress = false;
-				$scope.samplesDT.setSpinner(false);
-
+			//console.log("YYYYYYYYYYYYYYYYYYYYYYYYY dans error ");
+			console.log("error = ", error);
+			$scope.messages.addDetails(error); 
+			$scope.messages.setError("Erreur "); 
+			//$scope.treeLoadInProgress = false;
+			$scope.samplesDT.setSpinner(false);
 		});
-		//$scope.treeLoadInProgress = false;
 	}; // end $scope.submit
 	
 	

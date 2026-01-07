@@ -7,38 +7,45 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 
 import controllers.NGLAPIController;
 import controllers.QueryFieldsForm;
+import controllers.sra.api.ExperimentAPI;
 import fr.cea.ig.authentication.Authenticated;
 import fr.cea.ig.authorization.Authorized;
 import fr.cea.ig.ngl.NGLApplication;
 import fr.cea.ig.ngl.dao.api.APIException;
 import fr.cea.ig.ngl.dao.api.APIValidationException;
-import fr.cea.ig.ngl.dao.api.sra.ExperimentAPI;
 import fr.cea.ig.ngl.dao.sra.ExperimentDAO;
 import models.sra.submit.sra.instance.Experiment;
+import models.sra.submit.sra.instance.ExperimentBatchElement;
 import models.sra.submit.sra.instance.UserExperimentExtendedType;
 import models.sra.submit.sra.instance.UserExperimentType;
+import java.util.List;
 import play.data.Form;
 import play.libs.Json;
 import play.mvc.Result;
-import services.Tools;
 import sra.parser.UserExperimentExtendedTypeParser;
 import sra.parser.UserExperimentTypeParser;
+import sra.services.Tools;
 import validation.ContextValidation;
+import views.components.datatable.DatatableBatchResponseElement;
 import views.components.datatable.DatatableForm;
 
-public class Experiments extends NGLAPIController<ExperimentAPI, ExperimentDAO, Experiment>  {
 
+public class Experiments extends NGLAPIController<ExperimentAPI, ExperimentDAO, Experiment>  {
+	@SuppressWarnings("unused")
 	private static final play.Logger.ALogger         logger                     = play.Logger.of(Experiments.class);
 	private Map<String, UserExperimentType>          mapUserExperiments         = new HashMap<>();
 	private Map<String, UserExperimentExtendedType>  mapUserExperimentsExtended = new HashMap<>();
 	private final Form<Experiment>                   experimentForm;
 	private final Form<QueryFieldsForm>              updateForm;
 	private final Form<UserFileExperimentsForm>      userFileExperimentsForm;
+	private final Form<ExperimentBatchElement>       batchElementForm; 
 
 	//NGL-3666:
 	//	private AbstractSampleAPI abstractSampleAPI; utilisé dans getQuery deportée dans ExperimentSearchForm
@@ -52,7 +59,32 @@ public class Experiments extends NGLAPIController<ExperimentAPI, ExperimentDAO, 
 		this.userFileExperimentsForm = app.formFactory().form(UserFileExperimentsForm.class);
 		this.experimentForm          = app.formFactory().form(Experiment.class);
 		this.updateForm              = app.form(QueryFieldsForm.class);
+		this.batchElementForm = app.form(ExperimentBatchElement.class);
 	}
+
+	@Authenticated
+    @Authorized.Write
+    public Result batchUpdate() {
+		//logger.debug("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX          Entree dans batchUpdate du controlleur des experiments");
+
+        List<Form<ExperimentBatchElement>> filledForms =  getFilledFormList(batchElementForm, ExperimentBatchElement.class);
+        final String user = getCurrentUser();
+
+            List<DatatableBatchResponseElement> response = filledForms.stream()
+                    .map(filledForm -> {
+                        ExperimentBatchElement element = filledForm.get();
+                        try {
+                            Experiment exp = api().update(element.data, user);
+                            //logger.debug("XXXXXXXXXXXXXXXXXXX   dans batchUpdate, apres update, pour " + exp.code);
+                            return new DatatableBatchResponseElement(OK, exp, element.index);
+                        } catch (APIValidationException e) {
+                            return new DatatableBatchResponseElement(BAD_REQUEST, errorsAsJson(e.getErrors()), element.index);
+                       } catch (APIException e) {
+                           return new DatatableBatchResponseElement(BAD_REQUEST, element.index);
+                       }
+                   }).collect(Collectors.toList());
+        return ok(Json.toJson(response));
+    }
 
 
 
@@ -99,6 +131,8 @@ public class Experiments extends NGLAPIController<ExperimentAPI, ExperimentDAO, 
 	@Authenticated
 	@Authorized.Write
 	public Experiment updateImpl(String code) throws Exception, APIException, APIValidationException {
+		//logger.debug("XXXXXXXXXXXXXXXXXXXXXXXXX          Entree dans updateImpl du controlleur des experiments");
+
 		Experiment userExperiment =  getFilledForm(experimentForm, Experiment.class).get();
 		//Form<QueryFieldsForm> filledQueryFieldsForm = filledFormQueryString(updateForm, QueryFieldsForm.class);
 		//QueryFieldsForm queryFieldsForm = filledQueryFieldsForm.get();
@@ -109,12 +143,12 @@ public class Experiments extends NGLAPIController<ExperimentAPI, ExperimentDAO, 
 		if(StringUtils.isNotBlank(userExperiment.code) && ! userExperiment.code.equals(code)) {
 			throw new Exception("experiment.code :  valeur " + userExperiment.code + " != du code indiqué dans la route "  + code);
 		}
-		boolean copy = false;
+		// boolean copy = false;
 		if (queryFieldsForm.fields == null) {	
 			return api().update(userExperiment, getCurrentUser(), false);
 		} 
 		if(queryFieldsForm.fields.contains("copy")) {
-			copy = true;
+			// copy = true;
 			queryFieldsForm.fields.remove("copy");
 			return api().update(userExperiment, getCurrentUser(), true);
 		} 
@@ -136,7 +170,7 @@ public class Experiments extends NGLAPIController<ExperimentAPI, ExperimentDAO, 
 			return badRequest(errorsAsJson(ctxVal.getErrors()));
 		}
 		
-		logger.debug("ZZZZZZZZZZZZZZZZZZZ           typeParser=" + typeParser);
+		//logger.debug("ZZZZZZZZZZZZZZZZZZZ           typeParser=" + typeParser);
 		try {
 			//logger.debug("form.base64UserFileExperiment", form.base64UserFileExperiment);
 			//logger.debug("Experiments::list::list.size = " + list.size());

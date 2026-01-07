@@ -43,17 +43,18 @@ angular.module('home').controller('SearchCtrl', ['$scope', '$routeParams', 'data
 							"header":Messages("archives.table.path"),
 							"type":"String",
 							"order":true
-						 },{	
-							"property":"date",
-							"header":Messages("archives.table.date"),
-							"type":"Date",
-							"order":true
-						 },{	
-							"property":"id",
-							"header":Messages("archives.table.backupid"),
-							"type":"String",
-							"order":true
-						 }			           
+						 }
+//					     ,{	
+//							"property":"date",
+//							"header":Messages("archives.table.date"),
+//							"type":"Date",
+//							"order":true
+//						 },{	
+//							"property":"id",
+//							"header":Messages("archives.table.backupid"),
+//							"type":"String",
+//							"order":true
+//						 }			           
 			 ]			
 			
 	};

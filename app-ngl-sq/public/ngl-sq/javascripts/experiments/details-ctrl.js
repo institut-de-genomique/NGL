@@ -643,40 +643,173 @@ angular.module('home').controller('DetailsCtrl',['$rootScope', '$scope','$sce', 
 				});
 			}
 	};
+
+	// FDS 15/02/2024 créé pour le NGL-4358 (pacBio)
+	// 30/06/2025 => était pas dans le bon fichier details-ctrl.js !!!!
+	$scope.stripUtils={
+		isStripToStrip:function(){
+			return ($scope.experiment.instrument.inContainerSupportCategoryCode === 'strip-8' 
+					&& $scope.experiment.instrument.outContainerSupportCategoryCode === 'strip-8');								
+		},
+		copyMode : function(atmService, udt){
+			var tubes = udt.displayResult;
+			for(var j = 0; j < tubes.length; j++){
+				// un strip est composé de tubes en non de wells !!!!!!
+				if(tubes[j].data.inputContainerUsed.categoryCode ==='tube'){
+					tubes[j].data.outputContainerUsed.locationOnContainerSupport.line = tubes[j].data.inputContainerUsed.locationOnContainerSupport.line;
+					tubes[j].data.outputContainerUsed.locationOnContainerSupport.column = tubes[j].data.inputContainerUsed.locationOnContainerSupport.column;
+				}
+			}
+		},
+		templates : {
+			buttonCopyPosition : function(udtName){
+				if(!udtName)udtName='atmService.data';
+				return ''
+				+'<div class="btn-group" ng-if="stripUtils.isStripToStrip()">'
+				+'<button class="btn btn-default" ng-click="stripUtils.copyMode(atmService, '+udtName+')" data-toggle="tooltip" title="'+Messages("experiments.button.plate.copyMode.title")+'" ng-disabled="!isEditMode()">'
+				+'	<i class="fa fa-copy"></i> '+Messages("experiments.button.plate.copyMode")
+				+'</button>'
+				+'</div>'
+			}
+		}
+	};
 	
 	$scope.plateUtils = {
 			/**
 			 * Compute A1, B1, C1, etc.
+			 * Note FDS: !! if inputs are tubes,  udt.displayResult can be > 96!!
+			 *  ==> stop when 96 "wells" are processed
 			 */
 			computeColumnMode : function(atmService, udt, maxLine){
 				var wells = udt.displayResult;
 				var nbCol = 12;
 				var nbLine = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 				var x = 0;
+
+				//pb en cas de changement d'avis de l'utilisateur, commencer par nettoyer
+				this.cleanPositions(atmService, udt);
+
 				for(var i = 0; i < nbCol ; i++){
 					for(var j = 0; j < nbLine.length && j <= maxLine; j++){
 						if(x < wells.length && x < 96){
-							wells[x].data.outputContainerUsed.locationOnContainerSupport.line = nbLine[j]+'';
+							wells[x].data.outputContainerUsed.locationOnContainerSupport.line = nbLine[j]+''; // pourquoi +'' ?
 							wells[x].data.outputContainerUsed.locationOnContainerSupport.column = i+1;					
 						}
 						x++;
 					}
 				}		
 			},
-			
+			// NGL-5176 Commencer à une position choisie
+			computeColumnMode_withStartPosition : function(atmService, udt, startLine, startCol){
+				//console.log ('computeColumnMode_withStartPosition '+startLine+' '+startCol);
+				
+				var wells = udt.displayResult;
+				var nbCol = 12;
+				var nbLine = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+				var startJ= nbLine.indexOf(startLine);// trouver l'index de startLine dans nbLine
+				var startI= startCol -1;
+				var x = 0;
+
+				//pb en cas de changement d'avis de l'utilisateur, commencer par nettoyer
+				this.cleanPositions(atmService, udt);
+
+				// traiter la colonne incomplète d'abord
+				for(var j = startJ; j < nbLine.length ; j++){
+					if(x < wells.length && x < 96){
+						wells[x].data.outputContainerUsed.locationOnContainerSupport.line = nbLine[j]+'';
+						wells[x].data.outputContainerUsed.locationOnContainerSupport.column = startI +1;	
+						//console.log	(nbLine[j]+'-'+(startI+1))	;					
+					}
+					x++;
+				}
+				//...puis les colonnes complètes restantes
+				for(var i = startI +1; i < nbCol ; i++){
+					for(var j = 0; j < nbLine.length ; j++){
+						if(x < wells.length && x < 96){
+							wells[x].data.outputContainerUsed.locationOnContainerSupport.line = nbLine[j]+'';
+							wells[x].data.outputContainerUsed.locationOnContainerSupport.column = i+1;	
+							//console.log	(nbLine[j]+':'+(i+1))	;						
+						}
+						x++;
+					}
+				}		
+			},
 			/**
 			 * Compute A1, A2, A3, etc.
+			 * Note FDS: !! if inputs are tubes,  udt.displayResult can be > 96!!
+			 *  ==> stop when 96 "wells" are processed
 			 */
 			computeLineMode : function(atmService, udt, maxColumn){
 				var wells = udt.displayResult;
 				var nbCol = 12;
 				var nbLine = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 				var x = 0;
+
+				//pb en cas de changement d'avis de l'utilisateur, commencer par nettoyer
+				this.cleanPositions(atmService, udt);
+
 				for(var j = 0; j < nbLine.length; j++){
 					for(var i = 0; i < nbCol && i <= maxColumn; i++){
 						if(x < wells.length && x < 96){
-							wells[x].data.outputContainerUsed.locationOnContainerSupport.line = nbLine[j]+'';
+							wells[x].data.outputContainerUsed.locationOnContainerSupport.line = nbLine[j]+''; // pourquoi +'' ?
 							wells[x].data.outputContainerUsed.locationOnContainerSupport.column = i+1;					
+						}
+						x++;
+					}
+				}		
+			},
+			// NGL-5176 Commencer à une position choisie
+			computeLineMode_withStartPosition : function(atmService, udt, startLine, startCol){
+				//console.log ('computeLineMode_withStartPosition '+ startLine+' '+startCol);
+
+				var wells = udt.displayResult;
+				var nbCol = 12;
+				var nbLine = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+				var startJ= nbLine.indexOf(startLine);// trouver l'index de startLine dans nbLine
+				var startI=startCol -1;
+				var x = 0;
+
+				//pb en cas de changement d'avis de l'utilisateur, commencer par nettoyer
+				this.cleanPositions(atmService, udt);
+
+				// traiter la ligne incomplète d'abord
+				for(var i = startI; i < nbCol ; i++){
+					if(x < wells.length && x < 96){
+						wells[x].data.outputContainerUsed.locationOnContainerSupport.line = nbLine[startJ]+'';
+						wells[x].data.outputContainerUsed.locationOnContainerSupport.column = i+1;	
+						//console.log	(nbLine[startJ]+'/'+(i+1))	;		
+					}
+					x++;
+				}
+
+				// ...puis les lignes complètes restantes
+				for(var j = startJ +1; j < nbLine.length; j++){
+					for(var i = 0; i < nbCol ; i++){
+						if(x < wells.length && x < 96){
+							wells[x].data.outputContainerUsed.locationOnContainerSupport.line = nbLine[j]+'';
+							wells[x].data.outputContainerUsed.locationOnContainerSupport.column = i+1;	
+							//console.log	(nbLine[j]+';'+(i+1))	;						
+						}
+						x++;
+					}
+				}		
+			},
+			// vu pendant NGL-5176
+			// pb en cas de changement d'avis de l'utilisateur => des positions de l'ancien choix restent définies!
+			//==> il faut une méthode de nettoyage !
+			cleanPositions : function(atmService, udt){
+				console.log('CLEANING POSITIONS...');
+				var wells = udt.displayResult;
+				var nbCol = 12;
+				var nbLine = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+				var x = 0;
+
+				// ici l'algo est en mode colonne mais les 2 donnent la meme chose
+				for(var i = 0; i < nbCol ; i++){
+					for(var j = 0; j < nbLine.length ; j++){
+						if(x < wells.length && x < 96){
+							wells[x].data.outputContainerUsed.locationOnContainerSupport.line = undefined;
+							wells[x].data.outputContainerUsed.locationOnContainerSupport.column = undefined;					
 						}
 						x++;
 					}
@@ -761,12 +894,136 @@ angular.module('home').controller('DetailsCtrl',['$rootScope', '$scope','$sce', 
 					return this.plateCells[line][column];
 				}
 			},
+			// FDS 04/08/2025 NGL-5175 generer le tableau de toutes les positions pour un type de plaque
+			generatePlatePositions : function(plateSize, mode){
+				// clé numérique
+				var plateMap = new Map([
+					[96, {'lines':8, 'columns':12}],
+					[384,{'lines':16,'columns':24}],
+				]);
+				positionArray=[];
+
+   				// verifier que la cle recue est valide
+  				if  ( plateMap.has(plateSize) ){  
+					if( mode === 'line'){
+						for(var l = 1; l < plateMap.get(plateSize).lines +1; l++){
+							for(var c = 1; c < plateMap.get(plateSize).columns+1 ; c++){
+								positionArray.push (String.fromCharCode(l + 64)  +  c);
+							}
+						}
+					} else {
+						//mode column
+						for(var c = 1; c < plateMap.get(plateSize).columns+1 ; c++){
+							for(var l = 1; l < plateMap.get(plateSize).lines +1; l++){
+								positionArray.push (String.fromCharCode(l + 64)  +  c);
+							}
+						}
+					}
+				}
+				return positionArray;
+			},
+			//------------- NGL-5175 déplacées depuis x-to-plates-ctrl.js/CNG pour être communes CNG/CNS
+			//              ajout des paramètres optionnels maxLine ou maxCol dans toutes les fonctions de calcul 
+			// convertir Ligne alpha (A,B,C ...) en numérique (1,2,3...)
+			lineCharToNum : function(char){
+				return char.charCodeAt(0) - 64; 
+			},
+			// convertir (1,2,3...) en alpha (A,B,C ...) 
+			lineNumToChar : function(num){
+				return String.fromCharCode(num + 64);
+			},
+			// FDS 29/06/2016 calcul de la ligne en fonction de position 96 numerotée en mode colonne ( 1=A1, 2=B1... 9=A2...) [ thx NW ]
+			//     modulo variable et non harcodé à 8 (valeur pour la colonne max par defaut: H)
+			getLineFromPosition96_C :function(pos96, maxLine){	
+				var modulo=(maxLine === undefined)? 8 : this.lineCharToNum(maxLine);
+				var L=(pos96 -1)%modulo +1;
+				var line= this.lineNumToChar(L); // String.fromCharCode (L + 64);
+				console.log("getLineFromPosition96_C: "+ pos96 +"=>"+ L+"/"+line);
+
+				return line;
+			},
+			// FDS 29/06/2016  calcul de la colonne en fonction de position-96 numerotée en mode colonne ( 1=A1, 2=B1... 9=A2...) [ thx NW ]
+			//     modulo variable (valeur ascii de la ligne) et non harcodé à 8 (valeur pour la colonne max par defaut: H)
+			//           !! la colonne ne doit pas dépaser 12 pour une plaque 96 !!!
+			getColumnFromPosition96_C : function(pos96, maxLine){
+				var modulo=(maxLine === undefined)? 8 : this.lineCharToNum(maxLine);
+				var C=Math.floor( (pos96 -1)/modulo) +1 ;
+				if (C > 12){
+					var column=undefined;
+					console.log("getColumnFromPosition96_C: UNDEFINED");
+				} else {
+					var column= C.toString();  // locationOnContainerSupport.column attend une string
+					console.log("getColumnFromPosition96_C:"+ pos96 +"=>"+ C+"/"+column);
+				}
+				return column;
+			},
+			// FDS 31/07/2025 calcul de la ligne en fonction de position 96 numerotée en mode ligne ( 1=A1, 2=A2... 13=B1...)
+			//     modulo variable et non harcodé à 12 (colonne max par défaut)
+			//            !! la ligne ne doit pas dépasser H (8) pour une plaque 96
+			getLineFromPosition96_L : function(pos96, maxCol){	
+				var modulo=(maxCol === undefined)? 12 : maxCol;
+				var L=Math.floor((pos96 -1)/modulo) +1;
+				if (L > 8){
+					var line=undefined;
+					console.log("getLineFromPosition96_L: UNDEFINED");
+				} else {
+					//var line= String.fromCharCode (L + 64);
+					var line=this.lineNumToChar(L);
+					console.log("getLineFromPosition96_L: "+ pos96 +"=>"+ L +"/"+line);
+				}
+
+				return line;
+			},
+			// FDS 31/07/2025 calcul de la colonne en fonction de position 96 numerotée en mode ligne ( 1=A1, 2=A2... 13=B1...)
+			//     modulo variable et non harcodé à 12 (colonne max par défaut)
+			getColumnFromPosition96_L : function(pos96, maxCol){	
+				var modulo=(maxCol === undefined)? 12 : maxCol;
+				var C=(pos96 -1)%modulo +1;
+				var column= C.toString();  // locationOnContainerSupport.column attend une string
+				console.log("getColumnFromPosition96_L: "+ pos96 +"=>"+ C+"/"+column);
+
+				return column;
+			},
+			// FDS 03/10/2016 calculer la position-96 en mode colonne à partir de ligne et colonne ( A1=1, B1=2... A2=9...) 
+			//     line variable et non harcodée à 8 (H)
+			getPos96FromLineAndCol_C : function(ln,col, maxLine){
+				var line=(maxLine === undefined)? 8: this.lineCharToNum(maxLine);
+				if ( ln && col ){
+					var pos96=(col -1 )*line + this.lineCharToNum(ln);
+					console.log("getPos96FromLineAndCol_C: "+ln+"/"+col+"=>"+pos96);
+
+					return pos96;
+				}
+			},
+			// FDS 31/07/2025 calculer la position-96 en mode ligne a partir de ligne et colonne ( 1=A1, 2=A2...13=B1...)
+			//     column variable et non harcodée à 12
+			getPos96FromLineAndCol_L : function(ln,col, maxCol){
+				var column=(maxCol === undefined)? 12 : maxCol;
+				if ( ln && col ){
+					var pos96=((this.lineCharToNum(ln) -1)*column) + col*1; // col*1 pour forcer conversion numérique??
+					console.log("getPos96FromLineAndCol_L: "+ln+"/"+col+"=>"+pos96);
+
+					return pos96;
+				}
+			},
+			//-----------------------------------------------------------
 			templates : {
 				buttonLineMode : function(udtName){
 					if(!udtName)udtName='atmService.data';
 					return ''
 					+'<div class="btn-group" style="margin-left:5px" ng-if="plateUtils.isPlate()">'
-	            	+'<button class="btn btn-default" ng-click="plateUtils.computeLineMode(atmService, '+udtName+', 11)" data-toggle="tooltip" title="'+Messages("experiments.button.plate.computeLineMode")+'"  ng-disabled="!isEditMode()"><i class="fa fa-magic"></i><i class="fa fa-arrow-right"></i></button>'
+					// ---NGL-5176 nouveau bouton start position
+	            	+'<div class="btn-group" role="group">'
+	            	+'<button type="button" title="'+Messages("experiments.button.plate.computeLineMode.startPosition")+'" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ng-disabled="!isEditMode()">'
+	            	+'  <span class="caret"></span>'
+	            	+'</button>'
+	            	+' <ul class="dropdown-menu">'  // pourrait etre moins large !!
+	            	+ this.generateStartLI(udtName, 'computeLineMode')
+	            	+'</ul>'
+	            	+'</div>'
+					// ---
+	            	+'<button class="btn btn-default" ng-click="plateUtils.computeLineMode(atmService, '+udtName+', 11)" data-toggle="tooltip" title="'+Messages("experiments.button.plate.computeLineMode")+'"  ng-disabled="!isEditMode()"><i class="fa fa-magic"></i><i class="fa fa-arrow-right"></i>'
+					+'</button>'
 	            	+'<div class="btn-group" role="group">'
 	            	+'<button type="button" title="'+Messages("experiments.button.plate.computeLineMode.advanced")+'" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ng-disabled="!isEditMode()">'
 	            	+'  <span class="caret"></span>'
@@ -792,7 +1049,18 @@ angular.module('home').controller('DetailsCtrl',['$rootScope', '$scope','$sce', 
 					if(!udtName)udtName='atmService.data';
 					return ''
 					+'<div class="btn-group" ng-if="plateUtils.isPlate()">'
-	            	+'<button class="btn btn-default" ng-click="plateUtils.computeColumnMode(atmService, '+udtName+', 7)" data-toggle="tooltip" title="'+Messages("experiments.button.plate.computeColumnMode")+'" ng-disabled="!isEditMode()"><i class="fa fa-magic"></i><i class="fa fa-arrow-down"></i></button>'
+					// ---NGL-5176 nouveau bouton start position
+	            	+'<div class="btn-group" role="group">'
+	            	+'<button type="button" title="'+Messages("experiments.button.plate.computeLineMode.startPosition")+'" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ng-disabled="!isEditMode()">'
+	            	+'  <span class="caret"></span>'
+	            	+'</button>'
+	            	+' <ul class="dropdown-menu">' // pourrait etre moins large !
+					+ this.generateStartLI(udtName, 'computeColumnMode')
+	            	+'</ul>'
+	            	+'</div>'
+					// ---
+	            	+'<button class="btn btn-default" ng-click="plateUtils.computeColumnMode(atmService, '+udtName+', 7)" data-toggle="tooltip" title="'+Messages("experiments.button.plate.computeColumnMode")+'" ng-disabled="!isEditMode()"><i class="fa fa-magic"></i><i class="fa fa-arrow-down"></i>'
+					+'</button>'
 	            	+'<div class="btn-group" role="group">'
 	            	+'<button type="button"  title="'+Messages("experiments.button.plate.computeColumnMode.advanced")+'" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ng-disabled="!isEditMode()">'
 	            	+'  <span class="caret"></span>'
@@ -818,9 +1086,125 @@ angular.module('home').controller('DetailsCtrl',['$rootScope', '$scope','$sce', 
 	            	+'	<i class="fa fa-copy"></i> '+Messages("experiments.button.plate.copyMode")
 	            	+'</button>'
 	            	+'</div>'
-	            }
+	            },
+				// NGL-5176: générer 96 <li> pour sélectionner la position de départ
+				generateStartLI: function (udtName, mode){
+					//console.log ('generateStartLI', mode);
+
+					var li='';
+				   	var nbLine = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+					var nbColumn=12;
+					for(var l = 0; l < nbLine.length; l++){
+						for (c=1; c<=nbColumn; c++){
+							//console.log ('generateStartLI ,' + nbLine[l] +','+c);
+							li=li+'<li><a href="#" ng-click="plateUtils.'+mode+'_withStartPosition(atmService, '+udtName+',\''+nbLine[l]+'\','+c+')">'+ nbLine[l]+c +'</a></li>'; 
+						}
+					}
+					return li;
+				}	
 			}
 	};
+
+	// NGL-5175 séparer les methodes spécifiques pour le experience de pool
+	$scope.poolUtils = {
+		// on est dans le controller parent, on a pas acces au $scope des controllers fils il faut donc recevoir tous les paramètres
+		calculateATMPlatePosFromIndex:function (ATMindex, outputMode, startPositionColumn, maxOutputLine, startPositionLine, maxOutputColumn){
+		  var ATMpos={};
+		  try {
+		    if ( ATMindex===undefined || outputMode===undefined || startPositionColumn===undefined || maxOutputLine===undefined || startPositionLine===undefined || maxOutputColumn===undefined){
+				throw "calculateATMPlatePosFromIndex: missing parameter";
+		    }
+
+			console.log('>>>> init ATM='+ ATMindex );
+			var col=undefined;
+			var line=undefined;
+			
+			if ( outputMode === 'C' ){
+		
+				var startLine=startPositionColumn.charAt(0);
+				var startCol=startPositionColumn.substr(1,2);
+				//console.log("[[["+ startLine+ " | " + startCol +"]]]");
+				//!! si startLine  >   maxOutputLine  alors pb!!!!
+				//==> bloqué dans checkOutputModeButtonConsistancy mais doit etre traité ici aussi !!
+				// comparaison de strings !!!!
+				if ( startLine > maxOutputLine){
+					throw "calculateATMPlatePosFromIndex: startLine > maxOutputLine";
+				}
+		
+				// prise en compte de $scope.maxOutputLine si different de pas de choix ou valeur max
+				if ( maxOutputLine !== "---"  &&  maxOutputLine !== "H" ){
+		
+					var shift=$scope.plateUtils.getPos96FromLineAndCol_C(startLine, startCol, maxOutputLine ) -1;  // A1 -1 ==> shift=0
+					//console.log('>>>> shift='+shift);
+					var newIndex=ATMindex + shift*1;
+					//console.log('>>>> new index='+ newIndex );
+					
+					line=$scope.plateUtils.getLineFromPosition96_C( newIndex, maxOutputLine);
+					col=$scope.plateUtils.getColumnFromPosition96_C(newIndex, maxOutputLine);
+				} else {
+		
+					var shift=$scope.plateUtils.getPos96FromLineAndCol_C(startLine, startCol ) -1;  // A1 -1 ==> shift=0
+					//console.log('>>>> shift='+shift);
+					var newIndex=ATMindex + shift*1;
+					//console.log('>>>> new index='+ newIndex );
+		
+					line=$scope.plateUtils.getLineFromPosition96_C( newIndex);
+					col=$scope.plateUtils.getColumnFromPosition96_C(newIndex);
+				}
+				//console.log('>>>>>>LINE='+ line + 'COL='+ col);
+		
+			} else if ( outputMode === 'L' ){
+		
+				var startLine=startPositionLine.charAt(0);
+				var startCol=startPositionLine.substr(1,2);
+				//console.log("[[["+ startLine+ " | " + startCol + "]]]" );
+		
+				//!! si startColumn  >   $scope.maxOutputColumn alors pb
+				//==> normallement bloqué dans checkOutputModeButtonConsistancy dans le controller du pool mais doit etre traité ici aussi !!
+				if ( parseInt(startCol) > parseInt($scope.maxOutputColumn) ){
+					throw "calculateATMPlatePosFromIndex: startCol > maxOutputColumn";
+				}
+		
+				// prise en compte de $scope.maxOutputColumn si different de pas de choix ou valeur max
+				if ( maxOutputColumn !== "---"  &&  maxOutputColumn !== "12"){
+		
+					var shift=$scope.plateUtils.getPos96FromLineAndCol_L(startLine, startCol, maxOutputColumn) -1;  // A1 -1 ==> shift=0
+					//console.log('>>>> shift='+shift);
+					var newIndex=ATMindex + shift*1;
+					//console.log('>>>> new index= '+ newIndex );
+		
+					line=$scope.plateUtils.getLineFromPosition96_L(newIndex, maxOutputColumn );
+					col=$scope.plateUtils.getColumnFromPosition96_L(newIndex, maxOutputColumn);
+				} else {
+		
+					var shift=$scope.plateUtils.getPos96FromLineAndCol_L(startLine, startCol) -1;  // A1 -1 ==> shift=0
+					//console.log('>>>> shift='+shift);
+					var newIndex=ATMindex + shift*1;
+					//console.log('>>>> new index= '+ newIndex );
+		
+					line=$scope.plateUtils.getLineFromPosition96_L( newIndex);
+					col=$scope.plateUtils.getColumnFromPosition96_L(newIndex);
+				}
+				//console.log('>>>>>>LINE='+ line + 'COL='+ col);
+
+			} else { 
+				//incorrect mode !!
+				throw "calculateATMPlatePosFromIndex: incorrect outputMode: "+outputMode;
+			}
+		  }
+		  catch (err){
+			ATMpos.error=err;
+			return ATMpos;
+		  }
+		
+			ATMpos.line=line;
+			ATMpos.col=col;
+		
+			return ATMpos;
+		}
+		
+	};	
+
 	
 	$scope.plateFluoUtils = {
 			
@@ -847,12 +1231,18 @@ angular.module('home').controller('DetailsCtrl',['$rootScope', '$scope','$sce', 
 			},
 			/**
 			 * Compute A1, B1, C1, etc.
+			 * Note FDS: !! if inputs are tubes,  udt.displayResult can be > 96!!
+			 *  ==> stop when 96 "wells" are processed
 			 */
 			computeColumnMode : function(atmService, udt, maxLine){
 				var wells = udt.displayResult;
 				var nbCol = 12;
 				var nbLine = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 				var x = 0;
+
+				//pb en cas de changement d'avis de l'utilisateur, commencer par nettoyer
+				// TODO !! $scope.plateUtils.cleanPositions(atmService, udt);
+
 				for(var i = 0; i < nbCol ; i++){
 					for(var j = 0; j < nbLine.length && j <= maxLine; j++){
 						if(x < wells.length && x < 96){
@@ -874,12 +1264,18 @@ angular.module('home').controller('DetailsCtrl',['$rootScope', '$scope','$sce', 
 			
 			/**
 			 * Compute A1, A2, A3, etc.
+			 * Note FDS: !! if inputs are tubes,  udt.displayResult can be > 96!!
+			 *  ==> stop when 96 "wells" are processed
 			 */
 			computeLineMode : function(atmService, udt, maxColumn){
 				var wells = udt.displayResult;
 				var nbCol = 12;
 				var nbLine = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 				var x = 0;
+
+				//pb en cas de changement d'avis de l'utilisateur, commencer par nettoyer
+				//TODO !! $scope.plateUtils.cleanPositions(atmService, udt);
+
 				for(var j = 0; j < nbLine.length; j++){
 					for(var i = 0; i < nbCol && i <= maxColumn; i++){
 						if(x < wells.length && x < 96){
@@ -989,7 +1385,155 @@ angular.module('home').controller('DetailsCtrl',['$rootScope', '$scope','$sce', 
 	            }
 			}
 	            
-		};
+	};
+
+	$scope.plateFemtopulseUtils = {
+		/**
+		* Compute X1, X2, X3...X11
+		* Attention pour les positions Femtoplusle la position X12 est interdite (réservéee ladder)
+		*==>pour une plaque maxWells=88 (96-8) 
+		* pas de maxColonne en 3eme parametre
+		*/
+		computeLineMode :function(atmService, udt){
+			//console.log ("computeFemtopluseLineMode");
+			var wells = udt.displayResult;
+			var maxWells=88;
+			var nbCol = 11; // la colonne 12 est reservée au ladder
+			// on ne positionne que les colonnes en laissant à l'utilisateur le choix de la ligne...
+			var nbLine = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+			var x = 0;
+			for(var j = 0; j < nbLine.length; j++){
+				for(var i = 0; i < nbCol; i++){
+					if(x < wells.length && x < maxWells){
+						if(wells[x].data.inputContainerUsed.instrumentProperties==undefined)
+							wells[x].data.inputContainerUsed.instrumentProperties={};
+						//if(wells[x].data.inputContainerUsed.instrumentProperties.femtopulseLine==undefined)
+						//	wells[x].data.inputContainerUsed.instrumentProperties.femtopulseLine={};
+						if(wells[x].data.inputContainerUsed.instrumentProperties.femtopulseColumn==undefined)
+							wells[x].data.inputContainerUsed.instrumentProperties.femtopulseColumn={};
+							
+						//wells[x].data.inputContainerUsed.instrumentProperties.femtopulseLine.value = nbLine[j]+'';
+						wells[x].data.inputContainerUsed.instrumentProperties.femtopulseColumn.value = i+1;					
+					}
+					x++;
+				}
+			}		
+		}
+ 	};
+
+	$scope.plateTapestationUtils = {
+		/**
+		* Compute A1, B1, C1, etc.
+		* 21/07/2025 retour du labo utilisateur: 
+		*   en mode plaque le ladder est sur un strip a part, la position A1 n'est PAS réservée
+		*   en mode strip le ladder est en A1
+		* pas de maxLine en 3eme parametre
+		*/
+		computeColumnMode :function(atmService, udt){
+			//console.log ('computeTapestationColumnMode');
+
+			var wells = udt.displayResult;
+			var maxWells
+			var nbCol;
+
+			// $scope.modeTapestation n'est pas visible ici !!! ???
+			if ($scope.experiment.instrumentProperties.modeTapestation.value === 'plaque'){ 
+				nbCol = 12;
+				maxWells=96;
+				col0_startline=0;
+			} else { 
+				nbCol = 2; 
+				maxWells=15
+				col0_startline=1;
+			};
+			var nbLine = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+			var x = 0;
+
+			// colonne 1 
+			// fixer c=0;  commencer ligne en col0_startline (0 pour plaque, 1 pour strip)
+			var c=0;
+			for(var l = col0_startline; l < nbLine.length; l++){
+				if(x < wells.length && x < maxWells){
+					//init instrumentProperties if undefined
+					if(wells[x].data.inputContainerUsed.instrumentProperties==undefined)
+						wells[x].data.inputContainerUsed.instrumentProperties={};
+					if(wells[x].data.inputContainerUsed.instrumentProperties.tapestationLine==undefined)
+						wells[x].data.inputContainerUsed.instrumentProperties.tapestationLine={};
+					if(wells[x].data.inputContainerUsed.instrumentProperties.tapestationColumn==undefined)
+						wells[x].data.inputContainerUsed.instrumentProperties.tapestationColumn={};
+					
+					wells[x].data.inputContainerUsed.instrumentProperties.tapestationLine.value = nbLine[l]+'';
+					wells[x].data.inputContainerUsed.instrumentProperties.tapestationColumn.value = c+1;					
+				}
+				x++;
+			}
+
+			// autres colonnes
+			// recommencer avec c=1
+			for(var c = 1; c < nbCol ; c++){
+				for(var l = 0; l < nbLine.length; l++){
+					if(x < wells.length && x < maxWells){
+						//init instrumentProperties if undefined
+						if(wells[x].data.inputContainerUsed.instrumentProperties==undefined)
+							wells[x].data.inputContainerUsed.instrumentProperties={};
+						if(wells[x].data.inputContainerUsed.instrumentProperties.tapestationLine==undefined)
+							wells[x].data.inputContainerUsed.instrumentProperties.tapestationLine={};
+						if(wells[x].data.inputContainerUsed.instrumentProperties.tapestationColumn==undefined)
+							wells[x].data.inputContainerUsed.instrumentProperties.tapestationColumn={};
+						
+						wells[x].data.inputContainerUsed.instrumentProperties.tapestationLine.value = nbLine[l]+'';
+						wells[x].data.inputContainerUsed.instrumentProperties.tapestationColumn.value = c+1;					
+					}
+					x++;
+				}
+			}	
+		},
+		// copyMode spécial 
+		copyMode : function(atmService, udt){
+			//console.log ('copyMode');
+			var wells = udt.displayResult;
+
+			for(var j = 0; j < wells.length; j++){
+				if(wells[j].data.inputContainerUsed.categoryCode === 'well'){
+
+					if(wells[j].data.inputContainerUsed.instrumentProperties==undefined)
+						wells[j].data.inputContainerUsed.instrumentProperties={};
+					if(wells[j].data.inputContainerUsed.instrumentProperties.tapestationLine==undefined)
+						wells[j].data.inputContainerUsed.instrumentProperties.tapestationLine={};
+					if(wells[j].data.inputContainerUsed.instrumentProperties.tapestationColumn==undefined)
+						wells[j].data.inputContainerUsed.instrumentProperties.tapestationColumn={};
+
+					wells[j].data.inputContainerUsed.instrumentProperties.tapestationLine.value = wells[j].data.inputContainerUsed.locationOnContainerSupport.line;
+					wells[j].data.inputContainerUsed.instrumentProperties.tapestationColumn.value = wells[j].data.inputContainerUsed.locationOnContainerSupport.column;
+				}
+			}	
+		},
+		templates : {
+			// pour strip et plaques...computeColumnMode() marche dans les 2 cas (mais avec 1 difference)
+			// Le title générique n'est pas adapté,
+			buttonColumnMode : function(udtName){
+				if(!udtName)udtName='atmService.data';
+				return ''
+				+'<div class="btn-group">'
+				+'<button class="btn btn-default" ng-click="plateTapestationUtils.computeColumnMode(atmService, '+udtName+')" data-toggle="tooltip"  title="Calcul positions en mode colonne"'
+				+   'ng-disabled="!isEditMode()"><i class="fa fa-magic"></i><i class="fa fa-arrow-down"></i>'
+				+'</button>' 
+				+'</div>'  
+			},
+			// pour plaques uniquement
+			// Le title générique n'est pas adapté, garder le nom X/Y ....
+			// il faut le désactiver si le modeTapestation été modifié en strip !
+			buttonCopyPosition : function(udtName){
+				if(!udtName)udtName='atmService.data';
+				return ''
+				+'<div class="btn-group">'
+				+'<button class="btn btn-default" ng-click="plateTapestationUtils.copyMode(atmService, '+udtName+')" data-toggle="tooltip" title="Copier les positions des containers d\'entrée"'
+				+  ' ng-disabled="!isEditMode() || modeTapestation != \'plaque\' "><i class="fa fa-copy"></i> X/Y'
+				+'</button>'
+				+'</div>'
+			}
+		}
+	}
 	
 	var updatePropertyUnit = function(experiment){
 		$scope.experimentType.propertiesDefinitions.forEach(function(propertyDef){
@@ -1210,6 +1754,22 @@ angular.module('home').controller('DetailsCtrl',['$rootScope', '$scope','$sce', 
 		console.log ('toggleIsShowInformation');
 		if ( $scope.isShowInformation===false) { $scope.isShowInformation=true; }
 		else {$scope.isShowInformation=false}
+	}
+
+	// 23/07/2025 fonction pour trouver la position d'une colonne par son nom de propriété
+	$scope.getColumnPosition=function (dtConfig, colPropertyName){
+		var columns=dtConfig.columns;
+		var pos=undefined;
+		for(var i = 0 ; i < columns.length ; i++){ 
+			//exemple de propriété: "inputContainerUsed.instrumentProperties.tapestationColumn.value") {
+			if ( columns[i].property === colPropertyName ){
+				pos=i;
+				break;
+			}
+		}	
+		// si la colonne demandée n'a pas été trouvée pos reste undefined !!
+		console.log(colPropertyName +' / pos =='+ pos );
+		return pos;
 	}
 	
 	init();
@@ -1759,8 +2319,7 @@ angular.module('home').controller('DetailsCtrl',['$rootScope', '$scope','$sce', 
 		if($scope.experiment.categoryCode === 'qualitycontrol'){
 			columns.push({
 				 "header":Messages("containers.table.isValid"),
-	        	 "property":"container.valuation.valid", //NGL-2457 => ca c'est la validite du container, ce qu'on veut c'est la validite donnee dans l'experience
-				 //"property": "inputContainerUseds[0].valuation.valid", NON NE CORRIGE PAS...TODO !!!
+	        	 "property":"container.valuation.valid", 
 	        	 "filter":"codes:'valuation'",
 	        	 "order":true,
 				 "edit":false,

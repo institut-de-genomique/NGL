@@ -4,8 +4,8 @@ package models.sra.submit.sra.instance;
 import org.apache.commons.lang3.StringUtils;
 
 import play.Logger;
+import services.sra.SraValidationHelper;
 import validation.ContextValidation;
-import validation.sra.SraValidationHelper;
 import validation.utils.ValidationHelper;
 
 public class UserSampleType {
@@ -77,16 +77,16 @@ public class UserSampleType {
 		//NGL-4235 : on veut laisser passer des samples invalides, sans attributes, qui pourront etre completes à la validation. 
 		switch (contextValidation.getMode()) {
 		case CREATION:
-			SraValidationHelper   .validateAttributes (contextValidation,"attributes", this.attributes);
+			SraValidationHelper   .validateSampleAttributes (contextValidation,"attributes", this.attributes);
 			break;
 		case DELETE:
-			SraValidationHelper   .validateAttributes (contextValidation,"attributes", this.attributes);
+			SraValidationHelper   .validateSampleAttributes (contextValidation,"attributes", this.attributes);
 			break;
 		case UPDATE:
-			SraValidationHelper   .newValidateAttributesRequired (contextValidation,"attributes", this.attributes);
+			SraValidationHelper   .validateSampleAttributesRequired (contextValidation,"attributes", this.attributes);
 			break;
 		case NOT_DEFINED:
-			SraValidationHelper   .validateAttributes (contextValidation,"attributes", this.attributes);
+			SraValidationHelper   .validateSampleAttributes (contextValidation,"attributes", this.attributes);
 			break;
 		}
 		contextValidation.removeKeyFromRootKeyName(mess);

@@ -16,6 +16,7 @@ import fr.cea.ig.ngl.dao.api.APIException;
 import fr.cea.ig.ngl.dao.api.APIValidationException;
 import fr.cea.ig.ngl.dao.projects.ProjectsAPI;
 import models.Constants;
+import models.laboratory.common.instance.State;
 import models.laboratory.project.instance.Project;
 import models.laboratory.project.instance.UmbrellaProject;
 import models.laboratory.sample.instance.Sample;
@@ -82,18 +83,20 @@ public class ProjectImportCNS extends AbstractImportDataCNS {
 
 				Builder update =  DBUpdate.set("name",limsUmbrellaProject.name);
 
-				if (nglUmbrellaProject.name != limsUmbrellaProject.name) {
+				if (!nglUmbrellaProject.name.equals(limsUmbrellaProject.name)) {
 					update.set("name", limsUmbrellaProject.name);
 					isUpdated = true;
 				}
 
-				if (nglUmbrellaProject.description != limsUmbrellaProject.description) {
+				if (!nglUmbrellaProject.description.equals(limsUmbrellaProject.description)) {
 					update.set("description", limsUmbrellaProject.description);
 					isUpdated = true;
 				}
 
-				if (nglUmbrellaProject.properties.get("applicant").getValue() != limsUmbrellaProject.properties.get("applicant").getValue()) {
-					update.set("properties.applicant.value", limsUmbrellaProject.properties.get("applicant").getValue());
+				if ((nglUmbrellaProject.applicants.size() != limsUmbrellaProject.applicants.size()) || 
+					 nglUmbrellaProject.applicants.get(0).id != limsUmbrellaProject.applicants.get(0).id) {
+
+					update.set("applicants", limsUmbrellaProject.applicants);
 					isUpdated = true;
 				}
 
@@ -102,7 +105,7 @@ public class ProjectImportCNS extends AbstractImportDataCNS {
 				}
 
 				MongoDBDAO.update(InstanceConstants.UMBRELLA_PROJECT_COLL_NAME, UmbrellaProject.class, 
-						DBQuery.is("code", limsUmbrellaProject.code), update);
+						DBQuery.is("properties.limsCode.value", limsUmbrellaProject.properties.get("limsCode").getValue()), update);
 			} else {
 				contextValidation.setCreationMode();
 
@@ -121,14 +124,15 @@ public class ProjectImportCNS extends AbstractImportDataCNS {
 
 			if (nglProject != null) {
 				contextValidation.setUpdateMode();
+				boolean isUpdated = false;
 
 				if (! nglProject.name.equals( limsProject.name)) {
 					Logger.info("Project renamed in NGL: \""+nglProject.code+"::"+nglProject.name+"\" (name in NGL) => \""+limsProject.name+"\" (name in Lims)");
 					nglProject.traceInformation.modificationStamp(Constants.NGL_DATA_USER);
+					isUpdated = true;
 				}
 
 				Builder update =  DBUpdate.set("name",limsProject.name);
-				boolean isUpdated = false;
 				boolean withoutDate = false; // Permet de savoir si on met la modifyDate à maintenant ou si on garde celle de l'ancien LIMS.
 
 				//1 si lastSampleCode est renseigné uniquement dans le Lims
@@ -154,13 +158,13 @@ public class ProjectImportCNS extends AbstractImportDataCNS {
 				}	
 
 				if ((	nglProject.properties == null || nglProject.properties.get("infoProjectManager") == null) || 
-						nglProject.properties.get("infoProjectManager").value != limsProject.properties.get("infoProjectManager").value) {
+						!nglProject.properties.get("infoProjectManager").value.equals(limsProject.properties.get("infoProjectManager").value)) {
 					update.set("properties.infoProjectManager", limsProject.properties.get("infoProjectManager"));
 					isUpdated = true;
 				}
 
 				if ((	nglProject.properties == null || nglProject.properties.get("bioProjectManager") == null) || 
-						nglProject.properties.get("bioProjectManager").value != limsProject.properties.get("bioProjectManager").value) {
+						!nglProject.properties.get("bioProjectManager").value.equals(limsProject.properties.get("bioProjectManager").value)) {
 					update.set("properties.bioProjectManager", limsProject.properties.get("bioProjectManager"));
 					isUpdated = true;
 				}
@@ -170,6 +174,11 @@ public class ProjectImportCNS extends AbstractImportDataCNS {
 						update.set("traceInformation.modifyDate", limsProject.traceInformation.modifyDate);
 						withoutDate = true;
 					}
+				}
+
+				if (nglProject.description == null || !nglProject.description.equals(limsProject.description)) {
+					update.set("description", limsProject.description);
+					isUpdated = true;
 				}
 
 				if (isUpdated) {
@@ -188,8 +197,14 @@ public class ProjectImportCNS extends AbstractImportDataCNS {
 
 				//Si l'état du projet Lims est a finish et que le projet n'existe pas dans NGL alors on ne le créé pas!!!			
 				if (! limsProject.state.code.contentEquals("F")) {
+					State state = new State(); 
+					state.code="IP";
+					state.user = "ngl-data"; 
+
 					Logger.info("createProject:: Creation nouveau projet dans NGL: "+limsProject.name+"::"+limsProject.code);			
-					InstanceHelpers.save(InstanceConstants.PROJECT_COLL_NAME,limsProject,contextValidation);
+					limsProject = InstanceHelpers.save(InstanceConstants.PROJECT_COLL_NAME,limsProject,contextValidation);
+
+					projectsWorkflows.setState(contextValidation, limsProject, state);
 				}else {
 					Logger.info("createProject:: Projet absent dans NGL et a l'etat F dans Lims::"+limsProject.name+"::"+limsProject.code+" => projet non importe !");						
 				}

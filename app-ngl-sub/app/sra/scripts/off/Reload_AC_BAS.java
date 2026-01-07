@@ -10,10 +10,9 @@ import fr.cea.ig.MongoDBDAO;
 import fr.cea.ig.lfw.controllers.scripts.buffered.ScriptNoArgs;
 import mail.MailServiceException;
 import models.sra.submit.sra.instance.Submission;
-import models.sra.submit.util.SraException;
 import models.utils.InstanceConstants;
-
-import sra.api.submission.SubmissionNewAPI;
+import services.sra.SraException;
+import sra.api.SubmissionNewAPI;
 import validation.ContextValidation;
 /*
  * Script à utiliser pour ajouter les numeros d'accession à la soumission et tous 
@@ -51,7 +50,7 @@ public class Reload_AC_BAS extends ScriptNoArgs {
 			String user = "ngsrg";
 			ContextValidation ctxVal = ContextValidation.createUndefinedContext(user);
 			//submission = fileAcServices.traitementFileAC(ctxVal, submissionCode, fileEbi); 
-			this.submissionNewAPI.loadEbiResponseAC(ctxVal, submission);
+			this.submissionNewAPI.loadRespEbiForCreation(ctxVal, submission);
 		}	
 	}
 		

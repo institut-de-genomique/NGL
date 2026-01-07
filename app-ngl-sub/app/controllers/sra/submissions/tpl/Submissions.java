@@ -3,7 +3,6 @@ package controllers.sra.submissions.tpl;
 import javax.inject.Inject;
 
 import controllers.NGLController;
-//import controllers.NGLBaseController;
 import fr.cea.ig.authentication.Authenticated;
 import fr.cea.ig.lfw.Historized;
 import fr.cea.ig.ngl.NGLApplication;
@@ -15,10 +14,9 @@ import views.html.submissions.create;
 import views.html.submissions.details;
 import views.html.submissions.home;
 import views.html.submissions.validation;
+import views.html.submissions.delete;
 
-// import controllers.CommonController;                  // done
-//public class Submissions extends -CommonController {   // done
-public class Submissions extends NGLController implements NGLJavascript  { // NGLBaseController {
+public class Submissions extends NGLController implements NGLJavascript  { 
 	
 	private final home         home;
 	private final create       create;
@@ -26,9 +24,10 @@ public class Submissions extends NGLController implements NGLJavascript  { // NG
 	private final activate     activate;
 	private final consultation consultation;
 	private final validation   validation;
-	
+	private final delete       delete;
+
 	@Inject
-	public Submissions(NGLApplication app, home home, create create, details details, activate activate, consultation consultation, validation validation) {
+	public Submissions(NGLApplication app, home home, create create, details details, activate activate, consultation consultation, validation validation, delete delete) {
 		super(app);
 		this.home         = home;
 		this.create       = create;
@@ -36,6 +35,7 @@ public class Submissions extends NGLController implements NGLJavascript  { // NG
 		this.activate     = activate;
 		this.consultation = consultation;	
 		this.validation   = validation;	
+		this.delete       = delete;
 	}
 	
 	@Authenticated
@@ -91,6 +91,10 @@ public class Submissions extends NGLController implements NGLJavascript  { // NG
 		return ok(validation.render());
 	}
 	
+	public Result delete()	{
+		return ok(delete.render());
+	}
+	
 	// No annotation for tpl 
 	public Result javascriptRoutes() {
 		return jsRoutes(controllers.sra.submissions.tpl.routes.javascript.Submissions.home(),
@@ -112,18 +116,24 @@ public class Submissions extends NGLController implements NGLJavascript  { // NG
 						controllers.sra.analyzes.api.routes.javascript.Analyzes.update(),
 						controllers.readsets.api.routes.javascript.ReadSets.list(),
 						controllers.sra.submissions.api.routes.javascript.Submissions.list(),
+						controllers.sra.submissions.api.routes.javascript.Submissions.createFromTolid(),
 						controllers.sra.submissions.api.routes.javascript.Submissions.save(),
+						controllers.sra.submissions.api.routes.javascript.Submissions.save(),
+						controllers.sra.submissions.api.routes.javascript.Submissions.delete(),
 	    	      		controllers.sra.submissions.api.routes.javascript.SubmissionComments.save(),
 	      	    		controllers.sra.submissions.api.routes.javascript.SubmissionComments.update(),
 	      	    		controllers.sra.submissions.api.routes.javascript.SubmissionComments.delete(),
 						controllers.sra.submissions.api.routes.javascript.Submissions.get(),
 						controllers.sra.submissions.api.routes.javascript.Submissions.update(),
 						controllers.sra.submissions.api.routes.javascript.Submissions.updateState(),
+						controllers.sra.submissions.api.routes.javascript.Submissions.validateAndUpdateState(),
 						controllers.sra.submissions.tpl.routes.javascript.Submissions.get(),
 						controllers.sra.samples.api.routes.javascript.Samples.list(),
-						controllers.sra.samples.api.routes.javascript.Samples.get(),
 						controllers.sra.samples.api.routes.javascript.Samples.update(),
+						controllers.sra.samples.api.routes.javascript.Samples.batchUpdate(),
+						controllers.sra.samples.api.routes.javascript.Samples.get(),
 						controllers.sra.experiments.api.routes.javascript.Experiments.list(),
+						controllers.sra.experiments.api.routes.javascript.Experiments.batchUpdate(),
 						controllers.sra.experiments.api.routes.javascript.Experiments.get(),
 						controllers.sra.experiments.api.routes.javascript.Experiments.update(),
 	    				controllers.sra.experiments.api.routes.javascript.ExperimentsRawDatas.delete(),

@@ -61,7 +61,7 @@ public class MultiInputHelperTest {
 		Set<String> filePositions = Collections.set("A1", "A2", "B1", "B2", "C3", "C4");
 		ContextValidation contextValidation = ContextValidation.createUndefinedContext(TestUtils.CURRENT_USER);
 		
-		MultiInputHelper.handleMissingPositions(icuPositions, filePositions, contextValidation);
+		MultiInputHelper.handleMissingPositions(icuPositions, filePositions, null, contextValidation);
 		
 		assertFalse("Identical sets should return true", contextValidation.hasErrors());
 		
@@ -77,7 +77,7 @@ public class MultiInputHelperTest {
 		Set<String> filePositions = Collections.set("A1", "B2", "C3");
 		ContextValidation contextValidation = ContextValidation.createUndefinedContext(TestUtils.CURRENT_USER);
 		
-		MultiInputHelper.handleMissingPositions(icuPositions, filePositions, contextValidation);
+		MultiInputHelper.handleMissingPositions(icuPositions, filePositions, null, contextValidation);
 		
 		assertTrue("Missing positions expected", contextValidation.hasErrors());
 		assertNotNull("Expected error key: 'Erreurs fichier'", contextValidation.getErrors().get("Erreurs fichier"));

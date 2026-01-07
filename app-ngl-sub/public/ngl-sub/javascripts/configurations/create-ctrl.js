@@ -14,10 +14,15 @@ angular.module('home').controller('CreateCtrl',[ '$http', '$scope', '$routeParam
 	
 	$scope.createService = configurationsCreateService;	
 	$scope.createService.init($routeParams);
-	
+	console.log("mainService.getForm()", mainService.getForm());
+	console.log("scope", $scope);
 	$scope.save = function(){
 		$scope.messages = messages();	// enleve le message mais pas la partie details + efficace d'utiliser $scope.messages.clear();
         $scope.messages.clear();
+		console.log("configuration.librarySource = ", $scope.createService.form.librarySource);
+		console.log("configuration.dropBox = ", $scope.createService.form.dropBox);
+		console.log("scope.createService.form = ", $scope.createService.form);
+		
 		mainService.setForm($scope.createService.form);
 			$http.post(jsRoutes.controllers.sra.configurations.api.Configurations.save().url, mainService.getForm()).success(function(data) {
 				$scope.messages.clazz="alert alert-success";

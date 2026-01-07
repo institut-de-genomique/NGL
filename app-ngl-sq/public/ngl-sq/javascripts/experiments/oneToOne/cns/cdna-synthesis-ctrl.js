@@ -259,7 +259,7 @@ angular.module('home').controller('cDNASynthesisCtrl',['$scope', '$parse', 'atmT
 	} else {
 		datatableConfig.columns.push({
 			"header" : Messages("containers.table.code"),
-			"property" : "inputContainer.support.code",
+			"property" : "inputContainer.code",
 			"order" : true,
 			"edit" : false,
 			"hide" : true,

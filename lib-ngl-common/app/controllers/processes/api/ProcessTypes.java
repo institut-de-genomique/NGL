@@ -44,7 +44,6 @@ public class ProcessTypes extends APICommonController<ProcessTypesSearchForm> {
 		ProcessTypesSearchForm processTypesSearch = processTypeFilledForm.get();
 		
 		List<ProcessType> processTypes;
-		
 		try{	
 			if (CollectionUtils.isNotEmpty(processTypesSearch.propertyDefinitionCodes)){
 				processTypes = ProcessType.find.get().findByPropertyDefinitions(processTypesSearch.propertyDefinitionCodes, processTypesSearch.categoryCodes, processTypesSearch.codes);
@@ -54,9 +53,16 @@ public class ProcessTypes extends APICommonController<ProcessTypesSearchForm> {
 				processTypes = ProcessType.find.get().findByProcessCategoryCodes(processTypesSearch.categoryCode);
 			}else if(CollectionUtils.isNotEmpty(processTypesSearch.categoryCodes)){
 				processTypes = ProcessType.find.get().findByProcessCategoryCodes(processTypesSearch.categoryCodes.toArray(new String[0]));
+			} else if(CollectionUtils.isNotEmpty(processTypesSearch.experimentTypes)){
+				processTypes = ProcessType.find.get().findByExperimentTypes(processTypesSearch.light, processTypesSearch.experimentTypes.toArray(new String[0]));
+			} else if(CollectionUtils.isNotEmpty(processTypesSearch.firstExperimentTypes)){
+				processTypes = ProcessType.find.get().findByFirstExperimentTypes(processTypesSearch.firstExperimentTypes.toArray(new String[0]));
+			} else if(CollectionUtils.isNotEmpty(processTypesSearch.lastExperimentTypes)){
+				processTypes = ProcessType.find.get().findByLastExperimentTypes(processTypesSearch.lastExperimentTypes.toArray(new String[0]));
 			}else {
 				processTypes = ProcessType.find.get().findAll(processTypesSearch.light);
 			}
+
 			if(processTypesSearch.datatable){
 				return ok(Json.toJson(new DatatableResponse<>(processTypes, processTypes.size()))); 
 			}else if(processTypesSearch.list){

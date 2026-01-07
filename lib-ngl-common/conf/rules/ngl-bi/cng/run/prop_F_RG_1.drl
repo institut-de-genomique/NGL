@@ -1,5 +1,6 @@
 // creation 13/07/2021 FDS NGL-3450
 // copier  run.treatments.ngsrg.default.flowcellVersion => n x ( readset.sampleOnContainer.properties.novaseqFlowcellMode)
+// 10/09/2024 FDS NGL-4733 declencher aussi pour typeCode == "RNVSXP
 package rules
 
 rule "Copy propertie flowcellVersion from Run to Readsets"
@@ -8,7 +9,7 @@ rule "Copy propertie flowcellVersion from Run to Readsets"
 	salience 600
 	no-loop
 	when
-		$run : Run($treatment : treatments["ngsrg"], $treatment!=null, categoryCode=="illumina", typeCode == "RNVS6000" )
+		$run : Run($treatment : treatments["ngsrg"], $treatment!=null, categoryCode=="illumina", typeCode == "RNVS6000" || typeCode == "RNVSXP"  )
 		$mapValue : Map() from $treatment.results.values()
 		$flowcellVersion : Entry(key=="flowcellVersion") from $mapValue.entrySet()
 	then

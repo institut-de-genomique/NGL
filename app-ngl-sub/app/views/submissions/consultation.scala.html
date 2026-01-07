@@ -8,15 +8,6 @@
 		@formGroup{
 			<div class="form-control" bt-select  ng-model="form.projCodes" filter="true" multiple="true" placeholder='@Messages("consultation.placeholder.projectCodes")' bt-options="project.code as project|formatProjectListLabel for project in lists.getProjects()"></div>	
 		}													
-	}
-	@**
-	@columnSearchForm{
-		@formGroup{
-			<div class="form-control" bt-select  ng-model="form.stateCodes" filter="true" multiple="true" placeholder='@Messages("consultation.placeholder.stateCodes")'  bt-options="state.code as state.name for state in lists.getStates()"></div>	
-		}													
-	}
-	**@
-	@columnSearchForm{
 		@formGroup{
 			<div class="form-control" bt-select ng-model="form.pseudoStateCodes"  filter="true" multiple="true" placeholder='@Messages("consultation.placeholder.pseudoStateCodes")' 
 			                          bt-options="pseudoStates.code as pseudoStates.name for pseudoStates in sraVariables.simplifiedStates|orderBy:'code'"></div>			
@@ -25,25 +16,20 @@
 	@columnSearchForm{
 		@formGroup{
 			<bt-input  class="form-control"  input-ng-model="form.accessionRegex" textarea-ng-model="form.accessions" 
-			title='@Messages("consultation.textarea-placeholder.submissionAccessions")' 
-			textarea-placeholder-ng-model='@Messages("consultation.textarea-placeholder.submissionAccessions")' 
-			placeholder='@Messages("consultation.placeholder.submissionAccessions")' >
+			title='@Messages("consultation.textarea-placeholder-title.submissionAccessions")' 
+			textarea-placeholder-ng-model='@Messages("consultation.textarea-placeholder-title.submissionAccessions")' 
+			placeholder='@Messages("consultation.textarea-placeholder.submissionAccessions")' >
 			</bt-input>									
-		}
-	}
-	
-	@columnSearchForm{
-		@formGroup{			
+		}	
+		@formGroup{
 			<bt-input  class="form-control"  input-ng-model="form.codeRegex" textarea-ng-model="form.codes" 
-			title='@Messages("consultation.textarea-placeholder.submissionCodes")' 
-			textarea-placeholder-ng-model='@Messages("consultation.textarea-placeholder.submissionCodes")' 
-			placeholder='@Messages("consultation.placeholder.submissionCodes")' >
+			title='@Messages("consultation.textarea-placeholder-title.submissionCodes")' 
+			textarea-placeholder-ng-model='@Messages("consultation.textarea-placeholder-title.submissionCodes")' 
+			placeholder='@Messages("consultation.textarea-placeholder.submissionCodes")' >
 			</bt-input>									
-		}
+		}	
 	}
-	@columnSearchForm{
-	
-	}
+
 	@columnSearchForm{
 	
 	}

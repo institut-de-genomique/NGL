@@ -35,6 +35,18 @@ angular.module('home').controller('TagPCRCtrl',['$scope', '$parse','$filter', 'a
 							"position":4,
 							"extraHeaders":{0:Messages("experiments.inputs")}
 						},
+						
+						{
+							"header":Messages("containers.table.extractionBlankSampleCode"),
+							"property":"inputContainerUsed.contents",
+							"filter" : "getArray:'properties.extractionBlankSampleCode.value'",
+							"order":true,
+							"edit":false,
+							"hide":true,
+							"type":"text",
+							"position":4.5,
+							"extraHeaders":{0:Messages("experiments.inputs")}
+						},
 						{
 							"header":Messages("containers.table.concentration") + " (ng/µL)",
 							"property":"inputContainerUsed.concentration.value",
@@ -409,7 +421,7 @@ angular.module('home').controller('TagPCRCtrl',['$scope', '$parse','$filter', 'a
 	} else {
 		datatableConfig.columns.push({
 			"header" : Messages("containers.table.code"),
-			"property" : "inputContainer.support.code",
+			"property" : "inputContainer.code",
 			"order" : true,
 			"edit" : false,
 			"hide" : true,
@@ -490,7 +502,7 @@ angular.module('home').controller('TagPCRCtrl',['$scope', '$parse','$filter', 'a
 		});
 	}
 	
-	
+	$scope.setIsShowInformation (false);
 	
 	var atmService = atmToSingleDatatable($scope, datatableConfig);
 	//defined new atomictransfertMethod
@@ -590,7 +602,7 @@ angular.module('home').controller('TagPCRCtrl',['$scope', '$parse','$filter', 'a
            }
   }
 	 
-	 $http.get(jsRoutes.controllers.commons.api.Parameters.list().url,{params:{typeCode:"index-illumina-sequencing",categoryCode:"MID"}})
+	 $http.get(jsRoutes.controllers.commons.api.Parameters.list().url,{params:{typeCodes:["index-illumina-sequencing","index-pacbio-sequencing"],categoryCode:"MID"}})
 		.success(function(data, status, headers, config) {
 				$scope.tags = data;		
 		})
@@ -671,14 +683,39 @@ angular.module('home').controller('TagPCRCtrl',['$scope', '$parse','$filter', 'a
 			 return values
 		 }
 		
-		
-		
-		
-		$scope.indexPlates = [];
-		
-		$scope.indexPlates.push({label:"Bid1 à Bid18", value:populateSpecialIndexLinePlate("BID", 1, 18, [3,6,7,10,12,14], 12)});
-		$scope.indexPlates.push({label:"Bid18 à Bid33", value:populateSpecialIndexLinePlate("BID", 18, 33, [24,26,28,30], 12)});		
-		$scope.indexPlates.push({label:"Bid19 à Bid42", value:populateSpecialIndexLinePlate("BID", 19, 42, [24,26,28,30,34,35,36,37,38,39,40,41], 12)});
+		/* NGL-5070 
+			si  16S_V4V5 => Bid1 à Bid18 et Bid19 à Bid42
+				  18S_V9 => Bid1 à Bid18 et Bid18 à Bid33
+			AUTRE région =>  afficher tout
+		*/
+		var setIndexPlates = function() {
+			$scope.indexPlates = [];
+			// toujours present
+			$scope.indexPlates.push({label:"Bid1 à Bid18", value:populateSpecialIndexLinePlate("BID", 1, 18, [3,6,7,10,12,14], 12)});
+			
+			var targetedRegion=$scope.experiment.experimentProperties.targetedRegion.value;
+			if ( targetedRegion === '16S_V4V5' ){
+				$scope.indexPlates.push({label:"Bid19 à Bid42", value:populateSpecialIndexLinePlate("BID", 19, 42, [24,26,28,30,34,35,36,37,38,39,40,41], 12)});	
+			}
+			else if ( targetedRegion === '18S_V9' ){
+				$scope.indexPlates.push({label:"Bid18 à Bid33", value:populateSpecialIndexLinePlate("BID", 18, 33, [24,26,28,30], 12)});
+			} else {
+				// y compris aucune valeur ??
+				$scope.indexPlates.push({label:"Bid18 à Bid33", value:populateSpecialIndexLinePlate("BID", 18, 33, [24,26,28,30], 12)});
+				$scope.indexPlates.push({label:"Bid19 à Bid42", value:populateSpecialIndexLinePlate("BID", 19, 42, [24,26,28,30,34,35,36,37,38,39,40,41], 12)});
+			}
+
+			console.log ("setIndexPlates for targetedRegion ="+ targetedRegion);
+		}
+
+		$scope.$watch("experiment.experimentProperties.targetedRegion.value", function(newValue, OldValue){
+			//NGL-5137 modif pour permettre la sélection targetedRegion AVANt le choix outputContainer 
+			//if ((newValue) && (newValue !== null ) && ( newValue !== OldValue )){
+			if ((newValue) && (newValue !== null )) {
+				console.log( 'change targetedRegion !!');
+				setIndexPlates();
+			}
+		});
 
 		$scope.updatePlateWithIndex = function(selectedPlateIndex){
 			console.log("choose : "+selectedPlateIndex);
@@ -718,5 +755,8 @@ angular.module('home').controller('TagPCRCtrl',['$scope', '$parse','$filter', 'a
 		};
 
 		checkMissingExtractionNegatveControls();
-	
+
+		// NGL-5070 initialiser les plaques dès le début!
+		// NGL-5137 non !!! génère une erreur si le choix targetedRegion n'a pas été fait
+		//setIndexPlates(); 
 }]);

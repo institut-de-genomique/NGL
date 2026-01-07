@@ -1,12 +1,78 @@
 "use strict";
 
-angular.module('home').controller('DetailsCtrl', ['$sce', '$scope', '$http', '$routeParams', '$filter', 'messages', 'lists', 'mainService', 'tabService', '$window', 
+angular.module('home').controller('DetailsCtrl', ['$sce', '$scope', '$http', '$routeParams', '$filter', 'messages', 'lists', 'mainService', 'tabService', '$window', 'datatable',
                                                                                                     
-  function($sce, $scope, $http, $routeParams, $filter, messages, lists, mainService, tabService, $window) {
+  function($sce, $scope, $http, $routeParams, $filter, messages, lists, mainService, tabService, $window, datatable) {
 		
 	$scope.form = {				
 	
 	}
+
+	$scope.datatableConfig = {
+		search:{
+			active:false
+		},
+		pagination:{
+			active:true
+		},
+		order:{
+			mode:'local'
+		},
+		hide:{
+			active:false
+		 },
+		edit:{
+			active:false
+		},
+		exportCSV:{
+			active:true
+		},
+		select:{
+			active:false
+		},
+		cancel : {
+			active:false
+		},
+		name:"Associatied Projects",
+		showTotalNumberRecords: false,
+		columns:[{
+			"header":"Code projet",
+			"property":"code",
+			"order":true,
+			"hide":true,
+			"position":1,
+			"type":"text"
+		}, {
+			"header":"Nom projet",
+			"property":"name",
+			"order":true,
+			"hide":true,
+			"position":2,
+			"type":"text"
+		}, {
+			"header":"OS",
+			"property":"properties.os.value",
+			"order":true,
+			"hide":true,
+			"position":3,
+			"type":"text"
+		}, {
+			"header":"Genre",
+			"property":"properties.genre.value",
+			"order":true,
+			"hide":true,
+			"position":4,
+			"type":"text"
+		}, {
+			"header":"Source financement",
+			"property":"properties.financingSource.value",
+			"order":true,
+			"hide":true,
+			"position":5,
+			"type":"text"
+		}]
+	};
+
 	
 	$scope.isCreationMode=function() {
 		return false; 
@@ -52,7 +118,7 @@ angular.module('home').controller('DetailsCtrl', ['$sce', '$scope', '$http', '$r
 	}
 
 	$scope.removeDT = function() {
-		console.log("removeDT");
+		delete $scope.umbrellaProject.properties.dt;
 	};
 	
 	/* main section  */
@@ -66,12 +132,15 @@ angular.module('home').controller('DetailsCtrl', ['$sce', '$scope', '$http', '$r
 		
 			if(tabService.getTabs().length == 0){
 				tabService.addTabs({label:Messages('projects.menu.search'), href:jsRoutes.controllers.projects.tpl.UmbrellaProjects.home("search").url, remove:true});
-				tabService.addTabs({label:$scope.umbrellaProject.code, href:jsRoutes.controllers.projects.tpl.UmbrellaProjects.get($scope.umbrellaProject.code).url, remove:true});
+				tabService.addTabs({label:$scope.umbrellaProject.name, href:jsRoutes.controllers.projects.tpl.UmbrellaProjects.get($scope.umbrellaProject.code).url, remove:true});
 				tabService.activeTab(tabService.getTabs(1));
 			}
 			
-			$http.get(jsRoutes.controllers.projects.api.Projects.list().url + "?umbrellaCodes=" + $scope.umbrellaProject.code).success(function(dataProj) {
-				$scope.associatedProjects = dataProj
+			$http.get(jsRoutes.controllers.projects.api.Projects.list().url + "?datatable=true&paginationMode=local&umbrellaCodes=" + $scope.umbrellaProject.code).success(function(dataProj) {
+				$scope.associatedProjects = dataProj.data;
+
+				$scope.associatedProjectsDT = datatable($scope.datatableConfig);
+				$scope.associatedProjectsDT.setData($scope.associatedProjects, $scope.associatedProjects.length);
 			}).error(function(err){
 				$scope.messages.setError(err);
 			}); 

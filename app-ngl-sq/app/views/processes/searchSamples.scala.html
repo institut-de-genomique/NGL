@@ -1,5 +1,6 @@
-@this()
+@this(ctx : fr.cea.ig.ngl.NGLApplication)
 @()
+@isCNSInstitute  = @{ "CNS" == ctx.nglConfig().getInstitute() }
 @import views.html.helper._
 
 @** FDS 24/11/2020 remise en forme de l'ordre des attributs...
@@ -179,6 +180,18 @@
 		<div class="tab-content">
 		<div class="tab-pane active" id="filters">
 			<form class="well well-small">
+				@if(isCNSInstitute){
+				<div class="row" style="margin-bottom: 20px;">
+					@columnSearchForm{	
+						@formGroup{
+							<div class='form-control' bt-select filter='true' ng-model='searchService.form.umbrellaCodes' 
+									placeholder='Nom umbrella' multiple='true' ng-change='selectProjetsFromUmbrellas()' 
+									bt-options='umbrellaProject.code as umbrellaProject.name for umbrellaProject in searchService.lists.getUmbrellaProjects()'>
+							</div>
+						}
+					}
+				</div>
+			}
 			<div ng-form  name="samplesSearchForm" class="row">
 			@form			
 			</div>		

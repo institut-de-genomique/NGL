@@ -96,10 +96,27 @@
     <form class="well well-small">
         <div class="row">
             @columnSearchForm{
+                @formGroup{
+                <div bt-select placeholder='@Messages("descriptions.select.properties.category")' class="form-control"
+                    filter="true" multiple="true" ng-model="searchService.tabs.properties.form.categoryCodes"
+                    bt-options="category.code as category.name for category in searchService.tabs.properties.lists.categories()"
+                    ng-change="searchService.tabs.instruments.form.typeCodes=null">
+                </div>
+            }
+            }
+            @columnSearchForm{
             @formGroup{
             <div bt-select placeholder='@Messages("descriptions.select.properties.type")' class="form-control"
                 filter="true" multiple="true" ng-model="searchService.tabs.properties.form.codes"
                 bt-options="type.code as type.name for type in searchService.tabs.properties.lists.types()">
+            </div>
+            }
+            }
+            @columnSearchForm{
+            @formGroup{
+            <div bt-select placeholder='@Messages("descriptions.select.properties.property.definitions")' class="form-control" filter="true" multiple="true"
+                ng-model="searchService.tabs.properties.form.propertyDefinitionNames"
+                bt-options="propertyDefinition.name for propertyDefinition in searchService.tabs.properties.lists.propertyDefinitions() | unique:'name'">
             </div>
             }
             }

@@ -64,6 +64,10 @@ sentCollaborator.value.FALSE = Non
 boolean.value.TRUE = Oui
 boolean.value.FALSE = Non
 
+search.placeholder.curator = Curator
+search.placeholder.reviewer = Reviewer
+search.placeholder.tolid = ToLID
+search.placeholder.primaryAssemblyProjectAccession = PRJEB
 
 search.placeholder.taxonCode = Taxon ID
 search.placeholder.ncbiScientificNameRegex = Regex taxon
@@ -88,15 +92,20 @@ search.placeHolder.run.types = Types de run
 search.placeholder.run.categories = Catégories run
 search.placeholder.run.valid = Evaluation run
 search.placeholder.run.regexCode = Regex code run
+
 search.placeholder.readset.states = Etats readset
 search.placeholder.readset.regexCode = Regex code readset
 search.placeholder.readset.types = Types readset (techno)
-search.placeholder.containerSupport = Regex pour code support
 search.placeholder.readset.regexColumn = Regex pour colonne
+
+search.placeholder.containerSupport = Regex pour code support
+
 search.placeholder.analyse.regexCode = Regex pour le code Analyse
+search.placeholder.analyse.regexColumn = Regex pour colonne
 
 search.placeholder.productionValid = Eval. QC
 search.placeholder.bioinformaticValid  = Eval. bioinfo
+# le code de quoi ? Générique ?
 search.placeholder.regexCode = Regex pour le code
 search.placeholder.lanes = Lanes
 search.placeholder.reporting.configuration = Colonnes config.
@@ -113,7 +122,8 @@ search.placeholder.sequencingProgramTypes = Type de lectures
 search.placeholder.analyseValuationUser = Analyse évaluée par : 
 search.placeholder.stats.configuration = Configuration
 search.placeholder.treatment = Traitement
-search.placeholder.treatment.type=  Treatment Type 
+search.placeholder.treatment.type.code=  Treatment Type Code
+search.placeholder.treatment.type.name=  Treatment Type Name
 search.placeholder.treatment.category= Treatment category
 
 search.placeholder.fromEndRGDate = Fin RG depuis le (jj/mm/aaaa)
@@ -127,6 +137,11 @@ search.placeHolder.config.context = Contexte
 
 search.placeholder.fromAbundanceClusterPercentSum= Somme % abundance (extraction ou pcr1 ou pcr2)
 
+#NGL-4147 : placeholders génériques
+search.textarea.placeholder.codesList= Liste exacte de codes
+search.textarea.placeholder.labelsList= Liste exacte de labels
+
+#09/04/2025 en DEV il a surcharge qq part de certaines de ces definitions !! : printMode, print,...
 button.search = Rechercher
 button.reset = Réinitialiser
 button.validate = Sauvegarder
@@ -137,7 +152,7 @@ button.edit = Editer
 button.add = Ajouter
 button.printMode = Mode impression
 button.print = Impression
-button.return = Retour
+button.return = Retour 
 button.download.manual = Télécharger le manuel
 
 ############
@@ -326,19 +341,19 @@ runs.treatments.quality-control-nanopore.channelActivity.activity72h = Activity 
 runs.treatments.quality-control-nanopore.generalMetrics.nbTotalSeq   = Total number of reads
 runs.treatments.quality-control-nanopore.generalMetrics.nbTotalBases = Total number of bases
 runs.treatments.quality-control-nanopore.generalMetrics.meanLength   = Mean length
-runs.treatments.quality-control-nanopore.generalMetrics.n50          = n50 of all reads
+runs.treatments.quality-control-nanopore.generalMetrics.n50          = N50 of all reads
 runs.treatments.quality-control-nanopore.generalMetrics.meanQual     = Average basecalling quality
 runs.treatments.quality-control-nanopore.generalMetrics.meanSpeed    = Average sequencing speed
 
 runs.treatments.quality-control-nanopore.generalMetrics.nbTrueSeq        = Number of pass reads
 runs.treatments.quality-control-nanopore.generalMetrics.percentTrueSeq   = Percentage of pass reads
-runs.treatments.quality-control-nanopore.generalMetrics.n50SizeTrue      = n50 of pass reads
+runs.treatments.quality-control-nanopore.generalMetrics.n50SizeTrue      = N50 of pass reads
 runs.treatments.quality-control-nanopore.generalMetrics.nbTrueBases      = Number of pass bases
 runs.treatments.quality-control-nanopore.generalMetrics.percentTrueBases = Percentage of pass bases
 
 runs.treatments.quality-control-nanopore.generalMetrics.nbFalseSeq        = Number of fail reads
 runs.treatments.quality-control-nanopore.generalMetrics.percentFalseSeq   = Percentage of fail reads
-runs.treatments.quality-control-nanopore.generalMetrics.n50SizeFalse      = n50 of fail reads
+runs.treatments.quality-control-nanopore.generalMetrics.n50SizeFalse      = N50 of fail reads
 runs.treatments.quality-control-nanopore.generalMetrics.nbFalseBases      = Number of fail bases
 runs.treatments.quality-control-nanopore.generalMetrics.percentFalseBases = Percentage of fail bases
 
@@ -532,6 +547,85 @@ runs.lanes.treatments.demultiplexingMGI.indexSummary.barcode = barcode
 runs.lanes.treatments.demultiplexingMGI.indexSummary.count = count
 runs.lanes.treatments.demultiplexingMGI.indexSummary.percent = percent
 
+# NGL-4395 Runs Pacbio
+runs.treatments.sequencing = Sequencing
+
+runs.treatments.sequencing.metadata = Metadata
+runs.treatments.sequencing.metadata.movieId = Movie id
+runs.treatments.sequencing.metadata.movieLength = Sequencing Runtime (h)
+runs.treatments.sequencing.metadata.basecallerVersion = Basecaller version
+runs.treatments.sequencing.metadata.ccsVersion = CCS version
+runs.treatments.sequencing.metadata.limaVersion = Lima version
+runs.treatments.sequencing.metadata.instrumentSoftwareVersion = SMRTlink version
+runs.treatments.sequencing.adapter = Adapter
+runs.treatments.sequencing.adapter.localBaseRate = Local base rate
+runs.treatments.sequencing.rawdata = Rawdata
+runs.treatments.sequencing.rawdata.polymeraseBases = Polymerase bases en Gb
+runs.treatments.sequencing.rawdata.meanPolymeraseReadLength = Mean polymerase read length en Gb
+runs.treatments.sequencing.rawdata.maxSubreadLength = Max subread length
+runs.treatments.sequencing.sequencing = Sequencing
+runs.treatments.sequencing.sequencing.totalZmws = Total ZMWs
+runs.treatments.sequencing.sequencing.productiveZmws = Productive ZMWs
+runs.treatments.sequencing.sequencing.percentProductiveZmws = Productive ZMWs %
+runs.treatments.sequencing.sequencing.p0 = P0
+runs.treatments.sequencing.sequencing.percentP0 = P0 %
+runs.treatments.sequencing.sequencing.p1 = P1
+runs.treatments.sequencing.sequencing.percentP1 = P1 %
+runs.treatments.sequencing.sequencing.p2 = P2
+runs.treatments.sequencing.sequencing.percentP2 = P2 %
+runs.treatments.sequencing.consensus = Consensus
+runs.treatments.sequencing.consensus.inputReads = Input reads
+runs.treatments.sequencing.consensus.ccsReads = Ccs reads
+runs.treatments.sequencing.consensus.percentCcsReads = Ccs reads %
+runs.treatments.sequencing.hifi = Hifi
+runs.treatments.sequencing.hifi.hifiBases = Hifi bases
+runs.treatments.sequencing.hifi.hifiReads = Hifi reads
+runs.treatments.sequencing.hifi.percentHifiReads = Hifi reads %
+runs.treatments.sequencing.hifi.meanHifiReadLength = Mean length of hifi reads
+runs.treatments.sequencing.hifi.medianHifiReadLength = Median length of hifi reads
+runs.treatments.sequencing.hifi.n50Hifi = N50 hifi
+runs.treatments.sequencing.hifi.medianHifiQuality = Median quality of hifi reads
+runs.treatments.sequencing.hifi.meanHifiPasses = Mean hifi passes
+runs.treatments.sequencing.hifi.percentQ30HifiBases = % bases hifi >=Q30
+runs.treatments.sequencing.demultiplexing = Demultiplexing
+runs.treatments.sequencing.demultiplexing.assignedHifiBases = Assigned hifi bases
+runs.treatments.sequencing.demultiplexing.assignedHifiReads = Assigned hifi reads
+runs.treatments.sequencing.demultiplexing.percentAssignedHifiReads = Assigned hifi reads %
+runs.treatments.sequencing.indexSummary.barcode = barcode
+runs.treatments.sequencing.indexSummary.count = count
+runs.treatments.sequencing.indexSummary.percent = percent
+runs.treatments.sequencing.control = Control
+runs.treatments.sequencing.control.reads = Reads
+runs.treatments.sequencing.control.meanReadLength = Mean read length en Kb
+runs.treatments.sequencing.control.percentMeanConcordance = Mean concordance en %
+runs.treatments.sequencing.hqRegionFilteringEvaluation = HQ region filtering evaluation
+runs.treatments.sequencing.controlPolymeraseReadLength = Control polymerase read length
+runs.treatments.sequencing.processedVsPolymeraseReadLength = Processed vs polymerase read length
+runs.treatments.sequencing.baseYieldDensity = Base yield density
+runs.treatments.sequencing.polymeraseReadLength = Polymerase read length
+runs.treatments.sequencing.hifiReadLengthDistribution = Hifi read length distribution
+runs.treatments.sequencing.hifiReadQualityDistribution = Hifi read quality distribution
+runs.treatments.sequencing.hifiNumberOfPasses = Hifi number of passes
+runs.treatments.sequencing.yieldByHifiReadLength = Yield by hifi read length
+runs.topindex.pacbio.unexpectedIndexes = Unexpected indexes
+runs.topindex.pacbio.percentThreshold = Percentage threshold
+runs.topindex.pacbio.barcode = Barcode
+runs.topindex.pacbio.count = Count
+runs.topindex.pacbio.percent = % of unassigned reads
+
+# NGL-4427 Readsets PacBio
+
+readsets.treatments.sequencing = Sequencing
+
+readsets.treatments.sequencing.hifiReads = Hifi reads
+readsets.treatments.sequencing.hifiBases = Hifi bases
+readsets.treatments.sequencing.percentHifiReads = Hifi reads %
+readsets.treatments.sequencing.percentHifiBases = Hifi bases %
+readsets.treatments.sequencing.medianHifiQuality = Median hifi quality
+readsets.treatments.sequencing.failBases = Fail bases
+readsets.treatments.sequencing.failReads = Fail reads
+readsets.treatments.sizeEstimatingPacbio = Estimation taille génome
+
 #search
 sequencingProgramType.value.PE = Pair End
 sequencingProgramType.value.SR = Single Read
@@ -563,6 +657,7 @@ readsets.menu.batch = Modification en masse
 
 readsets.archiveId = SSID
 readsets.archiveDate = Date de l''archive
+readset.properties.localDataCloned = Donnée clonée
 
 readsets.tabs.general = Général
 readsets.tabs.advanced = Avancé
@@ -767,7 +862,9 @@ readsets.treatments.merging.mergedReadsPercent = % merged reads
 
 readsets.treatments.sizeEstimatingClean.p1 = P1
 readsets.treatments.sizeEstimatingClean.p2 = P2
-readsets.treatments.sizeEstimatingClean.tabP1genomeHaploidLengthMax = Genome Haploid Length Max
+readsets.treatments.sizeEstimatingClean.tabP2genomeHaploidLengthMax = Genome Haploid Length Max
+readsets.treatments.sizeEstimatingClean.tabP2modelFitMax = Model Fit Max
+readsets.treatments.sizeEstimatingClean.basesTosequence = Nombre de bases à séquencer en long reads
 readsets.treatments.sizeEstimatingClean.tabP2heterozygosityRateMax = Heterozygosity Rate Max
 readsets.treatments.sizeEstimatingClean.summaryFile = Summary File
 readsets.treatments.sizeEstimatingClean.genomeScope = Genome Scope
@@ -792,6 +889,7 @@ readsets.treatments.read_quality.sampleInput = Sample input
 readsets.treatments.read_quality_pacbio.legende_1 = Stats sur les reads
 readsets.treatments.read_quality_pacbio.reads.nbReads = Nombre de reads
 readsets.treatments.read_quality_pacbio.reads.maxSize = Taille maximale des reads
+readsets.treatments.read_quality_pacbio.reads.medianSize = Taille médiane des reads
 readsets.treatments.read_quality_pacbio.reads.nbBases = Nombre de bases
 readsets.treatments.read_quality_pacbio.reads.nbReadsOver50kb = Nombre de reads sup à 50kb
 readsets.treatments.read_quality_pacbio.reads.nbReadsOver10kb = Nombre de reads sup à 10kb
@@ -813,15 +911,15 @@ readsets.treatments.mapping_pacbio.reads.percentAlignedBasePairs = % de bases al
 readsets.treatments.mapping_pacbio.reads.verticalCoverage = Couverture verticale
 readsets.treatments.mapping_pacbio.reads.horizontalCoverage = Couverture horizontale
 readsets.treatments.mapping_pacbio.reads.readAlignementSizeMax = Taille maximale des reads alignés
-readsets.treatments.mapping_pacbio.reads.identityPercentageAvg = Moyenne des % d'identité
+readsets.treatments.mapping_pacbio.reads.identityPercentageAvg = Moyenne des % d''identité
 readsets.treatments.mapping_pacbio.reads.percentAlignedReadsL100 = % des reads alignés sur 100% de leur longueur
 readsets.treatments.mapping_pacbio.reads.percentAlignedReads = % des reads alignés
 readsets.treatments.mapping_pacbio.reverseAlignedReadsPercent = % alignement reverse
 readsets.treatments.mapping_pacbio.chimericAlignedReads = Reads chimériques alignés
 readsets.treatments.mapping_pacbio.forwardAlignedReadsPercent = % reads alignés en forward
 readsets.treatments.mapping_pacbio.noChimericAlignedReads = Reads non chimériques alignés
-readsets.treatments.mapping_pacbio.identityPercentVsReadAlignedLength = % d'identité VS taille des reads alignés
-readsets.treatments.mapping_pacbio.identityPercentVsReadQuality = % d'identité VS qualité des reads
+readsets.treatments.mapping_pacbio.identityPercentVsReadAlignedLength = % d''identité VS taille des reads alignés
+readsets.treatments.mapping_pacbio.identityPercentVsReadQuality = % d''identité VS qualité des reads
 readsets.treatments.mapping_pacbio.reverseAlignedReads = Reads alignés en reverse
 readsets.treatments.mapping_pacbio.forwardAlignedReads = Reads alignés en forward
 readsets.treatments.mapping_pacbio.inputNbBases = Nb de bases en entrée
@@ -965,6 +1063,7 @@ readsets.treatments.exome = Exome
 readsets.treatments.chromium = Chromium 
 readsets.treatments.indexComposition = Répartition des index
 readsets.treatments.sizeEstimatingClean = Estimation taille génome
+readsets.treatments.RNAmapping = RNA mapping
 
 readsets.treatments.gender.properlyPaired = Properly Paired
 readsets.treatments.gender.notProperlyPaired = Not Properly Paired
@@ -1100,6 +1199,101 @@ readsets.treatments.index_composition.sequencing_summary.count=Nb occurrences
 readsets.treatments.index_composition.sequencing_summary.percent=% de cet index dans le readset
 
 readsets.treatments.clustersDbAssignation=Clusters Db Assignation
+
+readsets.treatments.baseComplexity=Base Complexity
+readsets.treatments.baseComplexity.sampleInput=Nb Seq. (échantillonnage)
+readsets.treatments.baseComplexity.minPercentOfRead=Pourcentage minimal du motif dans la lecture
+readsets.treatments.baseComplexity.motifs=Motifs
+readsets.treatments.baseComplexity.motifs.sequence=Séquence du motif
+readsets.treatments.baseComplexity.motifs.percentOfInput=Pourcentage des lectures
+readsets.treatments.baseComplexity.motifsPlot=Représentation graphique des motifs
+
+readsets.treatments.longReadQuality = Long Read Quality
+
+# RNA Mapping
+
+readsets.treatments.rnamaping.alignedReadsPercent = Aligned reads percent
+readsets.treatments.rnamaping.transcriptsNumber = Number of transcripts
+readsets.treatments.rnamaping.averageTranscriptsSize = Average size of transcripts
+readsets.treatments.rnamaping.medTranscriptsSize = Median size of transcripts
+readsets.treatments.rnamaping.maxTranscriptsSize = Maximal size of transcripts
+readsets.treatments.rnamaping.n50Transcripts = N50 of transcripts
+readsets.treatments.rnamaping.specificBuscoResult = Specific taxon busco result
+readsets.treatments.rnamaping.eukaryotaBuscoResult = Eukaryota busco result
+readsets.treatments.rnamaping.assemblyFile = Assembly file used for mapping
+readsets.treatments.rnamaping.softwareVersion = Software Version
+readsets.treatments.rnamaping.averageExonNumber = Average exon number per transcript
+
+# Long Read Nanopore
+
+readsets.treatments.long_read_quality.nbReads = Nombre de reads
+readsets.treatments.long_read_quality.nbBases = Nombre de bases
+readsets.treatments.long_read_quality.minSize = Min read length
+readsets.treatments.long_read_quality.maxSize = Max read length
+readsets.treatments.long_read_quality.medianSize = Median read length
+readsets.treatments.long_read_quality.avgSize = Average read length
+readsets.treatments.long_read_quality.Q1Size = Read length Q1
+readsets.treatments.long_read_quality.Q3Size = Read length Q3
+readsets.treatments.long_read_quality.L10 = L10
+readsets.treatments.long_read_quality.L50 = L50
+readsets.treatments.long_read_quality.L90 = L90
+readsets.treatments.long_read_quality.N10 = N10
+readsets.treatments.long_read_quality.N50 = N50
+readsets.treatments.long_read_quality.N90 = N90
+readsets.treatments.long_read_quality.auN = auN
+readsets.treatments.long_read_quality.nbReadsOver10kb = nbReadsOver10kb
+readsets.treatments.long_read_quality.nbReadsOver30kb = nbReadsOver30kb
+readsets.treatments.long_read_quality.nbReadsOver50kb = nbReadsOver50kb
+readsets.treatments.long_read_quality.nbReadsOver100kb = nbReadsOver100kb
+
+readsets.treatments.long_read_quality.minQuality = Min quality
+readsets.treatments.long_read_quality.maxQuality = Max quality
+readsets.treatments.long_read_quality.medianQuality = Median quality
+readsets.treatments.long_read_quality.avgQuality = Average quality
+readsets.treatments.long_read_quality.Q1Quality = Quality Q1
+readsets.treatments.long_read_quality.Q3Quality = Quality Q3
+
+readsets.treatments.long_read_quality.avgGCPercent = Average %GC
+readsets.treatments.long_read_quality.minGCPercent = Min %GC
+readsets.treatments.long_read_quality.maxGCPercent = Max %GC
+readsets.treatments.long_read_quality.medianGCPercent = Median %GC
+readsets.treatments.long_read_quality.Q1GCPercent = %GC Q1
+readsets.treatments.long_read_quality.Q3GCPercent = %GC Q3
+readsets.treatments.long_read_quality.GCPercent = %GC
+readsets.treatments.long_read_quality.GCDistribution = GCDistribution
+
+# Long Read Pacbio
+
+readsets.treatments.long_read_quality_pacbio.nbReads = Nombre de reads
+readsets.treatments.long_read_quality_pacbio.nbBases = Nombre de bases
+readsets.treatments.long_read_quality_pacbio.minSize = Min read length
+readsets.treatments.long_read_quality_pacbio.maxSize = Max read length
+readsets.treatments.long_read_quality_pacbio.medianSize = Median read length
+readsets.treatments.long_read_quality_pacbio.avgSize = Average read length
+readsets.treatments.long_read_quality_pacbio.Q1Size = Read length Q1
+readsets.treatments.long_read_quality_pacbio.Q3Size = Read length Q3
+readsets.treatments.long_read_quality_pacbio.L10 = L10
+readsets.treatments.long_read_quality_pacbio.L50 = L50
+readsets.treatments.long_read_quality_pacbio.L90 = L90
+readsets.treatments.long_read_quality_pacbio.N10 = N10
+readsets.treatments.long_read_quality_pacbio.N50 = N50
+readsets.treatments.long_read_quality_pacbio.N90 = N90
+
+readsets.treatments.long_read_quality_pacbio.minQuality = Min quality
+readsets.treatments.long_read_quality_pacbio.maxQuality = Max quality
+readsets.treatments.long_read_quality_pacbio.medianQuality = Median quality
+readsets.treatments.long_read_quality_pacbio.avgQuality = Average quality
+readsets.treatments.long_read_quality_pacbio.Q1Quality = Quality Q1
+readsets.treatments.long_read_quality_pacbio.Q3Quality = Quality Q3
+
+readsets.treatments.long_read_quality_pacbio.avgGCPercent = Average %GC
+readsets.treatments.long_read_quality_pacbio.minGCPercent = Min %GC
+readsets.treatments.long_read_quality_pacbio.maxGCPercent = Max %GC
+readsets.treatments.long_read_quality_pacbio.medianGCPercent = Median %GC
+readsets.treatments.long_read_quality_pacbio.Q1GCPercent = %GC Q1
+readsets.treatments.long_read_quality_pacbio.Q3GCPercent = %GC Q3
+readsets.treatments.long_read_quality_pacbio.GCPercent = %GC
+
 readsets.files.fullname = Nom du fichier
 readsets.files.typeCode = Type de fichier
 readsets.files.usable = Utilisable
@@ -1117,6 +1311,9 @@ readsets.files.isUsable = Oui
 readsets.files.isNotUsable = Non
 readsets.files.path = Chemin fichiers utiles
 readsets.files.location = Localisation
+readsets.files.localDataDeleted = Données brutes supprimées des disques locaux ?
+readsets.files.tgccDataDeleted = Données supprimées au TGCC ?
+readsets.files.doNotRestore = Ne pas restaurer ?
 
 readsets.modal.header.text = ReadSet status flow
 
@@ -1139,6 +1336,9 @@ readset.sampleOnContainer.qcFlowcell=QC Flowcell
 readset.sampleOnContainer.qcFlowcell.preLoading=réception
 readset.sampleOnContainer.qcFlowcell.postLoading=dépôt
 readset.sampleOnContainer.qcFlowcell.pores=pores
+readset.sampleOnContainer.ncbiPhylum = Taxon phylum
+readset.sampleOnContainer.ncbiClass = Taxon class
+
 
 
 readsets.workflow.state = Etat
@@ -1151,6 +1351,84 @@ readsets.valuation.qc.history.date = Date
 readsets.valuation.ba.history.valid = Valide BioInfo ?
 readsets.valuation.ba.history.who = Evalué par
 readsets.valuation.ba.history.date = Date
+
+#NGL-4364 :
+
+readsets.treatments.WgsBarcoding = Wgs Barcoding
+readsets.treatments.wgsBarcoding.metrics = Metrics
+readsets.treatments.wgsBarcoding.krona = Krona
+readsets.treatments.wgsBarcoding.specificDbMapping = Analyse DB Spécifique
+readsets.treatments.wgsBarcoding.organelBlastTop = Blast Organelle
+ 
+readsets.treatments.WgsBarcoding.assignation = Bilan Wgs Barcoding
+readsets.treatments.WgsBarcoding.scaffoldClean = Scaffold metrics (CLEAN)
+readsets.treatments.WgsBarcoding.scaffold = Scaffold metrics
+readsets.treatments.WgsBarcoding.researchedTaxon = Taxon recherché
+readsets.treatments.WgsBarcoding.taxonFound = Taxon trouvé dans la DB
+readsets.treatments.WgsBarcoding.ncbiScientificName = Taxon recherché 	
+readsets.treatments.WgsBarcoding.dataBaseVersion = Bases de données et versions
+readsets.treatments.WgsBarcoding.software = Logiciels
+readsets.treatments.WgsBarcoding.sampleInput = Nb Seq. (échantillonnage) 
+
+readsets.treatments.WgsBarcoding.dbspecies = Nombre d''espèces du genre par DB
+readsets.treatments.WgsBarcoding.dbspecies.dbname = Nom Database
+readsets.treatments.WgsBarcoding.dbspecies.speciesnumber = Nombre d''espèces
+readsets.treatments.WgsBarcoding.homology18S = Homologies 18S
+readsets.treatments.WgsBarcoding.homology18S.species = Espèce homologue
+readsets.treatments.WgsBarcoding.homology18S.alignSize = Longueur de l''alignement
+readsets.treatments.WgsBarcoding.homology18S.alignIdentityPercent = % Identité
+readsets.treatments.WgsBarcoding.homology18S.speciesdb = DB espèce
+readsets.treatments.WgsBarcoding.homology18S.homologousdb = DB homologue
+readsets.treatments.WgsBarcoding.homologyOther = Autres Homologies
+readsets.treatments.WgsBarcoding.homologyOther.species = Espèce homologue
+readsets.treatments.WgsBarcoding.homologyOther.alignSize = Longueur de l''alignement
+readsets.treatments.WgsBarcoding.homologyOther.alignIdentityPercent = % Identité
+readsets.treatments.WgsBarcoding.homologyOther.speciesdb = DB espèce
+readsets.treatments.WgsBarcoding.homologyOther.homologousdb = DB homologue
+readsets.treatments.WgsBarcoding.scaffold.nb = Nb scaffold
+readsets.treatments.WgsBarcoding.scaffold.min = Taille Min
+readsets.treatments.WgsBarcoding.scaffold.max = Taille Max
+readsets.treatments.WgsBarcoding.scaffoldClean.nb = Nb scaffold
+readsets.treatments.WgsBarcoding.scaffoldClean.min = Taille Min
+readsets.treatments.WgsBarcoding.scaffoldClean.max = Taille Max
+readsets.treatments.WgsBarcoding.assignation.id = ID scaffold
+readsets.treatments.WgsBarcoding.assignation.refLen = Taille scaffold
+readsets.treatments.WgsBarcoding.assignation.lenRef	= Taille Ref
+readsets.treatments.WgsBarcoding.assignation.count = Nb seq
+readsets.treatments.WgsBarcoding.assignation.taxon = Taxon 
+readsets.treatments.WgsBarcoding.assignation.percentIdentity = % identité
+readsets.treatments.WgsBarcoding.assignation.percentLen = % longueur
+readsets.treatments.WgsBarcoding.assignation.nbBestHit = Nb best hit 
+readsets.treatments.WgsBarcoding.assignation.db = DB 
+
+readsets.treatments.WgsBarcoding.specificDbMapping = Mapping DB spécifique
+readsets.treatments.WgsBarcoding.specificDbMapping.seqnumber = Numéro Séquence
+readsets.treatments.WgsBarcoding.specificDbMapping.sequenceId = Séquence ID
+readsets.treatments.WgsBarcoding.specificDbMapping.reference = Référence
+readsets.treatments.WgsBarcoding.specificDbMapping.sequenceSize = Taille Séquence
+readsets.treatments.WgsBarcoding.specificDbMapping.referenceSize = Taille Référence
+readsets.treatments.WgsBarcoding.specificDbMapping.alignSize = Taille Alignement
+readsets.treatments.WgsBarcoding.specificDbMapping.identityPercent = % Identité
+readsets.treatments.WgsBarcoding.specificDbMapping.taxonRef = Taxon Référence
+readsets.treatments.WgsBarcoding.specificDbMapping.typeSeqRef = Type Séquence Réf
+
+readsets.treatments.WgsBarcoding.organelBlastTop = Top5 Blast organelle
+readsets.treatments.WgsBarcoding.organelBlastTop.seqname = Nom Sequence
+readsets.treatments.WgsBarcoding.organelBlastTop.reference = Sequence Reference
+readsets.treatments.WgsBarcoding.organelBlastTop.sequenceSize = Taille Sequence
+readsets.treatments.WgsBarcoding.organelBlastTop.referenceSize = Taille Reference
+readsets.treatments.WgsBarcoding.organelBlastTop.alignSize = Taille Alignement
+readsets.treatments.WgsBarcoding.organelBlastTop.identityPercent = % Identité	
+readsets.treatments.WgsBarcoding.organelBlastTop.titleRef = Titre Reference
+
+# NGL-4471
+readsets.treatments.WgsBarcodingPacbio.assignation.nbHit=Nb hit
+readsets.treatments.WgsBarcodingPacbio.assignation.accessionId=Accession ID
+readsets.treatments.WgsBarcodingPacbio.assignation.db=DB
+readsets.treatments.WgsBarcodingPacbio.assignation.taxon=Taxon
+# NGL-4640
+readsets.treatments.WgsBarcodingPacbio.assignation.percentIdentity=% identité (best score)
+
 ############
 #
 # analyses
@@ -1178,10 +1456,21 @@ analyses.valuation.valid = Valid ?
 analyses.valuation.resolutions = Comptes Rendus
 analyses.valuation.creationDate = Date de création
 analyses.valuation.criteria = Critères éval.
+analyses.properties.curator = Curator
+analyses.properties.reviewer = Reviewer
+analyses.properties.tolid = ToLID
+analyses.properties.primaryAssemblyProjectAccession = PRJEB
+
 
 
 analyses.tabs.general = Général
 analyses.tabs.advanced = Avancé
+analyses.tabs.samples = Infos échantillon
+analyses.sample.code = Code échantillon
+analyses.sample.taxonCode = Code taxon
+analyses.sample.ncbiScientificName = Nom taxon
+analyses.sample.properties.collabScientificName = Nom organisme collab
+analyses.sample.properties.WoRMSCode = AphiaID
 analyses.tabs.workflow = Infos workflow
 analyses.tabs.valuations.history = Historique d''évaluation
 analyses.workflow.state = Etat
@@ -1319,6 +1608,7 @@ analyses.treatments.gapClosing_ba.GCpercent = % GC
 analyses.treatments.gapClosing_ba.numberOfN = Nombre de N
 analyses.treatments.gapClosing_ba.percentOfN = % N
 
+analyses.treatments.images.margin=25
 analyses.treatments.wholeGenome = Whole Genome
 analyses.treatments.wholeGenome.statAnalysis = Statistiques de l''analyse
 analyses.treatments.wholeGenome.gender= Sex
@@ -1371,6 +1661,319 @@ analyses.treatments.wholeGenome.chrYNoCovered=ChrY
 analyses.treatments.wholeGenome.info=Informations générales
 analyses.treatments.wholeGenome.fastqFiles=ReadSets
 analyses.treatments.wholeGenome.filePath=Path Fichier
+
+#NGL-4588 ajout
+analyses.treatments.wholeGenomeONT = Whole Genome ONT
+# titres tables
+analyses.treatments.wholeGenomeONT.sequencingPrimaryQC = Sequencing Primary QC
+analyses.treatments.wholeGenomeONT.mappingSecondaryQC = Mapping Secondary QC
+analyses.treatments.wholeGenomeONT.infoPipeline = Info Pipeline
+analyses.treatments.wholeGenomeONT.svCalling= SV Calling
+analyses.treatments.wholeGenomeONT.smallVariantCalling = Small Variant Calling
+
+analyses.treatments.wholeGenomeONT.nbTotalSeq = Nb Total Seq
+analyses.treatments.wholeGenomeONT.nbTrueBases = Nb True Bases (Gb)
+analyses.treatments.wholeGenomeONT.theoreticalDepth = Theoretical Depth
+analyses.treatments.wholeGenomeONT.humanReferenceGenome = Version Génome
+analyses.treatments.wholeGenomeONT.pipelineVersion = Version Pipeline
+analyses.treatments.wholeGenomeONT.mappedPercent = % Mapped
+analyses.treatments.wholeGenomeONT.dupPercent = % Dup
+analyses.treatments.wholeGenomeONT.mq0Percent = % MQ0
+analyses.treatments.wholeGenomeONT.suppPercent = % Supp
+analyses.treatments.wholeGenomeONT.meanLength = Mean Length
+analyses.treatments.wholeGenomeONT.medianLength = Median Length
+analyses.treatments.wholeGenomeONT.n50 = N50
+analyses.treatments.wholeGenomeONT.alignedLengthPercent = % Aligned Length (MedianLength/MedianLength (TrueSeq))  
+analyses.treatments.wholeGenomeONT.accuracy = Accuracy
+analyses.treatments.wholeGenomeONT.meanDepth = Mean Depth (allTrueSeq)
+analyses.treatments.wholeGenomeONT.medianDepth = Median Depth (MapQ>=20) mosdepth
+analyses.treatments.wholeGenomeONT.coverageBreadthPercent = % Coverage Breadth
+analyses.treatments.wholeGenomeONT.gender = Sex
+analyses.treatments.wholeGenomeONT.svSniffles = SV sniffles
+analyses.treatments.wholeGenomeONT.svPassSniffles = SV Pass sniffles
+analyses.treatments.wholeGenomeONT.ratioPassSniffles = Ratio Pass sniffles
+analyses.treatments.wholeGenomeONT.heterozygotesSniffles = HET sniffles
+analyses.treatments.wholeGenomeONT.homozygotesSniffles = HOM sniffles
+analyses.treatments.wholeGenomeONT.ratioHetHomSniffles = Ratio HET/HOM sniffles
+# NGL-5011 suppression 6 métriques SVIM
+#analyses.treatments.wholeGenomeONT.svSvim = SV svim
+#analyses.treatments.wholeGenomeONT.svPassSvim = SV Pass svim
+#analyses.treatments.wholeGenomeONT.ratioPassSvim = Ratio Pass svim
+#analyses.treatments.wholeGenomeONT.heterozygotesSvim = HET svim
+#analyses.treatments.wholeGenomeONT.homozygotesSvim = HOM svim
+#analyses.treatments.wholeGenomeONT.ratioHetHomSvim = Ratio HET/HOM svim
+analyses.treatments.wholeGenomeONT.svCuteSv = SV cuteSV
+analyses.treatments.wholeGenomeONT.svPassCuteSv = SV Pass cuteSV
+analyses.treatments.wholeGenomeONT.ratioPassCuteSv = Ratio Pass cuteSV
+analyses.treatments.wholeGenomeONT.heterozygotesCuteSv = HET cuteSV
+analyses.treatments.wholeGenomeONT.homozygotesCuteSv = HOM cuteSV
+analyses.treatments.wholeGenomeONT.ratioHetHomCuteSv = Ratio HET/HOM cuteSV
+# NGL-5011 ajout 13 métriques 
+analyses.treatments.wholeGenomeONT.total = Total
+analyses.treatments.wholeGenomeONT.totalPass = Total Pass
+analyses.treatments.wholeGenomeONT.ratioPass = Ratio Pass
+analyses.treatments.wholeGenomeONT.nbSNVs = '#SNVs'
+analyses.treatments.wholeGenomeONT.nbPassSNVs = '#Pass SNVs'
+analyses.treatments.wholeGenomeONT.ratioPassSNVs = Ratio Pass SNVs
+analyses.treatments.wholeGenomeONT.nbIndels = '#Indels'
+analyses.treatments.wholeGenomeONT.nbPassIndels = '#Pass Indels'
+analyses.treatments.wholeGenomeONT.ratioPassIndels = Ratio Pass Indels
+analyses.treatments.wholeGenomeONT.nbComplex = '#Complex'
+analyses.treatments.wholeGenomeONT.nbPassComplex = '#Pass Complex'
+analyses.treatments.wholeGenomeONT.ratioPassComplex = Ratio Pass Complex
+analyses.treatments.wholeGenomeONT.ratioTiTV = Ti/TV
+
+#NGL-5202 Whole Genome Pacbio
+analyses.treatments.wholeGenomePacbio = Whole Genome PacBio
+# titres tables
+analyses.treatments.wholeGenomePacbio.sequencingPrimaryQC = Sequencing Primary QC
+analyses.treatments.wholeGenomePacbio.mappingSecondaryQC = Mapping Secondary QC
+analyses.treatments.wholeGenomePacbio.infoPipeline = Info Pipeline
+analyses.treatments.wholeGenomePacbio.svCalling= SV Calling
+analyses.treatments.wholeGenomePacbio.smallVariantCalling = Small Variant Calling
+analyses.treatments.wholeGenomePacbio.phasing = Phasing
+
+analyses.treatments.wholeGenomePacbio.hifiReads= HiFi reads
+analyses.treatments.wholeGenomePacbio.hifiYield= HiFi Yield (bp)
+analyses.treatments.wholeGenomePacbio.hifiReadLengthMean= HiFi Read Length (mean, bp)
+analyses.treatments.wholeGenomePacbio.hifiReadlengthMedian= HiFi Read Length (median, bp)
+analyses.treatments.wholeGenomePacbio.hifiReadlengthN50= HiFi Read Length N50 (bp)
+analyses.treatments.wholeGenomePacbio.hifiReadQualitymedian= HiFi Read Quality (median)
+analyses.treatments.wholeGenomePacbio.hifiNbPassesMean= HiFi Number of Passes (mean) 
+analyses.treatments.wholeGenomePacbio.baseQtyGtQ30Percent= Base Quality >=Q30 (%)
+
+analyses.treatments.wholeGenomePacbio.humanReferenceGenome = Version Génome
+analyses.treatments.wholeGenomePacbio.pipelineVersion= Pipeline Version
+
+analyses.treatments.wholeGenomePacbio.reads= Reads
+analyses.treatments.wholeGenomePacbio.mapped= Mapped
+analyses.treatments.wholeGenomePacbio.mappedPercent= % Mapped
+analyses.treatments.wholeGenomePacbio.mq0= MQ0
+analyses.treatments.wholeGenomePacbio.mq0Percent= % MQ0
+analyses.treatments.wholeGenomePacbio.dup= DUP
+analyses.treatments.wholeGenomePacbio.dupPercent= % DUP
+analyses.treatments.wholeGenomePacbio.suppPercent= % Supp
+analyses.treatments.wholeGenomePacbio.medianLength= Median Length
+analyses.treatments.wholeGenomePacbio.meanLength= Mean Length
+analyses.treatments.wholeGenomePacbio.n50Length= N50 Length
+analyses.treatments.wholeGenomePacbio.maxLength= Max Length
+analyses.treatments.wholeGenomePacbio.accuracy= Accuracy
+analyses.treatments.wholeGenomePacbio.averageQuality= Average Quality
+analyses.treatments.wholeGenomePacbio.coveredGenomeSize= Covered Genome Size (Gb)
+analyses.treatments.wholeGenomePacbio.uncoveredSize= Size of Uncov. Genome Regions (Gb)
+analyses.treatments.wholeGenomePacbio.uncoveredPercent= Percent. of Uncov. Genome Regions 
+analyses.treatments.wholeGenomePacbio.coverageBreadthPercent= % Coverage Breadth
+analyses.treatments.wholeGenomePacbio.gender= Sex
+analyses.treatments.wholeGenomePacbio.n50ContigSize= N50 Contig Size
+analyses.treatments.wholeGenomePacbio.longestContigLength= Length of the Longest Contig
+analyses.treatments.wholeGenomePacbio.10Percentt= 10 %
+analyses.treatments.wholeGenomePacbio.q1= Q1
+analyses.treatments.wholeGenomePacbio.medianDepth= Median Depth
+analyses.treatments.wholeGenomePacbio.q3= Q3
+analyses.treatments.wholeGenomePacbio.90Percentt= 90 %
+analyses.treatments.wholeGenomePacbio.iqr= IQR
+analyses.treatments.wholeGenomePacbio.meanDepth= Mean Depth
+
+analyses.treatments.wholeGenomePacbio.svPbsv= SV Pbsv
+analyses.treatments.wholeGenomePacbio.svPassPbsv= SV Pass Pbsv
+analyses.treatments.wholeGenomePacbio.ratioPassPbsv= Ratio Pass Pbsv
+analyses.treatments.wholeGenomePacbio.heterozygotePbsv= HET Pbsv
+analyses.treatments.wholeGenomePacbio.homozygotePbsv= HOM Pbsv
+analyses.treatments.wholeGenomePacbio.ratioHetHomPbsv= Ratio HET/HOM Pbsv
+analyses.treatments.wholeGenomePacbio.svSniffles2= SV Sniffles2
+analyses.treatments.wholeGenomePacbio.svPassSniffles2= SV Pass Sniffles2
+analyses.treatments.wholeGenomePacbio.ratioPassSniffles2= Ratio Pass Sniffles2
+analyses.treatments.wholeGenomePacbio.heterozygoteSniffles2= HET Sniffles2
+analyses.treatments.wholeGenomePacbio.homozygoteSniffles2= HOM Sniffles2
+analyses.treatments.wholeGenomePacbio.ratioHetHomSniffles2= Ratio HET/HOM Sniffles2
+analyses.treatments.wholeGenomePacbio.totalSmallVariantsDeepVariant= Total Small Variants DeepVariant
+analyses.treatments.wholeGenomePacbio.totalPassSmallVariantsDeepVariant= Total Pass Small Variants DeepVariant
+analyses.treatments.wholeGenomePacbio.ratioPassSmallVariantsDeepVariant= Ratio Pass Small Variants DeepVariant
+analyses.treatments.wholeGenomePacbio.nbSNVsDeepVariant= SNVs DeepVariant
+analyses.treatments.wholeGenomePacbio.nbPassSNVsDeepVariant= Pass SNVs DeepVariant
+analyses.treatments.wholeGenomePacbio.ratioPassSNVsDeepVariant= Ratio Pass SNVs DeepVariant
+analyses.treatments.wholeGenomePacbio.nbIndelsDeepVariant= Indels DeepVariant
+analyses.treatments.wholeGenomePacbio.nbPassIndelsDeepVariant= Pass Indels DeepVariant
+analyses.treatments.wholeGenomePacbio.ratioPassIndelsDeepVariant= Ratio Pass Indels DeepVariant
+analyses.treatments.wholeGenomePacbio.nbComplexDeepVariant= Complex DeepVariant
+analyses.treatments.wholeGenomePacbio.nbPassComplexDeepVariant= Pass Complex DeepVariant
+analyses.treatments.wholeGenomePacbio.ratioPassComplexDeepVariant= Ratio Pass Complex DeepVariant
+analyses.treatments.wholeGenomePacbio.ratioTiTvDeepVariant= Ti/Tv DeepVariant
+
+analyses.treatments.wholeGenomePacbio.totalVariantsHiPhase= Total Variants HiPhase
+analyses.treatments.wholeGenomePacbio.totalHeterozygousVariantsHiPhase= Total Heterozygous Variants HiPhase
+analyses.treatments.wholeGenomePacbio.totalPhasedVariantsHiPhase= Total Phased Variants HiPhase
+analyses.treatments.wholeGenomePacbio.hetPhasedVariantsPercentHiPhase= % HET Phased Variants HiPhase
+analyses.treatments.wholeGenomePacbio.nbBlocksHiPhase= Number of Blocks HiPhase
+analyses.treatments.wholeGenomePacbio.singletonPercentHiPhase= % Singleton HiPhase
+analyses.treatments.wholeGenomePacbio.maxBlockSizeHiPhase= Max Block Size HiPhase
+analyses.treatments.wholeGenomePacbio.totalBlockSizeHiPhase= Total Block Size HiPhase
+analyses.treatments.wholeGenomePacbio.blockNG50HiPhase= Block NG50 HiPhase
+
+analyses.treatments.wholeGenomePacbio.totalVariantsWhatsHap= Total Variants WhatsHap
+analyses.treatments.wholeGenomePacbio.totalHeterozygousVariantsWhatsHap= Total Heterozygous Variants WhatsHap
+analyses.treatments.wholeGenomePacbio.totalPhasedVariantsWhatsHap= Total Phased Variants WhatsHap
+analyses.treatments.wholeGenomePacbio.hetPhasedVariantsPercentWhatsHap= % HET Phased Variants WhatsHap
+analyses.treatments.wholeGenomePacbio.nbBlocksWhatsHap= Number of Blocks WhatsHap
+analyses.treatments.wholeGenomePacbio.singletonPercentWhatsHap= % Singleton WhatsHap
+analyses.treatments.wholeGenomePacbio.maxBlockSizeWhatsHap= Max Block Size WhatsHap
+analyses.treatments.wholeGenomePacbio.totalBlockSizeWhatsHap= Total Block Size WhatsHap
+analyses.treatments.wholeGenomePacbio.blockNG50WhatsHap= Block NG50 WhatsHap
+
+#NGL-4045 :
+analyses.treatments.genomeReadsAssembly = Genome Reads Assembly
+analyses.treatments.genomeReadsAssembly.readsetsused=Readsets used
+analyses.treatments.genomeReadsAssembly.assembly.assemblerParams=Assembler name/parameters
+analyses.treatments.genomeReadsAssembly.assembly.cumulativeSize=Cumulative size
+analyses.treatments.genomeReadsAssembly.assembly.n50=N50
+analyses.treatments.genomeReadsAssembly.assembly.n90=N90
+analyses.treatments.genomeReadsAssembly.assembly.l50=L50
+analyses.treatments.genomeReadsAssembly.assembly.l90=L90	
+analyses.treatments.genomeReadsAssembly.assembly.auN=auN	
+analyses.treatments.genomeReadsAssembly.assembly.maxSize=Contigs max size
+analyses.treatments.genomeReadsAssembly.assembly.nbcontigs=Number of contigs
+analyses.treatments.genomeReadsAssembly.assembly.assemblerVersion=Software version
+analyses.treatments.genomeReadsAssembly.assembly.genomesize=Estimated genome size
+analyses.treatments.genomeReadsAssembly.assembly.readscoverage=Reads coverage
+
+analyses.treatments.genomeReadsAssembly.reads.nbreads=Number of reads
+analyses.treatments.genomeReadsAssembly.reads.cumulativeSize=Reads cumulative size
+analyses.treatments.genomeReadsAssembly.reads.coverage=Reads coverage
+analyses.treatments.genomeReadsAssembly.reads.n50=N50
+analyses.treatments.genomeReadsAssembly.reads.minSize=Reads min size
+analyses.treatments.genomeReadsAssembly.reads.maxSize=Reads max size
+analyses.treatments.genomeReadsAssembly.reads.meanSize=Reads Mean size
+
+
+analyses.treatments.assemblyPolishing = Assembly Polishing
+analyses.treatments.assemblyPolishing.softwareVersion=Software version
+analyses.treatments.assemblyPolishing.selectedAssembly=Selected assembly		
+analyses.treatments.assemblyPolishing.cumulativeSize=Assembly cumulative size
+analyses.treatments.assemblyPolishing.n50=N50
+analyses.treatments.assemblyPolishing.n90=N90
+analyses.treatments.assemblyPolishing.l50=L50
+analyses.treatments.assemblyPolishing.l90=L90	
+analyses.treatments.assemblyPolishing.auN=auN	
+analyses.treatments.assemblyPolishing.maxSize=Contigs max size
+analyses.treatments.assemblyPolishing.nbcontigs=Number of contigs
+analyses.treatments.assemblyPolishing.readsetsused=Readsets used
+
+# NGL-4045 : traitement 3
+analyses.treatments.assemblyDecontamination = Assembly Décontamination	
+analyses.treatments.assemblyDecontamination.softwareVersion=Software version
+analyses.treatments.assemblyDecontamination.selectedAssembly=Selected assembly 		
+analyses.treatments.assemblyDecontamination.summaryPlot=Summary Plot	
+analyses.treatments.assemblyDecontamination.summaryPlot.label=Taxonomy 2D plot
+analyses.treatments.assemblyDecontamination.contextPlot=Taxonomy 3D plot
+analyses.treatments.assemblyDecontamination.contextPlot.unvailable=Taxonomy 3D plot unavailable
+analyses.treatments.assemblyDecontamination.cumulativeSize=Assembly cumulative size
+analyses.treatments.assemblyDecontamination.n50=N50
+analyses.treatments.assemblyDecontamination.n90=N90
+analyses.treatments.assemblyDecontamination.l50=L50
+analyses.treatments.assemblyDecontamination.l90=L90	
+analyses.treatments.assemblyDecontamination.auN=auN	
+analyses.treatments.assemblyDecontamination.maxSize=Contigs max size
+analyses.treatments.assemblyDecontamination.fileName=File name
+analyses.treatments.assemblyDecontamination.nbcontigs=Number of contigs
+
+# NGL-4045 : traitement 3'
+analyses.treatments.assemblyHaplotypicDuplicationPurge = Assembly Haplotypic Duplication Purge
+analyses.treatments.assemblyHaplotypicDuplicationPurge.softwareVersion=Software version
+analyses.treatments.assemblyHaplotypicDuplicationPurge.selectedAssembly=Selected assembly 			
+analyses.treatments.assemblyHaplotypicDuplicationPurge.cumulativeSize=Assembly cumulative size
+analyses.treatments.assemblyHaplotypicDuplicationPurge.n50=N50
+analyses.treatments.assemblyHaplotypicDuplicationPurge.n90=N90
+analyses.treatments.assemblyHaplotypicDuplicationPurge.l50=L50
+analyses.treatments.assemblyHaplotypicDuplicationPurge.l90=L90	
+analyses.treatments.assemblyHaplotypicDuplicationPurge.auN=auN	
+analyses.treatments.assemblyHaplotypicDuplicationPurge.maxSize=Contigs max size
+analyses.treatments.assemblyHaplotypicDuplicationPurge.nbcontigs=Number of contigs
+analyses.treatments.assemblyHaplotypicDuplicationPurge.purgeGraph=purge_dups graph
+analyses.treatments.assemblyHaplotypicDuplicationPurge.hapdup=Haplotypic duplications
+analyses.treatments.assemblyHaplotypicDuplicationPurge.hapdup.auN=auN
+analyses.treatments.assemblyHaplotypicDuplicationPurge.hapdup.cumulativeSize=cumulative size
+analyses.treatments.assemblyHaplotypicDuplicationPurge.hapdup.maxSize=max size
+analyses.treatments.assemblyHaplotypicDuplicationPurge.hapdup.nbseq=Number of sequences
+analyses.treatments.assemblyHaplotypicDuplicationPurge.hapdup.n50=N50
+analyses.treatments.assemblyHaplotypicDuplicationPurge.hapdup.l90=L90
+analyses.treatments.assemblyHaplotypicDuplicationPurge.hapdup.l50=L50
+analyses.treatments.assemblyHaplotypicDuplicationPurge.hapdup.n90=N90
+
+# NGL-4045 : traitement 4, 4' et 4'':
+analyses.treatments.assemblyQuality = Assembly Quality
+analyses.treatments.assemblyPurgedQuality = Assembly Purged Quality
+analyses.treatments.assemblyDecontaminedQuality = Assembly Decontaminated Quality
+analyses.treatments.scaffoldsQuality = Scaffolds Quality
+
+analyses.treatments.assemblyQuality.katGraph150=KAT graph 150 kmers
+analyses.treatments.assemblyQuality.katGraph300=KAT graph 300 kmers
+#analyses.treatments.assemblyQuality.buscoScore=Score Busco
+analyses.treatments.assemblyQuality.scoreBuscoEuk=Eukaryote Busco score
+analyses.treatments.assemblyQuality.scoreBuscoTaxon=Taxon Busco score
+analyses.treatments.assemblyQuality.taxonBusco=Busco taxon
+analyses.treatments.assemblyQuality.merquryScore=Merqury score
+analyses.treatments.assemblyQuality.completion=Completion
+analyses.treatments.assemblyQuality.selectedAssembly=Selected Assembly
+
+
+analyses.treatments.genomeContigsScaffolding = Genome Contigs Scaffolding
+analyses.treatments.genomeContigsScaffolding.softwareVersion = Software Version
+analyses.treatments.genomeContigsScaffolding.katGraph150=KAT graph 150 kmers
+analyses.treatments.genomeContigsScaffolding.katGraph300=KAT graph 300 kmers
+analyses.treatments.genomeContigsScaffolding.buscoScore=Score Busco
+#analyses.treatments.genomeContigsScaffolding.scoreBuscoEuk=Eukaryote Busco score
+#analyses.treatments.genomeContigsScaffolding.scoreBuscoTaxon=Taxon Busco score
+#analyses.treatments.genomeContigsScaffolding.taxonBusco=Busco taxon
+analyses.treatments.genomeContigsScaffolding.merquryScore=Merqury score	
+analyses.treatments.genomeContigsScaffolding.completion=Completion
+analyses.treatments.genomeContigsScaffolding.cumulativeSize=Cumulative size
+analyses.treatments.genomeContigsScaffolding.n50=N50
+analyses.treatments.genomeContigsScaffolding.n90=N90
+analyses.treatments.genomeContigsScaffolding.l50=L50		
+analyses.treatments.genomeContigsScaffolding.l90=L90
+analyses.treatments.genomeContigsScaffolding.auN=auN					
+analyses.treatments.genomeContigsScaffolding.maxSize=Contigs max size
+analyses.treatments.genomeContigsScaffolding.nbscaffolds=Scaffolds number
+analyses.treatments.genomeContigsScaffolding.contactMap=Contact map
+analyses.treatments.genomeContigsScaffolding.gapnumber=Gap number/Gb
+analyses.treatments.genomeContigsScaffolding.reads.nbreads=HiC reads number
+analyses.treatments.genomeContigsScaffolding.reads.cumulativeSize=HiC reads cumulative size
+analyses.treatments.genomeContigsScaffolding.reads.coverage=HiC reads coverage
+analyses.treatments.genomeContigsScaffolding.lr_reads.nbreads=LR reads number
+analyses.treatments.genomeContigsScaffolding.lr_reads.cumulativeSize=LR reads cumulative size
+analyses.treatments.genomeContigsScaffolding.lr_reads.coverage=LR reads coverage
+
+analyses.treatments.hicLibqc = Hi-C LibQC
+analyses.treatments.hicLibqc.omnic.softwareVersion = Software Version
+analyses.treatments.hicLibqc.omnic.readsetName = Readset name
+analyses.treatments.hicLibqc.omnic.mapqualthreshold = Mapping Quality Threshold 
+analyses.treatments.hicLibqc.omnic.read1 = read1
+analyses.treatments.hicLibqc.omnic.r1wtqualfil = Read1 without Quality filter
+analyses.treatments.hicLibqc.omnic.read2 = read2
+analyses.treatments.hicLibqc.omnic.r2wtqualfil = Read2 without Quality filter
+analyses.treatments.hicLibqc.omnic.mappedpairs = Mapped pairs
+analyses.treatments.hicLibqc.omnic.pcrdupepairs = PCR dupe pairs
+analyses.treatments.hicLibqc.omnic.mappednondupepairs = Mapped nondupe pairs
+analyses.treatments.hicLibqc.omnic.validpairs = Valid Pairs (cis>1000bp + trans)
+analyses.treatments.hicLibqc.omnic.mapndpairscis = Mapped nondupe pairs cis
+analyses.treatments.hicLibqc.omnic.mapndpairscisinf1000 = Mapped nondupe pairs cis <= 1000bp
+analyses.treatments.hicLibqc.omnic.mapndpairscissup1000 = Mapped nondupe pairs cis > 1000bp
+analyses.treatments.hicLibqc.omnic.mapndpairscissup10000 = Mapped nondupe pairs cis > 10000bp
+analyses.treatments.hicLibqc.omnic.mapndpairstrans = Mapped nondupe trans pairs
+analyses.treatments.hicLibqc.omnic.expecteduniqpairs300m = Expected unique pairs at 300M sequencing
+analyses.treatments.hicLibqc.omnic.mappedpairsrelateR1 = Mapped pairs / read1
+analyses.treatments.hicLibqc.omnic.validpairsrelateR1 = Valid Pairs (cis>1000bp + trans) / read1
+analyses.treatments.hicLibqc.omnic.mapndpairscissup10000relateR1 = Mapped nondupe pairs cis >10000bp / read1 
+
+analyses.treatments.manualScaffoldingCurationBA = Manual Scaffolding Curation
+
+analyses.treatments.reviewing = Reviewing
+analyses.treatments.reviewing.contactMap = Contact map
+analyses.treatments.reviewing.katGraph150 = KAT graph 150 kmers
+analyses.treatments.reviewing.katGraph300 = KAT graph 300 kmers
+analyses.treatments.reviewing.softwareVersion = Software Version
+analyses.treatments.reviewing.readsetsused = Readsets used
+
 ############
 #
 # Balance Sheets
@@ -1381,6 +1984,7 @@ balanceSheets.page.title = Bilan de production
 balanceSheets.menu = Bilans
 balanceSheets.menu.rsillumina = Bilans Illumina
 balanceSheets.menu.rsnanopore = Bilans Nanopore
+balanceSheets.menu.rspacbio   = Bilans PacBio 
 
 balanceSheets.export.excel = Export Excel
 balanceSheets.export.pdf = Export PDF
@@ -1587,7 +2191,7 @@ descriptions.treatments.table.category = Treatment Category
 descriptions.treatments.table.type.name = Treatment Type (Name)
 descriptions.treatments.table.type.code = Treatment Type (Code)
 descriptions.treatments.table.type.names = Treatment Names
-descriptions.treatments.table.type.context.code = Treatment Context Code
+descriptions.treatments.table.type.context.code = Treatment Context Code (+required?)
 descriptions.treatments.table.properties.definitions.name = Property Definition Name
 descriptions.treatments.table.properties.definitions.code = Property Definition Code
 descriptions.treatments.table.properties.definitions.required = Property Definition Required

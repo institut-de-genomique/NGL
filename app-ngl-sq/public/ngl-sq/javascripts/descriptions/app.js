@@ -3,7 +3,7 @@
 angular.module('home', [
 	'commonsServices','ngRoute','ultimateDataTableServices','ui.bootstrap', 'ngl-sq.descriptionsServices.instruments', 
 	'ngl-sq.descriptionsServices.imports', 'ngl-sq.descriptionsServices.protocols', 'ngl-sq.descriptionsServices.experiments',
-	'ngl-sq.descriptionsServices.mappingprojects', 'ngl-sq.descriptionsServices.processes',
+	'ngl-sq.descriptionsServices.mappingprojects', 'ngl-sq.descriptionsServices.processes', 'ngl-sq.descriptionsServices.processesgraph',
 	])
 	.config(
 	['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
@@ -45,6 +45,11 @@ angular.module('home', [
 	$routeProvider.when('/descriptions/processes/home', {
 		templateUrl : function(params){return jsRoutes.controllers.descriptions.tpl.Descriptions.processes().url},
 		controller : 'ProcessesCtrl'
+	});
+
+	$routeProvider.when('/descriptions/processesgraph/home', {
+		templateUrl : function(params){return jsRoutes.controllers.descriptions.tpl.Descriptions.processesGraph().url},
+		controller : 'ProcessesGraphCtrl'
 	});
 
     $routeProvider.otherwise({redirectTo: jsRoutes.controllers.descriptions.tpl.Descriptions.home("instruments").url});

@@ -202,11 +202,13 @@ factory('samplesSearchService', ['$http', 'mainService', 'lists', 'datatable', f
 			lists.refresh.experimentTypes({categoryCodes:["transfert"], withoutOneToVoid:false},"transfert");
 			lists.refresh.states({objectTypeCode:"Sample"});
 			lists.refresh.users();
-			lists.refresh.reportConfigs({pageCodes:["samples"+"-"+mainService.getHomePage()]});
+			lists.refresh.reportConfigs({pageCodes:["samples"+"-"+mainService.getHomePage()], active:true});
 			lists.refresh.reportConfigs({pageCodes:["samples-addcolumns"]}, "samples-addcolumns");
-			lists.refresh.filterConfigs({pageCodes:["samples-search-addfilters"]}, "samples-search-addfilters");
-			lists.refresh.resolutions({"objectTypeCode":"Sample"}, "sampleResolutions");
+			lists.refresh.filterConfigs({pageCodes:["samples-search-addfilters"], active:true}, "samples-search-addfilters");
 			lists.refresh.protocols({}, 'all-protocols');
+			lists.refresh.umbrellaProjects();
+			lists.refresh.importTypes();
+			lists.refresh.resolutions({objectTypeCode:"Sample"});
 			isInit=true;
 		}
 	};

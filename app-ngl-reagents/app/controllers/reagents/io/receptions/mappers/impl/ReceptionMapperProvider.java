@@ -22,10 +22,16 @@ public class ReceptionMapperProvider {
 		return new NanoporeReceptionMapper(contextValidation);
 	}
 	
+	public PacBioReceptionMapper pacBioReceptionMapper(ContextValidation contextValidation) throws APIException {
+		require(contextValidation);
+		return new PacBioReceptionMapper(contextValidation);
+	}
+	
 	public AbstractReceptionMapper getReceptionMapper(String importFormat, ContextValidation contextValidation) throws APIException {
 		switch(importFormat) {
 		case IlluminaReceptionMapper.IMPORT_TYPE_FILE: return illuminaReceptionMapper(contextValidation);
 		case NanoporeReceptionMapper.IMPORT_TYPE_FILE: return nanoporeReceptionMapper(contextValidation);
+		case PacBioReceptionMapper.IMPORT_TYPE_FILE: return pacBioReceptionMapper(contextValidation);
 		default: throw new APIException("Unknow import format : " + String.valueOf(importFormat));
 		}
 	}

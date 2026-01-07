@@ -1,6 +1,23 @@
 //created on: Nov 21, 2013
 package rules
 
+
+//NGL-4923 1-ajout : comme au CNS sans la contrainte PROD
+rule "Set state to In Waiting Transfert CCRT from Avalaible readSet"
+	@nglBI( A_1 )
+	dialect "java"
+	salience 600
+	no-loop
+	when
+		$nextState : State(code=="A")
+		$project : Project(bioinformaticParameters!=null, bioinformaticParameters.fgGroup!=null, !StringUtils.isBlank(bioinformaticParameters.fgGroup),
+							bioinformaticParameters.ccrtAutomaticTransfer!=null, bioinformaticParameters.ccrtAutomaticTransfer==true)
+		$readSet : ReadSet(location==null || (location!=null && location!="CCRT"))
+	then
+		Logger.debug("Set state readSet "+$readSet.code+" to IW-TF");	
+		$nextState.code="IW-TF";
+end
+
 rule "Set state to In Waiting Transfert CCRT from In Waiting BI Analyse readSet"
 	@nglBI( IW_BA_1 )
 	dialect "java"
@@ -12,10 +29,11 @@ rule "Set state to In Waiting Transfert CCRT from In Waiting BI Analyse readSet"
 							bioinformaticParameters.ccrtAutomaticTransfer!=null, bioinformaticParameters.ccrtAutomaticTransfer==true)
 		$readSet : ReadSet(location==null || (location!=null && location!="CCRT"))
 	then
-		Logger.debug("Set state readSet to IW-TF "+$readSet.code);
+		Logger.debug("Set state readSet "+$readSet.code+" to IW-TF");	
 		$nextState.code="IW-TF";
 end
 
+//NGL-4923 2-modification,  ajout contrainte biologicalAnalysis == true
 rule "Set state to In Waiting BI Analyse from Finished Transfert CCRT"
 	@nglBI( F_TF_1 )
 	dialect "java"
@@ -23,10 +41,25 @@ rule "Set state to In Waiting BI Analyse from Finished Transfert CCRT"
 	no-loop
 	when
 		$nextState : State(code=="F-TF")
-		$project : Project(bioinformaticParameters!=null, bioinformaticParameters.fgGroup!=null, !StringUtils.isBlank(bioinformaticParameters.fgGroup))
+		$project : Project(bioinformaticParameters!=null, bioinformaticParameters.biologicalAnalysis == true, bioinformaticParameters.fgGroup!=null, !StringUtils.isBlank(bioinformaticParameters.fgGroup))
 	then
 		Logger.debug("Set state readSet to IW-BA");
 		$nextState.code="IW-BA";
+end
+
+
+// NGL-4923 3-ajout : comme au CNS MAIS avec  Analyse biologique non positionné  ( inutile de tester location==CCRT )
+rule "Set state to Available from Finished Transfert CCRT"
+	@nglBI( F_TF_1 )
+	dialect "java"
+	salience 600
+	no-loop
+	when
+		$nextState : State(code=="F-TF")
+		$project : Project(bioinformaticParameters!=null, bioinformaticParameters.biologicalAnalysis == false, bioinformaticParameters.fgGroup!=null, !StringUtils.isBlank(bioinformaticParameters.fgGroup))
+	then
+		Logger.debug("Set state readSet to A");
+		$nextState.code="A";
 end
 
 rule "Set state to In Progress BI Analyse from In Waiting BI Analyse CCRT"
@@ -39,7 +72,7 @@ rule "Set state to In Progress BI Analyse from In Waiting BI Analyse CCRT"
 		$project : Project(bioinformaticParameters!=null, bioinformaticParameters.fgGroup!=null, !StringUtils.isBlank(bioinformaticParameters.fgGroup))
 		$readSet : ReadSet(location!=null, location=="CCRT")
 	then
-		Logger.debug("Set state readSet to IP-BA "+$readSet.code);
+		Logger.debug("Set state readSet "+$readSet.code+" to IP-BA ");
 		$nextState.code="IP-BA";
 end
 
@@ -99,4 +132,22 @@ rule "Update sampleOnContainer properties Readset external"
 						DBQuery.is("code", $readset.code), DBUpdate.set("sampleOnContainer", $sampleOnContainer));
 		}
 		
+end
+
+
+//NGL-4937
+rule "Build localDataCloned property in readset"
+	@nglBI( F_RG_1 )
+	dialect "java"
+	salience 600
+	no-loop
+	when
+		$readset : ReadSet()
+	then
+		Logger.debug("Build localDataCloned property in readset");
+		boolean localDataClonedValue = false;
+		PropertySingleValue localDataCloned = new PropertySingleValue(localDataClonedValue);
+		MongoDBDAO.update(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, 
+				DBQuery.is("code", $readset.code),
+				DBUpdate.set("properties.localDataCloned", localDataCloned));
 end

@@ -17,6 +17,7 @@
 @user            = @{ ctx.currentUser() }
 @writePermission = @{ PermissionHelper.checkPermission(user, "writing") }
 @adminPermission = @{ PermissionHelper.checkPermission(user, "admin") }
+@role = @{ PermissionHelper.getRole(user) }
 @always          = @{ true }
 @* OLD... @version         = @{ ctx.nglConfig().getApplicationVersion() } *@
 
@@ -27,7 +28,8 @@
 <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
 	<div class="container-fluid">
 		<div class="navbar-header">
-			<a class="navbar-brand" href="@controllers.main.tpl.routes.Main.home()">@ctx.messageEnv("application.name")</a>
+			<!-- NGL-4344  couleur differente PROD/NOPROD -->
+			<a class="navbar-brand @("noprod".when( "PROD" != ctx.nglConfig().nglEnv() ))" href="@controllers.main.tpl.routes.Main.home()">@ctx.messageEnv("application.name")</a>
     	</div>
 
     	<div class="collapse navbar-collapse">
@@ -67,6 +69,7 @@
 				@ddmenu(nav, "balance","balanceSheets.menu") {
 				  @ddentry(nav, "balanceSheets.illumina", BalanceSheets.home("rsillumina","general"), "balanceSheets.menu.rsillumina")
 				  @ddentry(nav, "balanceSheets.nanopore", BalanceSheets.home("rsnanopore","general"), "balanceSheets.menu.rsnanopore")
+				  @ddentry(nav, "balanceSheets.pacbio", BalanceSheets.home("rspacbio","general"), "balanceSheets.menu.rspacbio")
 				}
 
 				@ddmenu(nav,"descriptions","descriptions.menu") {
@@ -79,7 +82,7 @@
 					 	<a href="@routes.Assets.at("ngl-bi/documentation/DOC_UTILISATEUR_CNS.pdf")" target="doc">@Messages("docs.menu")</a>
 					 }
 					 @if(isCNGInstitute){
-						<a href="@routes.Assets.at("ngl-bi/documentation/DOC_UTILISATEUR.pdf")" target="doc">@Messages("docs.menu")</a>
+						<a href="@routes.Assets.at("ngl-bi/documentation/DOC_UTILISATEUR_CNG.pdf")" target="doc">@Messages("docs.menu")</a>
 					}
 				</li>
 				
@@ -100,13 +103,16 @@
 				<i class="fa fa-user"></i> @user <b class="caret"></b></a>
 				<ul class="dropdown-menu" role="menu" aria-labelledby="user">
 						<li><a href="/authentication/logout">@Messages("authentification.dropdown_list.signout")</a></li>
+						<li><a>@role</a></li>
 				</ul>
 				</li>
-				<!--  NGL-3363/NGL-3436 ajout version de l'application   -->
+				<!--  NGL-3363 ajout application version / NGL-3446 ajout lien vers notes de version   -->
 				<li>
 					<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" id="more"><i class="fa fa-ellipsis-v"></i></a>
 					<ul class="dropdown-menu" role="menu" aria-labelledby="more">
-						<li>&nbsp;&nbsp;Version: @Messages("application.name") @version</li>
+						<!-- <li>&nbsp;&nbsp;Version: @Messages("application.name") @version</li> -->
+						<li><a href='http://wiki.cnrgh.fr/wiki/ngldocumentation/view/Documents%20de%20mise%20en%20production/@Messages("application.name")/@ctx.getVersion()'
+							target="_blank">&nbsp;&nbsp;Version: @Messages("application.name") @ctx.getVersion()</a></li>
 					</ul>
 				</li>
 			</ul>

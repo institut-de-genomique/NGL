@@ -20,11 +20,11 @@ import fr.cea.ig.lfw.controllers.scripts.buffered.ScriptNoArgs;
 import fr.cea.ig.lfw.utils.ZenIterable;
 import models.sra.submit.sra.instance.Sample;
 import models.utils.InstanceConstants;
-import services.SraEbiAPI;
 import sra.scripts.utils.DateTools;
 import sra.scripts.utils.Tools;
 import sra.scripts.utils.iteration.CSVIterable;
 import sra.scripts.utils.iteration.FileLineIterable;
+import sra.services.SraEbiAPI;
 
 public class RepriseHistoSample_extId extends ScriptNoArgs {
 	/* version 1 : on demande à play d'instancier la classe avec un objet WSClient et on instantiera 

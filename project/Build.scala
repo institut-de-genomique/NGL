@@ -37,24 +37,27 @@ object ApplicationBuild extends Build {
 	val buildVersion           = "2.1"    + distSuffix
 	val nglVersion             = "2.0"    + distSuffix
 
-	val sqVersion              = "2.21.0" + distSuffix
-
-	val biVersion              = "2.17.0" + distSuffix
+	val sqVersion              = "2.24.2" + distSuffix
 
 
-	val projectsVersion        = "2.13.0"  + distSuffix
+	val biVersion              = "2.21.0" + distSuffix
 
-	val reagentsVersion       = "3.4.0"  + distSuffix
 
-	// val dataVersion            = "2.0.0"  + distSuffix
-	val nglAssetsVersion       = "2.4.0"  + distSuffix
+	val projectsVersion        = "2.16.0"  + distSuffix
 
-	val nglDataVersion         = "2.30.0"  + distSuffix
+
+	val reagentsVersion       = "3.5.0"  + distSuffix
+
+	// val dataVersion         = "2.0.0"  + distSuffix
+	val nglAssetsVersion       = "2.4.2"  + distSuffix
+
+	val nglDataVersion         = "2.42.0"  + distSuffix
+
 	val nglPlatesVersion       = "2.4.0"  + distSuffix
 	val nglDevGuideVersion     = "2.0.0"  + distSuffix
 
-	val subVersion             = "3.9.0"  + distSuffix
 
+	val subVersion             = "3.16.0"  + distSuffix
 
 
 	val libDatatableVersion    = "2.0.0"  + distSuffix
@@ -210,11 +213,11 @@ object ApplicationBuild extends Build {
 		  "com.sybase"	  	     % "jdbc4"                 	   % "7.0",
 		  "org.jsoup"            % "jsoup"                     % "1.13.1",
       "org.hsqldb"           % "hsqldb"                    % "2.4.1" % Test,
-      "org.mockito" % "mockito-all" % "1.10.8" % Test,
-      "org.powermock" % "powermock-api-mockito" % "1.6.1" % Test,
-      "org.powermock" % "powermock-core" % "1.6.1" % Test,
-      "org.powermock" % "powermock-api-mockito" % "1.6.1" % Test,
-      "org.powermock" % "powermock-module-junit4" % "1.6.1" % Test
+     	"org.mockito" % "mockito-all" % "1.10.19" % Test,
+      "org.powermock" % "powermock-api-mockito" % "1.6.2" % Test,
+      "org.powermock" % "powermock-core" % "1.6.2" % Test,
+      "org.powermock" % "powermock-api-mockito" % "1.6.2" % Test,
+      "org.powermock" % "powermock-module-junit4" % "1.6.2" % Test
 //      "junit" % "junit" % "4.11" % Test,
 ////      crossPaths := false,
 //      "com.novocode" % "junit-interface" % "0.11" % Test
@@ -223,7 +226,7 @@ object ApplicationBuild extends Build {
      val ngltestDependencies = Seq(
        "junit" % "junit" % "4.10",
       "com.typesafe.play" %% "play-test" % "2.6.11",
-      "org.mockito" % "mockito-all" % "1.10.8" % Test,
+     	"org.mockito" % "mockito-all" % "1.10.19" % Test,
       "org.powermock" % "powermock-api-mockito" % "1.6.1" % Test,
       "org.powermock" % "powermock-core" % "1.6.1" % Test,
       "org.powermock" % "powermock-api-mockito" % "1.6.1" % Test,

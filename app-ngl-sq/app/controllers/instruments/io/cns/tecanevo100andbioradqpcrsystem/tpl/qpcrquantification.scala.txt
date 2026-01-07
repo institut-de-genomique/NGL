@@ -1,0 +1,8 @@
+@(lines: List[controllers.instruments.io.cns.tecanevo100andbioradqpcrsystem.SampleSheetBioradLine])
+
+@import controllers.instruments.io.utils._;
+
+Row,Column,*Target Name,*Sample Name,*Biological Group
+@for((line) <- lines){
+	@line.row,@line.column,,@line.wellName,\u000D\u000A	
+}

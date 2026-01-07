@@ -4,17 +4,15 @@ package sra.scripts.off;
 import java.util.List;
 import javax.inject.Inject;
 
-import org.mongojack.DBQuery;
-import org.mongojack.DBUpdate;
-
+import controllers.sra.api.ExperimentAPI;
 import fr.cea.ig.lfw.controllers.scripts.buffered.Script;
 import fr.cea.ig.ngl.NGLApplication;
-import fr.cea.ig.ngl.dao.api.sra.ExperimentAPI;
+import models.sra.submit.sra.instance.Experiment;
 //import models.sra.submit.common.instance.Sample;
 import models.sra.submit.sra.instance.Run;
 import play.libs.Json;
-import services.SraEbiAPI;
-import services.XmlToSra;
+import sra.services.SraEbiAPI;
+import sra.services.XmlToSra;
 import validation.ContextValidation;
 
 /*
@@ -79,7 +77,10 @@ public class ImportEbiRuns extends Script<ImportEbiRuns.Args> {
 					throw new RuntimeException("Tentativee de sauvegarde dans la base du run " + run.code + " sans que l'experiment " + run.expCode + " soit dans la base");
 				}
 				printfln("sauvegarde dans la base de l'experiment exp.code=%s avec run.AC = %s et run.code =%s", run.expCode, run.accession , run.code);
-				experimentAPI.dao_update(DBQuery.is("code", run.expCode), DBUpdate.set("run", run));
+				//experimentAPI.dao_update(DBQuery.is("code", run.expCode), DBUpdate.set("run", run));
+				Experiment experiment = experimentAPI.get(run.expCode);
+				experiment.run = run;
+				experimentAPI.update(experiment, user);
 			}
 		}	
 	}

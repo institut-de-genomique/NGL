@@ -1,4 +1,6 @@
 @import views.html.helper._
+@import views.html.tools.controleTaxon
+
 @()
 
 		@** definition formulaire pour soumission Illumina ou nanopore **@
@@ -7,6 +9,7 @@
 		@formGroup{
 			<div  class="form-control" bt-select  ng-model="form.projCodes" filter="true" multiple = "true" placeholder='@Messages("create.placeholder.projectCodes")' bt-options="project.code as project|formatProjectListLabel for project in lists.getProjects()" required ng-change="refreshSubmissions()"></div>	
 		}
+
 		@** 
 		bt-options = lists.getSraConfigurations() defini dans ngl-common/common.js
 		ng-focus = appelle refreshSraConfigurations de createService
@@ -23,15 +26,21 @@
 			<div  ng-if="STRATEGY_CODE_STUDY" class="form-control" bt-select  ng-model="form.studyCode" placeholder='@Messages("create.placeholder.submissions.study")' bt-options="study.code as study.code for study in lists.getSraStudies()" ng-focus="refreshSraStudies()"></div>			
 		}
 		
+		@formGroup{
+			<textarea type="number" class="form-control"  rows="2" ng-model="form.taxonCode" placeholder='@Messages("create.placeholder.taxonCode")' ></textarea>		
+		}
+			
 		@** 
 		bt-options = lists.getReadSets() defini dans ngl-common/common.js
 		ng-focus = appelle refreshReadSets de createService
 		**@
+					
 		@formGroup{		
 			<div class="form-control" bt-select ng-model="form.readSetCodes" filter="true" multiple="true" textarea="true" placeholder='@Messages("create.placeholder.submissions.readSet")' bt-options="readSet.code as readSet.code for readSet in readSets" ng-focus="refreshReadSets()"></div>			
 		}	
+
 		@formGroup{		
-			<div ng-if="STRATEGY_AC_STUDY" >
+			<div ng-if="STRATEGY_AC_STUDY">
 				<input type="text" class="form-control" ng-model="form.acStudy" placeholder='@Messages("create.placeholder.acStudy")'>
 			</div>
 		}
@@ -43,14 +52,19 @@
 		}
 		@formGroup{	
 				<div>
-					<label>@Messages("userFileReadSet")</label> 
+					<label>@Messages("userFileReadSet.txt")</label> 
 					<input type="file"  id="idUserFileReadSet" base64-file="userFileReadSet"/>
 				</div>
 				<br/>
-				<div ng-show="STRATEGY_AC_SAMPLE">
-					<label>@Messages("userFileRefCollabToAc")</label> 
-					<input type="file"  id="idUserFileRefCollabToAc" base64-file="userFileRefCollabToAc"/>
+				<div ng-show="STRATEGY_AC_SAMPLE || STRATEGY_AC_STUDY">
+					<label>@Messages("userFileRefCollabToEbiIdentifier.txt")</label> 
+					<input type="file"  id="idUserFileRefCollabToEbiIdentifier" base64-file="userFileRefCollabToEbiIdentifier"/>
 				</div>
 		}
+		@formGroup{	
+			<div class="checkbox" ng-if="STRATEGY_AC_SAMPLE"><label><input type="checkbox" ng-model="form.noCheckTaxonSampleCollab"/>désactiver la vérification des taxonCodes des samples des collaborateurs</label></div>	
+			<div ng-if="STRATEGY_AC_SAMPLE">
+				@controleTaxon()
+			</div>
+		}
 		
-		</form>

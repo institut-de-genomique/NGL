@@ -4,18 +4,7 @@ angular.module('home').controller('DnaExtractionCtrl',['$scope', '$parse', '$fil
 
 	var datatableConfig =  {
 			name: $scope.experiment.typeCode.toUpperCase(),
-			columns:[   
-			         /*      {
-			        	 "header":Messages("containers.table.code"),
-			        	 "property":"inputContainer.support.code",
-			        	 "order":true,
-			        	 "edit":false,
-			        	 "hide":true,
-			        	 "type":"text",
-			        	 "mergeCells" : true,
-			        	 "position":1,
-			        	 "extraHeaders":{0:Messages("experiments.inputs")}
-			         },	*/	         
+			columns:[            
 			         {
 			        	 "header":Messages("containers.table.projectCodes"),
 			        	 "property": "inputContainer.projectCodes",
@@ -322,7 +311,7 @@ angular.module('home').controller('DnaExtractionCtrl',['$scope', '$parse', '$fil
 	} else {
 		datatableConfig.columns.push({
 			"header" : Messages("containers.table.code"),
-			"property" : "inputContainer.support.code",
+			"property" : "inputContainer.code",
 			"order" : true,
 			"edit" : false,
 			"hide" : true,
@@ -403,16 +392,16 @@ angular.module('home').controller('DnaExtractionCtrl',['$scope', '$parse', '$fil
 	//defined new atomictransfertMethod
 	atmService.newAtomicTransfertMethod =  function(line, column){
 		var getLine = function(line){
-			if($scope.experiment.instrument.outContainerSupportCategoryCode 
-					=== $scope.experiment.instrument.inContainerSupportCategoryCode){
-				return line;
-			}else if($scope.experiment.instrument.outContainerSupportCategoryCode !== "tube" 
-				&& $scope.experiment.instrument.inContainerSupportCategoryCode === "tube") {
-				return undefined;
-			}else if($scope.experiment.instrument.outContainerSupportCategoryCode === "tube"){
-				return "1";
-			}
+			var inputCategory = $scope.experiment.instrument.inContainerSupportCategoryCode;
+			var outputCategory = $scope.experiment.instrument.outContainerSupportCategoryCode;
 
+			if(outputCategory === "tube") {
+				return "1";
+			} else if(inputCategory === "tube") {
+				return undefined;
+			} else {
+				return line;
+			}
 		}
 		var getColumn=getLine;
 
@@ -519,6 +508,8 @@ angular.module('home').controller('DnaExtractionCtrl',['$scope', '$parse', '$fil
 	$scope.sample = {
 			extractionDNABlankSampleCode:null
 	};
+
+	$scope.setIsShowInformation (false);
 
 	$scope.refreshExtractionBlankSampleCodeLists();
 	atmService.experimentToView($scope.experiment, $scope.experimentType);					

@@ -37,7 +37,6 @@ public class DescriptionHistories extends NGLAPIController<DescriptionHistoriesA
 
   @Override
   public DescriptionHistory updateImpl(String code) throws Exception, APIException, APIValidationException {
-    // TODO Auto-generated method stub
      return null;
   }
 }

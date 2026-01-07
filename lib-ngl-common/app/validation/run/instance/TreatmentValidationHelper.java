@@ -197,12 +197,12 @@ public class TreatmentValidationHelper {
 		if (! ValidationHelper.validateNotEmpty(contextValidation, code, "code"))
 			return;
 		if (contextValidation.isCreationMode() && exists.get()) {
-			contextValidation.addError("code", ValidationConstants.ERROR_CODE_NOTUNIQUE_MSG, code, treatmentType.code);		    	
+			contextValidation.addError("111code", ValidationConstants.ERROR_CODE_NOTUNIQUE_MSG, code, treatmentType.code);		    	
 		} else if (contextValidation.isUpdateMode() && !exists.get()) {
-			contextValidation.addError("code", ValidationConstants.ERROR_CODE_NOTEXISTS_MSG, code, treatmentType.code);
+			contextValidation.addError("222code", ValidationConstants.ERROR_CODE_NOTEXISTS_MSG, code, treatmentType.code);
 		}
 		if (!treatmentType.names.contains(code)) {
-			contextValidation.addError("code", ValidationConstants.ERROR_VALUENOTAUTHORIZED_MSG, code);
+			contextValidation.addError("333code", ValidationConstants.ERROR_VALUENOTAUTHORIZED_MSG, code);
 		}		
 	}
 	

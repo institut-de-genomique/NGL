@@ -1,6 +1,7 @@
 
 -> / apinglcommon.Routes
 -> / apinglprojects.Routes
+-> / apinglsub.Routes
 -> / apinglsq.Routes
 -> / apinglbi.Routes
 -> / apimigration.Routes

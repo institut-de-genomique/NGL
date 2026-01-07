@@ -38,8 +38,8 @@ angular.module('home').controller('ModalChoiceCtrl', ['$scope', '$modalInstance'
 	};	 
 }]);
 	
-angular.module('home').controller('StatsSearchReadSetsCtrl',['$scope', '$routeParams', 'mainService', 'tabService','readSetsSearchService', 'valuationService','queriesConfigReadSetsService',
-                                                              function($scope, $routeParams, mainService, tabService, readSetsSearchService, valuationService, queriesConfigReadSetsService) { 
+angular.module('home').controller('StatsSearchReadSetsCtrl',['$scope', '$routeParams', 'mainService', 'tabService','readSetsSearchService', 'valuationService','queriesConfigReadSetsService', 'projectSearchFromUmbrella',
+                                                              function($scope, $routeParams, mainService, tabService, readSetsSearchService, valuationService, queriesConfigReadSetsService, projectSearchFromUmbrella) { 
 
 	var datatableConfig = {
 			group: {
@@ -58,6 +58,11 @@ angular.module('home').controller('StatsSearchReadSetsCtrl',['$scope', '$routePa
 				template:'<button class="btn btn-default" ng-click="addToBasket()" data-toggle="tooltip" title="'+Messages("button.query.addbasket")+'"><i class="fa fa-shopping-cart"></i> (<span ng-bind="queriesConfigService.queries.length"/>)</button>'
 			}
 	};
+
+	$scope.selectProjetsFromUmbrellas = function() {
+		var projCodes = projectSearchFromUmbrella.search($scope.searchService.form.umbrellaCodes);
+		$scope.searchService.form.projectCodes = projCodes;
+	}
 
 	if(angular.isUndefined(mainService.getHomePage())){
 		mainService.setHomePage('search');

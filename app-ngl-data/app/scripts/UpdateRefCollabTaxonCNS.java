@@ -13,7 +13,7 @@ import models.laboratory.sample.instance.Sample;
 import models.utils.InstanceConstants;
 import play.Logger;
 import validation.ContextValidation;
-
+@Deprecated
 public class UpdateRefCollabTaxonCNS extends ScriptWithArgsAndExcelBody <UpdateRefCollabTaxonCNS.Args> {
 
 	public static class Args {

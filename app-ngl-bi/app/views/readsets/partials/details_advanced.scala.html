@@ -1,4 +1,6 @@
+@(ctx : fr.cea.ig.ngl.NGLApplication)
 @()
+@isCNGInstitute  = @{ "CNG" == ctx.nglConfig().getInstitute() }
 
 @columnLabelValueAdv(label:String)(value: Html) = {
 	<div class="form-group">
@@ -19,11 +21,53 @@
 				@columnLabelValueAdv(Messages("readsets.archiveDate")){
 					<p class="form-control-static">{{readset.archiveDate | date:'@Messages("datetime.format")'}}</p>
 				}
+				
+				@columnLabelValueAdv(Messages("readset.properties.localDataCloned")){
+					<p class="form-control-static">{{isLocalDataCloned()}}</p>
+				}
+				
+				<!-- NGL-5228-->
+				@if(isCNGInstitute){						
+					@columnLabelValueAdv(Messages("readsets.files.doNotRestore")){
+						<div class="checkbox" ng-if="isEditMode()">
+								<label>
+								<input type="checkbox" ng-model="readset.properties.doNotRestore.value" ng-if="isEditMode()">&nbsp;	
+								</label>
+						</div>
+
+						<p class="form-control-static" ng-switch on="readset.properties.doNotRestore.value" ng-if="!isEditMode()">
+							<i ng-switch-when="true" class="fa fa-check-square-o  fa-lg"></i>
+							<i ng-switch-default class="fa fa-square-o  fa-lg"></i>
+						</p>
+					}
+				}
 				@columnLabelValueAdv(Messages("readsets.files.path")){
 					<p class="form-control-static">{{readset.path}}</p>
 				}
 				@columnLabelValueAdv(Messages("readsets.files.location")){
 					<p class="form-control-static">{{readset.location}}</p>
+				}
+				<!-- NGL-4422-->
+				@if(isCNGInstitute){
+					@columnLabelValueAdv(Messages("readsets.files.localDataDeleted")){
+						<p class="form-control-static" ng-switch on="readset.properties.localDataDeleted.value">
+							<i ng-switch-when="true" class="fa fa-check-square-o  fa-lg"></i>
+							<i ng-switch-default class="fa fa-square-o  fa-lg"></i>
+						</p>
+					}
+					<!-- NGL-4925-->
+					@columnLabelValueAdv(Messages("readsets.files.tgccDataDeleted")){
+						<div class="checkbox" ng-if="isEditMode()">
+					 	  	<label>
+					  	 	<input type="checkbox" ng-model="readset.properties.tgccDataDeleted.value" ng-if="isEditMode()">&nbsp;	
+					  	 	</label>
+				   		</div>
+
+						<p class="form-control-static" ng-switch on="readset.properties.tgccDataDeleted.value" ng-if="!isEditMode()">
+							<i ng-switch-when="true" class="fa fa-check-square-o  fa-lg"></i>
+							<i ng-switch-default class="fa fa-square-o  fa-lg"></i>
+						</p>
+					}
 				}
 				@columnLabelValueAdv(Messages("readsets.properties.isSentCollaborator")){
 					<div class="checkbox" ng-if="isEditMode()">

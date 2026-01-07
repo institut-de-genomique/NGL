@@ -10,8 +10,25 @@ angular.module('home').controller('CreateCtrl',[ '$http', '$scope', '$routeParam
 	$scope.form = {};
 	$scope.lists = lists;
 	$scope.treeLoadInProgress = false;
-	$scope.maxReadSetCodes = 750;
+	$scope.maxReadSetCodes = 1000;
 	$scope.labelSelectAll = "SELECT ALL";
+	$scope.treeLoadInProgress = false;
+	
+	$scope.isClickable=function() {
+		if ($scope.treeLoadInProgress){
+			return false;
+		}
+		return true;
+	}
+	
+	// NGL-4952 
+	$scope.isShowConsigne=false;
+	$scope.toggleShowConsigne=function(){
+		//console.log("TOGGLE search-ctrl.js");
+		if ( $scope.isShowConsigne===false) { 
+			$scope.isShowConsigne=true}
+		else {$scope.isShowConsigne=false}
+	};
 	
 	if(angular.isUndefined(mainService.getHomePage())){
 		mainService.setHomePage('create');
@@ -58,19 +75,37 @@ angular.module('home').controller('CreateCtrl',[ '$http', '$scope', '$routeParam
 			if($scope.bionanoCheck) {
 				var tab_typeCodes = []; // tableau provisoire pour construire requete
 				tab_typeCodes.push("rsbionano");
-				$http.get(jsRoutes.controllers.readsets.api.ReadSets.list().url,{params:{projectCodes:this.form.projCodes, submissionStateCode:"NONE", stateCode:"A", includes:"code", bioinformaticValidCode:"TRUE", typeCodes:tab_typeCodes}}).success(function(data) {
-					$scope.readSets = data;
-					$scope.readSets.unshift({"code": $scope.labelSelectAll});
-				});
+				if(toolsServices.isNotBlank($scope.form.taxonCode)) {
+					// ancienne version avec selection des readsets disponibles:
+					//$http.get(jsRoutes.controllers.readsets.api.ReadSets.list().url,{params:{projectCodes:this.form.projCodes, submissionStateCode:"NONE", stateCode:"A", includes:"code", bioinformaticValidCode:"TRUE", typeCodes:tab_typeCodes, taxonCode:this.form.taxonCode}}).success(function(data) {
+					// nouvelle version avec selection des readset valide pour bioinfo et QC (production) :	
+					$http.get(jsRoutes.controllers.readsets.api.ReadSets.list().url,{params:{projectCodes:this.form.projCodes, submissionStateCode:"NONE", productionValidCode:"TRUE", includes:"code", bioinformaticValidCode:"TRUE", typeCodes:tab_typeCodes, taxonCode:this.form.taxonCode}}).success(function(data) {
+						$scope.readSets = data;
+						$scope.readSets.unshift({"code": $scope.labelSelectAll});
+					});
+				} else {
+					$http.get(jsRoutes.controllers.readsets.api.ReadSets.list().url,{params:{projectCodes:this.form.projCodes, submissionStateCode:"NONE", productionValidCode:"TRUE", includes:"code", bioinformaticValidCode:"TRUE", typeCodes:tab_typeCodes}}).success(function(data) {
+						$scope.readSets = data;
+						$scope.readSets.unshift({"code": $scope.labelSelectAll});
+					});					
+				}
 			} else {
 				var tab_typeCodes = []; // tableau provisoire pour construire requete
 				tab_typeCodes.push("rsillumina");
 				tab_typeCodes.push("rsnanopore");
 				tab_typeCodes.push("rsmgi");
-				$http.get(jsRoutes.controllers.readsets.api.ReadSets.list().url,{params:{projectCodes:this.form.projCodes, submissionStateCode:"NONE", stateCode:"A", includes:"code", bioinformaticValidCode:"TRUE", typeCodes:tab_typeCodes}}).success(function(data) {
-					$scope.readSets = data;
-					$scope.readSets.unshift({"code": $scope.labelSelectAll});
-				});			
+				tab_typeCodes.push("rspacbio");
+				if(toolsServices.isNotBlank($scope.form.taxonCode)) {
+					$http.get(jsRoutes.controllers.readsets.api.ReadSets.list().url,{params:{projectCodes:this.form.projCodes, submissionStateCode:"NONE", productionValidCode:"TRUE", includes:"code", bioinformaticValidCode:"TRUE", typeCodes:tab_typeCodes, taxonCode:this.form.taxonCode}}).success(function(data) {
+						$scope.readSets = data;
+						$scope.readSets.unshift({"code": $scope.labelSelectAll});
+					});	
+				} else {
+					$http.get(jsRoutes.controllers.readsets.api.ReadSets.list().url,{params:{projectCodes:this.form.projCodes, submissionStateCode:"NONE", productionValidCode:"TRUE", includes:"code", bioinformaticValidCode:"TRUE", typeCodes:tab_typeCodes}}).success(function(data) {
+						$scope.readSets = data;
+						$scope.readSets.unshift({"code": $scope.labelSelectAll});
+					});	
+				}		
 			}
 			//console.log ("type de readSets=", typeof $scope.readSets); 
 			//console.log("liste des readsets =", $scope.readSets);
@@ -112,23 +147,35 @@ angular.module('home').controller('CreateCtrl',[ '$http', '$scope', '$routeParam
 			$http.get(jsRoutes.controllers.sra.configurations.api.Configurations.get($scope.form.configurationCode).url).success(function(data) {
 				//console.log("data.strategyStudy", data.strategyStudy);				
 				if(data.strategyStudy === 'STRATEGY_AC_STUDY') {
-					//console.log("cas STRATEGY_AC_STUDY");
+					console.log("cas STRATEGY_AC_STUDY");
 					$scope.STRATEGY_CODE_STUDY=false;
 					$scope.STRATEGY_AC_STUDY=true;	
 				}
 				if(data.strategySample === 'STRATEGY_AC_SAMPLE') {
-					//console.log("cas STRATEGY_AC_SAMPLE");
+					console.log("cas STRATEGY_AC_SAMPLE");
 					$scope.STRATEGY_AC_SAMPLE=true;	
 				} else {
 					
 				}
+				//console.log("data", data);
 			});
 		}
 	};
 	
+
+
 //	Initialisation variables sra :
 
-	$scope.save = function(){
+	$scope.save = function() {
+		if($scope.form.atlaseaCheck) {
+			$scope.saveIfAtlaseaCheck();
+		} else {
+			$scope.saveDefault();
+		}
+	}; // end save()
+	
+	
+	$scope.saveDefault = function(){
 		$scope.messages = messages();	
 		$scope.messages.clear();
 		$scope.treeLoadInProgress = true;
@@ -159,10 +206,10 @@ angular.module('home').controller('CreateCtrl',[ '$http', '$scope', '$routeParam
 //		console.log("typeof $scope.userRefFileCollabToAc : '" + typeof $scope.userRefFileCollabToAc + "'");
 //		console.log("typeof undefined : '" + typeof undefined + "'");
 		
-		$scope.form.base64UserFileRefCollabToAc=""; 
-		if ($scope.userFileRefCollabToAc != null &&	$scope.userFileRefCollabToAc != undefined) {
-			if ($scope.userFileRefCollabToAc.value != null && $scope.userFileRefCollabToAc.value != undefined) {
-				$scope.form.base64UserFileRefCollabToAc=$scope.userFileRefCollabToAc.value;
+		$scope.form.base64UserFileRefCollabToEbiIdentifier=""; 
+		if ($scope.userFileRefCollabToEbiIdentifier != null &&	$scope.userFileRefCollabToEbiIdentifier != undefined) {
+			if ($scope.userFileRefCollabToEbiIdentifier.value != null && $scope.userFileRefCollabToEbiIdentifier.value != undefined) {
+				$scope.form.base64UserFileRefCollabToEbiIdentifier=$scope.userFileRefCollabToEbiIdentifier.value;
 			}
 		} 
 		$scope.form.base64UserFileReadSet="";
@@ -200,7 +247,7 @@ angular.module('home').controller('CreateCtrl',[ '$http', '$scope', '$routeParam
 			$scope.messages = messages();
 			$scope.messages.clear();
 			$scope.messages.clazz="alert alert-success";
-			$scope.messages.text=Messages('submissions.msg.save.success') + " : " + data.code;
+			$scope.messages.text=Messages('submissions.msg.save.success') + " : " + data.code  + " => Pensez à valider puis demarrer votre soumission !!! ";
 			$scope.messages.open();
 			$scope.codeSubmission = data;
 		    $scope.resetUserData();
@@ -213,10 +260,53 @@ angular.module('home').controller('CreateCtrl',[ '$http', '$scope', '$routeParam
 			//$scope.resetUserData();
 			//$scope.messages.clear();
 			//angular.element('#idUserFileReadSet')[0].value = null;
-			//angular.element('#idUserFileRefCollabToAc')[0].value = null;
+			//angular.element('#idUserFileRefCollabToEbiIdentifier')[0].value = null;
 		});
-	}; // end save()
+	}; // end saveDefault()
 	
+	
+	$scope.saveIfAtlaseaCheck = function(){
+		$scope.messages = messages();	
+		$scope.messages.clear();
+		$scope.treeLoadInProgress = true;
+		
+		console.log("$scope.form", $scope.form );
+
+ 
+		$scope.form.base64UserFileRefCollabToEbiIdentifier=""; 
+		if ($scope.userFileRefCollabToEbiIdentifier != null &&	$scope.userFileRefCollabToEbiIdentifier != undefined) {
+			if ($scope.userFileRefCollabToEbiIdentifier.value != null && $scope.userFileRefCollabToEbiIdentifier.value != undefined) {
+				$scope.form.base64UserFileRefCollabToEbiIdentifier=$scope.userFileRefCollabToEbiIdentifier.value;
+			}
+		} 
+
+		mainService.setForm($scope.form);
+		console.log("Dans scope.saveIfAtlaseaCheck, mainService.getForm=", mainService.getForm());
+		//$scope.search();
+		$http.put(jsRoutes.controllers.sra.submissions.api.Submissions.createFromTolid().url, mainService.getForm()).success(function(data) {
+			$scope.treeLoadInProgress = false;
+			$scope.messages = messages();
+			$scope.messages.clear();
+			$scope.messages.clazz="alert alert-success";
+			$scope.messages.text=data;
+			$scope.messages.open();
+			$scope.codeSubmission = data;
+			console.log("codeSubmission=", $scope.codeSubmission);
+		    $scope.resetUserData();
+		}).error(function(data){
+		    $scope.treeLoadInProgress = false;
+			//$scope.messages.setDetails({"error":["code":"value","code2":"value2"]});
+		    console.log("data=", data);
+			$scope.messages.setDetails(data);
+			$scope.messages.setError("save");
+			//$scope.resetUserData();
+			//$scope.messages.clear();
+			//angular.element('#idUserFileReadSet')[0].value = null;
+			//angular.element('#idUserFileRefCollabToEbiIdentifier')[0].value = null;
+		});
+	}; // end saveIfAtlaseaCheck()
+	
+		
 	$scope.resetUserData = function(){
 		$scope.treeLoadInProgress = false;
 		$scope.form = {}; // on initialise à null toutes les variables recuperees dans create-ctrl.js dans code : ng-model="form
@@ -226,20 +316,21 @@ angular.module('home').controller('CreateCtrl',[ '$http', '$scope', '$routeParam
 		if (angular.element('#idUserFileReadSet') != null && angular.element('#idUserFileReadSet')[0] != null) {
 			angular.element('#idUserFileReadSet')[0] = null;
 		}
-		if (angular.element('#idUserFileRefCollabToAc') != null && angular.element('#idUserFileRefCollabToAc')[0] != null) {
-			angular.element('#idUserFileRefCollabToAc')[0] = null;	
+		if (angular.element('#idUserFileRefCollabToEbiIdentifier') != null && angular.element('#idUserFileRefCollabToEbiIdentifier')[0] != null) {
+			angular.element('#idUserFileRefCollabToEbiIdentifier')[0] = null;	
 		}
 		if (angular.element('#idUserFilePathcmap') != null && angular.element('#idUserFilePathcmap')[0] != null) {
 			angular.element('#idUserFilePathcmap')[0] = null;	
 		}
 		$scope.userFileExperiments=null;
 		$scope.userFileSamples=null;
-		$scope.userFileRefCollabToAc=null;
+		$scope.userFileRefCollabToEbiIdentifier=null;
 		$scope.userFileReadSet=null;
 		$scope.userFilePathcmap = null;
 		$scope.bionanoCheck = false;
 		$scope.defaultCheck = false;
 		$scope.metadataCheck = false;
+		$scope.atlaseaCheck = false;
 		$scope.acStudy=null;
 		$scope.acSample=null;
 		
@@ -266,7 +357,12 @@ angular.module('home').controller('CreateCtrl',[ '$http', '$scope', '$routeParam
 		if(choixCheck=="metadataCheck") {
 			$scope.metadataCheck = true;
 			$scope.form.metadataCheck = true;
-		}		
+		}	
+		if(choixCheck=="atlaseaCheck") {
+			$scope.atlaseaCheck = true;
+			$scope.form.atlaseaCheck = true;
+		}
+			
 	};
 	
 	$scope.reset = function(){	
@@ -313,8 +409,17 @@ angular.module('home').controller('CreateCtrl',[ '$http', '$scope', '$routeParam
 			if($scope.form.sampleCodes) {
 				retour = true;
 			} 
+		}
+		// si soumission atlasea et tolid existe	
+		if ($scope.atlaseaCheck && $scope.form != null) {
+			// si tolid renseigné :
+			if($scope.form.tolId) {
+				retour = true;
+			} 
 		}	
 		return retour;
+		
+		
 	};
 	
 }]);

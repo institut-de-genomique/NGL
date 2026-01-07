@@ -6,7 +6,7 @@ angular.module('home').controller('HiCPrepCtrl',['$scope', '$parse', '$filter', 
 			columns:[   
 			        {
 			        	 "header":Messages("containers.table.code"),
-			        	 "property":"inputContainer.support.code",
+			        	 "property":"inputContainer.code",
 			        	 "order":true,
 			        	 "edit":false,
 			        	 "hide":true,

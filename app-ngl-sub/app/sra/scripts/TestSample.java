@@ -2,17 +2,17 @@ package sra.scripts;
 
 import javax.inject.Inject;
 
+import controllers.sra.api.AbstractStudyAPI;
+import controllers.sra.api.ConfigurationAPI;
+import controllers.sra.api.ExperimentAPI;
+import controllers.sra.api.SampleAPI;
+import controllers.sra.api.SubmissionAPI;
 import fr.cea.ig.lfw.controllers.scripts.buffered.ScriptNoArgs;
 import fr.cea.ig.ngl.NGLApplication;
-import fr.cea.ig.ngl.dao.api.sra.AbstractStudyAPI;
-import fr.cea.ig.ngl.dao.api.sra.ConfigurationAPI;
-import fr.cea.ig.ngl.dao.api.sra.ExperimentAPI;
-import fr.cea.ig.ngl.dao.api.sra.SampleAPI;
-import fr.cea.ig.ngl.dao.api.sra.SubmissionAPI;
 import fr.cea.ig.ngl.dao.readsets.ReadSetsAPI;
 import validation.ContextValidation;
-import validation.sra.SraValidationHelper;
 import play.libs.Json;
+import services.sra.SraValidationHelper;
 
 
 /*
@@ -111,7 +111,7 @@ public class TestSample extends ScriptNoArgs {
 //ok 		String sampleAttributes = "<SAMPLE_ATTRIBUTE><TAG>Strain</TAG><VALUE>ABBA</VALUE></SAMPLE_ATTRIBUTE>";
 //ok		String sampleAttributes = "<SAMPLE_ATTRIBUTE><TAG>Depth</TAG><VALUE>200</VALUE><UNITS>m</UNITS></SAMPLE_ATTRIBUTE>";
 //ok		String sampleAttributes = "<SAMPLE_ATTRIBUTE><TAG>Sample Collection Device</TAG><VALUE>high volume peristaltic pump [HVP-PUMP]</VALUE></SAMPLE_ATTRIBUTE>";
-		SraValidationHelper.newValidateAttributesRequired (contextValidation,"attributes", sampleAttributes);
+		SraValidationHelper.validateSampleAttributesRequired (contextValidation,"attributes", sampleAttributes);
 		if(contextValidation.hasErrors()) {
 			contextValidation.displayErrors(logger, "debug");
 			println(Json.prettyPrint(app.errorsAsJson(contextValidation.getErrors())));				

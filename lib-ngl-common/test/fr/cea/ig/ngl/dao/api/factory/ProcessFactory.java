@@ -9,6 +9,7 @@ import java.util.UUID;
 import org.apache.commons.lang.RandomStringUtils;
 
 import fr.cea.ig.ngl.utils.TestUtils;
+import models.laboratory.common.instance.State;
 import models.laboratory.processes.instance.Process;
 
 /**
@@ -31,6 +32,50 @@ public final class ProcessFactory {
 		}
 
 		return res;
+	}
+
+	/**
+	 * Méthode permettant de générer un objet "Process" aléatoire.
+	 * 
+	 * @param state Le state que le process doit avoir.
+	 * @param hasNullICU
+	 * 
+	 * @return Un objet "Process" aléatoire.
+	 */
+	public static Process getRandomProcess(State state, boolean hasNullICU) {
+		Process process = getRandomProcess(false, false, false);
+		process.state = state;
+
+		if (hasNullICU) {
+			process.inputContainerCode = null;
+		} else {
+			Set<String> icuCodes = new HashSet<>();
+
+			icuCodes.add(ContainerFactory.getRandomContainerCode());
+			
+			process.outputContainerCodes = icuCodes;
+		}
+
+		return process;
+	}
+
+	/**
+	 * getRandomProcess
+	 */
+	public static Process getRandomProcess(State state, boolean hasNullICU, boolean hasOcuCodes) {
+		Process process = getRandomProcess(state, hasNullICU);
+		
+		if (hasOcuCodes) {
+			Set<String> ocuCodes = new HashSet<>();
+
+			if (hasOcuCodes) {
+				ocuCodes.add(ContainerFactory.getRandomContainerCode());
+			}
+
+			process.outputContainerCodes = ocuCodes;
+		}
+
+		return process;
 	}
 
 	/**

@@ -20,7 +20,7 @@ import validation.ContextValidation;
 
 public class ExperimentsRuns extends DocumentController<Experiment> {
 
-	private static final play.Logger.ALogger logger = play.Logger.of(ExperimentsRuns.class);
+	// private static final play.Logger.ALogger logger = play.Logger.of(ExperimentsRuns.class);
 
 	final static List<String>   authorizedUpdateFields = Arrays.asList("accession");
 	final Form<Experiment>      experimentForm;

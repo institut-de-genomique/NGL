@@ -23,16 +23,6 @@ import fr.cea.ig.MongoDBDAO;
 import fr.cea.ig.MongoDBResult;
 import fr.cea.ig.ngl.NGLConfig;
 import fr.cea.ig.play.migration.NGLContext;
-<<<<<<< HEAD
-import models.laboratory.common.instance.property.PropertyFileValue;
-import models.laboratory.run.instance.ReadSet;
-import models.utils.InstanceConstants;
-import play.Logger;
-import play.Play;
-import play.mvc.Result;
-import rules.services.RulesServices6;
-=======
->>>>>>>  correction import NGLContext  MigrationTaxonomyFungi.java
 
 
 public class MigrationTaxonomyFungi extends DocumentController<ReadSet>{

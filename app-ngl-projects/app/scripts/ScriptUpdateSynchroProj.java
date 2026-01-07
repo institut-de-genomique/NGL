@@ -4,7 +4,6 @@ import java.util.List;
 
 import fr.cea.ig.MongoDBDAO;
 import fr.cea.ig.lfw.controllers.scripts.chunked.ScriptWithExcelBody;
-import models.laboratory.common.instance.property.PropertySingleValue;
 import models.laboratory.project.instance.Project;
 import models.utils.InstanceConstants;
 import play.Logger;
@@ -43,7 +42,7 @@ public class ScriptUpdateSynchroProj extends ScriptWithExcelBody {
 				if (projectCode.trim().equals(p.code)) {
 					this.isPresent = true;
 					Project projEnBase = MongoDBDAO.findByCode(InstanceConstants.PROJECT_COLL_NAME, Project.class, projectCode);
-					projEnBase.properties.put("synchroProj", new PropertySingleValue(Boolean.TRUE));
+					projEnBase.systemParameters.synchroProj = Boolean.TRUE;
 					
 					MongoDBDAO.update(InstanceConstants.PROJECT_COLL_NAME, projEnBase);
 				}
@@ -51,7 +50,7 @@ public class ScriptUpdateSynchroProj extends ScriptWithExcelBody {
 			
 			if (!this.isPresent) {
 				Project projEnBase = MongoDBDAO.findByCode(InstanceConstants.PROJECT_COLL_NAME, Project.class, allProjectsList.get(i).code);
-				projEnBase.properties.put("synchroProj", new PropertySingleValue(Boolean.FALSE));
+				projEnBase.systemParameters.synchroProj = Boolean.FALSE;
 				
 				MongoDBDAO.update(InstanceConstants.PROJECT_COLL_NAME, projEnBase);
 			}

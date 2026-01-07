@@ -18,14 +18,22 @@ import com.mongodb.MongoException;
 import fr.cea.ig.MongoDBDAO;
 import fr.cea.ig.ngl.NGLApplication;
 import models.Constants;
+import models.laboratory.common.instance.property.PropertySingleValue;
+import models.laboratory.sample.description.ImportType;
 import models.laboratory.sample.instance.Sample;
 import models.utils.InstanceConstants;
 import models.utils.dao.DAOException;
+import play.Logger;
 import rules.services.RulesException;
 import services.instance.AbstractImportData;
 import services.taxonomy.Taxon;
 import services.taxonomy.TaxonomyServices;
 import validation.ContextValidation;
+import validation.common.instance.CommonValidationHelper;
+import models.laboratory.common.description.Level;
+import models.laboratory.common.description.PropertyDefinition;
+import models.laboratory.common.instance.PropertyValue;
+
 
 public abstract class AbstractUpdateSampleNCBITaxon extends AbstractImportData {
 
@@ -43,15 +51,17 @@ public abstract class AbstractUpdateSampleNCBITaxon extends AbstractImportData {
 	}
 
 	public void updateSampleNCBI(ContextValidation contextError, List<String> sampleCodes) {
+		
 		// enlever la cle import qui pollue un peu les log d'erreurs :
 		contextError.removeKeyFromRootKeyName("import");
 
 		BasicDBObject keys = new BasicDBObject();
 		keys.put("code", 1);
 		keys.put("taxonCode", 1);
+		keys.put("importTypeCode", 1);
 
 		List<Sample> samples = MongoDBDAO.find(InstanceConstants.SAMPLE_COLL_NAME, Sample.class, 
-				DBQuery.notEquals("taxonCode", null).
+				DBQuery.notEquals("taxonCode",null).
 				or(DBQuery.is("ncbiScientificName", null), 
 				   DBQuery.is("ncbiScientificName", ""), 
 				   DBQuery.is("ncbiScientificName", TaxonomyServices.defaultErrorMessage), 
@@ -62,11 +72,10 @@ public abstract class AbstractUpdateSampleNCBITaxon extends AbstractImportData {
 		logger.info("update sample without ncbi data : "+samples.size());
 		
 		Map<String, List<Sample>> samplesByTaxon = samples.stream().collect(Collectors.groupingBy(sample -> sample.taxonCode));
-		// NGL-3902 : 
+		// NGL-3902 :
 		ArrayList<String> listTaxonCodes = new ArrayList<String>();
 		listTaxonCodes.addAll(samplesByTaxon.keySet());
 		Map<String, Taxon> mapTaxons = taxonomyServices.getTaxons(listTaxonCodes);
-		
 		for(String keyTaxonCode : samplesByTaxon.keySet()){
 			logger.debug("Get ncbiTaxon for " + keyTaxonCode);
 			
@@ -74,7 +83,10 @@ public abstract class AbstractUpdateSampleNCBITaxon extends AbstractImportData {
 			                                           // ajout dans la mapTaxons du taxon en erreur
 			String scientificName = TaxonomyServices.defaultErrorMessage;
 			String lineage = TaxonomyServices.defaultErrorMessage;; 
-			
+			String phylumScientificName = null;
+			String classScientificName = null;
+
+		
 			if (taxon == null) { // normalement ne doit pas arriver
 				taxon = new Taxon(keyTaxonCode);
 				taxon.error = true;
@@ -85,6 +97,7 @@ public abstract class AbstractUpdateSampleNCBITaxon extends AbstractImportData {
 			} else {
 				scientificName = taxon.getScientificName();
 				lineage = taxon.getLineage();
+
 			}
 			if (taxon.error) {
 				String errorMessage = " pour les sample.codes suivants : ";
@@ -93,9 +106,59 @@ public abstract class AbstractUpdateSampleNCBITaxon extends AbstractImportData {
 				}
 				contextError.addError(keyTaxonCode, TaxonomyServices.defaultErrorMessage + keyTaxonCode  + errorMessage);
 			}
+		
 			DBUpdate.Builder builder = DBUpdate.set("traceInformation.modifyDate",new Date() ).set("traceInformation.modifyUser",Constants.NGL_DATA_USER);
 			builder.set("ncbiScientificName", scientificName);
 			builder.set("ncbiLineage", lineage);
+
+			//NGL-4631: Rajout de la propriété phylum sur les samples qui ont phylum pour les proriété de leur import type 
+
+			for (int j = 0; j < samplesByTaxon.get(keyTaxonCode).size(); j++) {
+				Sample sample = samplesByTaxon.get(keyTaxonCode).get(j);
+
+				if(sample.importTypeCode != null){
+
+					ImportType importType = CommonValidationHelper.validateCodeForeignOptional(null, ImportType.miniFind.get(), sample.importTypeCode, "importTypeCode", true);
+					
+					for (int i = 0; i < importType.getPropertyDefinitionByLevel(Level.CODE.Sample, Level.CODE.Content).size(); i++) {	
+						
+						PropertyDefinition propertyDef = importType.getPropertyDefinitionByLevel(Level.CODE.Sample, Level.CODE.Content).get(i);
+						
+						if (propertyDef.code.equals("ncbiPhylum")) { // 
+							
+							phylumScientificName = taxon.getPhylum();
+							if(phylumScientificName != null){
+								PropertyValue phylumValue = new PropertySingleValue();
+								phylumValue.value = phylumScientificName;
+	
+								builder.set("properties.ncbiPhylum", phylumValue);
+							}else{
+								Logger.error("Aucun phylum trouvé pour le taxon :"+ taxon.code);
+							}
+						
+						}
+						if (propertyDef.code.equals("ncbiClass")) { 
+			
+							classScientificName = taxon.getClassTaxon();
+							
+							if(classScientificName != null){
+								PropertyValue classValue = new PropertySingleValue();
+								classValue.value = classScientificName;
+	
+								builder.set("properties.ncbiClass", classValue);
+							}else{
+								Logger.error("Aucun rank de niveau class n'a été trouvé pour le taxon :"+ taxon.code);
+							}
+						
+						}
+					}
+				}
+				
+			}
+	
+
+
+			
 			
 			// important d'avoir keyTaxonCode et non taxon.code car taxon.code != de keyTaxonCode si alias ou aka de taxonId :
 			samplesByTaxon.get(keyTaxonCode).forEach(sample ->{

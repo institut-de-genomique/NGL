@@ -16,10 +16,13 @@
 			<textarea class="form-control" rows="3" ng-model="form.description" placeholder='@Messages("create.analyzes.placeholder.description")' required></textarea>		
 		}
 		@formGroup{
-			<textarea type="text" class="form-control"  rows="2" ng-model="form.studyAccession" placeholder='@Messages("create.analyzes.placeholder.studyAccession")' required></textarea>		
+			<textarea type="text" class="form-control"  rows="2" ng-model="form.studyIdentifier" placeholder='@Messages("create.analyzes.placeholder.studyIdentifier")' required></textarea>		
 		}					
 		@formGroup{
-			<textarea class="form-control" rows="2" ng-model="form.sampleAccession" placeholder='@Messages("create.analyzes.placeholder.sampleAccession")' required></textarea>		
+			<textarea class="form-control" rows="2" ng-model="form.sampleIdentifier" placeholder='@Messages("create.analyzes.placeholder.sampleIdentifier")' required></textarea>		
+		}
+		@formGroup{
+			<div class="form-control" bt-select ng-model="form.legendeDropBox" placeholder='@Messages("create.analyzes.placeholder.dropBox")' bt-options="legendeDropBox.name as legendeDropBox.code for legendeDropBox in sraVariables.legendeDropBox" required></div>			
 		}		
 	}
 

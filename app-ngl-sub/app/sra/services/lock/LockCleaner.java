@@ -1,0 +1,23 @@
+package sra.services.lock;
+//package services.crontab;
+//
+//// Recurring low frequency lock cleaning process.
+//// Delete all instances whose duration has expired.
+//// We use the $currentDate operator to have the proper expiration dates
+//// set server side. We need some date comparison with offsets to delete
+//// things (lastModified + 5mn < expirationDate)
+//// This is just run at some low frequency.
+//public class LockCleaner implements Runnable {
+//	
+//	private final LockAPI api;
+//	
+//	public LockCleaner(LockAPI api) {
+//		this.api = api;
+//	}
+//	
+//	@Override
+//	public void run() {
+//		api.garbageCollectLocks();
+//	}
+//	
+//}

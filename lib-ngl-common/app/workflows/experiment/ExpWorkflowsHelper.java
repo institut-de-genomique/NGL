@@ -1301,6 +1301,7 @@ public class ExpWorkflowsHelper {
 					if(null != icu.newQuantity && null != icu.newQuantity.value)c.quantity = icu.newQuantity;
 					if(null != icu.newVolume && null != icu.newVolume.value)c.volume = icu.newVolume;
 					if(null != icu.newSize && null != icu.newSize.value)c.size = icu.newSize;
+					if(isNotQuantifiableByFluo(exp.typeCode, icu))clearCurrentQuantification(c);
 					if (icu.valuation != null && TBoolean.TRUE.equals(icu.copyValuationToInput)) {
 						c.valuation      = icu.valuation;
 						c.valuation.user = validation.getUser();
@@ -1339,6 +1340,23 @@ public class ExpWorkflowsHelper {
 			// update containers
 			containers.parallelStream().forEach(container -> MongoDBDAO.update(InstanceConstants.CONTAINER_COLL_NAME,container));
 		});
+	}
+	
+	public boolean isNotQuantifiableByFluo(String typeCode, InputContainerUsed icu) {
+		return isFluoQuantificationType(typeCode) && isNotQuantifiable(icu) && icu.newConcentration == null;
+	}
+	
+	private boolean isFluoQuantificationType(String typeCode) {
+		return "fluo-quantification".equals(typeCode) || "reception-fluo-quantification".equals(typeCode);
+	}
+
+	private boolean isNotQuantifiable(InputContainerUsed icu) {
+		return icu.experimentProperties != null && icu.experimentProperties.containsKey("calculationMethod") && icu.experimentProperties.get("calculationMethod") != null && "Non quantifiable".equals(icu.experimentProperties.get("calculationMethod").value);
+	}
+
+	public void clearCurrentQuantification(Container c) {
+		c.quantity = null;
+		c.concentration = null;
 	}
 
 	public void updateWithNewSampleCodesIfNeeded(Experiment exp) {
@@ -1787,14 +1805,13 @@ public class ExpWorkflowsHelper {
 	}
 
 	private void updateContainerContentPropertiesInCascading(ContextValidation validation, AbstractContainerUsed acu, Set<String> contentPropertyCodes, Map<String, Content> oldExpContents) {
-		Logger.debug("Update content container "+acu.code);
+		Logger.info("Update content container "+acu.code);
 		List<Container> containerMustBeUpdated = MongoDBDAO.find(InstanceConstants.CONTAINER_COLL_NAME, Container.class,  
 				DBQuery.or(DBQuery.is("code", acu.code), DBQuery.regex("treeOfLife.paths", Pattern.compile(","+acu.code+"$|,"+acu.code+","))))
 				.toList();
 		Set<String> containerCodes = containerMustBeUpdated.stream().map(c -> c.code).collect(Collectors.toSet());
 
 		acu.contents.forEach(ocuContent -> {
-			Logger.debug("Content "+ocuContent.sampleCode);
 			Content oldContent = oldExpContents.get(getKey(acu, ocuContent, contentPropertyCodes));
 			Map<String, Pair<PropertyValue, PropertyValue>> updatedProperties = InstanceHelpers.getUpdatedPropertiesForSomePropertyCodes(contentPropertyCodes, oldContent.properties, ocuContent.properties);
 			Set<String> deletedPropertyCodes = InstanceHelpers.getDeletedPropertiesForSomePropertyCodes(contentPropertyCodes, oldContent.properties, ocuContent.properties);
@@ -1807,9 +1824,6 @@ public class ExpWorkflowsHelper {
 				Set<String> projectCodes = allSamples.stream().map(s -> s.projectCodes).flatMap(Set::stream).collect(Collectors.toSet());
 				Set<String> sampleCodes = allSamples.stream().map(s -> s.code).collect(Collectors.toSet());
 				Set<String> tags = getTagAssignFromContainerLife(containerCodes, ocuContent, projectCodes, sampleCodes, updatedProperties, oldContent);
-				Logger.debug("Tags "+tags);
-				logger.debug(getKey(acu, ocuContent, contentPropertyCodes)+" updatedProperties "+updatedProperties);
-				logger.debug(getKey(acu, ocuContent, contentPropertyCodes)+" deletedPropertyCodes "+deletedPropertyCodes);
 
 				InstanceHelpers._updateContentProperties(projectCodes, sampleCodes, containerCodes, tags, updatedProperties,
 						deletedPropertyCodes, validation);

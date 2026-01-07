@@ -1,11 +1,11 @@
 package sra.scripts;
 
-
 //import java.util.Iterator;
 import javax.inject.Inject;
+
+import controllers.sra.api.ExperimentAPI;
 import fr.cea.ig.lfw.controllers.scripts.buffered.Script;
-import fr.cea.ig.ngl.dao.api.sra.ExperimentAPI;
-import services.DatabaseConsistencyTools;
+import sra.services.DatabaseConsistencyTools;
 
 /*
  * Script à utiliser pour completer la base pour les ExternalStudy et ExternalSample et experiments si soumission 

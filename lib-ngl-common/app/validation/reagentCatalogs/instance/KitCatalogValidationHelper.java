@@ -100,8 +100,8 @@ public class KitCatalogValidationHelper {
 	/**
 	 * Validate updated list of required experiment type codes.
 	 * @param contextValidation validation context
-	 * @param kitCatalogCode kit catalog code
-	 * @param updatedExperimentTypes experiment type codes
+	 * @param experimentTypeCodes experiment type codes
+	 * @param validator {@link UpdatedExperimentTypesValidator}
 	 */
 	public static void validateExperimentTypeCodesUpdate(ContextValidation contextValidation, List<String> experimentTypeCodes, UpdatedExperimentTypesValidator validator) {
 		for(String experimentTypeCode : experimentTypeCodes) {

@@ -17,9 +17,9 @@ public class UmbrellaProjectsAPI extends GenericAPI<UmbrellaProjectsDAO, Umbrell
 
 	private static final play.Logger.ALogger logger = play.Logger.of(UmbrellaProjectsAPI.class);
 
-	private static final List<String> authorizedUpdateFields = Arrays.asList(); // TODO
+	private static final List<String> authorizedUpdateFields = Arrays.asList();
 
-	private final static List<String> defaultKeys = Arrays.asList(); // TODO
+	private final static List<String> defaultKeys = Arrays.asList();
 
 	@Inject
 	public UmbrellaProjectsAPI(UmbrellaProjectsDAO dao) {
@@ -34,6 +34,10 @@ public class UmbrellaProjectsAPI extends GenericAPI<UmbrellaProjectsDAO, Umbrell
 	@Override
 	protected List<String> defaultKeys() {
 		return defaultKeys;
+	}
+
+	public Iterable<UmbrellaProject> all() throws APIException {
+		return dao.all();
 	}
 
 	@Override

@@ -1,5 +1,6 @@
 package fr.cea.ig.lfw.controllers.scripts.buffered;
 
+import java.util.List;
 import java.util.Map;
 
 import fr.cea.ig.lfw.controllers.scripts.ScriptException;
@@ -7,6 +8,8 @@ import fr.cea.ig.lfw.controllers.scripts.buffered.example.ScriptNoArgs_impl;
 import fr.cea.ig.lfw.controllers.scripts.buffered.example.Script_impl;
 import fr.cea.ig.lfw.reflect.ReflectionUtils;
 import play.mvc.Http.RequestBody;
+import validation.ContextValidation;
+import play.data.validation.ValidationError;
 import play.mvc.Result;
 import play.mvc.Results;
 
@@ -49,7 +52,7 @@ public abstract class Script<T> {
 	/**
 	 * Logger.
 	 */
-	private final play.Logger.ALogger logger;
+	protected final play.Logger.ALogger logger;
 	
 	/**
 	 * HTTP response buffer.
@@ -111,7 +114,22 @@ public abstract class Script<T> {
 		sb.append(arg);
 		println();
 		log(arg);
-	}	
+	}
+	
+	
+	public void println(ContextValidation ctx) {
+		// affichage pour l'utilisateur des erreurs sur console ou dans interface:
+		String messages = "";
+		for (Map.Entry<String,List<ValidationError>> e : ctx.getErrors().entrySet()) {
+			for (ValidationError validationError : e.getValue()) {
+				for (String message : validationError.messages())
+					messages = messages + e.getKey() + " : " +  message + "\n";
+			}
+		}
+		// affichage dans script
+		println(messages);
+	}
+
 	
 	/**
 	 * Outputs the given formatted string to the log and the response.
@@ -160,7 +178,7 @@ public abstract class Script<T> {
 			sb.append("***************** ERROR ***********************\n");
 			logger.error(e.getMessage(), e);
 			return Results.notFound(sb.toString());			
-		}
+		} 
 	}
 
 	private T buildParametersInstance(Class<T> c, Map<String, String[]> args) throws Exception {

@@ -5,21 +5,29 @@ import javax.inject.Inject;
 import fr.cea.ig.lfw.controllers.scripts.buffered.Script;
 import fr.cea.ig.ngl.NGLApplication;
 import play.Logger;
+import services.instance.balancesheet.UpdateDailyBalanceSheet;
+import services.instance.balancesheet.UpdateMonthlyBalanceSheet;
+import services.instance.container.TubeImportCNS;
+import services.instance.project.ProjectImportCNG;
 import services.instance.project.ProjectImportCNS;
+import services.instance.sample.UpdateSampleAtlaSea;
+import services.instance.sample.UpdateSampleCNS;
+import services.instance.sample.UpdateSampleNCBITaxonCNS;
+import services.taxonomy.TaxonomyServices;
 
 
 /**
  * Script qui simule l'execution de NGL DATA séquentiellement
- * Uniquement CNG
  * 
  * @author ejacoby
  *
  */
+
+
 public class ScriptImportDataCNS extends Script<ScriptImportDataCNS.Args>{
 
-	//TODO prevoir de mettre en argument l'institut CNS/CNG pour un script commun
 	public static class Args {
-
+		
 	}
 
 	private final NGLApplication app;
@@ -29,27 +37,19 @@ public class ScriptImportDataCNS extends Script<ScriptImportDataCNS.Args>{
 		super();
 		this.app=app;
 	}
-
+	
+	// Merci de laisser cette methode ici car permet dans execute() d'utiliser les appels suivants :
+	// 'app.injector().instanceOf(SubmissionAtlaseaProjectsToEbi.class).run();' ou 
+	// 'run(SubmissionAtlaseaProjectsToEbi.class);' qui est beaucoup plus lisible et qui permet de ne pas se préoccuper de l'instanciation des classes passées en paramètre du cron.
+	public <T extends Runnable> void run(Class<T> c) {
+		app.injector().instanceOf(c).run();
+	}
+	
 	@Override
 	public void execute(Args args) throws Exception {
 		
-		Logger.debug("Start projectImport");
-	//	new ProjectImportCNG(app).run();
-		/* Logger.debug("Start projectImport"); */
-		new ProjectImportCNS(app).run();
-		/** Logger.debug("Start tubeImport");
-		new TubeImportCNS(app).run();
-		Logger.debug("Start updateSample");
-		new UpdateSampleCNS(app).run();
-		/*Logger.debug("Start BanqueAmpliImport");
-		new BanqueAmpliImportCNS(app).run();
-		Logger.debug("Start sizingImport");
-		new SizingImportCNS(app).run();
-		Logger.debug("Start updateSampleNCBITaxon");
-		new UpdateSampleNCBITaxonCNS(app, new TaxonomyServices(app)).run();
-		Logger.debug("Start updateSampleProperties");
-		new UpdateSamplePropertiesCNS(app).run();*/
-		
+		//new UpdateSampleNCBITaxonCNS(app,new TaxonomyServices(app)).run();
+		new UpdateSampleAtlaSea(app).run();
+//		run(SubmissionAtlaseaProjectsToEbi.class);  //ok marche
 	}
-
 }

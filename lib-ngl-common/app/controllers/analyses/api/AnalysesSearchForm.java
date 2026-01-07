@@ -3,8 +3,11 @@ package controllers.analyses.api;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -12,11 +15,18 @@ import org.apache.commons.lang3.StringUtils;
 import org.mongojack.DBQuery;
 import org.mongojack.DBQuery.Query;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import akka.stream.javadsl.Source;
+import akka.util.ByteString;
 import controllers.DBObjectListForm;
 import controllers.NGLControllerHelper;
+import fr.cea.ig.MongoDBDAO;
 import models.laboratory.common.description.Level;
 import models.laboratory.common.instance.TBoolean;
 import models.laboratory.run.instance.Analysis;
+import models.laboratory.sample.instance.Sample;
+import models.utils.InstanceConstants;
 
 public class AnalysesSearchForm extends DBObjectListForm<Analysis> {
 	
@@ -47,6 +57,14 @@ public class AnalysesSearchForm extends DBObjectListForm<Analysis> {
 	
 	public List<String> readSetCodes;
 	public String readSetCode;
+
+    public List<String> umbrellaCodes;
+    
+	public String ncbiScientificNameRegex;
+	public List<String> ncbiScientificNames;
+	
+	public String collabScientificNameRegex;
+	public List<String> collabScientificNames;
 	
 	public List<String> existingFields, notExistingFields;
    
@@ -136,5 +154,87 @@ public class AnalysesSearchForm extends DBObjectListForm<Analysis> {
         
         return query;
     }
+    
+    private List<Query> getSampleAttributesFilters() {
+    	List<Query> sampleFilters = new ArrayList<>(2);
+    	if(CollectionUtils.isNotEmpty(this.ncbiScientificNames)) {
+    		sampleFilters.add(DBQuery.in("ncbiScientificName", this.ncbiScientificNames));
+    	} else if(StringUtils.isNotEmpty(this.ncbiScientificNameRegex)) {
+    		sampleFilters.add(DBQuery.regex("ncbiScientificName", Pattern.compile(this.ncbiScientificNameRegex)));
+    	}
+		if(CollectionUtils.isNotEmpty(this.collabScientificNames)) {
+    		sampleFilters.add(DBQuery.in("properties.collabScientificName.value", this.collabScientificNames));
+    	} else if(StringUtils.isNotEmpty(this.collabScientificNameRegex)) {
+			sampleFilters.add( DBQuery.regex("properties.collabScientificName.value", Pattern.compile(this.collabScientificNameRegex, Pattern.CASE_INSENSITIVE)));
+		}
+		return sampleFilters;
+    }
+    
+    private Function<Analysis, Query> getIteratorQueryBuilder() {
+    	final List<Query> filters = this.getSampleAttributesFilters();
+    	switch(filters.size()) {
+    	case 1 : return (Analysis analysis) -> DBQuery.and(DBQuery.in("code", analysis.sampleCodes), filters.get(0));
+    	case 2 : return (Analysis analysis) -> DBQuery.and(DBQuery.in("code", analysis.sampleCodes), filters.get(0), filters.get(1));
+    	default : throw new IllegalStateException("Invalid number of filters for sample attributes : " + String.valueOf(filters.size()));
+    	}
+    }
+    
+    private Predicate<? super Analysis> validateAnalysisSamples(Function<Analysis, Query> iteratorQueryBuilder) {
+    	return (Analysis analysis) -> MongoDBDAO.getCount(InstanceConstants.SAMPLE_COLL_NAME, Sample.class, iteratorQueryBuilder.apply(analysis)) > 0;
+    }
+    
+    private Iterator<Analysis> getFilteredIteratorFrom(Iterator<Analysis> iterator, Predicate<? super Analysis> filter) {
+    	return new Iterator<Analysis>() {
+			
+			private Analysis nextAnalysis = findNextValidAnalysis();
+			
+			private boolean isValid(Analysis analysis) {
+				return CollectionUtils.isNotEmpty(analysis.sampleCodes) && filter.test(analysis);
+			}
+			
+			private Analysis findNextValidAnalysis() {
+				if(!iterator.hasNext()) return null;
+				Analysis next = iterator.next();
+				while(next != null && !isValid(next)) {
+					next = iterator.hasNext() ? iterator.next() : null;
+				}
+				return next;
+			}
+
+			@Override
+			public boolean hasNext() {
+				return this.nextAnalysis != null;
+			}
+
+			@Override
+			public Analysis next() {
+				Analysis analysisToReturn = nextAnalysis;
+				this.nextAnalysis = findNextValidAnalysis();
+				return analysisToReturn;
+			}
+			
+		};
+    }
+    
+    private Iterator<Analysis> getFilteredIteratorFrom(Iterable<Analysis> iterable) {
+    	Iterator<Analysis> iterator = iterable.iterator();
+		Function<Analysis, Query> queryBuilder = getIteratorQueryBuilder();
+		Predicate<? super Analysis> filter = validateAnalysisSamples(queryBuilder);
+		return this.getFilteredIteratorFrom(iterator, filter);
+    }
+    
+    private Function<Iterable<Analysis>, Source<ByteString, ?>> getFilteredTransform(Function<Iterable<Analysis>, Source<ByteString, ?>> transform) {
+    	return (Iterable<Analysis> iterable) -> transform.apply(() -> this.getFilteredIteratorFrom(iterable));
+    }
+    
+    private boolean needFilteringBySample() {
+    	return StringUtils.isNotEmpty(this.ncbiScientificNameRegex) || StringUtils.isNotEmpty(this.collabScientificNameRegex) || CollectionUtils.isNotEmpty(this.ncbiScientificNames) || CollectionUtils.isNotEmpty(this.collabScientificNames);
+    }
+    
+    @Override
+    @JsonIgnore
+	public Function<Iterable<Analysis>, Source<ByteString, ?>> transform() {
+    	return needFilteringBySample() ? getFilteredTransform(super.transform()) : super.transform();
+	}
      
 }

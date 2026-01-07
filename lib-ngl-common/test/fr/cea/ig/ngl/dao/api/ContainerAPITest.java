@@ -3,11 +3,7 @@ package fr.cea.ig.ngl.dao.api;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.UUID;
-import java.util.Map;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,15 +16,10 @@ import fr.cea.ig.ngl.dao.containers.ContainersAPI;
 import fr.cea.ig.ngl.dao.containers.ContainersDAO;
 import fr.cea.ig.ngl.dao.api.factory.ContainerFactory;
 import fr.cea.ig.ngl.utils.TestUtils;
-import models.laboratory.common.instance.TraceInformation;
 import models.laboratory.container.instance.Container;
-import models.laboratory.container.instance.LocationOnContainerSupport;
 import ngl.refactoring.state.ContainerStateNames;
-import models.laboratory.common.instance.State;
-import models.laboratory.common.instance.PropertyValue;
 import play.Logger;
 import play.modules.jongo.MongoDBPlugin;
-import validation.ContextValidation;
 import validation.common.instance.CommonValidationHelper;
 import validation.container.instance.ContainerValidationHelper;
 import workflows.container.ContWorkflows;
@@ -57,26 +48,6 @@ public class ContainerAPITest {
 		PowerMockito.mockStatic(MongoDBPlugin.class);
 		PowerMockito.mockStatic(CommonValidationHelper.class);
 		PowerMockito.mockStatic(ContainerValidationHelper.class);
-
-		try {
-			PowerMockito.doNothing().when(CommonValidationHelper.class, "validateIdPrimary", any(ContextValidation.class), any(Container.class));
-			PowerMockito.doNothing().when(CommonValidationHelper.class, "validateCodePrimary", any(ContextValidation.class), any(Container.class), any(String.class));
-			PowerMockito.doNothing().when(ContainerValidationHelper.class, "validateContainerStateRequired", any(ContextValidation.class), any(State.class));
-			PowerMockito.doNothing().when(CommonValidationHelper.class, "validateTraceInformationRequired", any(ContextValidation.class), any(TraceInformation.class));
-			PowerMockito.doNothing().when(ContainerValidationHelper.class, "validateContainerCategoryCodeRequired", any(ContextValidation.class), any(String.class), any(String.class));
-			PowerMockito.doNothing().when(ContainerValidationHelper.class, "validateImportTypeOptional", any(ContextValidation.class), any(String.class), any(Map.class));		
-			PowerMockito.doNothing().when(ContainerValidationHelper.class, "validateContents", any(ContextValidation.class), any(List.class), any(String.class));
-			PowerMockito.doNothing().when(ContainerValidationHelper.class, "validateContainerSupportRequired", any(ContextValidation.class), any(LocationOnContainerSupport.class));
-			PowerMockito.doNothing().when(ContainerValidationHelper.class, "validateInputProcessCodes", any(ContextValidation.class), any(Collection.class), any(String.class));		
-			PowerMockito.doNothing().when(ContainerValidationHelper.class, "validateQualityControlResults", any(ContextValidation.class), any(List.class));
-			PowerMockito.doNothing().when(ContainerValidationHelper.class, "validateConcentrationOptional", any(ContextValidation.class), any(PropertyValue.class));
-			PowerMockito.doNothing().when(ContainerValidationHelper.class, "validateQuantityOptional", any(ContextValidation.class), any(PropertyValue.class));
-			PowerMockito.doNothing().when(ContainerValidationHelper.class, "validateVolumeOptional", any(ContextValidation.class), any(PropertyValue.class));
-			PowerMockito.doNothing().when(ContainerValidationHelper.class, "validateSizeOptional", any(ContextValidation.class), any(PropertyValue.class));
-		} catch (Exception e) {
-			Logger.error("Exception occured during setUp()");
-			fail(e.getMessage());
-		}
 	}
 	
 	@Test
@@ -198,7 +169,7 @@ public class ContainerAPITest {
 		}
 		
 		if (!exceptFired) {
-			fail("Invalid run, should have been refused.");
+			fail("Invalid container, should have been refused.");
 		}
 	}
 	

@@ -1,50 +1,19 @@
 // GS dupliqué depuis manyToOne.experiments.cng.x-to-plates
 // FDS Ajout PoolingMode (NGL-3401)=> ajouter mainService
-angular.module('home').controller('XToPlatesCtrlCNS',['$scope', '$http','$parse', '$filter', 'mainService',
-                                                               function($scope, $http, $parse, $filter, mainService ) {
+// FDS Ajout de choix de positions en mode libre (NGL-5175)
 
-	//-----------------------------------------reutilisables ailleurs ??----------------------------------------------------------
-	// FDS 29/06/2016 calcul de la ligne en fonction de position 96 numerotée en mode colonne ( 1=A1, 2=B1... 9=A2...) [ thx NW ]
-	var getLineFromPosition96_C = function(pos96){	
-		var line= String.fromCharCode (((pos96 -1) % 8 ) + 65 );
-		//console.log(">line ="+ line +" ("+pos96+")");
-		return line;
-	};
-	
-	//  FDS 29/06/2016  calcul de la colonne en fonction de position-96 numerotée en mode colonne ( 1=A1, 2=B1... 9=A2...) [ thx NW ]
-	var getColumnFromPosition96_C = function(pos96){	
-		var c=Math.floor((pos96 -1) / 8) +1 ;
-		var column= c.toString();
-		//console.log(">col ="+column+" ("+pos96+")");
-		return column;
-	};
-	
-	
-	var getLineFromPosition96_L = function(pos96){	
-		//TODO ??
-	}
-	
-	var getColFromPosition96_L = function(pos96){	
-		//TODO ??
-	}
-	
-	
-	// FDS 03/10/2016 calculer la position-96 en mode colonne a partir de ligne et colonne ( 1=A1, 2=B1... 9=A2...) 
-	var getPos96FromLineAndCol_C = function(ln,col){
-		if ( ln && col ){
-			// numeroter a partir de 1 et pas 0!!   var pos= (col  -1 )*8 + ( ln.charCodeAt(0) -65);
-			var pos96=(col -1 )*8 + ( ln.charCodeAt(0) -64);
-			//console.log(ln+"/"+col+"=>"+pos96);
-			return pos96;
-		}
-	}
-	
-	//  FDS 03/10/2016 calculer la position-96 en mode ligne a partir de ligne et colonne ( 1=A1, 2=A2...13=B1...)
-	var getPos96FromLineAndCol_L = function(ln,col){
-       //TODO ??
-	}
-	//---------------------------------------------------------------------------------------------------------------------------
-	
+angular.module('home').controller('XToPlatesCtrlCNS',['$scope', '$http','$parse', '$filter', 'mainService',
+                                              function($scope, $http, $parse, $filter, mainService ) {
+
+	//-- NGL-5175 methodes de calcul de position déplacées dans experiment/details-ctrl.js plateUtils et poolUtils
+           
+	// pour désactiver les boutons du outputMode
+	$scope.manualPoolingStarted=false;
+
+	//pour arrêter l'algo de calcul de position
+	$scope.ATMposError=false;
+
+
 	// s'execute a la creation de chaque ATM meme sans mise a jour de concentration le nom est trompeur!!!
 	$scope.atmService.updateOutputConcentration = function(atm){
 		
@@ -82,15 +51,28 @@ angular.module('home').controller('XToPlatesCtrlCNS',['$scope', '$http','$parse'
 			// FDS 29/06/2016 positionnement automatique de ligne et colonne sur une plaque
 			//     19/10/2016 gerer les 2 cas plaques/tubes
 			//console.log("instrument.outContainerSupportCategoryCode="+ $scope.experiment.instrument.outContainerSupportCategoryCode);
-			//EJ Ne pas mettre les valeurs par défaut des lignes/colonnes demande d'Eric NGL-2542 
-			if ( $scope.experiment.instrument.outContainerSupportCategoryCode === "96-well-plate" ){	
-				//atm.outputContainerUseds[0].locationOnContainerSupport.column=getColumnFromPosition96_C(atm.viewIndex);
-				//atm.outputContainerUseds[0].locationOnContainerSupport.line=getLineFromPosition96_C(atm.viewIndex);
+			if ( $scope.experiment.instrument.outContainerSupportCategoryCode === "96-well-plate" ){
+				//FDS NGL-5175 positionner les valeurs lignes/colonnes en prennant en compte les 3 nouveaux parametres
+				//    startPosition / outputMode / maxOuputLine ou maxOutputColumn
+				if ( ! $scope.ATMposError ) {
+					// si une erreur a été trouvée précédemment, inutile de continuer de calculer...
+					var ATMpos=$scope.poolUtils.calculateATMPlatePosFromIndex(atm.viewIndex, $scope.outputMode, $scope.startPositionColumn, $scope.maxOutputLine, $scope.startPositionLine,$scope.maxOutputColumn );
+					if ( ATMpos.error){
+						$scope.messages.setError(ATMpos.error);
+						// pour arreter le calcule de position des ATM suivant ???
+						$scope.ATMposError=true;
+					}
+				}
+				console.log( "ATMpos.line="+ ATMpos.line + "...ATMpos.col="+ATMpos.col);
+
+				atm.outputContainerUseds[0].locationOnContainerSupport.column=ATMpos.col;
+				atm.outputContainerUseds[0].locationOnContainerSupport.line=ATMpos.line;
 			} else {
 				atm.outputContainerUseds[0].locationOnContainerSupport.column=1;
 				atm.outputContainerUseds[0].locationOnContainerSupport.line=1;
 			}
 				
+			// copier les positions dans l'atm
 			atm.column=atm.outputContainerUseds[0].locationOnContainerSupport.column;
 			atm.line=atm.outputContainerUseds[0].locationOnContainerSupport.line;
 		}
@@ -154,8 +136,7 @@ angular.module('home').controller('XToPlatesCtrlCNS',['$scope', '$http','$parse'
 		}
     };
 	
-	
-	// /!\ controller commun a normalization-and-pooling et pool
+
 
     /* FDS 27/10/2016  la modification des proprietes line et column n'as pas besoin de recalculer les volumes!!
                        Vu avec Julie: la modification des proprietes experimentProperties.inputVolume et experimentProperties.bufferVolume
@@ -263,8 +244,7 @@ angular.module('home').controller('XToPlatesCtrlCNS',['$scope', '$http','$parse'
 		}
 	}
 	
-
-$scope.computeInSizeToOut= function(){
+	$scope.computeInSizeToOut= function(){
 		
 		console.log("Compute out size");
 		var atm = $scope.atmService.data.atm;	
@@ -291,13 +271,13 @@ $scope.computeInSizeToOut= function(){
 				$scope.messages.text = "Le calcul \"moyenne pondérée des tailles\" ne peut pas s'effectuer car la taille est manquante chez au moins un container d'entrée";
 				$scope.messages.showDetails = false;
 				$scope.messages.open();
-			}
-			
+			}	
 		});
 		$scope.atmService.data.updateDatatable();
 	}
 	
-	if($scope.experiment.instrument.typeCode === "biomek-fx" && $scope.experiment.instrument.outContainerSupportCategoryCode !== "tube"
+	if($scope.experiment.instrument.typeCode === "biomek-fx" 
+	    && $scope.experiment.instrument.outContainerSupportCategoryCode !== "tube"
 		&& $scope.experiment.instrument.inContainerSupportCategoryCode !== "tube"){
 			$scope.setAdditionnalButtons([{
 				isDisabled : function(){return $scope.isNewState();} ,
@@ -312,14 +292,15 @@ $scope.computeInSizeToOut= function(){
 			}]);		
 	}
 	
-	if($scope.experiment.instrument.typeCode === "tecan-evo-100" && $scope.atmService.inputContainerSupportCategoryCode !== "tube" 
+	if($scope.experiment.instrument.typeCode === "tecan-evo-100" 
+	    && $scope.atmService.inputContainerSupportCategoryCode !== "tube" 
 		&& $scope.experiment.instrument.outContainerSupportCategoryCode === "tube"){
-		$scope.setAdditionnalButtons([{
-			isDisabled : function(){return $scope.isNewState();} ,
-			isShow:function(){return !$scope.isNewState();},
-			click:$scope.fileUtils.generateSampleSheet,
-			label:Messages("experiments.sampleSheet")
-		}]);
+			$scope.setAdditionnalButtons([{
+				isDisabled : function(){return $scope.isNewState();} ,
+				isShow:function(){return !$scope.isNewState();},
+				click:$scope.fileUtils.generateSampleSheet,
+				label:Messages("experiments.sampleSheet")
+			}]);
 	}
 
 	//restriction tecan : forcer tube en sortie
@@ -351,7 +332,6 @@ $scope.computeInSizeToOut= function(){
  		"position":5.9,
         "extraHeaders":{0:Messages("experiments.inputs")}
 	});
-
 	columns.push({
         "header": Messages("containers.table.secondaryTags.shortLabel"),
  		"property": "inputContainer.contents",
@@ -363,7 +343,6 @@ $scope.computeInSizeToOut= function(){
  		"render":"<div list-resize='cellValue' list-resize-min-size='3'>",
         "extraHeaders":{0:Messages("experiments.inputs")}
 	});
-	
 	columns.push({
 		"header" : Messages("containers.table.size"),
 		"property": "inputContainerUsed.size.value",
@@ -372,12 +351,8 @@ $scope.computeInSizeToOut= function(){
 		"hide" : true,
 		"type" : "number",
 		"position" :7.5,
-		"extraHeaders" : {
-			0 : Messages("experiments.inputs")
-		}
+		"extraHeaders" : {0 : Messages("experiments.inputs")}
 	});
-	
-	
 	columns.push({
 		"header" : Messages("containers.table.size"),
 		"property": "outputContainerUsed.size.value",
@@ -386,84 +361,99 @@ $scope.computeInSizeToOut= function(){
 		"hide" : true,
 		"type" : "number",
 		"position" :100,
-		"extraHeaders" : {
-			0 : Messages("experiments.outputs")
-		}
+		"extraHeaders" : {0 : Messages("experiments.outputs")}
 	});
 	
-	
 	$scope.atmService.$atmToSingleDatatable.data.setColumnsConfig(columns);
-
-	// pour selects de position de sortie dans le cas des plaques !!!!
-	//// TODO mettre ces tableaux dans le scala.html plutot qu'ici ???
-	$scope.columns = ["1","2","3","4","5","6","7","8","9","10","11","12"]; 
-	$scope.lines=["A","B","C","D","E","F","G","H"];  
 	
 	//NGL-3203 ajout information masquable; commencer masqué
 	$scope.setIsShowInformation (false);
 	
-	
-	
 	//------------NGL-3401 22/11/2021 POOLING INTELLIGENT POUR SAMPLES AVEC BID ---------------------
 	
-	//???  pourquoi l'assignation par ng-model ne le fait pas automatiquement ???
-	$scope.setPoolingMode=function(p){
-		$scope.poolingMode=p;
-		//console.log( "DEBUG selected poolingMode ="+ p.name);
+	$scope.setPoolingMode=function(pmode){
+
+		// NGL-5175 annuler le pooling précédent !!  faire avant de reassigner poolingMode !!
+		if ($scope.atmService.data.atm.length != 0){
+			resetPreviousPooling();
+		}
+		$scope.messages.clear();
+
+		$scope.poolingMode=pmode;
+		console.log("DEBUG selected poolingMode ="+ pmode.name);
+
+		if ( pmode.code === 'manual'){
+			// NGL-5175	ajoute de boutons en mode manuel
+			// Pb les scope sont mises a jour mais la vue n'est pas rafraichie !!
+			resetMaxOutputLine(); 
+			resetMaxOutputColumn();
+			resetStartPositionLine(); 
+			resetStartPositionColumn(); 
+			
+			$scope.outputMode=undefined;// en mode manuel cette variable est inutile/inutilisée...
+			$scope.manualPoolingStarted=false;
+		} else {
+			console.log("...REINIT BID...");
+			// attention les modes automatique (BIDs) ne proposent pas les choix outputMode, startPositionXXX, maxOutputXXX 
+			// ==> pas dans les specs !!
+			// mais la nouvelle methode de calcul des positions à besoin de ces paramètres. ils sont ici harcodé en mode 'Colonne'
+
+			//$scope.outputMode='C';
+			//$scope.startPositionColumn="A1";
+			//$scope.maxOutputLine='H';
+
+			// 27/08/2025 non ca doit marcher aussi !!!
+			resetMaxOutputLine(); 
+			resetMaxOutputColumn();
+			resetStartPositionLine(); 
+			resetStartPositionColumn(); 
+			$scope.outputMode=undefined;			
+			
+			// reinitialiser les options BID
+			$scope.samplesProject="CCU";
+			$scope.allowNoNegControls=false;
+			$scope.sortByBID=false;
+			$scope.simulation=true;	
+		}
+	}
+
+	var resetPreviousPooling=function(){
+		console.log ("removing all ATMs");
+		
+		$scope.atmService.data.atm.forEach( function(atm){
+				$scope.atmService.data.deleteATM(atm);
+		});
+
+		// deleteATM ne marche pas comme prevu => reste 1 atm a la fin !!
+		if ($scope.atmService.data.atm[0]) {
+			console.log("removing LAST ATM !!");
+			$scope.atmService.data.deleteATM($scope.atmService.data.atm[0]);
+		}
+
+		if ($scope.poolingMode.code === 'manual'){
+			$scope.manualPoolingStarted=false;
+		}
 	}
 	
-	//???  pourquoi l'assignation par ng-model ne le fait pas automatiquement ???
 	$scope.toggleAllowNoNegControls=function(){
 		$scope.allowNoNegControls===false ? $scope.allowNoNegControls=true : $scope.allowNoNegControls=false ;
 		//console.log("allowNoNegControls="+$scope.allowNoNegControls);
 	}
 	
-	//???  pourquoi l'assignation par ng-model ne le fait pas automatiquement ???
 	$scope.toggleSortByBID=function(){
 		$scope.sortByBID===false ? $scope.sortByBID=true : $scope.sortByBID=false ;
 		//console.log("sortByBID="+$scope.sortByBID);
 	}
 	
-	//???  pourquoi l'assignation par ng-model ne le fait pas automatiquement ???
 	$scope.toggleSimulation=function(){
 		$scope.simulation===false ? $scope.simulation=true : $scope.simulation=false ;
 		console.log("simulation="+$scope.simulation);
 	}
-	//???  pourquoi l'assignation par ng-model ne le fait pas automatiquement ???
+
 	$scope.setSamplesProject=function(s){
 		$scope.samplesProject=s;
 		//console.log("project="+$scope.samplesProject);
 	}
-	
-	/* TEST pour effacer tous les atms créés par le pooling 
-		MARCHE PAS...abandonné pour l'instant
-		la suppression des ATMs un par un marche pourtant dans outputplates.scala.html!!!
-		deleteATM(atm)  ne delete pas 1 atm particulier car "atm" est une liste !!!
-		
-	$scope.deleteAllATMs=function(){
-		console.log('DELETE ALL ATMS');
-		// !! certains ATMs peuvent avoir été créés manuellement 
-		// le nombre d'ATM est alors > data.nbPools !!!
-		
-		// ne marche pas car deleteATM ne delete pas 1 atm particulier....
-		$scope.atmService.data.atm.forEach(function(atm){
-			console.log('>>>'+atm.viewIndex);
-			console.log(atm);
-			$scope.atmService.data.deleteATM(atm); 
-			console.log('<<<');
-			
-		});
-	
-		// marche pas non plus ???
-		var hasATMs=true;
-		while (hasATMs){
-			var atm=$scope.atmService.data.atm;
-			console.log (atm);
-			$scope.atmService.data.deleteATM(atm);
-			if ( $scope.atmService.data.atm.length > 0 ? hasATMs=true: hasATMs=false );
-		}
-	}
-	*/
 
 	// ajouter autres modes si nécessaire...
 	// noms modifiés orde=> consécutifs; progressigs=> en parallèle
@@ -476,7 +466,7 @@ $scope.computeInSizeToOut= function(){
 	// l'algorithme de "pooling intelligent" a été développé pour le projet CCU, mais une variable permet à l'utilisateur de le changer si nécessaire !!
 	// valeurs par défaut déclarés avant l'appel aux fonctions de pooling type BID pour l'affichage initial
 	
-	$scope.poolingMode=$scope.poolingModes[0]; // par defaut => "Libre"
+	$scope.poolingMode=$scope.poolingModes[0]; // par defaut => "Libre"/manual
 	$scope.samplesProject="CCU"; 
 	$scope.allowNoNegControls=false;
 	$scope.sortByBID=false;
@@ -489,8 +479,13 @@ $scope.computeInSizeToOut= function(){
 		// on peut dans la même expérience cumuler les modes !! comment l'interdire ???
 		switch ( $scope.poolingMode.code ){
 			case 'manual':
-				// fonctionnement manuel ancien 
-		    	$scope.atmService.data.dropInSelectInputContainer(); ///===> cree un seul pool avec la selection courante
+				// fonctionnement manuel ancien : 
+				//    la selection courante donne 1 pool = 1 container en sortie mais sa position reste non definie, l'utilisateur la défini manuellement
+				// NGL-5175 
+				//    prendre en compte les choix outputMode / startPosition / maxLine ou maxColumn  => la position est calculée
+				//    les modifications sont dans updateOutputConcentration !!!
+		    	$scope.atmService.data.dropInSelectInputContainer(); 
+				$scope.manualPoolingStarted=true;
 				break;
 			case 'bidPooling_orderedPools':
 				// ne pooler que si qq chose dispo...
@@ -506,7 +501,6 @@ $scope.computeInSizeToOut= function(){
 					finalMessage(poolData);
 				}
 				break;
-			//place pour autres algos sans rien a voir avec BID pooling...
 		}
 	}
 	
@@ -515,12 +509,10 @@ $scope.computeInSizeToOut= function(){
 		if ($scope.alert.Problemes.length > 0 ){
 			if ($scope.simulation) {
 				$scope.messages.clazz = "alert alert-warning";
-				//$scope.messages.text = Messages("???");
-				$scope.messages.text ="Simulation de pooling"; // mettre dans message ?
+				$scope.messages.text ="Simulation de pooling";
 			} else {
 				$scope.messages.clazz = "alert alert-danger";
-				//$scope.messages.text = Messages("???");
-				$scope.messages.text ="Erreurs de pooling"; // mettre dans message ?
+				$scope.messages.text ="Erreurs de pooling";
 			}
 			
 			$scope.messages.showDetails = true;
@@ -589,9 +581,7 @@ $scope.computeInSizeToOut= function(){
 			nbSampInPool:undefined    // nombre de sample d'intérete par pool
 		};
 		
-
 		// vérifier qu'il y a au moins un inputContainer avant de commencer ?????
-		
 		
 		//-- 0 -- remplissage des 3 tableaux 
 		parseContainers(data);
@@ -675,7 +665,6 @@ $scope.computeInSizeToOut= function(){
 			console.log('  création effective du pool '+p);
 			$scope.atmService.data.dropInSelectInputContainer();
 		}
-		
 	}
 	
 	function orderedPools(data,config){
@@ -707,7 +696,6 @@ $scope.computeInSizeToOut= function(){
 		
 		finalize(data,config);
 	}
-	
 
 	function dispatchNegControls2(data,config){
 		// parcourir les pools et trouver 1 negControl qui convient
@@ -967,7 +955,7 @@ $scope.computeInSizeToOut= function(){
 		  var categoryCodes = $scope.$eval("getBasket().get()|getArray:'support.categoryCode'|unique",mainService);
 		if ( (categoryCodes.length === 1) && ( categoryCodes[0] === "96-well-plate") ){
 		*/
-			
+
 			var inputContainers= $scope.atmService.data.inputContainers;
 			angular.forEach(inputContainers, function(container){
 				//console.log('INPUT CONTAINER '+ container.code);
@@ -1056,7 +1044,6 @@ $scope.computeInSizeToOut= function(){
 		}  
 		*/
 		
-
 		//nombre de sample d'intéret par pool
 		data.nbSampInPool=poolSize - data.nbNegContInPool;  // !! peut etre 0!! (cas intercepté avec l'ajout controle sur poolsize)
 		console.log('nbSampInPool -> '+ data.nbSampInPool);
@@ -1191,10 +1178,204 @@ $scope.computeInSizeToOut= function(){
 		else return false;
 	}
 	
-	// 26/08/2022 Essai image d'aide
-	$scope.showModalHelp=function(){
-		console.log("showModale");
- 		angular.element('#infoModale').modal('show');
+	// 26/08/2022 image d'aide; 21/10/2025 ajout paramètre
+	$scope.showModalHelp=function(modale){
+ 		angular.element(modale).modal('show');
+		//angular.element('#infoModale').modal('show');
 	}
+
+
+
+	/* --------------  NGL-5175 ajout des boutons pour remplir automatiquement les positions des ATM --------*/
+	$scope.outputMode=undefined;
+
+	// Classe pour identifier quel mode est actif !!
+	$scope.getBtnClass=function(curr_om, set_om){
+		if ( curr_om === set_om ){ return 'btn-primary'}
+		return 'btn-default'
+	}
+
+	// pour selects de position de sortie dans le cas des plaques !!!!
+	$scope.columns = ["1","2","3","4","5","6","7","8","9","10","11","12"]; 
+	$scope.lines=["A","B","C","D","E","F","G","H"];
+
+	// 10/2024 NGL-4764 tableaux avec valeur nulle initiale pour la valeur non selectionnée
+	// utiliser le delimiteur de string "  et pas '  ( sinon '---' n'est pas correctement interprété: ce n'est pas un char !!) 
+	$scope.maxColumns = ["---","1","2","3","4","5","6","7","8","9","10","11","12"]; 
+	$scope.maxLines=["---","A","B","C","D","E","F","G","H"];  
+
+	// Tableaux générés (ajouter "---" avec unshift)
+	$scope.modeLinePlatePositions=$scope.plateUtils.generatePlatePositions(96,'line');
+	$scope.modeLinePlatePositions.unshift("---");
+
+	$scope.modeColumnPlatePositions=$scope.plateUtils.generatePlatePositions(96,'column');
+	$scope.modeColumnPlatePositions.unshift("---");
+
+	$scope.maxOutputColumn=$scope.maxColumns[0]; // init 
+	$scope.maxOutputLine=$scope.maxLines[0]; // init 
+	$scope.startPositionLine=$scope.modeLinePlatePositions[0]; //init
+	$scope.startPositionColumn=$scope.modeColumnPlatePositions[0]; //init
+
+	resetMaxOutputLine=function(){
+		// select ne se rafraichi pas dans certains cas !!! bug angular ??
+		//$scope.maxOutputLine=$scope.maxLines[0]; 
+		$scope.maxOutputLine="---"; // essai harcodé; ne change rien !!
+		//console.log("RESET maxOutputLine ==>"+$scope.maxOutputLine);
+	}
+
+	resetMaxOutputColumn=function(){
+		// select ne se rafraichi pas dans certains cas !!! bug angular ??
+		//$scope.maxOutputColumn=$scope.maxColumns[0];
+		$scope.maxOutputColumn="---"; // essai harcodé; ne change rien !!
+		//console.log("RESET maxOutputColumn ==>"+$scope.maxOutputColumn);
+	}
+
+	resetStartPositionLine=function(){
+		// select ne se rafraichi pas dans certains cas !!! bug angular ?? 
+		//$scope.startPositionLine=$scope.modeLinePlatePositions[0];
+		$scope.startPositionLine="---";// essai harcodé; ne change rien !!
+		//console.log("RESET startPositionLine ==>"+$scope.startPositionLine);
+	}
+
+	resetStartPositionColumn=function(){
+		// select ne se rafraichi pas dans certains cas !!! bug angular ?? 
+		//$scope.startPositionColumn=$scope.modeColumnPlatePositions[0];
+		$scope.startPositionColumn="---";// essai harcodé; ne change rien !!
+		//console.log("RESET startPositionColumn ==>"+$scope.startPositionColumn);
+	}
+
+	// dans scope car appellee depuis scala
+	$scope.setStartPositionLine=function(start){
+		$scope.startPositionLine=start; // !!! pourquoi l'assignation par ng-model ne le fait pas automatiquement ???? 
+		//console.log("DEBUG1 selected startPositionLine ="+ $scope.startPositionLine);
+
+		$scope.setOutputMode('L');
+		resetStartPositionColumn()// reinitialiser l'autre select
+
+		// vérifier cohérence des choix
+		$scope.buttonsConsistancyError=checkOutputModeButtonsConsistancy('L');
+	}
+
+	// dans scope car appellee depuis scala
+	$scope.setStartPositionColumn=function(start){
+		$scope.startPositionColumn=start; // !!! pourquoi l'assignation par ng-model ne le fait pas automatiquement ???? 
+		//console.log("DEBUG1 selected startPositionColumn ="+ $scope.startPositionColumn);
+
+		$scope.setOutputMode('C');
+		resetStartPositionLine()// reinitialiser l'autre select
+
+		// vérifier cohérence des choix
+		$scope.buttonsConsistancyError=checkOutputModeButtonsConsistancy('C');
+	}
+
+	// dans scope car appellee depuis scala
+	$scope.setMaxOutputLine=function(mol){
+		$scope.maxOutputLine=mol; // !!! pourquoi l'assignation par ng-model ne le fait pas automatiquement ????
+		$scope.setOutputMode('C'); 
+		//console.log("DEBUG2 maxOutputLine ="+ $scope.maxOutputLine);
+		resetMaxOutputColumn();// reinitialiser l'autre select
+
+		// effacer un precedent message du a une valeur MaxOutputLine ?
+		$scope.messages.clear();
+
+		// vérifier cohérence des choix
+		$scope.buttonsConsistancyError=checkOutputModeButtonsConsistancy('C');		
+	}
+
+	// dans scope car appellee depuis scala
+	$scope.setMaxOutputColumn=function(moc){
+		$scope.maxOutputColumn=moc; // !!! pourquoi l'assignation par ng-model ne le fait pas automatiquement ???? 
+		$scope.setOutputMode('L');
+		//console.log("DEBUG2 maxOutputColumn ="+ $scope.maxOutputColumn);
+		resetMaxOutputLine();// reinitialiser l'autre select
+
+		// effacer un precedent message du a une valeur MaxOutputLine ?
+		$scope.messages.clear();
+
+		// vérifier cohérence des choix
+		$scope.buttonsConsistancyError=checkOutputModeButtonsConsistancy('L');	
+	}
+
+	// dans scope car appellee depuis scala
+	// ajout param caller pour essayer d'alleger et voir si c'est l'origine du bug de rafraichissement ???
+	$scope.setOutputMode=function(om, caller){
+    	$scope.outputMode=om; 
+		console.log("DEBUG0 selected outputMode ="+ $scope.outputMode + ' from '+ caller);
+
+		if (om === 'C' && caller === 'computeColumnMode') { 
+			$scope.maxOutputLine="H";	      //$scope.maxOutputLine=$scope.maxLines[8]; // essai; idem
+			$scope.startPositionColumn="A1";  //$scope.startPositionColumn=$scope.modeColumnPlatePositions[1];// essai; idem
+			//console.log("DEBUG0 set maxOutputLine ="+ $scope.maxOutputLine);
+			//console.log("DEBUG0 set startPositionColumn ="+ $scope.startPositionColumn);
+
+			resetMaxOutputColumn();    // refresh select ne marche plus une fois un choix effectué !!
+			resetStartPositionLine();  // refresh select ne marche plus une fois un choix effectué !!
+
+		} else if ( om === 'L' && caller === 'computeLineMode'){
+			$scope.maxOutputColumn="12";    //$scope.maxOutputColumn=$scope.maxColumns[12]; // essai; idem
+			$scope.startPositionLine="A1"; //$scope.startPositionLine=$scope.modeLinePlatePositions[1];// essai; idem
+			//console.log("DEBUGO set maxOutputColumn ="+ $scope.maxOutputColumn);
+			//console.log("DEBUG0 set startPositionLine ="+ $scope.startPositionLine);
+
+			resetMaxOutputLine();        // refresh select ne marche plus une fois un choix effectué !!
+			resetStartPositionColumn();  // refresh select ne marche plus une fois un choix effectué !!
+		}
+
+		// annuler une potentielle erreur précédente
+		$scope.messages.clear();
+		$scope.ATMposError=false;
+
+	}
+
+	/* 20/08/2025 creer une fonction isNotReadyPooling pour alleger le scala et mieux ajouter prevoir de nouveaux cas !!
+		bouton désactivé si
+	   	 SI pooling mode libre ET rien selectionné OU pas d'outputMode choisi)
+		 OU pooling auto et qq chose selectionné 
+
+		 OLD scala
+		 ng-disabled="( (poolingMode.code ==='manual') && ( !atmService.data.isSelectInputContainers() || ( outputMode === undefined) ) ) ||
+						 ( (poolingMode.code !=='manual') && atmService.data.isSelectInputContainers() )
+
+		
+	*/
+	$scope.isNotReadyPooling=function(){
+		// le bouton n'existe pas encore !!! if      ( $scope.atmService.outputContainerSupportCategoryCode === null) { return true; }
+		if     ( $scope.poolingMode.code === 'manual') {
+			if      ( $scope.atmService.outputContainerSupportCategoryCode === '96-well-plate' && ( !$scope.atmService.data.isSelectInputContainers() || ( $scope.outputMode === undefined) )){ return true; }
+			else if ( $scope.atmService.outputContainerSupportCategoryCode === 'tube'          && !$scope.atmService.data.isSelectInputContainers() ){ return true; }
+		}
+		else if ( $scope.poolingMode.code !== 'manual') {
+			if      ( $scope.atmService.outputContainerSupportCategoryCode === '96-well-plate' && ( $scope.atmService.data.isSelectInputContainers() || ( $scope.outputMode === undefined) )){ return true; }
+			else if ( $scope.atmService.outputContainerSupportCategoryCode === 'tube'          && $scope.atmService.data.isSelectInputContainers() ){ return true; }
+		}
+		else if ($scope.buttonsConsistancyError) { return true; }
+		else { return false;} // active le bouton
+	}
+
+	$scope.buttonsConsistancyError=false;
+
+	/* vérifier consistance des boutons startPositionXX / maxOutputXX */
+	function checkOutputModeButtonsConsistancy(mode){
+		if ( mode === 'C' ){
+			var startLine=$scope.startPositionColumn.charAt(0);
+
+			// si startLine  >   $scope.maxOutputLine alors pb pour l'algo de calcul de position ATM !!!!
+			// comparaison de strings !!!!
+			if ( startLine >  $scope.maxOutputLine ){
+				$scope.messages.setError("Output Mode : ligne du puits de départ > ligne max");
+				$scope.buttonsConsistancyError=true;
+			} else {$scope.buttonsConsistancyError=false; }
+		} else {
+			// mode=L
+			var startCol=$scope.startPositionLine.substr(1,2);
+
+			// si startCol  >   $scope.maxOutputColumn alors pb pour l'algo de calcul de position ATM !!!!
+			if ( parseInt(startCol) > parseInt($scope.maxOutputColumn) ){
+				$scope.messages.setError("Output Mode : colonne du puits de départ > colonne max");
+				$scope.buttonsConsistancyError=true;
+			} else {$scope.buttonsConsistancyError=false; }
+		}
+	}
+
 	
 }]);

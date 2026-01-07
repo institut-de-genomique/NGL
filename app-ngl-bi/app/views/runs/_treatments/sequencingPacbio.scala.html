@@ -1,0 +1,225 @@
+@()
+
+@formMetadata() = {
+	<div class="row">
+	<div class="col-md-10 col-lg-10">
+        <br/>
+		<div ultimate-datatable="metadataDatatable"></div>  			
+	</div>
+	</div>
+}
+
+@formAdapter() = {
+	<div class="row">
+	<div class="col-md-10 col-lg-10">
+        <br/>
+		<div ultimate-datatable="adapterDatatable"></div>		
+	</div>
+	</div>
+}
+
+@formRawData() = {
+	<div class="row">
+	<div class="col-md-10 col-lg-10">
+        <br/>
+		<div ultimate-datatable="rawDataDatatable"></div>  
+        <br/>
+		<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+			ng-click="setImage(run.treatments.sequencing.default.processedVsPolymeraseReadLength.value,'processedVsPolymeraseReadLength','','sequencing',
+			run.treatments.sequencing.default.processedVsPolymeraseReadLength.width,
+			run.treatments.sequencing.default.processedVsPolymeraseReadLength.height)">
+			<strong>@Messages("runs.treatments.sequencing.processedVsPolymeraseReadLength") :</strong>
+			<a href="#">
+		    	<img id="default_processedVsPolymeraseReadLength" ng-src="data:image/png;base64,{{run.treatments.sequencing.default.processedVsPolymeraseReadLength.value}}" />
+		 	</a> 
+	 	</div>
+         <br/>
+         <div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+             ng-click="setImage(run.treatments.sequencing.default.baseYieldDensity.value,'baseYieldDensity','','sequencing',
+             run.treatments.sequencing.default.baseYieldDensity.width,
+             run.treatments.sequencing.default.baseYieldDensity.height)">
+             <strong>@Messages("runs.treatments.sequencing.baseYieldDensity") :</strong>
+             <a href="#">
+                 <img id="default_baseYieldDensity" ng-src="data:image/png;base64,{{run.treatments.sequencing.default.baseYieldDensity.value}}" />
+              </a> 
+          </div>
+          <br/>
+		<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+			ng-click="setImage(run.treatments.sequencing.default.polymeraseReadLength.value,'polymeraseReadLength','','sequencing',
+			run.treatments.sequencing.default.polymeraseReadLength.width,
+			run.treatments.sequencing.default.polymeraseReadLength.height)">
+			<strong>@Messages("runs.treatments.sequencing.polymeraseReadLength") :</strong>
+			<a href="#">
+		    	<img id="default_polymeraseReadLength" ng-src="data:image/png;base64,{{run.treatments.sequencing.default.polymeraseReadLength.value}}" />
+		 	</a> 
+	 	</div>  			
+	</div>
+	</div>
+}
+
+@formSequencing() = {
+	<div class="row">
+	<div class="col-md-10 col-lg-10">
+        <br/>
+		<div ultimate-datatable="sequencingDatatable"></div>    
+        <br/>
+		<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+			ng-click="setImage(run.treatments.sequencing.default.hqRegionFilteringEvaluation.value,'hqRegionFilteringEvaluation','','sequencing',
+			run.treatments.sequencing.default.hqRegionFilteringEvaluation.width,
+			run.treatments.sequencing.default.hqRegionFilteringEvaluation.height)">
+			<strong>@Messages("runs.treatments.sequencing.hqRegionFilteringEvaluation") :</strong>
+			<a href="#">
+		    	<img id="default_hqRegionFilteringEvaluation" ng-src="data:image/png;base64,{{run.treatments.sequencing.default.hqRegionFilteringEvaluation.value}}" />
+		 	</a> 
+	 	</div>			
+	</div>
+	</div>
+}
+
+@formConsensus() = {
+	<div class="row">
+	<div class="col-md-10 col-lg-10">
+        <br/>
+		<div ultimate-datatable="consensusDatatable"></div>   			
+	</div>
+	</div>
+}
+
+@formHifi() = {
+	<div class="row">
+	<div class="col-md-10 col-lg-10">
+        <br/>
+		<div ultimate-datatable="hifiDatatable"></div>    
+        <br/>
+        <div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+            ng-click="setImage(run.treatments.sequencing.default.hifiReadLengthDistribution.value,'hifiReadLengthDistribution','','sequencing',
+            run.treatments.sequencing.default.hifiReadLengthDistribution.width,
+            run.treatments.sequencing.default.hifiReadLengthDistribution.height)">
+            <strong>@Messages("runs.treatments.sequencing.hifiReadLengthDistribution") :</strong>
+            <a href="#">
+                <img id="default_hifiReadLengthDistribution" ng-src="data:image/png;base64,{{run.treatments.sequencing.default.hifiReadLengthDistribution.value}}" />
+             </a> 
+         </div>
+         <br/>
+         <div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+             ng-click="setImage(run.treatments.sequencing.default.hifiReadQualityDistribution.value,'hifiReadQualityDistribution','','sequencing',
+             run.treatments.sequencing.default.hifiReadQualityDistribution.width,
+             run.treatments.sequencing.default.hifiReadQualityDistribution.height)">
+             <strong>@Messages("runs.treatments.sequencing.hifiReadQualityDistribution") :</strong>
+             <a href="#">
+                 <img id="default_hifiReadQualityDistribution" ng-src="data:image/png;base64,{{run.treatments.sequencing.default.hifiReadQualityDistribution.value}}" />
+              </a> 
+          </div>
+          <br/>
+          <div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+              ng-click="setImage(run.treatments.sequencing.default.hifiNumberOfPasses.value,'hifiNumberOfPasses','','sequencing',
+              run.treatments.sequencing.default.hifiNumberOfPasses.width,
+              run.treatments.sequencing.default.hifiNumberOfPasses.height)">
+              <strong>@Messages("runs.treatments.sequencing.hifiNumberOfPasses") :</strong>
+              <a href="#">
+                  <img id="default_hifiNumberOfPasses" ng-src="data:image/png;base64,{{run.treatments.sequencing.default.hifiNumberOfPasses.value}}" />
+               </a> 
+           </div>
+           <br/>
+           <div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+               ng-click="setImage(run.treatments.sequencing.default.yieldByHifiReadLength.value,'yieldByHifiReadLength','','sequencing',
+               run.treatments.sequencing.default.yieldByHifiReadLength.width,
+               run.treatments.sequencing.default.yieldByHifiReadLength.height)">
+               <strong>@Messages("runs.treatments.sequencing.yieldByHifiReadLength") :</strong>
+               <a href="#">
+                   <img id="default_yieldByHifiReadLength" ng-src="data:image/png;base64,{{run.treatments.sequencing.default.yieldByHifiReadLength.value}}" />
+                </a> 
+            </div>			
+	</div>
+	</div>
+}
+
+@formDemultiplexing() = {
+	<div class="row">
+		<br/>
+		<div class="col-md-10 col-lg-10" ultimate-datatable="indexSummaryDatatable"></div>
+	</div>
+	<div class="row">
+		<div class="col-md-10 col-lg-10" ultimate-datatable="demultiplexingDatatable"></div>
+	</div>
+}
+
+@formControl() = {
+	<div class="row">
+	<div class="col-md-10 col-lg-10">
+        <br/>
+		<div ultimate-datatable="controlDatatable"></div>
+        <br/>
+		<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+			ng-click="setImage(run.treatments.sequencing.default.controlPolymeraseReadLength.value,'controlPolymeraseReadLength','','sequencing',
+			run.treatments.sequencing.default.controlPolymeraseReadLength.width,
+			run.treatments.sequencing.default.controlPolymeraseReadLength.height)">
+			<strong>@Messages("runs.treatments.sequencing.controlPolymeraseReadLength") :</strong>
+			<a href="#">
+		    	<img id="default_controlPolymeraseReadLength" ng-src="data:image/png;base64,{{run.treatments.sequencing.default.controlPolymeraseReadLength.value}}" />
+		 	</a> 
+	 	</div>  			
+	</div>
+	</div>
+}
+
+<div ng-controller="SequencingPacBioCtrl" ng-init="init()">
+	<div class="col-md-12 col-lg-12">
+		<ul class="nav nav-tabs" role="tablist">
+			<li role="presentation" class="active">
+				<a href="#" data-target="#metadata" data-toggle="tab" role="tab">@Messages("runs.treatments.sequencing.metadata")</a>
+			</li>
+			<li role="presentation">
+				<a href="#" data-target="#adapter" data-toggle="tab" role="tab">@Messages("runs.treatments.sequencing.adapter")</a>
+			</li>
+			<li role="presentation">
+				<a href="#" data-target="#rawdata" data-toggle="tab" role="tab">@Messages("runs.treatments.sequencing.rawdata")</a>
+			</li> 
+		   <li role="presentation">
+				<a href="#" data-target="#sequencing" data-toggle="tab" role="tab">@Messages("runs.treatments.sequencing.sequencing")</a>
+			</li> 
+		  <li role="presentation">
+				<a href="#" data-target="#consensus" data-toggle="tab" role="tab">@Messages("runs.treatments.sequencing.consensus")</a>
+			</li> 
+			<li role="presentation">
+				<a href="#" data-target="#hifi" data-toggle="tab" role="tab">@Messages("runs.treatments.sequencing.hifi")</a>
+			</li>
+			<li role="presentation">
+				<a href="#" data-target="#demultiplexing" data-toggle="tab" role="tab">@Messages("runs.treatments.sequencing.demultiplexing")</a>
+			</li>
+			<li role="presentation">
+				<a href="#" data-target="#control" data-toggle="tab" role="tab">@Messages("runs.treatments.sequencing.control")</a>
+			</li>
+		</ul>	
+		<div class="tab-content">
+			<div class="tab-pane fade in active" id="metadata">
+				@formMetadata
+			</div>
+			<div class="tab-pane" id="adapter">
+				@formAdapter
+			</div>
+		   <div class="tab-pane" id="rawdata">
+				@formRawData
+			</div>
+		   <div class="tab-pane" id="sequencing">
+				@formSequencing
+			</div>
+		   <div class="tab-pane" id="consensus">
+				@formConsensus
+			</div>
+			<div class="tab-pane" id="hifi">
+				@formHifi
+			</div>
+			<div class="tab-pane" id="demultiplexing">
+				@formDemultiplexing
+			</div>
+			<div class="tab-pane" id="control">
+				@formControl
+			</div>
+	
+		  </div>
+	</div>
+</div>
+
+
+

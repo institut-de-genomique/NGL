@@ -1,7 +1,8 @@
 angular.module('home').controller('OneToVoidQCCtrl',['$scope', '$parse','$filter','atmToSingleDatatable','mainService',
                                                              function($scope,$parse, $filter,atmToSingleDatatable,mainService) {
 	 
-	
+	var inputExtraHeaders=Messages("experiments.inputs");
+
 	// NGL-1055: mettre les getArray et codes'' dans filter et pas dans render
 	var getDefaultDatatableColumn = function() {
 		var columns = [];
@@ -16,7 +17,7 @@ angular.module('home').controller('OneToVoidQCCtrl',['$scope', '$parse','$filter
 			"type" : "text",
 			"render" : "<div list-resize='cellValue' list-resize-min-size='3'>",
 			"position" : 4,
-			"extraHeaders" : {0 : Messages("experiments.inputs")}
+			"extraHeaders":{0: inputExtraHeaders}
 		});
 		columns.push({
 			"header" : Messages("containers.table.valuation.valid"),
@@ -27,7 +28,7 @@ angular.module('home').controller('OneToVoidQCCtrl',['$scope', '$parse','$filter
 			"hide" : false,
 			"type" : "text",
 			"position" : 5,
-			"extraHeaders" : {0 : Messages("experiments.inputs")}
+			"extraHeaders":{0: inputExtraHeaders}
 		});
 		columns.push({
 			"header" : Messages("containers.table.projectCodes"),
@@ -38,7 +39,7 @@ angular.module('home').controller('OneToVoidQCCtrl',['$scope', '$parse','$filter
 			"type" : "text",
 			"position" : 6,
 			"render" : "<div list-resize='cellValue' list-resize-min-size='3'>",
-			"extraHeaders" : {0 : Messages("experiments.inputs")}
+			"extraHeaders":{0: inputExtraHeaders}
 		});
 		columns.push({
 			"header" : Messages("containers.table.sampleCodes"),
@@ -49,9 +50,8 @@ angular.module('home').controller('OneToVoidQCCtrl',['$scope', '$parse','$filter
 			"type" : "text",
 			"position" : 7,
 			"render" : "<div list-resize='cellValue' list-resize-min-size='3'>",
-			"extraHeaders" : {0 : Messages("experiments.inputs")}
+			"extraHeaders":{0: inputExtraHeaders}
 		});
-
 				
 	/*	columns.push({
 			"header" : Messages("containers.table.concentration"),
@@ -192,7 +192,7 @@ angular.module('home').controller('OneToVoidQCCtrl',['$scope', '$parse','$filter
 				
 		console.log("supportCategoryCode : "+supportCategoryCode);
 		
-		if(supportCategoryCode ==="tube"){
+		if(supportCategoryCode === "tube"){
 			columns.push({
 				"header" : Messages("containers.table.code"),
 				"property" : "inputContainer.support.code",
@@ -203,7 +203,7 @@ angular.module('home').controller('OneToVoidQCCtrl',['$scope', '$parse','$filter
 				"position" : 3,
 				"extraHeaders" : {0 : Messages("experiments.inputs")}
 			});
-		}else if(supportCategoryCode ==="96-well-plate"){
+		}else if(supportCategoryCode === "96-well-plate"){
 			columns.push({
 				"header" : Messages("containers.table.supportCode"),
 				"property" : "inputContainer.support.code",
@@ -234,7 +234,7 @@ angular.module('home').controller('OneToVoidQCCtrl',['$scope', '$parse','$filter
 				"position" : 1.2,
 				"extraHeaders" : {0 : Messages("experiments.inputs")}
 			});
-		}else if(supportCategoryCode ==="strip-8"){
+		}else if(supportCategoryCode === "strip-8"){
 				columns.push({
 					"header" : Messages("containers.table.supportCode"),
 					"property" : "inputContainer.support.code",
@@ -257,7 +257,7 @@ angular.module('home').controller('OneToVoidQCCtrl',['$scope', '$parse','$filter
 					"extraHeaders" : {0 : Messages("experiments.inputs")}
 				});
 		}else{
-			// mixte !!
+			// mixte !!         NOTE 27/03/2024 ou autre type non prevu !!!
 			columns.push({
 				"header" : Messages("containers.table.code"),
 				"property" : "inputContainer.code",
@@ -389,8 +389,36 @@ angular.module('home').controller('OneToVoidQCCtrl',['$scope', '$parse','$filter
 	};
 	
 	atmService.experimentToView($scope.experiment, $scope.experimentType);
+
+	// NGL-4560 un seule plaque en entree de l'experience "miseq-qc"
 	
-	$scope.atmService = atmService;
+	if ( $scope.isCreationMode() && ($scope.experiment.typeCode === "miseq-qc" )){
+		// voir aussi ligne 180
+		// !! en mode creation $scope.experiment.atomicTransfertMethod n'est pas encore chargé=> passer par Basket
+		var inputSupportCodes = $scope.$eval("getBasket().get()|getArray:'support.code'|unique", mainService); 
+		var categoryCodes = $scope.$eval("getBasket().get()|getArray:'support.categoryCode'|unique",mainService);
+		var supports = $scope.$eval("getBasket().get()|getArray:'support.code'|unique",mainService);
+
+		if (( categoryCodes[0] === "96-well-plate") && (inputSupportCodes.length > 1) ){
+			$scope.messages.clear();
+			$scope.messages.setError(Messages("experiments.input.error.only-1-plate"));
+			// pour bloquer l'execution du contenu du controleur enfant "qc-miseq-ctrl.js"
+			$scope.atmService = null;
+		}
+		/*   bloquer aussi le cas ou on a autre chose que "96-well-plate" en entree ??? PAS POUR L"INSTANT....
+		} else if ( categoryCodes[0] !== "96-well-plate"){
+			$scope.messages.clear();
+			$scope.messages.setError(Messages("experiments.input.error.only-plates"));
+			// pour bloquer l'execution du contenu du controleur enfant "qc-miseq-ctrl.js"
+			$scope.atmService = null;
+		}
+		*/
+		else {
+			$scope.atmService = atmService;
+		}
+	} else {
+		$scope.atmService = atmService;
+	}
 		
 	$scope.computeQuantity = function(concentration, volume){
 		if(concentration && concentration.value && volume && volume.value){

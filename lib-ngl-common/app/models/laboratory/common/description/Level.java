@@ -60,7 +60,9 @@ public class Level extends Model {
 		Single, 
 		Pairs, 
 		Default, 
-		Analysis
+		Analysis,
+		Pass,
+		Fail
 	}
 			
 	public String name;

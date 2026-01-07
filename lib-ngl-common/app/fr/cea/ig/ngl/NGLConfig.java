@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
+
 import fr.cea.ig.lfw.LFWConfig;
 
 /**
@@ -55,7 +57,7 @@ public class NGLConfig {
 	public static final String AD_USER_NAME            = "ad.user.name";
 	public static final String AD_PASSWORD             = "ad.user.password";
 	public static final String AD_DOMAIN_COMPONENT     = "ad.dc";
-	public static final String AD_ORGANIZATION_UNIT    = "ad.ou";
+	public static final String AD_ORGANIZATION_UNIT    = "ad.ouproj";
 	public static final String AD_MSFU_NIS_DOMAIN      = "ad.msfu.nis.domain";
 	public static final String AD_GID_NUMBER_MIN       = "ad.gid.number.min";
 	public static final String AD_GID_NUMBER_MAX       = "ad.gid.number.max";
@@ -65,19 +67,21 @@ public class NGLConfig {
 	public static final String AD_GROUP_REGEX	        = "ad.groups.name.regex";
 	public static final String AD_GROUP_TYPE	        = "ad.groups.type";
 
+	public static final String AD_IBFJ_SERVER               = "ad.ibfj.server";
+	public static final String AD_IBFJ_USER_NAME            = "ad.ibfj.user.name";
+	public static final String AD_IBFJ_PASSWORD             = "ad.ibfj.user.password";
+	public static final String AD_IBFJ_DOMAIN_COMPONENT     = "ad.ibfj.dc";
+	public static final String AD_IBFJ_ORGANIZATION_UNIT    = "ad.ibfj.ouproj";
+	public static final String AD_IBFJ_MSFU_NIS_DOMAIN      = "ad.ibfj.msfu.nis.domain";
+	public static final String AD_IBFJ_GID_NUMBER_MIN       = "ad.ibfj.gid.number.min";
+	public static final String AD_IBFJ_GID_NUMBER_MAX       = "ad.ibfj.gid.number.max";
+	public static final String AD_IBFJ_GROUP_TYPE	        = "ad.ibfj.groups.type";
+	public static final String AD_IBFJ_OU_GROUPS_LABO_NAME  = "ad.ibfj.ou.groups.labo.name";
+	public static final String AD_IBFJ_DEFAULT_GROUP_ACCESS = "ad.ibfj.default.group.access";
+	public static final String AD_IBFJ_DEFAULT_GROUP_ADMIN  = "ad.ibfj.default.group.admin"; 
 
-	public static final String ACCESSION_REPORTING_EMAIL_FROM_PATH    = "accessionReporting.email.from"; 
-	public static final String ACCESSION_REPORTING_EMAIL_TO_PATH      = "accessionReporting.email.to";
-	public static final String ACCESSION_REPORTING_EMAIL_SUCCESS_PATH = "accessionReporting.email.subject.success";
-	public static final String ACCESSION_REPORTING_EMAIL_ERROR_PATH   = "accessionReporting.email.subject.error";
-	public static final String RELEASE_REPORTING_EMAIL_FROM_PATH      = "releaseReporting.email.from"; 
-	public static final String RELEASE_REPORTING_EMAIL_TO_PATH        = "releaseReporting.email.to";
-	public static final String RELEASE_REPORTING_EMAIL_SUCCESS_PATH   = "releaseReporting.email.subject.success";
-	public static final String RELEASE_REPORTING_EMAIL_ERROR_PATH     = "releaseReporting.email.subject.error";
-	public static final String UPDATE_REPORTING_EMAIL_FROM_PATH       = "updateReporting.email.from"; 
-	public static final String UPDATE_REPORTING_EMAIL_TO_PATH         = "updateReporting.email.to";
-	public static final String UPDATE_REPORTING_EMAIL_SUCCESS_PATH    = "updateReporting.email.subject.success";
-	public static final String UPDATE_REPORTING_EMAIL_ERROR_PATH      = "updateReporting.email.subject.error";
+	public static final String AD_IBFJ_ENABLED = "ad.ibfj.enabled";
+	public static final String AD_ORIGINAL_ENABLED = "ad.original.enabled";
 
 
 	/**
@@ -180,48 +184,7 @@ public class NGLConfig {
 	public String getProjectUrl() {
 		return config.getString(NGL_PROJECT_URL_PATH);
 	}
-	// -- accession reporting
-	public String getAccessionReportingEmailFrom() {
-		return config.getString(ACCESSION_REPORTING_EMAIL_FROM_PATH);
-	}
-	public String getAccessionReportingEmailTo() {
-		return config.getString(ACCESSION_REPORTING_EMAIL_TO_PATH);
-	}
 
-	public String getAccessionReportingEmailSubjectSuccess() {
-		return config.getString(ACCESSION_REPORTING_EMAIL_SUCCESS_PATH);
-	}
-	public String getAccessionReportingEmailSubjectError() {
-		return config.getString(ACCESSION_REPORTING_EMAIL_ERROR_PATH);
-	}
-
-	// -- release reporting
-	public String getReleaseReportingEmailFrom() {
-		return config.getString(RELEASE_REPORTING_EMAIL_FROM_PATH);
-	}
-	public String getReleaseReportingEmailTo() {
-		return config.getString(RELEASE_REPORTING_EMAIL_TO_PATH);
-	}
-	public String getReleaseReportingEmailSubjectSuccess() {
-		return config.getString(RELEASE_REPORTING_EMAIL_SUCCESS_PATH);
-	}
-	public String getReleaseReportingEmailSubjectError() {
-		return config.getString(RELEASE_REPORTING_EMAIL_ERROR_PATH);
-	}
-	
-	// -- update reporting
-	public String getUpdateReportingEmailFrom() {
-		return config.getString(UPDATE_REPORTING_EMAIL_FROM_PATH);
-	}
-	public String getUpdateReportingEmailTo() {
-		return config.getString(UPDATE_REPORTING_EMAIL_TO_PATH);
-	}
-	public String getUpdateReportingEmailSubjectSuccess() {
-		return config.getString(UPDATE_REPORTING_EMAIL_SUCCESS_PATH);
-	}
-	public String getUpdateReportingEmailSubjectError() {
-		return config.getString(UPDATE_REPORTING_EMAIL_ERROR_PATH);
-	}
 	
 	// AD configuration
 	public String getActiveDirectoryServer() {
@@ -272,8 +235,68 @@ public class NGLConfig {
 		return config.getString(AD_GROUP_REGEX);
 	}
 	
-	public String getActiveDirectoryGroupType()
-	{
+	public String getActiveDirectoryGroupType() {
 		return config.getString(AD_GROUP_TYPE);
 	}
+
+	// AD IBFJ
+
+	public String getActiveDirectoryIbfjPassword() {
+		return config.getString(AD_IBFJ_PASSWORD);
+	}
+
+	public String getActiveDirectoryIbfjOrganisationUnit() {
+		return config.getString(AD_IBFJ_ORGANIZATION_UNIT);
+	}
+
+	public String getActiveDirectoryIbfjServer() {
+		return config.getString(AD_IBFJ_SERVER);
+	}
+
+	public String getActiveDirectoryIbfjUserName() {
+		return config.getString(AD_IBFJ_USER_NAME);
+	}
+
+	public String getActiveDirectoryIbfjDomainComponent() {
+		return config.getString(AD_IBFJ_DOMAIN_COMPONENT);
+	}
+
+	public String getActiveDirectoryIbfjGroupType() {
+		return config.getString(AD_IBFJ_GROUP_TYPE);
+	}
+
+	public Integer getActiveDirectoryIbfjGIDNumberMin() {
+		return Integer.parseInt(config.getString(AD_IBFJ_GID_NUMBER_MIN));
+	}
+
+	public Integer getActiveDirectoryIbfjGIDNumberMax() {
+		return Integer.parseInt(config.getString(AD_IBFJ_GID_NUMBER_MAX));
+	}
+
+	public String getActiveDirectoryIbfjMsfuNisDomain() {
+		return config.getString(AD_IBFJ_MSFU_NIS_DOMAIN);
+	}
+
+	public String getActiveDirectoryIbfjOrganizationUnitGroupsLaboName() {
+		return config.getString(AD_IBFJ_OU_GROUPS_LABO_NAME);
+	}
+
+	public String getActiveDirectoryIbfjDefaultGroupAccess() {
+		return config.getString(AD_IBFJ_DEFAULT_GROUP_ACCESS);
+	}
+
+	public String getActiveDirectoryIbfjDefaultGroupAdmin() {
+		return config.getString(AD_IBFJ_DEFAULT_GROUP_ADMIN);
+	}
+
+	public boolean isADIBFJEnabled() {
+		return config.getBoolean(AD_IBFJ_ENABLED, false);
+	}
+
+	public boolean isADOriginalEnabled() {
+		return config.getBoolean(AD_ORIGINAL_ENABLED, false);
+	}
+
+
+
 }

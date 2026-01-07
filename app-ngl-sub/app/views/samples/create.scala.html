@@ -1,36 +1,31 @@
 @this()
 @()
 @import views.html.helper._
-@import views.html.tools.attributesInstructions
+@import views.html.tools.sampleAttributesInstructions
 
 			   
 @form() = {
-	@attributesInstructions()
+	@sampleAttributesInstructions()
 
 	@columnSearchForm{
 		@formGroup{
-			<div class="form-control" bt-select  ng-model="form.projectCode" filter="true" placeholder='@Messages("create.placeholder.projectCodes")' bt-options="project.code as project|formatProjectListLabel for project in lists.getProjects()" required"></div>	
+			<div class="form-control" bt-select  ng-model="form.projectCode" filter="true" placeholder='@Messages("create.placeholder.projectCodes")' bt-options="project.code as project|formatProjectListLabel for project in lists.getProjects()" required></div>	
 		}			
 		@formGroup{
 			<textarea type="number" class="form-control"  rows="2" ng-model="form.taxonId" placeholder='@Messages("create.samples.placeholder.taxonId")' required></textarea>		
 		}					
-		@**
 		@formGroup{
-			<textarea class="form-control" rows="2" ng-model="refCollab" placeholder='@Messages("create.samples.placeholder.refCollab")'></textarea>		
-		} **@	
-		@formGroup{
-			<textarea class="form-control" rows="2" ng-model="form.title" placeholder='@Messages("create.samples.placeholder.title")' </textarea>		
-		}		
-		@formGroup{
-			<textarea type="text" class="form-control"  rows="3" ng-model="form.description" placeholder='@Messages("create.samples.placeholder.description")'></textarea>		
-		}					
+			<textarea class="form-control" rows="2" ng-model="form.title" placeholder='@Messages("create.samples.placeholder.title")'></textarea>		
+		}						
 		@formGroup{
 			<textarea class="form-control" rows="2" ng-model="form.anonymizedName" placeholder='@Messages("create.samples.placeholder.anonymizedName")'></textarea>		
 		}	
-		
 		@formGroup{
 			<textarea class="form-control" rows="4" ng-model="form.attributes" placeholder='@Messages("create.samples.placeholder.attributes")'></textarea>		
 		}	
+		@formGroup{
+			<div class="form-control" bt-select ng-model="form.legendeDropBox" placeholder='@Messages("create.placeholder.dropBox")' bt-options="legendeDropBox.name as legendeDropBox.code for legendeDropBox in sraVariables.legendeDropBox" required></div>			
+		}
 	}
 
 	
@@ -41,6 +36,13 @@
 	</div> 
 <div class="row">
 <div class="col-md-12 col-lg-12"  messages="messages"></div>
+</div>
+
+<!--Pour affichage d'un spinner-->
+<div class="inProgressSpinner" ng-if="treeLoadInProgress">
+<button class="btn btn-primary btn-lg">
+<i class="fa fa-spinner fa-spin fa-5x"></i>
+</button>
 </div>
 
 <div class="row"> 
@@ -54,7 +56,7 @@
 						@columnSearchForm{
 							@formGroup{
 							<div class="btn-toolbar">
-								<button type="submit" title='@Messages("button.save")' ng-disabled="samplesForm.$invalid" ng-click="save()" data-toggle="tooltip" class="btn btn-primary" >
+								<button type="submit" title='@Messages("button.save")' ng-disabled="samplesForm.$invalid || ! isClickable()" ng-click="save()" data-toggle="tooltip" class="btn btn-primary" >
 									<i class="fa fa-save"></i>
 								</button>
 								<button title='@Messages("button.reset")' ng-click="reset()" data-toggle="tooltip"  class="btn btn-default">

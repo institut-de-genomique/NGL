@@ -9,6 +9,21 @@ angular.module('home').controller('OneToVoidQPCRQuantificationCNSCtrl',['$scope'
 	}
 	$scope.atmService.data.setConfig(config );
 	
+
+	$scope.$on('refresh', function(e) {	
+		// On récupère la config du datatable à l'écran.
+		var dtConfig = $scope.atmService.data.getConfig();
+
+		// On met à jour la condition d'affichage de la poubelle individuelle du tableau des containers : à l'état new uniquement et pas en mode édit.
+		dtConfig.remove.active = ($scope.isEditModeAvailable() && $scope.isNewState());
+
+		// On met à jour la config du datatable à l'écran qu'on vient de modifier.
+		$scope.atmService.data.setConfig(dtConfig);
+
+		// Refresh de l'expérience affichée à l'écran.
+		$scope.atmService.refreshViewFromExperiment($scope.experiment);
+	});
+
 	$scope.$parent.copyPropertiesToInputContainer = function(experiment){
 		
 		experiment.atomicTransfertMethods.forEach(function(atm){

@@ -4,7 +4,7 @@ import javax.inject.Inject;
 
 import controllers.NGLAPIController;
 import controllers.QueryFieldsForm;
-import controllers.authorisation.PermissionHelper;
+import fr.cea.ig.authorization.Authorized;
 import fr.cea.ig.ngl.NGLApplication;
 import fr.cea.ig.ngl.dao.api.APIException;
 import fr.cea.ig.ngl.dao.api.APIValidationException;
@@ -32,54 +32,38 @@ public class UmbrellaProjects extends NGLAPIController<UmbrellaProjectsAPI, Umbr
 
 	@Override
 	public UmbrellaProject saveImpl() throws APIValidationException, APIException {
-		boolean isChefProjet = PermissionHelper.checkPermission(getCurrentUser(), "chef-projet");
-
-		if (isChefProjet) {
-			UmbrellaProject umbrellaProjectInput = getFilledForm(umbrellaProjectForm, UmbrellaProject.class).get();
-			UmbrellaProject p = api().create(umbrellaProjectInput, getCurrentUser());
-			return p;
-		} else {
-			throw new APIException("Current user is not 'chef-projet'.");
-		}	
+		UmbrellaProject umbrellaProjectInput = getFilledForm(umbrellaProjectForm, UmbrellaProject.class).get();
+		UmbrellaProject p = api().create(umbrellaProjectInput, getCurrentUser());
+		return p;	
 	}
 	
 	@Override
     @BodyParser.Of(value = IGBodyParsers.Json15MB.class)
+	@Authorized.ChefProjet
     public Result update(String code) {
-		boolean isChefProjet = PermissionHelper.checkPermission(getCurrentUser(), "chef-projet");
-
-		if (isChefProjet) {
-			return super.update(code);
-		} else {
-			return unauthorized();
-		}	
+		return super.update(code);	
 	}
 
 	@Override
 	public UmbrellaProject updateImpl(String code) throws Exception, APIException, APIValidationException {
-		boolean isChefProjet = PermissionHelper.checkPermission(getCurrentUser(), "chef-projet");
-
-		if (isChefProjet) {
-			UmbrellaProject input = getFilledForm(umbrellaProjectForm, UmbrellaProject.class).get();
+		UmbrellaProject input = getFilledForm(umbrellaProjectForm, UmbrellaProject.class).get();
 			
-			Form<QueryFieldsForm> filledQueryFieldsForm = filledFormQueryString(updateForm, QueryFieldsForm.class);
-			QueryFieldsForm queryFieldsForm = filledQueryFieldsForm.get();
-			if (queryFieldsForm.fields == null) {
-				if (code.equals(input.code)) {
-					return api().update(input, getCurrentUser());
-				} else {
-					throw new APIException("UmbrellaProject codes are not the same");
-				}
+		Form<QueryFieldsForm> filledQueryFieldsForm = filledFormQueryString(updateForm, QueryFieldsForm.class);
+		QueryFieldsForm queryFieldsForm = filledQueryFieldsForm.get();
+		
+		if (queryFieldsForm.fields == null) {
+			if (code.equals(input.code)) {
+				return api().update(input, getCurrentUser());
 			} else {
-				if (code.equals(input.code)) {
-					return api().update(input, getCurrentUser(), queryFieldsForm.fields);
-				} else {
-					throw new APIException("UmbrellaProject codes are not the same");
-				}
+				throw new APIException("UmbrellaProject codes are not the same");
 			}
 		} else {
-			throw new APIException("Current user is not 'chef-projet'.");
-		}	
+			if (code.equals(input.code)) {
+				return api().update(input, getCurrentUser(), queryFieldsForm.fields);
+			} else {
+				throw new APIException("UmbrellaProject codes are not the same");
+			}
+		}
 	}
 }
 

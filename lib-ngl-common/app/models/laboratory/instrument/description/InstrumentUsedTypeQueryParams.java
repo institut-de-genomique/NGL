@@ -13,6 +13,9 @@ public class InstrumentUsedTypeQueryParams {
 	public String categoryCode;
 	public List<String> categoryCodes;
 	
+	public String propertyDefinitionName;
+	public List<String> propertyDefinitionNames;
+	
 	private boolean isStringValid(String value) {
 		return StringUtils.isNotBlank(value);
 	}
@@ -37,8 +40,16 @@ public class InstrumentUsedTypeQueryParams {
 		return this.isListValid(categoryCodes);
 	}
 	
+	public boolean isSinglePropertyDefinitionName() {
+		return this.isStringValid(propertyDefinitionName);
+	}
+	
+	public boolean isPropertyDefinitionNameList() {
+		return this.isListValid(propertyDefinitionNames);
+	}
+	
 	public boolean isAtLeastOneParam(){
-		return isSingleCode() || isCodeList() || isSingleCategoryCode() || isCategoryCodeList();
+		return isSingleCode() || isCodeList() || isSingleCategoryCode() || isCategoryCodeList() || isSinglePropertyDefinitionName() || isPropertyDefinitionNameList();
 	}
 
 }

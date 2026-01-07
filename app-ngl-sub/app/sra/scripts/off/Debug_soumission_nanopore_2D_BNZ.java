@@ -14,10 +14,10 @@ import models.laboratory.run.instance.ReadSet;
 import models.sra.submit.sra.instance.RawData;
 import models.sra.submit.sra.instance.Run;
 import models.sra.submit.sra.instance.Submission;
-import models.sra.submit.util.SraException;
-import models.sra.submit.util.VariableSRA;
 import models.utils.InstanceConstants;
-import sra.api.submission.SubmissionNewAPI;
+import services.sra.SraException;
+import services.sra.VariableSRA;
+import sra.api.SubmissionNewAPI;
 import validation.ContextValidation;
 
 public class Debug_soumission_nanopore_2D_BNZ extends ScriptNoArgs {
@@ -56,7 +56,7 @@ public class Debug_soumission_nanopore_2D_BNZ extends ScriptNoArgs {
 			String user = "ngsrg";
 			ContextValidation ctxVal = ContextValidation.createUndefinedContext(user);
 //			submission = this.fileAcServices.traitementFileAC(ctxVal, submissionCode, fileEbi); 
-			this.submissionNewAPI.loadEbiResponseAC(ctxVal, submission);
+			this.submissionNewAPI.loadRespEbiForCreation(ctxVal, submission);
 		}	
 	}
 	

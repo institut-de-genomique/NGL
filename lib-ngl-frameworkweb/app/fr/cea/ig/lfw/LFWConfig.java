@@ -117,5 +117,21 @@ public class LFWConfig {
 	public String getRulesKey() {
 		return config.getString(NGL_RULES_PATH);
 	}
+	
+    /**
+    * Checks whether a value is present at the given path, even
+    * if the value is null. Most of the getters on
+    * <code>Config</code> will throw if you try to get a null
+    * value, so if you plan to call {@link #getValue(String)},
+    * {@link #getInt(String)}, or another getter you may want to
+    * use plain {@link #hasPath(String)} rather than this method.
+    *
+    **/
+	public boolean hasPath(String path) {
+		if (config.hasPath(path)) {
+			return true;
+		}
+		return false;
+	}
 
 }

@@ -2,6 +2,7 @@ package fr.cea.ig.ngl.dao.api.factory;
 
 import java.util.UUID;
 
+import models.laboratory.common.instance.State;
 import models.laboratory.container.instance.ContainerSupport;
 
 /**
@@ -18,7 +19,7 @@ public final class ContainerSupportFactory {
 	 * @return Un objet "ContainerSupport" aléatoire.
 	 */
 	public static ContainerSupport getRandomContainerSupportWithSizeMoreThan30() {
-		ContainerSupport support = getRandomContainerSupport(true, false);
+		ContainerSupport support = getRandomContainerSupport(true, false, null);
 		support.code = "ABCDEFGHABCDEFGHABCDEFGHABCDEFGH";
 
 		return support;
@@ -29,10 +30,11 @@ public final class ContainerSupportFactory {
 	 * 
 	 * @param hasValidCode
 	 * @param hasLongCode
+	 * @param state
 	 * 
 	 * @return Un objet "ContainerSupport" aléatoire.
 	 */
-	public static ContainerSupport getRandomContainerSupport(boolean hasValidCode, boolean hasLongCode) {
+	public static ContainerSupport getRandomContainerSupport(boolean hasValidCode, boolean hasLongCode, State state) {
 		ContainerSupport support = new ContainerSupport();
 		
 		if (hasValidCode) {
@@ -48,7 +50,13 @@ public final class ContainerSupportFactory {
 		support.categoryCode = UUID.randomUUID().toString();
 		support.nbContainers = 1;
 		support.nbContents = 1;
-		support.state = StateFactory.getRandomState();
+
+		if (state == null) {
+			support.state = StateFactory.getRandomState();
+		} else {
+			support.state = state;
+		}
+		
 		support.storageCode = UUID.randomUUID().toString();
 		
 		return support;

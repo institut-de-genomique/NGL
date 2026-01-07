@@ -16,16 +16,24 @@ import fr.cea.ig.DBObject;
 import fr.cea.ig.MongoDBDAO;
 import models.laboratory.common.instance.Comment;
 import models.laboratory.common.instance.TraceInformation;
+import models.laboratory.container.instance.StorageHistory;
 import models.laboratory.project.instance.Project;
 import models.laboratory.reception.instance.AbstractFieldConfiguration;
 import models.laboratory.reception.instance.DefaultFieldConfiguration;
+import models.laboratory.reception.instance.ExcelFieldConfiguration;
+import models.laboratory.reception.instance.PropertiesFieldConfiguration;
+import models.laboratory.reception.instance.PropertyValueFieldConfiguration;
+import models.laboratory.reception.instance.ReceptionConfiguration;
 import models.laboratory.reception.instance.ReceptionConfiguration.Action;
 import models.laboratory.sample.description.SampleType;
+import models.laboratory.sample.instance.ResolutionHistoryEntry;
 import models.laboratory.sample.instance.Sample;
 import models.utils.CodeHelper;
 import models.utils.InstanceConstants;
 import models.utils.instance.SampleHelper;
+import play.Logger;
 import services.io.reception.Mapping;
+import services.io.reception.Mapping.Keys;
 import validation.ContextValidation;
 import validation.IValidation;
 import validation.utils.ValidationConstants;
@@ -34,11 +42,15 @@ public class SampleMapping extends Mapping<Sample> {
 
 	private Map<String, Project> lastSampleCodeForProjects = new HashMap<>(0);
 
+	private ReceptionConfiguration receptionConfiguration;
+
 	public SampleMapping(Map<String, Map<String, DBObject>> objects, 
 			Map<String, ? extends AbstractFieldConfiguration> configuration, 
 			Action action, 
-			ContextValidation contextValidation) {
+			ContextValidation contextValidation,
+			ReceptionConfiguration receptionConfiguration) {
 		super(objects, configuration, action, InstanceConstants.SAMPLE_COLL_NAME, Sample.class, Mapping.Keys.sample, contextValidation);
+		this.receptionConfiguration = receptionConfiguration;
 	}
 
 	/*
@@ -66,6 +78,41 @@ public class SampleMapping extends Mapping<Sample> {
 				}
 				needPopulate=true;
 			}else{
+				// Cas spécifique induit par le NGL-4240 : on veut pouvoir grouper les échantillons par une propriété et pouvoir ainsi ne pas créer un échantillon par ligne (comportement par défaut).
+				if ("groupSample".equals(this.receptionConfiguration.mode)) {
+					HashMap<String, PropertiesFieldConfiguration> lhm = (HashMap<String, PropertiesFieldConfiguration>) receptionConfiguration.configs.get(Mapping.Keys.sample.name());
+						
+					if (lhm != null) {
+						// On récupère les properties de la clé de la réception (sample, support, container).
+						PropertiesFieldConfiguration pFC = lhm.get("properties");
+
+						if (pFC != null) {
+							PropertyValueFieldConfiguration pvfc = pFC.configs.get(this.receptionConfiguration.groupProperty);
+
+							// Si on trouve la propriété par laquelle on veut grouper les objets.
+							if (pvfc != null) {
+								ExcelFieldConfiguration efc = (ExcelFieldConfiguration) pvfc.value;
+								Object propValueGroup = rowMap.get(efc.cellPosition); 
+								// On arrive à trouver la valeur de la propriété où on veut grouper par la définition de la réception (position dans l'Excel).
+
+								if (propValueGroup != null) {
+									for (int i = 0; i < objects.get(Mapping.Keys.sample.name()).values().toArray().length; i++) {
+										Sample s = (Sample) objects.get(Mapping.Keys.sample.name()).values().toArray()[i];
+
+										/**
+										 * Si on trouve que le sample en train d'être créé a une valeur de groupProperty qui existe déjà dans un autre sample,
+										 * on ne créé pas le sample, on récupère le code du sample existant.
+										 */
+										if (s.properties.get(this.receptionConfiguration.groupProperty).value.equals(propValueGroup)) {
+											object.code = s.code;
+										} 
+									}	
+								} 
+							} 
+						} 
+					} 
+				}
+
 				needPopulate=true;
 			}
 		}
@@ -185,7 +232,10 @@ public class SampleMapping extends Mapping<Sample> {
 				sample.life = null;
 			}
 			//Call rules to add properties to sample
-			SampleHelper.executeSampleCreationRules(sample);
+			
+			SampleHelper.executeSampleCreationRules(sample, contextValidation);
+			
+
 		} else if(Action.save.equals(action) && sample._id != null && sample.traceInformation.modifyUser==null) {
 			//Copy traceInfo create to modify for validation NGL-2408
 			sample.traceInformation.modifyUser=sample.traceInformation.createUser;
@@ -199,7 +249,8 @@ public class SampleMapping extends Mapping<Sample> {
 				sample.technicalComments = new ArrayList<Comment>();
 			}
 			sample.technicalComments.add(new Comment(newComment, contextValidation.getUser()));
-			sample.traceInformation.setTraceInformation(contextValidation.getUser());			
+			sample.traceInformation.setTraceInformation(contextValidation.getUser());	
+			SampleHelper.executeSampleUpdateRules(imporTypeValue, sample, contextValidation);
 		}
 	}
 
@@ -221,7 +272,23 @@ public class SampleMapping extends Mapping<Sample> {
 
 	@Override
 	public void consolidate(Sample sample) {
+		if(objects.containsKey(Keys.sample.toString())) {
+			if(configuration.containsKey("resolutionCodes") && (sample.resolutionCodes != null) && (!sample.resolutionCodes.isEmpty())) {
+				if(sample.resolutionHistory == null){
+					sample.resolutionHistory = new ArrayList<>();
+				}
+				
+				ResolutionHistoryEntry rhe = new ResolutionHistoryEntry();
+				rhe.resolutionCodes = sample.resolutionCodes;
+				rhe.date = new Date();
+				rhe.user = contextValidation.getUser();
+				rhe.index = sample.resolutionHistory.size();
 
+				if (!sample.resolutionHistory.stream().filter(rhet -> rhet.resolutionCodes.equals(rhe.resolutionCodes)).findAny().isPresent()) {
+					sample.resolutionHistory.add(rhe);
+				}
+			}
+		}
 	}	
 
 	//	@Override

@@ -553,14 +553,18 @@ angular.module('home').controller('LibraryPrepMetagCtrl',['$scope', '$parse',  '
 	$scope.tagPlateColumnToClean=undefined;
 	
 	$scope.plates=[];
-	$scope.plates.push( {name: "---",                                           tagCategory: undefined,   tags: undefined });
-	// NGL-4203
-	// utiliser les fonctions utilisant populateIndex_PlateRange
+	$scope.plates.push( {name: "---", tagCategory: undefined,  tags: undefined }); // entrée minimale pour "pas de choix"
+	/* NGL-4657 passage en V3 de toutes les plaques basées sur les index Illumina UDI
 	$scope.plates.push( {name:"IDT for Illumina Nextera DNA Unique Dual Indexes Set A", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_IDT_Nextera_Set_A() });
 	$scope.plates.push( {name:"IDT for Illumina Nextera DNA Unique Dual Indexes Set B", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_IDT_Nextera_Set_B() });
 	// plaques V2 !!
-	$scope.plates.push( {name:"IDT for Illumina Nextera DNA Unique Dual Indexes Set C V2", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_IDT_Nextera_Set_CV2() });
-	$scope.plates.push( {name:"IDT for Illumina Nextera DNA Unique Dual Indexes Set D V2", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_IDT_Nextera_Set_DV2() });
+	$scope.plates.push( {name:"IDT for Illumina Nextera DNA Unique Dual Indexes Set C V2", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_IDT_Nextera_Set_C_V2() });
+	$scope.plates.push( {name:"IDT for Illumina Nextera DNA Unique Dual Indexes Set D V2", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_IDT_Nextera_Set_D_V2() });
+	*/
+	$scope.plates.push( {name:"IDT for Illumina Nextera DNA Unique Dual Indexes Set A (V3)", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_Illumina_UDI_Set_A_V3() });
+	$scope.plates.push( {name:"IDT for Illumina Nextera DNA Unique Dual Indexes Set B (V3)", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_Illumina_UDI_Set_B_V3() });
+	$scope.plates.push( {name:"IDT for Illumina Nextera DNA Unique Dual Indexes Set C (V3)", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_Illumina_UDI_Set_C_V3() });
+	$scope.plates.push( {name:"IDT for Illumina Nextera DNA Unique Dual Indexes Set D (V3)", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_Illumina_UDI_Set_D_V3() })
 	
 	$scope.tagPlate = $scope.plates[0]; // defaut du select
 	
@@ -591,7 +595,8 @@ angular.module('home').controller('LibraryPrepMetagCtrl',['$scope', '$parse',  '
 	// meme si la fonctionnalité n'a pas été mise en place dans cette expérience, 
 	// l'appel a tagService.initTags() est maintenant obligatoire pour l'assignation automatique de tagCategory
 	if ( $scope.isNewState() || $scope.isInProgressState() || Permissions.check("admin") ){
-		//02/02/2022 si pas de parametre passé a initTag => tous les types, sinon preciser !!! 2 valeurs existent: 'index-illumina-sequencing','index-nanopore-sequencing'
+		//02/02/2022 si pas de parametre passé a initTag => tous les types, sinon preciser !!! 
+		//21/05/2024: 3 valeurs existent: 'index-illumina-sequencing','index-nanopore-sequencing', 'index-pacbio-sequencing'
 		tagService.initTags("index-illumina-sequencing");
 		$scope.getTags= function(){ return tagService.getAllTags()};
 		

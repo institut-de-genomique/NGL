@@ -143,7 +143,7 @@ public abstract class Index extends Parameter {
 	 * !! ngs-rg file is parsed with "_" as item sepator thus it must not be used
 	 * !! "-" is used to concatenate Iary and IIary tags it must not be used
 	 * @param contextValidation  validation context
-	 * @param code               parameter code to validate
+	 * @param shortName          shortName
 	 * 
 	 * @author fdsantos
 	 */

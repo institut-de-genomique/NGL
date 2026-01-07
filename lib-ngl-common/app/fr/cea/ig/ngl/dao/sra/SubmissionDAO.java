@@ -4,8 +4,8 @@ import javax.inject.Inject;
 
 import fr.cea.ig.ngl.dao.GenericMongoDAO;
 import models.sra.submit.sra.instance.Submission;
-import models.sra.submit.util.SraException;
 import models.utils.InstanceConstants;
+import services.sra.SraException;
 
 public class SubmissionDAO extends GenericMongoDAO<Submission> {
 	

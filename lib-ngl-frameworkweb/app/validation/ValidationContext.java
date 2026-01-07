@@ -7,9 +7,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Predicate;
 
 import org.apache.commons.lang3.StringUtils;
 
+import fr.cea.ig.lfw.utils.Iterables;
 import fr.cea.ig.util.function.C0;
 import fr.cea.ig.util.function.F0;
 import play.Logger.ALogger;
@@ -391,6 +393,42 @@ public class ValidationContext implements ContextValidation {
 		}
 	}
 	
+	
+	private static String message(ContextValidation ctx) {
+		StringBuilder messages = new StringBuilder();
+		for (Map.Entry<String,List<ValidationError>> e : ctx.getErrors().entrySet()) {
+			for (ValidationError validationError : e.getValue()) {
+				for (String message : validationError.messages()) {
+					messages.append(e.getKey()).append(" : ").append(message).append("\n");
+				}
+			}
+		}
+		return messages.toString();
+	}
+
+	public void displayUniqMessageError(ALogger logger, String loggerLevel) {
+		// construction du message d'erreur (recuperer depuis ctx) :
+		String message = message(this);
+		// affichage  => Ecriture d'un seul message :
+		switch(loggerLevel) {
+		case  "info" :
+			logger.info(message);
+			break;
+		case "debug" :
+			logger.debug(message);
+			break;
+		case "warn" : 
+			logger.warn(message);
+			break;
+		case "error" :
+			logger.error(message);
+			break;
+		default :
+			logger.debug(message);
+		}
+	}
+	
+	
 	public void setErrors(Map<String,List<ValidationError>> errors) {
 		this.errors = errors;
 	}
@@ -414,7 +452,48 @@ public class ValidationContext implements ContextValidation {
 			errorsAsExceptions.set(old);
 		}
 	}
+	
+	//--------------------------------------------------------------
+	
+	@Override
+	public void removeErrorsByKey(Iterable<String> cles) {
+		for (String cle : Iterables.toList(cles)) {
+			errors.remove(cle);
+		}
+	}
 
+//	public void removeErrorsByKey_2(String chaine) {
+//		List<String> cleToDelete = new ArrayList<String>();
+//		for(String cle : errors.keySet()) {
+//			if(cle.contains(chaine)) {
+//				cleToDelete.add(cle);
+//			}
+//		}
+//		for(String cle : cleToDelete) {
+//			getErrors().remove(cle);
+//		}
+//	}
+	
+	
+//	public void removeErrorsByKey(Predicate<String> filtre) {
+//		List<String> cleToDelete = new ArrayList<String>();
+//		for(String cle : errors.keySet()) {
+//			if(filtre.test(cle)) {
+//				cleToDelete.add(cle);
+//			}
+//		}
+//		removeErrorsByKey(cleToDelete);
+//	}
+	
+	@Override
+	public void removeErrorsByKey(String chaine) {
+		removeErrorsByKey(Iterables.filter(errors.keySet(), cle -> cle.contains(chaine)));
+	}
+	
+	@Override
+	public void removeErrorsByKey(Predicate<String> filtre) {
+		removeErrorsByKey(Iterables.filter(errors.keySet(), filtre));
+	}
 
 	
 }

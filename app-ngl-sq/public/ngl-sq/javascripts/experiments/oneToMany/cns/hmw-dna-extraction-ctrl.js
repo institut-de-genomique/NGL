@@ -8,7 +8,7 @@ angular.module('home').controller('HmwDnaExtractionCtrl',['$scope', '$parse', 'a
 			columns:[   
 					 {
 			        	 "header":Messages("containers.table.code"),
-			        	 "property":"inputContainer.support.code",
+			        	 "property":"inputContainer.code",
 			        	 "order":true,
 						 "edit":false,
 						 "hide":true,
@@ -16,6 +16,28 @@ angular.module('home').controller('HmwDnaExtractionCtrl',['$scope', '$parse', 'a
 			        	 "position":1,
 			        	 "extraHeaders":{0:Messages("experiments.inputs")}
 			         },	
+					 {
+						"header":Messages("containers.table.projectCodes"),
+						"property":"inputContainer.projectCodes",
+						"order":false,
+						"edit":false,
+						"hide":false,
+						"type":"text",						
+						"position":2,
+						"render":"<div list-resize='cellValue' list-resize-min-size='3'>",
+						"extraHeaders":{0:Messages("experiments.inputs")}
+					},
+					 {
+						"header":Messages("containers.table.sampleCodes"),
+						"property":"inputContainer.sampleCodes",
+						"order":false,
+						"edit":false,
+						"hide":false,
+						"type":"text",						
+						"position":2,
+						"render":"<div list-resize='cellValue' list-resize-min-size='3'>",
+						"extraHeaders":{0:Messages("experiments.inputs")}
+					},
 			         {
 			        	 "header":Messages("containers.table.outputNumber"),
 			        	 "property":"outputNumber",
@@ -39,7 +61,7 @@ angular.module('home').controller('HmwDnaExtractionCtrl',['$scope', '$parse', 'a
 			order:{
 				mode:'local', //or 
 				active:true,
-				by:'inputContainer.code'
+				by:'inputContainer.sampleCodes'
 			},
 			remove:{
 				active: ($scope.isEditModeAvailable() && $scope.isNewState()),
@@ -80,7 +102,7 @@ angular.module('home').controller('HmwDnaExtractionCtrl',['$scope', '$parse', 'a
 			columns:[   
 					 {
 			        	 "header":Messages("containers.table.code"),
-			        	 "property":"inputContainer.support.code",
+			        	 "property":"inputContainer.code",
 			        	 "order":true,
 						 "edit":false,
 						 "hide":true,
@@ -125,6 +147,39 @@ angular.module('home').controller('HmwDnaExtractionCtrl',['$scope', '$parse', 'a
 			        	 "position":4,
 			        	 "extraHeaders":{0:Messages("experiments.inputs")}
 			         },
+					 {
+						"header":Messages("containers.table.volume") + " (µL)",
+						"property":"inputContainerUsed.volume.value",
+						"order":true,
+						"edit":false,
+						"hide":true,
+						"type":"number",
+						"mergeCells" : true,
+						"position":4.1,
+						"extraHeaders":{0:Messages("experiments.inputs")}
+					},
+					{
+						"header":Messages("containers.table.quantity"),
+						"property":"inputContainerUsed.quantity.value",
+						"order":true,
+						"edit":false,
+						"hide":true,
+						"type":"number",
+						"mergeCells" : true,
+						"position":4.2,
+						"extraHeaders":{0:Messages("experiments.inputs")}
+					},
+					{
+						"header":Messages("containers.table.quantity.unit"),
+						"property":"inputContainerUsed.quantity.unit",
+						"order":true,
+						"edit":false,
+						"hide":true,
+						"type":"text",
+						"mergeCells" : true,
+						"position":4.3,
+						"extraHeaders":{0:Messages("experiments.inputs")}
+					},
 			         {
 			         "header":Messages("containers.table.biologicalMaterialQuantity"),
 		        	 "property":"inputContainer.properties.biologicalMaterialQuantity.value",
@@ -136,6 +191,7 @@ angular.module('home').controller('HmwDnaExtractionCtrl',['$scope', '$parse', 'a
 		        	 "position":5,
 		        	 "extraHeaders":{0:Messages("experiments.inputs")}
 			         },
+				
 			         {
 			        	 "header":Messages("containers.table.state.code"),
 			        	 "property":"inputContainer.state.code",
@@ -144,9 +200,9 @@ angular.module('home').controller('HmwDnaExtractionCtrl',['$scope', '$parse', 'a
 						 "hide":true,
 			        	 "type":"text",
 			        	 "filter":"codes:'state'",
-			        	 "position":7,
+			        	 "position":9,
 			        	 "extraHeaders":{0:Messages("experiments.inputs")}
-			         },			        	        
+			         },	
 			         {
 			        	 "header":Messages("containers.table.volume")+" (µL)",
 			        	 "property":"outputContainerUsed.volume.value",
@@ -154,7 +210,7 @@ angular.module('home').controller('HmwDnaExtractionCtrl',['$scope', '$parse', 'a
 						 "edit":true,
 						 "hide":true,
 						 "type":"number",
-			        	 "position":14,
+			        	 "position":399,
 			        	 "extraHeaders":{0:Messages("experiments.outputs")}
 			         },
 			         {
@@ -208,7 +264,7 @@ angular.module('home').controller('HmwDnaExtractionCtrl',['$scope', '$parse', 'a
 			order:{
 				mode:'local', //or 
 				active:true,
-				by:'inputContainer.code'
+				by:'inputContainer.sampleCodes'
 			},
 			remove:{
 				active:false,
@@ -248,13 +304,14 @@ angular.module('home').controller('HmwDnaExtractionCtrl',['$scope', '$parse', 'a
 			}
 
 	};	
-	
+
 	$scope.$on('save', function(e, callbackFunction) {	
 		console.log("call event save on tube-to-tubes");
+
 		$scope.atmService.viewToExperiment($scope.experiment);
-		$scope.$emit('childSaved', callbackFunction);
+
+		$scope.$emit('childSaved', callbackFunction);				
 	});
-	
 	
 	$scope.$on('refresh', function(e) {
 		console.log("call event refresh on tube-to-tubes");

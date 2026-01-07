@@ -13,6 +13,7 @@ import fr.cea.ig.ngl.NGLApplication;
 import fr.cea.ig.ngl.dao.projects.MembersProjectsAPI;
 import fr.cea.ig.ngl.support.NGLForms;
 import models.laboratory.project.instance.UserMembers;
+import play.Logger;
 import play.data.Form;
 import play.mvc.Result;
 
@@ -24,13 +25,14 @@ public class UserMembersProjects extends NGLController implements NGLForms {
 	@Inject
 	public UserMembersProjects(NGLApplication app, MembersProjectsAPI membersApi) {
 		super(app);
+
 		this.membersApi=membersApi;
 		this.searchForm = app.formFactory().form(UserMembersProjectsSearchForm.class);
-
 	}
 
 	/**
 	 * Méthode permettant de récupérer les membres (admins + non admins) AD d'un projet.
+	 * 
 	 * @param code Le code du projet où on veut récupérer les membres.
 	 * @return Un objet "UserMembers" comprenant les admins du projet et les membres du projet.
 	 */
@@ -50,17 +52,34 @@ public class UserMembersProjects extends NGLController implements NGLForms {
 	public Result list() {
 		UserMembersProjectsSearchForm form = filledFormQueryString(searchForm, UserMembersProjectsSearchForm.class).get();
 		List<UserMembers> results = getResultFormQueryString(form);
+		
 		return okAsJson(results);
 	}		
 	
 	private List<UserMembers> getResultFormQueryString(UserMembersProjectsSearchForm form) {
 		List<UserMembers> results = new ArrayList<>();
 		
-		if(StringUtils.isNotBlank(form.groupName))
-			results.addAll(membersApi.getUserMemberByGroup(form.groupName));
+		if (StringUtils.isNotBlank(form.groupName)) {
+			List<UserMembers> usersToAdd = membersApi.getUserMemberByGroup(form.groupName);
+
+			if (usersToAdd != null) {
+				results.addAll(usersToAdd);
+			} else {
+				Logger.error("Erreur lors de la récupération dans le groupe : " + form.groupName);
+			}
+		}
+			
 		
-		if(StringUtils.isNotBlank(form.ouName))
-			results.addAll(membersApi.getUserMembersByOrganizationUnit(form.ouName));
+		if (StringUtils.isNotBlank(form.ouName)) {
+			List<UserMembers> usersToAdd = membersApi.getUserMembersByOrganizationUnit(form.ouName);
+
+			if (usersToAdd != null) {
+				results.addAll(usersToAdd);
+			} else {
+				Logger.error("Erreur lors de la récupération dans l'ou : " + form.ouName);
+			}
+		}
+			
 		
 		return results;
 	}

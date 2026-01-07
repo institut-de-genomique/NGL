@@ -67,10 +67,6 @@ public class SRAStudyStateNames {
 	 */
 	public static final String SUBU_V;
 	/**
-	 * Soumission de type update en attente pour étape "Send Meta Data" ({@link States#SUBU_SMD_IW}).
-	 */
-	public static final String SUBU_SMD_IW;
-	/**
 	 * Soumission de type update en cours pour "Send Meta Data" ({@link States#SUBU_SMD_IP}).
 	 */
 	public static final String SUBU_SMD_IP;
@@ -82,16 +78,10 @@ public class SRAStudyStateNames {
 	 * Soumission de type update en echec pour l'étape "Send Meta Data"({@link States#SUBU_SMD_FE}).
 	 */
 	public static final String SUBU_SMD_FE;
-
 	/**
 	 * New pour release ({@link States#SUBR_N}).
 	 */
 	public static final String SUBR_N;
-
-	/**
-	 * Soumission de type release en attente pour étape "Send Meta Data" ({@link States#SUBR_SMD_IW}).
-	 */
-	public static final String SUBR_SMD_IW;
 	/**
 	 * Soumission de type release en cours pour "Send Meta Data" ({@link States#SUBR_SMD_IP}).
 	 */
@@ -127,12 +117,10 @@ public class SRAStudyStateNames {
 		SUB_F        = StateNames.SUB_F,
 		SUBU_N       = StateNames.SUBU_N,
 		SUBU_V       = StateNames.SUBU_V,
-		SUBU_SMD_IW  = StateNames.SUBU_SMD_IW,
 		SUBU_SMD_IP  = StateNames.SUBU_SMD_IP,
 		SUBU_SMD_F   = StateNames.SUBU_SMD_F,
 		SUBU_SMD_FE  = StateNames.SUBU_SMD_FE,
 		SUBR_N       = StateNames.SUBR_N,
-		SUBR_SMD_IW  = StateNames.SUBR_SMD_IW,
 		SUBR_SMD_IP  = StateNames.SUBR_SMD_IP,
 		SUBR_SMD_F   = StateNames.SUBR_SMD_F,
 		SUBR_SMD_FE  = StateNames.SUBR_SMD_FE,

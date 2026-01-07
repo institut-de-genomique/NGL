@@ -169,8 +169,16 @@
 			    		  edit:false,
 			    		  order:true
 			    		});	
+
 			columns.push({property:"studyCode",
 			    		  header: Messages("experiment.studyCode"),
+			    		  type :"String",		    	  	
+			    		  hide:true,
+			    		  edit:false,
+			    		  order:true
+			    		});
+			columns.push({property:"dropBox",
+			    		  header: Messages("experiment.dropBox"),
 			    		  type :"String",		    	  	
 			    		  hide:true,
 			    		  edit:false,
@@ -347,18 +355,25 @@
 			    		  edit:true,
 			    		  order:true
 			    		});	
-			columns.push({property:"sampleAccession",
-			    		  header: Messages("experiment.sampleAccession"),
+			columns.push({property:"sampleIdentifier",
+			    		  header: Messages("experiment.sampleIdentifier"),
 			    		  type :"String",		    	  	
 			    		  hide:true,
 			    		  edit:true,
 			    		  order:true
 			    		});	
-			columns.push({property:"studyAccession",
-			    		  header: Messages("experiment.studyAccession"),
+			columns.push({property:"studyIdentifier",
+			    		  header: Messages("experiment.studyIdentifier"),
 			    		  type :"String",		    	  	
 			    		  hide:true,
 			    		  edit:true,
+			    		  order:true
+			    		});
+			columns.push({property:"dropBox",
+			    		  header: Messages("experiment.dropBox"),
+			    		  type :"String",		    	  	
+			    		  hide:true,
+			    		  edit:false,
 			    		  order:true
 			    		});
 				     	        
@@ -407,22 +422,22 @@
 						if(toolsServices.isNotBlank(userExperiment.librarySource)) {
 							experiment_db.librarySource = userExperiment.librarySource;
 						}
-						// experiment.studyAccession modifiable uniquement si experiment deja soumis et si mode update = etat SUB-F.
-						if( toolsServices.isNotBlank(userExperiment.studyAccession)
+						// experiment.studyIdentifier modifiable uniquement si experiment deja soumis et si mode update = etat SUB-F.
+						if( toolsServices.isNotBlank(userExperiment.studyIdentifier)
 								&& (experiment_db.state.code === "SUB-F") 
-								&& (userExperiment.studyAccession !== experiment_db.studyAccession) ) {
-							// si modification du studyAccession alors enlever studyCode pour mettre le bon ensuite recuperer studyCode si existe, sinon le creer  ou bien deporter cela apres 
-							experiment_db.studyAccession = userExperiment.studyAccession;
+								&& (userExperiment.studyIdentifier !== experiment_db.studyIdentifier) ) {
+							// si modification du studyIdentifier alors enlever studyCode pour mettre le bon ensuite recuperer studyCode si existe, sinon le creer  ou bien deporter cela apres 
+							experiment_db.studyIdentifier = userExperiment.studyIdentifier;
 							experiment_db.studyCode = null;
-							//console.log("ZZZZZZZZZZZZZ   installation du userStudyAccession pour " , userExperiment.code)
+							//console.log("ZZZZZZZZZZZZZ   installation du studyIdentifier pour " , userExperiment.code)
 						}
-						// experiment.sampleAccession modifiable uniquement si experiment deja soumis et si mode update = etat SUB-F.
-						if( toolsServices.isNotBlank(userExperiment.sampleAccession)
+						// experiment.sampleIdentifier modifiable uniquement si experiment deja soumis et si mode update = etat SUB-F.
+						if( toolsServices.isNotBlank(userExperiment.sampleIdentifier)
 								&& (experiment_db.state.code === "SUB-F") 
-								&& (userExperiment.sampleAccession !== experiment_db.sampleAccession) ) {
-							experiment_db.sampleAccession = userExperiment.sampleAccession;
+								&& (userExperiment.sampleIdentifier !== experiment_db.sampleIdentifier) ) {
+							experiment_db.sampleIdentifier = userExperiment.sampleIdentifier;
 							experiment_db.sampleCode = null;
-							//console.log("ZZZZZZZZZZZZZ   installation du userSampleAccession pour " , userExperiment.code)
+							//console.log("ZZZZZZZZZZZZZ   installation du userSampleIdentifier pour " , userExperiment.code)
 						}
 					} // end if useExperiment
 				} // end if editable

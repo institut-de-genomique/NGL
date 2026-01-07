@@ -277,6 +277,7 @@ public class DefaultCodeImpl implements Code {
 	}
 
 	@Override
+	@SuppressWarnings({"unchecked"})
 	public void updateProjectSampleCodeWithLastSampleCode(String projectCode) {
 		ProjectionBuilder dbProject = DBProjection.include("code");
 		dbProject.append("name", new BasicDBObject("$strLenCP", "$code"));

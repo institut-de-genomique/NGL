@@ -45,7 +45,15 @@ angular.module('home').controller('DNAPacBioLibraryCtrl',['$scope', '$parse', '$
 			 			"render":"<div list-resize='cellValue | unique | codes:\"type\"' list-resize-min-size='3'>",
 			        	 "position":4,
 			        	 "extraHeaders":{0:Messages("experiments.inputs")}
-			         },		 
+			         }, {
+						"header":Messages("containers.table.storageCodeIn"),			        	 
+						"property":"inputContainer.support.storageCode",
+						"type":"text",
+						"order":true,
+						"hide":true,
+						"position":4.6,
+						"extraHeaders":{0:Messages("experiments.inputs")}
+					 },	
 					 {
 			        	 "header":Messages("containers.table.concentration") + " (ng/µL)",
 			        	 "property":"inputContainerUsed.concentration.value",
@@ -149,6 +157,7 @@ angular.module('home').controller('DNAPacBioLibraryCtrl',['$scope', '$parse', '$
 			},
 			order:{
 				mode:'local', //or 
+				by:'inputContainer.sampleCodes',
 				active:true
 			},
 			remove:{
@@ -222,8 +231,7 @@ angular.module('home').controller('DNAPacBioLibraryCtrl',['$scope', '$parse', '$
 		console.log("call event activeEditMode");
 		$scope.atmService.data.selectAll(true);
 		$scope.atmService.data.setEdit();
-	});
-	
+	});	
 	
 	var atmService = atmToSingleDatatable($scope, datatableConfig);
 	
@@ -289,5 +297,37 @@ angular.module('home').controller('DNAPacBioLibraryCtrl',['$scope', '$parse', '$
 		if(col.property === 'outputContainerUsed.experimentProperties.tag.value'){
 			tagService.computeTagCategory(value.data);
 		}
+
+		if(col.property === 'inputContainerUsed.experimentProperties.inputVolume.value' ){
+			computelibraryInputQuantity(value.data);
+		}
 	}
+
+	var computelibraryInputQuantity = function(udtData){
+		var getter = $parse("inputContainerUsed.experimentProperties.libraryInputQuantity.value");
+		var libraryInputQuantity = getter(udtData);
+		
+		var compute = {
+			inputVolume : $parse("inputContainerUsed.experimentProperties.inputVolume.value")(udtData),
+			conc : $parse("inputContainerUsed.concentration.value")(udtData),
+			isReady:function(){
+				return (this.inputVolume && this.conc);
+			}
+		};
+		if(compute.isReady()){
+			var result = compute.inputVolume * compute.conc;
+			//console.log("result = "+result);
+			if(result){
+				libraryInputQuantity = Math.round(result*10)/10;
+			}else{
+				libraryInputQuantity = undefined;
+			}	
+			getter.assign(udtData, libraryInputQuantity);
+		}else {
+			//console.log("not ready");
+			getter.assign(udtData, undefined);
+		}
+		
+	}
+
 }]);

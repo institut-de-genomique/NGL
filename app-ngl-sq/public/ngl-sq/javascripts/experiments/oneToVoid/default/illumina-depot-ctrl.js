@@ -1,4 +1,3 @@
-// TEST ajouter mainService pour 3599
 angular.module('home').controller('IlluminaDepotCtrl',['$scope', '$parse','$http','atmToSingleDatatable','dateServices', 'mainService',
                                                              function($scope,$parse, $http, atmToSingleDatatable, dateServices, mainService) {
 	
@@ -244,8 +243,9 @@ angular.module('home').controller('IlluminaDepotCtrl',['$scope', '$parse','$http
 	}
 	
 	//22/01/2018 NGL-1768 22/01/2018: importer le fichier XML du NovaSeq 6000
-	var importNOVASEQ6000XMLfile = function(){
-		console.log('Import NOVASEQ6000 RunParameters XML file');
+	// NGL-4319: le fonctionnement est idem sur Novaseq 6000 et Novaseq X => enlever "6000"
+	var importNOVASEQXMLfile = function(){
+		console.log('Import NOVASEQ RunParameters XML file');
 		
 		$scope.messages.clear();
 		
@@ -261,7 +261,7 @@ angular.module('home').controller('IlluminaDepotCtrl',['$scope', '$parse','$http
 			
 			// reinit select File...
 			$scope.file = undefined;
-			angular.element('#NOVASEQ6000XMLfile')[0].value = null;
+			angular.element('#NOVASEQXMLfile')[0].value = null;
 			
 			//refresh  reagents !!!
 			$scope.$emit('askRefreshReagents');	
@@ -276,11 +276,12 @@ angular.module('home').controller('IlluminaDepotCtrl',['$scope', '$parse','$http
 			// reinit select File..
 			$scope.file = undefined;
 			// il faut aussi réinitaliser le bouton d'import
-			angular.element('#NOVASEQ6000XMLfile')[0].value = null;
+			angular.element('#NOVASEQXMLfile')[0].value = null;
 		});		
 	};
-			
-	$scope.buttonNOVASEQ6000XMLfile = {
+	
+	// NGL-4319 : le fonctionnement est idem pour Novaseq 6000 et Novaseq X => enlever "6000"
+	$scope.buttonNOVASEQXMLfile = {
 			isShow:function(){
 				//return (( $scope.isInProgressState() || $scope.isFinishState() ) &&  $scope.isEditMode() ); // MARCHE pas, editMode pas vu voir plus haut
 				return ( $scope.isInProgressState() || $scope.isFinishState() );
@@ -288,7 +289,7 @@ angular.module('home').controller('IlluminaDepotCtrl',['$scope', '$parse','$http
 			isFileSet:function(){
 				return ($scope.file === undefined)?"disabled":"";
 			},
-			click:importNOVASEQ6000XMLfile	
+			click:importNOVASEQXMLfile	
 	};
 	
 	//---NGL-3180 -- Spécifique CNG, mais comme checkReagentNovaSeqXPKit est appelé dans le $on(save) ca doit etre dans ce controleur

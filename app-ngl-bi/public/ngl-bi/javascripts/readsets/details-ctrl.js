@@ -127,6 +127,31 @@
 		}
 		return undefined;
     };
+
+	$scope.hasProperties = function(property) {
+		if ($scope.readset && $scope.readset.sampleOnContainer && $scope.readset.sampleOnContainer.properties) {
+
+			var properties = Object.keys($scope.readset.sampleOnContainer.properties);
+
+			return properties.some(function(p) {
+				return p === property
+			});
+
+		}
+		return false;
+	};
+	// Constante pouvant évoluer si une nouvelle propriété doit être déplacée dans le bloc "Détails Echantillon"
+	var FORBIDDEN_PROPERTIES = ["ncbiClass","ncbiPhylum"]
+
+	$scope.isAllowedProperty = function(property) {
+		for(var i =0 ; i<FORBIDDEN_PROPERTIES.length;i++){
+			if(FORBIDDEN_PROPERTIES[i] == property){
+				return false;
+			}
+		}
+		return true;
+	}
+
     
 	$scope.showPropertyData = function(read, treatmentCode, property) {
 		if (angular.isDefined($scope.readset) && angular.isDefined($scope.readset.treatments) && angular.isDefined($scope.readset.treatments[treatmentCode])) {
@@ -154,6 +179,23 @@
 		return b;
 	}
 	
+	$scope.isDataExistsForWgsBarCoding = function(trtCode) {
+		var b = true;
+		return b;
+	}
+	
+	$scope.isLocalDataCloned=function(){
+		if(! angular.isDefined($scope.readset) ||
+		   ! angular.isDefined($scope.readset.properties) ||
+		   ! angular.isDefined($scope.readset.properties.localDataCloned) || 
+           ! angular.isDefined($scope.readset.properties.localDataCloned.value)) {
+			return "undefined";
+		} else if ($scope.readset.properties.localDataCloned.value) {
+			return true;
+		} 
+		return false;
+	}	
+		
 	$scope.isRefCollabSub=function(){
 		if (angular.isDefined($scope.readset) && angular.isDefined($scope.readset.properties) && angular.isDefined($scope.readset.properties.refCollabSub) && angular.isDefined($scope.readset.properties.refCollabSub.value)){
 			return true;
@@ -230,6 +272,19 @@
 	$scope.sorterFunc = function(trt){
 	    return -parseInt(trt.abundance);
 	};
+
+	$scope.limit = 5;
+	$scope.textLimit = "Voir plus";
+
+	$scope.stopLimit = function() {
+		if ($scope.limit === 5) {
+			$scope.limit = 100000;
+			$scope.textLimit = "Voir moins";
+		} else {
+			$scope.limit = 5;
+			$scope.textLimit = "Voir plus";
+		}
+	}
 	
 	$scope.setFilterTaxonBilan = function(value){
 		 mainService.put('filterTaxonBilan', value);
@@ -293,7 +348,7 @@
 			
 			if(angular.isDefined($scope.readset.sampleOnContainer) && $scope.readset.sampleOnContainer != null && 
 				angular.isDefined($scope.readset.sampleOnContainer.properties) && $scope.readset.sampleOnContainer.properties != null && 
-				angular.isDefined($scope.readset.sampleOnContainer.properties.expectedSequences) && $scope.readset.sampleOnContainerproperties.expectedSequences != null) {
+				angular.isDefined($scope.readset.sampleOnContainer.properties.expectedSequences) && $scope.readset.sampleOnContainer.properties.expectedSequences != null) {
 				var expectedSequences = $scope.readset.sampleOnContainer.properties.expectedSequences.value.replace(/["]/g,'');
 				var lastChar = expectedSequences.charAt(expectedSequences.length-1);
 				if(lastChar==","){
@@ -313,7 +368,7 @@
 			}
 			
 			// NGL-2970 - Vue Bionano. La requête part alors qu'il n'y a pas de traitements ngsrg dans bionano.
-			if (data.typeCode != 'rsbionano') {
+			if (data.typeCode != 'rsbionano' && data.typeCode != 'rspacbio') {
 				$http.get(jsRoutes.controllers.runs.api.RunTreatments.get($scope.readset.runCode, "ngsrg").url).success(function(data) {
 					$scope.runNGSRG = data;	
 				});	
@@ -514,9 +569,23 @@
 		return "data:text/txt;base64," + base64txt;
 	};
 	
-}])
+}]);
  
- 
+//NGL-4510
+  angular.module('home').controller('SizeEstimatingPacbioCtrl', [ '$scope', function($scope) {
+
+	$scope.getTabP1SummaryFile = function(readset, treatmentCode) {
+		var base64txt = readset.treatments[treatmentCode].default.tabP1summaryFile.value;
+		return "data:text/txt;base64," + base64txt;
+	};
+
+	$scope.getTabP2SummaryFile = function(readset, treatmentCode) {
+		var base64txt = readset.treatments[treatmentCode].default.tabP2summaryFile.value;
+		return "data:text/txt;base64," + base64txt;
+	};
+	
+}]);
+
  angular.module('home').controller('MappingCtrl', ['$scope', '$parse', function($scope, $parse) {
 	 
 		$scope.isDataExistsForRead = function(read) {

@@ -10,7 +10,9 @@
 				property:"name",
 				header: "projects.name",
 				type :"text",
+				groupMethod:"collect:true",
 				order:true,
+				render : "<div list-resize='cellValue'list-resize-min-size='3' vertical>",
 				position: 2,
 				edit:false
 			});
@@ -18,6 +20,7 @@
 			columns.push({
 				property: "traceInformation.creationDate",
 				header: "projects.traceInformation.creationDate",
+				groupMethod:"unique",
 				type: "date",
 				order: true,
 				position: 3,
@@ -28,6 +31,7 @@
 			columns.push({
 				property:"code",
 				header: "projects.code",
+				groupMethod:"countDistinct",
 				type :"text",
 				position: 4,
 				order:true,
@@ -60,7 +64,7 @@
 				this.selectedAddColumns = [];
 				this.mapAdditionnalColumn = new Map();
    
-				if (lists.get("umbrellaprojects-addcolumns") && lists.get("umbrellaprojects-addcolumns").length === 1) {
+				if (searchService.lists.get("umbrellaProjects-addcolumns") && searchService.lists.get("umbrellaProjects-addcolumns").length === 1) {
 					var formColumns = [];
 					var allColumns = this.computeMapAdditionnalColumns();
 					var nbElementByColumn = Math.ceil(allColumns.length / 5); //5 columns
@@ -105,7 +109,7 @@
 			},
 
 			computeMapAdditionnalColumns: function () {
-				var allColumns = angular.copy(lists.get("umbrellaprojects-addcolumns")[0].columns);
+				var allColumns = angular.copy(lists.get("umbrellaProjects-addcolumns")[0].columns);
 				var allColumnsFiltered = [];
 				for (var i = 0; i < allColumns.length; i++) {
 					if (allColumns[i].groupHeader == undefined) {
@@ -142,8 +146,7 @@
 				
 			convertForm : function(){
 				var _form = angular.copy(this.form);
-				if(_form.fromDate)_form.fromDate = moment(_form.fromDate, Messages("date.format").toUpperCase()).valueOf();
-				if(_form.toDate)_form.toDate = moment(_form.toDate, Messages("date.format").toUpperCase()).valueOf();		
+				
 				return _form
 			},
 
@@ -167,11 +170,41 @@
 				});
 			},
 
+			getAddFiltersToForm: function () {
+				if (this.additionalFilters.length === 0) {
+					this.initAdditionalFilters();
+				}
+				return this.additionalFilters;
+			},
+
+			initAdditionalFilters: function () {
+				this.additionalFilters = [];
+   
+				if (lists.get("umbrellaProjects-addfilters") && lists.get("umbrellaProjects-addfilters").length === 1) {
+					var formFilters = [];
+					var allFilters = angular.copy(lists.get("umbrellaProjects-addfilters")[0].filters);
+   
+					var nbElementByColumn = Math.ceil(allFilters.length / 5); //5 columns
+					for (var i = 0; i < 5 && allFilters.length > 0; i++) {
+						formFilters.push(allFilters.splice(0, nbElementByColumn));
+					}
+					//complete to 5 five element to have a great design 
+					while (formFilters.length < 5) {
+						formFilters.push([]);
+					}
+   
+					this.additionalFilters = formFilters;
+				}
+			},
+
 			init: function ($routeParams, datatableConfig) {
 				searchService.lists.refresh.umbrellaProjects();
 				searchService.lists.refresh.reportConfigs({
-					pageCodes: ["umbrellaprojects-addcolumns"]
-				}, "umbrellaprojects-addcolumns");
+					pageCodes: ["umbrellaProjects-addcolumns"], 
+					active:true
+				}, "umbrellaProjects-addcolumns");
+
+				searchService.lists.refresh.filterConfigs({pageCodes:["umbrellaProjects-addfilters"]}, "umbrellaProjects-addfilters");
 
 				datatableConfig.messages = {
 					transformKey: function (key, args) {
@@ -183,7 +216,7 @@
 					searchService.datatable = datatable(datatableConfig);
 					mainService.setDatatable(searchService.datatable);
 					searchService.datatable.setColumnsConfig(getDefaultColumns());
-					this.datatable.search();
+	
 				} else if (angular.isDefined(mainService.getDatatable())) {
 					searchService.datatable = mainService.getDatatable();
 				}

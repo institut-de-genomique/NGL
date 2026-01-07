@@ -61,6 +61,9 @@ error.validationexp.manytagSize="Plusieurs tailles d''index sont présentes"
 error.validationexp.sameTagSequence="Séquence identique ({1}) en position {0}"
 error.validationexp.sameconcentration="La concentration du container {0} n''est pas homogène avec celles des autres containers (elle vaut {1} nM)"
 error.validationexp.outputvolumenotnull="La saisie du volume de sortie est obligatoire pour le container {0}"
+error.validationexp.biologicalMaterialInputQty.unit=La saisie de l''unité est obligatoire pour la propriété ''biologicalMaterialInputQty'' si une valeur est saisie.
+error.validationexp.biologicalMaterialQuantity.unit=La saisie de l''unité est obligatoire pour la propriété ''biologicalMaterialQuantity'' si une valeur est saisie.
+error.validationexp.hmwDnaExtractInputQty.unit=La saisie de l''unité est obligatoire pour la propriété ''hmwDnaExtractInputQty'' si une valeur est saisie.
 error.validationexp.outputvolumenotnull.light="La saisie du volume de sortie est obligatoire"
 error.validationexp.outputconcentrationnotnull="La saisie de la concentration de sortie est obligatoire pour le container {0}"
 error.validationexp.outputconcentrationnotnull.light="La saisie de la concentration de sortie est obligatoire"
@@ -103,6 +106,7 @@ error.receptionfile.expectedPrimaryTags.errorSorting = Les index dans la liste {
 error.receptionfile.expectedPrimaryTags.errorFirstTag = Le tag {0} n'est pas le premier de la liste triée
 
 error.invalid.collabFileName = Le nom de fichier collaborateur {0} est invalide
+error.invalid.refCollabSub = La refCollabSub {0} est invalide
 
 #directive messages
 msg.details = [détails]

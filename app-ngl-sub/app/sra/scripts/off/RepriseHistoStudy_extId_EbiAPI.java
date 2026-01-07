@@ -12,7 +12,7 @@ import fr.cea.ig.MongoDBDAO;
 import fr.cea.ig.lfw.controllers.scripts.buffered.ScriptNoArgs;
 import models.sra.submit.sra.instance.Study;
 import models.utils.InstanceConstants;
-import services.SraEbiAPI;
+import sra.services.SraEbiAPI;
 
 public class RepriseHistoStudy_extId_EbiAPI extends ScriptNoArgs {
 	private SraEbiAPI ebiAPI;
@@ -32,7 +32,8 @@ public class RepriseHistoStudy_extId_EbiAPI extends ScriptNoArgs {
 		for (Study dbStudy : dbStudies) {
 			printfln(dbStudy.accession + " --  " + dbStudy.code );
 			ebiAPI.ebiStudyExists(dbStudy.accession);
-			String xmlStudy = ebiAPI.ebiStudyXml(dbStudy.accession);
+			// String xmlStudy = 
+			ebiAPI.ebiStudyXml(dbStudy.accession);
 			
 		}
 	}

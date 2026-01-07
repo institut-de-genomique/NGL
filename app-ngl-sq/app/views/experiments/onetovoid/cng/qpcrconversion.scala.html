@@ -1,0 +1,34 @@
+<!-- NGL4902 duplication depuis qpcrquantification.scal.html -->
+@()
+<div ng-controller="OneToVoidQCCtrl">	
+<div class="col-md-12 col-lg-12 margin-left-0 padding-left-0" ng-controller="OneToVoidQPCRConversionCtrl">
+	<div class="row margin-bottom-7" ng-show="buttons.isShowBravo()">
+	<div class="col-md-8 col-lg-8 col-sm-8" ng-show="experiment.instrumentProperties.sector96.value !== undefined && ! buttons.isFullPlate()">
+		<form class="form-inline" role="form">
+			<div class="form-group col-md-12 col-lg-12 col-sm-12 vertical-align-left">
+			
+				<label for="selectMappingMode" class="col-md-3 col-lg-3 col-sm-3 control-label">Type de fichier résultat qPCR</label>
+				<select class="form-control input-sm" id="selectMappingMode" 
+						ng-model="mappingMode"
+						ng-change="setMappingMode(mappingMode)"	
+						ng-options="mode as mode.name for mode in bravoMappingModes_halfPlate">  			    							     	 
+				</select>
+	
+				<div class="input-group col-md-4 col-lg-4 col-sm-4" >
+					<input id="importQpcrFile" type="file" class="form-control" base64-file="qpcrFile">
+					<span class="input-group-btn">
+						<button class="btn btn-primary" ng-click="buttons.clickImport()" ng-disabled="buttons.isFileSet()" title="@Messages("button.import.file")"><i class="fa fa-upload"></i></button>
+					</span>
+				</div>	
+			</div> 
+		</form>
+	</div>
+	</div>
+	
+	<div class="row margin-bottom-7">
+		<div class="col-md-12 col-lg-12" >
+			@views.html.experiments.onetoone.defaults.partials.udtAndPlateDesign()
+		</div>
+	</div> 	 
+</div>
+</div>

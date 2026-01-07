@@ -67,7 +67,7 @@ public class CatalogsAPI extends GenericAPI<CatalogsDAO, AbstractCatalog> {
 
 	/**
 	 * Get catalogs by catalogRefCode.
-	 * @param catalogRefCode
+	 * @param catalogRefCode catalog refCode
 	 * @return catalogs
 	 */
 	public Iterable<AbstractCatalog> getByRef(String catalogRefCode) {
@@ -76,9 +76,9 @@ public class CatalogsAPI extends GenericAPI<CatalogsDAO, AbstractCatalog> {
 
 	/**
 	 * Get Reagent or Box catalog by catalogRefCode and its kitCatalog's providerCode and name.
-	 * @param catalogRefCode
-	 * @param providerCode
-	 * @param kitCatalogName
+	 * @param catalogRefCode catalogRefCode
+	 * @param providerCode providerCode
+	 * @param kitCatalogName kitCatalogName
 	 * @return reagent or box catalog
 	 */
 	public AbstractCatalog getByRefAndProvider(String catalogRefCode, String providerCode, String kitCatalogName) {

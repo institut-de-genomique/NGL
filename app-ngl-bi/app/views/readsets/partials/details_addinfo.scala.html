@@ -16,7 +16,22 @@
 		@views.html.helper.columnLabelValue(Messages("readset.sampleOnContainer.referenceCollab")){
 			<p class="form-control-static" ng-bind="readset.sampleOnContainer.referenceCollab"></p>
 		}
-		
+
+		<div class="form-group" >
+			<span ng-if="hasProperties('ncbiPhylum')">
+				<label class="col-md-6 col-lg-6 control-label" >@Messages("readset.sampleOnContainer.ncbiPhylum")</label>
+				<div class="col-md-6 col-lg-6"><p class="form-control-static" ng-bind="readset.sampleOnContainer.properties.ncbiPhylum.value" /></div>
+			</span>
+		</div>
+
+		<div class="form-group" >
+			<span ng-if="hasProperties('ncbiClass')">
+				<label class="col-md-6 col-lg-6 control-label" >@Messages("readset.sampleOnContainer.ncbiClass")</label>
+				<div class="col-md-6 col-lg-6"><p class="form-control-static" ng-bind="readset.sampleOnContainer.properties.ncbiClass.value" /></div>
+			</span>
+		</div>
+
+
 		@views.html.helper.columnLabelValue(Messages("readset.sampleOnContainer.taxonCode")){
 			<p class="form-control-static" ng-bind="readset.sampleOnContainer.taxonCode"></p>
 		}
@@ -52,7 +67,7 @@
 		
 		
 		<div ng-repeat="(key, value) in readset.sampleOnContainer.properties">
-			<property-value key-ng-model="key" value-ng-model="value"/>
+			<property-value ng-if="isAllowedProperty(key)" key-ng-model="key" value-ng-model="value"/>
 		</div>
 		
 	}

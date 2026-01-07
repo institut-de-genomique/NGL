@@ -396,7 +396,8 @@ angular.module('home').controller('BisSeqLibPrepCtrl',['$scope', '$parse',  '$fi
 	// 31/08/2018 NGL-1350 aide a la saisie des tags
 	// appeller initTags() isNewState() necessaire sinon ils ne sont pas initialisés au moment du chgt etat de l'experience a InProgress
 	if ( $scope.isNewState() || $scope.isInProgressState() || Permissions.check("admin") ){ 
-		//29/10/2018 si pas de parametre passé a initTag => tous les types, sinon preciser !!! 2 valeurs existent: 'index-illumina-sequencing','index-nanopore-sequencing'
+		//29/10/2018 si pas de parametre passé a initTag => tous les types, sinon preciser !!! 
+		//21/05/2024: 3 valeurs existent: 'index-illumina-sequencing','index-nanopore-sequencing', 'index-pacbio-sequencing'
 		tagService.initTags("index-illumina-sequencing");
 
 		$scope.getTagGroups= function(){return tagService.getAllTagGroups()};

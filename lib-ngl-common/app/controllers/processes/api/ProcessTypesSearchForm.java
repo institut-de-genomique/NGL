@@ -16,4 +16,13 @@ public class ProcessTypesSearchForm extends ListForm{
 	public Boolean isActive;
 	
 	public Boolean light = true;
+
+	public List<String> experimentTypes;
+
+	public List<String> firstExperimentTypes;
+
+	public List<String> lastExperimentTypes;
+
+	
+
 }

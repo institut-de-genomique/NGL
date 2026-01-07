@@ -1,6 +1,8 @@
 @this()
 @()
 @import views.html.helper._
+@import views.html.tools.projectAttributesInstructions
+
 @**Definition d'une variable user :**@
 @user            = @{ fr.cea.ig.authentication.Authentication.getUser() }
 
@@ -10,54 +12,31 @@
 		@formGroup{
 			<div class="form-control" bt-select  ng-model="form.projCodes" filter="true" multiple="true" placeholder='@Messages("consultation.placeholder.projectCodes")' bt-options="project.code as project|formatProjectListLabel for project in lists.getProjects()"></div>	
 		}													
-	}
-	@**
-	@columnSearchForm{	
 		@formGroup{
 			<div class="form-control" bt-select ng-model="form.pseudoStateCodes"  filter="true" multiple="true" placeholder='@Messages("consultation.placeholder.pseudoStateCodes")' 
-			                          bt-options="pseudoStates.code as pseudoStates.name for pseudoStates in sraVariables.simplifiedStatesWithNone|orderBy:'code'"></div>			
-		}	
+			                          bt-options="pseudoStates.code as pseudoStates.name for pseudoStates in sraVariables.simplifiedStatesWithNone|orderBy:'code'"></div>				
+		}
 	}
-	**@
 	@columnSearchForm{	
 		@formGroup{
-						<div class="form-control" bt-select ng-model="form.pseudoStateCodes"  filter="true" multiple="true" placeholder='@Messages("consultation.placeholder.pseudoStateCodes")' 
-			                          bt-options="pseudoStates.code as pseudoStates.name for pseudoStates in sraVariables.simplifiedStatesWithNone|orderBy:'code'"></div>				
-		}	
-	}
-	@columnSearchForm{
-		@formGroup{			
 			<bt-input  class="form-control"  input-ng-model="form.codeRegex" textarea-ng-model="form.codes" 
-			title='@Messages("consultation.textarea-placeholder.studyCodes")' 
-			textarea-placeholder-ng-model='@Messages("consultation.textarea-placeholder.studyCodes")'
-			placeholder='@Messages("consultation.placeholder.studyCodes")' >
+			title='@Messages("consultation.textarea-placeholder-title.studyCodes")' 
+			textarea-placeholder-ng-model='@Messages("consultation.textarea-placeholder-title.studyCodes")' 
+			placeholder='@Messages("consultation.textarea-placeholder.studyCodes")' >
 			</bt-input>									
 		}
+		@formGroup{
+			<bt-input  class="form-control"  input-ng-model="form.identifierRegex" textarea-ng-model="form.identifiers" 
+			title='@Messages("consultation.textarea-placeholder-title.studyIdentifiers")' 
+			textarea-placeholder-ng-model='@Messages("consultation.textarea-placeholder-title.studyIdentifiers")' 
+			placeholder='@Messages("consultation.textarea-placeholder.studyIdentifiers")' >
+			</bt-input>									
+		}	
 	}
 
 	@columnSearchForm{
-		@formGroup{
-			<bt-input  class="form-control"  input-ng-model="form.accessionRegex" textarea-ng-model="form.accessions" 
-			title='@Messages("consultation.textarea-placeholder.studyAccessions")' 
-			textarea-placeholder-ng-model='@Messages("consultation.textarea-placeholder.studyAccessions")' 
-			placeholder='@Messages("consultation.placeholder.studyAccessions")' >
-			</bt-input>									
-		}
 	}
-	@columnSearchForm{
-		@formGroup{			
-			<bt-input  class="form-control"  input-ng-model="form.externalIdRegex" textarea-ng-model="form.externalIds" 
-			title='@Messages("consultation.textarea-placeholder.studyExternalIds")' 
-			textarea-placeholder-ng-model='@Messages("consultation.textarea-placeholder.studyExternalIds")' 
-			placeholder='@Messages("consultation.placeholder.studyExternalIds")' >
-			</bt-input>									
-		}
-	}
-@*	@columnSearchForm{
-	}
-	@columnSearchForm{
-	}	
-*@
+
 		
 	@columnSearchForm{
 		@formGroup{
@@ -86,7 +65,7 @@
 	}
 	@columnSearchForm{
 	}
-		
+	@projectAttributesInstructions()		
 }
 
 

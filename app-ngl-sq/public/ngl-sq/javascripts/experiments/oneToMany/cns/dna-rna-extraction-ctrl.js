@@ -7,7 +7,7 @@ angular.module('home').controller('DnaRnaExtractionCtrl',['$scope', '$parse', '$
 			columns:[   
 					 {
 			        	 "header":Messages("containers.table.code"),
-			        	 "property":"inputContainer.support.code",
+			        	 "property":"inputContainer.code",
 			        	 "order":true,
 						 "edit":false,
 						 "hide":true,
@@ -174,7 +174,7 @@ angular.module('home').controller('DnaRnaExtractionCtrl',['$scope', '$parse', '$
 
 	};	
 	
-	
+	$scope.setIsShowInformation (false);
 	
 	$scope.updateInputVolume = function(experiment){
 		for(var i=0 ; i < experiment.atomicTransfertMethods.length ; i++){

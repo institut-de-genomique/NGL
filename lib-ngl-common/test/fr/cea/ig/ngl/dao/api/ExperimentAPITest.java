@@ -6,8 +6,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -23,10 +21,7 @@ import fr.cea.ig.ngl.dao.experiments.ExperimentsDAO;
 import fr.cea.ig.ngl.dao.api.factory.ExperimentFactory;
 import fr.cea.ig.ngl.utils.TestUtils;
 import models.laboratory.common.instance.State;
-import models.laboratory.common.instance.TraceInformation;
-import models.laboratory.common.instance.Valuation;
 import models.laboratory.experiment.instance.Experiment;
-import models.laboratory.instrument.instance.InstrumentUsed;
 import models.utils.CodeHelper;
 import models.utils.code.Code;
 import models.utils.instance.ExperimentHelper;
@@ -61,22 +56,6 @@ public class ExperimentAPITest {
 		PowerMockito.mockStatic(CommonValidationHelper.class);
 		PowerMockito.mockStatic(ExperimentValidationHelper.class);
 		PowerMockito.mockStatic(CodeHelper.class);
-
-		try {
-			PowerMockito.doNothing().when(CommonValidationHelper.class, "validateIdPrimary", any(ContextValidation.class), any(Experiment.class));
-			PowerMockito.doNothing().when(CommonValidationHelper.class, "validateCodePrimary", any(ContextValidation.class), any(Experiment.class), any(String.class));
-			PowerMockito.doNothing().when(ExperimentValidationHelper.class, "validateExperimentTypeRequired", any(ContextValidation.class), any(String.class), any(Map.class));
-			PowerMockito.doNothing().when(ExperimentValidationHelper.class, "validateExperimentCategoryCodeRequired", any(ContextValidation.class), any(String.class));
-			PowerMockito.doNothing().when(ExperimentValidationHelper.class, "validateStatusRequired", any(ContextValidation.class), any(String.class), any(Valuation.class));
-			PowerMockito.doNothing().when(ExperimentValidationHelper.class, "validateProtocolCode", any(ContextValidation.class), any(String.class), any(String.class), any(String.class));
-			PowerMockito.doNothing().when(ExperimentValidationHelper.class, "validateInstrumentUsed", any(ContextValidation.class), any(InstrumentUsed.class), any(Map.class), any(String.class));
-			PowerMockito.doNothing().when(ExperimentValidationHelper.class, "validateAtomicTransfertMethods", any(ContextValidation.class), any(String.class), any(String.class), any(InstrumentUsed.class), any(List.class), any(Experiment.class), any(String.class));
-			PowerMockito.doNothing().when(ExperimentValidationHelper.class, "validateReagents", any(ContextValidation.class), any(List.class)); 
-			PowerMockito.doNothing().when(CommonValidationHelper.class, "validateTraceInformationRequired", any(ContextValidation.class), any(TraceInformation.class));
-		} catch (Exception e) {
-			Logger.error("Exception occured during setUp()");
-			fail(e.getMessage());
-		}
 	}
 	
 	@Test
@@ -184,7 +163,7 @@ public class ExperimentAPITest {
 		}
 		
 		if (!exceptFired) {
-			fail("Invalid run, should have been refused.");
+			fail("Invalid experiment, should have been refused.");
 		}
 	}
 	

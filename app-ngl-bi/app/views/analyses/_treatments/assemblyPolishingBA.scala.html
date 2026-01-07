@@ -1,0 +1,51 @@
+@()
+<div ng-init="treatmentCode='assemblyPolishing'">
+<div class="row">
+
+ <div class="col-md-7 col-lg-7">
+    <br />
+    <br />
+	<br/>
+    <b>Readsets used : </b>
+    {{analysis.treatments[treatmentCode].pairs.readsetsused.value}}
+    <br />
+    <br />
+	 <br/>
+	 <strong></strong>
+	 <br/><br/>  
+	 <table class="table table-condensed table-hover table-bordered">
+		<thead>
+		<tr>
+			<th>@Messages("analyses.treatments.assemblyPolishing.softwareVersion")</th> 
+			<th>@Messages("analyses.treatments.assemblyPolishing.selectedAssembly")</th> 
+			
+			<th>@Messages("analyses.treatments.assemblyPolishing.cumulativeSize")</th> 
+			<th>@Messages("analyses.treatments.assemblyPolishing.n50")</th> 
+			<th>@Messages("analyses.treatments.assemblyPolishing.n90")</th>
+			<th>@Messages("analyses.treatments.assemblyPolishing.l50")</th>
+			<th>@Messages("analyses.treatments.assemblyPolishing.l90")</th>		
+			<th>@Messages("analyses.treatments.assemblyPolishing.auN")</th>		
+			<th>@Messages("analyses.treatments.assemblyPolishing.maxSize")</th>						
+			<th>@Messages("analyses.treatments.assemblyPolishing.nbcontigs")</th>						
+				
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<td>{{analysis.treatments[treatmentCode].pairs.softwareVersion.value }}</td>
+			<td>{{analysis.treatments[treatmentCode].pairs.selectedAssembly.value }}</td>	
+			<td>{{analysis.treatments[treatmentCode].pairs.cumulativeSize.value | number}}</td>
+			<td>{{analysis.treatments[treatmentCode].pairs.n50.value | number}}</td>	
+			<td>{{analysis.treatments[treatmentCode].pairs.n90.value | number}}</td>
+			<td>{{analysis.treatments[treatmentCode].pairs.l50.value | number}}</td>	
+			<td>{{analysis.treatments[treatmentCode].pairs.l90.value | number}}</td>
+			<td>{{analysis.treatments[treatmentCode].pairs.auN.value | number}}</td>
+			<td>{{analysis.treatments[treatmentCode].pairs.maxSize.value | number}}</td>
+			<td>{{analysis.treatments[treatmentCode].pairs.nbcontigs.value | number}}</td>
+
+		</tr>						
+	</tbody>
+	 </table>
+ </div>	 
+</div>
+</div>

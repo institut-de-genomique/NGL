@@ -36,6 +36,4 @@ public class EbiIdentifiers {
 		this.externalId = externalId;
 	}
 	
-	
-	
 }

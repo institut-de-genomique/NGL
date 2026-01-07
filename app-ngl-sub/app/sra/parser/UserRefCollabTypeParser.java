@@ -7,14 +7,14 @@ import java.util.List;
 import java.util.Map;
 
 import models.sra.submit.sra.instance.UserRefCollabType;
-import models.sra.submit.util.SraException;
+import services.sra.SraException;
 
 public class UserRefCollabTypeParser {
-	private static final play.Logger.ALogger logger = play.Logger.of(UserRefCollabTypeParser.class);
+	// private static final play.Logger.ALogger logger = play.Logger.of(UserRefCollabTypeParser.class);
 
 	static final String REF_COLLAB = "refcollab";
-	static final String STUDY_AC = "study_id";
-	static final String SAMPLE_AC = "sample_id";
+	static final String STUDY_ID = "study_id";
+	static final String SAMPLE_ID = "sample_id";
 
 	private List<String> allowedFields = new ArrayList<>();
 	private String keyField;
@@ -27,8 +27,8 @@ public class UserRefCollabTypeParser {
 	
 	private void init() {
 		allowedFields.add(REF_COLLAB);
-		allowedFields.add(STUDY_AC);
-		allowedFields.add(SAMPLE_AC);
+		allowedFields.add(STUDY_ID);
+		allowedFields.add(SAMPLE_ID);
 
 		keyField = REF_COLLAB;
 		separator = "\\|";
@@ -42,11 +42,11 @@ public class UserRefCollabTypeParser {
 				//listUserRefCollab = (List<UserRefCollabType>)parser.load(inputStream, new UserRefCollabTypeParserFactory());
 				listUserRefCollab = parser.load(inputStream, new UserRefCollabTypeParserFactory());
 				//logger.debug("taille listUserRefCollab = " + listUserRefCollab.size());
-				for(  UserRefCollabType userRefCollab : listUserRefCollab) {
+				// for(  UserRefCollabType userRefCollab : listUserRefCollab) {
 					//logger.debug("userRefCollab.alias "+ userRefCollab.getAlias());
 					//logger.debug("userRefCollab.sampleAC "+ userRefCollab.getSampleAc());
 					//logger.debug("userRefCollab.studyAC "+ userRefCollab.getStudyAc());
-				}
+				// }
 			} else {
 				throw new SraException("Probleme lors de l'installation des champs autorises");
 			}

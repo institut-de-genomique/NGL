@@ -3,12 +3,14 @@ package fr.cea.ig.ngl.dao.api.factory;
 import java.util.*;
 
 import fr.cea.ig.ngl.utils.TestUtils;
-import models.laboratory.common.description.Value;
 import models.laboratory.common.instance.PropertyValue;
 import models.laboratory.common.instance.TraceInformation;
 import models.laboratory.common.instance.property.PropertyListValue;
 import models.laboratory.project.instance.BioinformaticParameters;
 import models.laboratory.project.instance.Project;
+import models.laboratory.project.instance.SystemParameters;
+import models.laboratory.project.instance.SystemParameters.ArchiveEntry;
+import models.laboratory.project.instance.SystemParameters.ArchiveEntry.Action;
 
 /**
  * Factory pour l'entité "Project".
@@ -30,6 +32,10 @@ public final class ProjectFactory {
 		}
 		
 		return projectList;
+	}
+
+	public static Project getRandomProject() {
+		return getRandomProject(false);
 	}
 	
 	/**
@@ -144,22 +150,17 @@ public final class ProjectFactory {
 	 * 
 	 * @return Un objet "Project" aléatoire avec la propriété archiveHistory valide.
 	 */
-	public static Project getRandomProjectValidArchiveHistory() {
-		Map<String, Object> archive = new HashMap<String, Object>();
-		archive.put("date", new Date());
-		archive.put("action", "ARCHIVAGE");
-		archive.put("rawArchiveId", "AAA_123256789");
-		archive.put("projArchiveId", "AAA_123456789");
-		archive.put("scratchArchiveId", "AAA_9876543210");
-		
-		List<Map<String, Object>> pMapVal = new ArrayList<Map<String, Object>>();
-		pMapVal.add(archive);
+	public static Project getRandomProjectValidArchiveHistory() {		
+		ArchiveEntry archive = new ArchiveEntry();
+		archive.date = new Date();
+		archive.action = Action.ARCHIVAGE;
+		archive.rawArchiveId = "AAA_9876543200";
+		archive.projArchiveId = "AAA_9876543000";
+		archive.scratchArchiveId = "AAA_9876543210";
 
-		PropertyListValue pListVal = new PropertyListValue(pMapVal);
-
-		Project project = getRandomProject(true);
-		project.properties = new HashMap<String, PropertyValue>();
-		project.properties.put("archiveHistory", pListVal);		
+		Project project = getRandomProject(true);	
+		project.systemParameters = new SystemParameters();
+		project.systemParameters.archiveHistory = Arrays.asList(archive);
 		
 		return project;
 	}
@@ -170,22 +171,17 @@ public final class ProjectFactory {
 	 * 
 	 * @return Un objet "Project" aléatoire avec un ID invalide (niveau format) pour chacun des id existants.
 	 */
-	public static Project getRandomProjectInvalidArchiveHistoryIdFormatAll() {
-		Map<String, Object> archive = new HashMap<String, Object>();
-		archive.put("date", new Date());
-		archive.put("action", "ARCHIVAGE");
-		archive.put("rawArchiveId", "INVALID");
-		archive.put("projArchiveId", "AAA_123456789");
-		archive.put("scratchArchiveId", "9876543210");
-		
-		List<Map<String, Object>> pMapVal = new ArrayList<Map<String, Object>>();
-		pMapVal.add(archive);
+	public static Project getRandomProjectInvalidArchiveHistoryIdFormatAll() {		
+		ArchiveEntry archive = new ArchiveEntry();
+		archive.date = new Date();
+		archive.action = Action.ARCHIVAGE;
+		archive.rawArchiveId = "INVALID";
+		archive.projArchiveId = "INVALID";
+		archive.scratchArchiveId = "INVALID";
 
-		PropertyListValue pListVal = new PropertyListValue(pMapVal);
-
-		Project project = getRandomProject(true);
-		project.properties = new HashMap<String, PropertyValue>();
-		project.properties.put("archiveHistory", pListVal);		
+		Project project = getRandomProject(true);	
+		project.systemParameters = new SystemParameters();
+		project.systemParameters.archiveHistory = Arrays.asList(archive);
 		
 		return project;
 	}
@@ -196,41 +192,17 @@ public final class ProjectFactory {
 	 * @return Un objet "Project" aléatoire avec un ID invalide dans les archives.
 	 */
 	public static Project getRandomProjectInvalidActionArchiveHistory() {
-		Map<String, Object> archive = new HashMap<String, Object>();
-		archive.put("date", new Date());
-		archive.put("action", "INVALID");
-		archive.put("rawArchiveId", "AAA_1234567191");
-		archive.put("projArchiveId", "AAA_1234563891");
-		archive.put("scratchArchiveId", "AAA_1234567891");
-		
-		List<Map<String, Object>> pMapVal = new ArrayList<Map<String, Object>>();
-		pMapVal.add(archive);
+		ArchiveEntry archive = new ArchiveEntry();
+		archive.date = new Date();
+		archive.action = null;
+		archive.rawArchiveId = "AAA_1234567191";
+		archive.projArchiveId = "AAA_123456789";
+		archive.scratchArchiveId = "AAA_9876543210";
 
-		PropertyListValue pListVal = new PropertyListValue(pMapVal);
-
-		Project project = getRandomProject(true);
-		project.properties = new HashMap<String, PropertyValue>();
-		project.properties.put("archiveHistory", pListVal);		
+		Project project = getRandomProject(true);	
+		project.systemParameters = new SystemParameters();
+		project.systemParameters.archiveHistory = Arrays.asList(archive);
 		
 		return project;
-	}
-	
-	/**
-	 * Méthode permettant de retourner une liste de valeurs possibles pour la propertyDefinition "archiveHistory.action".
-	 * 
-	 * @return Une liste de valeurs possibles pour la propertyDefinition "archiveHistory.action".
-	 */
-	public static List<Value> getPossibleActionValues() {
-		Value value1 = new Value();
-		value1.value = "ARCHIVAGE";
-
-		Value value2 = new Value();
-		value2.value = "DESARCHIVAGE";
-
-		List<Value> possibleValues = new ArrayList<Value>();
-		possibleValues.add(value1);
-		possibleValues.add(value2);
-		
-		return possibleValues;
 	}
 }

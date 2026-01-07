@@ -61,7 +61,9 @@ public class UpdateSampleLaunchDateFromSamples extends ScriptWithExcelBody {
 					sampleList.forEach(sampleToUpdate -> {
 						sampleToUpdate.setProcessesToLaunchDate(new Date());
 
-						MongoDBDAO.update(InstanceConstants.SAMPLE_COLL_NAME, sampleToUpdate);
+						if (sampleToUpdate.getProcessesToLaunchDate() != null) {
+							MongoDBDAO.update(InstanceConstants.SAMPLE_COLL_NAME, sampleToUpdate);
+						}
 					});
 				} else {
 					println("Le code du sample donné n'existe pas (code : '" + sampleCode + "').");

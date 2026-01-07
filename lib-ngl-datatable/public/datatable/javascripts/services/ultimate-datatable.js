@@ -1514,6 +1514,7 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                                  });
                              }
                          }
+
                          if(data.length === 0){
                         	 return $q.when(this.saveFinish());
                          }else if (!this.isRemoteMode(this.config.save.mode)) {
@@ -1521,6 +1522,7 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                          } else if (this.isRemoteMode(this.config.save.mode) && !this.config.save.batch) {
                         	 return this.saveAllRemote(data);
                          } else if (this.isRemoteMode(this.config.save.mode) && this.config.save.batch) {
+
                         	 return this.saveAllBatchRemote(data);
                          }
             		}                	
@@ -2561,7 +2563,6 @@ factory('datatable', ['$http', '$filter', '$parse', '$window', '$q', 'udtI18n', 
                 } else if (!result.line.group && column.url !== undefined && column.url !== null) {
                     var url = $parse(column.url)(result.data, context);
                     var v;
-                    
                     if (typeof this.urlCache[url] == 'string') { // Si c'est un string, c'est qu'il y a eu une erreur et donc un message d'erreur.
                                                                  // Sinon on a un objet en JSON.
                         v = this.urlCache[url];
@@ -3914,7 +3915,7 @@ directive("udtTbody", function(){
 	    							editElement = '<select class="form-control" multiple="true" '+requiredDirective+' '+defaultValueDirective+' ng-options="opt.code '+scope.udtTable.getFormatter(col)+' as opt.name '+getGroupBy(col)+' for opt in '+getOptions(col)+'" '+' ng-model="'+getEditProperty(col,header,filter)+ngChange+userDirectives+'></select>';
 		    						break;
 	    						case "bt-select":
-	    							editElement = '<div udt-html-filter="{{col.type}}" class="form-control" udt-btselect '+requiredDirective+' '+defaultValueDirective+' placeholder="" bt-dropdown-class="dropdown-menu-right" bt-options="opt.code as opt.name  '+getGroupBy(col)+' for opt in '+getOptions(col)+'" '+' ng-model="'+getEditProperty(col,header,filter)+ngChange+userDirectives+'></div>';
+	    							editElement = '<div udt-html-filter="{{col.type}}" class="form-control" udt-btselect '+requiredDirective+' '+defaultValueDirective+' placeholder="" bt-dropdown-class="dropdown-menu-right" bt-options="opt.code as opt.name '+getGroupBy(col)+' for opt in '+getOptions(col)+'" '+' ng-model="'+getEditProperty(col,header,filter)+ngChange+userDirectives+'></div>';
 	    							break;
 								case "bt-select-filter":
 	    							editElement = '<div udt-html-filter="{{col.type}}" class="form-control" filter="true" udt-btselect '+requiredDirective+' '+defaultValueDirective+' placeholder="" bt-dropdown-class="dropdown-menu-right" bt-options="opt.code as opt.name  '+getGroupBy(col)+' for opt in '+getOptions(col)+'" '+' ng-model="'+getEditProperty(col,header,filter)+ngChange+userDirectives+'></div>';
@@ -4313,6 +4314,7 @@ factory('udtConvertValueServices', [function() {
 										value = value.toPrecision(precision);
 									}
 								}else if(convert === undefined || convert === null){
+                                    console.log(value)
 									throw "Error: Unknown Conversion "+inputUnit+" to "+outputUnit;
 									// return undefined;
 								}
@@ -4326,9 +4328,9 @@ factory('udtConvertValueServices', [function() {
 							return (1/1000);
 						}else if((inputUnit === 'ng' && outputUnit === '\u00B5g') || (inputUnit === '\u00B5l' && outputUnit === 'ml') || (inputUnit === 'nM' && outputUnit === 'pM')){
 							return 1000;
-						}else if ((inputUnit === 'mM' && outputUnit === 'nM')){
+						}else if ((inputUnit === 'mM' && outputUnit === 'nM') || (inputUnit === 'mg' && outputUnit === 'ng')){
 							return 1000000;
-						}else if ((inputUnit === 'nM' && outputUnit === 'mM')){
+						}else if ((inputUnit === 'nM' && outputUnit === 'mM') || (inputUnit === 'ng' && outputUnit === 'mg')){
 							return 1/1000000;
 						}else if((inputUnit === 'pmol' && outputUnit === 'fmol')){
 							return 1000;
@@ -4439,8 +4441,8 @@ factory('udtI18n', [function() {
 						},
 						"en": {
 							"result":"Results",
-							"date.format":"MM/dd/yyyy",
-							"datetime.format":"MM/dd/yyyy HH:mm:ss",
+							"date.format":"dd/MM/yyyy",
+							"datetime.format":"dd/MM/yyyy HH:mm:ss",
 							"datatable.button.selectall":"Select all (current page)",
 							"datatable.button.unselectall" :"Deselect all (current page)",
 							"datatable.button.cancel":"Cancel",

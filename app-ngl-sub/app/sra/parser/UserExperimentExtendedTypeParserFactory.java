@@ -5,8 +5,8 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 
 import models.sra.submit.sra.instance.UserExperimentExtendedType;
-import models.sra.submit.util.SraException;
-import services.IUserObjectFactory;
+import services.sra.SraException;
+import sra.services.IUserObjectFactory;
 
 
 public class UserExperimentExtendedTypeParserFactory implements IUserObjectFactory<UserExperimentExtendedType> {
@@ -44,11 +44,11 @@ public class UserExperimentExtendedTypeParserFactory implements IUserObjectFacto
 		if(StringUtils.isNotBlank(line.get(UserExperimentExtendedTypeParser.TITLE))) {
 			userExperimentExtendedType.setTitle(line.get(UserExperimentExtendedTypeParser.TITLE));
 		}	
-		if(StringUtils.isNotBlank(line.get(UserExperimentExtendedTypeParser.STUDY_AC))) {
-			userExperimentExtendedType.setStudyAccession(line.get(UserExperimentExtendedTypeParser.STUDY_AC));
+		if(StringUtils.isNotBlank(line.get(UserExperimentExtendedTypeParser.STUDY_ID))) {
+			userExperimentExtendedType.setStudyIdentifier(line.get(UserExperimentExtendedTypeParser.STUDY_ID));
 		}
-		if(StringUtils.isNotBlank(line.get(UserExperimentExtendedTypeParser.SAMPLE_AC))) {
-			userExperimentExtendedType.setSampleAccession(line.get(UserExperimentExtendedTypeParser.SAMPLE_AC));
+		if(StringUtils.isNotBlank(line.get(UserExperimentExtendedTypeParser.SAMPLE_ID))) {
+			userExperimentExtendedType.setSampleIdentifier(line.get(UserExperimentExtendedTypeParser.SAMPLE_ID));
 		}
 		return userExperimentExtendedType;
 	}

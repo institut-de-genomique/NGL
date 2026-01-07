@@ -10,7 +10,8 @@ angular.module('home').controller('UpdateCtrl',
 			columns.push({
 						property     : "traceInformation.creationDate",
 						header       : Messages("traceInformation.creationDate"),
-						type         : "date",		    	  	
+						type         : "date",	
+						hide         : true,	    	  	
 						order        : true,
 						edit         : false,
 						choiceInList : false  
@@ -19,21 +20,24 @@ angular.module('home').controller('UpdateCtrl',
 						property     : "traceInformation.createUser",
 						header       : Messages("traceInformation.creationUser"),
 						type         : "date",		    	  	
+						hide         : true,	    	  	
 						order        : true,
 						edit         : false,
 						choiceInList : false  
 						});
 			columns.push({
-						property : "state.code",
-						header   : Messages("project.state.code"),
-						"filter" : "codes:'state'",
-						type     : "text",		    	  	
-						order    : true
+						header       : Messages("project.state.code"),
+						property     :"state.code",
+						"filter"     :"codes:'state'",
+						type         : "text",		    	  	
+						hide         : true,	    	  	
+						order        : true
 						});	
 			columns.push({
 						property   : "code",
-		  	        	header     : Messages("code"),
+		  	        	header     : Messages("project.code"),
 				       	type       : "text",		    	  	
+						hide       : true,	    	  	
 				       	order      : true
 				        });		
 			columns.push({
@@ -47,45 +51,26 @@ angular.module('home').controller('UpdateCtrl',
 						});	
 			columns.push({
 						property     : "accession",
-					    header       : Messages("accession"),
+					    header       : Messages("project.accession"),
 				        type         : "text",		    	  	
+						hide         : true,	    	  	
 				        order        : true,
 				        edit         : false,
 				        choiceInList : false  
-				       	});	     			        			        
+				       	});	   			        
 			columns.push({
 						property     : "title",
-						header       : Messages("title"),
-						type :"text",	
-						hide:true,
-						order:true,
-						edit:true,  
-						editTemplate:"<textarea class='form-control' #ng-model rows='1'></textarea>",
+						header       : Messages("project.title"),
+						type         :"text",	
+						hide         :true,
+						order        :true,
+						edit         :true,  
+						editTemplate :"<textarea class='form-control' #ng-model rows='1'></textarea>",
 						choiceInList:false
 						});	    
 			columns.push({
 						property     : "description",
-						header       : Messages("description"),
-						type :"text",	
-						hide:true,
-						order:true,
-						edit:true,  
-						editTemplate:"<textarea class='form-control' #ng-model rows='1'></textarea>",
-						choiceInList:false
-						});	 
-			columns.push({
-						property     : "childrenProjectAccessions",
-				       	header       : Messages("project.childrenProjectAccessions"),
-						type :"text",	
-						hide:true,
-						order:true,
-						edit:true,  
-						editTemplate:"<textarea class='form-control' #ng-model rows='1'></textarea>",
-						choiceInList:false
-				       	}); 
-			columns.push({
-						property     : "idsPubmed",
-						header       : Messages("project.idsPubmed"),
+						header       : Messages("project.description"),
 						type :"text",	
 						hide:true,
 						order:true,
@@ -94,11 +79,39 @@ angular.module('home').controller('UpdateCtrl',
 						choiceInList:false
 						});	
 			columns.push({
+						property     : "parentProjectAccessions",
+						header       : Messages("parentProjectAccessions"),
+						type         : "text",	
+						hide         : true,
+						order        : true,
+						edit         : true,  // modifiable en update
+					    choiceInList : false
+						}); 
+			columns.push({
+						property     : "childrenProjectAccessions",
+				       	header       : Messages("project.childrenProjectAccessions"),
+				       	type         : "text",		    	  	
+						hide         : true,	    	  	
+				       	order        : false,
+				       	edit         : true,
+				       	choiceInList : false  
+				       	}); 	
+			columns.push({
+						property     : "idsPubmed",
+						header       : Messages("project.idsPubmed"),
+						type         : "text",
+						hide         : true,
+						edit         : true, 
+						order        : false,
+						choiceInList : false,
+						listStyle    : 'bt-select',
+						});
+			columns.push({
 						property     : "taxonId",
 						header       : Messages("project.taxonId"),
 						type         : "text",
 						hide         : true,
-						edit         : false, 
+						edit         : true, 
 						order        : true,
 						choiceInList : false,
 						});		
@@ -110,10 +123,45 @@ angular.module('home').controller('UpdateCtrl',
 						edit         : false, 
 						order        : true,
 						choiceInList : false,
-						});								
+						});	
+			columns.push({property   : "attributes",
+					    header       : Messages("project.attributes"),
+					    //"filter":"codes:'state'",
+					    type         : "text",		    	  	
+					    order        : false, 
+					    edit         : true,  
+					   	hide         : true,
+						choiceInList : false,
+						editTemplate :"<textarea class='form-control' #ng-model rows='3'></textarea>",
+//						render       : function(data, edit) {
+//							              return toolsServices.getStringAttributes(data);
+//						             }
+				        });							
+			columns.push({property   : "dropBox",
+						header       : Messages("study.dropBox"),
+						type         : "String",
+						hide         : true,
+						edit         : false,
+						order        : false,
+						choiceInList : true,
+						listStyle    : 'bt-select',
+						possibleValues:'sraVariables.dropBox',
+				    	});						
+			columns.push({
+						property     : "comments",
+						header       : Messages("comments"),
+						type         : "text",
+						hide         : true,
+						edit         : false, // pas modifiable en consultation car uniquement dans vue detail
+						order        : false,
+						choiceInList : false,
+						filter       : "collect:'comment'",
+						listStyle    : 'bt-select',
+						});						
 			return columns;
 		};
-      
+
+	
 	
 	$scope.projectsDTConfig = {
 			name:'umbrellasDT',
@@ -175,6 +223,12 @@ angular.module('home').controller('UpdateCtrl',
 				value:function(line){
 					return line;
 				},
+				callback : function(datatable, errors) {
+					console.log("++++++++++++++++++++++                 JE PASSE PAR LE callback DU DATATABLE  !!!! ");
+					$scope.messages.clear();
+					$scope.updateCallback(datatable, errors);
+					$scope.projectsDT.setSpinner(false);
+				},
 				mode:'local',
 			},
 
@@ -186,6 +240,7 @@ angular.module('home').controller('UpdateCtrl',
 	// Initialisations :
 	//------------------
 	//console.log("Dans update-ctrl.js");
+	$scope.errorDetails = {};
 	$scope.messages = messages();	
 	$scope.messages.clear();
 	$scope.form = {};  // important. 
@@ -211,7 +266,65 @@ angular.module('home').controller('UpdateCtrl',
 	
 	// Definitions methodes :
 	//-----------------------
+	$scope.toJsonUmbrellaModelOrThrow = function(line, errorDetails) {
+		//console.log("dans toJsonUmbrellaModelOrThrow, errorDetails=", errorDetails);
+		//console.log("En entree de toJsonUmbrellaModelOrThrow, json=", line);
+
+		toolsServices.toJsonUmbrellaModel(line, errorDetails);
+		if((Object.keys(errorDetails)).length > 0) {
+			//console.log("AAAAAAAAAAAAAAAAAAA               J'ai bien une erreur de  PARSING");
+			$scope.messages = messages(); // si on re-sauve sans recharger page.
+			$scope.messages.clear();      // si on re-sauve sans recharger page.
+			$scope.messages.addDetails(errorDetails);
+			$scope.messages.setError("save");
+			$scope.projectsDT.setSpinner(false);
+			$scope.treeLoadInProgress = false;
+			throw("Erreur de parsing");
+		} 
+		//console.log("En sortie de toJsonUmbrellaModelOrThrow, json=", line);
+	}; // end $scope.toJsonStudyModelOrThrow
 	
+		$scope.updateCallback = function(datatable, countError) {
+		$scope.messages = messages(); // si on re-sauve sans recharger page.
+		$scope.messages.clear();      // si on re-sauve sans recharger page.
+		//console.log(datatable);
+//		console.log(countError);
+//		console.log("YYYYYYYY   TOTOTO   YYYYYYYYYYY    dans callback, displayResult : ", datatable.displayResult);
+//		console.log("xxxxxxxxxx    dans callback, displayResult.line : ", datatable.displayResult.line);
+		//console.log("eeeeeeeeeeeeee  dans callback scope.dbSamples = ", $scope.dbSamples);
+		for (var i = 0; i < datatable.displayResult.length; i++) {
+			var keysError =  Object.keys(datatable.displayResult[i].line.errors);
+//			console.log("eeeeeeeee keysError", keysError);
+//			console.log("eeeeeeeee keysError.length", keysError.length);
+			if ( keysError.length >= 1 ) {
+				// Recuperation message erreur :
+				var monObj = datatable.displayResult[i].line.errors;
+//				console.log("dans callback, monObj", monObj);
+//				console.log("dans callback, monObj.typeOf", monObj.typeOf);
+//				console.log("dans callback, monObj.hasOwnProperty()", monObj.hasOwnProperty());
+				for (var [key, values] of Object.entries(monObj)) {
+					var cle = `${key}`;
+					var values = `${values}`; 
+//  				console.log("xxxxxxxxxxx    cle = ", cle);
+//					console.log("xxxxxxxxxxx    values = ", values);
+//					console.log("monObjValues = ", monObj[cle]);
+					var monError = {};
+					monError[cle]=[values];
+					$scope.messages.addDetails(monError);
+				} // end for
+			} // end if						
+		}// end for
+		// Affichage message succes ou erreur :
+		// Dans le cas d'une exception, countError n'est pas definie :
+		if ( countError == undefined || countError == null || countError > 0) {
+			$scope.messages.setError("save");
+			$scope.treeLoadInProgress = false;
+		} else {
+			$scope.messages.setSuccess("save");			
+		}
+	}; // end updateCallback
+	
+		
 	// methode appelée depuis la vue avec la directive ng-init
 	$scope.setUserInScope = function(user) {
 		$scope.user = user;
@@ -223,10 +336,10 @@ angular.module('home').controller('UpdateCtrl',
 		$scope.messages.clear();
 		console.log("Dans update-ctrl.search");
 		console.log("user", $scope.user);
-		console.log("scope.form", $scope.form);
-		if ($scope.form.accession) {
+		//console.log("scope.form", $scope.form);
+		if(toolsServices.isBlank($scope.form.accession)) {
 			$scope.messages.setError(Messages("AbsenceSearchParameter"));
-			console.log("update-ctrl.$scope.messages = ", $scope.messages);
+			//console.log("update-ctrl.$scope.messages = ", $scope.messages);
 			// annuler spinner si besoin
 			throw("Aucun parametre pour la recherche du study à updater");  
 		} 
@@ -237,7 +350,7 @@ angular.module('home').controller('UpdateCtrl',
 
 	$scope.reset = function(){
 		//console.log("Dans update-ctrl.resetForm");
-        $scope.form = {};
+		$scope.errorDetails = {};
 		$scope.tab_projects = []; 
 		$scope.projectsDT = datatable($scope.projectsDTConfig);
 		$scope.projectsDT.setColumnsConfig($scope.getProjectColumns());
@@ -251,6 +364,9 @@ angular.module('home').controller('UpdateCtrl',
 	$scope.submit = function() {
 		$scope.messages = messages();
 		$scope.messages.clear();
+		$scope.errorDetails = {}; // important de le mettre ici si après une erreur on retente un submit sans recharger page
+		$scope.projectsDT.setSpinner(true);	
+
 		//console.log("YYYYYYYYYY Dans update-ctrl.submit");
 		mainService.setForm($scope.form);
 		// sauvegarde des données en local (mode local le save de getColumnStudy) 
@@ -261,56 +377,32 @@ angular.module('home').controller('UpdateCtrl',
 		// les modifications des utilisateurs, en revanche pas de sauvegarde dans la base !
 		// ici la sauvegarde du study se fait au moment de la creation de la soumission dans la partie java.
 
-		$scope.projectsDT.save(); 
+		console.log("$scope.projectsDT AVANT SAVE du datatable ", $scope.projectsDT);
+		$scope.projectsDT.save();
+		console.log("$scope.projectsDT APRES SAVE du datatable ", $scope.projectsDT);
 		$scope.tab_projects = $scope.projectsDT.getData();
 		if(!$scope.tab_projects || $scope.tab_projects.length < 1) {
 			$scope.reset();
 			$scope.messages.setError(Messages("AbsenceDonneePourUpdate"));
 			throw(Messages("AbsenceDonneePourUpdate"));
 		}
-		var tabRequestCreateForUpdate = [];
+	
 		
-		//console.log("YYYYYYYYYY Dans update-ctrl.submit: nb_study=" + $scope.tab_bilans.length);
-		// declencher creation d'un objet submission pour update :
-		var umbrella = $scope.tab_projects[0];  // requete avec ERP ou PRJEB qui renvoie un seul resultat
-        //console.log("xxxxxxxx study=", study);
+		//console.log("$scope.projectsDT APRES SAVE du datatable ", $scope.projectsDT);
+		for(var i= 0; i < $scope.tab_projects.length; i++) {
+			var umbrella = $scope.tab_projects[i];
+			//console.log("UMBRELLA avant modification modele = ", umbrella);
+			$scope.toJsonUmbrellaModelOrThrow(umbrella, $scope.errorDetails);
+			//console.log("UMBRELLA apres modification modele = ", umbrella);
+		}
 
-		if(toolsServices.isNotBlank(umbrella.childrenProjectAccessions)) {
-			console.log("typeOf childrenProjectAccessions", typeof umbrella.childrenProjectAccessions);
-			console.log(umbrella.childrenProjectAccessions);
-			// si on edite la valeur de locusTagPrefixs dans datatable alors string, et sinon array d'ou teste sur le type :
-			if(typeof umbrella.childrenProjectAccessions === 'string' || umbrella.childrenProjectAccessions instanceof String) {
-				var strChildrenProjectAccessions = umbrella.childrenProjectAccessions.replace(/,\s*$/, "");
-				strChildrenProjectAccessions = strChildrenProjectAccessions.replace(/,\s*$/, "");
-				delete umbrella.childrenProjectAccessions;
-				umbrella.childrenProjectAccessions = strChildrenProjectAccessions.split(','); 
-		    	// Preferer boucle for au forEach ici car passage par valeur du locusTag d'ou modification dans le forEach qu'il faut sauvegarder
-            	// hors de la boucle forEach. De plus, boucle for plus efficace.
-				for(var i= 0; i < umbrella.childrenProjectAccessions.length; i++) {
-     				umbrella.childrenProjectAccessions[i] = toolsServices.clean(umbrella.childrenProjectAccessions[i]);
-				}
-			}
-		} else {
-			delete umbrella.childrenProjectAccessions;
-		}
-		if(toolsServices.isNotBlank(umbrella.idsPubmed)) {
-			console.log("typeOf umbrella.idsPubmed", typeof umbrella.idsPubmed);
-			console.log(umbrella.idsPubmed);
-			// si on edite la valeur de idsPubmed dans datatable alors string, et sinon array d'ou teste sur le type :
-			if(typeof umbrella.idsPubmed === 'string' || umbrella.idsPubmed instanceof String) {
-				var strIdsPubmed = umbrella.idsPubmed.replace(/,\s*$/, "");
-				strIdsPubmed = strIdsPubmed.replace(/,\s*$/, "");
-				delete umbrella.idsPubmed;
-				umbrella.idsPubmed = strIdsPubmed.split(','); 
-		    	// Preferer boucle for au forEach ici car passage par valeur du idPubmed d'ou modification dans le forEach qu'il faut sauvegarder
-            	// hors de la boucle forEach. De plus, boucle for plus efficace.
-				for(var i= 0; i < umbrella.idsPubmed.length; i++) {
-     				umbrella.idsPubmed[i] = toolsServices.clean(umbrella.idsPubmed[i]);
-				}
-			}
-		} else {
-			delete umbrella.idsPubmed;
-		}
+
+		var umbrella = $scope.tab_projects[0];
+		console.log("UMBRELLA pour sauvegarde en base = ", umbrella);
+		//$scope.treeLoadInProgress = false;
+
+        //throw("Arret premature");
+		var tabRequestCreateForUpdate = [];
 		
 		// mise à jour du project umbrella dans base qui se fait dans createSubmission() appelé par createForUpdate
 
@@ -331,28 +423,18 @@ angular.module('home').controller('UpdateCtrl',
 		tabRequestCreateForUpdate.push(request);
 		$q.all(tabRequestCreateForUpdate)
 		.then(result => { // result de l'operation precedente, cad la creation de la soumission
-				console.log("result_2 = " + result); 	
-				//console.log("result_2 = " + result[0].data); 	
-				//console.log("result_2 = " + result[0].data.code); 	
-				var submission = result[0].data;
-				var submissionCode = result[0].data.code;
-				var submissionState = angular.copy(result[0].data.state);
-				submissionState.code = "SUBU-SMD-IW";
-				$scope.messages.setSuccess("La soumission " + submissionCode + " pour la mise a jour à l'EBI des données du tableau est en cours de traitement"); 
-				return $http.put(jsRoutes.controllers.sra.submissions.api.Submissions.updateState(submissionCode).url, submissionState);					
-		}).then(result => { // result de l'operation precedente cad la mise à jour de l'etat de la soumission
-				console.log("result_3 = " + result); 	
-				//console.log("result_3 = " + result.data); 
-				var submissionCode = result.data.code;
-				$scope.messages.setSuccess("La soumission " + submissionCode + " pour la mise a jour à l'EBI des données du tableau est en cours de traitement"); 
-				// rafraichissement tableau avec nouveaux status: 
-				$scope.tab_projects.forEach(function(umbrella) {
-					umbrella.state.code="SUBU-SMD-IW";	
-				});
-				$scope.projectsDT.setData($scope.tab_projects, $scope.tab_projects.length);				
+			$scope.projectsDT.setSpinner(false);	
+			console.log("result_2 = " + result); 	
+			//console.log("result_2 = " + result[0].data); 	
+			//console.log("result_2 = " + result[0].data.code); 	
+			var submission = result[0].data;
+			//var submissionState = angular.copy(result[0].data.state);
+			var submission = result[0].data;
+			$scope.messages.setSuccess("L'umbrella " + umbrella.code + " a bien été mis à jour à l'EBI via la soumission "  + submission.code + " voir ebiReport " + submission.submissionDirectory + "/" + submission.ebiResult);
 		}).catch(error => { 
+			$scope.projectsDT.setSpinner(false);	
 			$scope.messages.addDetails(error.data); 
-			$scope.messages.setError("Erreur de sauvegarde");   // important pour avoir le message.
+			$scope.messages.setError("Erreur "); 
 			// Pas bonne idée car si message d'erreur bien que l'utilisateur voit sa saisie erronnée dans le tableau
 			// affichage données originales dans base si donnée modifiées par user non validees
 			//$scope.projectsDT.setData($scope.tab_projects_ori, $scope.tab_projects_ori.length);				
@@ -360,6 +442,14 @@ angular.module('home').controller('UpdateCtrl',
 		
 	};// end $scope.submit
 
+	// NGL-4708
+	$scope.isShowConsigne=false;
+	$scope.toggleShowConsigne=function(){
+		//console.log("TOGGLE search-ctrl.js");
+		if ( $scope.isShowConsigne===false) { $scope.isShowConsigne=true}
+		else {$scope.isShowConsigne=false}
+	};
+	
 }]);
 
 

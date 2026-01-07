@@ -11,9 +11,13 @@ angular.module('home').controller('OneToVoidQCMiseqCNGCtrl',['$scope', '$parse',
 	}
 	*/
 	
+	// NGL-4560 26/03/2024 bloquer le controller fils en cas d'erreur dans le parent ??? VERIFIER QUAND OK
+	if ( $scope.atmService) { 
+
 	// 08/01/2020 deplacement en tete de fichier
 	// la difference de colonnes affichees entre tubes et plaque est prise en charge au niveau du controleur parent one-to-void-qc-ctrl.js 
-	var columns = $scope.atmService.data.getColumnsConfig();
+
+	var columns = $scope.atmService.data.getColumnsConfig(); 
 	columns.push({
     	"header" :Messages("containers.table.codeAliquot"),
 		"property" : "inputContainer.contents",
@@ -235,4 +239,5 @@ angular.module('home').controller('OneToVoidQCMiseqCNGCtrl',['$scope', '$parse',
 		},
 	]);
 	
+	} // fin NGL-4560
 }]);

@@ -28,7 +28,8 @@ angular.module('home').controller('SearchCtrl', ['$scope', '$routeParams', 'main
 				method:'put',
 			},
 			group:{
-				active:true
+				active:true,
+				showOnlyGroups:true
 			},
 			name:"UmbrellaProjects"
 	};

@@ -240,6 +240,7 @@
 				lists.refresh.protocols({}, 'all-protocols');
 				//lists.refresh.instruments();
 				lists.refresh.resolutions({objectTypeCode:"Experiment",distinct:true});
+				lists.refresh.umbrellaProjects();
 				isInit=true;
 			}
 		};
@@ -512,7 +513,7 @@
 		
 		return searchService;				
 	}
-])// nouveau nom tagService (code déplacé depuis cng/tag-plate-helpers.js)
+])
 .factory('tagService', ['$parse', '$filter','$http',
                    function($parse, $filter,  $http){
 	
@@ -526,7 +527,7 @@
 				* 07/05/2020 ajout un parametre optionnel "auto" : dans les cas ou l'utilisateur n'a pas le choix de la colonne de départ 
 				* (exemple: pcr-indexing-and-purification-qmp-seq_ctrl.js=> colonne 1 est imposée) 
 				* les warnings concernant cette colonne ne sont pas pertinents => ne pas les afficher
-				* NGL-2944 11/05/2020 version sans le unset des tags qui est déporté dans une fonction dédiée  unsetTags
+				* NGL-2944 11/05/2020 unset des tags est déporté dans une fonction dédiée  unsetTags
 				* 
 				* SUPSQCNG-866: dans le cas de l'administrateur il faut pouvoir écraser un index déjà présent
 				*/

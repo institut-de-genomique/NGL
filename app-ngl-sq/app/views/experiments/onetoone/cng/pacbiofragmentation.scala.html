@@ -1,0 +1,14 @@
+@()
+<div ng-controller="PacBioFragmentationCtrl">
+  <div class="col-md-12 col-lg-12" >
+       <p><a class="fa fa-info-circle" style="color:blue" ng-click="toggleIsShowInformation()" title="Information" href=""> Information</a></p>
+       <div ng-show="isShowInformation">
+        <ul>
+         <li><p>Si vous voulez engager tout le volume d'entrée, cliquez sur le bouton "Copier les volumes et calculer les quantités"</p></li>
+         <li><p>sinon saisissez la valeur dans 'Volume engagé'. Le calcul de la qté engagée s'effectuera automatiquement.</p></li>
+        </ul>
+	    </div>
+  </div>
+
+  <div class="col-md-12 col-lg-12" ultimate-datatable="atmService.data"></div>		
+</div>

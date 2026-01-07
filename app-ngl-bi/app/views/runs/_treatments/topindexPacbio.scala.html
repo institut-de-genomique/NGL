@@ -1,0 +1,37 @@
+@()
+
+<div class="panel panel-info">
+    <div class="panel-heading"><strong>@(Messages("runs.topindex.pacbio.unexpectedIndexes"))</strong></div>	
+     <div class="treatmentOverflow">
+         <label for="inputFilter">@Messages("runs.topindex.pacbio.percentThreshold") </label>
+         <input type="text" ng-model='percentThreshold' placeholder='@Messages("runs.topindex.pacbio.percentThreshold")' ng-init='percentThreshold=0.01' id="inputFilter">
+         <table class="table table-condensed table-hover table-bordered">
+             <thead>							
+              <tr>
+                  <th>
+                      @Messages("runs.topindex.pacbio.barcode")
+                  </th>
+                  <th>
+                      @Messages("runs.topindex.pacbio.count")
+                  </th>
+                  <th>
+                      @Messages("runs.topindex.pacbio.percent")
+                  </th>
+              </tr>
+          </thead>
+          <tbody>
+          <tr ng-repeat='obj in @("run.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.unexpectedIndexes.value")|orderBy:"count":true' ng-if='!percentThreshold || (obj.percent>percentThreshold)'>
+              <td>									
+                   {{obj.barcode}}
+              </td>
+              <td>
+                   {{obj.count | number}}													
+              </td>
+              <td>
+                  {{ obj.percent | number:2}} @Messages("unit.percent")												
+              </td>
+          </tr>
+          </tbody>
+         </table>
+     </div>
+  </div>	

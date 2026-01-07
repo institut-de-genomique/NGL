@@ -12,6 +12,9 @@ public class InstrumentUsedTypesSearchForm extends ListForm{
 	public String categoryCode;
 	public List<String> categoryCodes;
 	
+	public String propertyDefinitionName;
+	public List<String> propertyDefinitionNames;
+	
 	public String experimentTypeCode;
 	
 	public Boolean isActive; 
@@ -22,6 +25,8 @@ public class InstrumentUsedTypesSearchForm extends ListForm{
 		instrumentUsedTypeQueryParams.codes = codes;
 		instrumentUsedTypeQueryParams.categoryCode = categoryCode;
 		instrumentUsedTypeQueryParams.categoryCodes = categoryCodes;
+		instrumentUsedTypeQueryParams.propertyDefinitionName = propertyDefinitionName;
+		instrumentUsedTypeQueryParams.propertyDefinitionNames = propertyDefinitionNames;
 		return instrumentUsedTypeQueryParams;
 	}
 }

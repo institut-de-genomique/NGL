@@ -1,7 +1,7 @@
 "use strict";
 
-angular.module('home').controller('SearchContainersCtrl', ['$scope','$routeParams', '$filter','datatable','basket','lists','$http','mainService','tabService', 
-                                                           function ($scope,$routeParams, $filter, datatable,basket, lists, $http,mainService,tabService) {
+angular.module('home').controller('SearchContainersCtrl', ['$scope','$routeParams', '$filter','datatable','basket','lists','$http','mainService','tabService', 'projectSearchFromUmbrella', 
+                                                           function ($scope,$routeParams, $filter, datatable,basket, lists, $http,mainService,tabService, projectSearchFromUmbrella) {
 	$scope.searchService = {};
 	$scope.searchService.lists = lists;
 	
@@ -647,9 +647,10 @@ angular.module('home').controller('SearchContainersCtrl', ['$scope','$routeParam
 	$scope.searchService.lists.refresh.experimentCategories();
 	$scope.searchService.lists.refresh.users();
 	$scope.searchService.lists.refresh.containerSupports();
+	$scope.searchService.lists.refresh.umbrellaProjects();
 	//$scope.searchService.lists.refresh.experiments();
 	$scope.searchService.lists.refresh.states({objectTypeCode:"Container"});
-	$scope.searchService.lists.refresh.reportConfigs({pageCodes:["containers-search"]});
+	$scope.searchService.lists.refresh.reportConfigs({pageCodes:["containers-search"], active:true});
 	$scope.searchService.lists.refresh.reportConfigs({pageCodes:["containers-addcolumns"]}, "containers-addcolumns");
 	$scope.searchService.lists.refresh.filterConfigs({pageCodes:["containers-search-addfilters"]}, "containers-search-addfilters");
 	$scope.form = {};
@@ -670,6 +671,11 @@ angular.module('home').controller('SearchContainersCtrl', ['$scope','$routeParam
 			})       	 			
 	 
 	}); */
+
+	$scope.selectProjetsFromUmbrellas = function() {
+		var projCodes = projectSearchFromUmbrella.search($scope.searchService.form.umbrellaCodes);
+		$scope.searchService.form.projectCodes = projCodes;
+	}
 	
 	if(angular.isUndefined(mainService.getForm())){
 		$scope.searchService.form = {};

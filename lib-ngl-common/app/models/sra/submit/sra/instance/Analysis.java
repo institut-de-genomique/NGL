@@ -7,16 +7,16 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import controllers.sra.api.AnalysisAPI;
 import fr.cea.ig.DBObject;
-import fr.cea.ig.ngl.dao.api.sra.AnalysisAPI;
 import models.laboratory.common.instance.Comment;
 import models.laboratory.common.instance.State;
 import models.laboratory.common.instance.TraceInformation;
 import models.utils.InstanceConstants;
+import services.sra.SraValidationHelper;
 import validation.ContextValidation;
 import validation.IValidation;
 import validation.common.instance.CommonValidationHelper;
-import validation.sra.SraValidationHelper;
 import validation.utils.ValidationHelper;
 
 // Declaration d'une collection Analysis (herite de DBObject)
@@ -34,8 +34,9 @@ public class Analysis extends DBObject implements IValidation, IStateReference {
 									         // ou si utilisation d'un sampleAC soumis par les collaborateurs.
 	public String studyCode   = null;        // champs qui peut etre null, si rappatriement à partir de l'EBI
 	                                         // ou si utilisation d'un sampleAC soumis par les collaborateurs.
-	public String sampleAccession = null;    // champs qui doit etre renseigné si state > SUB-F
-	public String studyAccession  = null;
+	
+	public String sampleIdentifier = null;
+	public String studyIdentifier = null;
 	
 	public State state = new State(); // Reference sur "models.laboratory.common.instance.state" 
 							 // pour gerer les differents etats de l'objet.
@@ -47,8 +48,11 @@ public class Analysis extends DBObject implements IValidation, IStateReference {
 	public Date firstSubmissionDate;
 	public List<RawData> listRawData; 
     public List<Comment>comments = new ArrayList<Comment>();// commentaires des utilisateurs.
-
-
+    public boolean consolidatedPublicStatus; // mis à true si releaseDate > date du jour. Rempli par crons.
+    public Date releaseDate;
+	// NGL-4593
+    public String dropBox;
+    
 	@Override
 	public State getState() {
 		return state;
@@ -79,30 +83,30 @@ public class Analysis extends DBObject implements IValidation, IStateReference {
 		ValidationHelper.validateNotEmpty(contextValidation, this.title , "title");
 
 		// L'un des champs sampleAccession ou sampleCode doit etre defini :
-		if (StringUtils.isBlank(this.sampleAccession)) {
+		if (StringUtils.isBlank(this.sampleIdentifier)) {
 			ValidationHelper.validateNotEmpty(contextValidation, this.sampleCode , "sampleCode");
 		} 
 		if (StringUtils.isBlank(this.sampleCode)) {
-			ValidationHelper.validateNotEmpty(contextValidation, this.sampleAccession , "sampleAccession");
+			ValidationHelper.validateNotEmpty(contextValidation, this.sampleIdentifier , "sampleAccession");
 			
 		}
 		// le champs sampleAccession est contraint
-		if (StringUtils.isNotBlank(this.sampleAccession)) {
-			if( ! (sampleAccession.startsWith("ERS") || sampleAccession.startsWith("SAM")) ) {
-				contextValidation.addError("sampleAccession",  " avec valeur '" + this.sampleAccession + "' qui ne commence pas par ERS ou SAM");
+		if (StringUtils.isNotBlank(this.sampleIdentifier)) {
+			if( ! (sampleIdentifier.startsWith("ERS") || sampleIdentifier.startsWith("SRS") || sampleIdentifier.startsWith("SAM")) ) {
+				contextValidation.addError("sampleAccession",  " avec valeur '" + this.sampleIdentifier + "' qui ne commence pas par ERS ou SRS ou ou SAM");
 			}
 		}
 		// L'un des champs studyAccession ou studyCode doit etre defini :
-		if (StringUtils.isBlank(this.studyAccession)) {
+		if (StringUtils.isBlank(this.studyIdentifier)) {
 			ValidationHelper.validateNotEmpty(contextValidation, this.studyCode , "studyCode");
 		}
 		if (StringUtils.isBlank(this.studyCode)) {
-			ValidationHelper.validateNotEmpty(contextValidation, this.studyAccession , "studyAccession");
+			ValidationHelper.validateNotEmpty(contextValidation, this.studyIdentifier , "studyIdentifier");
 		}	
 		// Le champs studyAccession est contraint
-		if (StringUtils.isNotBlank(this.studyAccession)) {
-			if( ! (studyAccession.startsWith("ERP") || studyAccession.startsWith("PRJ")) ) {
-				contextValidation.addError("studyAccession", " avec valeur '" + this.studyAccession + "' qui ne commence pas par ERP ou PRJ ");
+		if (StringUtils.isNotBlank(this.studyIdentifier)) {
+			if( ! (studyIdentifier.startsWith("ERP") || studyIdentifier.startsWith("PRJ")) ) {
+				contextValidation.addError("studyIdentifier", " avec valeur '" + this.studyIdentifier + "' qui ne commence pas par ERP ou PRJ ");
 			}
 		}
 

@@ -93,6 +93,7 @@ PUT		/api/analyses/batch/valuation		 		controllers.analyses.api.Analyses.valuati
 PUT		/api/analyses/:code/valuation		 		controllers.analyses.api.Analyses.valuation(code:java.lang.String)
 PUT     /api/analyses/batch/properties				controllers.analyses.api.Analyses.propertiesBatch()
 PUT     /api/analyses/:code/properties				controllers.analyses.api.Analyses.properties(code: java.lang.String)
+PUT     /api/analyses/:code/properties/:propname	controllers.analyses.api.Analyses.property(code: java.lang.String, propname: java.lang.String)
 PUT		/api/analyses/:code/apply-rules/:codeRules	controllers.analyses.api.Analyses.applyRules(code: java.lang.String, codeRules: java.lang.String)
 
 GET		/api/analyses/:code/treatments				controllers.analyses.api.AnalysisTreatments.list(code: java.lang.String)

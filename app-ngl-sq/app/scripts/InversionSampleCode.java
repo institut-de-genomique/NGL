@@ -4,10 +4,8 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -823,101 +821,101 @@ public class InversionSampleCode extends ScriptWithExcelBody{
 	}
 
 
-	private Set<String> getNewProjectCodes(Set<String> sampleCodes, Map<String, Set<String>> mapSampleProjects)
-	{
-		Set<String> newProjectCodes = new HashSet<String>();
-		for(String sampleCode : sampleCodes){
-			if(mapSampleProjects.containsKey(sampleCode))
-				newProjectCodes.addAll(mapSampleProjects.get(sampleCode));
-			else{
-				Sample sample = MongoDBDAO.findByCode(InstanceConstants.SAMPLE_COLL_NAME, Sample.class, sampleCode);
-				newProjectCodes.addAll(sample.projectCodes);
-				mapSampleProjects.put(sampleCode, sample.projectCodes);
-			}
-		}
-		return newProjectCodes;
-	}
+	// private Set<String> getNewProjectCodes(Set<String> sampleCodes, Map<String, Set<String>> mapSampleProjects)
+	// {
+	// 	Set<String> newProjectCodes = new HashSet<String>();
+	// 	for(String sampleCode : sampleCodes){
+	// 		if(mapSampleProjects.containsKey(sampleCode))
+	// 			newProjectCodes.addAll(mapSampleProjects.get(sampleCode));
+	// 		else{
+	// 			Sample sample = MongoDBDAO.findByCode(InstanceConstants.SAMPLE_COLL_NAME, Sample.class, sampleCode);
+	// 			newProjectCodes.addAll(sample.projectCodes);
+	// 			mapSampleProjects.put(sampleCode, sample.projectCodes);
+	// 		}
+	// 	}
+	// 	return newProjectCodes;
+	// }
 
-	@SuppressWarnings("unchecked")
-	private void updateListeProjectCodes(List<String> newSampleCodes, ContextValidation cv)
-	{
-		Map<String, Set<String>> mapSampleProjects = new HashMap<String, Set<String>>();
-		for(String newSampleCode : newSampleCodes){
-			Logger.debug("Update list projectCodes for "+newSampleCode);
-			//Collection container propriete : projectCodes 
-			List<Container> containers = MongoDBDAO.find(InstanceConstants.CONTAINER_COLL_NAME, Container.class, DBQuery.in("sampleCodes", newSampleCode)).toList();
-			for(Container container : containers){
-				Set<String> newProjectCodes = getNewProjectCodes(container.sampleCodes, mapSampleProjects);
-				Logger.debug(newSampleCode+","+InstanceConstants.CONTAINER_COLL_NAME+",projectCodes,"+container.code+","+container.projectCodes.toString().replaceAll(",", "#")+","+newProjectCodes.toString().replaceAll(",", "#"));
-				((List<String>)cv.getObject("RecapListProjects")).add(newSampleCode+","+InstanceConstants.CONTAINER_COLL_NAME+",projectCodes,"+container.code+","+container.projectCodes.toString().replaceAll(",", "#")+","+newProjectCodes.toString().replaceAll(",", "#"));
-				MongoDBDAO.update(InstanceConstants.CONTAINER_COLL_NAME, Container.class,
-						DBQuery.is("code", container.code),
-						DBUpdate.set("projectCodes", newProjectCodes));
-			}
+	// @SuppressWarnings("unchecked")
+	// private void updateListeProjectCodes(List<String> newSampleCodes, ContextValidation cv)
+	// {
+	// 	Map<String, Set<String>> mapSampleProjects = new HashMap<String, Set<String>>();
+	// 	for(String newSampleCode : newSampleCodes){
+	// 		Logger.debug("Update list projectCodes for "+newSampleCode);
+	// 		//Collection container propriete : projectCodes 
+	// 		List<Container> containers = MongoDBDAO.find(InstanceConstants.CONTAINER_COLL_NAME, Container.class, DBQuery.in("sampleCodes", newSampleCode)).toList();
+	// 		for(Container container : containers){
+	// 			Set<String> newProjectCodes = getNewProjectCodes(container.sampleCodes, mapSampleProjects);
+	// 			Logger.debug(newSampleCode+","+InstanceConstants.CONTAINER_COLL_NAME+",projectCodes,"+container.code+","+container.projectCodes.toString().replaceAll(",", "#")+","+newProjectCodes.toString().replaceAll(",", "#"));
+	// 			((List<String>)cv.getObject("RecapListProjects")).add(newSampleCode+","+InstanceConstants.CONTAINER_COLL_NAME+",projectCodes,"+container.code+","+container.projectCodes.toString().replaceAll(",", "#")+","+newProjectCodes.toString().replaceAll(",", "#"));
+	// 			MongoDBDAO.update(InstanceConstants.CONTAINER_COLL_NAME, Container.class,
+	// 					DBQuery.is("code", container.code),
+	// 					DBUpdate.set("projectCodes", newProjectCodes));
+	// 		}
 
-			//Collection containerSupport propriete : projectCodes
-			List<ContainerSupport> containerSupports = MongoDBDAO.find(InstanceConstants.CONTAINER_SUPPORT_COLL_NAME, ContainerSupport.class, DBQuery.in("sampleCodes", newSampleCode)).toList();
-			for(ContainerSupport cs : containerSupports){
-				Set<String> newProjectCodes = getNewProjectCodes(cs.sampleCodes, mapSampleProjects);
-				Logger.debug(newSampleCode+","+InstanceConstants.CONTAINER_SUPPORT_COLL_NAME+",projectCodes,"+cs.code+","+cs.projectCodes.toString().replaceAll(",", "#")+","+newProjectCodes.toString().replaceAll(",", "#"));
-				((List<String>)cv.getObject("RecapListProjects")).add(newSampleCode+","+InstanceConstants.CONTAINER_SUPPORT_COLL_NAME+",projectCodes,"+cs.code+","+cs.projectCodes.toString().replaceAll(",", "#")+","+newProjectCodes.toString().replaceAll(",", "#"));
-				MongoDBDAO.update(InstanceConstants.CONTAINER_SUPPORT_COLL_NAME, ContainerSupport.class,
-						DBQuery.is("code", cs.code),
-						DBUpdate.set("projectCodes", newProjectCodes));
-			}
+	// 		//Collection containerSupport propriete : projectCodes
+	// 		List<ContainerSupport> containerSupports = MongoDBDAO.find(InstanceConstants.CONTAINER_SUPPORT_COLL_NAME, ContainerSupport.class, DBQuery.in("sampleCodes", newSampleCode)).toList();
+	// 		for(ContainerSupport cs : containerSupports){
+	// 			Set<String> newProjectCodes = getNewProjectCodes(cs.sampleCodes, mapSampleProjects);
+	// 			Logger.debug(newSampleCode+","+InstanceConstants.CONTAINER_SUPPORT_COLL_NAME+",projectCodes,"+cs.code+","+cs.projectCodes.toString().replaceAll(",", "#")+","+newProjectCodes.toString().replaceAll(",", "#"));
+	// 			((List<String>)cv.getObject("RecapListProjects")).add(newSampleCode+","+InstanceConstants.CONTAINER_SUPPORT_COLL_NAME+",projectCodes,"+cs.code+","+cs.projectCodes.toString().replaceAll(",", "#")+","+newProjectCodes.toString().replaceAll(",", "#"));
+	// 			MongoDBDAO.update(InstanceConstants.CONTAINER_SUPPORT_COLL_NAME, ContainerSupport.class,
+	// 					DBQuery.is("code", cs.code),
+	// 					DBUpdate.set("projectCodes", newProjectCodes));
+	// 		}
 
-			//Collection experiment propriete : projectCodes
-			List<Experiment> experiments = MongoDBDAO.find(InstanceConstants.EXPERIMENT_COLL_NAME, Experiment.class, DBQuery.in("sampleCodes", newSampleCode)).toList();
-			for(Experiment exp : experiments){
-				Set<String> newProjectCodes = getNewProjectCodes(exp.sampleCodes, mapSampleProjects);
-				Logger.debug(newSampleCode+","+InstanceConstants.EXPERIMENT_COLL_NAME+",projectCodes,"+exp.code+","+exp.projectCodes.toString().replaceAll(",", "#")+","+newProjectCodes.toString().replaceAll(",", "#"));
-				((List<String>)cv.getObject("RecapListProjects")).add(newSampleCode+","+InstanceConstants.EXPERIMENT_COLL_NAME+",projectCodes,"+exp.code+","+exp.projectCodes.toString().replaceAll(",", "#")+","+newProjectCodes.toString().replaceAll(",", "#"));
-				MongoDBDAO.update(InstanceConstants.EXPERIMENT_COLL_NAME, Experiment.class,
-						DBQuery.is("code", exp.code),
-						DBUpdate.set("projectCodes", newProjectCodes));
-			}
-			List<Experiment> experimentsATM = MongoDBDAO.find(InstanceConstants.EXPERIMENT_COLL_NAME, Experiment.class, DBQuery.in("atomicTransfertMethods.inputContainerUseds.sampleCodes", newSampleCode)).toList();
-			for(Experiment expATM : experimentsATM){
-				expATM.atomicTransfertMethods.forEach(atm->{
-					atm.inputContainerUseds.forEach(icu->{
-						if(icu.sampleCodes.contains(newSampleCode)){
-							Set<String> newProjectCodes = getNewProjectCodes(icu.sampleCodes, mapSampleProjects);
-							Logger.debug(newSampleCode+","+InstanceConstants.EXPERIMENT_COLL_NAME+",atomicTransfertMethods.inputContainerUseds.sampleCodes,"+expATM.code+","+icu.projectCodes.toString().replaceAll(",", "#")+","+newProjectCodes.toString().replaceAll(",", "#"));
-							((List<String>)cv.getObject("RecapListProjects")).add(newSampleCode+","+InstanceConstants.EXPERIMENT_COLL_NAME+",atomicTransfertMethods.inputContainerUseds.sampleCodes,"+expATM.code+","+icu.projectCodes.toString().replaceAll(",", "#")+","+newProjectCodes.toString().replaceAll(",", "#"));
-							icu.projectCodes=newProjectCodes;
-						}
-					});
-				});
-				MongoDBDAO.update(InstanceConstants.EXPERIMENT_COLL_NAME, Experiment.class,
-						DBQuery.is("code", expATM.code),
-						DBUpdate.set("atomicTransfertMethods", expATM.atomicTransfertMethods));
-			}
-			//Collection process propriete : projectCodes
-			List<Process> processes = MongoDBDAO.find(InstanceConstants.PROCESS_COLL_NAME, Process.class, DBQuery.in("sampleCodes", newSampleCode)).toList();
-			for(Process p : processes){
-				Set<String> newProjectCodes = getNewProjectCodes(p.sampleCodes, mapSampleProjects);
-				Logger.debug(newSampleCode+","+InstanceConstants.PROCESS_COLL_NAME+",projectCodes,"+p.code+","+p.projectCodes.toString().replaceAll(",", "#")+","+newProjectCodes.toString().replaceAll(",", "#"));
-				((List<String>)cv.getObject("RecapListProjects")).add(newSampleCode+","+InstanceConstants.PROCESS_COLL_NAME+",projectCodes,"+p.code+","+p.projectCodes.toString().replaceAll(",", "#")+","+newProjectCodes.toString().replaceAll(",", "#"));
-				MongoDBDAO.update(InstanceConstants.PROCESS_COLL_NAME, Process.class,
-						DBQuery.is("code", p.code),
-						DBUpdate.set("projectCodes", newProjectCodes));
-			}
+	// 		//Collection experiment propriete : projectCodes
+	// 		List<Experiment> experiments = MongoDBDAO.find(InstanceConstants.EXPERIMENT_COLL_NAME, Experiment.class, DBQuery.in("sampleCodes", newSampleCode)).toList();
+	// 		for(Experiment exp : experiments){
+	// 			Set<String> newProjectCodes = getNewProjectCodes(exp.sampleCodes, mapSampleProjects);
+	// 			Logger.debug(newSampleCode+","+InstanceConstants.EXPERIMENT_COLL_NAME+",projectCodes,"+exp.code+","+exp.projectCodes.toString().replaceAll(",", "#")+","+newProjectCodes.toString().replaceAll(",", "#"));
+	// 			((List<String>)cv.getObject("RecapListProjects")).add(newSampleCode+","+InstanceConstants.EXPERIMENT_COLL_NAME+",projectCodes,"+exp.code+","+exp.projectCodes.toString().replaceAll(",", "#")+","+newProjectCodes.toString().replaceAll(",", "#"));
+	// 			MongoDBDAO.update(InstanceConstants.EXPERIMENT_COLL_NAME, Experiment.class,
+	// 					DBQuery.is("code", exp.code),
+	// 					DBUpdate.set("projectCodes", newProjectCodes));
+	// 		}
+	// 		List<Experiment> experimentsATM = MongoDBDAO.find(InstanceConstants.EXPERIMENT_COLL_NAME, Experiment.class, DBQuery.in("atomicTransfertMethods.inputContainerUseds.sampleCodes", newSampleCode)).toList();
+	// 		for(Experiment expATM : experimentsATM){
+	// 			expATM.atomicTransfertMethods.forEach(atm->{
+	// 				atm.inputContainerUseds.forEach(icu->{
+	// 					if(icu.sampleCodes.contains(newSampleCode)){
+	// 						Set<String> newProjectCodes = getNewProjectCodes(icu.sampleCodes, mapSampleProjects);
+	// 						Logger.debug(newSampleCode+","+InstanceConstants.EXPERIMENT_COLL_NAME+",atomicTransfertMethods.inputContainerUseds.sampleCodes,"+expATM.code+","+icu.projectCodes.toString().replaceAll(",", "#")+","+newProjectCodes.toString().replaceAll(",", "#"));
+	// 						((List<String>)cv.getObject("RecapListProjects")).add(newSampleCode+","+InstanceConstants.EXPERIMENT_COLL_NAME+",atomicTransfertMethods.inputContainerUseds.sampleCodes,"+expATM.code+","+icu.projectCodes.toString().replaceAll(",", "#")+","+newProjectCodes.toString().replaceAll(",", "#"));
+	// 						icu.projectCodes=newProjectCodes;
+	// 					}
+	// 				});
+	// 			});
+	// 			MongoDBDAO.update(InstanceConstants.EXPERIMENT_COLL_NAME, Experiment.class,
+	// 					DBQuery.is("code", expATM.code),
+	// 					DBUpdate.set("atomicTransfertMethods", expATM.atomicTransfertMethods));
+	// 		}
+	// 		//Collection process propriete : projectCodes
+	// 		List<Process> processes = MongoDBDAO.find(InstanceConstants.PROCESS_COLL_NAME, Process.class, DBQuery.in("sampleCodes", newSampleCode)).toList();
+	// 		for(Process p : processes){
+	// 			Set<String> newProjectCodes = getNewProjectCodes(p.sampleCodes, mapSampleProjects);
+	// 			Logger.debug(newSampleCode+","+InstanceConstants.PROCESS_COLL_NAME+",projectCodes,"+p.code+","+p.projectCodes.toString().replaceAll(",", "#")+","+newProjectCodes.toString().replaceAll(",", "#"));
+	// 			((List<String>)cv.getObject("RecapListProjects")).add(newSampleCode+","+InstanceConstants.PROCESS_COLL_NAME+",projectCodes,"+p.code+","+p.projectCodes.toString().replaceAll(",", "#")+","+newProjectCodes.toString().replaceAll(",", "#"));
+	// 			MongoDBDAO.update(InstanceConstants.PROCESS_COLL_NAME, Process.class,
+	// 					DBQuery.is("code", p.code),
+	// 					DBUpdate.set("projectCodes", newProjectCodes));
+	// 		}
 
-			//Collection Run propriete : projectCodes
-			List<Run> runs = MongoDBDAO.find(InstanceConstants.RUN_ILLUMINA_COLL_NAME, Run.class, DBQuery.in("sampleCodes", newSampleCode)).toList();
-			for(Run run : runs){
-				Set<String> newProjectCodes = getNewProjectCodes(run.sampleCodes, mapSampleProjects);
-				Logger.debug(newSampleCode+","+InstanceConstants.RUN_ILLUMINA_COLL_NAME+",projectCodes,"+run.code+","+run.projectCodes.toString().replaceAll(",", "#")+","+newProjectCodes.toString().replaceAll(",", "#"));
-				((List<String>)cv.getObject("RecapListProjects")).add(newSampleCode+","+InstanceConstants.RUN_ILLUMINA_COLL_NAME+",projectCodes,"+run.code+","+run.projectCodes.toString().replaceAll(",", "#")+","+newProjectCodes.toString().replaceAll(",", "#"));
-				MongoDBDAO.update(InstanceConstants.RUN_ILLUMINA_COLL_NAME, Run.class,
-						DBQuery.is("code", run.code),
-						DBUpdate.set("projectCodes", newProjectCodes));
-			}
-		}
+	// 		//Collection Run propriete : projectCodes
+	// 		List<Run> runs = MongoDBDAO.find(InstanceConstants.RUN_ILLUMINA_COLL_NAME, Run.class, DBQuery.in("sampleCodes", newSampleCode)).toList();
+	// 		for(Run run : runs){
+	// 			Set<String> newProjectCodes = getNewProjectCodes(run.sampleCodes, mapSampleProjects);
+	// 			Logger.debug(newSampleCode+","+InstanceConstants.RUN_ILLUMINA_COLL_NAME+",projectCodes,"+run.code+","+run.projectCodes.toString().replaceAll(",", "#")+","+newProjectCodes.toString().replaceAll(",", "#"));
+	// 			((List<String>)cv.getObject("RecapListProjects")).add(newSampleCode+","+InstanceConstants.RUN_ILLUMINA_COLL_NAME+",projectCodes,"+run.code+","+run.projectCodes.toString().replaceAll(",", "#")+","+newProjectCodes.toString().replaceAll(",", "#"));
+	// 			MongoDBDAO.update(InstanceConstants.RUN_ILLUMINA_COLL_NAME, Run.class,
+	// 					DBQuery.is("code", run.code),
+	// 					DBUpdate.set("projectCodes", newProjectCodes));
+	// 		}
+	// 	}
 
 
 
-	}
+	// }
 
 	/**
 	 * Create excel file in execution directory

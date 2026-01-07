@@ -1,6 +1,7 @@
 @this()
 @()
 @import views.html.helper._
+@import views.html.tools.projectAttributesInstructions
 
 @user            = @{ fr.cea.ig.authentication.Authentication.getUser() }
 
@@ -8,20 +9,13 @@
 
 	@columnSearchForm{
 		@formGroup{
-			<input type="text" class="form-control" ng-model="form.accession" placeholder='@Messages("update.placeholder.studyAccession")' >	
+			<input type="text" class="form-control" ng-model="form.identifier" placeholder='@Messages("update.placeholder.studyIdentifier")' >	
 		}	
 	}
-
-	@columnSearchForm{
-		@formGroup{
-			<input type="text" class="form-control" ng-model="form.externalId" placeholder='@Messages("update.placeholder.studyExternalId")' >	
-		}	
+	
+	@columnSearchForm{	
 	}
-
-@*	
-	@columnSearchForm{
-	}
-*@
+	
 	<div class="tab-pane active" id="filters">
 	@columnSearchForm{
 		@formGroup{
@@ -42,14 +36,10 @@
 		</form>	
 	</div>
 	
-		}													
+		}	
+														
 	}
-	
-	@columnSearchForm{
-	}	
-	@columnSearchForm{
-	}	
-	
+
 	@columnSearchForm{
 		@formGroup{
 			<button type="submit" title='@Messages("button.submitUpdate")'  ng-click="submit()" data-toggle="tooltip" class="btn btn-primary" >
@@ -58,7 +48,8 @@
 		}	
 	}
 	
-	
+	@projectAttributesInstructions()	
+
 }
 
 
@@ -73,8 +64,16 @@
 qui permet d'installer $user dans le scope-->
 <span ng-init="setUserInScope('@user')"></span>
 
+<!--Pour affichage d'un spinner-->
+<div class="inProgressSpinner" ng-if="treeLoadInProgress">
+<button class="btn btn-primary btn-lg">
+<i class="fa fa-spinner fa-spin fa-5x"></i>
+</button>
+</div>
+
 @***<div><br><br><h4 class="text-warning">La mise &agrave jour dans ngl-sub des champs du study mettra à jour les champs correspondant dans le project</h4><br><br></div>
 **@	
+<div><br><br><h4 class="text-warning">Attention, vous pouvez ajouter des projects enfants, des locus_tag et des identifiants PUBMED, mais si vous voulez en supprimer, il faut faire un ticket JIRA</h4><br><br></div>
 <div class="row"> 
 	<div class="col-md-12 col-lg-12" ultimate-datatable="studiesDT">
 		<div dt-form>	

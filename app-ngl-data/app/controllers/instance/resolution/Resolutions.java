@@ -20,7 +20,7 @@ public class Resolutions extends Controller {
 		this.dataService = dataService;
 	}
 	
-	public Result save() {
+	/* public Result save() {
 //		ContextValidation ctx = new ContextValidation(Constants.NGL_DATA_USER);
 //		ctx.setCreationMode();
 		ContextValidation ctx = ContextValidation.createCreationContext(Constants.NGL_DATA_USER);
@@ -36,7 +36,41 @@ public class Resolutions extends Controller {
 			logger.error(e.getMessage(), e);
 			return internalServerError(e.getMessage());
 		}	
+	} */
+
+	public Result save_sq() {
+	
+		ContextValidation ctx = ContextValidation.createCreationContext(Constants.NGL_DATA_USER);
+		try {
+			// ResolutionService.main(ctx);
+			dataService.saveResolutionDataSQ(ctx);
+			if (ctx.getErrors().size() > 0) {
+				return badRequest(Json.toJson(ctx.getErrors()));
+			} else {
+				return ok();
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			return internalServerError(e.getMessage());
+		}	
 	}
+	public Result save_bi() {
+		
+				ContextValidation ctx = ContextValidation.createCreationContext(Constants.NGL_DATA_USER);
+				try {
+					// ResolutionService.main(ctx);
+					dataService.saveResolutionDataBI(ctx);
+					if (ctx.getErrors().size() > 0) {
+						return badRequest(Json.toJson(ctx.getErrors()));
+					} else {
+						return ok();
+					}
+				} catch (Exception e) {
+					logger.error(e.getMessage(), e);
+					return internalServerError(e.getMessage());
+				}	
+			}
+
 	
 }
 

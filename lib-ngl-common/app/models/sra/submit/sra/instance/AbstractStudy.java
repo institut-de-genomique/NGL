@@ -34,8 +34,12 @@ public abstract class AbstractStudy extends DBObject implements IValidation, ISt
 	public String adminComment; // commentaire privé "reprise historique"
 	public TraceInformation traceInformation = new TraceInformation();
     public List<Comment>comments = new ArrayList<Comment>();// commentaires des utilisateurs.
+    public boolean consolidatedPublicStatus; // mis à true si releaseDate > date du jour. Rempli par crons.
 	public AbstractStudy(String _type) {
 		this._type=_type;
+		if(_type.equals(externalStudyType)) {
+			consolidatedPublicStatus = true;
+		}
 	} 
 
 

@@ -3,6 +3,8 @@
 @()
 
 <!-- work with atmDragAndDrop2 -->
+<!-- Note FDS 09/01/2025 : au CNG le scala equivalent utilise getCurrentSupportCodeSorted() au lieu de getCurrentSupportCode()[ NGL-4845 ]
+     pas nécessaire de le changer au CNS car le pool multiplaque n'existe pas (pour l'instant..)-->
 
 <table class="table table-bordered table-condensed"
 				ng-mouseup="atmService.data.stopSelectInputContainer($event)"

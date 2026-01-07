@@ -1,8 +1,8 @@
 "use strict";
 
 
-angular.module('home').controller('SearchContainersCtrl', ['$scope','$filter','$http','$parse','$location','basket','mainService','tabService','containersSearchService', 'processGraphService',
-    function($scope, $filter,$http,$parse,$location,basket, mainService, tabService, containersSearchService,processGraphService) {
+angular.module('home').controller('SearchContainersCtrl', ['$scope','$filter','$http','$parse','$location','basket','mainService','tabService','containersSearchService', 'processGraphService', 'projectSearchFromUmbrella',
+    function($scope, $filter,$http,$parse,$location,basket, mainService, tabService, containersSearchService,processGraphService, projectSearchFromUmbrella) {
 
 	
 	var isAssign = ($location.path() === "/processes/assign-to-container/home");
@@ -131,6 +131,11 @@ angular.module('home').controller('SearchContainersCtrl', ['$scope','$filter','$
 			tabService.addTabs({label:$filter('codes')($scope.searchService.form.nextProcessTypeCode,"type"),href:$scope.searchService.form.nextProcessTypeCode,remove:false});
 		}
 	};
+
+	$scope.selectProjetsFromUmbrellas = function() {
+		var projCodes = projectSearchFromUmbrella.search($scope.searchService.form.umbrellaCodes);
+		$scope.searchService.form.projectCodes = projCodes;
+	}
 	
 	if(angular.isUndefined($scope.getHomePage()) && !isAssign){
 		mainService.setHomePage('new');
@@ -152,7 +157,7 @@ angular.module('home').controller('SearchContainersCtrl', ['$scope','$filter','$
 	$scope.searchService = containersSearchService;
 	$scope.searchService.init(null, datatableConfig);
 	$scope.searchService.lists.refresh.experimentTypes({categoryCode:"transformation", withoutOneToVoid:true},'transformation');
-	$scope.searchService.lists.refresh.reportConfigs({pageCodes:["containers-search"]});
+	$scope.searchService.lists.refresh.reportConfigs({pageCodes:["containers-search"], active:true});
 	
 	$scope.processGraphService = processGraphService;
 	$scope.processGraphService.init(document);
@@ -171,8 +176,8 @@ angular.module('home').controller('SearchContainersCtrl', ['$scope','$filter','$
 	}
 }]);
 
-angular.module('home').controller('SearchSamplesCtrl', ['$scope','$filter','basket','mainService','tabService','samplesSearchService',  'processGraphService',
-    function($scope, $filter,basket, mainService, tabService, samplesSearchService, processGraphService) {
+angular.module('home').controller('SearchSamplesCtrl', ['$scope','$filter','basket','mainService','tabService','samplesSearchService',  'processGraphService', 'projectSearchFromUmbrella',
+    function($scope, $filter,basket, mainService, tabService, samplesSearchService, processGraphService, projectSearchFromUmbrella) {
 	var datatableConfig = {
 			group:{active:true},
 			search:{
@@ -210,7 +215,10 @@ angular.module('home').controller('SearchSamplesCtrl', ['$scope','$filter','bask
 			}
 		}
 
-		
+		$scope.selectProjetsFromUmbrellas = function() {
+			var projCodes = projectSearchFromUmbrella.search($scope.searchService.form.umbrellaCodes);
+			$scope.searchService.form.projectCodes = projCodes;
+		}
 		
 		$scope.search = function(){		
 			if(this.samplesSearchForm.$valid){
@@ -834,8 +842,8 @@ angular.module('home').controller('SearchContainersCtrlOld', ['$scope', 'datatab
 		$scope.lists.refresh.containerSupportCategories();
 		$scope.lists.refresh.users();
 		lists.refresh.experimentTypes({categoryCode:"transformation", withoutOneToVoid:true},'transformation');
-		lists.refresh.reportConfigs({pageCodes:["containers-search"]});
-		$scope.lists.refresh.reportConfigs({pageCodes:["containers-addcolumns-processes-creation"]}, "containers-addcolumns-processes-creation");
+		lists.refresh.reportConfigs({pageCodes:["containers-search"], active:true});
+		$scope.lists.refresh.reportConfigs({pageCodes:["containers-addcolumns-processes-creation"], active:true}, "containers-addcolumns-processes-creation");
 		$scope.lists.refresh.filterConfigs({pageCodes:["containers-search-addfilters"]}, "containers-search-addfilters");
 		$scope.searchService.additionalFilters=[];
 		$scope.searchService.additionalColumns=[];

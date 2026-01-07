@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import models.sra.submit.sra.instance.UserExperimentExtendedType;
-import models.sra.submit.util.SraException;
+import services.sra.SraException;
 
 public class UserExperimentExtendedTypeParser {
 	// champs, cle de map :
@@ -21,8 +21,8 @@ public class UserExperimentExtendedTypeParser {
 	static final String TITLE             = "title";
 	static final String SPOT_LENGTH       = "spot_length";
 	static final String LAST_BASE_COORD   = "last_base_coordonnee";
-	static final String STUDY_AC   = "study_ac";
-	static final String SAMPLE_AC  = "sample_ac";
+	static final String STUDY_ID          = "study_id";
+	static final String SAMPLE_ID         = "sample_id";
 
 
 
@@ -46,8 +46,8 @@ public class UserExperimentExtendedTypeParser {
 		allowedFields.add(EXPERIMENT_CODE);
 		allowedFields.add(LAST_BASE_COORD);
 		allowedFields.add(SPOT_LENGTH);
-		allowedFields.add(STUDY_AC);
-		allowedFields.add(SAMPLE_AC);
+		allowedFields.add(STUDY_ID);
+		allowedFields.add(SAMPLE_ID);
 
 		keyField = EXPERIMENT_CODE;
 		separator = "\\|";

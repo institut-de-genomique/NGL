@@ -79,6 +79,10 @@ angular.module('home').controller('ConsultationCtrl',[ '$http', '$scope', '$rout
 						header: Messages("submissions.state"),
 						type :"text",
 						order:true});	
+		columns.push({	property:"dropBox",
+						header: Messages("submissions.dropBox"),
+						type :"text",
+						order:true});							
 		columns.push({
 						property     : "comments",
 						header       : Messages("comments"),

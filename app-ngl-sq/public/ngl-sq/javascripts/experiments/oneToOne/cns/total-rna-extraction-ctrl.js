@@ -1,7 +1,5 @@
 angular.module('home').controller('TotalRNAExtractionCtrl',['$scope', '$parse', 'atmToSingleDatatable',
                                                     function($scope, $parse, atmToSingleDatatable){
-        
-	$scope.dispatchConfiguration.orderBy = "container.sampleCodes";
 	
 	var datatableConfig = {
 			name: $scope.experiment.typeCode.toUpperCase(),
@@ -71,18 +69,39 @@ angular.module('home').controller('TotalRNAExtractionCtrl',['$scope', '$parse', 
 			        	 "position":5,
 			        	 "extraHeaders":{0:Messages("experiments.inputs")}
 			         },
-			         /*
-			         {
-			        	 "header":Messages("containers.table.quantity") + " (ng)",
-			        	 "property":"inputContainerUsed.quantity.value",
-			        	 "order":true,
-						 "edit":false,
-						 "hide":true,
-			        	 "type":"number",
-			        	 "position":6.5,
-			        	 "extraHeaders":{0:Messages("experiments.inputs")}
-			         },
-			         */
+					 {
+						"header":Messages("containers.table.quantity"),
+						"property":"inputContainerUsed.quantity.value",
+						"order":true,
+						"edit":false,
+						"hide":true,
+						"type":"number",
+						"mergeCells" : true,
+						"position":5,
+						"extraHeaders":{0:Messages("experiments.inputs")}
+					},
+					{
+						"header":Messages("containers.table.quantity.unit"),
+						"property":"inputContainerUsed.quantity.unit",
+						"order":true,
+						"edit":false,
+						"hide":true,
+						"type":"text",
+						"mergeCells" : true,
+						"position":6,
+						"extraHeaders":{0:Messages("experiments.inputs")}
+					},
+					{
+						"header":Messages("containers.table.biologicalMaterialQuantity"),
+						"property":"inputContainer.properties.biologicalMaterialQuantity.value", 
+						"order":true,
+						"edit":false,
+						"hide":true,
+						"type":"text",
+						"mergeCells" : true,
+						"position":6.5,
+						"extraHeaders":{0:Messages("experiments.inputs")}
+					},
 			         {
 			        	 "header":Messages("containers.table.state.code"),
 			        	 "property":"inputContainer.state.code",
@@ -135,7 +154,8 @@ angular.module('home').controller('TotalRNAExtractionCtrl',['$scope', '$parse', 
 			},
 			order:{
 				mode:'local', //or 
-				active:true
+				active:true,
+				by:"inputContainer.sampleCodes"
 			},
 			remove:{
 				active: ($scope.isEditModeAvailable() && $scope.isNewState()),
@@ -177,6 +197,7 @@ angular.module('home').controller('TotalRNAExtractionCtrl',['$scope', '$parse', 
 		console.log("call event save");
 		$scope.atmService.data.save();
 		$scope.atmService.viewToExperimentOneToOne($scope.experiment);
+
 		$scope.$emit('childSaved', callbackFunction);
 	});
 	
@@ -256,7 +277,7 @@ angular.module('home').controller('TotalRNAExtractionCtrl',['$scope', '$parse', 
 	} else {
 		datatableConfig.columns.push({
 			"header" : Messages("containers.table.code"),
-			"property" : "inputContainer.support.code",
+			"property" : "inputContainer.code",
 			"order" : true,
 			"edit" : false,
 			"hide" : true,
@@ -266,7 +287,6 @@ angular.module('home').controller('TotalRNAExtractionCtrl',['$scope', '$parse', 
 				0 : Messages("experiments.inputs")
 			}
 		});
-		datatableConfig.order.by="inputContainer.support.code";
 	}
 	
 	if($scope.experiment.instrument.outContainerSupportCategoryCode !== "tube") {

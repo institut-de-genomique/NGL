@@ -1,14 +1,11 @@
 package scripts;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 import fr.cea.ig.MongoDBDAO;
 import fr.cea.ig.lfw.controllers.scripts.chunked.ScriptWithExcelBody;
-import models.laboratory.common.instance.property.PropertyObjectValue;
 import models.laboratory.project.instance.Project;
+import models.laboratory.project.instance.SystemParameters.QtreeQuota;
 import models.utils.InstanceConstants;
 import play.Logger;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -32,10 +29,10 @@ public class ScriptUpdateQtree extends ScriptWithExcelBody {
 				// double rawQtree = row.getCell(2).getNumericCellValue();
 				// double projQtree = row.getCell(3).getNumericCellValue();
 				
-				Map<String, Object> map = new HashMap<>();
-				map.put("scratch", scratchQtree);
-				map.put("proj", 0 /* projQtree */);
-				map.put("rawdata", 0) /* rawQtree */;
+				QtreeQuota qtreeQuota = new QtreeQuota();
+				qtreeQuota.scratch = (int) scratchQtree;
+				qtreeQuota.proj = 0; /* projQtree */
+				qtreeQuota.rawdata = 0; /* rawQtree */
 
 				projectCode = projectCode.trim();
 				
@@ -43,7 +40,7 @@ public class ScriptUpdateQtree extends ScriptWithExcelBody {
 					projectsUpdated.add(p);
 
 					Project projEnBase = MongoDBDAO.findByCode(InstanceConstants.PROJECT_COLL_NAME, Project.class, projectCode);
-					projEnBase.properties.put("qtreeQuota", new PropertyObjectValue(map));
+					projEnBase.systemParameters.qtreeQuota = qtreeQuota;
 					
 					MongoDBDAO.update(InstanceConstants.PROJECT_COLL_NAME, projEnBase);
 				}
@@ -55,14 +52,14 @@ public class ScriptUpdateQtree extends ScriptWithExcelBody {
 
 		for (int i = 0; i < notUpdated.size(); i++) {
 			Logger.debug("Updating " + notUpdated.get(i).code);
-
-			Map<String, Object> map = new HashMap<>();
-			map.put("scratch", 0);
-			map.put("proj", 0);
-			map.put("rawdata", 0);
+			
+			QtreeQuota qtreeQuota = new QtreeQuota();
+			qtreeQuota.scratch = 0;
+			qtreeQuota.proj = 0;
+			qtreeQuota.rawdata = 0;
 
 			Project projEnBase = MongoDBDAO.findByCode(InstanceConstants.PROJECT_COLL_NAME, Project.class, notUpdated.get(i).code);
-			projEnBase.properties.put("qtreeQuota", new PropertyObjectValue(map));
+			projEnBase.systemParameters.qtreeQuota = qtreeQuota;
 			
 			MongoDBDAO.update(InstanceConstants.PROJECT_COLL_NAME, projEnBase);
 		}

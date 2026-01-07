@@ -3,11 +3,11 @@ package sra.scripts;
 import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 
+import controllers.sra.api.ExperimentAPI;
+import controllers.sra.api.SampleAPI;
+import controllers.sra.api.StudyAPI;
+import controllers.sra.api.SubmissionAPI;
 import fr.cea.ig.lfw.controllers.scripts.chunked.ScriptWithArgs;
-import fr.cea.ig.ngl.dao.api.sra.ExperimentAPI;
-import fr.cea.ig.ngl.dao.api.sra.SampleAPI;
-import fr.cea.ig.ngl.dao.api.sra.StudyAPI;
-import fr.cea.ig.ngl.dao.api.sra.SubmissionAPI;
 import models.sra.submit.sra.instance.Experiment;
 import models.sra.submit.sra.instance.Sample;
 import models.sra.submit.sra.instance.Study;

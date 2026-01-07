@@ -70,9 +70,7 @@
 								}
 							];						
 				return columns;
-			
 		}
-		
 		
 		var isInit = false;
 		
@@ -85,13 +83,14 @@
 				lists.refresh.resolutions({objectTypeCode:"Run"});
 				lists.refresh.runs();
 				lists.refresh.runCategories();
-				lists.refresh.instruments({categoryCodes:["illumina-sequencer","extseq","nanopore-sequencer", "opt-map-bionano", "mgi-sequencer"]});
+				//NGL-4322 : ajout pacbio-sequencer
+				lists.refresh.instruments({categoryCodes:["illumina-sequencer","extseq","nanopore-sequencer", "opt-map-bionano", "mgi-sequencer", "pacbio-sequencer"]});
 				lists.refresh.users();
 				lists.refresh.filterConfigs({pageCodes:["runs-addfilters"]}, "runs-addfilters");
 				lists.refresh.reportConfigs({pageCodes:["runs-addcolumns"]}, "runs-addcolumns");
-				
+				lists.refresh.reportConfigs({pageCodes:["runs"+"-"+mainService.getHomePage()], active:true}); // ajout NGL-4531
+				lists.refresh.umbrellaProjects();
 				searchService.lists.refresh.valuationCriterias({objectTypeCode:"Run",orderBy:'name'});
-				
 				
 				isInit=true;
 			}
@@ -104,6 +103,8 @@
 				isRouteParam:false,
 				lists : lists,
 				form : undefined,
+				reportingConfigurationCode:undefined, // ajout NGL-4531 (utile?)
+				reportingConfiguration:undefined, // ajout NGL-4531 (utile?)
 				additionalColumns:[],
 				additionalFilters:[],
 				selectedAddColumns:[],
@@ -120,16 +121,28 @@
 					}
 				},
 				
-				updateForm : function(){
+				updateForm : function(){	
+					// faut il garder ce block ????		
 					if (mainService.isHomePage('valuation')) {
 						if(!this.isRouteParam && (this.form.stateCodes === undefined || this.form.stateCodes.length === 0)) {
 							//No stateCodes selected, the filter by default (on the only two possible states for the valuation) is applied
 							this.form.stateCodes = ["IW-V","IP-V"];
 						}		
 					}
-					this.form.includes = ["default"];
-					//this.form.excludes =  ["lanes"];	
-					
+					// ajout NGL-4531 copié depuis readsets
+					this.form.includes = [];
+					if(this.reportingConfiguration){
+						for(var i = 0 ; i < this.reportingConfiguration.columns.length ; i++){
+							if(this.reportingConfiguration.columns[i].queryIncludeKeys && this.reportingConfiguration.columns[i].queryIncludeKeys.length > 0){
+								this.form.includes = this.form.includes.concat(this.reportingConfiguration.columns[i].queryIncludeKeys);
+							}else{
+								this.form.includes.push(this.reportingConfiguration.columns[i].property.replace('.value',''));	
+							}
+						}
+					}else{
+						this.form.includes = ["default"];
+					}
+
 					for(var i = 0 ; i < this.selectedAddColumns.length ; i++){
 						//remove .value if present to manage correctly properties (single, list, etc.)
 						if(this.selectedAddColumns[i].queryIncludeKeys && this.selectedAddColumns[i].queryIncludeKeys.length > 0){
@@ -137,16 +150,15 @@
 						}else{
 							this.form.includes.push(this.selectedAddColumns[i].property.replace('.value',''));	
 						}
-						
 					}
 				},
 				convertForm : function(){
 					var _form = angular.copy(this.form);
+
 					if(_form.fromDate)_form.fromDate = moment(_form.fromDate, Messages("date.format").toUpperCase()).valueOf();
 					if(_form.toDate)_form.toDate = moment(_form.toDate, Messages("date.format").toUpperCase()).valueOf();		
 					if(_form.fromEndRGDate)_form.fromEndRGDate = moment(_form.fromEndRGDate, Messages("date.format").toUpperCase()).valueOf();
 					if(_form.toEndRGDate)_form.toEndRGDate = moment(_form.toEndRGDate, Messages("date.format").toUpperCase()).valueOf();		
-					
 					
 					return _form
 				},
@@ -172,6 +184,7 @@
 					this.updateForm();
 					mainService.setForm(this.form);
 					this.datatable.search(this.convertForm());
+					this.datatable.setMessagesActive(true); // ajout NGL-4531 (utile ??)
 				},
 				
 				refreshSamples : function(){
@@ -231,13 +244,17 @@
 					}else{
 						this.datatable.setColumnsConfig(this.getColumns().concat(this.selectedAddColumns));						
 					}
-					this.search();
+					if(this.datatable.isData()){
+						this.search();
+					}
 				},
+
 				resetDatatableColumns:function(){
 					this.initAdditionalColumns();
 					this.datatable.setColumnsConfig(this.getColumns());
 					this.search();
 				},
+
 				initAdditionalFilters:function(){
 					this.additionalFilters=[];
 					if(lists.get("runs-addfilters") && lists.get("runs-addfilters").length === 1){
@@ -259,8 +276,33 @@
 						this.additionalFilters = formFilters;										
 					}
 				},
-				
-
+				/**
+				 * NGL-4531 manquait !!
+				 * Update column when change reportingConfiguration
+				*/
+				updateColumn : function(){
+					this.initAdditionalColumns();
+					if(this.reportingConfigurationCode){
+						$http.get(jsRoutes.controllers.reporting.api.ReportingConfigurations.get(this.reportingConfigurationCode).url,{searchService:this, datatable:this.datatable})
+								.success(function(data, status, headers, config) {		
+									config.searchService.reportingConfiguration = data;
+									// orig if(config.searchService.lists.get('reportConfigs').length > 1 && config.datatable.isData()){
+									// la recherche ne se lance pas automatiquement !!!
+									if (config.datatable.isData()){
+										config.searchService.search();
+									}
+									config.datatable.setColumnsConfig(data.columns);
+						});
+					}else{
+						this.reportingConfiguration = undefined;
+						this.initAdditionalFilters();
+						this.mainFilters = [];							
+						this.datatable.setColumnsConfig(this.getColumns());
+						if(this.datatable.isData()){
+							this.search();
+						}
+					}	
+				},
 				getAddFiltersToForm : function(){
 					if(this.additionalFilters.length === 0){
 						this.initAdditionalFilters();
@@ -297,8 +339,7 @@
 					if(angular.isDefined($routeParams)){
 						this.setRouteParams($routeParams);
 					}
-				}
-				
+				}	
 		};
 		return searchService;		
 	}

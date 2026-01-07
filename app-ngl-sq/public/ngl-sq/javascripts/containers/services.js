@@ -254,15 +254,17 @@ factory('containersSearchService', ['$rootScope', '$http', 'mainService', 'lists
 			lists.refresh.experimentTypes({categoryCode:"qualitycontrol"}, "qualitycontrol");
 			lists.refresh.experimentTypes({categoryCode:"transfert"}, "transfert");
 			lists.refresh.containerSupports();
+			lists.refresh.importTypes();
 			lists.refresh.projects();
 			lists.refresh.processCategories();
 			lists.refresh.states({objectTypeCode:"Container"});
 			lists.refresh.users();
-			lists.refresh.reportConfigs({pageCodes:["containers"+"-"+mainService.getHomePage()]});
+			lists.refresh.reportConfigs({pageCodes:["containers"+"-"+mainService.getHomePage()], active:true});
 			lists.refresh.reportConfigs({pageCodes:["containers-addcolumns"]}, "containers-addcolumns");
 			lists.refresh.filterConfigs({pageCodes:["containers-search-addfilters"]}, "containers-search-addfilters");
 			lists.refresh.resolutions({"objectTypeCode":"Container"}, "containerResolutions");
 			lists.refresh.values({propertyDefinitionCode:'rnaEvaluation'},"rnaEvaluation");
+			lists.refresh.umbrellaProjects();
 			isInit=true;
 		}
 	};
@@ -276,6 +278,7 @@ factory('containersSearchService', ['$rootScope', '$http', 'mainService', 'lists
 			form:undefined,
 			mainFilters:[],
 			additionalFilters:[],
+			mapAdditionnalColumn : new Map(),
 			additionalColumns:[],
 			selectedAddColumns:[],
 			authorizedStates : null,
@@ -442,7 +445,11 @@ factory('containersSearchService', ['$rootScope', '$http', 'mainService', 'lists
 					
 					for(var key in this.aggregateForm){
 						//replace "#someThing" by "somethingValue" but in case of number does not work because number cannot be inside a double quote
-						this.form.reportingQuery = this.form.reportingQuery.replace(new RegExp("#"+key,"g"),this.aggregateForm[key]);
+						var replacementValue = this.aggregateForm[key];
+						this.form.reportingQuery = this.form.reportingQuery.replace(new RegExp("#"+key,"g"),replacementValue);
+						//replace "@someThing" by ["somethingValue", ...] but in case of number does not work because number cannot be inside a double quote
+						var replacementValueList = this.aggregateForm[key] instanceof Array ? this.aggregateForm[key].join("\",\"") : this.aggregateForm[key];
+						this.form.reportingQuery = this.form.reportingQuery.replace(new RegExp("@"+key,"g"), "\"" + replacementValueList + "\"");
 					}					
 				}else if(this.form.reportingQuery){
 					this.form.reportingQuery.trim();
@@ -546,11 +553,12 @@ factory('containersSearchService', ['$rootScope', '$http', 'mainService', 'lists
 			initAdditionalColumns : function(){
 				this.additionalColumns=[];
 				this.selectedAddColumns=[];
+				this.mapAdditionnalColumn=new Map();
 				
 				if(lists.get("containers-addcolumns") && lists.get("containers-addcolumns").length === 1){
 					var formColumns = [];
 					//we used the order in the document to order column in display and not the position value !!!!
-					var allColumns = angular.copy(lists.get("containers-addcolumns")[0].columns);
+					var allColumns = this.computeMapAdditionnalColumns();
 					var nbElementByColumn = Math.ceil(allColumns.length / 5); //5 columns
 					for(var i = 0; i  < 5 && allColumns.length > 0 ; i++){
 						formColumns.push(allColumns.splice(0, nbElementByColumn));
@@ -562,6 +570,27 @@ factory('containersSearchService', ['$rootScope', '$http', 'mainService', 'lists
 					this.additionalColumns = formColumns;
 				}
 			},
+			computeMapAdditionnalColumns:function(){
+				var allColumns = angular.copy(lists.get("containers-addcolumns")[0].columns);
+				var allColumnsFiltered = [];
+				for(var i=0; i<allColumns.length; i++){
+					if(allColumns[i].groupHeader==undefined){
+						allColumnsFiltered.push(allColumns[i]);
+					}else{
+						if(this.mapAdditionnalColumn.get(allColumns[i].groupHeader)==undefined){
+							//if(this.contextValue==undefined || (this.contextValue!=undefined && allColumns[i].context!=null && allColumns[i].context.includes(this.contextValue))){
+								allColumnsFiltered.push(allColumns[i]);
+								var tabColumn=[];
+								tabColumn.push(allColumns[i]);
+								this.mapAdditionnalColumn.set(allColumns[i].groupHeader,tabColumn);
+								//}
+						}else{
+							this.mapAdditionnalColumn.get(allColumns[i].groupHeader).push(allColumns[i]);
+						}
+					}
+				}
+				return allColumnsFiltered;
+			},
 			getAddColumnsToForm : function(){
 				if(this.additionalColumns.length === 0){
 					this.initAdditionalColumns();
@@ -569,25 +598,29 @@ factory('containersSearchService', ['$rootScope', '$http', 'mainService', 'lists
 				return this.additionalColumns;
 			},
 			addColumnsToDatatable : function(){
-				//this.reportingConfiguration = undefined;
-				//this.reportingConfigurationCode = undefined;
-				
 				this.selectedAddColumns = [];
-				for(var i = 0 ; i < this.additionalColumns.length ; i++){
-					for(var j = 0; j < this.additionalColumns[i].length; j++){
-						if(this.additionalColumns[i][j].select){
-							this.selectedAddColumns.push(this.additionalColumns[i][j]);
+					
+					for(var i = 0 ; i < this.additionalColumns.length ; i++){
+						for(var j = 0; j < this.additionalColumns[i].length; j++){
+							if(this.additionalColumns[i][j].select){
+								if(this.additionalColumns[i][j].groupHeader!=undefined){
+									for(var c=0; c<this.mapAdditionnalColumn.get(this.additionalColumns[i][j].groupHeader).length; c++){
+										this.selectedAddColumns.push(this.mapAdditionnalColumn.get(this.additionalColumns[i][j].groupHeader)[c]);
+									}
+								}else{
+									this.selectedAddColumns.push(this.additionalColumns[i][j]);
+								}
+							}
 						}
 					}
-				}
-				if(this.reportingConfigurationCode){
-					this.datatable.setColumnsConfig(this.reportingConfiguration.columns.concat(this.selectedAddColumns));
-				}else{
-					this.datatable.setColumnsConfig(this.getDefaultColumns().concat(this.selectedAddColumns));
-				}
-				if(this.datatable.isData()){
-					this.search();
-				}
+					if(this.reportingConfigurationCode){
+						this.datatable.setColumnsConfig(this.reportingConfiguration.columns.concat(this.selectedAddColumns));
+					}else{
+						this.datatable.setColumnsConfig(this.getDefaultColumns().concat(this.selectedAddColumns));						
+					}
+					if(this.datatable.isData()){
+						this.search();
+					}
 			},	
 			resetDatatableColumns : function(){
 				this.updateColumn();

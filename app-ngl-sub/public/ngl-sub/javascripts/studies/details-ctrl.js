@@ -90,15 +90,15 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 						editTemplate:"<textarea class='form-control' #ng-model rows='1'></textarea>",
 						choiceInList:false
 					},
-					{property:"studyAccession",
-						header: Messages("analysis.studyAccession"),
+					{property:"studyIdentifier",
+						header: Messages("analysis.studyIdentifier"),
 						type :"String",		    	  	
 						hide:true,
 						edit:true,
 						order:false
 					},					
-					{property:"sampleAccession",
-						header: Messages("analysis.sampleAccession"),
+					{property:"sampleIdentifier",
+						header: Messages("analysis.sampleIdentifier"),
 						type :"String",		    	  	
 						hide:true,
 						edit:true,
@@ -114,6 +114,172 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 			        }
 			 ]	        
 	};
+	
+	
+
+	var samplesDTConfig = {
+			name:'sampleDT',
+			//order :{by:'code',mode:'local', reverse:true},
+			order :{by:'code',mode:'local', reverse:true},
+			search:{active:false},
+			select:{active:false},
+			pagination:{
+				active:false,
+				mode:'local'
+			},
+			showTotalNumberRecords:true,
+			edit : {
+				active:true,
+				showButton : false,
+				withoutSelect : true,
+				columnMode : true,
+				lineMode : function(line){
+					if(line.state.code === "SUB-N")
+						return true;
+					else 
+						return false;
+				}
+			},
+			save : {
+				active:true,
+				// important de mettre en mode local pour rafraichissement de la page, mais sauvegarde globale via bouton
+				mode:'local',
+				showButton : false,
+				changeClass : false,				
+				url:function(line){
+					return jsRoutes.controllers.sra.samples.api.Samples.update(line.code).url; // jamais utilisé en mode local
+				},
+				method:'put',
+				value:function(line){
+					return line;
+				},
+			},
+
+			/*cancel : {
+				showButton:true
+			},
+			hide:{
+				active:true
+			},
+			 */
+			exportCSV:{
+				active:true
+			},
+			
+
+			columns : [
+			 	{property:"traceInformation.creationDate",
+			       	header: Messages("sample.traceInformation.creationDate"),
+			       	type :"date",		    	  	
+			       	order:true
+			    },
+			    {property:"traceInformation.createUser",
+			       	header: Messages("traceInformation.creationUser"),
+			       	type :"text",		    	  	
+			       	order:true
+			    },
+				{property:"state.code",
+					"filter":"codes:'state'", 
+					header: Messages("state"),
+					type :"text",		    	  	
+					order:true,
+					edit:false
+				},
+				{property:"code",
+					header: Messages("sample.code"),
+					type :"text",		    	  	
+					order:true
+				},
+				{property:"accession",
+					header: Messages("sample.accession"),
+					type :"text",
+					edit :false,
+					order:true
+				},
+				{property:"externalId",
+					header: Messages("sample.externalId"),
+					type :"text",	
+					edit :false,
+					order:true
+				},				
+				{property:"projectCode",
+					header: Messages("sample.projectCode"),
+					type :"text",		    	  	
+					order:true,
+					edit :false           
+				},
+				{property:"anonymizedName",
+					header: Messages("sample.anonymizedName"),
+					type :"text",	
+					hide:true,
+					order:true,
+					edit:true,
+					editTemplate:"<textarea class='form-control' #ng-model rows='1'></textarea>",
+					choiceInList:false
+				},
+				{property:"title",
+					header: Messages("sample.title"),
+					type :"text",	
+					hide:true,
+					order:true,
+					edit:true,
+					editTemplate:"<textarea class='form-control' #ng-model rows='1'></textarea>",
+					choiceInList:false
+				},
+				{property:"description",
+					header: Messages("sample.description"),
+					type :"text",	
+					hide:true,
+					order:true,
+					edit:true,
+					editTemplate:"<textarea class='form-control' #ng-model rows='1'></textarea>",
+					choiceInList:false
+				},				
+				{property:"taxonId",
+					header: Messages("sample.taxonId"),
+					type :"int",
+					hide:true,
+					order:true,
+					edit:false,
+					choiceInList:false
+				},
+				/*{property:"commonName",
+					header: Messages("sample.commonName"),
+					type :"text",		    	  	
+					hide:true,
+					order:true,
+					edit:false,
+					choiceInList:false
+				},*/
+				{property:"scientificName",
+					header: Messages("sample.scientificName"),
+					type :"text",		    	  	
+					order:true,
+					edit:false,
+					choiceInList:false
+				},
+				{property:"attributes",
+					header: Messages("sample.attributes"),
+					//"filter":"codes:'state'",
+					type :"text",		    	  	
+					order:true,
+					edit:true,
+					editTemplate:"<textarea class='form-control' #ng-model rows='1'></textarea>",
+					choiceInList:false
+				},
+			    {property     : "comments",
+					header       : Messages("comments"),
+					type         : "text",
+					hide         : true,
+					edit         : false, // pas modifiable en consultation car uniquement dans vue detail
+					order        : false,
+				    choiceInList : false,
+					filter       : "collect:'comment'",
+					listStyle    : 'bt-select',
+				}
+				]				
+	};
+
 		
 	var experimentsDTConfig = {
 			name:'experimentDT',
@@ -429,9 +595,11 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 	
 	var init = function(userName){
 		$scope.mainService = mainService;
+		$scope.treeLoadInProgress = false;
 		$scope.messages = messages();
 		$scope.messages.clear(); 
 		$scope.countAnalysis = 0;
+		$scope.countSample = 0;
 		$scope.countExperiment = 0;
 		$scope.isPublic=false;
 		$scope.visibility="undefined";
@@ -445,6 +613,7 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 		//$http.get(jsRoutes.controllers.sra.studies.api.Studies.list().url,  {params: {code:$routeParams.code}}).success(function(data){
 		// en ajoutant $code dans studySearchForm.
 		
+		console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
 		// Recuperer le study en passant par get :		
 		$http.get(jsRoutes.controllers.sra.studies.api.Studies.get($routeParams.code).url).success(function(data){
 			//console.log("nbre de study:"+data.length);
@@ -485,30 +654,29 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 			// On compare les date :
 			// $scope.study.releaseDate correspond à la date de release exprimée en milliseconde ecoulées depuis 01/01/1970 (Date Epoch) 
 			// Date.now() correspond à la date courante exprimee en ms depuis Epoch
-			/*if ($scope.study.traceInformation.createUser!=userName) {
-				$scope.isReleasable = false;
-				console.log("utilisateur" + userName + "!= createur" + $scope.study.traceInformation.createUser);
-			} else */
 
 		
-		
-			if ( !$scope.study.releaseDate) {
-				//$scope.isReleasable = function(userName){return false;}; // isReleasable est une fonction
-				//console.log("study.releaseDate non renseigné");
-				$scope.visibility="undefined";
+			if($scope.study.consolidatedPublicStatus || $scope.study._type=="ExternalStudy") {
+				$scope.visibility="public";	
 			} else {		
-				//console.log("study.releaseDate" + $scope.study.releaseDate);
-				//console.log("Date.now" + Date.now());
-				if ($scope.study.releaseDate < Date.now()) {
-					$scope.isPublic=true;
-					$scope.visibility="public";	
-				} else {
-					$scope.visibility="private";	
-					if ($scope.study.state.code == "SUB-F") {
-						//$scope.isReleasable = function(userName){return $scope.study.traceInformation.createUser==userName;};
-						$scope.isReleasable = function(userName){return true;};
-						//console.log("donnée confidentielle");
-						//console.log("isReleasable: " + $scope.isReleasable);
+				if ( !$scope.study.releaseDate) {
+					//$scope.isReleasable = function(userName){return false;}; // isReleasable est une fonction
+					//console.log("study.releaseDate non renseigné");
+					$scope.visibility="undefined";
+				} else {		
+					//console.log("study.releaseDate" + $scope.study.releaseDate);
+					//console.log("Date.now" + Date.now());
+					if ($scope.study.releaseDate < Date.now()) {
+						$scope.isPublic=true;
+						$scope.visibility="public";	
+					} else {
+						$scope.visibility="private";	
+						if ($scope.study.state.code == "SUB-F") {
+							//$scope.isReleasable = function(userName){return $scope.study.traceInformation.createUser==userName;};
+							$scope.isReleasable = function(userName){return true;};
+							//console.log("donnée confidentielle");
+							//console.log("isReleasable: " + $scope.isReleasable);
+						}
 					}
 				} 
 			}
@@ -524,12 +692,12 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 			*/
 		
 		
-			// recuperation des analyses avec studyAccession:
-		   	$scope.studyAccession= "NONE";
+			// recuperation des analyses avec studyIdentifier:
+		   	$scope.studyIdentifier= "NONE";
 		   	if (toolsServices.isNotBlank($scope.study.accession)) {
-				$scope.studyAccession = $scope.study.accession;
+				$scope.studyIdentifier = $scope.study.accession;
 		   	}
-			$http.get(jsRoutes.controllers.sra.analyzes.api.Analyzes.list().url, {params: {studyIdentifier:$scope.studyAccession}}).success(function(data) {
+			$http.get(jsRoutes.controllers.sra.analyzes.api.Analyzes.list().url, {params: {studyIdentifier:$scope.studyIdentifier}}).success(function(data) {
 				//console.log("study.accession=", $scope.study.accession);
 				$scope.analyzes = data;
 				$scope.countAnalysis = $scope.analyzes.length;
@@ -538,11 +706,20 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 				//Init datatable
 				$scope.analysisDT = datatable(analyzesDTConfig);
 				$scope.analysisDT.setData($scope.analyzes, $scope.analyzes.length);
+				
 				var maListRawDatas = [];
+				var maListSampleIdentifiers = [];
 				for (var i=0; i<$scope.analyzes.length; i++) {
+					if (toolsServices.isNotBlank($scope.analyzes[i].sampleAccession)) {
+						if ( ! maListSampleIdentifiers.includes($scope.analyzes[i].sampleAccession)) {
+							maListSampleIdentifiers.push($scope.analyzes[i].sampleAccession);
+						}
+					}
 					if($scope.analyzes[i].listRawData != null) {
 						for (var j=0; j<$scope.analyzes[i].listRawData.length; j++) {
-							maListRawDatas.push($scope.analyzes[i].listRawData[j]);
+							if ( ! maListRawDatas.includes($scope.analyzes[i].listRawData[j])) {
+								maListRawDatas.push($scope.analyzes[i].listRawData[j]);
+							}
 						}
 					}
 				}
@@ -550,7 +727,7 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 				//Get experiments (and runs)
 				$http.get(jsRoutes.controllers.sra.experiments.api.Experiments.list().url, {params: {studyCode:$routeParams.code}}).success(function(data) {
 					//console.log("$routeParams.code:"+$routeParams.code);
-			
+					var maListSampleCodes = [];
 					$scope.experiments = data;
 					$scope.countExperiment = $scope.experiments.length;
 					//Init datatable
@@ -563,16 +740,64 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 					
 					
 					// Get RawDatas : construction de la liste des rawData puis injection dans datatable :
-					//var maListRawDatas = [];
 					for (var i=0; i<$scope.experiments.length; i++) {
+						if ( ! maListSampleIdentifiers.includes($scope.experiments[i].sampleAccession)) {
+							maListSampleIdentifiers.push($scope.experiments[i].sampleAccession);
+						}
+						if ( ! maListSampleCodes.includes($scope.experiments[i].sampleCode)) {
+							maListSampleCodes.push($scope.experiments[i].sampleCode);
+						}
 						var run = $scope.experiments[i].run;
 						for (var j=0; j<run.listRawData.length; j++) {
 							maListRawDatas.push(run.listRawData[j]);
 						}
 					}
-					
 					$scope.rawDataDT = datatable(rawDatasDTConfig);
 					$scope.rawDataDT.setData(maListRawDatas, maListRawDatas.length);
+					// Get samples from identifiers
+					if(maListSampleIdentifiers.length==0){
+						//console.log("Aucun sampleIdentifiers à rechercher");
+						maListSampleIdentifiers.push("NONE"); // pour avoir une requete qui renvoie bien 0 resultats
+					} 
+					if(maListSampleCodes.length==0){
+						//console.log("Aucun sampleCodes à rechercher");
+						maListSampleCodes.push("NONE"); // pour avoir une requete qui renvoie bien 0 resultats
+					}
+										
+					$scope.samplesFromIdentifiers = [];
+					$http.get(jsRoutes.controllers.sra.samples.api.Samples.list().url, {params: {identifiers:maListSampleIdentifiers}}).success(function(data) {
+					//$http.get(jsRoutes.controllers.sra.samples.api.Samples.list().url, {params: {accession:"ERS2467118"}}).success(function(data) {
+						$scope.samplesFromIdentifiers = data;
+						//console.log("XXXX    XXXXXXXXXXXXXX    samplesFromIdentifiers", $scope.samplesFromIdentifiers);
+					
+						// Get samples from codes
+						$http.get(jsRoutes.controllers.sra.samples.api.Samples.list().url, {params: {codes:maListSampleCodes}}).success(function(data) {
+							$scope.samplesFromCodes = data;	
+							//console.log("XXXXXXXXXXXXXX    XXXXXXXXXXXXX   samplesFromCodes", $scope.samplesFromCodes);
+
+							// construire liste unique de samples (Dans la base il n'existe pas de sample sans code, en revanche il existe des samples sans AC si pas encore soumis)
+							$scope.samples = [];
+							var dbSampleCodes = {}; //map des dbSampleCodes
+							// construire une liste unique des samples à partir des resultats renvoyees par les 2 requetes :
+							for(var i= 0; i < $scope.samplesFromIdentifiers.length; i++) {
+								var sample = $scope.samplesFromIdentifiers[i];
+								//console.log("ZZZZZZZZZZZZZZZZZ     sampleCode", sample.code);
+								dbSampleCodes[sample.code] = "ok";
+								$scope.samples.push(sample);
+							}
+							for(var i= 0; i < $scope.samplesFromCodes.length; i++) {
+								var sample = $scope.samplesFromCodes[i];
+								//console.log("ZZZZZZZZZZZZZZZZZ     sampleCode", sample.code);
+								if(! dbSampleCodes.hasOwnProperty(sample.code)) {
+									dbSampleCodes[sample.code] = "ok";
+									$scope.samples.push(sample);
+								}
+							}
+							//console.log("uniq samples", $scope.samples);					
+							$scope.sampleDT = datatable(samplesDTConfig);
+							$scope.sampleDT.setData($scope.samples, $scope.samples.length);
+						});
+					});	
 				});	
 			});
 	    });		
@@ -583,51 +808,26 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 	/* buttons section */
 	
 	$scope.userRelease = function(){
+		$scope.treeLoadInProgress = true;
 		$scope.messages = messages();
 		$scope.messages.clear();
 		//console.log("je suis dans le bouton studies.details-ctrl.js.userRelease");
-		
-		/*Partie faites maintenant en passant par createFromStudyRelease
-		var state = angular.copy($scope.study.state);
-		state.code = "SUBR-SMD-IW";
-		$http.put(jsRoutes.controllers.sra.studies.api.Studies.updateState($scope.study.code).url, state)
-			.success(function(data){
-		   		$scope.messages.clazz="alert alert-success";
-				$scope.messages.text=Messages('studies.msg.release.success');
+               
+		 $http.put(jsRoutes.controllers.sra.submissions.api.Submissions.createFromStudyRelease($scope.study.code).url)
+			.success(function(data){	
+				var submission = data;	
+		        $scope.treeLoadInProgress = false;
+				$scope.messages = messages();
+				$scope.messages.clear();
+				$scope.messages.clazz="alert alert-success";
+				$scope.messages.text="Le study "+ $scope.study.code + " a bien été mis dans le domaine public par l'EBI via la soumission "  + submission.code + " voir ebiReport " + submission.submissionDirectory + "/" + submission.ebiResult;
 				$scope.messages.open();
 			})
 			.error(function(data){
+				$scope.treeLoadInProgress = false;
 				$scope.messages.addDetails(data);
-				$scope.messages.setError("release");	
+				$scope.messages.setError("Probleme pour la release à l'EBI du study");	
 			});	
-		  */                    
-		 $http.put(jsRoutes.controllers.sra.submissions.api.Submissions.createFromStudyRelease($scope.study.code).url)
-			.success(function(data){
-//		   		$scope.messages.clazz="alert alert-success";
-//				$scope.messages.text=Messages('studies.msg.release.success');
-//				$scope.messages.open();
-				//console.log("code de la soumission crée " + data.code);
-				var submissionCode = data.code;
-				var submissionState = angular.copy(data.state);
-				submissionState.code = "SUBR-SMD-IW";
-				$http.put(jsRoutes.controllers.sra.submissions.api.Submissions.updateState(submissionCode).url, submissionState)
-					.success(function(data){
-				   		$scope.messages.clazz="alert alert-success";
-						$scope.messages.text=Messages('studies.msg.release.success');
-						$scope.messages.open();
-					})				
-					.error(function(data){
-						$scope.messages.addDetails(data);
-						$scope.messages.setError("Probleme pour la release du study");	
-				});		
-			})
-			.error(function(data){
-				$scope.messages.addDetails(data);
-				$scope.messages.setError("Probleme pour la release");	
-			});	
-	 
-		 
-		 
 	};
 	
 	$scope.cancel = function(){

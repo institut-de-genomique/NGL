@@ -3,6 +3,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 import org.junit.Test;
 
+import services.sra.SraCodeHelper;
+
 public class TestNomClone {
 	public void assertGoodNameClone(String clone) {
 //		assertTrue(clone.matches(SraCodeHelper.cloneRegExp));

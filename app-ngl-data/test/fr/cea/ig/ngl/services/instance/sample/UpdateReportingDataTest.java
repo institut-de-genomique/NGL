@@ -307,6 +307,8 @@ public class UpdateReportingDataTest {
         assertTrue("size are not equals", resFilter.size() == properties.size());
     }
 
+    @SuppressWarnings("null")
+    // Pas de null pointer possible, on fail si c'est le cas, j'ignore donc l'erreur.
     @Test
     public void testFilterPropertiesWithFileAndImg() {
         Map<String, PropertyValue> properties = null;

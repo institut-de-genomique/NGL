@@ -279,7 +279,10 @@ public class ReadSetsAPI extends GenericAPI<ReadSetsDAO, ReadSet> {
 		// Mise à jour du champ "processesToLaunchDate" qui permet de prendre le sample en compte dans le reporting data.
 		Sample sample = MongoDBDAO.findByCode(InstanceConstants.SAMPLE_COLL_NAME, Sample.class, readSet.sampleCode);
 		sample.setProcessesToLaunchDate(new Date());
-		MongoDBDAO.update(InstanceConstants.SAMPLE_COLL_NAME, sample);
+		
+		if (sample.getProcessesToLaunchDate() != null) {
+			MongoDBDAO.update(InstanceConstants.SAMPLE_COLL_NAME, sample);
+		}
 
 	    if ((readSet.projectCode!= null) && ! dao.checkObjectExist(DBQuery.and(DBQuery.is("runCode",     readSet.runCode), 
 	    		                                                               DBQuery.is("projectCode", readSet.projectCode)))) {

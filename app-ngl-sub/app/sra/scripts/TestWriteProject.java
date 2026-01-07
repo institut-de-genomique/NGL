@@ -5,12 +5,12 @@ import java.io.File;
 
 import javax.inject.Inject;
 
+import controllers.sra.api.ExperimentAPI;
+import controllers.sra.api.ProjectAPI;
+import controllers.sra.api.SubmissionAPI;
 import fr.cea.ig.lfw.controllers.scripts.buffered.ScriptNoArgs;
-import fr.cea.ig.ngl.dao.api.sra.ExperimentAPI;
-import fr.cea.ig.ngl.dao.api.sra.ProjectAPI;
-import fr.cea.ig.ngl.dao.api.sra.SubmissionAPI;
 import models.sra.submit.sra.instance.Submission;
-import services.XmlServices;
+import sra.services.XmlServices;
 
 /*
  * Script à utiliser pour recharger les md5 d'une soumission a partir de NGL.

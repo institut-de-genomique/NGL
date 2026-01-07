@@ -13,7 +13,7 @@ public class RawData  implements IValidation {
 	public String md5;
 	public String location;
 	public String collabFileName;         // nom du fichier final à l'EBI : fastq.gz ou sff donné par le champs collabFileName de readset
-	public Boolean gzipForSubmission = false;
+	public Boolean gzipForSubmission   = false;
 	public Boolean md5sumForSubmission = false; // md5ForSubmission = false;
 	public String instrumentUsedTypeCode;
 

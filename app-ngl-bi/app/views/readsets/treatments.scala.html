@@ -26,6 +26,13 @@
 	@_treatments.readQualityPacbio()
 }
 
+@if(typeCode == "long-read-quality-pacbio"){
+	@_treatments.longReadQualityPacbio()
+}
+
+@if(typeCode == "long-read-quality-nanopore"){
+	@_treatments.longReadQualityNanopore()
+}
 
 @if(typeCode == "duplicates") {
 	@_treatments.duplicates()	
@@ -132,4 +139,32 @@
 
 @if(typeCode == "size-estimating") {
 	@_treatments.sizeEstimatingClean()
+}
+
+@if(typeCode == "size-estimating-pacbio") {
+	@_treatments.sizeEstimatingPacbio()
+}
+
+@if(typeCode == "sequencing-pacbio") {
+	@_treatments.sequencingPacbio()
+}
+
+@if(typeCode == "wgs-barcoding") {
+	@_treatments.wgsBarCoding()
+}
+
+@if(typeCode == "wgs-barcoding-pacbio") {
+	@_treatments.wgsBarCodingPacbio()
+}
+
+@if(typeCode == "wgs-barcoding-nanopore") {
+	@_treatments.wgsBarCodingNanopore()
+}
+
+@if(typeCode == "base-complexity") {
+	@_treatments.baseComplexity()
+}
+
+@if(typeCode == "rna-mapping") {
+	@_treatments.rnaMapping()
 }

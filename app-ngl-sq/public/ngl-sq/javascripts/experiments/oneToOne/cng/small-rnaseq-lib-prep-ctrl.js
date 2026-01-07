@@ -387,6 +387,15 @@ angular.module('home').controller('SmallRNASeqLibPrepCtrl',['$scope', '$parse', 
 	$scope.plates.push( {name:"RUDI plate F", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_RUDI_plate_F() });
 	$scope.plates.push( {name:"RUDI plate G", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_RUDI_plate_G() });
 	$scope.plates.push( {name:"RUDI plate H", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_RUDI_plate_H() });
+	// NGL-4567 plaques iMUDI
+	$scope.plates.push( {name:"iMUDI plate A", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_iMUDI_plate_A() });
+	$scope.plates.push( {name:"iMUDI plate B", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_iMUDI_plate_B() });
+	$scope.plates.push( {name:"iMUDI plate C", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_iMUDI_plate_C() });
+	$scope.plates.push( {name:"iMUDI plate D", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_iMUDI_plate_D() });
+	$scope.plates.push( {name:"iMUDI plate E", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_iMUDI_plate_E() });
+	$scope.plates.push( {name:"iMUDI plate F", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_iMUDI_plate_F() });
+	$scope.plates.push( {name:"iMUDI plate G", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_iMUDI_plate_G() });
+	$scope.plates.push( {name:"iMUDI plate H", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_iMUDI_plate_H() });
 	
 	$scope.tagPlate = $scope.plates[0]; // defaut du select
 	

@@ -124,6 +124,34 @@
 						"mergeCells":true,
 						"filter": "getArray:'value' | orderBy",
 						"render":"<div list-resize='cellValue' list-resize-min-size='5'vertical>",
+					},
+					
+					{
+						"header":Messages("descriptions.imports.table.property.definitions.value.displayUnit"),
+						"property":"displayMeasureValue.code",
+						"order":true,
+						"hide":true,
+						"position":10,
+						"type":"text",
+						"mergeCells":true
+					},
+					{
+						"header":Messages("descriptions.imports.table.property.definitions.value.saveUnit"),
+						"property":"saveMeasureValue.code",
+						"order":true,
+						"hide":true,
+						"position":11,
+						"type":"text",
+						"mergeCells":true
+					},
+					{
+						"header":Messages("descriptions.imports.table.property.definitions.value.displayOrder"),
+						"property":"displayOrder",
+						"order":true,
+						"hide":true,
+						"position":12,
+						"type":"text",
+						"mergeCells":true
 					}
 				];
 			}

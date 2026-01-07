@@ -1,7 +1,7 @@
 "use strict";
 
-angular.module('home').controller('DetailsCtrl', ['$scope', '$sce', '$http', '$routeParams', 'messages', 'lists', 'mainService', 'tabService', 'datatable',  '$window', 
-	function($scope, $sce, $http, $routeParams, messages, lists, mainService, tabService,datatable, $window) {
+angular.module('home').controller('DetailsCtrl', ['$q', '$scope', '$sce', '$http', '$routeParams', 'messages', 'lists', 'mainService', 'tabService', 'datatable',  '$window', 'projectsSearchService',
+	function($q, $scope, $sce, $http, $routeParams, messages, lists, mainService, tabService,datatable, $window, projectsSearchService) {
 	
 	$scope.datatableConfig = function(){
 		var config = {
@@ -205,10 +205,35 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$sce', '$http', '$r
 	
 	$scope.form = {	}
 
+	$scope.isValidValues = function(){
+		var isAllValid = true;
+		setErrorIfNotNumber($scope.project.systemParameters.qtreeQuota.proj,"errorProj");
+		setErrorIfNotNumber($scope.project.systemParameters.qtreeQuota.rawdata,"errorRawdata");
+		setErrorIfNotNumber($scope.project.systemParameters.qtreeQuota.scratch,"errorScratch");
+		return isAllValid;
+
+		//---
+
+		function setErrorIfNotNumber(projectValue,errorProjectValue){
+			if(isNumber(projectValue)){
+				$scope[errorProjectValue] = false;
+			}else{
+				$scope.messages.setError("save : Qtree Quota");	
+				$scope[errorProjectValue] = true;	
+				isAllValid = false;	
+			}
+		}
+
+		function isNumber(value) {
+			if(value === undefined || typeof(value) === 'number') {return true;}
+			return typeof(value) === 'string' && value.match(/^\d+$/g);
+		}
+	}
 
 	/* buttons section */
-	$scope.update = function(){
+	$scope.update = function(isChefProjet){
 		var objProj = angular.copy($scope.project);
+		if(!$scope.isValidValues()) { return; }
 
 		//Update listAnalysis 
 		if($scope.project.bioinformaticParameters.biologicalAnalysis){
@@ -225,19 +250,78 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$sce', '$http', '$r
 					objProj.properties.analysisTypes = {value: selectedTypes,_type: "list"};
 				}
 			}
+		} else if(objProj.properties.analysisTypes) {
+			delete objProj.properties["analysisTypes"];
 		}
 
-		$http.put(jsRoutes.controllers.projects.api.Projects.update($routeParams.code).url, objProj).success(function(data) {	
+		httpUpdate();
+
+		//---
+
+		function httpUpdate() {
+			return isChefProjet ? projectUpdate() : parametersUpdates();
+		}
+
+		function projectUpdate() {
+			return $http.put(jsRoutes.controllers.projects.api.Projects.update($routeParams.code).url, objProj).then(onSuccess, onError);
+		}
+
+		function parametersUpdates() {
+			return $q.all([bioinformaticParametersUpdateWorkflow(), systemParametersUpdate(), nbCharactersInSampleCodeUpdate()]).then(onSuccess, onError);
+		}
+
+		function bioinformaticParametersUpdateWorkflow() {
+			return analysisTypesUpdate().then(bioinformaticParametersUpdate);
+		}
+
+		function bioinformaticParametersUpdate() {
+			return $http.put(jsRoutes.controllers.projects.api.ProjectBioinformaticParameters.update($routeParams.code).url, objProj.bioinformaticParameters);
+		}
+
+		function systemParametersUpdate() {
+			return $http.put(jsRoutes.controllers.projects.api.ProjectSystemParameters.update($routeParams.code).url, objProj.systemParameters);
+		}
+
+		function nbCharactersInSampleCodeUpdate() {
+			return $http.put(jsRoutes.controllers.projects.api.ProjectNbCharsInSamples.update($routeParams.code).url, objProj.nbCharactersInSampleCode);
+		}
+
+		function analysisTypesUpdate(){
+			return isAnalysisTypes() ? setAnalysisTypes() : unsetAnalysisTypes();
+		}
+
+		function isAnalysisTypes() {
+			var analysisTypes = objProj.properties.analysisTypes;
+			return analysisTypes !== undefined && analysisTypes.value !== undefined && analysisTypes.value.length>0;
+		}
+
+		function setAnalysisTypes() {
+			return $http.head(jsRoutes.controllers.projects.api.ProjectAnalysisTypes.head($routeParams.code).url).then(function(){
+				return $http.put(jsRoutes.controllers.projects.api.ProjectAnalysisTypes.update($routeParams.code).url, objProj.properties.analysisTypes);
+			}, function(){
+				return $http.post(jsRoutes.controllers.projects.api.ProjectAnalysisTypes.save($routeParams.code).url, objProj.properties.analysisTypes);
+			});
+		}
+
+		function unsetAnalysisTypes() {
+			return $http.head(jsRoutes.controllers.projects.api.ProjectAnalysisTypes.head($routeParams.code).url).then(function(){
+				return $http.delete(jsRoutes.controllers.projects.api.ProjectAnalysisTypes.delete($routeParams.code).url);
+			}, function(){
+				return $q.defer();
+			});
+		}
+
+		function onSuccess(){
 			$scope.messages.clear();
 			$scope.messages.setSuccess("save");
 			mainService.stopEditMode();
 			updateData(true);
+		}
 
-
-		}).error(function(data, status, headers, config){
+		function onError(response) {
 			$scope.messages.setError("save");
-			$scope.messages.setDetails(data);
-		});
+			$scope.messages.setDetails(response.data);
+		}
 	};
 
 	$scope.cancel = function(){
@@ -285,6 +369,10 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$sce', '$http', '$r
 		mainService.put('projectActiveTab', value);
 	};
 
+	$scope.removeDT = function() {
+		delete $scope.project.properties.dt;
+	};
+
 	$scope.toggleIsShowInformation=function(){
 		console.log ('toggleIsShowInformation');
 		if ( $scope.isShowInformation===false) { $scope.isShowInformation=true; }
@@ -308,7 +396,10 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$sce', '$http', '$r
 		$scope.lists.refresh.states({objectTypeCode:"Project"});
 		$scope.lists.refresh.projectTypes();
 		$scope.lists.refresh.projectCategories();
-		$scope.lists.refresh.umbrellaProjects();
+		
+		if ("true" == isCNSInstitute) {
+			$scope.lists.refresh.umbrellaProjects();
+		}
 		$scope.mainService = mainService;
 		$scope.mainService.stopEditMode();
 		$scope.isGroupAdminMember=false;
@@ -317,11 +408,15 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$sce', '$http', '$r
 		$scope.listLabos=undefined;
 		$scope.isShowInformation=false;
 
+		$scope.searchService = projectsSearchService;	
+
+		$scope.localEditModes = {};
+
 		$http.get(jsRoutes.controllers.projects.api.Projects.get($routeParams.code).url).success(function(data) {
 			$scope.project = data;	
 
 
-			if (isCNSInstitute) {
+			if ("true" == isCNSInstitute) {
 				$http.get(jsRoutes.controllers.projects.api.UmbrellaProjects.get($scope.project.umbrellaProjectCode).url).success(function(umbrellaProject) {
 					$scope.umbrellaProjectName = umbrellaProject.name;
 				});
@@ -433,7 +528,7 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$sce', '$http', '$r
 			});
 		}
 	};
-	
+
 	$scope.remove = function(comment, index){
 		if($scope.isCreationMode()){
 			$scope.currentComment = {comment:undefined};

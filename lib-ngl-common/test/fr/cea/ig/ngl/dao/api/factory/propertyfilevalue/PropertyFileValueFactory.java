@@ -24,6 +24,14 @@ public class PropertyFileValueFactory {
 		return pfv;
 	}
 	
+	/**
+	 * getRandomPropertyFileValue()
+	 * 
+	 * @param fullname
+	 * @param text
+	 * 
+	 * @return
+	 */
 	public static PropertyFileValue getRandomPropertyFileValue(String fullname, String text) {
 		PropertyFileValue pfv = getRandomPropertyFileValue(fullname);
 		pfv.value = text.getBytes();

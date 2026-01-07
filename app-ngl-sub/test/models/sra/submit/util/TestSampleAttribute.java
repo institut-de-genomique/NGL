@@ -3,8 +3,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 import org.junit.Test;
 
+import services.sra.SraValidationHelper;
 import validation.ContextValidation;
-import validation.sra.SraValidationHelper;
 
 public class TestSampleAttribute {
 	
@@ -12,14 +12,14 @@ public class TestSampleAttribute {
 		String user = "william";
 		String nameField = "attributes";
 		ContextValidation contextValidation = ContextValidation.createUndefinedContext(user);
-		assertTrue(SraValidationHelper.newValidateAttributesRequired(contextValidation, nameField, attributesValue));
+		assertTrue(SraValidationHelper.validateSampleAttributesRequired(contextValidation, nameField, attributesValue));
 	}
 	
 	public void assertBadAttributes(String attributesValue) {
 		String user = "william";
 		String nameField = "attributes";
 		ContextValidation contextValidation = ContextValidation.createUndefinedContext(user);
-		assertFalse(SraValidationHelper.newValidateAttributesRequired(contextValidation, nameField, attributesValue));	
+		assertFalse(SraValidationHelper.validateSampleAttributesRequired(contextValidation, nameField, attributesValue));	
 	}
 	
 	@Test

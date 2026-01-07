@@ -362,7 +362,7 @@ angular.module('home').controller('BatchPoolCtrl',['$scope', '$http','$parse', '
 
 		atmService.newAtomicTransfertMethod =  function(line, column){
 			var getLine = function(line){
-				//TEST correction FDS
+				// NGL-5093 : problème pour terminer l'expérience quand mélange de puits et de plaques non traité car pas de plaque en entrée dans cette expérience
 				if ($scope.experiment.instrument.outContainerSupportCategoryCode === "tube"){
 					return 1; // ligne et colonne=1 pour un tube
 				} else {

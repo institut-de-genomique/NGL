@@ -8,7 +8,7 @@ angular.module('home').controller('NanoporeBarcodeLigationCtrl',['$scope', '$par
 			columns:[			  
 					 {
 			        	 "header":Messages("containers.table.code"),
-			        	 "property":"inputContainer.support.code",
+			        	 "property":"inputContainer.code",
 			        	 "order":true,
 						 "edit":false,
 						 "hide":true,

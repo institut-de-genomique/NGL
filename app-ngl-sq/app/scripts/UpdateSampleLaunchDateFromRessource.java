@@ -162,7 +162,9 @@ public class UpdateSampleLaunchDateFromRessource extends ScriptWithExcelBody {
 			sampleList.forEach(sample -> {
 				sample.setProcessesToLaunchDate(new Date());
 
-				MongoDBDAO.update(InstanceConstants.SAMPLE_COLL_NAME, sample);
+				if (sample.getProcessesToLaunchDate() != null) {
+					MongoDBDAO.update(InstanceConstants.SAMPLE_COLL_NAME, sample);
+				}
 			});
 		} else {
 			println("Le code du process donné n'existe pas (code : '" + processCode + "').");
@@ -194,7 +196,9 @@ public class UpdateSampleLaunchDateFromRessource extends ScriptWithExcelBody {
 			sampleList.forEach(s -> {
 				s.setProcessesToLaunchDate(new Date());
 
-				MongoDBDAO.update(InstanceConstants.SAMPLE_COLL_NAME, s);
+				if (s.getProcessesToLaunchDate() != null) {
+					MongoDBDAO.update(InstanceConstants.SAMPLE_COLL_NAME, s);
+				}
 			});
 		} else {
 			println("Le code du readset donné n'existe pas (code : '" + readsetCode + "').");
@@ -230,7 +234,9 @@ public class UpdateSampleLaunchDateFromRessource extends ScriptWithExcelBody {
 			sampleList.forEach(sample -> {
 				sample.setProcessesToLaunchDate(new Date());
 
-				MongoDBDAO.update(InstanceConstants.SAMPLE_COLL_NAME, sample);
+				if (sample.getProcessesToLaunchDate() != null) {
+					MongoDBDAO.update(InstanceConstants.SAMPLE_COLL_NAME, sample);
+				}
 			});
 		} else {
 			println("Le code de l'expérience donnée n'existe pas (code : '" + experimentCode + "').");

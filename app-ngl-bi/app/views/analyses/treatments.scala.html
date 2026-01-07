@@ -29,6 +29,16 @@
 	@_treatments.wholeGenome()		
 }
 
+@*** NGL-4588 ***@
+@if(code == "whole-genome-ont") {
+	@_treatments.wholeGenomeONT()		
+}
+
+@*** NGL-5202 ***@
+@if(code == "whole-genome-pacbio") {
+	@_treatments.wholeGenomePacbio()		
+}
+
 @if(code == "ampliconassignation-ba") {
 	@_treatments.assignationBA()		
 }
@@ -40,4 +50,43 @@
 @if(code == "rna-seq") {
 	@_treatments.rnaSeq()		
 }
+
+
+@if(code == "reads-assembly-ba") {
+	@_treatments.readsAssemblyBA()	
+}
+@if(code == "assembly-polishing-ba") {
+	@_treatments.assemblyPolishingBA()		
+}
+@if(code == "assembly-decontamination-ba") {
+	@_treatments.assemblyDecontaminationBA()		
+}
+@if(code == "assembly-quality-ba") {
+	@_treatments.assemblyQualityBA()		
+}
+@if(code == "genome-contigs-scaffolding-ba") {
+	@_treatments.genomeContigsScaffoldingBA()		
+}
+@if(code == "hic-libqc-ba") {
+	@_treatments.hicLibqc()		
+}
+@if(code == "assembly-decontamined-quality-ba"){
+	@_treatments.assemblyDecontaminedQualityBA()	
+}
+@if(code == "assembly-haplotypic-duplication-purge-ba"){
+	@_treatments.assemblyHaplotypicDuplicationPurgeBA()	
+}
+@if(code == "assembly-purged-quality-ba"){
+	@_treatments.assemblyPurgedQualityBA()	
+}
+@if(code == "scaffolds-quality-ba"){
+	@_treatments.scaffoldsQualityBA()
+}
+@if(code == "manual-scaffolding-curation-ba"){
+	@_treatments.manualScaffoldingCurationBA()
+}
+@if(code == "reviewing-ba"){
+	@_treatments.reviewing()
+}
+
 

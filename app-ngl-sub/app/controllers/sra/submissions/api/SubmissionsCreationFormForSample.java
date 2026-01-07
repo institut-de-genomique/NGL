@@ -1,0 +1,19 @@
+package controllers.sra.submissions.api;
+
+import java.util.List;
+
+import views.components.datatable.DatatableForm;
+
+// classe utilisee pour la recuperation des variables du formulaire samples/create.scala.html
+// attention à mettre les memes noms ici et dans le formulaire create.scala.html
+public class SubmissionsCreationFormForSample  extends DatatableForm {
+	public String projectCode; // meme nom que dans la vue (view) et les services .js
+	public int    taxonId;
+	public String refCollab;
+	public String title;
+	public String description;
+	public String anonymizedName;
+	public String attributes;
+    public String dropBox;
+
+}

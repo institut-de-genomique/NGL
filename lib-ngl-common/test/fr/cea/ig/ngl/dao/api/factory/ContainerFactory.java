@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import models.laboratory.common.instance.State;
+import models.laboratory.common.instance.property.PropertySingleValue;
 import models.laboratory.container.instance.Container;
 import models.laboratory.container.instance.Content;
 import models.laboratory.container.instance.LocationOnContainerSupport;
@@ -55,6 +56,15 @@ public final class ContainerFactory {
 		contents.add(content);
 
 		container.contents = contents;
+		
+		return container;
+	}
+	
+	public static Container getRandomFilledContainer(String stateName) {
+		Container container = getRandomContainer(stateName);
+		container.concentration = new PropertySingleValue(5, "ng/µL");
+		container.quantity = new PropertySingleValue(5, "ng");
+		container.volume = new PropertySingleValue(1, "µL");
 		
 		return container;
 	}

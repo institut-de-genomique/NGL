@@ -14,7 +14,7 @@ public class Output2 extends AbstractOutput {
 	public File generateFile(Experiment experiment, ContextValidation contextValidation) throws Exception {
 		//		String type = (String)contextValidation.getObject("type");
 		String content = null;
-		Boolean isPlaque = "96-well-plate".equals(experiment.instrument.inContainerSupportCategoryCode);
+		// Boolean isPlaque = "96-well-plate".equals(experiment.instrument.inContainerSupportCategoryCode);
 
 		//Le type des entrées et sorties peut être tube / plaque ou les 2
 

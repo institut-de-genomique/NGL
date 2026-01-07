@@ -25,7 +25,7 @@ import validation.ContextValidation;
 
 public class AnalyzesRawDatas extends DocumentController<Analysis> {
  
-	private static final play.Logger.ALogger logger = play.Logger.of(AnalyzesRawDatas.class);
+	// private static final play.Logger.ALogger logger = play.Logger.of(AnalyzesRawDatas.class);
 
 	final Form<AnalyzesSearchForm>    analyzesSearchForm;
 	final Form<RawData>               rawDataForm;

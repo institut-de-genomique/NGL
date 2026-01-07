@@ -10,6 +10,7 @@ import fr.cea.ig.play.IGBodyParsers;
 import models.laboratory.common.instance.property.PropertyFileValue;
 import models.laboratory.reception.instance.ReceptionConfiguration;
 import models.utils.InstanceConstants;
+import play.Logger;
 import play.data.Form;
 import play.mvc.BodyParser;
 import play.mvc.Result;
@@ -45,7 +46,7 @@ public class Receptions extends TPLCommonController {
 		if (pfv == null) 
 			return badRequest("missing file");
 		ContextValidation contextValidation = ContextValidation.createUndefinedContext(getCurrentUser(), filledForm);
-		try {				
+		try {		
 			FileService fileService = receptionFileService.getFileService(configuration, pfv, contextValidation);
 			fileService.analyse();
 		} catch (Throwable e) {

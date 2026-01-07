@@ -25,7 +25,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 	@JsonSubTypes.Type(value = CommentsFieldConfiguration.class,        name = AbstractFieldConfiguration.commentsType),
 	@JsonSubTypes.Type(value = ContentsFieldConfiguration.class,        name = AbstractFieldConfiguration.contentsType),
 	@JsonSubTypes.Type(value = QualityControlResultConfiguration.class, name = AbstractFieldConfiguration.qualityControlResultsType),
-	@JsonSubTypes.Type(value = TagExcelFieldConfiguration.class,        name = AbstractFieldConfiguration.tagExcelType)
+	@JsonSubTypes.Type(value = TagExcelFieldConfiguration.class,        name = AbstractFieldConfiguration.tagExcelType),
+	@JsonSubTypes.Type(value = TagExcelLightFieldConfiguration.class,   name = AbstractFieldConfiguration.tagExcelLightType)
 })
 public abstract class AbstractFieldConfiguration {
 
@@ -39,6 +40,7 @@ public abstract class AbstractFieldConfiguration {
 	public static final String contentsType              = "contents";
 	public static final String qualityControlResultsType = "qualityControlResults";
 	public static final String tagExcelType              = "tagExcel";
+	public static final String tagExcelLightType              = "tagExcelLight";
 	
 	public static final String deleteFieldValue          = "A_EFFACER";
 

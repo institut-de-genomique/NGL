@@ -5,15 +5,19 @@ import static fr.cea.ig.play.IGGlobals.configuration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.mongojack.DBQuery;
 
 import fr.cea.ig.MongoDBDAO;
 import fr.cea.ig.lfw.utils.Iterables;
+import models.laboratory.reception.instance.ReceptionConfiguration.Action;
 import models.laboratory.sample.instance.Sample;
 import models.utils.InstanceConstants;
 import rules.services.RulesServices6;
+import validation.ContextValidation;
 
 public class SampleHelper {
 	
@@ -126,11 +130,23 @@ public class SampleHelper {
 		executeRules(sample, "sampleCreation");
 	}
 	
-	private static void executeRules(Sample sample, String rulesName) {
-		ArrayList<Object> facts = new ArrayList<>();
+	private static void executeRules(Sample sample, String rulesName, Object...objects) {
+		List<Object> facts = new ArrayList<>();
 		facts.add(sample);
+		Arrays.stream(objects).forEach(facts::add);
 		RulesServices6.getInstance().callRulesWithGettingFacts(configuration().getString("rules.key"), rulesName, facts);
 	}
+	
+	public static void executeSampleCreationRules(Sample sample, ContextValidation ctx) {
+		executeRules(sample, "sampleCreation", ctx);
+	}
+	
+	public static void executeSampleUpdateRules(String configImporTypeCode, Sample sample, ContextValidation ctx) {
+		executeRules(sample, "validations", ctx, Action.update, configImporTypeCode);
+	}
+
+	
+
 
 	/**
 	 * Set of parent samples of a sample.

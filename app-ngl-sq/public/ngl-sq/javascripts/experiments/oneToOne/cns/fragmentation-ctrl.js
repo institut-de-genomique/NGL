@@ -46,7 +46,15 @@ angular.module('home').controller('FragmentationCtrl',['$scope','$http', '$parse
 					        	 "render":"<div list-resize='cellValue | unique | codes:\"type\"' list-resize-min-size='3'>",
 					        	 "position":4,
 					        	 "extraHeaders":{0:Messages("experiments.inputs")}
-					         },
+					         }, {
+								"header":Messages("containers.table.storageCodeIn"),			        	 
+								"property":"inputContainer.support.storageCode",
+								"type":"text",
+								"order":true,
+								"hide":true,
+								"position":4.6,
+								"extraHeaders":{0:Messages("experiments.inputs")}
+							},	
 					         {
 					        	 "header":Messages("containers.table.concentration"),
 					        	 "property":"inputContainerUsed.concentration.value",
@@ -286,11 +294,33 @@ angular.module('home').controller('FragmentationCtrl',['$scope','$http', '$parse
 		}		
 	};
 
-	$scope.$on('finishExperiment', function(event, e){ 
-		$scope.atmService.data.displayResult.map(function(data) { return data.data; }).forEach(function(data) {
+	var copyFrgInputQuantity = function(data) {
+		var frgInputQuantity = data.inputContainerUsed.experimentProperties.frgInputQuantity;
+		if(frgInputQuantity) {
 			// copy 'Qté réelle engagée ds FRG' to 'Quantité (ng)'
 			data.outputContainerUsed.quantity = data.inputContainerUsed.experimentProperties.frgInputQuantity;
 			data.outputContainerUsed.quantity.unit = $scope.atmService.defaultOutputUnit.quantity;
+		}
+	}
+
+	var computeOutputConcentration = function(outputContainerUsed) {
+		if(isQuantifiable(outputContainerUsed)) computeConcentration(outputContainerUsed)
+
+		//---
+
+		function isQuantifiable(container) {
+			return container.quantity && container.quantity.value && container.volume && container.volume.value && container.volume.value > 0;
+		}
+
+		function computeConcentration(container) {
+			container.concentration.value = container.quantity.value / container.volume.value;
+		}
+	}
+
+	$scope.$on('finishExperiment', function(event, e){ 
+		$scope.atmService.data.displayResult.map(function(data) { return data.data; }).forEach(function(data) {
+			copyFrgInputQuantity(data);
+			computeOutputConcentration(data.outputContainerUsed);
 		});	
 	});
 
@@ -499,7 +529,7 @@ angular.module('home').controller('FragmentationCtrl',['$scope','$http', '$parse
 	} else {
 		datatableConfig.columns.push({
 			"header" : Messages("containers.table.code"),
-			"property" : "inputContainer.support.code",
+			"property" : "inputContainer.code",
 			"order" : true,
 			"edit" : false,
 			"hide" : true,
@@ -638,7 +668,7 @@ angular.module('home').controller('FragmentationCtrl',['$scope','$http', '$parse
 		$scope.fileUtils.generateSampleSheet({"type":"normalisation"});
 	};
 	
-	if($scope.experiment.instrument.typeCode === "biomek-fx-and-covaris-e220"){
+	if($scope.experiment.instrument.typeCode === "biomek-fx-and-covaris-e220" || $scope.experiment.instrument.typeCode === "firefly-and-pixul" || $scope.experiment.instrument.typeCode === "firefly-and-covaris-e220" || $scope.experiment.instrument.typeCode === "biomek-fx-and-pixul"){
 		
 		$scope.setAdditionnalButtons([{
 			isDisabled : function(){return $scope.isNewState();} ,

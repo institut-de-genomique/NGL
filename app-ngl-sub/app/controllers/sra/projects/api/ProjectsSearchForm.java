@@ -32,6 +32,7 @@ public class ProjectsSearchForm extends DBObjectListForm<Project> implements ISr
 	public List<String> stateCodes = new ArrayList<>(); 
 	public List<String> pseudoStateCodes = new ArrayList<>();
 	
+	
 	@Override
 	public List<String> getStateCodes() {
 		return this.stateCodes;
@@ -69,7 +70,7 @@ public class ProjectsSearchForm extends DBObjectListForm<Project> implements ISr
 			// l'ensemble des valeurs correspondent à l'ensemble des valeurs du thisulaire independamment de l'ordre.
 		}
 		if(StringUtils.isNotBlank(this.createUser)) {
-			queries.add(DBQuery.in("traceInthisation.createUser", this.createUser));
+			queries.add(DBQuery.in("traceInformation.createUser", this.createUser));
 		}
 		//logger.debug("this.submissionProjectType = " +this.submissionProjectType);
 		if(StringUtils.isNotBlank(this.submissionProjectType)) {

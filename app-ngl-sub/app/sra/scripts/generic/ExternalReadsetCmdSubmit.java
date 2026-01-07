@@ -16,9 +16,9 @@ import fr.cea.ig.ngl.dao.sra.ReadsetDAO;
 import models.laboratory.run.instance.ReadSet;
 import models.sra.submit.sra.instance.RawData;
 import models.sra.submit.sra.instance.Run;
-import models.sra.submit.util.SraException;
-import services.CreateServices;
-import services.Tools;
+import services.sra.SraException;
+import sra.services.CreateServices;
+import sra.services.Tools;
 
 
 /*
@@ -38,14 +38,14 @@ import services.Tools;
 public class ExternalReadsetCmdSubmit extends Script<ExternalReadsetCmdSubmit.MyParams> {
 	//private static final play.Logger.ALogger logger = play.Logger.of(ReloadMd5.class);
 	private final ReadSetsDAO           laboReadSetDAO; // DAO de la collection Illumina
-	private final ReadsetDAO            readsetDAO;     // DAO de la collection sra.readset
+	// private final ReadsetDAO            readsetDAO;     // DAO de la collection sra.readset
 	private final CreateServices        createServices;
 	@Inject
 	public ExternalReadsetCmdSubmit(ReadSetsDAO      	laboReadSetDAO ,
 						   ReadsetDAO           readsetDAO,
 						   CreateServices       createServices) {
 		this.laboReadSetDAO   = laboReadSetDAO;
-		this.readsetDAO       = readsetDAO;
+		// this.readsetDAO       = readsetDAO;
 		this.createServices   = createServices;
 
 

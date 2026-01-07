@@ -36,11 +36,14 @@
 @main("index.title", menu_("home"), scripts) {
 	<div  class="row">
 		<div  class="col-md-12 col-lg-12">
-		   <div class="jumbotron">
-		        <h1>@Messages("home.h10.header",user)</h1>
-		        <p>@Messages("home.p.comment")</p>
-		   </div>  
-		</div> 
+			<!--  NGL-4285  couleur differente PROD/NOPROD... ne pas le faire pour le bandeau d'accueil
+			<div class="jumbotron @("noprod".when( "PROD" != ctx.nglConfig().nglEnv() ))">
+			-->
+			<div class="jumbotron">	
+				<h1>@Messages("home.h10.header",user)</h1>
+				<p>@Messages("home.p.comment")</p>
+			</div> 
+		</div>  
     </div>
     <div ng-controller="SearchCtrl" ng-app="home">
       <div  class="row">

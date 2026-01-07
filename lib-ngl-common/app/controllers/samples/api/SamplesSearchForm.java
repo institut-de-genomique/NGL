@@ -12,6 +12,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.mongojack.DBQuery;
+import org.mongojack.DBQuery.Query;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -41,6 +42,10 @@ public class SamplesSearchForm extends DBObjectListForm<Sample> {
 	public Map<String, Boolean> existingFields;
 	public String referenceCollabRegex;
 	public List<String> referenceCollabs;
+	public List<String> umbrellaCodes;
+
+	public String importTypeCode; 
+	public Set<String> importTypeCodes;
 	
 	public String existingTransformationTypeCode;
 	public String notExistingTransformationTypeCode;
@@ -53,6 +58,14 @@ public class SamplesSearchForm extends DBObjectListForm<Sample> {
 
 	public String taxonCode;
 	public List<String> taxonCodes;
+	
+	public String lastrResolutionCode;
+	public List<String> lastResolutionCodes;
+	
+	public List<String> resolutionCodes;
+	public Date fromResolutionDate;
+	public Date toResolutionDate;
+	public List<String> resolutionUsers;
 
 	public Map<String, List<String>> experimentProperties = new HashMap<>();
 
@@ -85,8 +98,14 @@ public class SamplesSearchForm extends DBObjectListForm<Sample> {
 			queryElts.add(DBQuery.in("typeCode", typeCodes));
 		}
 
+		if(CollectionUtils.isNotEmpty(this.importTypeCodes)){
+			queryElts.add(DBQuery.in("importTypeCode", this.importTypeCodes));
+		}else if(StringUtils.isNotBlank(this.importTypeCode)){
+			queryElts.add(DBQuery.is("importTypeCode", this.importTypeCode));
+		}
+
 		if(StringUtils.isNotBlank(referenceCollabRegex)){
-			queryElts.add(DBQuery.regex("referenceCollab", Pattern.compile(referenceCollabRegex)));
+			queryElts.add(DBQuery.regex("referenceCollab", Pattern.compile(referenceCollabRegex,Pattern.CASE_INSENSITIVE)));
 		}
 		if(CollectionUtils.isNotEmpty(referenceCollabs)){
 			queryElts.add(DBQuery.in("referenceCollab", referenceCollabs));
@@ -144,6 +163,13 @@ public class SamplesSearchForm extends DBObjectListForm<Sample> {
 		if(CollectionUtils.isNotEmpty(taxonCodes)){
 			queryElts.add(DBQuery.in("taxonCode", taxonCodes));
 		}
+		
+		if(StringUtils.isNotBlank(lastrResolutionCode)){
+			queryElts.add(DBQuery.in("resolutionCodes", lastrResolutionCode));
+		}
+		if(CollectionUtils.isNotEmpty(lastResolutionCodes)){
+			queryElts.add(DBQuery.in("resolutionCodes", lastResolutionCodes));
+		}
 
 		if(StringUtils.isNotBlank(ncbiScientificNameRegex)){
 			queryElts.add(DBQuery.regex("ncbiScientificName", Pattern.compile(ncbiScientificNameRegex)));
@@ -188,6 +214,10 @@ public class SamplesSearchForm extends DBObjectListForm<Sample> {
 		if(CollectionUtils.isNotEmpty(experimentProtocolCodes)){
 			queryElts.add(DBQuery.in("processes.experiments.protocolCode",experimentProtocolCodes));
 		}
+		
+		if(isResolutionHistoryFilter()) {
+			this.addResolutionHistoryQuery(queryElts);
+		}
 
 		queryElts.addAll(NGLControllerHelper.generateQueriesForProperties(properties,Level.CODE.Sample, "properties"));
 		queryElts.addAll(NGLControllerHelper.generateQueriesForProperties(experimentProperties,Level.CODE.Experiment, "processes.experiments.properties"));
@@ -204,6 +234,32 @@ public class SamplesSearchForm extends DBObjectListForm<Sample> {
 		if (queryElts.size() == 0)
 			return  DBQuery.empty();
 		return DBQuery.and(queryElts.toArray(new DBQuery.Query[queryElts.size()]));
+	}
+
+	private boolean isResolutionHistoryFilter() {
+		return CollectionUtils.isNotEmpty(this.resolutionCodes) || this.fromResolutionDate != null || this.toResolutionDate != null || CollectionUtils.isNotEmpty(this.resolutionUsers);
+	}
+	
+	private void addResolutionHistoryQuery(List<Query> queryElts) {
+		List<Query> elemMatches = new ArrayList<>(4);
+		
+		if(CollectionUtils.isNotEmpty(this.resolutionCodes)) {
+			elemMatches.add(DBQuery.in("resolutionCodes", this.resolutionCodes));
+		}
+		
+		if(this.fromResolutionDate != null){
+			elemMatches.add(DBQuery.greaterThanEquals("date", this.fromResolutionDate));
+	    }
+		
+		if(this.toResolutionDate != null){
+			elemMatches.add(DBQuery.lessThan("date", DateUtils.addDays(this.toResolutionDate, 1)));
+	    }
+		
+		if(CollectionUtils.isNotEmpty(this.resolutionUsers)) {
+			elemMatches.add(DBQuery.in("user", this.resolutionUsers));
+		}
+		
+		queryElts.add(DBQuery.elemMatch("resolutionHistory", DBQuery.and(elemMatches.toArray(new Query[elemMatches.size()]))));
 	}
 	
 }

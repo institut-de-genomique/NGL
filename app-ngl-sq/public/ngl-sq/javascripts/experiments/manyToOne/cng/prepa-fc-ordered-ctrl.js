@@ -3,7 +3,7 @@ angular.module('home').controller('CNGPrepaFlowcellOrderedCtrl',['$scope', '$par
 	
 	//surcharge default/tubes-to-flowcell-ctrl.js !!!
 	var atmToSingleDatatable = $scope.atmService.$atmToSingleDatatable;
-	
+
 	// Pour le datatable dans l'onglet "feuille de calcul"
 	var columns = [  
 	             {
@@ -110,10 +110,25 @@ angular.module('home').controller('CNGPrepaFlowcellOrderedCtrl',['$scope', '$par
 		        	 "position":500,
 		        	 "extraHeaders":{0:"prep FC"}
 		         }
-		         ];
+	];
 	
-	// 25/04/2017  si utilisation du janus alors il ne faut aussi afficher la colonne de la plaque
-	if($scope.experiment.instrument.inContainerSupportCategoryCode !== "tube"){
+	// 09/01/2024 !! il peut y avoir un mix tubes/plates
+	var tmp = [];
+	if(!$scope.isCreationMode()){
+		tmp = $scope.$eval("atomicTransfertMethods|flatArray:'inputContainerUseds'|getArray:'locationOnContainerSupport.categoryCode'|unique",$scope.experiment);			
+	}else{
+		tmp = $scope.$eval("getBasket().get()|getArray:'support.categoryCode'|unique",mainService);
+	}
+	var supportCategoryCode = undefined;
+	if(tmp.length === 1){
+		$scope.supportCategoryCode = tmp[0];
+	}else{
+		$scope.supportCategoryCode = "mixte";
+	}
+
+	// 25/04/2017  si utilisation du janus alors il faut aussi afficher la colonne de la plaque
+	//if($scope.experiment.instrument.inContainerSupportCategoryCode !== "tube"){
+	if ($scope.supportCategoryCode !== "tube"){
 		columns.push(
 			 {
 	        	 "header":Messages("containers.table.well"),
@@ -204,7 +219,7 @@ angular.module('home').controller('CNGPrepaFlowcellOrderedCtrl',['$scope', '$par
 				
 				"outputContainerUsed.experimentProperties.finalVolume.value":90
 			},
-			// NGL-02/08/2019 NGL-2634  TODO
+			// NGL-2634 02/08/2019 
 			"NovaSeq 6000 / S2 / XP": {
 				"inputContainerUsed.experimentProperties.inputVolume2.value":22,
 				"inputContainerUsed.experimentProperties.NaOHVolume.value":5,
@@ -216,7 +231,7 @@ angular.module('home').controller('CNGPrepaFlowcellOrderedCtrl',['$scope', '$par
 				
 				"outputContainerUsed.experimentProperties.finalVolume.value":110
 			},
-			// NGL-02/08/2019 NGL-2634 TODO
+			// NGL-2634 02/08/2019 
 			"NovaSeq 6000 / S4 / XP": {
 				"inputContainerUsed.experimentProperties.inputVolume2.value":30,
 				"inputContainerUsed.experimentProperties.NaOHVolume.value":7,
@@ -228,9 +243,44 @@ angular.module('home').controller('CNGPrepaFlowcellOrderedCtrl',['$scope', '$par
 				
 				"outputContainerUsed.experimentProperties.finalVolume.value":150
 			},
-	
+			// NGL-4421 NovaSeq Xplus
+			"NovaSeq Xplus / 10B": {
+				//"inputContainerUsed.experimentProperties.inputVolume2.value":........ l'input volume va etre calculé
+				"inputContainerUsed.experimentProperties.NaOHVolume.value":8.5,
+				"inputContainerUsed.experimentProperties.NaOHConcentration.value":"0.2N",				
+				"inputContainerUsed.experimentProperties.trisHCLVolume.value":0,              // pas utilisé; historique 
+				"inputContainerUsed.experimentProperties.trisHCLConcentration.value":0,       // pas utilisé; historique 
+				"inputContainerUsed.experimentProperties.trisHCLConcentration.value.model":0, // pas utilisé; historique
+				"inputContainerUsed.experimentProperties.masterEPXVolume.value":127.5,        // est maintenant affiché "vol Master mix"
+
+				"outputContainerUsed.experimentProperties.finalVolume.value":170
+			},
+			"NovaSeq Xplus / 25B": {
+				//"inputContainerUsed.experimentProperties.inputVolume2.value":........ l'input volume va etre calculé
+				"inputContainerUsed.experimentProperties.NaOHVolume.value":14,
+				"inputContainerUsed.experimentProperties.NaOHConcentration.value":"0.2N",
+				"inputContainerUsed.experimentProperties.trisHCLVolume.value":0,              // pas utilisé; historique 
+				"inputContainerUsed.experimentProperties.trisHCLConcentration.value":0,       // pas utilisé; historique 
+				"inputContainerUsed.experimentProperties.trisHCLConcentration.value.model":0, // pas utilisé; historique
+				"inputContainerUsed.experimentProperties.masterEPXVolume.value":210,          // est maintenant affiché "vol Master mix"
+
+				"outputContainerUsed.experimentProperties.finalVolume.value":280
+			},
+			// NGL-4723 arrivée  1.5B. volumes identiques a la 10B
+			"NovaSeq Xplus / 1.5B": {
+				//"inputContainerUsed.experimentProperties.inputVolume2.value":........ l'input volume va etre calculé
+				"inputContainerUsed.experimentProperties.NaOHVolume.value":8.5,
+				"inputContainerUsed.experimentProperties.NaOHConcentration.value":"0.2N",
+				"inputContainerUsed.experimentProperties.trisHCLVolume.value":0,              // pas utilisé; historique 
+				"inputContainerUsed.experimentProperties.trisHCLConcentration.value":0,       // pas utilisé; historique 
+				"inputContainerUsed.experimentProperties.trisHCLConcentration.value.model":0, // pas utilisé; historique
+				"inputContainerUsed.experimentProperties.masterEPXVolume.value":127.5,        // est maintenant affiché "vol Master mix"
+
+				"outputContainerUsed.experimentProperties.finalVolume.value":170
+			}
 	};
-	
+
+	// appelé ?????? fois !!!!!
 	var getDefaultValueForWorkSheet = function(line, col){
 		//inputVolume2
 		//NaOHVolume
@@ -238,11 +288,15 @@ angular.module('home').controller('CNGPrepaFlowcellOrderedCtrl',['$scope', '$par
 		//trisHCLVolume
 		//trisHCLConcentration 
 		//masterEPXVolume
+		//final Volume
+		//console.log('get default value for '+  col.property);
 		
 		var worksheet = $parse("experimentProperties.sequencingType.value")($scope.experiment);
 		
 		if(worksheet && defaultValues[worksheet][col.property]){
-			return defaultValues[worksheet][col.property];
+			var def=defaultValues[worksheet][col.property];
+			//console.log( '3> def='+ def);
+			return def;
 		}else {
 			return undefined;
 		}
@@ -252,21 +306,21 @@ angular.module('home').controller('CNGPrepaFlowcellOrderedCtrl',['$scope', '$par
 	
 	// appellée pour chacune des propriétés des outputcontainerUsed
 	atmToSingleDatatable.convertOutputPropertiesToDatatableColumn = function(property, pName){
-		//console.log ('output property.code='+ property.code +'...'+pName);
+		console.log ('0> output property.code='+ property.code +'...'+pName);
 		return   this.$commonATM.convertSinglePropertyToDatatableColumn(property,"outputContainerUsed."+pName+".",{"0":"prep FC"});
 	};
 	
-    // appellée pour chacune des propriétés des inputcontainerUsed (inputVolume2, NaOHVolume,NaOHCocentration...)
-    // SUPSQCNG610=> probleme avec propriete source !!! ajout pName comme pour les propriétés des outputcontainerUsed
+    // appellée pour chacune des propriétés des inputcontainerUsed (inputVolume2, NaOHVolume, NaOHConcentration...)
+    // SUPSQCNG610=>  propriete source:  additionnal header "lib normalisée" et non "Dénaturation - neutralisation"
     atmToSingleDatatable.convertInputPropertiesToDatatableColumn = function(property, pName){
-        //console.log ('input property.code='+ property.code );
+        console.log ('1> input property.code='+ property.code +'...'+pName );
+
         if(property.code === "source"){
             var column = this.$commonATM.convertSinglePropertyToDatatableColumn(property,"inputContainerUsed."+pName+".",{"0":"lib normalisée"});
         }else{
-        	var column = this.$commonATM.convertSinglePropertyToDatatableColumn(property,"inputContainerUsed."+pName+".",{"0":"Dénaturation - neutralisation"});
-        }    
-    	column.defaultValues = getDefaultValueForWorkSheet;
-       
+        		var column = this.$commonATM.convertSinglePropertyToDatatableColumn(property,"inputContainerUsed."+pName+".",{"0":"Dénaturation - neutralisation"});
+				column.defaultValues = getDefaultValueForWorkSheet;
+		}
         return column;
     }
 	
@@ -366,13 +420,13 @@ angular.module('home').controller('CNGPrepaFlowcellOrderedCtrl',['$scope', '$par
 	};
 	
 	// 25/10/2017 FDS ajout pour l'import du fichier Mettler
-	// 31/01/2018 pas de fichier Mettler pour les cbot interne des novaseq; 02/01/2020 Arrivee BossaNova=> ! isInstrumentNovaSeq6000())
+	// 31/01/2018 pas de fichier Mettler pour les cbots interne des NovaSeq6000
+	// 24/10/2023 pas de fichier Mettler pour les cbots interne des NovaSeqXPlus
 	$scope.buttonMettler = {
 		isShow:function(){
 			// visible meme si terminé, mais seulement en mode edition
 			//return ( ($scope.isInProgressState()||$scope.isFinishState()) && $scope.isEditMode() ); // MARCHE PAS: editMode pas vu ici
-			// 13/11/2019 NGL-2752 ajout SuperNova; 02/01/2020 Arrivee BossaNova=> isInstrumentNovaSeq6000())
-			return ( ( $scope.isInProgressState()||$scope.isFinishState()) && ! isInstrumentNovaSeq6000() );
+			return ( ( $scope.isInProgressState()||$scope.isFinishState()) && ! isInstrumentNovaSeq6000() && ! isInstrumentNovaSeqXplus());
 			},
 		isFileSet:function(){
 			return ($scope.file == undefined)?"disabled":"";
@@ -384,7 +438,6 @@ angular.module('home').controller('CNGPrepaFlowcellOrderedCtrl',['$scope', '$par
 	// il doit recharger le fichier cBot pour qu'on puisse garantir la coherence !!
     //-1- stripCode.value
 	$scope.$watch("experiment.instrumentProperties.stripCode.value", function(newValue, oldValue){
-		//if ((newValue) && (newValue !== null ) && ( newValue !== oldValue ))  {
 		if (newValue && newValue !== oldValue ) {
 			console.log("1/watch-------stripCode.value="+newValue+"---------");
 			if ( $scope.experiment.instrumentProperties.cbotFile ) { $scope.experiment.instrumentProperties.cbotFile.value = undefined;}
@@ -422,71 +475,121 @@ angular.module('home').controller('CNGPrepaFlowcellOrderedCtrl',['$scope', '$par
 	
 	//-5- sequencingType
 	$scope.$watch("experiment.experimentProperties.sequencingType.value", function(newValue, oldValue){
-			if (newValue  && newValue !== oldValue) {
-				console.log("5/watch-------sequencingType.value="+newValue+"---------");
-				checkAll();
-			}
-			
-			$scope.atmService.data.atm.forEach(function(atm){
-				// modif du volume final
-				atm.outputContainerUseds.forEach(function(ocu){					
-					if(newValue && defaultValues[newValue]["outputContainerUsed.experimentProperties.finalVolume.value"]){
-						$parse("experimentProperties.finalVolume.value").assign(ocu, defaultValues[newValue]["outputContainerUsed.experimentProperties.finalVolume.value"]);	
-					}else{
-						// select remis a undefined 
-						$parse("experimentProperties.finalVolume.value").assign(ocu, undefined);
-					}																				
-				});
+		if (newValue  && newValue !== oldValue) {
+			console.log("5/watch-------sequencingType.value="+newValue+"---------");
+			checkAll();
+		}
+
+		// creation d'une methode séparée pour pouvoir l'appeler depuis le html
+		$scope.sampleSheetCalc();
+	});
+
+	// Appellé aussi depuis flowcell.scala.html quand selection du TAB #roadmap# (experiments.calculation.sheet)
+	// permet de selectionner le type de sequencage en premier 
+	$scope.sampleSheetCalc = function(){
+		// garder le nom newValue!!!
+		var newValue=$scope.experiment.experimentProperties.sequencingType.value;
+		console.log('>>>>>>>>>>CALC !!!!!'+newValue);
+
+		// ancien comportement: l'utilisateur spécifie le volume engagé et NGL calcule la concentration finale (le volume final est fixe)
+		// NGL-4421 NovaseqXplus : l'utilisateur spécifie la concentration finale et le volume engagé est calculé; ( le volume RSB est également calculé)
+		$scope.atmService.data.atm.forEach(function(atm){
+
+			// assignation du volume final (sequencingType dependant) [ idem ancien  mode calcul et nouveau mode calcul !!]
+			atm.outputContainerUseds.forEach(function(ocu){					
+				if(newValue && defaultValues[newValue]["outputContainerUsed.experimentProperties.finalVolume.value"]){
+					$parse("experimentProperties.finalVolume.value").assign(ocu, defaultValues[newValue]["outputContainerUsed.experimentProperties.finalVolume.value"]);	
+				}else{
+					// select "Sequencing type" remis a undefined 
+					$parse("experimentProperties.finalVolume.value").assign(ocu, undefined);
+				}																				
+			});
 				
-				// modif des proprietes input 
-				atm.inputContainerUseds.forEach(function(icu){	
-					
-				/* Vu avec Guillaume: normallement ne pas injecter de valeurs dans l'experience, car les valeurs sont recuperees au niveau du datatable qui lui effectue les conversions entre
-				 * l'unite de stockage et l'unite d'affichage a l'utilisateur!! ( c'est dans atmToSingleDatatable => getDefaultValueForWorkSheet)
-				 * MAIS pour arriver a calculer la concentration finale dès la selection du type sequencage le faire quand meme!! attention au trisHCLConcentration dont les unites sont differentes
-				 * entre l'experience et le datatable !!!!
-				 */
-					if(newValue){
+			// modif des proprietes input 
+			/* Vu avec Guillaume: normallement ne pas injecter de valeurs dans l'experience, car les valeurs sont recuperees au niveau du datatable qui lui effectue les conversions entre
+			 * l'unite de stockage et l'unite d'affichage a l'utilisateur!! ( c'est dans atmToSingleDatatable => getDefaultValueForWorkSheet)
+			 * MAIS pour arriver a calculer la concentration finale dès la selection du type sequencage le faire quand meme!! attention au trisHCLConcentration dont les unites sont differentes
+			 * entre l'experience et le datatable !!!!
+			 */
+			atm.inputContainerUseds.forEach(function(icu){	
+				if(newValue){
+					if  ( newValue.match(/NovaSeq Xplus/) ) {
+						console.log ('/NovaSeq Xplus/');
+						// -1 assignation
+						// pas d'assignation de inputVolume2.value  car va etre calculé
+						$parse("experimentProperties.NaOHVolume.value").assign(icu,           defaultValues[newValue]["inputContainerUsed.experimentProperties.NaOHVolume.value"]);
+						$parse("experimentProperties.NaOHConcentration.value").assign(icu,    defaultValues[newValue]["inputContainerUsed.experimentProperties.NaOHConcentration.value"]);
+						$parse("experimentProperties.trisHCLVolume.value").assign(icu,        defaultValues[newValue]["inputContainerUsed.experimentProperties.trisHCLVolume.value"]);
+						$parse("experimentProperties.trisHCLConcentration.value").assign(icu, defaultValues[newValue]["inputContainerUsed.experimentProperties.trisHCLConcentration.value.model"]);
+						$parse("experimentProperties.masterEPXVolume.value").assign(icu,      defaultValues[newValue]["inputContainerUsed.experimentProperties.masterEPXVolume.value"]);
+
+						// -2 calculs
+						var inputConc = $parse("concentration.value")(icu);
+						var finalConc = $parse("experimentProperties.finalConcentration2.value")(icu);
+						//var finalVol= defaultValues[newValue]["outputContainerUsed.experimentProperties.finalVolume.value"]; // !! paraissait logique
+						var finalVol = $parse("outputContainerUseds[0].experimentProperties.finalVolume.value")(atm); // !!!!! atm    copier dans l'ancien code
+						var NaOHVol = $parse("experimentProperties.NaOHVolume.value")(icu);
+						var masterEPXVol =$parse("experimentProperties.masterEPXVolume.value")(icu);
+
+						// et le cas ou inputConc=0 ???
+						var engagedVol= finalConc * finalVol / inputConc;
+						engagedVol = Math.round(engagedVol*100.0)/100.0;
+						var RSBVol = finalVol - masterEPXVol - NaOHVol  - engagedVol;
+
+						console.log ('sequencingType: engaged Vol='+ finalConc + '*' + finalVol+ '/' + inputConc +'='+ engagedVol );
+						console.log ('sequencingType: RSB Vol='+ finalVol + '-' + masterEPXVol + '-' + NaOHVol + '-' + engagedVol +'='+ RSBVol);
+
+						// 3-assignation des calculs
+						$parse("experimentProperties.inputVolume2.value").assign(icu, engagedVol);
+						$parse("experimentProperties.RSBVolume.value").assign(icu, RSBVol);
+
+					} else {
+						//old code
+						// -1 assignation
 						$parse("experimentProperties.inputVolume2.value").assign(icu,         defaultValues[newValue]["inputContainerUsed.experimentProperties.inputVolume2.value"]);
 						$parse("experimentProperties.NaOHVolume.value").assign(icu,           defaultValues[newValue]["inputContainerUsed.experimentProperties.NaOHVolume.value"]);
 						$parse("experimentProperties.NaOHConcentration.value").assign(icu,    defaultValues[newValue]["inputContainerUsed.experimentProperties.NaOHConcentration.value"]);
 						$parse("experimentProperties.trisHCLVolume.value").assign(icu,        defaultValues[newValue]["inputContainerUsed.experimentProperties.trisHCLVolume.value"]);
 						$parse("experimentProperties.trisHCLConcentration.value").assign(icu, defaultValues[newValue]["inputContainerUsed.experimentProperties.trisHCLConcentration.value.model"]);
 						$parse("experimentProperties.masterEPXVolume.value").assign(icu,      defaultValues[newValue]["inputContainerUsed.experimentProperties.masterEPXVolume.value"]);
-						
-						//console.log ('trisHCLConcentration='+ icu.experimentProperties.trisHCLConcentration.value);
-						
-					   //console.log ('computeConcentration 3... sequencingType');
+					
+						// -2 calcul
+						var engagedVol=$parse("experimentProperties.inputVolume2.value")(icu);
+						var inputConc=$parse("concentration.value")(icu);
+						var finalVol=$parse("outputContainerUseds[0].experimentProperties.finalVolume.value")(atm); // !!!!! atm
+						var finalConc=inputConc * engagedVol / finalVol;  // finalVol n'est jamais null a ce niveau
+						finalConc = Math.round(finalConc*100.0)/100.0;
+
+						console.log ('finalConc='+ inputConc+ '*'+ engagedVol+'/'+ finalVol+'='+finalConc);
 					   
-					   var engagedVol=$parse("experimentProperties.inputVolume2.value")(icu);
-					   var inputConc=$parse("concentration.value")(icu);
-					   var finalVol=$parse("outputContainerUseds[0].experimentProperties.finalVolume.value")(atm); // OK!!!!!
-					   
-					   var finalConc=inputConc * engagedVol / finalVol;  // finalVol n'est jamais null a ce niveau
-					   finalConc = Math.round(finalConc*100.0)/100.0;
-					   
-					   //console.log ('finalConc='+ inputConc+ '*'+ engagedVol+'/'+ finalVol+'='+finalConc);
-					   
-					   $parse("experimentProperties.finalConcentration2.value").assign(icu, finalConc);	
+						// -3 assignation du calcul
+						$parse("experimentProperties.finalConcentration2.value").assign(icu, finalConc);	
 						
-					} else {
-						// select remis a undefined 
-						$parse("experimentProperties.inputVolume2.value").assign(icu, undefined);
-						$parse("experimentProperties.NaOHVolume.value").assign(icu, undefined);
-						$parse("experimentProperties.NaOHConcentration.value").assign(icu, undefined);
-						$parse("experimentProperties.trisHCLVolume.value").assign(icu, undefined);
-						$parse("experimentProperties.trisHCLConcentration.value").assign(icu, undefined);
-						$parse("experimentProperties.masterEPXVolume.value").assign(icu, undefined);
-						
-						//raz aussi de la concentration finale calculée
-						///console.log ('finalConc reset..');
-						$parse("experimentProperties.finalConcentration2.value").assign(icu, undefined);	
 					}
-				});	
-			});
+				} else {
+					//select "Sequencing type" remis a undefined 
+
+					$parse("experimentProperties.inputVolume2.value").assign(icu, undefined);
+					$parse("experimentProperties.NaOHVolume.value").assign(icu, undefined);
+					$parse("experimentProperties.NaOHConcentration.value").assign(icu, undefined);
+					$parse("experimentProperties.trisHCLVolume.value").assign(icu, undefined);
+					$parse("experimentProperties.trisHCLConcentration.value").assign(icu, undefined);
+					$parse("experimentProperties.masterEPXVolume.value").assign(icu, undefined);
+			
+					// raz systematique!!
+					$parse("experimentProperties.finalConcentration2.value").assign(icu, undefined);
+
+					// NGL-4421 
+					//if ( newValues.match(/NovaSeq Xplus/) ) {    if peut pas marcher si select remis aundefined !!!
+						//raz volume RSB ( n'existait pas avant NGL-4421 )
+						$parse("experimentProperties.RSBVolume.value").assign(icu, undefined);
+					//}
+				}
+			});	
+		});
 		
 		$scope.atmService.data.updateDatatable();
-	});
+	}
 	
 	//6- instrument type NGL-2397
 	/* jamais declenché !!! voir aussi tubes-to-flowcell-ctrl.js
@@ -498,13 +601,32 @@ angular.module('home').controller('CNGPrepaFlowcellOrderedCtrl',['$scope', '$par
 		}
 	})
 	*/
+
+	//*7-  15/09/2023 NGL-4246: Controle de cohérence des processus des containers
+	//     seuls les processus ayant prepa-fc-ordered dans leur experimentTypes sont autorisés
+    if ( $scope.isCreationMode() ){
+        // A faire uniquement  s'il y a au moins un pool dans le basket [ contents[] > 1]
+		var allowedTypeCodes=[];
+        var poolInBasket=false;
+        poolInBasket= $scope.getBasket().get().some(function(input) {
+			// un pool est un input avec plus d'un content 
+            return input.contents.length > 1;
+        });
+
+        console.log('poolInBasket ? '+ poolInBasket)
+        if (poolInBasket ){
+			checkProcessTypeCodes("prepa-fc-ordered");
+			//checkProcessTypeCodes("TEST");
+        }
+    }
 	
 	// 30/01/2019 tous les checks doivent etre faite ensembles !!
 	function checkAll(){
 
 		$scope.messages.clear();
-		
-		$scope.messages.clazz = "alert alert-warning";
+		//NGL-4731 passer les alertes en "rouge"
+		//$scope.messages.clazz = "alert alert-warning";
+		$scope.messages.clazz = "alert alert-danger";
 		$scope.messages.text = "Alertes de configuration";
 		$scope.data = { Alertes:[]} 
 		
@@ -513,7 +635,7 @@ angular.module('home').controller('CNGPrepaFlowcellOrderedCtrl',['$scope', '$par
 			checkNovaSeqInstrument();
 			checkXPSequencing();
 			checkNbLaneCompat();
-			checkFcPattern (); // mettre en dernier ??
+			//checkFcPattern (); // mettre en dernier ; NGL-4730 ne plus faire ce controle !!
 		}
 		
 		if ( $scope.data.Alertes.length > 0 ){
@@ -548,8 +670,17 @@ angular.module('home').controller('CNGPrepaFlowcellOrderedCtrl',['$scope', '$par
 		
 		//ajouter la verification inverse;
 		//18/11/2019 NGL-2752 utiliser isInstrumentNovaSeq6000()
-		if ( sequencingType.match(/NovaSeq 6000/) && ! isInstrumentNovaSeq6000()) {
+		if ( sequencingType.match(/NovaSeq 6000/) && ! isInstrumentNovaSeq6000()){
 			setAlert("Alertes","L'instrument choisi n'est pas compatible avec un séquençage sur NovaSeq 6000");
+		} 
+
+		//11/10/2023 NGL-4319 NovaSeq Xplus
+		if ( ! sequencingType.match(/NovaSeq Xplus/) && isInstrumentNovaSeqXplus()){
+			setAlert("Alertes","Le type de séquencage doit etre 'NovaSeq Xplus / *' pour un NovaSeq Xplus");	
+		} 
+		
+		if ( sequencingType.match(/NovaSeq Xplus/) && ! isInstrumentNovaSeqXplus()){
+			setAlert("Alertes","L'instrument choisi n'est pas compatible avec un séquençage sur NovaSeq Xplus");
 		} 
 	}
 	
@@ -579,6 +710,7 @@ angular.module('home').controller('CNGPrepaFlowcellOrderedCtrl',['$scope', '$par
 		*/
 	}
 	
+	// NGL-4730 obsolete !!
 	function checkFcPattern (){	
 		console.log("check FC pattern...");
 		if ( undefined==$scope.experiment.experimentProperties || 
@@ -612,7 +744,6 @@ angular.module('home').controller('CNGPrepaFlowcellOrderedCtrl',['$scope', '$par
 		
 		} else if ((sequencingType === "Hiseq X") && ( null == fcBarcode.match(HXfcRegexp))) {
 			setAlert("Alertes", "Le Code Flowcell n'est pas du type 'Hiseq X' (*CCXY ou *CCX2).");	
-		
 		}
 		// NGL-2219 ajout NovaSeq 6000 / S* / XP
 		// NGL-2624 renommage "S1" => "S1-SP" 
@@ -628,6 +759,7 @@ angular.module('home').controller('CNGPrepaFlowcellOrderedCtrl',['$scope', '$par
 			        (sequencingType === "NovaSeq 6000 / S4 / XP")) && (null == fcBarcode.match(Nv6000S4fcRegexp))) {
 			setAlert("Alertes","Le Code Flowcell n'est pas du type 'NovaSeq 6000 / S4' (*DSX3).");
 		}
+		// les specs des flowcells pour NovaSeqXPlus ne sont pas encore connues...
 	}
 	
 	// NG-2397 verification sequencingType VS outContainerSupportCategoryCode
@@ -644,23 +776,32 @@ angular.module('home').controller('CNGPrepaFlowcellOrderedCtrl',['$scope', '$par
 		
 		//NovaSeq 6000 / SP => similaire a S1 donc fait dans S1-SP
 		//NGL-2624 renommage "S1" =>"S1-SP"
-		if        (((sequencingType === "Hiseq 4000") || (sequencingType === "Hiseq X")) && ( outContainerSupportCategoryCode != "flowcell-8")) {
+		if        (((sequencingType === "Hiseq 4000") || (sequencingType === "Hiseq X"))
+		    		&& ( outContainerSupportCategoryCode != "flowcell-8")) {
 			setAlert("Alertes", "Le type de séquencage "+ sequencingType +" nécessite une flowcell 8 pistes.");
 			
 		} else if (((sequencingType === "NovaSeq 6000 / S1-SP")||(sequencingType === "NovaSeq 6000 / S1-SP / XP")||
-				    (sequencingType === "NovaSeq 6000 / S2")   ||(sequencingType === "NovaSeq 6000 / S2 / XP")) && (outContainerSupportCategoryCode != "flowcell-2")){ 
+				    (sequencingType === "NovaSeq 6000 / S2")   ||(sequencingType === "NovaSeq 6000 / S2 / XP")) 
+					&& (outContainerSupportCategoryCode != "flowcell-2")){ 
 			setAlert("Alertes","Le type de séquencage "+ sequencingType +" nécessite une flowcell 2 pistes.");
 		
-		} else if (((sequencingType === "NovaSeq 6000 / S4")||
-				    (sequencingType === "NovaSeq 6000 / S4 / XP")) && (outContainerSupportCategoryCode != "flowcell-4")){
+		} else if (((sequencingType === "NovaSeq 6000 / S4")||(sequencingType === "NovaSeq 6000 / S4 / XP")) 
+					&& (outContainerSupportCategoryCode != "flowcell-4")){
 			setAlert("Alertes","Le type de séquencage "+ sequencingType +" nécessite une flowcell 4 pistes.");
+		}
+		// NGL-4723 arrivée de FC 1.5B
+		else if (((sequencingType === "NovaSeq Xplus / 25B")||(sequencingType === "NovaSeq Xplus / 10B")) 
+				&& (outContainerSupportCategoryCode != "flowcell-8") ){
+			setAlert("Alertes","Le type de séquencage "+ sequencingType +" nécessite une flowcell 8 pistes.");
+		}
+		else if ((sequencingType === "NovaSeq Xplus / 1.5B") 
+				&& (outContainerSupportCategoryCode != "flowcell-2") ){
+			setAlert("Alertes","Le type de séquencage "+ sequencingType +" nécessite une flowcell 2 pistes.");
 		}
 	}
 	
-	
 	function isAllowedOnBoard(){
-		// 19/11/2019 remplace checkNbLaneCompat2()
-		// ajout controle pour le type d'instrument cBot-onboard qui en fait n'est pas un type d'instrument mais plutot un mode de fonctionnement
+		// 19/11/2019 ajout controle pour le type d'instrument cBot-onboard qui en fait n'est pas un type d'instrument mais plutot un mode de fonctionnement
 		// puisqu'il existe pour Hiseq, Miseq, NextSeq et NovaSeq !!!!!!
 		console.log("isAllowedOnBoard...");
 		
@@ -672,10 +813,9 @@ angular.module('home').controller('CNGPrepaFlowcellOrderedCtrl',['$scope', '$par
 		console.log("isAllowedOnBoard:"+ instrumentTypecode+"/"+ instrumentCode);
 		
 		if ( instrumentTypecode === "cBot-onboard"  ){
-			// suppression des tests de differents cas =>seuls les NovaSeq6000 sont autorisés !!!
-			if (! isInstrumentNovaSeq6000() ){
-				setAlert("Alertes","Pour le type d'instrument cBot-onboard, seuls les cBot internes NovaSeq 6000 sont autorisés.");
-				// empecher de faire les autres tests...
+			//  les NovaSeq6000 sont autorisés !!! NGL-4319 les NovaSeqXplus aussi 
+			if (! isInstrumentNovaSeq6000() && ! isInstrumentNovaSeqXplus()){
+				setAlert("Alertes","Pour le type d'instrument cBot-onboard, seuls les cBot internes NovaSeq 6000 ou NovaSeq Xplus sont autorisés.");
 				return false;
 				//NB il faut une regle drools pour generer une erreur si l'utilisateur valide malgres cette alerte
 			}
@@ -686,13 +826,23 @@ angular.module('home').controller('CNGPrepaFlowcellOrderedCtrl',['$scope', '$par
 	//18/11/2019 NGL-2752 ajout SuperNova => pour prévoir l'arrivée d'autres instruments NovaSeq créer fonction dédiée
 	//02/01/2010 NGL-2785 ajout BossaNova
 	function isInstrumentNovaSeq6000(){
-		// 07/07/2021 n'est vu que maintenant sur expérience terminée !!!
 		var instrumentCode=$scope.experiment.instrument.code;
 		
 		if (instrumentCode && ( instrumentCode.match(/MarieCurix/) || 
 								instrumentCode.match(/SuperNova/)  ||
 								instrumentCode.match(/BossaNova/)  ||
 								instrumentCode.match(/novaseq-xp-fc-dock/)) ){
+			return true;
+		} else 
+			return false;
+	}
+
+	// 11/10/2023 NGL-4319 ajout NovaSeqXplus
+	function isInstrumentNovaSeqXplus(){
+		var instrumentCode=$scope.experiment.instrument.code;
+		// 24/09/2024 correction bug: manquait RayonX créé en février 2024!!!
+		if (instrumentCode && ( instrumentCode.match(/JoliotCurix/) ||
+								instrumentCode.match(/RayonX/)) ){
 			return true;
 		} else 
 			return false;
@@ -721,13 +871,97 @@ angular.module('home').controller('CNGPrepaFlowcellOrderedCtrl',['$scope', '$par
 			}
 		}
 	}
-	
+
+	//  15/09/2023 NGL-4246: Controle de cohérence des processus des containers
+	//  seuls les processus ayant prepa-fc-ordered dans leur experimentTypes sont autorisés
+	function checkProcessConsistancy (){
+
+		var alertTypeCodes=[];
+		var alertCodes=[];
+		//console.log (allowedTypeCodes);
+
+		//-1 liste des processTypesCode dans l'expérience courante
+		var inputProcessTypeCodes=$scope.$eval("getBasket().get()|flatArray:'processTypeCodes'|unique",mainService);
+		//console.log (inputProcessTypeCodes);
+
+		//-2 vérifier s'il y en a qui ne sont pas autorisés (pas dans la liste des autorisés )
+		//   s'ils n'ont pas le droit d'être là, les mettre dans la liste des warning
+		inputProcessTypeCodes.forEach(function(processTypeCode) {
+			if (! allowedTypeCodes.includes(processTypeCode) ) {
+				//console.log ( processTypeCode + ' not allowed');
+		        alertTypeCodes.push(processTypeCode);
+		    } /*else {
+				console.log ( processTypeCode + ' allowed');
+			}*/
+		});
+
+		if (alertTypeCodes.length > 0 ){
+			//-3 afficher les process correspondants aux types non autorisés
+		    console.log ( alertTypeCodes.length + ' inconsistant processes found:');
+		    var inputProcessCodes=$scope.$eval("getBasket().get()|flatArray:'processCodes'",mainService);
+		
+	        alertTypeCodes.forEach (function (type){
+		            console.log(type.toUpperCase());
+		            inputProcessCodes.forEach(function(processCode) {
+	                	//console.log('>'+processCode);
+	                    // si un processCode contient (en majusule le type inconsistant le mettre dans la liste)
+	                   	if ( processCode.includes(type.toUpperCase()) ) {
+		                   alertCodes.push(processCode);
+	                	}
+              		});
+		    });
+		
+	    	$scope.messages.setWarning("ATTENTION, les processus associés aux containers de cette expérience ne sont pas cohérents pour enchaîner la suite des expériences. Contactez l'équipe NGL.");
+		    $scope.messages.setDetails( {'Processus': alertCodes});
+		    $scope.messages.showDetails = true;
+        }
+	}
+
+	function getProcessTypeListByExpType(expTypeCode){
+		var url = jsRoutes.controllers.processes.api.ProcessTypes.list().url+"?experimentTypes="+expTypeCode;
+		return $http.get(url)
+	}
+
+	function checkProcessTypeCodes(expTypeCode) {
+		var allowedTypeCodes=[];
+		getProcessTypeListByExpType(expTypeCode)
+			.then( function(response){
+				console.log('ProcessTypeslist récupérée');
+				getAllowedTypeCodes(response.data);
+			})
+			.then( checkProcessConsistancy );	
+	}
+
+	/*  GARDER COMME EXEMPLE DE PARSING DE REPONSE ( l'ancienne URL retournait tout !!)
+	function getAllowedTypeCodes (data, experimentCode){
+		console.log('building allowedTypeCodes = have '+experimentCode);
+		data.forEach(function(processType){
+			//console.log ('--'+processType.code+'--');
+			if ( processType.experimentTypes.some(function(expType) {
+				return expType.experimentTypeCode === experimentCode
+				//return expType.experimentTypeCode === "TEST"
+			}) ){ 
+				allowedTypeCodes.push(processType.code);
+			}
+		});
+	}
+	*/
+
+	function getAllowedTypeCodes (data){
+		data.forEach(function(processType){
+				allowedTypeCodes.push(processType.code);
+		});
+	}
+
 	//------------ 16/01/2018 : NGL-1767 modification dynamique de la feuille de calcul en fonction du mode de sequencage-------
 	//             03/07/2018 2eme version avec utilisation du code CNS
+	//             04/01/2023 NGL-4421 : nouveau mode de calcul ajouté=> computeEngagedVolume
+	//               !! bug ancien: si le type de sequencage est défini avant la composition de flowcell=> pb... a resoudre !!!
 	
+	//appelé quand le datatable de "composition Flowcell" est modifié depuis l'entete
 	// surcharger celle de tubes-to-flowcell-ctrl.js  pour qu'elle appelle la changeValueOnFlowcellDesign locale qui utilise un parametre	
 	$scope.updateAllOutputContainerProperty = function(property){
-		//console.log('updateAllOutputContainerProperty ' + property.code);	
+		console.log('updateAllOutputContainerProperty !!!! ' + property.code);	
 		
 		var value = $scope.outputContainerValues[property.code];
 		var setter = $parse("outputContainerUseds[0].experimentProperties."+property.code+".value").assign;
@@ -736,42 +970,113 @@ angular.module('home').controller('CNGPrepaFlowcellOrderedCtrl',['$scope', '$par
 			var atm = $scope.atmService.data.atm[i];
 			if(atm.inputContainerUseds.length > 0){
 				setter(atm, value);
-				// logiquement seule la modification de finalVolume necessiterait un recalcul mais laisser le changement de phix declencher la mise a jour...
-				//if ( property.code === 'finalVolume'){
-				   $scope.changeValueOnFlowcellDesign(i+1);
-				//}
+				// NGL-4421 passer property.code en parametre pour debug
+				$scope.changeValueOnFlowcellDesign(i+1, property.code );
 			}
 		}
 	};
 	
+	//appelé quand le datatable de "composition Flowcell" est modifié depuis un ATM !!
 	// surcharger celle de tubes-to-flowcell-ctrl.js pour declencher les calculs
-	// appellée depuis le scala.html et $scope.updateAllOutputContainerProperty 
-	$scope.changeValueOnFlowcellDesign = function(l){ //l=atm.line si appel depuis scala.html
-		//console.log('% depot ou % phix ou Volume final modifié : atm.line: '+ l );
-		
-		// recalculer la concentration finale pour tous les inputContainerUsed de l'atm [l-1] 
-		// calcul effectuee meme si la la propriete changee est % depot ou  % phix qui n'interviennent pas dans calcul!!!
-		
-		for ( var j=0; j < $scope.atmService.data.atm[l-1].inputContainerUseds.length; j++ ){
-			//console.log('changeValueOnFlowcellDesign for input container :'+ j)
-			computeConcentrationAtm($scope.atmService.data.atm[l-1], l-1 , j);	
-		}
-		
+	// appellée depuis le scala.html et $scope.updateAllOutputContainerProperty (ci dessus )
+	$scope.changeValueOnFlowcellDesign = function(l, propertyCode){ //l=atm.line si appel depuis scala.html
+		// seuls "% a déposer", "volume final" "% PhiX" sont modifiables
+		// si on arrive depuis un ATM on n'a pas propertyCode !!!!
+		console.log('>>>>>colonne '+ propertyCode +' modifiée  line: '+ l );
+
+		// seul "volume final" induit un recalcul, mais dans certain cas on ne l'a pas...
+		//if ( propertyCode == 'finalVolume'){
+			if (undefined  !== $scope.experiment.experimentProperties && undefined  !== $scope.experiment.experimentProperties.sequencingType ){
+				var sequencingType=$scope.experiment.experimentProperties.sequencingType.value;
+
+				if ( sequencingType.match(/NovaSeq Xplus/) ){
+					// recalculer le volume engagé pour tous les inputContainerUsed de l'atm [l-1] 
+					for ( var j=0; j < $scope.atmService.data.atm[l-1].inputContainerUseds.length; j++ ){
+						console.log('(1) changeValueOnFlowcellDesign for input container :'+ j);
+						computeEngagedVolumeAtm($scope.atmService.data.atm[l-1], l-1 , j);	
+					}
+				} else {
+					//old code
+					// recalculer la concentration finale pour tous les inputContainerUsed de l'atm [l-1] 
+					for ( var j=0; j < $scope.atmService.data.atm[l-1].inputContainerUseds.length; j++ ){
+						console.log('(2) changeValueOnFlowcellDesign for input container :'+ j);
+						computeFinalConcentrationAtm($scope.atmService.data.atm[l-1], l-1 , j);	
+					}
+				}
+			} else {
+				console.log(' sequencingType undefined on ne peut pas refaire les calculs !!');
+			}
+		//}
+
 		$scope.atmService.data.updateDatatable(); 
 	};	
 	
-	// Utilisé qd la feuille de calcul est modifiée (seule la propriete "volume engagé" nécessite un recalcul)
+	// Utilisé qd la feuille de calcul est modifiée
 	$scope.updatePropertyFromUDT = function(value, col){
-		if ( col.property === 'inputContainerUsed.experimentProperties.inputVolume2.value'){ 
-			//console.log('propriéte volume engagé modifiée !!!');
-			// recalculer la concentration finale  (value.data ne contient qu'une seule ligne du datatable ??? )
-		    computeConcentration(value.data);
-		}
+		// NGL-4421 tester le sequencing type !!!
+		var sequencingType=$scope.experiment.experimentProperties.sequencingType.value;
+		if (sequencingType){
+			if (sequencingType.match(/NovaSeq Xplus/) ){
+				if ( col.property === 'inputContainerUsed.experimentProperties.finalConcentration2.value'){ 
+					// console.log('propriéte concentration finale modifiée !!!'  );
+					// recalculer le volume engagé  (value.data ne contient qu'une seule ligne du datatable ??? )
+					computeEngagedVolume(value.data);
+				}
+			} else {
+				//Old code
+				if ( col.property === 'inputContainerUsed.experimentProperties.inputVolume2.value'){ 
+					// console.log('propriéte volume engagé modifiée !!!');
+					// recalculer la concentration finale  (value.data ne contient qu'une seule ligne du datatable ??? )
+		   	 		computeFinalConcentration(value.data);
+				}
+			}
+		} // rien a calculer !!
 	}
-	
+	// NGL-4421 calculer le volume engagé ET le volume RSB d'une ligne datatable
+	var computeEngagedVolume = function(udtData){	
+		console.log(">>>computeEngagedVolume ... (udtData)");
+		var getterEngagedVolume2=$parse("inputContainerUsed.experimentProperties.inputVolume2.value");
+		var getterRSBVolume=$parse("inputContainerUsed.experimentProperties.RSBVolume.value");
+
+		var compute = {
+		    finalConc :    $parse("inputContainerUsed.experimentProperties.finalConcentration2.value")(udtData),	// input !!!
+			finalVol:      $parse("outputContainerUsed.experimentProperties.finalVolume.value")(udtData), 
+			inputConc:     $parse("inputContainerUsed.concentration.value")(udtData),	
+			NaOHVol :      $parse("inputContainerUsed.experimentProperties.NaOHVolume.value")(udtData),
+			masterEPXVol : $parse("inputContainerUsed.experimentProperties.masterEPXVolume.value")(udtData),
+
+			isReady:function(){
+				// !!input conc doit imperativement etre != 0 sinon div by 0; 
+				return (this.finalVol && this.finalConc && this.inputConc);
+			}
+		};
+
+		if(compute.isReady()){
+			//-1 calcul engagedVol
+			// la difference d'unités des concentrations finalConc (pM) et inputConc (nM) sont automatiquement prises en charge
+			var engagedVol= compute.finalConc * compute.finalVol / compute.inputConc;
+			// arrondir...
+			if(angular.isNumber(engagedVol) && !isNaN(engagedVol)){
+				engagedVol = Math.round(engagedVol*100.0)/100.0;
+			}
+			console.log('engagedVol :'+  compute.finalConc +'*'+  compute.finalVol +'/'+  compute.inputConc+'='+ engagedVol);
+			getterEngagedVolume2.assign(udtData, engagedVol);
+
+			//-2 calcul RSBVol
+			var RSBVol = compute.finalVol - compute.masterEPXVol - compute.NaOHVol  - engagedVol;
+			console.log('RSBVol :'+  compute.finalVol +'-'+  compute.masterEPXVol +'-'+  compute.NaOHVol +'-'+ engagedVol +'='+ RSBVol);
+			getterRSBVolume.assign(udtData, RSBVol);
+
+		}else{
+			console.log("computeEngagedVolume : Impossible de calculer volume engagé et volume RSB: valeurs manquantes");
+			getterEngagedVolume2.assign(udtData, undefined);
+			getterRSBVolume.assign(udtData, undefines);
+		}
+	}	
+
 	// calculer la concentration finale d'une ligne datatable
-	var computeConcentration = function(udtData){	
-		//console.log(">>>computeConcentration ... (udtData)");
+	var computeFinalConcentration = function(udtData){	
+		console.log(">>>computeConcentration ... (udtData)");
 		var getterFinalConcentration2=$parse("inputContainerUsed.experimentProperties.finalConcentration2.value");
 		
 		var compute = {
@@ -781,7 +1086,7 @@ angular.module('home').controller('CNGPrepaFlowcellOrderedCtrl',['$scope', '$par
 			
 			isReady:function(){
 				// !! final volume doit imperativement etre != 0 sinon div by 0; engagedVol doit aussi etre !=0
-				//console.log('computeConcentration: inputConc='+ this.inputConc +'  engagedVol='+ this.engagedVol +'  finalVol='+ this.finalVol);
+				//console.log('computeFinalConcentration: inputConc='+ this.inputConc +'  engagedVol='+ this.engagedVol +'  finalVol='+ this.finalVol);
 				return (this.finalVol && this.engagedVol);
 			}
 		};
@@ -796,15 +1101,16 @@ angular.module('home').controller('CNGPrepaFlowcellOrderedCtrl',['$scope', '$par
 			getterFinalConcentration2.assign(udtData, finalConcentration);
 			
 		}else{
-			console.log("computeConcentration : Impossible de calculer la concentration finale: valeurs manquantes");
+			console.log("computeFinalConcentration : Impossible de calculer la concentration finale: valeurs manquantes");
 			getterFinalConcentration2.assign(udtData, undefined);
 		}
 	}
-	
-	// version pour les cas ou on modifie seulement l'input container j de l'atm i
-	var computeConcentrationAtm = function(atm, i, j){
+
+	// version pour les cas ou on modifie seulement l'input container j de l'atm i (onglet Composition Flowcell)
+	// Note 21/12/2023 : seule la modification du volume final induit un recalcul, or le volume final est sensé etre imposé par le sequencing type
+	var computeFinalConcentrationAtm = function(atm, i, j){
 		// note: i ne sert que pour debug...
-		//console.log(">>computeConcentration 2...  atm "+ i +".inputContainerUsed:"+ j);
+		console.log(">>>computeFinalConcentrationAtm  atm "+ i +".inputContainerUsed:"+ j);
 		var getterFinalConcentration2=$parse("inputContainerUseds["+ j +"].experimentProperties.finalConcentration2.value");
 			
 	    //SUPSQCNG-611/ NGLSQ-2190: pb engagedVol undefined...car les experimentProperties  des inputContainers sont undefined qd on passe ici!!! => setter inputVolume2 !!
@@ -822,7 +1128,7 @@ angular.module('home').controller('CNGPrepaFlowcellOrderedCtrl',['$scope', '$par
 				
 				isReady:function(){
 					// !! final volume doit imperativement etre != 0 sinon div by 0
-					console.log('inputConc='+ this.inputConc +' engagedVol='+ this.engagedVol +' finalVol='+ this.finalVol);
+					// console.log('inputConc='+ this.inputConc +' engagedVol='+ this.engagedVol +' finalVol='+ this.finalVol);
 					return (this.finalVol && this.engagedVol );
 				}
 		};
@@ -833,12 +1139,65 @@ angular.module('home').controller('CNGPrepaFlowcellOrderedCtrl',['$scope', '$par
 			if(angular.isNumber(finalConcentration) && !isNaN(finalConcentration)){
 				finalConcentration = Math.round(finalConcentration*100.0)/100.0;	
 			}
-			
+			console.log('finalConcentration='+ compute.inputConc +'*'+ compute.engagedVol +'/'+  compute.finalVol +'='+ finalConcentration);
 			getterFinalConcentration2.assign(atm, finalConcentration);
 		} else {
 			console.log("computeConcentrationAtm: Impossible de calculer la concentration finale: valeurs manquantes");
 			getterFinalConcentration2.assign(atm, undefined);
 		}
 	}
-	
+
+	// version pour les cas ou on modifie seulement l'input container j de l'atm i (onglet Composition Flowcell)
+	var computeEngagedVolumeAtm = function(atm, i, j){
+		// note: i ne sert que pour debug...
+		console.log(">>>computeEngagedVolumeAtm  atm "+ i +".inputContainerUsed:"+ j);
+		var getterEngagedVolume2=$parse("inputContainerUseds["+ j +"].experimentProperties.inputVolume2.value");
+		var getterRSBVolume=$parse("inputContainerUseds["+ j +"].experimentProperties.RSBVolume.value");
+
+    	// !! les experimentProperties  des inputContainers sont undefined qd on passe ici!!! => setter inputVolume2 !!
+		if (undefined  !== $scope.experiment.experimentProperties && undefined  !== $scope.experiment.experimentProperties.sequencingType ){
+			var sequencingType=$scope.experiment.experimentProperties.sequencingType.value;
+			if ( undefined  !== defaultValues[sequencingType]["inputContainerUsed.experimentProperties.finalConcentration2.value"]) {
+				console.log(" !!!!!!!!!!!!!!!!");
+		 		$parse("inputContainerUseds["+ j +"].experimentProperties.finalConcentration2.value").assign(atm, defaultValues[sequencingType]["inputContainerUsed.experimentProperties.finalConcentration2.value"]);
+			}
+  		}
+
+		var compute = {
+		    finalConc :   $parse("inputContainerUseds["+ j +"].experimentProperties.finalConcentration2.value")(atm),	
+			inputConc :   $parse("inputContainerUseds["+ j +"].concentration.value")(atm),
+			NaOHVol:      $parse("inputContainerUseds["+ j +"].experimentProperties.NaOHVolume.value")(atm),	
+			masterEPXVol: $parse("inputContainerUseds["+ j +"].experimentProperties.masterEPXVolume.value")(atm),	
+			finalVol:     $parse("outputContainerUseds[0].experimentProperties.finalVolume.value")(atm),	
+
+			isReady:function(){
+				// !!input conc doit imperativement etre != 0 sinon div by 0; 
+				console.log('computeEngagedVolumeAtm: inputConc='+ this.inputConc +' finalConc='+ this.finalConc +'  finalVol='+ this.finalVol);
+				return (this.finalVol && this.finalConc && this.inputConc);
+			}
+		};
+		
+		if(compute.isReady()){
+			// -1 calcul engagedVol
+			// la difference d'unités des concentrations finalConc (pM) et inputConc (nM) sont automatiquement prises en charge
+			var engagedVol= compute.finalConc * compute.finalVol / compute.inputConc;
+
+			// arrondir...
+			if(angular.isNumber(engagedVol) && !isNaN(engagedVol)){
+				engagedVol = Math.round(engagedVol*100.0)/100.0;
+			}
+			console.log('engagedVol :'+  compute.finalConc +'*'+  compute.finalVol +'/'+  compute.inputConc+'='+ engagedVol);
+			getterEngagedVolume2.assign(atm, engagedVol);
+
+			// !-2 calcul RSBVol
+			var RSBVol = compute.finalVol - compute.masterEPXVol - compute.NaOHVol  - engagedVol;
+			console.log('RSBVol :'+  compute.finalVol +'-'+  compute.masterEPXVol +'-'+  compute.NaOHVol +'-'+ engagedVol +'='+ RSBVol);
+			getterRSBVolume.assign(atm, RSBVol);
+		}else{
+			console.log("computeEngagedVolumeAtm : Impossible de calculer volume engagé et volume RSB: valeurs manquantes");
+			getterEngagedVolume2.assign(atm, undefined);
+			getterRSBVolume.assign(atm, undefined);
+		}
+	}	
+
 }]);

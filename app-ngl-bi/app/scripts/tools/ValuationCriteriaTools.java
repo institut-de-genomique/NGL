@@ -23,7 +23,7 @@ import fr.cea.ig.ngl.dao.ValuationCriteriaDAO;
 import models.laboratory.valuation.instance.Expression;
 import models.laboratory.valuation.instance.Property;
 import models.laboratory.valuation.instance.ValuationCriteria;
-import models.sra.submit.util.SraException;
+import services.sra.SraException;
 import validation.ContextValidation;
 
 /**

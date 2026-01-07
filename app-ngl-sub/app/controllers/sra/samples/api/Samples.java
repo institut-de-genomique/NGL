@@ -4,27 +4,33 @@ package controllers.sra.samples.api;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import controllers.NGLAPIController;
 import controllers.QueryFieldsForm;
+import controllers.sra.api.AbstractSampleAPI;
+//import controllers.samples.api.SampleBatchElement;
 import fr.cea.ig.authentication.Authenticated;
 import fr.cea.ig.authorization.Authorized;
 import fr.cea.ig.ngl.NGLApplication;
 import fr.cea.ig.ngl.dao.api.APIException;
 import fr.cea.ig.ngl.dao.api.APIValidationException;
-import fr.cea.ig.ngl.dao.api.sra.AbstractSampleAPI;
 import fr.cea.ig.ngl.dao.sra.AbstractSampleDAO;
 import models.sra.submit.sra.instance.AbstractSample;
+import models.sra.submit.sra.instance.AbstractSampleBatchElement;
 import models.sra.submit.sra.instance.UserSampleType;
 import play.data.Form;
 import play.libs.Json;
 import play.mvc.Result;
-import services.Tools;
 import sra.parser.UserSampleTypeParser;
+import sra.services.Tools;
 import validation.ContextValidation;
+import views.components.datatable.DatatableBatchResponseElement;
 import views.components.datatable.DatatableForm;
 
 
@@ -35,6 +41,7 @@ public class Samples extends  NGLAPIController<AbstractSampleAPI, AbstractSample
 	private final Form<UserFileSamplesForm>   userFileSamplesForm;
 	private final Form<QueryFieldsForm>       updateForm;
 	private Map<String, UserSampleType>       mapUserSamples = new HashMap<>();
+	private final Form<AbstractSampleBatchElement>  batchElementForm; 
 
 
 	@Inject
@@ -44,7 +51,34 @@ public class Samples extends  NGLAPIController<AbstractSampleAPI, AbstractSample
 		this.abstractSampleForm     = app.formFactory().form(AbstractSample.class);
 		this.updateForm             = app.form(QueryFieldsForm.class);
 		this.userFileSamplesForm    = app.formFactory().form(UserFileSamplesForm.class);
+		this.batchElementForm       = app.form(AbstractSampleBatchElement.class);
 	}
+
+	@Authenticated
+    @Authorized.Write
+    public Result batchUpdate() {
+		//logger.debug("XXXXXXXXXXXXXXXXXXXXXXXXX          Entree dans batchUpdate du controlleur des samples");
+        List<Form<AbstractSampleBatchElement>> filledForms =  getFilledFormList(batchElementForm, AbstractSampleBatchElement.class);
+		//logger.debug("XXXXXXXXXXXXXXXXXXXXXXXXX          dans batchUpdate, apres getFilledFormList");
+        final String user = getCurrentUser();
+
+            List<DatatableBatchResponseElement> response = filledForms.stream()
+                    .map(filledForm -> {
+                        AbstractSampleBatchElement element = filledForm.get();
+                        try {
+                    		//logger.debug("XXXXXXXXXXXXXXXXXXXXXXXXX          dans batchUpdate, avant update");
+                            AbstractSample absSample = api().update(element.data, user);
+                    		//logger.debug("XXXXXXXXXXXXXXXXXXXXXXXXX          dans batchUpdate, apres update");
+                            return new DatatableBatchResponseElement(OK, absSample, element.index);
+                        } catch (APIValidationException e) {
+                            return new DatatableBatchResponseElement(BAD_REQUEST, errorsAsJson(e.getErrors()), element.index);
+                       } catch (APIException e) {
+                           return new DatatableBatchResponseElement(BAD_REQUEST, element.index);
+                       }
+                   }).collect(Collectors.toList());
+        return ok(Json.toJson(response));
+    }
+
 
 
 	@Override
@@ -88,7 +122,7 @@ public class Samples extends  NGLAPIController<AbstractSampleAPI, AbstractSample
 		} else {
 			copy = false;
 		}
-		logger.debug("AAAAAAAAAAAAAAA                   Dans controlleur des samples, dans saveImp, appel de api.create");
+		//logger.debug("AAAAAAAAAAAAAAA                   Dans controlleur des samples, dans saveImp, appel de api.create");
 		return api().create(userAbstractSample, getCurrentUser(), copy);	
 	}
 	
@@ -100,6 +134,8 @@ public class Samples extends  NGLAPIController<AbstractSampleAPI, AbstractSample
 	@Authenticated
 	@Authorized.Write
 	public AbstractSample updateImpl(String code) throws Exception, APIException, APIValidationException {
+		//logger.debug("XXXXXXXXXXXXXXXXXXXXXXXXX          Entree dans updateImpl du controlleur des samples");
+
 		AbstractSample userAbstractSample =  getFilledForm(abstractSampleForm, AbstractSample.class).get();
 		QueryFieldsForm queryFieldsForm   = filledFormQueryString(updateForm, QueryFieldsForm.class).get();
 		if (StringUtils.isBlank(code)) {
@@ -108,12 +144,12 @@ public class Samples extends  NGLAPIController<AbstractSampleAPI, AbstractSample
 		if(StringUtils.isNotBlank(userAbstractSample.code) && ! userAbstractSample.code.equals(code)) {
 			throw new Exception("abstractSample.code :  valeur " + userAbstractSample.code + " != du code indiqué dans la route "  + code);
 		}
-		boolean copy = false;
+		// boolean copy = false;
 		if (queryFieldsForm.fields == null) {	
 			return api().update(userAbstractSample, getCurrentUser(), false);
 		} 
 		if(queryFieldsForm.fields.contains("copy")) {
-			copy = true;
+			// copy = true;
 			queryFieldsForm.fields.remove("copy");
 			// en mode copy, on copie tout l'objet et non pas uniquement les champs indiqués
 			return api().update(userAbstractSample, getCurrentUser(), true);
@@ -147,9 +183,9 @@ public class Samples extends  NGLAPIController<AbstractSampleAPI, AbstractSample
 			mapUserSamples = userSamplesParser.loadMap(inputStreamUserFileSamples);
 			for (Iterator<Entry<String, UserSampleType>> iterator = mapUserSamples.entrySet().iterator(); iterator.hasNext();) {
 				Entry<String, UserSampleType> entry = iterator.next();
-				logger.debug("  cle de sample = '" + entry.getKey() + "'");
-				logger.debug("       description : '" + entry.getValue().getDescription()+ "'");
-				logger.debug("Appel de validate");
+//				logger.debug("  cle de sample = '" + entry.getKey() + "'");
+//				logger.debug("       description : '" + entry.getValue().getDescription()+ "'");
+//				logger.debug("Appel de validate");
 				entry.getValue().validate(ctxVal);
 			}
 			// Renvoyer message d'erreur si le fichier utilisateur n'est pas bon:

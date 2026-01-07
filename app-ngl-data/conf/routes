@@ -10,8 +10,11 @@ GET		/api/description/ngl-sq					controllers.description.NGLSeq.save()
 GET		/api/description/ngl-bi					controllers.description.NGLBI.save()
 GET		/api/description/projects				controllers.description.projects.Projects.save()
 
-GET		/api/instance/resolutions				controllers.instance.resolution.Resolutions.save()       
-GET		/api/instance/protocols					controllers.instance.protocol.Protocols.save()
+#GET		/api/instance/resolutions				controllers.instance.resolution.Resolutions.save()  
+
+GET		/api/instance/resolutions-sq				controllers.instance.resolution.Resolutions.save_sq()
+GET		/api/instance/resolutions-bi				controllers.instance.resolution.Resolutions.save_bi()
+# GET		/api/instance/protocols					controllers.instance.protocol.Protocols.save()
 GET		/api/instance/parameters/printers		controllers.instance.parameters.Printers.save()
 
 #Description state necessite de lancer sans exception les descriptions de bi, sq, project après la description de state

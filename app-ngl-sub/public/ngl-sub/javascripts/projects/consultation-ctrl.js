@@ -56,15 +56,6 @@ angular.module('home').controller('ConsultationCtrl',[ '$http', '$scope', '$rout
 				        edit         : false,
 				        choiceInList : false  
 				       	});	
-// Pas de ERP dans le cas d'un project umbrella et sequencingProject pas stoqué dans collection project mais fusionné avec study
-//			columns.push({
-//						property     : "externalId",
-//					    header       : Messages("project.externalId"),
-//				       	type         : "text",		    	  	
-//				       	order        : true,
-//				       	edit         : false,
-//				       	choiceInList : false  
-//				       	});	
 // Dans nouveau model, uniquement des projects de type umbrella stoqués dans collection project			        	    	
 //			columns.push({
 //						property     : "submissionProjectType",
@@ -96,16 +87,15 @@ angular.module('home').controller('ConsultationCtrl',[ '$http', '$scope', '$rout
 						editTemplate:"<textarea class='form-control' #ng-model rows='1'></textarea>",
 						choiceInList:false
 						});	
-// Pas de locus_tag dans le cas d'un project umbrella et sequencingProject pas stoqué dans collection project mais fusionné avec study
-//			columns.push({
-//						property     : "locusTagPrefixs",
-//				       	header       : Messages("project.locusTagPrefixs"),
-//				       	type         : "text",		    	  	
-//						hide         : true,	    	  	
-//				       	order        : false,
-//				       	edit         : false,
-//				       	choiceInList : false  
-//				       	}); 
+			columns.push({
+						property     : "parentProjectAccessions",
+				       	header       : Messages("project.parentProjectAccessions"),
+				       	type         : "text",		    	  	
+						hide         : true,	    	  	
+				       	order        : false,
+				       	edit         : false,
+				       	choiceInList : false  
+				       	}); 	
 			columns.push({
 						property     : "childrenProjectAccessions",
 				       	header       : Messages("project.childrenProjectAccessions"),
@@ -142,7 +132,30 @@ angular.module('home').controller('ConsultationCtrl',[ '$http', '$scope', '$rout
 						edit         : false, 
 						order        : true,
 						choiceInList : false,
-						});						
+						});	
+			columns.push({property   : "attributes",
+					    header       : Messages("project.attributes"),
+					    //"filter":"codes:'state'",
+					    type         : "text",		    	  	
+					    order        : false, 
+					    edit         : false,  
+					   	hide         : true,
+						choiceInList : false,
+						editTemplate :"<textarea class='form-control' #ng-model rows='3'></textarea>",
+						render       : function(data, edit) {
+							              return toolsServices.getStringAttributes(data);
+						             }
+				        });							
+			columns.push({property:"dropBox",
+						header: Messages("study.dropBox"),
+						type :"String",
+						hide:true,
+						edit:false,
+						order:false,
+						choiceInList:true,
+						listStyle:'bt-select',
+						possibleValues:'sraVariables.dropBox',
+				    	});						
 			columns.push({
 						property     : "comments",
 						header       : Messages("comments"),
@@ -172,12 +185,11 @@ angular.module('home').controller('ConsultationCtrl',[ '$http', '$scope', '$rout
 			select:{active:true},
 			showTotalNumberRecords:true,
 			edit : {
-				active:false, // permettre edition des champs editables
-				showButton : false,// bouton d'edition 
+				active        : false, // permettre edition des champs editables
+				showButton    : false, // bouton d'edition 
 				withoutSelect : true,
-				columnMode : true
+				columnMode    : true
 			},
-			
 			cancel : {
 				showButton:false
 			},
@@ -201,21 +213,33 @@ angular.module('home').controller('ConsultationCtrl',[ '$http', '$scope', '$rout
 					// mainService.setDatatable($scope.projectsDT);
 				}
 			},
-//			save : {
-//				active:true,
-//				showButton : true,
-//				changeClass : false,
-//				url:function(line){
-//					return jsRoutes.controllers.sra.projects.api.Projects.update(line.code).url; // jamais utilisé si mode local
-//				},
-//				method:'put',
-//				value:function(line){
-//					return line;
-//				},
-//			},
+			save : {
+				active      : false, // car l'umbrella est directement declaré à l'EBI. si modification alors passer par modifier à l'EBI.
+				showButton  : false,
+				mode        :'remote', 
+				changeClass : true, // pour mettre les lignes bien sauvegardees en verts et celles en echec en rouge
+				url:function(line){
+					// pour regler problème de mapping entre representation de umbrella dans datatable et dans model java :
+					$scope.toJsonUmbrellaModelOrThrow(line, $scope.errorDetails);
+					console.log("line dans bon model verifier si tous les champs =", line);
+					return jsRoutes.controllers.sra.projects.api.Projects.update(line.code).url; // jamais utilisé si mode local
+					// et si mode remote alors problème com.fasterxml.jackson.databind.JsonMappingException pour les champs locus_tag ...
+					// d'ou appel préalable de toJsonStudyModel;
+				},
+				method       :'put',
+				//withoutEdit:true, //??
 
-	};
-	
+				value        :function(line){
+					return line;
+				},				
+//				callback : function(datatable, errors) {
+//					//console.log("XXXXXXXXXXXXXXXXX           datatable", datatable);
+//					//console.log("XXXXXXXXXXXXXXXXX           errors", errors);
+//					$scope.updateCallback(datatable, errors, $scope.messages);
+//				}
+			},
+				
+	};	
 	
 
 	

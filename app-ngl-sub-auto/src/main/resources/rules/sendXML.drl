@@ -43,6 +43,8 @@ rule "Define variable lineParameter for sendXML specification"
        updateParameterXML("xmlRuns",$job, "subToSend");
        updateParameterXML("xmlUmbrella",$job, "subToSend");
        updateParameterXML("xmlAnalysis",$job, "subToSend");
+       updateParameterXML("xmlProjects",$job, "subToSend");
+       
        $job.setParameterValue("listAC",$job.getParameterValue("listAC").getValue().replace("%ebiResult%",$job.getUniqueJobResource("subToSend").getProperty("ebiResult")));
        
        //$job.setParameterValue("listAC",$job.getParameterValue("listAC").getValue().replace("%submissionCode%",$job.getUniqueJobResource("subToSend").getProperty("code")));

@@ -37,6 +37,17 @@
 	</div>
 }
 
+@if(code == "demultiplexing-pacbio") {
+	<div class="col-md-10 col-lg-10">
+		<div ng-repeat="lane in run.lanes" class="row" style="overflow-x: auto">
+			<h4><span class="label label-info">Lane {{lane.number}}</span></h4>
+			<div ng-controller="LanesDemultiplexingPacBioCtrl">
+				<div ultimate-datatable="lanesDemultiplexing[lane.number]"></div>
+			</div>
+		</div>
+	</div>
+}
+
 @if(code == "sav") {
 
 

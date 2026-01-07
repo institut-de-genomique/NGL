@@ -22,11 +22,11 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import controllers.sra.api.SubmissionAPI;
 import fr.cea.ig.lfw.controllers.scripts.buffered.ScriptNoArgs;
-import fr.cea.ig.ngl.dao.api.sra.SubmissionAPI;
 import models.sra.submit.sra.instance.Submission;
-import models.sra.submit.util.SraException;
-import services.SraEbiAPI;
+import services.sra.SraException;
+import sra.services.SraEbiAPI;
 
 
 /*

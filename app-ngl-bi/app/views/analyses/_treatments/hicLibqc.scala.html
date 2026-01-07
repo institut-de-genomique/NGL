@@ -1,0 +1,123 @@
+@()
+<div ng-init="treatmentCode='hicLibqc'">
+<div class="row">
+<div class="col-md-12 col-lg-12" ng-if="analysis.treatments[treatmentCode].pairs.omnic.value !== undefined" >
+	 <br/>
+	 <big><u><strong>Omnic</strong></u></big>
+ 	 <br/><br/>
+	 <div class="scroll-container">  
+	 <table class="table table-condensed table-hover table-bordered">
+	 <thead>
+			<tr>
+				<th>@Messages("analyses.treatments.hicLibqc.omnic.readsetName")</th> 
+				<th>@Messages("analyses.treatments.hicLibqc.omnic.mapqualthreshold")</th> 
+				<th>@Messages("analyses.treatments.hicLibqc.omnic.read1")</th>
+				<th>@Messages("analyses.treatments.hicLibqc.omnic.r1wtqualfil")</th> 
+				<th>@Messages("analyses.treatments.hicLibqc.omnic.read2")</th>
+				<th>@Messages("analyses.treatments.hicLibqc.omnic.r2wtqualfil")</th>
+				<th>@Messages("analyses.treatments.hicLibqc.omnic.mappedpairs")</th>
+				<th>@Messages("analyses.treatments.hicLibqc.omnic.mappedpairsrelateR1")</th> 
+				<th>@Messages("analyses.treatments.hicLibqc.omnic.pcrdupepairs")</th>
+				<th>@Messages("analyses.treatments.hicLibqc.omnic.mappednondupepairs")</th>
+				<th>@Messages("analyses.treatments.hicLibqc.omnic.validpairs")</th>	
+				<th>@Messages("analyses.treatments.hicLibqc.omnic.validpairsrelateR1")</th> 
+				<th>@Messages("analyses.treatments.hicLibqc.omnic.mapndpairscis")</th>
+				<th>@Messages("analyses.treatments.hicLibqc.omnic.mapndpairscisinf1000")</th>
+				<th>@Messages("analyses.treatments.hicLibqc.omnic.mapndpairscissup1000")</th>	
+				<th>@Messages("analyses.treatments.hicLibqc.omnic.mapndpairscissup10000")</th>
+				<th>@Messages("analyses.treatments.hicLibqc.omnic.mapndpairscissup10000relateR1")</th> 
+				<th>@Messages("analyses.treatments.hicLibqc.omnic.mapndpairstrans")</th>
+				<th>@Messages("analyses.treatments.hicLibqc.omnic.expecteduniqpairs300m")</th>	
+				<th>@Messages("analyses.treatments.hicLibqc.omnic.softwareVersion")</th> 
+			</tr> 
+		</thead>
+		<tbody>
+			<tr ng-repeat="value in analysis.treatments[treatmentCode].pairs.omnic.value">	
+				<td>{{value.readsetName }}</td>
+				<td>{{value.mapqualthreshold | number:2 }}</td>	
+				<td>{{value.read1 | number:2}}</td>
+				<td>{{value.r1wtqualfil | number:2}}</td>	
+				<td>{{value.read2 | number:2}}</td>
+				<td>{{value.r2wtqualfil | number:2}}</td>	
+				<td>{{value.mappedpairs | number:2}}</td>
+				<td>{{value.mappedpairsrelateR1 | number:2}}</td>
+				<td>{{value.pcrdupepairs | number:2}}</td>
+				<td>{{value.mappednondupepairs | number:2}}</td>
+				<td>{{value.validpairs | number:2}}</td>
+				<td>{{value.validpairsrelateR1 | number:2 }}</td>
+				<td>{{value.mapndpairscis | number:2}}</td>
+				<td>{{value.mapndpairscisinf1000 | number:2}}</td>	
+				<td>{{value.mapndpairscissup1000 | number:2}}</td>
+				<td>{{value.mapndpairscissup10000 | number:2}}</td>
+				<td>{{value.mapndpairscissup10000relateR1 | number:2 }}</td>
+				<td>{{value.mapndpairstrans | number:2}}</td>
+				<td>{{value.expecteduniqpairs300m | number:2}}</td>
+				<td>{{value.softwareVersion }}</td>
+	   		</tr>
+		</tbody>
+	 </table>
+	 </div>
+ </div>	
+</div>
+
+<br/><br/>  
+
+<div class="row">
+<div class="col-md-12 col-lg-12" ng-if="analysis.treatments[treatmentCode].pairs.arima.value !== undefined" >
+	 <br/>
+	 <big><p><u><strong>Arima</strong></u></p></big>
+	 <br/><br/>  
+	 <div class="scroll-container"> 
+	 <table class="table table-condensed table-hover table-bordered">
+	 <thead>
+			<tr>
+				<th>@Messages("analyses.treatments.hicLibqc.omnic.readsetName")</th> 
+				<th>@Messages("analyses.treatments.hicLibqc.omnic.mapqualthreshold")</th> 
+				<th>@Messages("analyses.treatments.hicLibqc.omnic.read1")</th>
+				<th>@Messages("analyses.treatments.hicLibqc.omnic.r1wtqualfil")</th> 
+				<th>@Messages("analyses.treatments.hicLibqc.omnic.read2")</th>
+				<th>@Messages("analyses.treatments.hicLibqc.omnic.r2wtqualfil")</th>
+				<th>@Messages("analyses.treatments.hicLibqc.omnic.mappedpairs")</th>
+				<th>@Messages("analyses.treatments.hicLibqc.omnic.mappedpairsrelateR1")</th> 
+				<th>@Messages("analyses.treatments.hicLibqc.omnic.pcrdupepairs")</th>
+				<th>@Messages("analyses.treatments.hicLibqc.omnic.mappednondupepairs")</th>
+				<th>@Messages("analyses.treatments.hicLibqc.omnic.validpairs")</th>	
+				<th>@Messages("analyses.treatments.hicLibqc.omnic.validpairsrelateR1")</th> 
+				<th>@Messages("analyses.treatments.hicLibqc.omnic.mapndpairscis")</th>
+				<th>@Messages("analyses.treatments.hicLibqc.omnic.mapndpairscisinf1000")</th>
+				<th>@Messages("analyses.treatments.hicLibqc.omnic.mapndpairscissup1000")</th>	
+				<th>@Messages("analyses.treatments.hicLibqc.omnic.mapndpairscissup10000")</th>
+				<th>@Messages("analyses.treatments.hicLibqc.omnic.mapndpairscissup10000relateR1")</th> 
+				<th>@Messages("analyses.treatments.hicLibqc.omnic.mapndpairstrans")</th>
+				<th>@Messages("analyses.treatments.hicLibqc.omnic.expecteduniqpairs300m")</th>	
+				<th>@Messages("analyses.treatments.hicLibqc.omnic.softwareVersion")</th> 
+			</tr> 
+		</thead>
+		<tbody>
+			<tr ng-repeat="value in analysis.treatments[treatmentCode].pairs.arima.value">	
+				<td>{{value.readsetName }}</td>
+				<td>{{value.mapqualthreshold | number:2}}</td>	
+				<td>{{value.read1 | number:2}}</td>
+				<td>{{value.r1wtqualfil | number:2}}</td>	
+				<td>{{value.read2 | number:2}}</td>
+				<td>{{value.r2wtqualfil | number:2}}</td>	
+				<td>{{value.mappedpairs | number:2}}</td>
+				<td>{{value.mappedpairsrelateR1 | number:2}}</td>
+				<td>{{value.pcrdupepairs | number:2}}</td>
+				<td>{{value.mappednondupepairs | number:2}}</td>
+				<td>{{value.validpairs | number:2}}</td>
+				<td>{{value.validpairsrelateR1  | number:2 }}</td>
+				<td>{{value.mapndpairscis | number:2}}</td>
+				<td>{{value.mapndpairscisinf1000 | number:2}}</td>	
+				<td>{{value.mapndpairscissup1000 | number:2}}</td>
+				<td>{{value.mapndpairscissup10000 | number:2}}</td>
+				<td>{{value.mapndpairscissup10000relateR1 | number:2}}</td>
+				<td>{{value.mapndpairstrans | number:2}}</td>
+				<td>{{value.expecteduniqpairs300m | number:2}}</td>
+				<td>{{value.softwareVersion }}</td>
+	   		</tr>
+		</tbody>
+	 </table>
+	 </div> 
+ </div>	
+</div>

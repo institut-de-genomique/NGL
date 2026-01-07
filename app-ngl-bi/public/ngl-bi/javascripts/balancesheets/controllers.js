@@ -144,7 +144,9 @@ angular.module('home').controller('BalanceSheetsGeneralCtrl', ['$scope', '$http'
 			title = title + "Readsets Illumina (généré le " + strDate + ")";
 		} else if (typeCode.includes("rsnanopore")) {
 			title = title + "Readsets Nanopore (généré le " + strDate + ")";
-		} else {
+		}  else if (typeCode.includes("rspacbio")) {
+			title = title + "Readsets PacBio (généré le " + strDate + ")";
+		}else {
 			title = title + typeCode + " (généré le " + strDate + ")";
 		}
 		return title;
@@ -624,6 +626,8 @@ angular.module('home').controller('BalanceSheetsYearCtrl', ['$scope', '$http','m
 			title = title + " Readsets Illumina";
 		} else if (typeCode.includes("rsnanopore")) {
 			title = title + " Readsets Nanopore";
+		}else if (typeCode.includes("rspacbio")) {
+			title = title + " Readsets PacBio";
 		} else {
 			title = title + typeCode;
 		}
@@ -642,6 +646,8 @@ angular.module('home').controller('BalanceSheetsYearCtrl', ['$scope', '$http','m
 			title = title + "RS Illumina";
 		} else if (typeCode.includes("rsnanopore")) {
 			title = title + "RS Nanopore";
+		}else if (typeCode.includes("rspacbio")) {
+			title = title + "RS PacBio";
 		} else {
 			title = title + typeCode;
 		}
@@ -705,7 +711,8 @@ angular.module('home').controller('BalanceSheetsYearCtrl', ['$scope', '$http','m
 							"treatments.ngsrg.default.1DForward.value.nbBases", 
 							"treatments.ngsrg.default.1DReverse.value.nbBases",
 							"treatments.readQuality.default.1DForward.value.nbBases",
-							"treatments.readQuality.default.1DReverse.value.nbBases"
+							"treatments.readQuality.default.1DReverse.value.nbBases",
+							"treatments.readQuality.default.reads.value.nbBases",
 						];
 						var readsetStats = $scope.balanceSheetsGeneralService.mergeReadSetComputations(
 							balanceSheets[0].computations.filter(function(computation) {

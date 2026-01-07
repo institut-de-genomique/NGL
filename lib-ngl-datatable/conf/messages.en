@@ -19,7 +19,3 @@ datatable.msg.success.remove = All the deletions are successful.
 datatable.msg.error.remove =  There are {0} deletion(s) in error.
 
 datatable.remove.confirm = can you confirm the delete ?
-
-#format date
-datetime.format=MM/dd/yyyy HH:mm:ss
-date.format=MM/dd/yyyy

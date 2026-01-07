@@ -6,10 +6,10 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import controllers.sra.api.ExperimentAPI;
+import controllers.sra.api.SubmissionAPI;
 import fr.cea.ig.lfw.controllers.scripts.buffered.ScriptNoArgs;
 import fr.cea.ig.ngl.NGLApplication;
-import fr.cea.ig.ngl.dao.api.sra.ExperimentAPI;
-import fr.cea.ig.ngl.dao.api.sra.SubmissionAPI;
 import models.sra.submit.sra.instance.Experiment;
 import models.sra.submit.sra.instance.Submission;
 
@@ -60,7 +60,7 @@ public class Debug_BMR_BEZ extends ScriptNoArgs {
 				experiment.run.code = newRunCode;
 				newExperimentCodes.add(newExperimentCode);
 				newRunCodes.add(newRunCode);
-				experimentAPI.dao_saveObject(experiment);
+				experimentAPI.update(experiment, "ngsrg");
 			}
 			submission.experimentCodes = newExperimentCodes;
 			submission.runCodes = newRunCodes;

@@ -3,104 +3,139 @@ package controllers.projects.api;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import javax.inject.Inject;
 
 import org.mongojack.DBQuery;
-import org.mongojack.DBQuery.Query;
-import org.mongojack.DBUpdate;
 
-import controllers.SubDocumentController;
-import fr.cea.ig.MongoDBDAO;
-import fr.cea.ig.MongoDBResult;
+import controllers.NGLController;
+import fr.cea.ig.authentication.Authenticated;
+import fr.cea.ig.authorization.Authorized;
 import fr.cea.ig.ngl.NGLApplication;
+import fr.cea.ig.ngl.dao.api.APIException;
+import fr.cea.ig.ngl.dao.api.APIValidationException;
+import fr.cea.ig.ngl.dao.projects.ProjectBioinformaticParametersAPI;
+import fr.cea.ig.ngl.dao.projects.ProjectsAPI;
+import fr.cea.ig.ngl.support.NGLForms;
+import fr.cea.ig.play.IGBodyParsers;
 import models.laboratory.project.instance.BioinformaticParameters;
 import models.laboratory.project.instance.Project;
-import models.utils.InstanceConstants;
 import play.data.Form;
-import play.libs.Json;
+import play.mvc.BodyParser;
 import play.mvc.Result;
 
-public class ProjectBioinformaticParameters extends SubDocumentController<Project, BioinformaticParameters> {
+public class ProjectBioinformaticParameters extends NGLController implements NGLForms {
 
-//	@Inject
-//	public ProjectBioinformaticParameters(NGLContext ctx) {
-//		super(ctx,InstanceConstants.PROJECT_COLL_NAME, Project.class, BioinformaticParameters.class);
-//	}
+	private final ProjectBioinformaticParametersAPI api;
+    private final ProjectsAPI projectsApi;
+    private final Form<BioinformaticParameters> bioinformaticParametersForm; 
 
-	@Inject
-	public ProjectBioinformaticParameters(NGLApplication app) {
-		super(app,InstanceConstants.PROJECT_COLL_NAME, Project.class, BioinformaticParameters.class);
-	}
+    @Inject
+    public ProjectBioinformaticParameters(NGLApplication app, ProjectBioinformaticParametersAPI api, ProjectsAPI projectsApi) {
+        super(app);
+        this.api           = api;
+        this.projectsApi    = projectsApi;
+        this.bioinformaticParametersForm = app.formFactory().form(BioinformaticParameters.class);
+    }
+    
+    private Project getProject(String projectCode) {
+    	return projectsApi.get(projectCode);
+    }
+    
+    @Authenticated
+    @Authorized.Read
+    public Result list(){
+        return globalExceptionHandler(() -> {
+        	try {
+	        	Iterable <Project> projects = projectsApi.find(DBQuery.exists("bioinformaticParameters.fgGroup"));
+	        	List<BioinformaticParameters> bioinformaticParameters = StreamSupport.stream(projects.spliterator(), false)
+	        			.map(api::getInnerObject).collect(Collectors.toList());
+                return okAsJson(bioinformaticParameters);
+        	} catch (APIValidationException e) {
+                return badRequestLoggingForValidationException(e);
+            } catch (APIException e) {
+            	 getLogger().error(e.getMessage(), e);
+                 return badRequestAsJson(e.getMessage());
+			}
+        });
+    }
 
-	@Override
-	protected Object getSubObject(Project objectInDB, String code) {
-		return getSubObject(objectInDB);
-	}
+    @Authenticated
+    @Authorized.Read
+    public Result get(String projectCode){
+        return globalExceptionHandler(() -> {
+            Project project = getProject(projectCode);
+            if (project != null && api.isInnerObject(project)) {
+            	BioinformaticParameters bioinformaticParameters = api.getInnerObject(project);
+                return okAsJson(bioinformaticParameters);
+            } else {
+                return notFound();
+            }
+        });
+    }
 
-	@Override
-	protected Query getSubObjectQuery(String parentCode, String code) {
-		return getSubObjectQuery(parentCode);
-	}
-
-	@Override
-	protected BioinformaticParameters getSubObjects(Project objectInDB) {
-		return objectInDB.bioinformaticParameters;
-	}
-
-	protected Query getSubObjectQuery(String parentCode){
-		return DBQuery.and(DBQuery.is("code", parentCode), DBQuery.exists("bioinformaticParameters"));
-	}
-
-
-	protected BioinformaticParameters getSubObject(Project object){
-		return object.bioinformaticParameters;
-	}
-
-
-	//@Permission(value={"reading"})
-	@Override
-	public Result get(String parentCode){
-		Project objectInDB = getObject(getSubObjectQuery(parentCode));
-		if (objectInDB == null) {
-			return notFound();			
-		}
-		return ok(Json.toJson(getSubObject(objectInDB)));		
-	}
-
-	//@Permission(value={"reading"})
-	@Override
-	public Result head(String parentCode){
-		if (!isObjectExist(getSubObjectQuery(parentCode))) {
-			return notFound();
-		}
-		return ok();
-	}
-
-
-	//@Permission(value={"bioinformaticParameters"})
-	public Result put(String parentCode){
-		Project objectInDB = getObject(parentCode);
-		if (objectInDB == null) {
-			return notFound();
-		}
-		Form<BioinformaticParameters> filledForm = getSubFilledForm();
-		BioinformaticParameters inputBioinfParams = filledForm.get();
-
-		updateObject(DBQuery.is("code", parentCode), 
-				DBUpdate.set("bioinformaticParameters", inputBioinfParams)
-				.set("traceInformation", getUpdateTraceInformation(objectInDB.traceInformation)));
-
-		return get(parentCode);
-	}
-
-	public Result list() {
-		MongoDBResult<Project> results = MongoDBDAO.find(InstanceConstants.PROJECT_COLL_NAME, Project.class, DBQuery.exists("bioinformaticParameters.fgGroup"));			
-		List<BioinformaticParameters> bioinformaticParameters = results.toList().stream().map(p->p.bioinformaticParameters).collect(Collectors.toList());			
-		return ok(Json.toJson(bioinformaticParameters));
-	}
-
-
-
+    @Authenticated
+    @Authorized.Write
+    @BodyParser.Of(value = IGBodyParsers.Json5MB.class)
+    public Result save(String projectCode){
+        return globalExceptionHandler(() -> {
+        	try {
+            	Project project = getProject(projectCode);
+            	if (project != null) {
+            		BioinformaticParameters bioinformaticParameters = getFilledForm(bioinformaticParametersForm, BioinformaticParameters.class).get();
+            		return okAsJson(api.save(project, bioinformaticParameters, projectCode));
+            	} else {
+                	return badRequestAsJson("Project with code " + projectCode + " doesn't exist");
+                }
+            } catch (APIValidationException e) {
+                return badRequestLoggingForValidationException(e);
+            } catch (APIException e) {
+            	 getLogger().error(e.getMessage(), e);
+                 return badRequestAsJson(e.getMessage());
+			}
+        });
+    }
+    
+    @Authenticated
+    @Authorized.Write
+    @BodyParser.Of(value = IGBodyParsers.Json5MB.class)
+    public Result update(String projectCode){
+        return globalExceptionHandler(() -> {
+            try {
+            	Project project = getProject(projectCode);
+            	if (project != null) {
+            		BioinformaticParameters bioinformaticParameters = getFilledForm(bioinformaticParametersForm, BioinformaticParameters.class).get();
+            		return okAsJson(api.update(project, bioinformaticParameters, getCurrentUser()));
+            	} else {
+                	return badRequestAsJson("Project with code " + projectCode + " doesn't exist");
+                }
+            } catch (APIValidationException e) {
+                return badRequestLoggingForValidationException(e);
+            } catch (APIException e) {
+            	 getLogger().error(e.getMessage(), e);
+                 return badRequestAsJson(e.getMessage());
+			}
+        });
+    }
+    
+    @Authenticated
+    @Authorized.Write
+    public Result delete(String projectCode){
+        return globalExceptionHandler(() -> {
+            try {
+            	Project project = getProject(projectCode);
+            	if (project != null) {
+                    api.delete(project, getCurrentUser());
+                    return ok();
+            	} else {
+                	return badRequestAsJson("Project with code " + projectCode + " doesn't exist");
+                }
+            } catch (APIException e) {
+            	getLogger().error(e.getMessage(), e);
+                return badRequestAsJson(e.getMessage());
+            }
+        });  
+    }
 
 }

@@ -28,6 +28,8 @@ public class ReceptionConfiguration extends DBObject implements IValidation {
 	public Action           action;
 	public TraceInformation traceInformation;
 	public Short            displayOrder;
+	public String 			mode;
+	public String 			groupProperty;
 	 
 	@JsonIgnore
 	public Map<String, Map<String, ? extends AbstractFieldConfiguration>> configs = new HashMap<>();

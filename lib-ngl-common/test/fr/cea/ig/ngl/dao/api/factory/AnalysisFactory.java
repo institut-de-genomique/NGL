@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import fr.cea.ig.ngl.utils.TestUtils;
 import models.laboratory.common.instance.PropertyValue;
@@ -25,11 +26,12 @@ public final class AnalysisFactory {
 	 * Utile dans certains cas bien précis où on doit mocker une analyse mais avec des valeurs.
 	 * 
 	 * @param analysis L'objet à mettre à jour.
+	 * @param withId
 	 * 
 	 * @return Un objet "Analysis" mis à jour.
 	 */
-	public static Analysis fillRandomAnalysis(Analysis analysis) {
-		analysis = getRandomAnalysis();
+	public static Analysis fillRandomAnalysis(Analysis analysis, boolean withId) {
+		analysis = getRandomAnalysis(true);
 
 		return analysis;
 	}
@@ -37,11 +39,17 @@ public final class AnalysisFactory {
 	/**
 	 * Méthode permettant de générer un objet "Analysis" aléatoire.
 	 * 
+	 * @param withId
+	 * 
 	 * @return Un objet "Analysis" aléatoire.
 	 */
-	public static Analysis getRandomAnalysis() {
+	public static Analysis getRandomAnalysis(boolean withId) {
 		Analysis analysis = new Analysis();
 		analysis.code = "BA.BFY_AAAAOSF_1_A737Y.IND1";
+
+		if (withId) {
+			analysis._id = UUID.randomUUID().toString();
+		}
 
 		analysis.traceInformation = new TraceInformation();
 		analysis.traceInformation.createUser = TestUtils.CURRENT_USER;

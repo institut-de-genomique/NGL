@@ -26,6 +26,10 @@
 		  </ul>
 		</div>
 	</div>
+	<!-- ajout 21/08/2925 warning pour les modes BID -->
+	<div class="col-md-12 col-lg-12" ng-show="poolingMode.code !== 'manual'" >
+		<p><a class="fa fa-exclamation-triangle" style="color:red"></a> Pour les modes pool intelligent (BID), ne rien sélectionner dans le tableau '@Messages("experiments.pools.design")'.
+  	</div>
 	
 	@xtox_()
 	</div>

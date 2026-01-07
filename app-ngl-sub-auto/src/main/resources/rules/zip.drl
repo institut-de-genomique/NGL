@@ -1,4 +1,4 @@
-q#created on: Jul 7, 2014
+#created on: Jul 7, 2014
 package birds
 
 rule "get input inputRawDataZip resources from NGL referential for zip"

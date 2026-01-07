@@ -141,7 +141,7 @@ angular.module('ngl-sq.indexesServices', []).factory('indexesSearchService', ['$
 		if(!isInit){
 			lists.refresh.users();
 			lists.refresh.tagCategories();
-			lists.refresh.reportConfigs({pageCodes:["indexes"+"-"+mainService.getHomePage()]});
+			lists.refresh.reportConfigs({pageCodes:["indexes"+"-"+mainService.getHomePage()], active:true});
 			lists.refresh.tags();
 			lists.refresh.tagGroupNames();
 			isInit=true;

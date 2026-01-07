@@ -8,12 +8,15 @@
 @*** FDS corrections 26/10/2016
 CRLF pour le header
 correction séparateur "," 
+FDS 15/04/2025 quel est le critère de tri effectué par lines.sorted ?????
+   @for((line) <- lines.sorted)
+    ne convient plus pour NGL-5049 !!! nouveau tri par lines.sortBy ( )
 ***@
 
 Source rack,Source position,Destination rack,Destination position,Volume\u000D\u000A
-@for((line) <- lines.sorted){
+@for( line <- lines.sortBy( line => (line.inputSupportSource,line.inputSupportContainerPosition))){
   @*** pour debug uniqt 
   @line.inputSupportCode;
-  **@
+  ***@
   @line.inputSupportSource,@line.inputSupportContainerPosition,@line.outputSupportDest,@line.outputSupportPosition,@line.inputSupportContainerVolume\u000D\u000A
 } 

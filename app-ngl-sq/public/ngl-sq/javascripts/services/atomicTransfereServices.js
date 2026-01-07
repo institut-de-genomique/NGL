@@ -33,8 +33,6 @@ angular.module('atomicTransfereServices', [])
 					}else{
 						throw 'not manage : '+type;
 					}
-
-					return type;
 				},
 				convertSinglePropertyToDatatableColumn : function(propertyDefinition, propertyNamePrefix, extraHeaders){
 					return this.convertPropertyToDatatableColumn(propertyDefinition, propertyNamePrefix, ".value", extraHeaders); 
@@ -111,8 +109,20 @@ angular.module('atomicTransfereServices', [])
 					var input = {
 						code:container.code,
 						categoryCode:container.categoryCode, 
-						contents:container.contents, //used in rules							
-					    locationOnContainerSupport:container.support,
+						contents:container.contents, //used in rules
+
+						// NGL-5091 - Avant
+						// locationOnContainerSupport:container.support,
+						
+						// NGL-5091 - Après
+					    locationOnContainerSupport:{
+							code: container.support.code,
+							categoryCode: container.support.categoryCode,
+							line: container.support.line,
+							column: container.support.column,
+							storageCode: undefined
+						}, 
+
 					    volume:container.volume, //used in rules
 						concentration:container.concentration,  //used in rules
 						quantity:container.quantity,
@@ -135,8 +145,9 @@ angular.module('atomicTransfereServices', [])
 						//not valuation to have the default value
 					};
 					
-					input.locationOnContainerSupport.storageCode = undefined;
-					
+					// NGL-5091 - Avant
+					// input.locationOnContainerSupport.storageCode = undefined;
+	
 					return input;					
 				},
 				updateInputContainerUsedFromContainer : function(containerUsed, container, experimentStateCode){
@@ -146,7 +157,14 @@ angular.module('atomicTransfereServices', [])
 					
 					var storageCode = $parse("locationOnContainerSupport.storageCode")(containerUsed);
 					containerUsed.locationOnContainerSupport = container.support;
-					containerUsed.locationOnContainerSupport.storageCode = storageCode;
+					containerUsed.locationOnContainerSupport = {
+							code: container.support.code,
+							categoryCode: container.support.categoryCode,
+							line: container.support.line,
+							column: container.support.column,
+							storageCode: storageCode
+					};
+					// containerUsed.locationOnContainerSupport.storageCode = storageCode;
 					if(experimentStateCode != null && experimentStateCode != undefined && experimentStateCode !== 'F'){
 						containerUsed.volume = container.volume;
 						containerUsed.concentration = container.concentration;
@@ -458,7 +476,7 @@ angular.module('atomicTransfereServices', [])
 									for(var k=0 ; k < atm.outputContainerUseds.length ; k++){
 							              var outputContainerCode = atm.outputContainerUseds[k].code;
 							              var outputContainer = outputContainers[outputContainerCode];
-							              
+
 							              allData[l] = {atomicIndex:atomicIndex};
 							              allData[l].atomicTransfertMethod = atm;
 							              allData[l].inputContainer = inputContainer;							              
@@ -471,6 +489,7 @@ angular.module('atomicTransfereServices', [])
 							              allData[l].outputContainerUsed =  $.extend(true,{}, atm.outputContainerUseds[k]);
 							              allData[l].outputContainerUsed = $commonATM.updateOutputContainerUsed(allData[l].outputContainerUsed, atm.line, atm.column);
 							              allData[l].outputContainer = outputContainer;
+
 							              l++;							             
 							        }
 									if($that.customExperimentToView !== undefined){
@@ -716,7 +735,7 @@ angular.module('atomicTransfereServices', [])
 				                                         si 'chip'    => c'est l'utilisateur qui détermine par ses choix les positions sur outputContainer de type "chip"(=strip)
 				*/
 				copyContainerSupportCodeAndStorageCodeToDT : function(datatable, pos){
-					if (pos !=='auto' && pos !=='userdef'&& pos !=='chip' ){
+					if (pos !=='auto' && pos !=='userdef' && pos !=='chip' ){
 						throw 'pos param must be "auto","userdef" or "chip"';
 					}
 					if($scope.experiment.instrument.outContainerSupportCategoryCode == "tube"){ 
@@ -741,8 +760,7 @@ angular.module('atomicTransfereServices', [])
 								
 							} else if (pos == 'chip' ){
 								var newChipPos =$parse("inputContainerUsed.instrumentProperties.chipPosition.value")(dataMain[i]);
-								console.log("data :"+ i + "=> new chip position =" + newChipPos);
-								
+
 								if ( null != newChipPos){
 									// creation du code du container
 									var newContainerCode = outputContainerSupportCode+"_"+newChipPos ;
@@ -1236,7 +1254,13 @@ angular.module('atomicTransfereServices', [])
 					}
 					return this.currentSupportCode;
 				},
-				
+				// FDS NGL-4845: version qui met en "current" le supportCode le plus "petit" dans l'ordre alphabétique de la liste, et non pas le premier de la liste
+				getCurrentSupportCodeSorted : function(){
+					if(!this.currentSupportCode){
+						this.currentSupportCode = this.inputContainerSupports.sort()[0];
+					}
+					return this.currentSupportCode;
+				},		
 				setCurrentSupportCode : function(code){
 					if(code){
 						this.currentSupportCode = code;

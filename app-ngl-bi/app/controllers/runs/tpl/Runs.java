@@ -99,6 +99,8 @@ public class Runs extends NGLController
   	    				controllers.valuation.api.routes.javascript.ValuationCriterias.list(),
   	    				controllers.valuation.api.routes.javascript.ValuationCriterias.get(),
   	    				controllers.projects.api.routes.javascript.Projects.list(),
+						  controllers.projects.api.routes.javascript.UmbrellaProjects.list(),
+						  controllers.projects.api.routes.javascript.UmbrellaProjects.get(),
   	    				controllers.samples.api.routes.javascript.Samples.list(),  	    		
   	    				controllers.commons.api.routes.javascript.States.list(),
   	    				controllers.commons.api.routes.javascript.StatesHierarchy.list(),

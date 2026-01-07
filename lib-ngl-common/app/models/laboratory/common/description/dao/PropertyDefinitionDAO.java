@@ -215,6 +215,27 @@ public class PropertyDefinitionDAO extends AbstractDAOMapping<PropertyDefinition
 				);
 	}
 
+	
+	public List<PropertyDefinition> findByTypeCode(String commonInfoTypeCode) {
+		String sql = "SELECT pd.id, pd.code, pd.name, pd.required, pd.required_state, " +
+					"pd.editable, pd.active, pd.type, pd.display_format, pd.display_order, " +
+					"pd.default_value, pd.description, pd.choice_in_list, pd.property_value_type, " +
+					"pd.fk_measure_category, pd.fk_save_measure_unit, pd.fk_display_measure_unit, " +
+					"pd.fk_common_info_type " +
+					"FROM property_definition pd " +
+					"INNER JOIN common_info_type cit ON pd.fk_common_info_type = cit.id " +
+					"WHERE cit.code = ?";
+
+		List<SqlParameter> sqlParameters = new ArrayList<>();
+		sqlParameters.add(new SqlParameter("cit.code", Types.VARCHAR));
+
+		PropertyDefinitionMappingQuery propertyDefinitionMappingQuery = 
+			new PropertyDefinitionMappingQuery(dataSource, sql, Version.DEFAULT, sqlParameters.toArray(new SqlParameter[0]));
+
+		return propertyDefinitionMappingQuery.execute(commonInfoTypeCode);
+	}
+
+
 	public PropertyDefinition save(PropertyDefinition propertyDefinition, long idCommonInfoType) throws DAOException {
 		if (propertyDefinition.levels == null || propertyDefinition.levels.size() == 0) {
 			throw new DAOException("level does not exist or level.id is null) !! - " + propertyDefinition.code);

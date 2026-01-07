@@ -149,16 +149,23 @@ angular.module('home').controller('ConsultationCtrl',[ '$http', '$scope', '$rout
 		////$scope.treeLoadInProgress = true;
 		//console.log("$scope.messages = ", $scope.messages);
 		//console.log("Dans consultation-ctr.search, avec user", user);
-		if (! $scope.form.projCodes        &&
-			! $scope.form.codes            &&
-			! $scope.form.codeRegex        &&
-			! $scope.form.accessionRegex   && 
-			! $scope.form.accessions       && 
-			! $scope.form.studyCode        &&
-			! $scope.form.studyIdentifier  &&
-			! $scope.form.sampleCode       &&
-			! $scope.form.sampleIdentifier &&
-			! $scope.form.pseudoStateCodes ) {
+		if (! $scope.form.projCodes             &&
+		    ! $scope.form.pseudoStateCodes      &&
+			! $scope.form.codes                 &&
+			! $scope.form.codeRegex             &&
+			! $scope.form.accessions            && 
+			! $scope.form.accessionRegex        && 
+			! $scope.form.studyCodes            &&			
+			! $scope.form.studyCodeRegex        &&
+			! $scope.form.studyIdentifiers      &&
+			! $scope.form.studyIdentifierRegex  &&
+			! $scope.form.sampleCodes           &&
+			! $scope.form.sampleCodeRegex       &&
+			! $scope.form.sampleIdentifiers     &&
+			! $scope.form.sampleIdentifierRegex &&
+			! $scope.form.submissionCodes       &&
+			! $scope.form.submissionCodeRegex 			 
+			) {
 				//console.log("Aucun parametre => envoyer message erreur");
 				$scope.messages.setError(Messages("AbsenceSearchParameter"));
 				//console.log("$scope.messages = ", $scope.messages);
@@ -182,7 +189,7 @@ angular.module('home').controller('ConsultationCtrl',[ '$http', '$scope', '$rout
 		
 		if (toolsServices.isNotBlank($scope.form.userFileExperiment) &&
 			toolsServices.isNotBlank($scope.form.userFileExperiment.value)) {
-				//console.log("Recuperation de $scope.base64UserFileExperiment");
+				console.log("Recuperation de $scope.base64UserFileExperiment");
 				$scope.base64UserFileExperiment = $scope.form.userFileExperiment.value;
 				delete $scope.form.userFileExperiment;
 		} 

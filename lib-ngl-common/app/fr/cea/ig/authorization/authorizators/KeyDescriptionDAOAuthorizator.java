@@ -37,7 +37,7 @@ public class KeyDescriptionDAOAuthorizator implements IKeyDescriptionAuthorizato
      * DI constructor.
      * 
      * @param config	configuration to use
-     * @param keyAPI	key API
+     * @param keyDescriptionAPI	key API
      */
     @Inject
     public KeyDescriptionDAOAuthorizator(IGConfig config, Provider<KeyDescriptionAPI> keyDescriptionAPI) {

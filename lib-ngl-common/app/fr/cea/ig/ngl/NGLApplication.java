@@ -21,9 +21,9 @@ import play.libs.ws.WSClient;
 @Singleton
 public class NGLApplication extends LFWApplication {
 	
-	private final Provider<APIs> apis;
-	private final NGLConfig      config;
-	private final IAuthorizator  authorizator;
+	protected final Provider<APIs> apis;
+	protected final NGLConfig      config;
+	protected final IAuthorizator  authorizator;
 	
 	@Inject
 	public NGLApplication(LFWApplication lfwa ,
@@ -36,8 +36,8 @@ public class NGLApplication extends LFWApplication {
 		this.authorizator = authorizator;
 	}
 	
-	public APIs apis()           { return apis.get(); }
-	public NGLConfig nglConfig() { return config;     }
+	public APIs apis()                  { return apis.get(); }
+	public NGLConfig nglConfig()        { return config;     }
 	public IAuthorizator authorizator() { return authorizator; } 
 
 	// parce que pas trouvé le wsClient:
@@ -80,7 +80,8 @@ public class NGLApplication extends LFWApplication {
 	
 	/**
 	 *NGL-3363: recupérer dynamiquement le numéro de version via le nom du package qui contient la classe "NGLApplication"
-	 *  ==>  https://stackoverflow.com/questions/320542/how-to-get-the-path-of-a-running-jar-file
+	 *  @return version
+	 *  @see  <a href=https://stackoverflow.com/questions/320542/how-to-get-the-path-of-a-running-jar-file>"how to get the path of a running jar-file"</a>
 	 */
 	public String getVersion() {
 		/* String path = NGLApplication.class.getProtectionDomain().getCodeSource().getLocation().getPath();
@@ -112,4 +113,5 @@ public class NGLApplication extends LFWApplication {
 		
 		return versionNumber;
 	}
+
 }

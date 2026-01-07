@@ -10,33 +10,45 @@ import org.mongojack.DBQuery;
 import org.mongojack.DBQuery.Query;
 
 import controllers.DBObjectListForm;
-import controllers.sra.api.ISraSearchForm;
-import fr.cea.ig.ngl.dao.api.sra.AbstractSampleAPI;
-import fr.cea.ig.ngl.dao.api.sra.AbstractStudyAPI;
-import models.sra.submit.sra.instance.AbstractSample;
-import models.sra.submit.sra.instance.AbstractStudy;
 import models.sra.submit.sra.instance.Analysis;
+import controllers.sra.api.ISraSearchForm;
+import controllers.sra.tools.Tools;
 
 public class AnalyzesSearchForm extends  DBObjectListForm<Analysis> implements ISraSearchForm {
 
-	public List<String> projCodes        = new ArrayList<>();
+	public List<String> projCodes = new ArrayList<>();
 	public String stateCode;
-	public List<String> stateCodes       = new ArrayList<>();
+	public List<String> stateCodes = new ArrayList<>(); 
 	public List<String> pseudoStateCodes = new ArrayList<>();
-	public String accession              = null;
-	public List<String> accessions       = new ArrayList<>();
-	public String accessionRegex;
-	public String code;
-	public List<String> codes            = new ArrayList<>();
-	public String codeRegex;
-	public String createUser;       // pour recherche pour un proprietaire (update-ctrl.js)
-	public String sampleIdentifier; // identifiant de type ERS ou SAM
-	public String studyIdentifier;  // identifiant de type ERP ou PRJ
-	public String submissionCode;
-	private AbstractSampleAPI abstractSampleAPI = AbstractSampleAPI.get();  // pour eviter injection problematique ici
-	private AbstractStudyAPI abstractStudyAPI   = AbstractStudyAPI.get();
+	public String createUser;      // pour recherche pour un proprietaire (update-ctrl.js)
 	
+	public String code;
+	public List<String> codes;    
+	public String codeRegex;
+	
+	public String accession;
+	public List<String> accessions = new ArrayList<>();
+	public String accessionRegex;
+		
+	public String studyCode;       // ajout pour interface release et update-ctrl.js  
+	public List<String> studyCodes = new ArrayList<>();
+	public String studyCodeRegex;
 
+	public String sampleCode;       // ajout pour interface release et update-ctrl.js  
+	public List<String> sampleCodes = new ArrayList<>();
+	public String sampleCodeRegex;
+	
+	public String studyIdentifier;    
+	public List<String> studyIdentifiers = new ArrayList<>();
+	public String studyIdentifierRegex;
+
+	public String sampleIdentifier;   // identifiant de type ERS ou SRS ou SAM 
+	public List<String> sampleIdentifiers = new ArrayList<>();
+	public String sampleIdentifierRegex;
+	
+	public String submissionCode;
+	public List<String> submissionCodes = new ArrayList<>();
+	public String submissionCodeRegex;
 
 	@Override
 	public List<String> getStateCodes() {
@@ -108,71 +120,58 @@ public class AnalyzesSearchForm extends  DBObjectListForm<Analysis> implements I
 		}
 		if(StringUtils.isNotBlank(this.code)) {
 			queries.add(DBQuery.in("code", this.code));
-		}
-		if (CollectionUtils.isNotEmpty(this.codes)) {
+		} else if (CollectionUtils.isNotEmpty(this.codes)) {
 			queries.add(DBQuery.in("code", this.codes));
-		} 
-		if(StringUtils.isNotBlank(this.codeRegex)) {
+		} else if(StringUtils.isNotBlank(this.codeRegex)) {
 			queries.add(DBQuery.regex("code", Pattern.compile(this.codeRegex)));
 		}
-
-
+		
 		if (StringUtils.isNotBlank(this.sampleIdentifier)) { 
 			List<String> identifiers = new ArrayList<String>();
-			AbstractSample abstSample = null;
-			if(abstractSampleAPI.dao_checkObjectExist("accession", this.sampleIdentifier)) {
-				//logger.debug("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX sample existe");
-			}
-			if (this.sampleIdentifier.startsWith("ERS") && abstractSampleAPI.dao_checkObjectExist("accession", this.sampleIdentifier)) {
-				//logger.debug("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX  sample existe et ERS");
-				abstSample = abstractSampleAPI.dao_findOne(DBQuery.in("accession", this.sampleIdentifier));
-				//logger.debug("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX  recuperation du sample ");
-
-			} else if (this.sampleIdentifier.startsWith("SAM") && abstractSampleAPI.dao_checkObjectExist("externalId", this.sampleIdentifier)) {
-				abstSample = abstractSampleAPI.dao_findOne(DBQuery.in("externalId", this.sampleIdentifier));
-			} 
-			if(abstSample != null) {
-				//logger.debug("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX sampleCode =" + abstSample.code);
-				if( StringUtils.isNotBlank(abstSample.accession) && ! identifiers.contains(abstSample.accession)) {
-					identifiers.add(abstSample.accession);
-				}
-				if( StringUtils.isNotBlank(abstSample.externalId) && ! identifiers.contains(abstSample.externalId)) {
-					identifiers.add(abstSample.externalId);
-				}
-			} else {
-				identifiers.add(this.sampleIdentifier); 
-			}
-			queries.add(DBQuery.in("sampleAccession", identifiers)); 
-//			logger.debug("Recherche des analyse avec sample dans ");
-//			for (String id : identifiers) {
-//				logger.debug(id);
-//			}
-		}
-		if (StringUtils.isNotBlank(this.studyIdentifier)) { 
+			Tools.completeListSampleIdentifiers(this.sampleIdentifier, identifiers);
+			queries.add(DBQuery.in("sampleIdentifier", identifiers)); 
+		} else if (CollectionUtils.isNotEmpty(this.sampleIdentifiers)) {
 			List<String> identifiers = new ArrayList<String>();
-			AbstractStudy abstStudy = null;
-			if (this.studyIdentifier.startsWith("ERP") && abstractStudyAPI.dao_checkObjectExist("accession", this.studyIdentifier)) {
-				abstStudy = abstractStudyAPI.dao_findOne(DBQuery.in("accession", this.studyIdentifier));
-			} else if (this.studyIdentifier.startsWith("PRJ") && abstractStudyAPI.dao_checkObjectExist("externalId", this.studyIdentifier)) {
-				abstStudy = abstractStudyAPI.dao_findOne(DBQuery.in("externalId", this.studyIdentifier));
-			} 
-			if(abstStudy != null) {
-				if( StringUtils.isNotBlank(abstStudy.accession) && ! identifiers.contains(abstStudy.accession)) {
-					identifiers.add(abstStudy.accession);
-				}
-				if( StringUtils.isNotBlank(abstStudy.externalId) && ! identifiers.contains(abstStudy.externalId)) {
-					identifiers.add(abstStudy.externalId);
-				}
-			} else {
-				identifiers.add(this.studyIdentifier);
+			for(String identifier : this.sampleIdentifiers) {
+				//logger.debug("appel de Tools.completeListSampleIdentifiers avec identifier '{}'", identifier);
+				Tools.completeListSampleIdentifiers(identifier, identifiers);
 			}
-			queries.add(DBQuery.in("studyAccession", identifiers)); 
-//			logger.debug("Recherche des analyse avec study dans ");
-//			for (String id : identifiers) {
-//				logger.debug(id);
-//			}
+			queries.add(DBQuery.in("sampleIdentifier", identifiers)); 
+		} else if(StringUtils.isNotBlank(this.sampleIdentifierRegex)) {
+			List<String> identifiers = new ArrayList<String>();
+			//logger.debug("appel de Tools.completeListSampleIdentifiersFromIdentifierRegex avec sampleIdentifierRegex '{}'", this.sampleIdentifierRegex);
+			Tools.completeListSampleIdentifiersFromIdentifierRegex(this.sampleIdentifierRegex, identifiers);
+			queries.add(DBQuery.in("sampleIdentifier", identifiers)); 
 		}
 		
+		if (StringUtils.isNotBlank(this.studyIdentifier)) { 
+			List<String> identifiers = new ArrayList<String>();
+			Tools.completeListStudyIdentifiers(this.studyIdentifier, identifiers);
+			queries.add(DBQuery.in("studyIdentifier", identifiers)); 
+		} else if (CollectionUtils.isNotEmpty(this.studyIdentifiers)) {
+			List<String> identifiers = new ArrayList<String>();
+			for(String identifier : this.studyIdentifiers) {
+				logger.debug("appel de Tools.completeListStudyIdentifiers avec identifier '{}'", identifier);
+				Tools.completeListStudyIdentifiers(identifier, identifiers);
+			}
+			queries.add(DBQuery.in("studyIdentifier", identifiers)); 
+		} else if(StringUtils.isNotBlank(this.studyIdentifierRegex)) {
+			List<String> identifiers = new ArrayList<String>();
+			logger.debug("appel de Tools.completeListStudyIdentifiersFromIdentifierRegex avec studyIdentifierRegex '{}'", this.studyIdentifierRegex);
+			Tools.completeListStudyIdentifiersFromIdentifierRegex(this.studyIdentifierRegex, identifiers);
+			queries.add(DBQuery.in("studyIdentifier", identifiers)); 
+		}
+		if (CollectionUtils.isNotEmpty(this.submissionCodes)) {
+			List<String> expCodes = new ArrayList<String>();
+			Tools.completeListAnalysisCodesFromSubmissionCodes(this.submissionCodes, expCodes);
+			queries.add(DBQuery.in("code", expCodes)); 
+		} else if(StringUtils.isNotBlank(this.submissionCodeRegex)) {
+			List<String> expCodes = new ArrayList<String>();
+			Tools.completeListAnalysisCodesFromSubmissionRegex(this.submissionCodeRegex, expCodes);
+			queries.add(DBQuery.in("code", expCodes)); 
+		}
+		
+				
 		if(queries.size() > 0){
 			query = DBQuery.and(queries.toArray(new Query[queries.size()]));
 		}

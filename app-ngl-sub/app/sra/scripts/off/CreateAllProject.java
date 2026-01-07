@@ -12,12 +12,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.mongojack.DBQuery;
 import org.mongojack.DBUpdate;
 
+import controllers.sra.api.AbstractStudyAPI;
+import controllers.sra.api.ProjectAPI;
+import controllers.sra.api.StudyAPI;
 import fr.cea.ig.lfw.controllers.scripts.buffered.ScriptNoArgs;
 import fr.cea.ig.lfw.utils.Iterables;
 import fr.cea.ig.ngl.NGLApplication;
-import fr.cea.ig.ngl.dao.api.sra.AbstractStudyAPI;
-import fr.cea.ig.ngl.dao.api.sra.ProjectAPI;
-import fr.cea.ig.ngl.dao.api.sra.StudyAPI;
 import models.laboratory.common.instance.State;
 import models.laboratory.common.instance.TraceInformation;
 import models.sra.submit.sra.instance.AbstractStudy;
@@ -25,8 +25,8 @@ import models.sra.submit.sra.instance.ExternalStudy;
 import models.sra.submit.sra.instance.Project;
 import models.sra.submit.sra.instance.Study;
 import play.libs.Json;
-import services.SraEbiAPI;
-import services.XmlToSra;
+import sra.services.SraEbiAPI;
+import sra.services.XmlToSra;
 import validation.ContextValidation;
 
 import static ngl.refactoring.state.SRASubmissionStateNames.SUB_F;

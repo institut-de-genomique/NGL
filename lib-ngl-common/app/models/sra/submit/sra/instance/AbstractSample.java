@@ -26,7 +26,7 @@ public abstract class AbstractSample extends DBObject implements IValidation, IS
 	public static final String externalSampleType = "ExternalSample";
 	
 	public String _type;
-	public String accession;       // numeros d'accession attribué par ebi de la forme ERS
+	public String accession;       // numeros d'accession attribué par ebi de la forme ERS ou SRS
 	public String externalId;      // numeros d'accession attribué par la base BioSample de la forme SAM
 	public State state = new State();// Reference sur "models.laboratory.common.instance.state" 
 	 // pour gerer les differents etats de l'objet.(new, inwaiting, inprogress, submitted)
@@ -34,9 +34,13 @@ public abstract class AbstractSample extends DBObject implements IValidation, IS
 	public String adminComment; // commentaire privé "reprise historique"
 	public TraceInformation traceInformation = new TraceInformation();
     public List<Comment>comments = new ArrayList<Comment>();// commentaires des utilisateurs.
+    public boolean consolidatedPublicStatus; // mis à true si releaseDate > date du jour. Rempli par crons.
 
 	public AbstractSample(String _type) {
 		this._type=_type;
+		if(_type.equals(externalSampleType)) {
+			consolidatedPublicStatus = true;
+		}
 	} 
 
 

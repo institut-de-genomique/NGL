@@ -35,7 +35,7 @@ angular.module('home').controller('DilutionCtrl',['$scope' ,'$http','$parse', 'a
 			        	 "position":4,
 			        	 "extraHeaders":{0:Messages("experiments.inputs")}
 			         },
-			         /*
+			         
 			         {
 			        	"header":Messages("containers.table.tags"),
 			 			"property": "inputContainer.contents",
@@ -47,7 +47,7 @@ angular.module('home').controller('DilutionCtrl',['$scope' ,'$http','$parse', 'a
 			 			"render":"<div list-resize='cellValue | unique' ' list-resize-min-size='3'>",
 			        	 "extraHeaders":{0:Messages("experiments.inputs")}
 			         },
-					*/			 
+							 
 					 {
 			        	 "header" : function(){return Messages("containers.table.concentration") + " (ng/µl)"},
 			 			 "property": "inputContainerUsed.concentration.value",
@@ -313,7 +313,7 @@ angular.module('home').controller('DilutionCtrl',['$scope' ,'$http','$parse', 'a
 	} else {
 		datatableConfig.columns.push({
 			"header" : Messages("containers.table.code"),
-			"property" : "inputContainer.support.code",
+			"property" : "inputContainer.code",
 			"order" : true,
 			"edit" : false,
 			"hide" : true,
@@ -408,19 +408,20 @@ angular.module('home').controller('DilutionCtrl',['$scope' ,'$http','$parse', 'a
 	// defined new atomictransfertMethod
 	atmService.newAtomicTransfertMethod =  function(line, column){
 		var getLine = function(line){
-			if($scope.experiment.instrument.outContainerSupportCategoryCode 
-					=== $scope.experiment.instrument.inContainerSupportCategoryCode){
-				return line;
-			}else if($scope.experiment.instrument.outContainerSupportCategoryCode !== "tube" 
-				&& $scope.experiment.instrument.inContainerSupportCategoryCode === "tube") {
-				return undefined;
-			}else if($scope.experiment.instrument.outContainerSupportCategoryCode === "tube"){
+			var inputCategory = $scope.experiment.instrument.inContainerSupportCategoryCode;
+			var outputCategory = $scope.experiment.instrument.outContainerSupportCategoryCode;
+
+			if(outputCategory === "tube") {
 				return "1";
+			} else if(inputCategory === "tube") {
+				return undefined;
+			} else {
+				return line;
 			}
-			
 		}
+
 		var getColumn=getLine;
-		
+
 		return {
 			class:"OneToOne",
 			line:getLine(line), 

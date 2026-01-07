@@ -18,7 +18,8 @@ public class Taxon {
 											// on peut utiliser cette notion pour estimer si un taxon est submittable voir script BilanTaxonInCollectionSamples : 
 	                                        // les rank species, subspecies, strain, genotype et varietas sont submittable, tandis que les autres rangs ne le sont pas.
 										    // la valeur "no rank" ne permet pas de deduire si le taxon est submittable.
-												
+	public String phylum;
+	public String classTaxon;											
 	
 	public Taxon(String code) {
 		this.code = code;
@@ -32,6 +33,11 @@ public class Taxon {
 	public String getLineage() {
 		return this.lineage;
 	}
-		
+	public String getPhylum() {
+		return this.phylum;
+	}
+	public String getClassTaxon() {
+		return this.classTaxon;
+	}
 	
 }

@@ -4,14 +4,17 @@ package controllers.protocols.api;
 import javax.inject.Inject;
 import controllers.NGLAPIController;
 import controllers.QueryFieldsForm;
+import fr.cea.ig.authentication.Authenticated;
 import fr.cea.ig.authorization.Authorized;
 import fr.cea.ig.ngl.NGLApplication;
 import fr.cea.ig.ngl.dao.api.APIException;
 import fr.cea.ig.ngl.dao.api.APIValidationException;
 import fr.cea.ig.ngl.dao.protocols.ProtocolsAPI;
 import fr.cea.ig.ngl.dao.protocols.ProtocolsDAO;
+import fr.cea.ig.play.IGBodyParsers;
 import models.laboratory.protocol.instance.Protocol;
 import play.data.Form;
+import play.mvc.BodyParser;
 import play.mvc.Result;
 
 public class Protocols extends NGLAPIController<ProtocolsAPI, ProtocolsDAO, Protocol> {
@@ -25,12 +28,21 @@ public class Protocols extends NGLAPIController<ProtocolsAPI, ProtocolsDAO, Prot
 	}
 
 	@Override
+	@Authenticated
+	@Authorized.Admin
+	public Result save() {
+		return super.save();		
+	}
+
+	@Override
 	public Protocol saveImpl() throws APIException {
 		Protocol input = getFilledForm(protocolForm, Protocol.class).get();
 		return api().create(input, getCurrentUser());
 	}
 
 	@Override
+	@Authenticated
+	@Authorized.Admin
     public Result delete(String code){
         return globalExceptionHandler(() -> {
             try {
@@ -46,7 +58,15 @@ public class Protocols extends NGLAPIController<ProtocolsAPI, ProtocolsDAO, Prot
     }
 
 	@Override
+    @BodyParser.Of(value = IGBodyParsers.Json15MB.class)
+	@Authenticated
 	@Authorized.Admin
+    public Result update(String code) {
+		return super.update(code);		
+	}
+
+	@Override
+	@Authenticated
 	public Protocol updateImpl(String code) throws Exception, APIException, APIValidationException {
 		Form<Protocol> filledForm = getFilledForm(protocolForm, Protocol.class);
 		Protocol protocolInForm = filledForm.get();

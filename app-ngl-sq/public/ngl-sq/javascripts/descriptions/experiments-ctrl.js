@@ -1,6 +1,6 @@
 "use strict"
-angular.module('home').controller('ExperimentsCtrl', ['$scope','$location','$routeParams','$filter', 'datatable','lists','mainService','tabService', "descriptionsExperimentsSearchService", 
-	                                     function($scope,  $location,  $routeParams,  $filter,   datatable,  lists,  mainService,  tabService, descriptionsExperimentsSearchService) {
+angular.module('home').controller('ExperimentsCtrl', ['$scope','$location','$routeParams','$filter', 'datatable','lists','mainService','tabService', "descriptionsExperimentsSearchService", "descriptionsExperimentsGraphService", 
+	                                     function($scope,  $location,  $routeParams,  $filter,   datatable,  lists,  mainService,  tabService, descriptionsExperimentsSearchService, descriptionsExperimentsGraphService) {
 	
 		handleHomePage();
 		setDatatableConfig();
@@ -101,6 +101,7 @@ angular.module('home').controller('ExperimentsCtrl', ['$scope','$location','$rou
 	
 		function setSearchService(){
 			$scope.searchService = descriptionsExperimentsSearchService;
+			$scope.graphSearchService = descriptionsExperimentsGraphService;
 		}
 	
 		function setResetsForm(){
@@ -127,10 +128,23 @@ angular.module('home').controller('ExperimentsCtrl', ['$scope','$location','$rou
 			$scope.resetCrossTableForm = function(){
 				$scope.searchService.resetCrossTableForm();
 			};
+
+			$scope.resetTransformationExpGraphForm = function(){
+				$scope.graphSearchService.resetForm();
+				$scope.graphSearchService.resetGraph();
+			};
 		}
 	
 		function initSearchService(){
 			$scope.searchService.init($routeParams, $scope.datatableConfig);
 		}
-		
+
+		$scope.displayGraph = function() {
+			$scope.graphSearchService.init($routeParams);
+		}
+
+		$scope.searchNode = function() {
+			$scope.graphSearchService.searchNode($scope.graphSearchService.form.experimentTypeCode);
+		}
+
 }]);

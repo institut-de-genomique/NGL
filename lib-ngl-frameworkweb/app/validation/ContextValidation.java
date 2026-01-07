@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -163,10 +164,77 @@ public interface ContextValidation {
 
 	Mode getMode();
 
-	void displayErrors(ALogger logger);
+	/**
+	 * ajoute dans le context de validation, avec une cle "Error", le message de l'exception s'il est definit 
+	 * ou le message "Erreur non identifiée", si le message de l'exception est null.
+	 * @param t  exception
+	 */
+	default void addError(Throwable t) {
+		if (t.getMessage() != null) {
+			addError("Error", t.getMessage()); 
+		} else {
+			addError("Error", "Erreur non identifiée"); 
+		}
+	}
 	
+	/**
+	 * Logue les erreurs du contexte de validation dans le logger au niveau error.
+	 * <p>
+	 * Similaire à <br>
+	 * <code>
+	 * 	displayErrors(logger, "error");
+	 * </code>
+	 * @param logger où logger
+	 */
+	void displayErrors(ALogger logger);
+	/**
+	 * Niveau de logging debug (à utliser dans {@link #displayErrors(ALogger, String)}).
+	 */
+	public static final String LOG_LEVEL_DEBUG = "debug";
+	/**
+	 * Niveau de logging info (à utliser dans {@link #displayErrors(ALogger, String)}).
+	 */
+	public static final String LOG_LEVEL_INFO  = "info";
+	/**
+	 * Niveau de logging warn (à utliser dans {@link #displayErrors(ALogger, String)}).
+	 */
+	public static final String LOG_LEVEL_WARN  = "warn";
+	/**
+	 * Niveau de logging error (à utliser dans {@link #displayErrors(ALogger, String)}).
+	 */
+	public static final String LOG_LEVEL_ERROR = "error";
+	
+	/**
+	 * Logue les erreurs du contexte de validation dans le logger au niveau specifié.
+	 * Si le niveau de log specifié n'est pas valide, les erreurs seront loguées 
+	 * en mode debug.
+	 * Niveaux de log possibles : 
+	 * <ul>
+	 *   <li>"debug" (constante : {@link #LOG_LEVEL_DEBUG})</li>
+	 *   <li>"info"  (constante : {@link #LOG_LEVEL_INFO})</li>
+	 *   <li>"warn"  (constante : {@link #LOG_LEVEL_WARN})</li>
+	 *   <li>"error" (constante : {@link #LOG_LEVEL_ERROR})</li>
+	 * </ul>
+	 * @param logger      où logger
+	 * @param loggerLevel niveau du logging
+	 */
 	void displayErrors(ALogger logger, String loggerLevel);
 	
+	/**
+	 * Concatene toutes les erreurs du contexte de validation et logge le message au niveau de log specifié.
+	 * Si le niveau de log specifié n'est pas valide, les erreurs seront loguées en mode debug.
+	 * Niveaux de log possibles : 
+	 * <ul>
+	 *   <li>"debug" (constante : {@link #LOG_LEVEL_DEBUG})</li>
+	 *   <li>"info"  (constante : {@link #LOG_LEVEL_INFO})</li>
+	 *   <li>"warn"  (constante : {@link #LOG_LEVEL_WARN})</li>
+	 *   <li>"error" (constante : {@link #LOG_LEVEL_ERROR})</li>
+	 * </ul>
+	 * @param logger      logger
+	 * @param loggerLevel niveau du logging
+	 */
+	void displayUniqMessageError(ALogger logger, String loggerLevel);
+
 	int errorCount();
 	
 	// ---------------------
@@ -332,6 +400,24 @@ public interface ContextValidation {
 	
 	void addErrorKey(String key, String property, String message, Object... arguments);
 	
+	//-------------------------------------------------
+	public void removeErrorsByKey(Iterable<String> cles);
+	/**
+	 * Supprime les erreurs du contexte de validation ayant une clé contenant la chaine de caracteres indiquée.
+	 * @param chaine chaine de caracteres 
+	 */
+	public void removeErrorsByKey(String chaine);
+
+	//	public void removeErrorsByKey_2(String chaine);
+	
+	/**
+	 *  Supprime les erreurs du contexte de validation ayant une clé repondant au predicat (filtre) indiqué <br>
+	 *  ex : removeErrorsByKey(cle->cle.contains("traceInformation"));
+	 *  
+	 * @param filtre  filtre
+	 */
+	public void removeErrorsByKey(Predicate<String> filtre);
+
 }
 
 // ---------------------------------------------------------------
@@ -389,10 +475,33 @@ abstract class ChildValidationContext implements ContextValidation {
 	@Override public Mode getMode() { return parent.getMode(); }
 	@Override public void displayErrors(ALogger logger) { parent.displayErrors(logger); }
 	@Override public void displayErrors(ALogger logger, String loggerLevel) { parent.displayErrors(logger, loggerLevel); }
+	@Override public void displayUniqMessageError(ALogger logger, String loggerLevel) { parent.displayErrors(logger, loggerLevel); }
 
+	
 	@Override public void addErrorKey(String key, String property, String message, Object... arguments) { parent.addErrorKey(key, property, message, arguments); }
 	public static String composeKey(String root, String key) { return StringUtils.isBlank(root) ? key : root + "." + key; }
 
+	@Override
+	public void removeErrorsByKey(Iterable<String> cles) {
+		parent.removeErrorsByKey(cles);
+	}
+
+	@Override
+	public void removeErrorsByKey(String regExp) {
+		parent.removeErrorsByKey(regExp);
+	}
+	
+//	@Override
+//	public void removeErrorsByKey_2(String regExp) {
+//		parent.removeErrorsByKey_2(regExp);
+//	}
+
+	@Override
+	public void removeErrorsByKey(Predicate<String> filtre) {
+		parent.removeErrorsByKey(filtre);
+	}
+	
+	
 	/**
 	 * Override the key value from parent context.
 	 * 
@@ -425,6 +534,9 @@ abstract class ChildValidationContext implements ContextValidation {
 		@Override public void addError(String property, String message, Object... arguments) { 
 			parent.addErrorKey(key, property, message, arguments); 
 		}
+
+
+
 	}
 	
 	/**
@@ -468,6 +580,7 @@ abstract class ChildValidationContext implements ContextValidation {
 		@Override public <T> T getTypedObject(String key)         { return this.key.equals(key) ? (T)value : parent.getTypedObject(key); }
 		@Override public Map<String, Object> getContextObjects()  { throw new UnsupportedOperationException(); }
 		@Override public void setContextObjects(Map<String, Object> contextObjects) { throw new UnsupportedOperationException();}
+
 	}
 	
 	/**
@@ -502,6 +615,8 @@ abstract class ChildValidationContext implements ContextValidation {
 		@Override public boolean isDeleteMode()   { return Mode.DELETE     .equals(mode); }
 		@Override public boolean isNotDefined()   { return Mode.NOT_DEFINED.equals(mode); }
 		@Override public Mode getMode()           { return mode; }
+
+
 		
 	}
 	

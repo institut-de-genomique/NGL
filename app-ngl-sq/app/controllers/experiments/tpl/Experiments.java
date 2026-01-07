@@ -16,7 +16,6 @@ import models.utils.DescriptionHelper;
 import play.mvc.Result;
 import play.twirl.api.Html;
 import views.html.experiments.details;
-import views.html.experiments.graph;
 import views.html.experiments.home;
 import views.html.experiments.listContainers;
 import views.html.experiments.search;
@@ -74,11 +73,6 @@ public class Experiments extends NGLController
 	// tpl
 	public Result listContainers() {
 		return ok(listContainers.render());
-	}
-	
-	// tpl
-	public Result graph() {
-		return ok(graph.render());
 	}
 	
 	/* This controller return a Result that contain the template, searching for the class that fit the most
@@ -202,7 +196,6 @@ public class Experiments extends NGLController
 	public Result javascriptRoutes() {
   	    return jsRoutes(controllers.experiments.tpl.routes.javascript.Experiments.searchContainers(),
   	    		controllers.experiments.tpl.routes.javascript.Experiments.search(),
-  	    		controllers.experiments.tpl.routes.javascript.Experiments.graph(),
   	    		controllers.experiments.tpl.routes.javascript.Experiments.listContainers(),
   	    		controllers.experiments.tpl.routes.javascript.Experiments.getTemplate(),
   	    		controllers.experiments.tpl.routes.javascript.Experiments.home(),  	    		
@@ -265,6 +258,8 @@ public class Experiments extends NGLController
 	      		controllers.reagents.api.routes.javascript.ReagentCatalogs.list(),
   	      		controllers.reagents.api.routes.javascript.Receptions.list(),
   	      		controllers.commons.api.routes.javascript.Values.list(),
+					controllers.projects.api.routes.javascript.UmbrellaProjects.list(),
+					controllers.projects.api.routes.javascript.UmbrellaProjects.get(),
 				controllers.commons.api.routes.javascript.CommonInfoTypes.list(),
 				controllers.experiments.api.routes.javascript.ExperimentCategories.list(),
 				controllers.projects.api.routes.javascript.Projects.list(),

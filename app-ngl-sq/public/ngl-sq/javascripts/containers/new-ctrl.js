@@ -49,8 +49,11 @@ angular.module('home').controller('NewFromFileCtrl', ['$scope', '$http','$filter
 	};
 	
 	$scope.upload = function(){
+		console.log("upload")
 		$scope.messages.clear();
 		if($scope.form.receptionConfigurationCode && $scope.form.file){
+			console.log("$scope.form.receptionConfigurationCode : "+$scope.form.receptionConfigurationCode)
+			console.log("$scope.form.file : "+$scope.form.file)
 			$scope.spinner = true;
 			$http.post(jsRoutes.controllers.receptions.io.Receptions.importFile($scope.form.receptionConfigurationCode).url, $scope.form.file)
 			.success(function(data, status, headers, config) {
@@ -136,12 +139,15 @@ angular.module('home').controller('NewFromFileCtrl', ['$scope', '$http','$filter
 	$http.get(jsRoutes.controllers.commons.api.Parameters.list().url,{params:{typeCode:"BBP11"}})
 	.success(function(data, status, headers, config) {
 			$scope.printers = data;		
+			console.log($scope.printers)
 	})
 	
 	
 	$scope.datatable = datatable(datatableConfig);
 	lists.refresh.receptionConfigs();
 	$scope.lists = lists;
+	console.log("entré")
+	
 	$scope.reset();
 	$scope.messages = messages();
 	if(angular.isUndefined($scope.getHomePage())){

@@ -256,7 +256,7 @@ angular.module('home').controller('cDNASynthesisCtrlCNG',['$scope', '$parse', 'a
 	} else {
 		datatableConfig.columns.push({
 			"header" : Messages("containers.table.code"),
-			"property" : "inputContainer.support.code",
+			"property" : "inputContainer.code",
 			"order" : true,
 			"edit" : false,
 			"hide" : true,

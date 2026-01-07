@@ -8,20 +8,21 @@
 
  	<!--  code pourrait aller dans un partial utilisable cng/cng -->
  	<!-- pour l'instant restreindre au CNRGH, le Novaseq6000 CNS pas encore arrivé -->
-    <!-- NGL-1769: import fichier XML pour NOVASEQ6000 -->
-	<div class="col-md-12 col-lg-offset-7" ng-show="('NOVASEQ6000' === experiment.instrument.typeCode)">
+    <!-- NGL-1769: import fichier XML pour NOVASEQ6000 
+	     NGL-4319: import fichier XML pour NOVASEQXPLUS; supprimer "6000" dans nom et label du nouton import-->
+	<div class="col-md-12 col-lg-offset-7" ng-show="('NOVASEQ6000' === experiment.instrument.typeCode)||('NOVASEQXPLUS' === experiment.instrument.typeCode) ">
 	  <form class="form-horizontal" role="form">
 	   <div class="row margin-bottom-7">
-	        <div class="form-group col-lg-6"  ng-show="buttonNOVASEQ6000XMLfile.isShow()">
+	        <div class="form-group col-lg-6"  ng-show="buttonNOVASEQXMLfile.isShow()">
 	             <div class="col-lg-6">
-	             <label for="importNOVASEQ6000XMLfile" class="control-label">Fichier NovaSeq 6000 (RunParameter.xml)</label>
+	             <label for="importNOVASEQXMLfile" class="control-label">Fichier RunParameter.xml</label>
 	             <div class="input-group" style="width:100%">
 	                <input class="form-control input-sm" type="file" 
 	                                                     base64-file="file" 
-	                                                     id="NOVASEQ6000XMLfile" />
+	                                                     id="NOVASEQXMLfile" />
 	                <span class="input-group-btn">									 
-	                     <button class="btn btn-primary" ng-click="buttonNOVASEQ6000XMLfile.click()" 
-	                                                     ng-disabled="buttonNOVASEQ6000XMLfile.isFileSet()" 
+	                     <button class="btn btn-primary" ng-click="buttonNOVASEQXMLfile.click()" 
+	                                                     ng-disabled="buttonNOVASEQXMLfile.isFileSet()" 
 	                                                     title="@Messages("button.import.file")"><i class="fa fa-upload"></i> 
 	                     </button>
 	                </span> 

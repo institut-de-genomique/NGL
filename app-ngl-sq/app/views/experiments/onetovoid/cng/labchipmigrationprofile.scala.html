@@ -66,15 +66,14 @@
 	        <td><strong>{{line}}</strong></td>
 	        
 	        <td ng-repeat="column in [1,2,3,4,5,6,7,8,9,10,11,12] track by $index">
-	        
-	        <div  ng-click="setImage(getProfile(line,column).value,getProfile(line,column).fullname,getProfile(line,column).width,getProfile(line,column).height)"  
+	        <div ng-click="setImage(getProfile(line,column).value,getProfile(line,column).fullname,getProfile(line,column).width,getProfile(line,column).height)"  
 	        	 ng-show="getProfile(line,column) !== undefined" > 
 	        	<div data-target="#modalImage" role="button" data-toggle="modal" >
 	        		<a href="#">
 	        		<img ng-src="data:image/{{getProfile(line,column).extension}};base64,{{getProfile(line,column).value}}"width="{{getProfile(line,column).width*0.15}}" height="{{getProfile(line,column).height*0.15}}"  class="center-block"/>
 	        		</a>
-	        		</div>
 	        	</div>
+	        </div>
 	        </td>
 	    </tr>
 	</tbody>

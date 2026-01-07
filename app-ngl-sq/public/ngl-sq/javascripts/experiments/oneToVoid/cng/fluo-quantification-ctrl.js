@@ -1,5 +1,6 @@
-angular.module('home').controller('OneToVoidFluoQuantificationCNGCtrl',['$scope', '$parse','$http',
-                                                                 function($scope,$parse,$http) {
+// NGL-4638 ajout $filter
+angular.module('home').controller('OneToVoidFluoQuantificationCNGCtrl',['$scope', '$parse','$http', '$filter',
+                                                                 function($scope, $parse, $http, $filter) {
 
 	/* 15/01/2020 FINALEMENT laisser le tri par defaut  column/line
 	//NGL-2755: trier sur line/colonne par défaut (colonnes héritées du controleur parent one-to-void-qc-ctrl.js)
@@ -9,8 +10,9 @@ angular.module('home').controller('OneToVoidFluoQuantificationCNGCtrl',['$scope'
 		$scope.atmService.data.setConfig(config );
 	}
 	*/
-	
-	// 08/01/2020 deplacement en tete de fichier
+
+	var inputExtraHeaders=Messages("experiments.inputs");
+
 	// la difference de colonnes affichees entre tubes et plaque est prise en charge au niveau du controleur parent one-to-void-qc-ctrl.js 
 	var columns = $scope.atmService.data.getColumnsConfig();
 	columns.push({
@@ -22,7 +24,7 @@ angular.module('home').controller('OneToVoidFluoQuantificationCNGCtrl',['$scope'
 		"type":"text",
 		"position":7.5,
 		"render": "<div list-resize='cellValue' list-resize-min-size='3'>",
-		"extraHeaders":{0:Messages("experiments.inputs")}
+		"extraHeaders":{0:inputExtraHeaders}
 	});
 	columns.push({
 		"header" : Messages("containers.table.tags"),
@@ -33,7 +35,7 @@ angular.module('home').controller('OneToVoidFluoQuantificationCNGCtrl',['$scope'
 		"type" : "text",
 		"position" : 8,
 		"render" : "<div list-resize='cellValue' list-resize-min-size='3'>",
-		"extraHeaders" : {0 : Messages("experiments.inputs")}
+		"extraHeaders" : {0 : inputExtraHeaders}
 	});
 	// 04/09/2017 niveau process ET contents =>utiliser properties et pas processProperties
 	columns.push({
@@ -42,40 +44,43 @@ angular.module('home').controller('OneToVoidFluoQuantificationCNGCtrl',['$scope'
 	   	 "filter" : "getArray:'properties.libProcessTypeCode.value' | unique | codes:'value'",
 	   	 "order":true,
 		 "edit":false,
-		  "hide":true,
+		 "hide":true,
 	   	 "type":"text",
 	   	 "position":8.1,
-	   	 "extraHeaders":{0 : Messages("experiments.inputs")}
+	   	 "extraHeaders":{0 :inputExtraHeaders}
 	  }); 
-	/*                  NGL-1226 11/2018  demande de ne plus afficher ces 2 colonnes....
-	// 04/09/2017 utiliser processProperties
+
+	// concentration toujours affichée position (displayOrder 13 dans ExperimentServiceCNG.java / getPropertyDefinitionsQuantIt )
+	// NGL-4638 colonnes qui ne s'affichent selon valeur displayChoice!! 
 	columns.push({
-		"header": Messages("containers.table.expectedBaits"),
-		"property" : "inputContainerUsed.contents",
-		"filter" : "getArray:'processProperties.expectedBaits.value' | unique | codes:'value'",
+		"header": Messages("containers.table.volume")+ " (μl)",
+		"property" : "inputContainerUsed.volume.value",
 		"order":true,
 		"edit":false,
 		"hide":true,
 		"type":"text",
-		"position":8.2,
-		"extraHeaders":{0 : Messages("experiments.inputs")}
-		});
-	// 04/09/2017 niveau process ET contents =>utiliser properties et pas processProperties
-	columns.push({
-	  	 "header": Messages("containers.table.captureProtocol"),
-	  	 "property" : "inputContainerUsed.contents",
-	  	 "filter" : "getArray:'properties.captureProtocol.value' | unique | codes:'value'",
-	  	 "order":true,
-		 "edit":false,
-		 "hide":true,
-	  	 "type":"text",
-	  	 "position":8.2,
-	  	 "extraHeaders":{0 : Messages("experiments.inputs")}
-	   });
-     */
+		"position":14,
+		"extraHeaders":{0 :inputExtraHeaders}
+ 	});
+	// Quantité library", "quantity1" : displayOrder 15
 	
+	// Rendement library PacBio (%)", "pacbioLibraryYield": displayOrder 17
+
 	$scope.atmService.data.setColumnsConfig(columns);
-	
+
+	// NGL-4638 modification de l'affichage dynamique sur choix utilisateur: classique ou pacbio (d'apres cns/reception-fluo-quantification-ctrl.js)
+	// pour modification
+	$scope.$watch("experiment.experimentProperties.displayChoice.value", function(newValue, oldValue){
+		if (newValue !== oldValue)  {
+			toggleColumns($scope.atmService, newValue);
+		}
+	});
+
+	// pour affichage initial
+	if($scope.experiment.experimentProperties.displayChoice.value){
+		toggleColumns($scope.atmService, $scope.experiment.experimentProperties.displayChoice.value);
+	}
+
 	// 04/02/2021 ajout de ce code après première utilisation par la prod....
 	// => permet de filter les inputContainers dans l'expérience et ne garde que ceux qui correspondent au secteur choisi
 	$scope.$on('updateInstrumentProperty', function(e, pName) {
@@ -104,6 +109,7 @@ angular.module('home').controller('OneToVoidFluoQuantificationCNGCtrl',['$scope'
 	// se déclenche dans onSave du controler parent
 	// les propriétés de l'expérience doivent etres copiées dans le container
 	// NGL-3247 ajout du calcul de quantité meme si elle n'est pas affichée
+	//  26/06/ ajout de l'affichage de la qté==> ajout propriété d'experience quantity1 !!!!!
 	$scope.$parent.copyPropertiesToInputContainer = function(experiment){
 		
 		experiment.atomicTransfertMethods.forEach(function(atm){
@@ -136,11 +142,10 @@ angular.module('home').controller('OneToVoidFluoQuantificationCNGCtrl',['$scope'
 						var calcQuantity= $parse("value")(concentration1) * $parse("inputVol")(computeQty);
 						calcQuantity=Math.round(calcQuantity*100)/100;
 						$parse("newQuantity.value").assign(inputContainerUsed, calcQuantity);
-						
-						// conc est définie en ng/µl (voir ExpirementServiceCNG.java / getPropertyDefinitionsQuantIt ); volume est en µL
-						// --->  ng/µL * µL => ng
+						// conc est définie en ng/µl (voir ExperimentServiceCNG.java / getPropertyDefinitionsQuantIt ); volume est en µL --->  ng/µL * µL => ng
 						$parse("newQuantity.unit").assign(inputContainerUsed, "ng");
 						//console.log("calcQuantity="+calcQuantity + " ng");
+
 					} else {
 						console.log("valeur manquante pour calculer calcQuantity OU unité volume non gérée");
 					}
@@ -153,13 +158,80 @@ angular.module('home').controller('OneToVoidFluoQuantificationCNGCtrl',['$scope'
 				} 
 			}
 		});
-		
-		// NGL_4153 mise à jour du message de concentrations manquantes
-		//console.log("save puis copyPropertiesToInputContainer > checkMissing ..." );
-		//$scope.expHasMissingConcentrations=checkMissingConcentrations();
-		
 	};
-	
+
+	// NGL-4638 
+	// updatePropertyFromUDT  est automatiqut defini pour les colonnes injectees dans le datatable....
+	$scope.updatePropertyFromUDT = function(value, col){
+		console.log("update from property : "+col.property);
+
+		if(col.property === 'inputContainerUsed.experimentProperties.concentration1.value'){
+			computeQuantity1(value.data);
+			computeYield(value.data);
+		} 
+	}
+
+	//NGL-4638 l'affichage de la quté est nécessaire meme si la copie n'est pas demandée !!
+	//////////  conflits ??????
+	//////////  traiter unités  !!!
+	//////////  pourquoi  computeQuantity  et  computeQty  plus haut ??
+	var computeQuantity1 = function(udtData){
+		var getterQuantity1= $parse("inputContainerUsed.experimentProperties.quantity1.value");
+		var quantity1= getterQuantity1(udtData);
+
+		var computeQuantity = {
+				// c'est le volume du container en input....
+				inputVol : $parse("inputContainerUsed.volume.value")(udtData),
+				inputConc1 : $parse("inputContainerUsed.experimentProperties.concentration1.value")(udtData),
+				isReady:function(){
+					return (this.inputVol && this.inputConc1);
+				}
+		};
+
+		if(computeQuantity.isReady()){
+			var result = $parse("(inputVol * inputConc1)")(computeQuantity);
+			console.log("computeQuantity1: result = "+result);
+			if(angular.isNumber(result) && !isNaN(result)){
+				quantity1 = Math.round(result*10)/10;	
+			}else{
+				quantity1 = undefined;
+			}	
+			getterQuantity1.assign(udtData, quantity1);
+		}else{
+			getterQuantity1.assign(udtData,undefined);
+			console.log("not ready to computeQuantity1");
+		}
+	};
+
+	// cette méthode ne fonctionnera que s'il existe "inputContainerUsed.contents[0].properties.pacbioLibraryInputQuantity.value"
+	// ==> uniquement si on est dans un processus PacBio!!!
+	var computeYield = function(udtData){
+		var getterYield=$parse("inputContainerUsed.experimentProperties.pacbioLibraryYield.value");
+		var yield= getterYield(udtData);
+
+		var computeYield = {
+			inputQuantityPacbio :  $parse("inputContainerUsed.contents[0].properties.pacbioLibraryInputQuantity.value")(udtData),
+			inputQuantity1 : $parse("inputContainerUsed.experimentProperties.quantity1.value")(udtData),
+			isReady:function(){
+				// il faudrait aussi qu'on ait les memes unités ???
+				return (this.inputQuantityPacbio && this.inputQuantity1);
+			}
+		};
+		if(computeYield.isReady()){
+			var result = $parse("(inputQuantity1 / inputQuantityPacbio *100)")(computeYield);
+			console.log("computeYield: result = "+result);
+			if(angular.isNumber(result) && !isNaN(result)){
+				yield = Math.round(result*10)/10;	
+			}else{
+				yield = undefined;
+			}	
+			getterYield.assign(udtData, yield);
+		}else{
+			getterYield.assign(udtData,undefined);
+			console.log("not ready to computeYield");
+		}
+	}
+
 	var importData = function(){
 		$scope.messages.clear();
 		
@@ -231,6 +303,24 @@ angular.module('home').controller('OneToVoidFluoQuantificationCNGCtrl',['$scope'
 		console.log('missing concentrations: '+ $scope.missingConcentrations );
 		
 		return ( $scope.missingConcentrations > 0 ? true : false );
+	}
+
+	// NGL-4638
+	function toggleColumns( atmService, displayChoice ){
+		var udt = atmService.data;
+		var columns = udt.getColumnsConfig(columns);
+		// !! garder en cohérence avec les valeurs de position déclarées dans le datatable et experience
+		// 14=volume; 15=Quantité; 17=Rendement
+		for(var i = 14; i <= 17 ; i++){
+			var selectedColumns = $filter('filter')(columns,{position:i});
+				if(selectedColumns.length === 1){
+					var column = selectedColumns[0];
+					//console.log( column.position);
+					// tester contre "Expérience Classique", perlmet de changer l'autre label si nécessaire
+					if      ((displayChoice !== "Expérience Classique" ) &&   udt.isHide(column.id)){ udt.setHideColumn(column);}
+					else if ((displayChoice == "Expérience Classique" ) && ! udt.isHide(column.id)){ udt.setHideColumn(column);}
+				} // else =plusieurs colonne a la meme position !!!!
+		}
 	}
 	
 	$scope.expHasMissingConcentrations=checkMissingConcentrations();

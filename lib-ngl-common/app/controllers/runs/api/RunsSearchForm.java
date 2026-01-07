@@ -60,6 +60,8 @@ public class RunsSearchForm extends DBObjectListForm<Run> {
     public List<String> runResolutionCodes;
     public List<String> laneResolutionCodes;
     public List<String> resolutionCodes;
+
+    public List<String> umbrellaCodes;
     
     public List<String> existingFields, notExistingFields;
     

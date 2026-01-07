@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import models.sra.submit.sra.instance.UserExperimentType;
-import models.sra.submit.util.SraException;
+import services.sra.SraException;
 
 public class UserExperimentTypeParser {
 	// champs, cle de map :

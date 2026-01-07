@@ -7,6 +7,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
@@ -17,6 +18,7 @@ import models.laboratory.common.instance.property.PropertyFileValue;
 import models.laboratory.common.instance.property.PropertySingleValue;
 import models.laboratory.experiment.instance.Experiment;
 import models.laboratory.parameter.map.MapQPCR;
+import models.laboratory.parameter.map.MapQPCRconvert; // NGL-4902
 import models.utils.InstanceConstants;
 import validation.ContextValidation;
 
@@ -30,6 +32,9 @@ import fr.cea.ig.MongoDBDAO;
  * experience qpcr quantification            :  mode="mapping"    ancien existant
  *                                           :  mode="standard"   28/04/2020 pas pour l'instant (désactivé dans le javascript)
  * experience qpcr Nb cycles determination   :  mode="nbCycle"    20/08/2020 spécifications définitives du fichier
+ * experience qpcr Convert Mt DNA            :  mode="convert" (NGL-4902)
+ *  
+ *  NGL-4902 en profiter pour simplifier... passer directement le parameterCode dans contexValidation !!!
  */
 
 public class Qpcrlightcycler480iiAloneInput extends AbstractInput {
@@ -56,6 +61,8 @@ public class Qpcrlightcycler480iiAloneInput extends AbstractInput {
 			case "nbCycle" :          processNbCycleSettingFile (experiment, pfv, mode, contextValidation);
 				return experiment;
 			case "mapping" :          processMappingFile (experiment, pfv, mode, contextValidation);
+				return experiment;	
+			case "convert" :          processConvertFile (experiment, pfv, mode, contextValidation);
 				return experiment;	
 				
 			default : contextValidation.addError("Erreur interne", "mode '" + mode + "' non supporté.");
@@ -147,13 +154,13 @@ public class Qpcrlightcycler480iiAloneInput extends AbstractInput {
 				if(belongToSector96(contextValidation, pos96, 0)){
 					// récupérer la pos384 mappée
 					String pos384=simpleMapping(pos96, mapLine);
-					logger.info("pos96 "+ pos96 + " mapped in "+ pos384);
+					//logger.info("pos96 "+ pos96 + " mapped in "+ pos384);
 					if (mapFile384ToCp.containsKey(pos384)) {
 						//logger.info("in mapFile384ToCp: key "+ pos384 + " get value=>"+ mapFile384ToCp.get(pos384) );
 					
 						optimalPcrCycleNb.value = mapFile384ToCp.get(pos384);
 					} else {
-						logger.info("in mapFile384ToCp: key "+ pos384 + " not found");
+						// logger.info("in mapFile384ToCp: key "+ pos384 + " not found");
 						// le fichier ne contient aucune valeur pour cette position => erreur de fichier ??? a voir si faut garder l'erreur ou pas...
 						contextValidation.addError("Erreurs fichier", "experiments.msg.import.cp.missing", pos384);
 					}
@@ -169,17 +176,18 @@ public class Qpcrlightcycler480iiAloneInput extends AbstractInput {
 	
 	
 	// code existant transféré depuis MappingLightcyclerQPCR.java.off
-	// 20/08/2020passer le parametre mode à loadFile
+	// 20/08/2020 passer le parametre mode à 
+	// 17/01/2025 a renommer en processQuantificationFile !! car NGL-4902 passe aussi par un mapping (et meme 2 d'ailleurs) mais pas pourde la quantification
 	private Experiment processMappingFile(Experiment experiment, PropertyFileValue pfv, String mode, ContextValidation contextValidation) throws Exception {
 
-		/* description de la tranformation effectuée (avec robot Bravo ou Tecan ou même à la main mais sans se tromper !!!!!)
+		/* description de la tranformation effectuée (avec robot Bravo ou même à la main mais sans se tromper !!!!!)
 		 * 
 		 *  Le fichier a traiter contient les mesures faites sur une plaque 384 puits 
 		 *  les puits on été transférés depuis une demi-plaque 96 (6 premieres ou 6 dernieres colonnes)
 		 *  il faut donc remaper les résutats trouves dans le fichier vers les puits concernés
-		 *  1 parametre necessaire: de quelle demi plaque s'agit-il ? colonne 1-6 ou 7-12 ? 
+		 *  1 parametre necessaire: de quelle demi plaque s'agit-il ? sector 0 ou sector 1 ? 
 		 *  
-	   	 *plaque 96 d'origine (celle pour laquelle NGL doir enregistrer les valeur de concentration):
+	   	 * plaque 96 d'origine (celle pour laquelle NGL doit enregistrer les valeurs de concentration):
 	   	 *
 	   	 *   1.......6 7.......12
 	  	 *  +-------------------+
@@ -211,47 +219,46 @@ public class Qpcrlightcycler480iiAloneInput extends AbstractInput {
 	  	 * chaque puit de la plaque initiale 96 est déposé 6 fois sur la plaque 384:
 	  	 *    - 3 en dilution  1/5000  (Prod)   1/10000  (Dev)
 	  	 *    - 3 en dilution  1/50000 (Prod)   1/100000 (Dev)
-	  	 *    
-		 */
+		 * 
+		 * ===> MongoDb: map-qpcr-parameter : bravo_10_100  et bravo_5_50
+		 * 
+		 * *************************************************************
+		 *  Et le mapping tecan_10_100  ?????
+		 * 
+		 * * *************************************************************
+		 * NGL-4635 un nouveau mapping est utilisé en prod le schéma n'est plus celui décrit ci dessus...
+		 * chaque puit de la plaque initiale 96 est déposée 3 fois sur la plaque 384 et il n'y a plus qu'une seule dilution
+		 * l'algorithme est le meme...mais il est inutile de faire des controles sur le sector car toute la plaque est concernée !!
+		 * 
+		 * ===> MongoDb: map-qpcr-parameter : bravo_10
+		 * 
+		*/
 		
-		
-		String mappingMode =null; // 08/04/2020 renommer ce parametre car mode deja utilisé !!!
-		String parameterCode=null;// 23/06/2022 utiliser les codes et pas les names!!!! car les names vont être utilisés pour IHM
+		String parameterCode=null;
+
 		// Assertions des preconditions
-		if (contextValidation.getObject("mappingMode") == null) {
+		if (contextValidation.getObject("parameterCode") == null) {
 			// url mal formée
-			contextValidation.addError("Erreur interne", "experiments.msg.import.parameter.missing","mappingMode");
+			contextValidation.addError("Erreur interne", "experiments.msg.import.parameter.missing","parameterCode");
 			return experiment;			
 		} else {
-			mappingMode = contextValidation.getObject("mappingMode").toString();
+			parameterCode = contextValidation.getObject("parameterCode").toString();
 			//logger.info("mappingMode:{}", mappingMode);
 		}
-		
-		// 30/03/2020 NGL-2897 il n'y a pas de Prod Tecan  c'est du dev !!! Renommer 
-		//  !!! parameterCodes hardcodés !!!
-		switch (mappingMode) {
-			case "ProdBravo" : parameterCode="bravo_5_50";
-					break;
-			case "DevBravo"  : parameterCode="bravo_10_100";
-					break;
-			case "DevTecan" :  parameterCode="tecan_10_100";
-					break;
-			default          : contextValidation.addError("Erreur interne", "experiments.msg.import.parameter.invalidValue", mappingMode, "mappingMode" ); 
-					return experiment;
-		}
 	
+		// récupérer le parametre mongoDB
 		MapQPCR mapQPCR= MongoDBDAO.findOne(InstanceConstants.PARAMETER_COLL_NAME, MapQPCR.class, DBQuery.is("typeCode", "map-qpcr-parameter").is("code", parameterCode));
 		if ( null == mapQPCR ){
 			contextValidation.addError("Erreur interne: map-qpcr-parameter ", "io.error.resultat.notexist", parameterCode); 
 			return experiment;
 		}
-		
-		// pour stocker le fichier
-		// 20/08/2020 ajout parametre mode
-		Map<String, Double> mapFile384ToConc= loadFile( pfv, mode, contextValidation);
-		
-		int sector = getSector(experiment, contextValidation);
 		final MapQPCR mapQPCRFinal =  mapQPCR;
+
+		// pour stocker le fichier
+		Map<String, Double> mapFile384ToConc= loadFile( pfv, mode, contextValidation);
+
+		// récuperer le secteur qu'on va traiter
+		int sector = getSector(experiment, contextValidation);
 		
 		if ( null == mapQPCRFinal.defaultSize ) {
 			// le document map-qpcr-parameter est incorrect, ne contient pas de defaultSize !!!
@@ -264,8 +271,6 @@ public class Qpcrlightcycler480iiAloneInput extends AbstractInput {
 			.stream()
 			.map(atm -> atm.inputContainerUseds.get(0))
 			.forEach(icu -> {
-				// FDS 11/02/2019 NGL-2399  puisqu'il est corrigé, utiliser InputHelper.getIcuPosition
-				//String pos96 = icu.locationOnContainerSupport.line+""+icu.locationOnContainerSupport.column;
 				String pos96 =InputHelper.getIcuPosition(icu);
 				// verifier qd meme que les positions dans l'experience correspondent au secteur demandé
 				if(belongToSector96(contextValidation, pos96, sector)){
@@ -333,8 +338,197 @@ public class Qpcrlightcycler480iiAloneInput extends AbstractInput {
 		return experiment;
 	}
 	
-	/* methodes appellées par processMappingFile */
+	private Experiment processConvertFile(Experiment experiment, PropertyFileValue pfv, String mode, ContextValidation contextValidation) throws Exception {
+		logger.info("processConvertFile........");
+
+		/* description de la tranformation effectuée (avec robot Bravo ou même à la main mais sans se tromper !!!!!)
+		 * 
+		 *  Le fichier a traiter contient les mesures faites sur une plaque 384 puits 
+		 *  les puits on été transférés depuis une demi-plaque 96 (6 premieres ou 6 dernieres colonnes)
+		 *  il faut donc remaper les résutats trouves dans le fichier vers les puits concernés
+		 *  1 parametre necessaire: de quelle demi plaque s'agit-il ? sector 0 ou sector 1 ? 
+		 *  
+	   	 * plaque 96 d'origine (celle pour laquelle NGL doit enregistrer les valeurs de conversion):
+	   	 *
+	   	 *   1.......6 7.......12
+	  	 *  +-------------------+
+		 * A|         |         |
+	 	 * B|         |         |
+	 	 * ....
+	 	 * H|         |         |
+	  	 *  +-------------------+
+	     *      ||       ||
+	     *      ||        ==>  sector 1 (samples 49 a 96)
+	     *       ==>  sector 0 (samples 1 a 48)
+	     *
+		 *
+	 	 * chaque plaque 384 est composé de 2 zones :
+	  	 *  1 zone pour les ADN génomiques
+	  	 *  1 zone pour les ADN convertis
+	  	 *
+	  	 *   1...6.8...13.14...20.22..24
+	  	 * A|            |             |
+	  	 * ...génomiques   convertis
+	  	 * P|            |             |
+	  	 *  +--------------------------+
+	  	 *
+		 * ===> MongoDb: map-qpcr-convert-parameter : bravo_convert_mt_dna
+		 */
+		 
+		String parameterCode=null;
+
+		// Assertions des preconditions
+		if (contextValidation.getObject("parameterCode") == null) {
+			// url mal formée
+			contextValidation.addError("Erreur interne", "experiments.msg.import.parameter.missing","parameterCode");
+			return experiment;			
+		} else {
+			parameterCode = contextValidation.getObject("parameterCode").toString();
+			//logger.info("mappingMode:{}", mappingMode);
+		}
+
+		// récupérer le paramètre dans mongoDB
+		MapQPCRconvert mapQPCR= MongoDBDAO.findOne(InstanceConstants.PARAMETER_COLL_NAME, MapQPCRconvert.class, DBQuery.is("typeCode", "map-qpcr-convert-parameter").is("code", parameterCode));
+		if ( null == mapQPCR ){
+			contextValidation.addError("Erreur interne: map-qpcr-convert-parameter ", "io.error.resultat.notexist", parameterCode); 
+			return experiment;
+		}
+		final MapQPCRconvert mapQPCRFinal =  mapQPCR;
+
+		// pour stocker le fichier
+		Map<String, Double> mapFile384= loadFile( pfv, mode, contextValidation);
+
+		// récuperer le secteur qu'on va traiter
+		int sector = getSector(experiment, contextValidation);
+
+		if (!contextValidation.hasErrors()) {
+			experiment.atomicTransfertMethods
+			.stream()
+			.map(atm -> atm.inputContainerUseds.get(0))
+			.forEach(icu -> {
+				String pos96 =InputHelper.getIcuPosition(icu);
+				// verifier qd meme que les positions dans l'experience correspondent au secteur demandé
+				if(belongToSector96(contextValidation, pos96, sector)){
+					logger.info("...POS96:"+pos96);
+
+					// 1) les ADN génomiques
+					logger.info("...ADN GENOMIQUES");
+					double[] resultsGen = getMeanAndSd(contextValidation, mapQPCRFinal, pos96, "map96To384geno", mapFile384); 
+					//if (!contextValidation.hasErrors()) { ???? continue ??????????????  }
+
+					//injecter valeurs des propriétés dans l'experience
+					PropertySingleValue meanCtGen = getOrCreatePSV(icu, "meanCtGen");
+					meanCtGen.value=resultsGen[0];
+					// pas de unit
+					logger.info("...meanCtGen="+resultsGen[0]);
+
+					PropertySingleValue sdCtGen = getOrCreatePSV(icu, "sdCtGen");
+					sdCtGen.value=resultsGen[1];
+					// pas de unit
+					logger.info("...sdCtGen="+resultsGen[1]);
 	
+					// 2) les ADN convertis
+					logger.info("...ADN CONVERTIS");
+					double[] resultsConv = getMeanAndSd(contextValidation, mapQPCRFinal, pos96, "map96To384conv", mapFile384); 
+					//if (!contextValidation.hasErrors()) { ???? continue ????????????????? }
+
+					//injecter valeur dans la propriétés de l'experience
+					PropertySingleValue meanCtConv = getOrCreatePSV(icu, "meanCtConv");
+					meanCtConv.value=resultsConv[0];
+					// pas de unit
+					logger.info("...meanCtConv="+resultsConv[0]);
+
+					//injecter valeur dans la propriétés de l'experience
+					PropertySingleValue sdCtConv = getOrCreatePSV(icu, "sdCtConv");
+					sdCtConv.value=resultsConv[1];
+					// pas de unit
+					logger.info("...sdCtConv="+resultsConv[1]);
+					
+					//3) Delta 
+					Double delta= resultsGen[0] - resultsConv[0];
+					logger.info("delta="+ delta+"..."+resultsGen[0]+ "-"+ resultsConv[0]);
+
+					//injecter valeur dans la propriétés de l'experience
+					PropertySingleValue deltaCp = getOrCreatePSV(icu, "deltaCt");
+					//arrondir à 2 décimales
+					deltaCp.value=Math.round(delta * 100.0)/100.0;
+					// pas de unit
+
+					//4) calculer Tx conversion 
+					// taux de conversion = 100-(1/(2^(6))*100) = 98,4375 soit 98,44%
+					// NON !!! Double convertPerc= 100 - ( 1/( Math.pow(2, delta) * 100));
+					Double convertPerc= 100 - ( (1/( Math.pow(2, delta)) * 100));
+
+					logger.info("convertPerc="+ Math.round(convertPerc * 100.0)/100.0 );
+
+					//injecter valeur dans la propriétés de l'experience
+					PropertySingleValue convPercentage = getOrCreatePSV(icu, "convPercentage");
+					// 01/04/2025 arrondir à 2 décimales
+					convPercentage.value=Math.round(convertPerc * 100.0)/100.0;
+					// pas de unit
+				} 
+				/* else
+				 *  si le puit 96 n'appartient pas au secteur demandé Il est simplement ignoré par l'algo...
+				 *  volontaire: permet pour la meme plaque 96 d'importer successivement 2 fichiers en changeant juste le secteur
+				 */
+			});
+		}
+		
+		return experiment;
+	}
+
+	/* get Mean  AND standard deviation */
+	private double[] getMeanAndSd(ContextValidation contextValidation, MapQPCRconvert mapQPCRFinal, String pos96, String mapname, Map<String, Double> mapFile384 ) {	
+
+					//List<String> listPos384 = mapQPCRFinal.map96To384c.get(pos96);
+					List<String> listPos384 = new ArrayList<>();;
+
+					if      (mapname.equals("map96To384conv")){  listPos384 = mapQPCRFinal.map96To384conv.get(pos96); }
+					else if (mapname.equals("map96To384geno")){  listPos384 = mapQPCRFinal.map96To384geno.get(pos96); }
+
+					Double sumCp = new Double(0);
+					Double sumCp_square = new Double(0);
+					int nb=0;
+					
+					for(String pos384 : listPos384){
+						logger.info(">>pos384:"+pos384);
+						
+						Double cp384 = mapFile384.get(pos384);
+						// et si rien trouvé dans le fichier pour cette position ???
+						if ( null == cp384) {
+							contextValidation.addError("Erreurs fichier", "experiments.msg.import.cp.missing", pos384);
+							// continue;
+							// !!! on est maintenant dans une metode et plus dans foreach icu!!!!!!
+							return new double[]{0d, 0d}; // retourner 0 en cas d'erreur ???
+						}
+						logger.info(">>> cp384 in file:"+cp384);
+						
+						/* ne pas compter les puits de cp nulle dans la moyenne */
+						if (cp384 > 0){
+							sumCp+=cp384;
+							sumCp_square+= Math.pow( cp384, 2 );
+
+							nb++;
+						}
+					}
+					// attention au cas nb=0 !! arrive quand ?????????
+					// moyenne = somme / n
+					Double cpMean = (nb > 0 ) ? sumCp/nb : 0d;
+					logger.info("nb="+ nb+";  cpMean="+cpMean);
+					
+					// ecart_type = (somme_carre / n - moyenne ^2) ^0.5
+					// attention il y a des NaN si ????
+					Double cpSd=  Math.pow( (sumCp_square/nb - Math.pow( cpMean, 2 )), 0.5);
+					logger.info("nb="+ nb+";  cpSd="+cpSd);
+
+					// 01/04/2025 arrondir à 2 décimales
+					return new double[]{  Math.round(cpMean * 100.0)/100.0,  Math.round(cpSd * 100.0)/100.0 };
+		
+	}
+
+	/* methodes appellées par processMappingFile et processConvertFile*/
+
+	// recodage de sector96 (string)=> sector (int), plus facile pour les tests
 	private int getSector(Experiment experiment, ContextValidation contextValidation) {	
 		if (! experiment.instrumentProperties.containsKey("sector96")) {
 			//normalement propriété obligatoie de l'expérience... ne devait pas arriver !!
@@ -345,10 +539,11 @@ public class Qpcrlightcycler480iiAloneInput extends AbstractInput {
 		switch (psv.value.toString()) {
 		case  "1-48" : return 0;
 		case "49-96" : return 1; 
+		case  "1-96" : return 2; // ajout NGL-4635 
 		default:
 			//c'est une liste de choix... ne devait pas arriver !!
 			contextValidation.addError("Erreur interne","experiments.msg.import.propertie.invalidValue", psv.value.toString(), "sector96"); 
-			return 2; // valeur inutilisée...
+			return 3; // NGL-4635 return 3 au lieu de 2
 		}
 	}
 	
@@ -358,6 +553,8 @@ public class Qpcrlightcycler480iiAloneInput extends AbstractInput {
 			// isPlatePosition envoie elle meme une erreur dans ContextValidation
 			return false;
 		}
+		// NGL-4635 si sector=2 c'est la plaque entière!  donc toujours vrai
+		if (sector == 2 ){ return true; }
 		
 		// les secteurs sont uniquement defini par les colonnes		
 		int col96 = Integer.parseInt(pos96.substring(1));
@@ -384,7 +581,7 @@ public class Qpcrlightcycler480iiAloneInput extends AbstractInput {
 	*  l'ordre des puits n'est plus assuré...
 	*  Pour les puits en erreur, il n'y a rien dans les colonnes "Cp" et "Concentration"
 	*  
-	*  20/08/2020 cettte methode est utilisable dans plusieurs modes=> ajouter le parametre mode
+	*  20/08/2020 cettte methode est utilisable dans plusieurs modes=> ajouter le parametre mode  (nbCycle, mapping, convert)
 	*/
 	private Map<String, Double> loadFile (PropertyFileValue pfv, String mode, ContextValidation contextValidation) {
 		// hashMap  pour stocker les informations du fichier... ???si on stocke un entier en double PB???
@@ -456,14 +653,25 @@ public class Qpcrlightcycler480iiAloneInput extends AbstractInput {
 									data.put(pos384, 0d);
 								}
 								break;
+							// NGL-XX 20/08/2020
 							case "nbCycle" :
-								// cas ajouté 20/08/2020
 								// exclure les positions au dela de la colonne 6
 								int col384 = Integer.parseInt(pos384.substring(1));
 								if (  (cols[0].equals("True") && cols[1].equals("255")) && col384 < 7 ) {
 									// la map data est faite pour des Doubles... declarer nbc en double meme si en fait c'est un integer !!
 									Double nbc=calculateNbCycle(cols[4]);
 									data.put(pos384, nbc);
+								}
+								break;
+							// NGL-4902 on lit la colonne "cp" et pas la concentration
+							case "convert":
+								double cp; // double en minuscule ???
+								if (cols[0].equals("True") && cols[1].equals("255")) { 
+									cp=Double.parseDouble(cols[4]);   
+									data.put(pos384, cp);
+								} else { 
+									//logger.info("excluding well "+pos384);
+									data.put(pos384, 0d);
 								}
 								break;
 							default : contextValidation.addError("Erreur interne", "mode '" + mode + "' non supporté.");

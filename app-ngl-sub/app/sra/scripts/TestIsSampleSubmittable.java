@@ -3,7 +3,7 @@ package sra.scripts;
 import javax.inject.Inject;
 
 import fr.cea.ig.lfw.controllers.scripts.buffered.ScriptNoArgs;
-import services.SraEbiAPI;
+import sra.services.SraEbiAPI;
 
 /*
  * Script à utiliser pour recharger les md5 d'une soumission a partir de NGL.
@@ -16,7 +16,7 @@ import services.SraEbiAPI;
  */
 public class TestIsSampleSubmittable extends ScriptNoArgs {
 	private final SraEbiAPI ebiAPI;
-	private static final play.Logger.ALogger logger = play.Logger.of(TestIsSampleSubmittable.class);
+	// private static final play.Logger.ALogger logger = play.Logger.of(TestIsSampleSubmittable.class);
 	
 	
 	@Inject

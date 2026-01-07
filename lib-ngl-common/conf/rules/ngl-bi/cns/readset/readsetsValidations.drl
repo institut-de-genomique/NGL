@@ -15,3 +15,24 @@ rule "Check collabFileName contains no spaces"
 	then
 		$contextVal.addErrors("files","error.invalid.collabFileName", $collabFileName);
 end
+
+
+// NGL-4667
+rule "Check RefCollabSub in readset"
+	@nglBI( validations )
+	dialect "java"
+	salience 900
+	no-loop
+    when  
+        $readSet: ReadSet(properties != null, properties["refCollabSub"] != null)
+        $refCollabSub: String() from $readSet.properties["refCollabSub"].value
+        $contextValidation:ContextValidation()	   
+    then
+    	Logger.debug("Check refCollabSub : " + $readSet.code + " " + $refCollabSub);  
+       	if( $refCollabSub != null && ( ! $refCollabSub.matches("^[\\.A-Za-z0-9_-]+$") || $refCollabSub.length() >25 ) ) {
+       		//$contextValidation.addErrors($readSet.code + ".refCollabSub", "error.invalid.refCollabSub", $refCollabSub);
+       		$contextValidation.addErrors($readSet.code + ".refCollabSub", "La refCollabSub '" + $refCollabSub + "' est invalide");
+       		Logger.debug("refCollabSub invalide" + $refCollabSub);  
+       	}
+end
+	

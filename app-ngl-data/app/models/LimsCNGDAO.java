@@ -26,7 +26,6 @@ import models.laboratory.common.instance.State;
 import models.laboratory.common.instance.TBoolean;
 import models.laboratory.common.instance.TraceInformation;
 import models.laboratory.common.instance.Valuation;
-import models.laboratory.common.instance.property.PropertyObjectValue;
 import models.laboratory.common.instance.property.PropertySingleValue;
 import models.laboratory.container.instance.Container;
 import models.laboratory.container.instance.ContainerSupport;
@@ -37,6 +36,8 @@ import models.laboratory.parameter.index.Index;
 import models.laboratory.project.description.ProjectType;
 import models.laboratory.project.instance.BioinformaticParameters;
 import models.laboratory.project.instance.Project;
+import models.laboratory.project.instance.SystemParameters;
+import models.laboratory.project.instance.SystemParameters.QtreeQuota;
 import models.laboratory.sample.description.SampleType;
 import models.laboratory.sample.instance.Sample;
 import models.utils.InstanceHelpers;
@@ -68,8 +69,6 @@ public class LimsCNGDAO {
 	
 	protected static final String PROJECT_TYPE_CODE_DEFAULT  = "default-project";
 	protected static final String PROJECT_STATE_CODE_DEFAULT = "IP";
-	protected static final String PROJECT_PROPERTIES_SYNCHRO_PROJ = "synchroProj";
-	protected static final String QTREE_QUOTA = "qtreeQuota";
 	
 	protected static final String IMPORT_CATEGORY_CODE     = "sample-import";  // inutilisé...
 	protected static final String IMPORT_TYPE_CODE_DEFAULT = "default-import";
@@ -112,8 +111,10 @@ public class LimsCNGDAO {
 		
 		project.categoryCode=projectType.category.code;
 		
+		project.systemParameters = new SystemParameters();
+		project.systemParameters.synchroProj = Boolean.TRUE;
+		
 		project.properties = new HashMap<>();
-		project.properties.put(PROJECT_PROPERTIES_SYNCHRO_PROJ, new PropertySingleValue(Boolean.TRUE));
 		
 		project.state = new State(); 
 		project.state.code=PROJECT_STATE_CODE_DEFAULT;
@@ -409,12 +410,11 @@ public class LimsCNGDAO {
 					ContextValidation ctxErr = contextError; 
 					Project p =  commonProjectMapRow(rs0, rowNum0, ctxErr); 
 					
-					Map<String, Object> map = new HashMap<>();
-					map.put("proj", 0);
-					map.put("rawdata", 0);
-					map.put("scratch", 100);
-
-					p.properties.put(QTREE_QUOTA, new PropertyObjectValue(map));
+					QtreeQuota qtreeQuota = new QtreeQuota();
+					qtreeQuota.proj = 0;
+					qtreeQuota.rawdata = 0;
+					qtreeQuota.scratch = 100;
+					p.systemParameters.qtreeQuota = qtreeQuota;
 					
 					return p;
 				}	

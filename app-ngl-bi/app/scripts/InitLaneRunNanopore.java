@@ -27,9 +27,11 @@ public class InitLaneRunNanopore extends ScriptNoArgs{
 		keys.put("treatments", 0);
 		Integer skip = 0;
 		
+		Logger.debug("InitLaneRunNanopore");
+		
 		//On ne peut pas faire un skip sur cette requête car résultats differents à chaque skip
-		//MongoDBResult<Run> result = MongoDBDAO.find(InstanceConstants.RUN_ILLUMINA_COLL_NAME, Run.class, DBQuery.is("categoryCode", "nanopore").notExists("lanes"),keys);	
-		MongoDBResult<Run> result = MongoDBDAO.find(InstanceConstants.RUN_ILLUMINA_COLL_NAME, Run.class, DBQuery.is("categoryCode", "nanopore"),keys);	
+		MongoDBResult<Run> result = MongoDBDAO.find(InstanceConstants.RUN_ILLUMINA_COLL_NAME, Run.class, DBQuery.is("categoryCode", "nanopore").notExists("lanes"),keys);	
+		//MongoDBResult<Run> result = MongoDBDAO.find(InstanceConstants.RUN_ILLUMINA_COLL_NAME, Run.class, DBQuery.is("categoryCode", "nanopore"),keys);	
 		Integer nbResult = result.count(); 
 		Logger.debug("Nb result "+nbResult);
 		while (skip < nbResult) {

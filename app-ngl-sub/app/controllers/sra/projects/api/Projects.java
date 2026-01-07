@@ -7,16 +7,20 @@ import org.apache.commons.lang3.StringUtils;
 
 import controllers.NGLAPIController;
 import controllers.QueryFieldsForm;
+import controllers.sra.api.ProjectAPI;
 import fr.cea.ig.authentication.Authenticated;
 import fr.cea.ig.authorization.Authorized;
 import fr.cea.ig.ngl.NGLApplication;
 import fr.cea.ig.ngl.dao.api.APIException;
 import fr.cea.ig.ngl.dao.api.APIValidationException;
-import fr.cea.ig.ngl.dao.api.sra.ProjectAPI;
 import fr.cea.ig.ngl.dao.sra.ProjectDAO;
+import models.sra.submit.sra.instance.ExternalStudy;
 import models.sra.submit.sra.instance.Project;
+import models.sra.submit.sra.instance.Study;
 import play.data.Form;
 import play.mvc.Result;
+import sra.api.SubmissionNewAPI;
+import validation.ContextValidation;
 import views.components.datatable.DatatableForm;
 
 public class Projects extends  NGLAPIController<ProjectAPI, ProjectDAO, Project>  {
@@ -25,15 +29,18 @@ public class Projects extends  NGLAPIController<ProjectAPI, ProjectDAO, Project>
 
 	private final Form<Project>              projectForm;
 	private final Form<QueryFieldsForm>      updateForm;
-	private static final play.Logger.ALogger logger        = play.Logger.of(Projects.class);
+	// private static final play.Logger.ALogger logger        = play.Logger.of(Projects.class);
+	private final SubmissionNewAPI            submissionNewAPI;
 
 
 	@Inject
-	public Projects(NGLApplication app,
-			        ProjectAPI     api) {
+	public Projects(NGLApplication       app,
+			        ProjectAPI           api,
+				    SubmissionNewAPI     submissionNewApi) {
 		super(app, api, ProjectsSearchForm.class);
 		this.projectForm            = app.formFactory().form(Project.class);
 		this.updateForm             = app.form(QueryFieldsForm.class);
+		this.submissionNewAPI       = submissionNewApi;
 	}
 
 
@@ -57,6 +64,7 @@ public class Projects extends  NGLAPIController<ProjectAPI, ProjectDAO, Project>
 	@Authorized.Write
 	public Project saveImpl() throws APIException {
 		Project userProject = getFilledForm(projectForm, Project.class).get();
+		logger.debug("YYYYYYYYYYYYYYY    userProject.attributes='" + userProject.attributes + "'");
 		boolean copy = false;
 		ProjectsUrlParamForm filledProjectsUrlParamForm = filledFormQueryString(getNGLApplication().formFactory()
 				.form(ProjectsUrlParamForm.class),  ProjectsUrlParamForm.class).get();
@@ -84,12 +92,19 @@ public class Projects extends  NGLAPIController<ProjectAPI, ProjectDAO, Project>
 		if(StringUtils.isNotBlank(userProject.code) && ! userProject.code.equals(code)) {
 			throw new Exception("project.code :  valeur " + userProject.code + " != du code indiqué dans la route "  + code);
 		}
-		boolean copy = false;
+	
+		ContextValidation ctxVal = ContextValidation.createUndefinedContext(getCurrentUser());
+		submissionNewAPI.synchronyseValuesInUmbrella(userProject, ctxVal);	
+		if(ctxVal.hasErrors()) {
+			throw new APIValidationException("INVALID_INPUT_ERROR_MSG", ctxVal.getErrors());
+		}
+		
+		// boolean copy = false;
 		if (queryFieldsForm.fields == null) {	
 			return api().update(userProject, getCurrentUser(), false);
 		} 
 		if(queryFieldsForm.fields.contains("copy")) {
-			copy = true;
+			// copy = true;
 			queryFieldsForm.fields.remove("copy");
 			return api().update(userProject, getCurrentUser(), true);
 		} 

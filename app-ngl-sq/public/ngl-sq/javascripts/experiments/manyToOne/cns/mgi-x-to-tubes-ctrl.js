@@ -460,6 +460,7 @@ angular.module('home').controller('MGIXToTubesCtrl',['$scope', '$parse', '$filte
 	// 19/10/2016 version de Guillaume pour gerer les cas tubes ou 96-well-plate
 	// 27/10/2016 bug vu par JG: au CNS pool generique tube=> tube : line et column sont undefined
 	atmService.newAtomicTransfertMethod =  function(line, column){
+		// NGL-5093 : problème pour terminer l'expérience quand mélange de puits et de plaques non traité car pas de plaque en entrée dans cette expérience
 		var getLine = function(line){
 			//TEST correction FDS
 			if ($scope.experiment.instrument.outContainerSupportCategoryCode === "tube"){

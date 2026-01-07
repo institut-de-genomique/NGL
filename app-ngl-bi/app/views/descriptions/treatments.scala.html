@@ -8,17 +8,27 @@
 
            @columnSearchForm{
                 @formGroup{
-                <div bt-select placeholder='@Messages("search.placeholder.treatment.category")' class='form-control' multiple=true
-                     ng-model="searchService.form.categoryNames"
-                     bt-options="treatmentCategory.code as treatmentCategory.name for treatmentCategory in searchService.lists.categories()">
+                <div bt-select class='form-control' placeholder='@Messages("search.placeholder.treatment.category")' title='@Messages("search.placeholder.treatment.category")'
+                    multiple=true
+                    ng-model="searchService.form.categoryNames"
+                    bt-options="treatmentCategory.code as treatmentCategory.name for treatmentCategory in searchService.lists.categories()">
                 </div>
                 }
             }
             @columnSearchForm{
                 @formGroup{
-                <div bt-select placeholder='@Messages("search.placeholder.treatment.type")' class='form-control' multiple=true textarea="true"
+                <div bt-select placeholder='@Messages("search.placeholder.treatment.type.code")' class='form-control' multiple=true textarea="true" filter="true"
+                     ng-model="searchService.form.codes"
+                     bt-options="treatmentType.code for treatmentType in searchService.lists.types()">
+                </div>
+                }
+            }
+            @columnSearchForm{
+                @formGroup{
+                <div bt-select placeholder='@Messages("search.placeholder.treatment.type.name")' class='form-control' title='@Messages("search.placeholder.treatment.type")' 
+                     multiple=true textarea="true" textareaplaceholder='@Messages("search.textarea.placeholder.labelsList")'
                      ng-model="searchService.form.names"
-                     bt-options="treatmentType.name for treatmentType in searchService.lists.types()">
+                     bt-options="treatmentType.name for treatmentType in searchService.lists.uniqueTypeNames()">
                 </div>
                 }
             }

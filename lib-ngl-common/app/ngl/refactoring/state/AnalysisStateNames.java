@@ -36,6 +36,6 @@ public class  AnalysisStateNames {
 	/**
 	 * All available state names for analysis.
 	 */
-	public static final String[] values = {	F_BA, F_V, IP_BA, IW_V , N };
+	public static final String[] values = {	F_BA, F_V, IP_BA, IW_V , N};
 	
 }

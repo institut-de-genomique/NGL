@@ -19,6 +19,7 @@ import views.html.descriptions.mappingprojects;
 import views.html.descriptions.newmappingprojects;
 import views.html.descriptions.processes;
 import views.html.descriptions.detailsprotocol;
+import views.html.descriptions.processesgraph;
 
 public class Descriptions extends NGLController implements NGLJavascript, NGLForms {
 
@@ -31,11 +32,12 @@ public class Descriptions extends NGLController implements NGLJavascript, NGLFor
 	private final newmappingprojects newmappingprojects;
 	private final processes processes;
 	private final detailsprotocol detailsprotocol;
+	private final processesgraph processesgraph;
 
 	@Inject
 	public Descriptions(NGLApplication app, home home, instruments instruments, imports imports, protocols protocols,
 			experiments experiments, mappingprojects mappingprojects, processes processes, newmappingprojects newmappingprojects,
-			detailsprotocol detailsprotocol) {
+			detailsprotocol detailsprotocol, processesgraph processesgraph) {
 		super(app);
 		this.home = home;
 		this.instruments = instruments;
@@ -46,7 +48,7 @@ public class Descriptions extends NGLController implements NGLJavascript, NGLFor
 		this.newmappingprojects = newmappingprojects;
 		this.processes = processes;
 		this.detailsprotocol = detailsprotocol;
-
+		this.processesgraph = processesgraph;
 	}
 
 	@Authenticated
@@ -88,6 +90,10 @@ public class Descriptions extends NGLController implements NGLJavascript, NGLFor
 		return ok(processes.render());
 	}
 
+	public Result processesGraph() {
+		return ok(processesgraph.render());
+	}
+
 	public Result javascriptRoutes() {
 		return jsRoutes(
 				controllers.descriptions.tpl.routes.javascript.Descriptions.home(),
@@ -99,6 +105,7 @@ public class Descriptions extends NGLController implements NGLJavascript, NGLFor
 				controllers.descriptions.tpl.routes.javascript.Descriptions.newMappingProjects(),
 				controllers.descriptions.tpl.routes.javascript.Descriptions.processes(),
 				controllers.descriptions.tpl.routes.javascript.Descriptions.detailsProtocol(),
+				controllers.descriptions.tpl.routes.javascript.Descriptions.processesGraph(),
 				controllers.instruments.api.routes.javascript.Instruments.list(),
 				controllers.instruments.api.routes.javascript.InstrumentCategories.list(),
 				controllers.instruments.api.routes.javascript.InstrumentUsedTypes.list(),
@@ -114,10 +121,12 @@ public class Descriptions extends NGLController implements NGLJavascript, NGLFor
 				controllers.protocols.api.routes.javascript.Protocols.update(),
 				controllers.protocols.api.routes.javascript.Protocols.save(),
 				controllers.commons.api.routes.javascript.CommonInfoTypes.list(),
+				controllers.experiments.api.routes.javascript.ExperimentTypes.get(),
 				controllers.experiments.api.routes.javascript.ExperimentTypes.list(),
 				controllers.experiments.api.routes.javascript.ExperimentTypeNodes.list(),
 				controllers.projects.api.routes.javascript.Projects.list(),
 				controllers.processes.api.routes.javascript.ProcessTypes.list(),
+				controllers.processes.api.routes.javascript.ProcessTypes.get(),
 				controllers.processes.api.routes.javascript.ProcessCategories.list(),
 				controllers.descriptionHistories.api.routes.javascript.DescriptionHistories.save(),
 				controllers.descriptionHistories.api.routes.javascript.DescriptionHistories.get(),

@@ -173,7 +173,11 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 				$scope.sraVariables.librarySource = data;
 			});
 			
-			
+			$http.get(jsRoutes.controllers.sra.api.Variables.list().url, {params:{type:'dropBox'}})
+			.success(function(data) {
+				// initialisation de la variable sraVariables.dropBox 
+				$scope.sraVariables.dropBox = data;
+			});
 			//Init datatable
 			var maListconfigurations = [];
 			maListconfigurations.push($scope.configuration)

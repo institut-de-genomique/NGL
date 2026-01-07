@@ -20,14 +20,11 @@ public class StudiesSearchForm  extends DBObjectListForm<AbstractStudy> implemen
 	public List<String>pseudoStateCodes = new ArrayList<>();
 	public Boolean confidential         = null;
 	public String stateCode             = null;
-	public String accession             = null;
-	public List<String> accessions      = new ArrayList<>();
-	public String accessionRegex;
+	public String identifier            = null;
+	public List<String> identifiers     = new ArrayList<>();
+	public String identifierRegex;	
 	public List<String> codes           = new ArrayList<>();
 	public String codeRegex;
-	public String externalId            = null;
-	public List<String> externalIds     = new ArrayList<>();
-	public String externalIdRegex;
 	public String type;                 // si on veut selectionner Study ou ExternalStudy
 	public String createUser;           // pour recherche pour un proprietaire (update-ctrl.js)
 
@@ -61,6 +58,7 @@ public class StudiesSearchForm  extends DBObjectListForm<AbstractStudy> implemen
 	public Query getQuery() {
 		List<Query> queries = new ArrayList<>();
 		Query query = null;
+		
 		this.copyPseudoStateCodesToStateCodesInFormulaire();
 
 		//logger.debug("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX   Dans getQuery");
@@ -77,22 +75,29 @@ public class StudiesSearchForm  extends DBObjectListForm<AbstractStudy> implemen
 		} else if (StringUtils.isNotBlank(this.stateCode)) { //all
 			queries.add(DBQuery.in("state.code", this.stateCode));
 		}
-		if (StringUtils.isNotBlank(this.accession)) {
-			queries.add(DBQuery.in("accession", this.accession));
-		} else if (CollectionUtils.isNotEmpty(this.accessions)) {
-			queries.add(DBQuery.in("accession", this.accessions));
-		} else if(StringUtils.isNotBlank(this.accessionRegex)) {
-			queries.add(DBQuery.regex("accession", Pattern.compile(this.accessionRegex)));
+		if (StringUtils.isNotBlank(this.identifier)) {
+            queries.add(DBQuery.or(DBQuery.in("accession", identifier),DBQuery.in("externalId", identifier)));
+		} else if (CollectionUtils.isNotEmpty(this.identifiers)) {
+			List<String> identifiers_ERP     = new ArrayList<>();
+			List<String> identifiers_PRJ     = new ArrayList<>();
+			for(String identifier : this.identifiers) {
+				if(identifier.startsWith("PRJ")) {
+					identifiers_PRJ.add(identifier);
+				} else {
+					identifiers_ERP.add(identifier);
+				}
+			}
+            queries.add(DBQuery.or(DBQuery.in("accession", identifiers_ERP),DBQuery.in("externalId", identifiers_PRJ)));
+		} else if(StringUtils.isNotBlank(this.identifierRegex)) {
+			// ne passe pas car trop volumineux, il faut distinguer les 2 cas :
+            //queries.add(DBQuery.or(DBQuery.in("accession", Pattern.compile(this.identifierRegex)),DBQuery.in("externalId", Pattern.compile(this.identifierRegex)));
+			if (this.identifierRegex.startsWith("PRJ")) {
+				queries.add(DBQuery.regex("externalId", Pattern.compile(this.identifierRegex)));
+			} else {
+				queries.add(DBQuery.regex("accession", Pattern.compile(this.identifierRegex)));
+			} 
 		}
-
-		if (StringUtils.isNotBlank(this.externalId)) {
-			queries.add(DBQuery.in("externalId", this.externalId));
-		} else if(CollectionUtils.isNotEmpty(this.externalIds)){
-			queries.add(DBQuery.in("externalId", this.externalIds));
-		} else if(StringUtils.isNotBlank(this.externalIdRegex)){
-			queries.add(DBQuery.regex("externalId", Pattern.compile(this.externalIdRegex)));
-		}
-
+		
 		if (CollectionUtils.isNotEmpty(this.codes)) { //all
 			queries.add(DBQuery.in("code", this.codes));
 		}

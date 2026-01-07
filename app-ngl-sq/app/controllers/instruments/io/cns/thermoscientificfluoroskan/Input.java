@@ -451,170 +451,170 @@ public class Input extends AbstractInput {
 	 * @param exp
 	 * @param wb
 	 */
-	private void importFirstVersion(Experiment experiment, Workbook wb, ContextValidation contextValidation)
-	{
-		//Get sheet "Facteur dilution" => si null erreur
-				//Get sheet "Moyenne..." optional
-				Sheet sheetFactDil = null;
-				Sheet sheetMoy = null;
-				for(int i=0; i<wb.getNumberOfSheets();i++){
-					if(wb.getSheetAt(i).getSheetName().toLowerCase().contains("facteur de dilution"))
-						sheetFactDil=wb.getSheetAt(i);
-					else if(wb.getSheetAt(i).getSheetName().toLowerCase().contains("moyenne"))
-						sheetMoy=wb.getSheetAt(i);
-				}
-				if(sheetFactDil!=null){
-					//Sheet sheet = wb.getSheetAt(0);
-					String plateCodeInFile =null;
-					String plateCodeInExp = null;
-					if(experiment.instrument.inContainerSupportCategoryCode.equals("tube")){
-						//Code Container de la cellule A1
-						plateCodeInExp=getCodeContainerFirstPositionFluoPlate(experiment);
-						//TODO attendre retour Julie pour savoir où se trouvera le code container de la position A1
-						//Pour le moment pas de controle 
-						//plateCodeInFile=getStringValue(sheet.getRow(0).getCell(1));
-						plateCodeInFile=plateCodeInExp;
-					}else{
-						//controle nom plaque dans onglet facteur dilution cellule A2
-						plateCodeInFile = getStringValue(sheetFactDil.getRow(1).getCell(0));
-						plateCodeInExp = experiment.inputContainerSupportCodes.iterator().next();
-					}
+	// private void importFirstVersion(Experiment experiment, Workbook wb, ContextValidation contextValidation)
+	// {
+	// 	//Get sheet "Facteur dilution" => si null erreur
+	// 			//Get sheet "Moyenne..." optional
+	// 			Sheet sheetFactDil = null;
+	// 			Sheet sheetMoy = null;
+	// 			for(int i=0; i<wb.getNumberOfSheets();i++){
+	// 				if(wb.getSheetAt(i).getSheetName().toLowerCase().contains("facteur de dilution"))
+	// 					sheetFactDil=wb.getSheetAt(i);
+	// 				else if(wb.getSheetAt(i).getSheetName().toLowerCase().contains("moyenne"))
+	// 					sheetMoy=wb.getSheetAt(i);
+	// 			}
+	// 			if(sheetFactDil!=null){
+	// 				//Sheet sheet = wb.getSheetAt(0);
+	// 				String plateCodeInFile =null;
+	// 				String plateCodeInExp = null;
+	// 				if(experiment.instrument.inContainerSupportCategoryCode.equals("tube")){
+	// 					//Code Container de la cellule A1
+	// 					plateCodeInExp=getCodeContainerFirstPositionFluoPlate(experiment);
+	// 					//TODO attendre retour Julie pour savoir où se trouvera le code container de la position A1
+	// 					//Pour le moment pas de controle 
+	// 					//plateCodeInFile=getStringValue(sheet.getRow(0).getCell(1));
+	// 					plateCodeInFile=plateCodeInExp;
+	// 				}else{
+	// 					//controle nom plaque dans onglet facteur dilution cellule A2
+	// 					plateCodeInFile = getStringValue(sheetFactDil.getRow(1).getCell(0));
+	// 					plateCodeInExp = experiment.inputContainerSupportCodes.iterator().next();
+	// 				}
 
-					logger.debug("Start Contextvalidation Error "+ plateCodeInExp +", "+ plateCodeInFile );
+	// 				logger.debug("Start Contextvalidation Error "+ plateCodeInExp +", "+ plateCodeInFile );
 
-					if (plateCodeInExp.equals(plateCodeInFile)) {
+	// 				if (plateCodeInExp.equals(plateCodeInFile)) {
 
-						String codePropertiesConcDil   = null;
-						//String codePropertiesConcFinal = null;
-						String codePropertiesConcReelle = null;
-						String codePropertiesDilFactor = null;
+	// 					String codePropertiesConcDil   = null;
+	// 					//String codePropertiesConcFinal = null;
+	// 					String codePropertiesConcReelle = null;
+	// 					String codePropertiesDilFactor = null;
 
-						if (experiment.typeCode.equals("reception-fluo-quantification") || 
-								experiment.typeCode.equals("fluo-quantification")) {
+	// 					if (experiment.typeCode.equals("reception-fluo-quantification") || 
+	// 							experiment.typeCode.equals("fluo-quantification")) {
 
-							//Get type QC  cellule A11 dans la onglet facteur dilution chercher motif et plus valeur exacte
-							//Valeurs possibles : Dosage HS1, Dosage HS2, Dosage HS3 et Dosage BR
-							String typeQC = getStringValue(sheetFactDil.getRow(10).getCell(0));
+	// 						//Get type QC  cellule A11 dans la onglet facteur dilution chercher motif et plus valeur exacte
+	// 						//Valeurs possibles : Dosage HS1, Dosage HS2, Dosage HS3 et Dosage BR
+	// 						String typeQC = getStringValue(sheetFactDil.getRow(10).getCell(0));
 
-							logger.debug("Type QC {}", typeQC);
-							// Valide typeQC
-							if (typeQC == null) {
-								contextValidation.addError("Erreur gamme", "Code gamme vide dans fichier");
-							} else if (!typeQC.contains(contextValidation.getObject("gamme").toString())) {
-								contextValidation.addError("Erreur gamme", "La gamme du fichier "+typeQC+" ne correspond pas au type d'import "+contextValidation.getObject("gamme").toString());
-							} else if (typeQC.contains("Dosage BR")) {
-								codePropertiesConcDil   = "concentrationDilBR1";
-								codePropertiesConcReelle = "concentrationBR1";
-								codePropertiesDilFactor = "dilutionFactorBR1";
-							} else if(typeQC.contains("Dosage HS1")) {
-								codePropertiesConcDil   = "concentrationDilHS1";
-								codePropertiesConcReelle = "concentrationHS1";
-								codePropertiesDilFactor = "dilutionFactorHS1";
-							} else if(typeQC.contains("Dosage HS2")) {
-								codePropertiesConcDil   = "concentrationDilHS2";
-								codePropertiesConcReelle = "concentrationHS2";
-								codePropertiesDilFactor = "dilutionFactorHS2";
-							} else if (typeQC.contains("Dosage HS3")) {
-								codePropertiesConcDil   = "concentrationDilHS3";
-								codePropertiesConcReelle = "concentrationHS3";
-								codePropertiesDilFactor = "dilutionFactorHS3";
-							} else {
-								contextValidation.addError("Erreur gamme", "Code gamme non géré : "+typeQC);	
-							}
-						}
+	// 						logger.debug("Type QC {}", typeQC);
+	// 						// Valide typeQC
+	// 						if (typeQC == null) {
+	// 							contextValidation.addError("Erreur gamme", "Code gamme vide dans fichier");
+	// 						} else if (!typeQC.contains(contextValidation.getObject("gamme").toString())) {
+	// 							contextValidation.addError("Erreur gamme", "La gamme du fichier "+typeQC+" ne correspond pas au type d'import "+contextValidation.getObject("gamme").toString());
+	// 						} else if (typeQC.contains("Dosage BR")) {
+	// 							codePropertiesConcDil   = "concentrationDilBR1";
+	// 							codePropertiesConcReelle = "concentrationBR1";
+	// 							codePropertiesDilFactor = "dilutionFactorBR1";
+	// 						} else if(typeQC.contains("Dosage HS1")) {
+	// 							codePropertiesConcDil   = "concentrationDilHS1";
+	// 							codePropertiesConcReelle = "concentrationHS1";
+	// 							codePropertiesDilFactor = "dilutionFactorHS1";
+	// 						} else if(typeQC.contains("Dosage HS2")) {
+	// 							codePropertiesConcDil   = "concentrationDilHS2";
+	// 							codePropertiesConcReelle = "concentrationHS2";
+	// 							codePropertiesDilFactor = "dilutionFactorHS2";
+	// 						} else if (typeQC.contains("Dosage HS3")) {
+	// 							codePropertiesConcDil   = "concentrationDilHS3";
+	// 							codePropertiesConcReelle = "concentrationHS3";
+	// 							codePropertiesDilFactor = "dilutionFactorHS3";
+	// 						} else {
+	// 							contextValidation.addError("Erreur gamme", "Code gamme non géré : "+typeQC);	
+	// 						}
+	// 					}
 
-						final String codePropertiesConcDilf   = codePropertiesConcDil;
-						final String codePropertiesConcR = codePropertiesConcReelle;
-						final String codePropertiesDilFactorf = codePropertiesDilFactor;
-						//Get second sheet 
-						logger.debug("Nb sheet "+wb.getNumberOfSheets());
+	// 					final String codePropertiesConcDilf   = codePropertiesConcDil;
+	// 					final String codePropertiesConcR = codePropertiesConcReelle;
+	// 					final String codePropertiesDilFactorf = codePropertiesDilFactor;
+	// 					//Get second sheet 
+	// 					logger.debug("Nb sheet "+wb.getNumberOfSheets());
 
-						//onglet moyenne mode replicat plage B14 à M21
-						//sinon onglet facteur dilution mode normal B14 à M21
-						Sheet sheetResults = sheetFactDil;
-						if(sheetMoy!=null)
-							sheetResults=sheetMoy;
+	// 					//onglet moyenne mode replicat plage B14 à M21
+	// 					//sinon onglet facteur dilution mode normal B14 à M21
+	// 					Sheet sheetResults = sheetFactDil;
+	// 					if(sheetMoy!=null)
+	// 						sheetResults=sheetMoy;
 
-						Map<String,Double> results = new HashMap<>(0);
-						//			String[] lines = new String[] { "A", "B", "C", "D", "E", "F", "G", "H" };
-						String[] lines = { "A", "B", "C", "D", "E", "F", "G", "H" };
-						//Resultats dans cellule B14 à M21
-						for (int i = 13; i < 21; i++) {
-							String line = lines[i-13];
-							// column
-							for (int j = 1; j <= 12; j++) {
-								String key = "";
-								if(experiment.instrument.inContainerSupportCategoryCode.equals("tube"))
-									key = "_" + line + j;
-								else
-									key = plateCodeInExp + "_" + line + j;
-								//que des valeurs numériques (valeurs  postives ou négatives)à importer si non numériques  ne rien importer valeur vide
-								if ( (sheetResults.getRow(i).getCell(j) != null) && (isNumericValue(sheetResults.getRow(i).getCell(j))) ){
-									Double concentration1 = getNumericValue(sheetResults.getRow(i).getCell(j));
-									//	logger.info("Conc "+concentration1+" key "+key);
-									results.put(key,concentration1);
-								}else { //Cas où la cellule est vide ou format incorrect
-									//	logger.info("Conc null: key: "+key);
-									results.put(key,null);
-								}
+	// 					Map<String,Double> results = new HashMap<>(0);
+	// 					//			String[] lines = new String[] { "A", "B", "C", "D", "E", "F", "G", "H" };
+	// 					String[] lines = { "A", "B", "C", "D", "E", "F", "G", "H" };
+	// 					//Resultats dans cellule B14 à M21
+	// 					for (int i = 13; i < 21; i++) {
+	// 						String line = lines[i-13];
+	// 						// column
+	// 						for (int j = 1; j <= 12; j++) {
+	// 							String key = "";
+	// 							if(experiment.instrument.inContainerSupportCategoryCode.equals("tube"))
+	// 								key = "_" + line + j;
+	// 							else
+	// 								key = plateCodeInExp + "_" + line + j;
+	// 							//que des valeurs numériques (valeurs  postives ou négatives)à importer si non numériques  ne rien importer valeur vide
+	// 							if ( (sheetResults.getRow(i).getCell(j) != null) && (isNumericValue(sheetResults.getRow(i).getCell(j))) ){
+	// 								Double concentration1 = getNumericValue(sheetResults.getRow(i).getCell(j));
+	// 								//	logger.info("Conc "+concentration1+" key "+key);
+	// 								results.put(key,concentration1);
+	// 							}else { //Cas où la cellule est vide ou format incorrect
+	// 								//	logger.info("Conc null: key: "+key);
+	// 								results.put(key,null);
+	// 							}
 
-							}								
-						}
+	// 						}								
+	// 					}
 
-						if (!contextValidation.hasErrors()) {
+	// 					if (!contextValidation.hasErrors()) {
 
-							experiment.atomicTransfertMethods
-							.stream()
-							.map(atm -> atm.inputContainerUseds.get(0))
-							.forEach(icu -> {
-								String key=null;
-								if(experiment.instrument.inContainerSupportCategoryCode.equals("tube") &&
-										icu.instrumentProperties!=null &&
-										icu.instrumentProperties.get("fluoroskanLine")!=null &&
-										icu.instrumentProperties.get("fluoroskanColumn")!=null)
-									key = "_" + icu.instrumentProperties.get("fluoroskanLine").getValue() + icu.instrumentProperties.get("fluoroskanColumn").getValue();
-								else if(!experiment.instrument.inContainerSupportCategoryCode.equals("tube"))
-									key = icu.locationOnContainerSupport.code + "_" + icu.locationOnContainerSupport.line + icu.locationOnContainerSupport.column;
-								if(key!=null){
+	// 						experiment.atomicTransfertMethods
+	// 						.stream()
+	// 						.map(atm -> atm.inputContainerUseds.get(0))
+	// 						.forEach(icu -> {
+	// 							String key=null;
+	// 							if(experiment.instrument.inContainerSupportCategoryCode.equals("tube") &&
+	// 									icu.instrumentProperties!=null &&
+	// 									icu.instrumentProperties.get("fluoroskanLine")!=null &&
+	// 									icu.instrumentProperties.get("fluoroskanColumn")!=null)
+	// 								key = "_" + icu.instrumentProperties.get("fluoroskanLine").getValue() + icu.instrumentProperties.get("fluoroskanColumn").getValue();
+	// 							else if(!experiment.instrument.inContainerSupportCategoryCode.equals("tube"))
+	// 								key = icu.locationOnContainerSupport.code + "_" + icu.locationOnContainerSupport.line + icu.locationOnContainerSupport.column;
+	// 							if(key!=null){
 
-									if(results.containsKey(key)){
-										PropertySingleValue concentrationDil = getOrCreatePSV(icu,codePropertiesConcDilf);
-										concentrationDil.value = results.get(key);
-										//	logger.info(" key "+key+" Conc "+concentrationDil.value);
-										concentrationDil.unit = "ng/µl";
-										if (codePropertiesDilFactorf != null && codePropertiesConcR != null ) {
-											if (concentrationDil.value != null){
-												computeConcReelle(icu, concentrationDil, codePropertiesDilFactorf, codePropertiesConcR);
+	// 								if(results.containsKey(key)){
+	// 									PropertySingleValue concentrationDil = getOrCreatePSV(icu,codePropertiesConcDilf);
+	// 									concentrationDil.value = results.get(key);
+	// 									//	logger.info(" key "+key+" Conc "+concentrationDil.value);
+	// 									concentrationDil.unit = "ng/µl";
+	// 									if (codePropertiesDilFactorf != null && codePropertiesConcR != null ) {
+	// 										if (concentrationDil.value != null){
+	// 											computeConcReelle(icu, concentrationDil, codePropertiesDilFactorf, codePropertiesConcR);
 
-											}else{
-												//Cas ou on vide un dosage (import cellule vide ou non numerique
-												PropertySingleValue concR = getOrCreatePSV(icu, codePropertiesConcR);
-												concR.value= null;
-												concR.unit=null;
-											}
-											updateCalculations(icu, experiment.typeCode);
-										}
-									}
-								}
-							});
-						}
+	// 										}else{
+	// 											//Cas ou on vide un dosage (import cellule vide ou non numerique
+	// 											PropertySingleValue concR = getOrCreatePSV(icu, codePropertiesConcR);
+	// 											concR.value= null;
+	// 											concR.unit=null;
+	// 										}
+	// 										updateCalculations(icu, experiment.typeCode);
+	// 									}
+	// 								}
+	// 							}
+	// 						});
+	// 					}
 
-					} else {
-						//TODO changer les messages d'erreur avec nouvelles valeur de cellule
-						if(experiment.instrument.inContainerSupportCategoryCode.equals("tube")){
-							if(StringUtils.isEmpty(plateCodeInExp)){
-								contextValidation.addError("Erreurs fichier", "Aucun tube trouvé en position A1 (plaque fluoroskan)");
-							}else if(StringUtils.isEmpty(plateCodeInFile)){
-								contextValidation.addError("Erreurs fichier", "Code container en position A1 (plaque fluoroskan) non renseigné dans fichier");
-							}else
-								contextValidation.addError("Erreurs fichier", "Code container en position A1 (plaque fluoroskan) différent de code container renseigné dans fichier : "+plateCodeInFile);
-						}
-						else
-							contextValidation.addError("Erreurs fichier", "Code de plaque incorrecte : "+plateCodeInFile);
-					}		
-				}else{
-					contextValidation.addError("Erreurs fichier", "Absence onglet Facteur dilution");
-				}
-	}
+	// 				} else {
+	// 					//TODO changer les messages d'erreur avec nouvelles valeur de cellule
+	// 					if(experiment.instrument.inContainerSupportCategoryCode.equals("tube")){
+	// 						if(StringUtils.isEmpty(plateCodeInExp)){
+	// 							contextValidation.addError("Erreurs fichier", "Aucun tube trouvé en position A1 (plaque fluoroskan)");
+	// 						}else if(StringUtils.isEmpty(plateCodeInFile)){
+	// 							contextValidation.addError("Erreurs fichier", "Code container en position A1 (plaque fluoroskan) non renseigné dans fichier");
+	// 						}else
+	// 							contextValidation.addError("Erreurs fichier", "Code container en position A1 (plaque fluoroskan) différent de code container renseigné dans fichier : "+plateCodeInFile);
+	// 					}
+	// 					else
+	// 						contextValidation.addError("Erreurs fichier", "Code de plaque incorrecte : "+plateCodeInFile);
+	// 				}		
+	// 			}else{
+	// 				contextValidation.addError("Erreurs fichier", "Absence onglet Facteur dilution");
+	// 			}
+	// }
 
 }

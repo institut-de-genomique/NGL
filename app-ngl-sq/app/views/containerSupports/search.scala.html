@@ -1,6 +1,9 @@
+@this(ctx : fr.cea.ig.ngl.NGLApplication)
 @()
-
+@import play.mvc.Http.Context
 @import views.html.helper._
+
+@isCNSInstitute  = @{ "CNS" == ctx.nglConfig().getInstitute() }
 
 @** FDS 23/11/2020 remise en forme de l'ordre des attributs...
                    NGL-3152 ajout des titles manquants sur bt-input => va sur 'icone d'ouverture des textarea => messages spécifiques ajoutés 
@@ -71,7 +74,7 @@
 			</div>
 		}
 	}
-	@columnSearchForm{
+	@columnSearchForm{		
 		@formGroup{
 			@** ne pas mettre la directive date-timestamp dans ce cas **@
 			<input class="form-control" type="text"  placeholder='@Messages("containerSupports.placeholder.toDate")' title='@Messages("containerSupports.placeholder.toDate")'  
@@ -85,4 +88,53 @@
 	}
 }
 
-@searchForm(form)()("searchService.datatable")
+<div class="row">
+	<div class="col-md-12 col-lg-12"  messages="messages"></div>
+</div>
+<div class="row"> 
+<div class="col-md-12 col-lg-12" ultimate-datatable="searchService.datatable">
+	<div udt-form>
+		<ul class="nav nav-tabs margin-bottom-5">
+	   	<li class="active"><a href="#" data-target="#filters" data-toggle="tab">@Messages("search.tab.filters")</a></li>
+	   	<li ng-if="searchService.getAddFiltersToForm().length > 0"><a href="#" data-target="#addfilters" data-toggle="tab">@Messages("search.tab.addfilters")</a></li>
+	   	<li ng-if="searchService.getAddColumnsToForm().length > 0"><a href="#" data-target="#addcolumns" data-toggle="tab">@Messages("search.tab.addcolumns")</a></li>
+	   	</ul>
+			
+		<div class="tab-content">
+		<div class="tab-pane active" id="filters">
+			<form class="well well-small">
+				@if(isCNSInstitute){
+					<div class="row" style="margin-bottom: 20px;">
+						@columnSearchForm{	
+							@formGroup{
+								<div class='form-control' bt-select filter='true' ng-model='searchService.form.umbrellaCodes' 
+										placeholder='Nom umbrella' multiple='true' ng-change='selectProjetsFromUmbrellas()' 
+										bt-options='umbrellaProject.code as umbrellaProject.name for umbrellaProject in searchService.lists.getUmbrellaProjects()'>
+								</div>
+							}
+						}
+					</div>
+				}
+			<div class="row">
+			@form
+			@columnSearchForm{
+				@formGroup{
+				<div class="btn-toolbar">
+					<button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="search()" class="btn btn-primary" >
+						<i class="fa fa-search"></i>
+					</button>
+					<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="reset()"  class="btn btn-default">
+						<i class="fa fa-undo"></i>
+					</button>
+				</div>	
+				}
+			}
+			</div>
+		</form>	
+	</div>
+	
+	</div>
+	</div>
+</div>
+</div>
+

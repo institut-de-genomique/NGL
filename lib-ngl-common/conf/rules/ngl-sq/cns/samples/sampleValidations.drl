@@ -26,3 +26,66 @@ rule "Check RefCollab in sample "
 	  }
 	end
 	
+rule "ATLASea Check collectHour properties "
+	@nglSQ( validations )
+	dialect "java"
+	salience 900
+	no-loop
+    when
+        $sample : Sample($properties:properties, $properties!=null, typeCode=="biological-sample", $pv:properties.get("collectHour")!=null)
+        $contextValidation:ContextValidation()	
+    then
+    	Logger.debug("Check collectHour : "+$sample.code);  
+       	String collectHourValue = $pv.value.toString();
+       	if(!collectHourValue.matches("^([0-1][0-9]|2[0-3]):[0-5][0-9]$")){
+			$contextValidation.addErrors("collectHour "+$sample.code, ValidationConstants.ERROR_VALUENOTAUTHORIZED_MSG, $sample.code+" / "+collectHourValue, "Sample");
+		}
+	end
+
+rule "ATLASea taxon update check sample import type"
+	@nglSQ( validations )
+	dialect "java"
+	salience 900
+	no-loop
+    when
+    	$sample : Sample($importTypeCode:importTypeCode, $importTypeCode!="reference-genome-biological-sample-reception")
+    	$contextValidation:ContextValidation()
+		$action:Action(name=="update")
+		$updateImportType: String(this == "update-taxon-atlasea")
+    then
+    	$contextValidation.addErrors("update taxon "+$sample.code, "L'échantillon " + $sample.code + " n'est pas un échantillon AtlaSea, type d'import : '" + $importTypeCode + "'", "Sample");
+	end
+	
+rule "ATLASea taxon update check sample life"
+	@nglSQ( validations )
+	dialect "java"
+	salience 1000
+	no-loop
+    when
+    	$sample : Sample(life != null)
+    	$contextValidation: ContextValidation()
+		$action: Action(name=="update")
+		$updateImportType: String(this == "update-taxon-atlasea")
+    then 
+    	$contextValidation.addErrors("update taxon "+$sample.code, "L'échantillon " + $sample.code + " n'est pas au sommet de son arbre de vie, veuillez corriger le code échantillon", "Sample");
+	end
+
+rule "ATLASea taxon update delete CRON properties"
+	@nglSQ( validations )
+	dialect "java"
+	salience 800
+	no-loop
+    when
+    	$sample : Sample()
+    	$contextValidation: ContextValidation()
+		$action: Action(name=="update")
+		$updateImportType: String(this == "update-taxon-atlasea")
+    then 
+    	Map<String,PropertyValue> properties = $sample.properties;
+		properties.remove("taxonSize");
+		properties.remove("currentGoatStatus");
+		properties.remove("currentGoatStatusATS");
+		properties.remove("currentGoatProject");
+		properties.remove("ncbiPhylum");
+		properties.remove("ncbiClass");
+	end

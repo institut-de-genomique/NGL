@@ -1,4 +1,4 @@
-// FDS 29/04/2021 - NGL-3380 Duplication à partir de additional-normalisation avec modifications EN COURS !!!!!
+// FDS 29/04/2021 - NGL-3380 Duplication à partir de additional-normalisation avec modifications
 angular.module('home').controller('PurificationBeadsCtrl',['$scope', '$parse', '$http', 'atmToSingleDatatable',
                                                      function($scope, $parse, $http, atmToSingleDatatable){
 

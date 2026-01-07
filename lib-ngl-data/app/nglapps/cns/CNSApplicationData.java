@@ -17,9 +17,9 @@ import services.description.instrument.InstrumentServiceCNS;
 import services.description.process.AbstractProcessService;
 import services.description.process.ProcessServiceCNS;
 import services.description.project.AbstractProjectService;
-// import services.description.project.AbstractUmbrellaProjectService;
+import services.description.project.AbstractUmbrellaProjectService;
 import services.description.project.ProjectServiceCNS;
-// import services.description.project.UmbrellaProjectServiceCNS;
+import services.description.project.UmbrellaProjectServiceCNS;
 import services.description.run.AbstractRunService;
 import services.description.run.AbstractTreatmentService;
 import services.description.run.RunServiceCNS;
@@ -96,11 +96,7 @@ public class CNSApplicationData implements IApplicationData {
 		return new TreatmentServiceCNS();
 	}
 
-	@Override
-	public Consumer<ContextValidation> getResolutionService() {
-//		return ResolutionService::saveResolutionsCNS;
-	    throw new RuntimeException("not implemented");
-	}
+	
 
 	@Override
 	public Consumer<ContextValidation> getProtocolService() {
@@ -128,9 +124,21 @@ public class CNSApplicationData implements IApplicationData {
 //		return ctx -> PrinterCNS.main(ctx); 
 	}
 
-	// @Override
-	// public AbstractUmbrellaProjectService getUmbrellaProjectService() {
-	// 	return new UmbrellaProjectServiceCNS();
-	// }
+	@Override
+	public AbstractUmbrellaProjectService getUmbrellaProjectService() {
+		return new UmbrellaProjectServiceCNS();
+	}
+
+	@Override
+	public Consumer<ContextValidation> getResolutionServiceSQ() {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'getResolutionServiceSQ'");
+	}
+
+	@Override
+	public Consumer<ContextValidation> getResolutionServiceBI() {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'getResolutionServiceBI'");
+	}
 
 }

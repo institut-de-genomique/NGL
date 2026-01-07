@@ -42,6 +42,8 @@ search.placeholder.unixGroup = Groupe Unix
 search.placeholder.labos= Laboratoire
 search.placeholder.users= Utilisateur
 search.placeholder.code = Code
+
+search.textarea.placeholder.namesList= Liste exacte de noms
 search.textarea.placeholder.codesList= Liste exacte de codes
 
 search.tab.addcolumns = Colonnes supplémentaires
@@ -100,7 +102,8 @@ projects.properties.rawdataQtreeQuota = Quota du qtree rawdata
 projects.properties.scratchQtreeQuota = Quota du qtree scratch (Gb)
 projects.properties.os = OS
 projects.technicalDescription = DT
-projects.properties.financingSource = Financing source
+project.button.delete = Supprimer le DT
+projects.properties.financingSource = Source de financement
 projects.properties.bioProjectManager = Chef projet bio
 projects.properties.infoProjectManager = Chef projet info
 projects.genre =Genre
@@ -114,6 +117,7 @@ umbrellaProjects.traceInformation.creationDate = Créé le
 umbrellaProjects.traceInformation.createUser = Créé par
 umbrellaProjects.limsCode = Code LIMS
 umbrellaProjects.applicant = Demandeur
+umbrellaProjects.affiliation = Affiliation
 umbrellaProjects.technicalDescription = DT
 umbrellaProject.typeCode = Type
 umbrellaProject.category.type = Catégorie

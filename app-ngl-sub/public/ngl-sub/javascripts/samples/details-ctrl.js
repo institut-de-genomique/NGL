@@ -90,15 +90,15 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 						editTemplate:"<textarea class='form-control' #ng-model rows='1'></textarea>",
 						choiceInList:false
 					},
-					{property:"studyAccession",
-						header: Messages("analysis.studyAccession"),
+					{property:"studyIdentifier",
+						header: Messages("analysis.studyIdentifier"),
 						type :"String",		    	  	
 						hide:true,
 						edit:true,
 						order:false
 					},					
-					{property:"sampleAccession",
-						header: Messages("analysis.sampleAccession"),
+					{property:"sampleIdentifier",
+						header: Messages("analysis.sampleIdentifier"),
 						type :"String",		    	  	
 						hide:true,
 						edit:true,
@@ -434,6 +434,9 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 		$scope.messages.clear(); 
 		$scope.countAnalysis = 0;
 		$scope.countExperiment = 0;
+		$scope.isPublic=false;
+		$scope.visibility="undefined";
+		$scope.isReleasable = function(userName) { return false; }; // fonction qui renvoie toujours false
 		
 		// Recuperer le sample en passant par get :	
 		//console.log("routeParams.code=", $routeParams);
@@ -447,6 +450,35 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 			if(tabService.getTabs().length == 0){			
 				tabService.addTabs({label:$scope.sample.code,href:jsRoutes.controllers.sra.samples.tpl.Samples.get($scope.sample.code).url,remove:true});
 				tabService.activeTab($scope.getTabs(0)); // active l'onglet indiqué, le met en bleu.
+			}
+		
+			if($scope.sample.consolidatedPublicStatus || $scope.sample._type=="ExternalSample") {
+				$scope.visibility="public";	
+				console.log("type de sample",$scope.sample._type);
+				console.log("consolidatedPublicStatus",$scope.sample.consolidatedPublicStatus );
+			} else {	
+				console.log("type de sample",$scope.sample._type);
+				console.log("consolidatedPublicStatus",$scope.sample.consolidatedPublicStatus );
+				if ( !$scope.sample.releaseDate) {
+					//$scope.isReleasable = function(userName){return false;}; // isReleasable est une fonction
+					//console.log("study.releaseDate non renseigné");
+					$scope.visibility="undefined";
+				} else {		
+					//console.log("sample.releaseDate" + $scope.sample.releaseDate);
+					//console.log("Date.now" + Date.now());
+					if ($scope.sample.releaseDate < Date.now()) {
+						$scope.isPublic=true;
+						$scope.visibility="public";	
+					} else {
+						$scope.visibility="private";	
+						if ($scope.sample.state.code == "SUB-F") {
+							//$scope.isReleasable = function(userName){return $scope.sample.traceInformation.createUser==userName;};
+							$scope.isReleasable = function(userName){return true;};
+							//console.log("donnée confidentielle");
+							//console.log("isReleasable: " + $scope.isReleasable);
+						}
+					}
+				} 
 			}
 		
 		   $scope.sampleAccession= "NONE";
@@ -505,7 +537,29 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 		
 	/* buttons section */
 	
-
+	$scope.userRelease = function(){
+		$scope.messages = messages();
+		$scope.messages.clear();
+		//console.log("je suis dans le bouton samples.details-ctrl.js.userRelease");
+		$scope.treeLoadInProgress = true;
+		$http.put(jsRoutes.controllers.sra.submissions.api.Submissions.createFromSampleRelease($scope.sample.code).url)
+			.success(function(data){
+				$scope.treeLoadInProgress = false;
+				var submission = data;
+		   		$scope.messages.clazz="alert alert-success";
+				$scope.messages.setSuccess("Le sample "+ $scope.sample.code + " a bien été mis dans le domaine public par l'EBI via la soumission "  + submission.code + " voir ebiReport " + submission.submissionDirectory + "/" + submission.ebiResult); 
+				$scope.messages.open();
+				//console.log("code de la soumission crée " + data.code);
+			})
+			.error(function(data){
+				$scope.treeLoadInProgress = false;
+				$scope.messages.addDetails(data);
+				$scope.messages.setError("Probleme pour la release");	
+			});	
+	 
+		 
+		 
+	};
 	$scope.cancel = function(){
 		//console.log("call cancel");
 		$scope.messages = messages();
@@ -565,6 +619,8 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 		//console.log("Dans isCreationMode");
 		return false; // Dans la vue details, on n'est jamais en mode creation d'un sample, le sample existe bien en base.
 	};
+	
+	
 	
 	
 }]).controller('CommentsCtrl',['$scope','$sce', '$http','lists','$parse','$filter','datatable', 

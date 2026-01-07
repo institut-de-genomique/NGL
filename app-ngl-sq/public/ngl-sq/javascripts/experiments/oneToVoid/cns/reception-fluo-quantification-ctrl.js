@@ -489,6 +489,34 @@ angular.module('home').controller('OneToVoidFluoQuantificationCNSCtrl',['$scope'
 	var columns = $scope.atmService.data.getColumnsConfig();
 
 	columns.push({
+		"header" : Messages("containers.table.fromPurificationTypeCode"),
+		"property": "inputContainer.fromPurificationTypeCode",
+		"filter":"codes:'type'",
+		"order" : true,
+		"edit" : false,
+		"hide" : true,
+		"type" : "text",
+		"position" : 4.1,
+		"extraHeaders" : {
+			0 : Messages("experiments.inputs")
+		}
+	});
+	
+	columns.push({
+		"header" : Messages("containers.table.fromTransfertTypeCode"),
+		"property": "inputContainer.fromTransfertTypeCode",
+		"filter":"codes:'type'",
+		"order" : true,
+		"edit" : false,
+		"hide" : true,
+		"type" : "text",
+		"position" : 4.2,
+		"extraHeaders" : {
+			0 : Messages("experiments.inputs")
+		}
+	});
+
+	columns.push({
 		"header" : Messages("containers.table.libProcessType"),
 		"property" : "inputContainer.contents",
 		"order" : false,
@@ -727,6 +755,20 @@ angular.module('home').controller('OneToVoidFluoQuantificationCNSCtrl',['$scope'
 		});
 	};
 
+	$scope.$on('refresh', function(e) {	
+		// On récupère la config du datatable à l'écran.
+		var dtConfig = $scope.atmService.data.getConfig();
+
+		// On met à jour la condition d'affichage de la poubelle individuelle du tableau des containers : à l'état new uniquement et pas en mode édit.
+		dtConfig.remove.active = ($scope.isEditModeAvailable() && $scope.isNewState());
+
+		// On met à jour la config du datatable à l'écran qu'on vient de modifier.
+		$scope.atmService.data.setConfig(dtConfig);
+
+		// Refresh de l'expérience affichée à l'écran.
+		$scope.atmService.refreshViewFromExperiment($scope.experiment);
+	});
+
 	$scope.button = {
 			isShow:function(){
 				return (("fluoroskan" === $scope.experiment.instrument.typeCode ||  "thermo-scientific-fluoroskan" === $scope.experiment.instrument.typeCode) && !$scope.mainService.isEditMode() 
@@ -781,6 +823,19 @@ angular.module('home').controller('OneToVoidReceptionFluoQuantificationCNSCtrl',
 			+$scope.plateFluoUtils.templates.buttonColumnMode();   
 	}
 
+	$scope.$on('refresh', function(e) {	
+		// On récupère la config du datatable à l'écran.
+		var dtConfig = $scope.atmService.data.getConfig();
+
+		// On met à jour la condition d'affichage de la poubelle individuelle du tableau des containers : à l'état new uniquement et pas en mode édit.
+		dtConfig.remove.active = ($scope.isEditModeAvailable() && $scope.isNewState());
+
+		// On met à jour la config du datatable à l'écran qu'on vient de modifier.
+		$scope.atmService.data.setConfig(dtConfig);
+
+		// Refresh de l'expérience affichée à l'écran.
+		$scope.atmService.refreshViewFromExperiment($scope.experiment);
+	});
 
 
 	$scope.atmService.data.setConfig(config );
@@ -822,6 +877,33 @@ angular.module('home').controller('OneToVoidReceptionFluoQuantificationCNSCtrl',
 
 	var columns = $scope.atmService.data.getColumnsConfig();
 
+	columns.push({
+		"header" : Messages("containers.table.fromPurificationTypeCode"),
+		"property": "inputContainer.fromPurificationTypeCode",
+		"filter":"codes:'type'",
+		"order" : true,
+		"edit" : false,
+		"hide" : true,
+		"type" : "text",
+		"position" : 4.1,
+		"extraHeaders" : {
+			0 : Messages("experiments.inputs")
+		}
+	});
+	
+	columns.push({
+		"header" : Messages("containers.table.fromTransfertTypeCode"),
+		"property": "inputContainer.fromTransfertTypeCode",
+		"filter":"codes:'type'",
+		"order" : true,
+		"edit" : false,
+		"hide" : true,
+		"type" : "text",
+		"position" : 4.2,
+		"extraHeaders" : {
+			0 : Messages("experiments.inputs")
+		}
+	});
 
 
 	columns.push({		
@@ -865,6 +947,18 @@ angular.module('home').controller('OneToVoidReceptionFluoQuantificationCNSCtrl',
 		}
 	});
 
+	if ($scope.experiment.instrument.inContainerSupportCategoryCode.indexOf('well') == -1) {
+		columns.push({
+			"header" : Messages("containers.table.workName"),
+			"property" : "inputContainer.properties.workName.value",
+			"order" : true,
+			"edit" : false,
+			"hide" : true,
+			"type" : "text",
+			"position" : 3.1,
+			"extraHeaders" : {0 : Messages("experiments.inputs")}
+		});
+	}
 
 	if(supportCategoryCode==="tube" && ($scope.experiment.instrument.typeCode==="fluoroskan" || $scope.experiment.instrument.typeCode==="thermo-scientific-fluoroskan")){
 		console.log("Support category "+supportCategoryCode);

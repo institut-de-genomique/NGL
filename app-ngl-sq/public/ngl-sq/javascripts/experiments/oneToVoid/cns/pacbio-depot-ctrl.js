@@ -1,6 +1,6 @@
 // FDS 13/10/2020 NGL-3000 ajout dateServices
-angular.module('home').controller('PacBioDepotCtrl',['$scope', '$parse','atmToSingleDatatable', 'dateServices',
-                                                             function($scope,$parse, atmToSingleDatatable, dateServices) {
+angular.module('home').controller('PacBioDepotCtrl',['$scope', '$parse','atmToSingleDatatable', 'dateServices', '$http', '$window',
+                                                             function($scope,$parse, atmToSingleDatatable, dateServices, $http, $window) {
 	
 	 var datatableConfig = {
 			name: $scope.experiment.typeCode.toUpperCase(),
@@ -171,6 +171,11 @@ angular.module('home').controller('PacBioDepotCtrl',['$scope', '$parse','atmToSi
 		$scope.atmService.refreshViewFromExperiment($scope.experiment);
 		$scope.$emit('viewRefeshed');
 	});
+
+	$scope.goToBi = function(code){
+		var value = AppURL("bi");
+		$window.open(value+"/runs/"+code, 'bi');
+	};
 	
 	$scope.$on('cancel', function(e) {
 		console.log("call event cancel on one-to-void (default)");
@@ -198,6 +203,22 @@ angular.module('home').controller('PacBioDepotCtrl',['$scope', '$parse','atmToSi
 		
 		$scope.atmService = atmService;
 		
-		
+		if($scope.isCreationMode()){
+			if(!$parse("experimentProperties.runStartDate.value")($scope.experiment)){
+				console.log('setting current date as default');
+				// dans le javascript positionner une valeur en millisecondes en utilisant la librairie moment.js
+				// le rendu au format date est executé par la directive date-timestamp (dateTimestamp) ou date-timestamp2 (dateTimestamp2) 
+				/* !!!!!!!!!    SUPSQCNG-902 le timestamp doit etre arrondi pour que NGSRG retrouve le fichier du run
+				   garder le code ci-dessous qui effectue l'arrondi !!!!!!! */
+				var format = Messages("date.format").toUpperCase();
+				var curdateMS_round = moment().format(format);
+				curdateMS_round = moment(curdateMS_round, format).valueOf();
+				console.log('timestamp arrondi='+curdateMS_round);
+				//var curdateMS_exact= moment().valueOf();
+				//console.log('timestamp exact  ='+curdateMS_exact);
+	
+				$parse("experimentProperties.runStartDate.value").assign($scope.experiment, curdateMS_round);
+			}
+		}
 		
 }]);

@@ -8,7 +8,7 @@ import fr.cea.ig.ngl.NGLApplication;
 import fr.cea.ig.ngl.NGLConfig;
 import scala.concurrent.duration.Duration;
 import services.instance.balancesheet.UpdateDailyBalanceSheet;
-import services.instance.balancesheet.UpdateQuarterBalanceSheet;
+import services.instance.balancesheet.UpdateMonthlyBalanceSheet;
 import services.instance.container.ContainerImportCNG;
 import services.instance.project.ProjectImportCNG;
 import services.instance.sample.UpdateFlagForReportingData;
@@ -72,8 +72,8 @@ public class ImportDataCNG {
 		new UpdateDailyBalanceSheet(app)
 			.startScheduling(ImportDataUtil.getDurationInHourAndMinute(20, 0), Duration.create(1, TimeUnit.DAYS));
 	
-		new UpdateQuarterBalanceSheet(app)
-			.startScheduling(ImportDataUtil.getDurationInHourAndMinute(24, 0), Duration.create(91, TimeUnit.DAYS)); 
+		new UpdateMonthlyBalanceSheet(app, config)
+			.startScheduling(ImportDataUtil.getDurationInHourAndMinute(24, 0), Duration.create(1, TimeUnit.DAYS)); 
 	}
 	
 }

@@ -47,7 +47,8 @@ public class ReadSetsSearchForm extends DBObjectListForm<ReadSet> {
 	public Set<Integer> laneNumbers;
 	public Integer laneNumber;
 	
-	
+	public List<String> umbrellaCodes;
+    
 	public String bioinformaticValidCode;
 	public String productionValidCode;
 	
@@ -92,7 +93,7 @@ public class ReadSetsSearchForm extends DBObjectListForm<ReadSet> {
     public String ncbiScientificName;
     
     public String ncbiScientificNameRegex;
-	public Set<String> ncbiScientificNameRegexs;
+	public Set<String> ncbiScientificNames;
 	
     
     public Set<String> existingFields, notExistingFields;
@@ -111,12 +112,12 @@ public class ReadSetsSearchForm extends DBObjectListForm<ReadSet> {
         final List<String>  list_ebiKnown = Arrays.asList(
         		SRASubmissionStateNames.SUB_F,
         		SRASubmissionStateNames.SUBR_N, 		SRASubmissionStateNames.SUBR_SMD_F,
-        		SRASubmissionStateNames.SUBR_SMD_IW, 	SRASubmissionStateNames.SUBR_SMD_IP,
+        		SRASubmissionStateNames.SUBR_SMD_IP,
         		SRASubmissionStateNames.SUBR_SMD_F, 	SRASubmissionStateNames.SUBR_SMD_FE, 	
         		SRASubmissionStateNames.SUBR_FE,
-        		SRASubmissionStateNames.SUBU_N,			SRASubmissionStateNames.SUBU_SMD_IW,    
-        		SRASubmissionStateNames.SUBU_SMD_IP,	SRASubmissionStateNames.SUBU_SMD_F,     
-        		SRASubmissionStateNames.SUBU_SMD_FE,    SRASubmissionStateNames.SUBU_FE);	
+        		SRASubmissionStateNames.SUBU_N,			SRASubmissionStateNames.SUBU_SMD_IP,   
+        		SRASubmissionStateNames.SUBU_SMD_F,     SRASubmissionStateNames.SUBU_SMD_FE,
+        		SRASubmissionStateNames.SUBU_FE);	
         List<Query> queries = new ArrayList<>();
         Query query = null;
 
@@ -236,18 +237,8 @@ public class ReadSetsSearchForm extends DBObjectListForm<ReadSet> {
             queries.add(DBQuery.is("sampleOnContainer.ncbiScientificName", this.ncbiScientificName));
         }else if(StringUtils.isNotBlank(this.ncbiScientificNameRegex)){
             queries.add(DBQuery.regex("sampleOnContainer.ncbiScientificName", Pattern.compile(this.ncbiScientificNameRegex)));
-        } else if (CollectionUtils.isNotEmpty(this.ncbiScientificNameRegexs)) {
-            DBQuery.Query queryTmp = DBQuery.empty();
-			Iterator<String> iterator = this.ncbiScientificNameRegexs.iterator();
-
-			while (iterator.hasNext()) {
-				String ncbiNameLoop = iterator.next();
-				queryTmp.or(
-					DBQuery.regex("sampleOnContainer.ncbiScientificName", Pattern.compile(ncbiNameLoop))
-				);
-			}
-
-			queries.add(queryTmp);
+        } else if (CollectionUtils.isNotEmpty(this.ncbiScientificNames)) {
+            queries.add(DBQuery.in("sampleOnContainer.ncbiScientificName", ncbiScientificNames));
         }
         
         if (CollectionUtils.isNotEmpty(this.instrumentCodes)) { //all

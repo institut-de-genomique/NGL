@@ -82,7 +82,7 @@ public class DataService {
 
 	public void saveProjectData(Map<String,List<ValidationError>> errors) {
 		data.getProjectService().main(errors);
-		//data.getUmbrellaProjectService().main(errors);
+		data.getUmbrellaProjectService().main(errors);
 	}
 
 	public void saveRunData(Map<String,List<ValidationError>> errors) {
@@ -93,8 +93,13 @@ public class DataService {
 		data.getTreatmentService().main(errors);
 	}
 	
-	public void saveResolutionData(ContextValidation ctx) {
-		data.getResolutionService().accept(ctx);
+
+	public void saveResolutionDataSQ(ContextValidation ctx) {
+		data.getResolutionServiceSQ().accept(ctx);
+	}
+
+	public void saveResolutionDataBI(ContextValidation ctx) {
+		data.getResolutionServiceBI().accept(ctx);
 	}
 	
 	public void saveProtocolData(ContextValidation ctx) {

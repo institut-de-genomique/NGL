@@ -1,7 +1,7 @@
 "use strict";
 
-angular.module('home').controller('StatsSearchLanesCtrl',['$scope', '$routeParams', '$location','$modal', 'mainService', '$http','tabService','runSearchService','chartsLanesService',
-                                                             function($scope, $routeParams, $location, $modal, mainService, $http, tabService, runSearchService, chartsLanesService) { 
+angular.module('home').controller('StatsSearchLanesCtrl',['$scope', '$routeParams', '$location','$modal', 'mainService', '$http','tabService','runSearchService','chartsLanesService', 'projectSearchFromUmbrella',
+                                                             function($scope, $routeParams, $location, $modal, mainService, $http, tabService, runSearchService, chartsLanesService, projectSearchFromUmbrella) { 
 
 	
 	if(angular.isUndefined(mainService.getHomePage())){
@@ -35,6 +35,11 @@ angular.module('home').controller('StatsSearchLanesCtrl',['$scope', '$routeParam
 		$scope.searchService.search();
 	};
 	
+	$scope.selectProjetsFromUmbrellas = function() {
+		var projCodes = projectSearchFromUmbrella.search($scope.searchService.form.umbrellaCodes);
+		$scope.searchService.form.projectCodes = projCodes;
+	}
+
 	$scope.reset = function(){
 		$scope.searchService.resetForm();
 	};

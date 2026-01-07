@@ -129,6 +129,7 @@ public class ModelDAOs {
 		if (sDao == null)
 			throw new RuntimeException("no DAO is defined for " + c);
 		// The following line produces a warning with javac but not in eclipse
+		@SuppressWarnings("unchecked")
 		AbstractDAO<T> dao = sDao.get();
 		if (dao == null)
 			throw new RuntimeException("dao supplier failed to provide an instance : " + sDao + " for " + c + " (get:" + sDao.get() + ")");

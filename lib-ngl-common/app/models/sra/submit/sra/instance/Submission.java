@@ -2,27 +2,32 @@ package models.sra.submit.sra.instance;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.util.StringUtil;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import controllers.sra.api.AbstractSampleAPI;
+import controllers.sra.api.AbstractStudyAPI;
+import controllers.sra.api.ConfigurationAPI;
+import controllers.sra.api.ExperimentAPI;
+import controllers.sra.api.SubmissionAPI;
 import fr.cea.ig.DBObject;
 import fr.cea.ig.lfw.utils.Iterables;
-import fr.cea.ig.ngl.dao.api.sra.AbstractSampleAPI;
-import fr.cea.ig.ngl.dao.api.sra.AbstractStudyAPI;
-import fr.cea.ig.ngl.dao.api.sra.ConfigurationAPI;
-import fr.cea.ig.ngl.dao.api.sra.ExperimentAPI;
-import fr.cea.ig.ngl.dao.api.sra.SubmissionAPI;
-
 import models.laboratory.common.description.ObjectType;
 import models.laboratory.common.instance.Comment;
 import models.laboratory.common.instance.State;
 import models.laboratory.common.instance.TraceInformation;
-import models.sra.submit.util.SraException;
 import models.utils.InstanceConstants;
+import services.sra.SraException;
 import validation.ContextValidation;
 import validation.IValidation;
 import validation.common.instance.CommonValidationHelper;
@@ -80,7 +85,10 @@ public class Submission extends DBObject implements IValidation, IStateReference
 	public String adminComment;
     public List<Comment>comments = new ArrayList<Comment>();// commentaires des utilisateurs.
 
-	public Map<String, UserRefCollabType> mapUserRefCollab; //= new HashMap<String, UserRefCollabType>();
+	//public Map<String, UserRefCollabType> mapUserRefCollab; //= new HashMap<String, UserRefCollabType>();
+    // NGL-5058
+	public List<UserRefCollabType> userRefCollabs; 
+
 	public TraceInformation traceInformation = new TraceInformation();  // Reference sur "models.laboratory.common.instance.TraceInformation" 
                                                                         // pour loguer les dernieres modifications utilisateurs
 	public State state           = new State(); // Reference sur "models.laboratory.common.instance.state" 
@@ -88,6 +96,13 @@ public class Submission extends DBObject implements IValidation, IStateReference
 	
 	//NGL-2066 :
 	public TypeRawDataSubmitted typeRawDataSubmitted; 
+
+	// NGL-4593
+    public String dropBox;
+	
+	@SuppressWarnings("unused")
+	private static final play.Logger.ALogger logger = play.Logger.of(Submission.class);
+
 
 	
 	public Submission() {
@@ -129,6 +144,22 @@ public class Submission extends DBObject implements IValidation, IStateReference
 	}
 	
 
+//	@Deprecated utilisation d'un getter ne correspondant pas à un champs : pas une bonne idée
+//	@JsonIgnore pour eviter que la methode soit utilisée à la serialisation ou la deserialisation 
+//	public Map<String, UserRefCollabType> getMapUserRefCollab(){
+//		if (listUserRefCollab == null) {
+//			return new HashMap<>();
+//		}
+//		return Iterables.toMap(
+//				listUserRefCollab, 
+//				r -> r.getAlias(), 
+//				r -> r);
+////		Map<String, UserRefCollabType> mapUserRefCollab = new HashMap<String, UserRefCollabType>();
+////		for (UserRefCollabType userRefCollab :  listUserRefCollab) {
+////			mapUserRefCollab.put(userRefCollab.getAlias(), userRefCollab);
+////		}
+////		return mapUserRefCollab;
+//	}
 	
 	public void validateInvariants(ContextValidation contextValidation) {
 		String undifinedValueInRepriseHistorique = "undefinedValue_repriseHistorique";
@@ -259,7 +290,7 @@ public class Submission extends DBObject implements IValidation, IStateReference
 			contextValidation = contextValidation.appendPath(code);
 		SubmissionAPI submissionAPI = SubmissionAPI.get();
 		if(submissionAPI.dao_checkObjectExist("code", code)) {
-			contextValidation.addError("code", code + " existe deja dans la base de données et MODE CREATION");
+			contextValidation.addError("code." + this.code, "existe deja dans la base de données et MODE CREATION");
 		}	
 	}
 
@@ -316,6 +347,7 @@ public class Submission extends DBObject implements IValidation, IStateReference
 	
 	@Override
 	public void validate(ContextValidation contextValidation) {
+		@SuppressWarnings("unused")
 		String mess = "validation de la soumission ";
 		if (StringUtils.isNotBlank(code)) {
 			mess += "." + code;
@@ -340,14 +372,12 @@ public class Submission extends DBObject implements IValidation, IStateReference
 //		if (contextValidation.hasErrors()) {
 //			contextValidation.displayErrors(logger, "debug");
 //		} 
-		contextValidation.removeKeyFromRootKeyName(mess);
 
 	}
 	
 	
 	/**
 	 * Cree le repertoire de soumission indiqué dans le champs submissionDirectory.
-	 * @param  submission   submission
 	 * @throws SraException SRA exception
 	 */
 	public void createDirSubmission() throws SraException {
@@ -365,8 +395,9 @@ public class Submission extends DBObject implements IValidation, IStateReference
 		} else {
 			if (!dataRep.mkdirs()) {	
 				//logger.debug("Impossible de creer le repertoire " + dataRep + " ");
-				throw new SraException("Impossible de creer le repertoire " + dataRep + " ");
+				throw new SraException("Impossible de creer le repertoire " + dataRep + " pour la soumission " + this.code);
 			}
 		}
 	}	
+	 
 }

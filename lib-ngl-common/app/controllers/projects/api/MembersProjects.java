@@ -71,20 +71,16 @@ public class MembersProjects extends NGLController implements NGLForms{
 	 * @return
 	 */
 	public Result get(String code) {
-		//Only if config OK 
-		//TODO remove for CNS implementation
-		if(config.isCNGInstitute()){
+		if (config.isADIBFJEnabled() || config.isADOriginalEnabled()){
 			Members members = membersApi.get(code);
-			if(members != null) {
+
+			if (members != null) {
 				return okAsJson(members);
 			} else {
 				return notFound();
 			}
-		}else{
-			return ok();
+		} else {
+			return TODO;
 		}
-
 	}
-
-
 }

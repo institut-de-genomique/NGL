@@ -18,7 +18,7 @@ rule "Code Flowcell with bad chars"
     	$contextValidation.addErrors("instrument",	"error.validationexp.codewithbadchar", "Code Flowcell");
 end
 
-// 18/03/2019 NGL-2474  blocage demandé pour certains cas
+// 18/03/2019 NGL-2474  blocage demandé pour certains cas; 30/09/2024 NGL-4725 ajout de "cBot-Miseq2" et"cBot-Miseq3"
 rule "Prepaflowcell validate contenant sortie avec instrument"
 	@nglSQ (validations )
 	dialect "java"
@@ -28,7 +28,7 @@ rule "Prepaflowcell validate contenant sortie avec instrument"
     	// !! 1) il n'y a pas "interne' pour les codes; 2) NextSeq1 avec "S"
     	Experiment($typeCode:typeCode,$typeCode=="prepa-flowcell",$instrumentCode:instrument.code
     			,$outputContainerSupport:instrument.outContainerSupportCategoryCode, 
-    		 ($instrumentCode in("cBot-Miseq1") && $outputContainerSupport!="flowcell-1")
+    		 ($instrumentCode in("cBot-Miseq1","cBot-Miseq2","cBot-Miseq3") && $outputContainerSupport!="flowcell-1" )
     		 || 
     		 ($instrumentCode in("cBot-NextSeq1") && $outputContainerSupport!="flowcell-4") )
     	$contextValidation:ContextValidation($errors : errors)

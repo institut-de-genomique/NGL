@@ -1,0 +1,37 @@
+@()
+
+<br/>
+<br/>
+<br/>
+<div class="row">		
+	<div class="col-md-10 col-lg-10">
+	<div class="panel panel-default">
+		  <div class="panel-heading"><strong>@Messages("readsets.treatments.WgsBarcoding.organelBlastTop")</strong></div>					  	
+			<table class="table table-condensed table-hover table-bordered">
+	   			<thead>
+				<tr>
+					<th>@Messages("readsets.treatments.WgsBarcoding.organelBlastTop.seqname")</th>
+					<th>@Messages("readsets.treatments.WgsBarcoding.organelBlastTop.reference")</th>
+					<th>@Messages("readsets.treatments.WgsBarcoding.organelBlastTop.sequenceSize")</th>
+					<th>@Messages("readsets.treatments.WgsBarcoding.organelBlastTop.referenceSize")</th>	
+					<th>@Messages("readsets.treatments.WgsBarcoding.organelBlastTop.alignSize")</th>	
+					<th>@Messages("readsets.treatments.WgsBarcoding.organelBlastTop.identityPercent")</th>	
+					<th>@Messages("readsets.treatments.WgsBarcoding.organelBlastTop.titleRef")</th>
+
+				</tr>
+	   			</thead>
+	   			<tbody>
+				<tr ng-repeat="value in readset.treatments[treatments.getTreatment().code].default.organelBlastTop.value">
+					<td>{{value.seqname }}</td>
+					<td>{{value.reference }}</td>
+					<td>{{value.sequenceSize | number }}</td>
+					<td>{{value.referenceSize | number}}</td>
+					<td>{{value.alignSize | number}}</td>
+					<td>{{value.identityPercent| number:2}}</td>
+					<td>{{value.titleRef }}</td>
+		 		</tr>
+				</tbody>		
+			</table>			
+ 		  </div>
+	</div>
+ </div>

@@ -7,13 +7,13 @@
 	@columnSearchForm{	
 		<div>
 		<label class="radio-inline">
-    	<input type="radio" ng-model="choixCheck" value="defaultCheck" ng-change="updateCheck('defaultCheck')"> soumission de données brutes illumina, nanopore ou mgi    	
+    	<input type="radio" ng-model="choixCheck" value="defaultCheck" ng-change="updateCheck('defaultCheck')"> soumission de données brutes illumina, nanopore, mgi ou pacbio    	
 	    </label></div><br/>
 	    <div><label class="radio-inline">
 	    	<input type="radio" ng-model="choixCheck" value="bionanoCheck" ng-change="updateCheck('bionanoCheck')"> soumission de données brutes bionano
 	    </label></div><br/>
 	    <div><label class="radio-inline">
-	   	 <input type="radio" ng-model="choixCheck" value="metadataCheck" ng-change="updateCheck('metadataCheck')"> soumission d'un study ou d'un sample sans données brutes
+	   	 <input type="radio" ng-model="choixCheck" value="atlaseaCheck" ng-change="updateCheck('atlaseaCheck')"> soumission de données brutes atlasea
 	    </label></div><br/>
 
 		<br/>	
@@ -49,7 +49,7 @@
 						@columnSearchForm{
 							@formGroup{
 							<div class="btn-toolbar">
-								<button type="submit" title='@Messages("button.save")'  ng-click="save()" ng-disabled="!isBuilding()" data-toggle="tooltip" class="btn btn-primary" >
+								<button type="submit" title='@Messages("button.save")'  ng-click="save()" ng-disabled="!isBuilding() || ! isClickable()" data-toggle="tooltip" class="btn btn-primary" >
 									<i class="fa fa-save"></i>
 								</button> 
 								<button title='@Messages("button.reset")' ng-click="reset()" data-toggle="tooltip"  class="btn btn-default">

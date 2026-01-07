@@ -1,4 +1,5 @@
 //created on: Nov 21, 2013
+// NGL-4588 add WG-ont-analysis + NGL-4820 bug in substring
 package rules
 
 rule "Whole Genome Analysis expectedCoverage and gender propagation"
@@ -7,7 +8,7 @@ rule "Whole Genome Analysis expectedCoverage and gender propagation"
 	salience 600
 	no-loop
 	when
-		$analysis : Analysis ( typeCode == "WG-analysis", $masterReadSetCode : masterReadSetCodes.get(0) )		
+		$analysis : Analysis ( typeCode == "WG-analysis" || typeCode == "WG-ont-analysis" || typeCode == "WG-pacbio-analysis" , $masterReadSetCode : masterReadSetCodes.get(0) )		
 	then
 		Logger.debug("Set ReadSet properties to Analysis "+$analysis.code);
 		BasicDBObject keys = new BasicDBObject();
@@ -17,7 +18,23 @@ rule "Whole Genome Analysis expectedCoverage and gender propagation"
 			Map<String, PropertyValue> properties = $analysis.properties;
 			//Get expectedCoverage value
 			if(readSet.sampleOnContainer.properties.get("expectedCoverage")!=null){
-				Double valueExpectedCoverage = Double.parseDouble(((String)readSet.sampleOnContainer.properties.get("expectedCoverage").getValue()).substring(0,((String)readSet.sampleOnContainer.properties.get("expectedCoverage").getValue()).length()-1));
+				//Double valueExpectedCoverage = Double.parseDouble(((String)readSet.sampleOnContainer.properties.get("expectedCoverage").getValue()).substring(0,((String)readSet.sampleOnContainer.properties.get("expectedCoverage").getValue()).length()-1));
+				
+				// NGL-4820 !!! expectedCoverage.value est une string depuis la déclaration du processus jusqu'ici. Elle contient PARFOIS un "X" final mais pas toujours !!!
+                // ATTENTION il est prévu des expectedCoverage décimaux !!ex : 0.5 en LowPass => vérifier si contient le décimal français "," ??!!! )
+                int lg=((String)readSet.sampleOnContainer.properties.get("expectedCoverage").getValue()).length() -1;
+                Double valueExpectedCoverage =null;
+                char lastChar=((String)readSet.sampleOnContainer.properties.get("expectedCoverage").getValue()).charAt(lg);
+                Logger.debug("last char in expectedCoverage ="+ lastChar);
+                // check if lastChar is a digit
+                if (lastChar >= '0' && lastChar <= '9') {
+                    // OUI convertir directement en Double
+                    valueExpectedCoverage = Double.parseDouble((String)readSet.sampleOnContainer.properties.get("expectedCoverage").getValue());
+                } else {
+                    // NON supprimer le dernier caractère
+                    valueExpectedCoverage = Double.parseDouble(((String)readSet.sampleOnContainer.properties.get("expectedCoverage").getValue()).substring(0,lg));
+                }
+				
 				PropertySingleValue propertyExpectedCoverage = new PropertySingleValue(valueExpectedCoverage);
 				properties.put("expectedCoverage",propertyExpectedCoverage);
 			}

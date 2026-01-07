@@ -1,0 +1,9 @@
+@(lines: List[controllers.instruments.io.cns.firefly.PlateSampleSheetLine])
+
+@import controllers.instruments.io.utils._;
+
+
+Volume tampon\u000D\u000A
+@for((line) <- lines){
+@line.bufferVolume\u000D\u000A	
+}

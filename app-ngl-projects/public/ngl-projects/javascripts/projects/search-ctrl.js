@@ -1,7 +1,7 @@
 "use strict";
 
-angular.module('home').controller('SearchCtrl',['$scope', '$routeParams','datatable', 'mainService', 'tabService', 'projectsSearchService',
-                                                function($scope, $routeParams, datatable,mainService,tabService,projectsSearchService) {
+angular.module('home').controller('SearchCtrl',['$scope', '$routeParams','datatable', 'mainService', 'tabService', 'projectsSearchService', 'projectSearchFromUmbrella',
+                                                function($scope, $routeParams, datatable,mainService,tabService,projectsSearchService, projectSearchFromUmbrella) {
 	
 	var datatableConfig = {
 			order :{mode:'local', by:'traceInformation.creationDate', reverse:true},
@@ -34,13 +34,13 @@ angular.module('home').controller('SearchCtrl',['$scope', '$routeParams','datata
 				method:'put',
 			},
 			group:{
-				active:true
+				active:true,
+				showOnlyGroups:true
 			},
 			name:"Projects"
 	};
 
 	$scope.search = function(){
-		console.log("appel search");
 		$scope.searchService.search();
 	};
 	
@@ -58,6 +58,11 @@ angular.module('home').controller('SearchCtrl',['$scope', '$routeParams','datata
 	$scope.searchService = projectsSearchService;	
 	$scope.searchService.init($routeParams, datatableConfig);
 	
+	$scope.selectProjetsFromUmbrellas = function() {
+		var projCodes = projectSearchFromUmbrella.search($scope.searchService.form.umbrellaCodes);
+		$scope.searchService.form.projectCodes = projCodes;
+	}
+
 	if($scope.searchService.isRouteParam){
 		$scope.search();
 	}

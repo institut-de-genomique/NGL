@@ -40,18 +40,13 @@ public class SRASampleStateNames {
 	 */
 	public static final String SUB_SMD_IP;	
 	/**
-	 * Soumission de type création finie pour l'étape "Send Meta Data" ({@link States#SUB_SMD_F}).
+	 * Soumission de type création en cours pour "Send Meta Data"({@link States#SUB_SMD_F}).
 	 */
-	public static final String SUB_SMD_F;
+	public static String SUB_SMD_F;
 	/**
 	 * Soumission de type création en echec pour l'étape "Send Meta Data"({@link States#SUB_SMD_FE}).
 	 */
-	public static final String SUB_SMD_FE;
-	/**
-	 * Soumission finie ({@link States#SUB_F}).
-	 */
-	public static final String SUB_F;
-	
+	public static final String SUB_SMD_FE;	
 	/**
 	 * Nouvelle soumission de type update({@link States#SUB_N}).
 	 */
@@ -60,10 +55,6 @@ public class SRASampleStateNames {
 	 * Soumission de type update validée utilisateur ({@link States#SUBU_V}).
 	 */
 	public static final String SUBU_V;
-	/**
-	 * Soumission de type update en attente pour étape "Send Meta Data" ({@link States#SUBU_SMD_IW}).
-	 */
-	public static final String SUBU_SMD_IW;
 	/**
 	 * Soumission de type update en cours pour "Send Meta Data" ({@link States#SUBU_SMD_IP}).
 	 */
@@ -76,29 +67,52 @@ public class SRASampleStateNames {
 	 * Soumission de type update en echec pour l'étape "Send Meta Data"({@link States#SUBU_SMD_FE}).
 	 */
 	public static final String SUBU_SMD_FE;
+	/**
+	 * Soumission de type release en cours pour "Send Meta Data" ({@link States#SUBR_SMD_IP}).
+	 */
+	public static final String SUBR_SMD_IP;
+	/**
+	 * Soumission de type release finie pour l'étape "Send Meta Data"({@link States#SUBR_SMD_F}).
+	 */
+	public static final String SUBR_SMD_F;
+	/**
+	 * Soumission de type release en echec pour l'étape "Send Meta Data"({@link States#SUBR_SMD_FE}).
+	 */
+	public static final String SUBR_SMD_FE;
+	/**
+	 * Soumission de type release en echec ({@link States#SUBR_FE}).
+	 */
+	public static final String SUBR_FE;
+	/**
+	 * Soumission de type création finie pour l'étape "Send Meta Data" ({@link States#SUB_F}).
+	 */
+	public static final String SUB_F;
 
 
 	/**
 	 * All available states for SRASample. 
 	 */
 	public static final String[] values = { 
-		SUB_N       = StateNames.SUB_N,
-		SUB_V       = StateNames.SUB_V,
-		SUB_SRD_IW  = StateNames.SUB_SRD_IW,
-		SUB_SRD_IP  = StateNames.SUB_SRD_IP,
-		SUB_SRD_F   = StateNames.SUB_SRD_F,
-		SUB_SRD_FE  = StateNames.SUB_SRD_FE,
-		SUB_SMD_IW  = StateNames.SUB_SMD_IW,
-		SUB_SMD_IP  = StateNames.SUB_SMD_IP,
-		SUB_SMD_F   = StateNames.SUB_SMD_F,
-		SUB_SMD_FE  = StateNames.SUB_SMD_FE,
-		SUB_F       = StateNames.SUB_F,
+		SUB_N        = StateNames.SUB_N,
+		SUB_V        = StateNames.SUB_V,
+		SUB_SRD_IW   = StateNames.SUB_SRD_IW,
+		SUB_SRD_IP   = StateNames.SUB_SRD_IP,
+		SUB_SRD_F    = StateNames.SUB_SRD_F,
+		SUB_SRD_FE   = StateNames.SUB_SRD_FE,
+		SUB_SMD_IW   = StateNames.SUB_SMD_IW,
+		SUB_SMD_IP   = StateNames.SUB_SMD_IP,
+		SUB_SMD_F    = StateNames.SUB_SMD_F,
+		SUB_SMD_FE   = StateNames.SUB_SMD_FE,
+		SUB_F        = StateNames.SUB_F,
 		SUBU_N       = StateNames.SUBU_N,
 		SUBU_V       = StateNames.SUBU_V,
-		SUBU_SMD_IW  = StateNames.SUBU_SMD_IW,
 		SUBU_SMD_IP  = StateNames.SUBU_SMD_IP,
 		SUBU_SMD_F   = StateNames.SUBU_SMD_F,
 		SUBU_SMD_FE  = StateNames.SUBU_SMD_FE,
+		SUBR_SMD_IP  = StateNames.SUBR_SMD_IP,
+		SUBR_SMD_F   = StateNames.SUBR_SMD_F,
+		SUBR_SMD_FE  = StateNames.SUBR_SMD_FE,
+		SUBR_FE      = StateNames.SUBR_FE
 		
 	};
 	

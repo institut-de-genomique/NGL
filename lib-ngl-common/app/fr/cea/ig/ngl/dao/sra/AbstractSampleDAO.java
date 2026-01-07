@@ -14,4 +14,5 @@ public class AbstractSampleDAO extends GenericMongoDAO<AbstractSample> {
 		super(InstanceConstants.SRA_SAMPLE_COLL_NAME, AbstractSample.class);
 	}
 
+
 }

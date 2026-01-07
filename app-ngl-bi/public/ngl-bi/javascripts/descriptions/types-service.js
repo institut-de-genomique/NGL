@@ -533,6 +533,7 @@
                 row.choiceInList=propDef.choiceInList;
                 row.valueType=propDef.valueType;
                 row.defaultValue=propDef.defaultValue;
+                row.possibleValues=propDef.possibleValues;
                 return row;
             }
         };

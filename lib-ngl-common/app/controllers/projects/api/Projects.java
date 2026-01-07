@@ -5,8 +5,6 @@ import javax.inject.Inject;
 import controllers.NGLAPIController;
 import controllers.QueryFieldsForm;
 import controllers.StateController;
-import controllers.authorisation.PermissionHelper;
-import fr.cea.ig.authentication.Authenticated;
 import fr.cea.ig.authorization.Authorized;
 import fr.cea.ig.lfw.Historized;
 import fr.cea.ig.ngl.NGLApplication;
@@ -39,15 +37,9 @@ public class Projects extends NGLAPIController<ProjectsAPI, ProjectsDAO, Project
 
 	@Override
 	public Project saveImpl() throws APIValidationException, APIException {
-		boolean isChefProjet = PermissionHelper.checkPermission(getCurrentUser(), "chef-projet");
-
-		if (isChefProjet) {
-			Project projectInput = getFilledForm(projectForm, Project.class).get();
-			Project p = api().create(projectInput, getCurrentUser());
-			return p;
-		} else {
-			throw new APIException("Current user is not 'chef-projet'.");
-		}	
+		Project projectInput = getFilledForm(projectForm, Project.class).get();
+		Project p = api().create(projectInput, getCurrentUser());
+		return p;
 	}
 
 	@Override
@@ -64,52 +56,36 @@ public class Projects extends NGLAPIController<ProjectsAPI, ProjectsDAO, Project
 	
     @Override
     @BodyParser.Of(value = IGBodyParsers.Json15MB.class)
+	@Authorized.ChefProjet
     public Result update(String code) {
-		boolean isChefProjet = PermissionHelper.checkPermission(getCurrentUser(), "chef-projet");
-
-		if (isChefProjet) {
-			return super.update(code);
-		} else {
-			return unauthorized();
-		}		
+		return super.update(code);		
 	}
 
 	@Override
 	public Project updateImpl(String code) throws Exception, APIException, APIValidationException {
-		boolean isChefProjet = PermissionHelper.checkPermission(getCurrentUser(), "chef-projet");
-
-		if (isChefProjet) {
-			Project input = getFilledForm(projectForm, Project.class).get();
+		Project input = getFilledForm(projectForm, Project.class).get();
 			
-			Form<QueryFieldsForm> filledQueryFieldsForm = filledFormQueryString(updateForm, QueryFieldsForm.class);
-			QueryFieldsForm queryFieldsForm = filledQueryFieldsForm.get();
-			if (queryFieldsForm.fields == null) {
-				if (code.equals(input.code)) {
-					return api().update(input, getCurrentUser());
-				} else {
-					throw new APIException("Project codes are not the same");
-				}
+		Form<QueryFieldsForm> filledQueryFieldsForm = filledFormQueryString(updateForm, QueryFieldsForm.class);
+		QueryFieldsForm queryFieldsForm = filledQueryFieldsForm.get();
+		
+		if (queryFieldsForm.fields == null) {
+			if (code.equals(input.code)) {
+				return api().update(input, getCurrentUser());
 			} else {
-				if (code.equals(input.code)) {
-					return api().update(input, getCurrentUser(), queryFieldsForm.fields);
-				} else {
-					throw new APIException("Project codes are not the same");
-				}
+				throw new APIException("Project codes are not the same");
 			}
 		} else {
-			throw new APIException("Current user is not 'chef-projet'.");
+			if (code.equals(input.code)) {
+				return api().update(input, getCurrentUser(), queryFieldsForm.fields);
+			} else {
+				throw new APIException("Project codes are not the same");
+			}
 		}	
 	}
 
 	@Override
 	public Project updateStateImpl(String code, State state, String currentUser) throws APIException {
-		boolean isChefProjet = PermissionHelper.checkPermission(getCurrentUser(), "chef-projet");
-
-		if (isChefProjet) {
-			return api().updateState(code, state, currentUser);
-		} else {
-			throw new APIException("Current user is not 'chef-projet'.");
-		}	
+		return api().updateState(code, state, currentUser);
 	}
 
 }

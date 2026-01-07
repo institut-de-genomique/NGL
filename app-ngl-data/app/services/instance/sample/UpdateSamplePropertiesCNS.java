@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
@@ -72,7 +73,7 @@ public class UpdateSamplePropertiesCNS extends AbstractImportDataCNS {
 						.toList();
 
 				cursor.forEach(sample -> {
-					if (!sample.projectCodes.contains("CEA")) {
+					if (Stream.of("CEA", "CEC", "CEE", "CED", "CSN").noneMatch(sample.projectCodes::contains)) {
 						try {
 							updateOneSample(sample,contextError);
 						} catch (Throwable e) {
@@ -99,32 +100,44 @@ public class UpdateSamplePropertiesCNS extends AbstractImportDataCNS {
 	}
 
 	public void updateOneSample(Sample sample, ContextValidation contextError) {
-
 		logger.debug("Update sample {}", sample.code);
 
-		Map<String, PropertyValue> updatedProperties = new HashMap<>(); // String, PropertyValue>();
+		Map<String, PropertyValue> updatedProperties = new HashMap<>();
 		Set<String> deletedPropertyCodes = new TreeSet<>();
-		//		SampleType sampleType = BusinessValidationHelper.validateExistDescriptionCode(null, sample.typeCode, "typeCode", SampleType.find.get(),true);
-		//		ImportType importType = BusinessValidationHelper.validateExistDescriptionCode(null, sample.importTypeCode, "importTypeCode", ImportType.find.get(),true);
+
+		Map<String, PropertyValue> updatedPropertiesAtLeastSample = new HashMap<>();
+		Set<String> deletedPropertyCodesAtLeastSample = new TreeSet<>();
+
 		// FIXME: why a null validation context instead of contextError ?
 		SampleType sampleType = CommonValidationHelper.validateCodeForeignOptional(null, SampleType.miniFind.get(), sample.typeCode, "typeCode",true);
 		ImportType importType = CommonValidationHelper.validateCodeForeignOptional(null, ImportType.miniFind.get(), sample.importTypeCode, "importTypeCode", true);
 
 		if (importType != null) {
 			InstanceHelpers.copyPropertyValueFromPropertiesDefinition(importType.getPropertyDefinitionByLevel(Level.CODE.Sample, Level.CODE.Content), sample.properties,updatedProperties);
+			InstanceHelpers.copyPropertyValueFromPropertiesDefinition(importType.getPropertyDefinitionByLevelStrict(Level.CODE.Sample), sample.properties,updatedPropertiesAtLeastSample);
+
 			deletedPropertyCodes.addAll(InstanceHelpers.getDeletedPropertyDefinitionCode(importType.getPropertyDefinitionByLevel(Level.CODE.Sample, Level.CODE.Content), sample.properties));
+			deletedPropertyCodesAtLeastSample.addAll(InstanceHelpers.getDeletedPropertyDefinitionCode(importType.getPropertyDefinitionByLevelStrict(Level.CODE.Sample), sample.properties));
 		}
+
 		if (sampleType != null) {
 			InstanceHelpers.copyPropertyValueFromPropertiesDefinition(sampleType.getPropertyDefinitionByLevel(Level.CODE.Sample, Level.CODE.Content), sample.properties,updatedProperties);
+			InstanceHelpers.copyPropertyValueFromPropertiesDefinition(sampleType.getPropertyDefinitionByLevelStrict(Level.CODE.Sample), sample.properties,updatedPropertiesAtLeastSample);
+
 			deletedPropertyCodes.addAll(InstanceHelpers.getDeletedPropertyDefinitionCode(sampleType.getPropertyDefinitionByLevel(Level.CODE.Sample, Level.CODE.Content), sample.properties));
+			deletedPropertyCodesAtLeastSample.addAll(InstanceHelpers.getDeletedPropertyDefinitionCode(sampleType.getPropertyDefinitionByLevelStrict(Level.CODE.Sample), sample.properties));
 		}
-		logger.warn("property will be deleted " + deletedPropertyCodes);
-		updateCollectionsFromSample(sample, updatedProperties, deletedPropertyCodes,contextError);
+
+		logger.warn("property (sample, content) will be deleted " + deletedPropertyCodes);
+		logger.warn("property (sample) will be deleted " + deletedPropertyCodesAtLeastSample);
+
+		updateCollectionsFromSample(sample, updatedProperties, deletedPropertyCodes, updatedPropertiesAtLeastSample, deletedPropertyCodesAtLeastSample, contextError);
 	} 
 
-	private void updateCollectionsFromSample(Sample sample, Map<String, PropertyValue> updatedProperties, Set<String> deletedPropertyCodes, ContextValidation contextError) {
+	private void updateCollectionsFromSample(Sample sample, Map<String, PropertyValue> updatedProperties, Set<String> deletedPropertyCodes, Map<String, PropertyValue> updatedPropertiesAtLeastSample, Set<String> deletedPropertyCodesAtLeastSample,  ContextValidation contextError) {
 		logger.info("Update son samples, containers, readSets, process from sample : {}", sample.code);
 		InstanceHelpers.updateContentProperties(sample, updatedProperties, deletedPropertyCodes, contextError);
+		InstanceHelpers.updateSampleProperties(sample, updatedPropertiesAtLeastSample, deletedPropertyCodesAtLeastSample, contextError);
 		// Updates on samples
 		List<Sample> samples = MongoDBDAO.find(InstanceConstants.SAMPLE_COLL_NAME, Sample.class,
 				DBQuery.is("life.from.sampleCode",sample.code).in("life.from.projectCode", sample.projectCodes)).toList();
@@ -134,9 +147,8 @@ public class UpdateSamplePropertiesCNS extends AbstractImportDataCNS {
 		//			DBQuery.is("life.from.sampleCode",sample.code).in("life.from.projectCode", sample.projectCodes))
 		//			.cursor
 		samples.forEach(sonSample -> {
-			updateCollectionsFromSample(sonSample, updatedProperties, deletedPropertyCodes, contextError);
+			updateCollectionsFromSample(sonSample, updatedProperties, deletedPropertyCodes, updatedPropertiesAtLeastSample, deletedPropertyCodesAtLeastSample, contextError);
 		});
-
 	}
 
 }

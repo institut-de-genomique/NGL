@@ -127,6 +127,16 @@
 					      editTemplate:"<textarea class='form-control' #ng-model rows='1'></textarea>",
 					      choiceInList:false
 				        });
+			columns.push({property:"dropBox",
+						header: Messages("sample.dropBox"),
+						type :"String",
+						hide:true,
+						edit:false,
+						order:false,
+						choiceInList:true,
+						listStyle:'bt-select',
+						possibleValues:'sraVariables.dropBox',
+				    	});	
 			columns.push({
 						property     : "comments",
 						header       : Messages("comments"),

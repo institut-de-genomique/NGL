@@ -51,8 +51,8 @@ public class TestUserExperimentExtendedParser extends ScriptWithArgs<TestUserExp
 				println("                  title  = '" + entry.getValue().getTitle() + "'");
 				println("                  spot_length  = '" + entry.getValue().getSpotLength() + "'");
 				println("                  last_base_coordonnee  = '" + entry.getValue().getLastBaseCoordonnee() + "'");
-				println("                  study_accession = '" + entry.getValue().getStudyAccession() + "'");
-				println("                  sample_accession = '" + entry.getValue().getSampleAccession() + "'");
+				println("                  study_accession = '" + entry.getValue().getStudyIdentifier() + "'");
+				println("                  sample_accession = '" + entry.getValue().getSampleIdentifier() + "'");
 
 			}
 			String user = "sgas";
@@ -76,7 +76,8 @@ public class TestUserExperimentExtendedParser extends ScriptWithArgs<TestUserExp
 
 
 	public void execute(MyParam args) throws Exception {
-		Map<String, UserExperimentExtendedType> mapUserExperiment = parseUserFileExperiment(args.fileName); 
+		// Map<String, UserExperimentExtendedType> mapUserExperiment = 
+		parseUserFileExperiment(args.fileName); 
 	}
 	
 }

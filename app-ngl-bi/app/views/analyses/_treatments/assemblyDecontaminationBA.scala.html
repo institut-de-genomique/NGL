@@ -1,0 +1,76 @@
+@()
+<div ng-init="treatmentCode='assemblyDecontamination'">
+<div ng-controller="AssemblyDecontaminationBACtrl as ctrl">
+	<div class="row">
+		<div class="col-md-7 col-lg-7">
+		   <br />
+		   <br />
+		   <br/>
+		   <b>@Messages("analyses.treatments.assemblyDecontamination.selectedAssembly") : </b>
+		   {{ analysis.treatments[treatmentCode].pairs.selectedAssembly.value }}
+		   <br />
+		   <br />
+		   <b>@Messages("analyses.treatments.assemblyDecontamination.softwareVersion") : </b>
+		   {{ analysis.treatments[treatmentCode].pairs.softwareVersion.value }}
+		   <br />
+		   <br />
+	   
+			<strong></strong>
+			<br/><br/> 
+			<table class="table table-condensed table-hover table-bordered">
+			   <thead>
+			   <tr>		
+				   <th>@Messages("analyses.treatments.assemblyDecontamination.fileName")</th> 
+				   <th>@Messages("analyses.treatments.assemblyDecontamination.cumulativeSize")</th> 
+				   <th>@Messages("analyses.treatments.assemblyDecontamination.n50")</th> 
+				   <th>@Messages("analyses.treatments.assemblyDecontamination.n90")</th>
+				   <th>@Messages("analyses.treatments.assemblyDecontamination.l50")</th>
+				   <th>@Messages("analyses.treatments.assemblyDecontamination.l90")</th>		
+				   <th>@Messages("analyses.treatments.assemblyDecontamination.auN")</th>		
+				   <th>@Messages("analyses.treatments.assemblyDecontamination.maxSize")</th>	
+				   <th>@Messages("analyses.treatments.assemblyDecontamination.nbcontigs")</th>					
+					   
+			   </tr>
+			   </thead>
+			   <tbody>
+			   <tr ng-repeat="file in analysis.treatments[treatmentCode].pairs.file.value">
+				   <td>{{file.fileName}}</td>
+				   <td>{{file.cumulativeSize | number}}</td>
+				   <td>{{file.n50 | number}}</td>	
+				   <td>{{file.n90 | number}}</td>
+				   <td>{{file.l50 | number}}</td>	
+				   <td>{{file.l90 | number}}</td>
+				   <td>{{file.auN | number}}</td>
+				   <td>{{file.maxSize | number}}</td>
+				   <td>{{file.nbcontigs | number}}</td>
+			   </tr>						
+		   </tbody>
+			</table>
+		</div>	 
+	   </div>
+	   
+	   <div class="row">
+		   <div class="col-md-4 col-lg-4">
+			   <b><u><h2>@Messages("analyses.treatments.assemblyDecontamination.summaryPlot.label") : </h2></u></b>
+			   <div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+			   ng-click="setImage(analysis.treatments[treament.code!=undefined?treament.code:treatmentCode].pairs.summaryPlot.value,'summaryPlot','summaryPlot',treament.code!=undefined?treament.code:treatmentCode,
+			   analysis.treatments[treament.code!=undefined?treament.code:treatmentCode].pairs.summaryPlot.width,
+			   analysis.treatments[treament.code!=undefined?treament.code:treatmentCode].pairs.summaryPlot.height)">
+				<a href="#">
+				   <img id="pairs_summaryPlot" ng-src="data:image/png;base64,{{analysis.treatments[treament.code!=undefined?treament.code:treatmentCode].pairs.summaryPlot.value}}" />
+				   <p>@Messages("analyses.treatments.assemblyDecontamination.summaryPlot")</p>
+				</a>   
+			   </div>
+		   </div>
+	   </div>
+	   <br/>
+	   <div class="row">
+			<div class="col-md-4 col-lg-4" ng-switch="analysis.treatments[treament.code!=undefined?treament.code:treatmentCode].pairs.contextPlot.value !== undefined">
+				<a ng-switch-when="true" href ng-click="openContextPlot(analysis.treatments[treament.code!=undefined?treament.code:treatmentCode].pairs)"><h3>@Messages("analyses.treatments.assemblyDecontamination.contextPlot")</h3></a>
+				<div ng-switch-when="false" ><h3>@Messages("analyses.treatments.assemblyDecontamination.contextPlot.unvailable")</h3></div>
+			</div>
+		</div>
+	   <br />
+	   <br/>
+</div>
+</div>

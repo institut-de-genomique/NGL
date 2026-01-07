@@ -54,6 +54,7 @@ public class ProjectsAPITest {
 
 	private final MailServices mailServices = mock(MailServices.class);
 
+	@SuppressWarnings("unchecked")
 	private final MiniDAO<ProjectType> miniDao = PowerMockito.mock(MiniDAO.class);
 
 	private final ProjectsDAO projectDAO = Mockito.mock(ProjectsDAO.class);
@@ -136,10 +137,10 @@ public class ProjectsAPITest {
 		when(projectDAO.saveObject(project)).thenReturn(project);
 
 		try {
-			Project sampCreateAPI = projectAPI.create(project, TestUtils.CURRENT_USER);
+			Project projetCrea = projectAPI.create(project, TestUtils.CURRENT_USER);
 
-			assertTrue("Different code on testCreateValid()", sampCreateAPI.code.equals(project.code));
-			assertNotNull(sampCreateAPI);
+			assertNotNull(projetCrea);
+			assertTrue("Different code on testCreateValid()", projetCrea.code.equals(project.code));
 		} catch (APIException e) {
 			Logger.error("Exception occured during testCreateValid()");
 			fail(e.getMessage());
@@ -339,6 +340,7 @@ public class ProjectsAPITest {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void testUpdateValidCNG() throws MailServiceException {
 		Project project = mock(Project.class);
 		project = ProjectFactory.fillRandomProject(project, false);
@@ -365,6 +367,7 @@ public class ProjectsAPITest {
 	} 
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void testUpdateValidCNSNoMail() throws MailServiceException {
 		Project project = mock(Project.class);
 		project = ProjectFactory.fillRandomProject(project, true);
@@ -391,6 +394,7 @@ public class ProjectsAPITest {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void testUpdateValidCNSMail() throws MailServiceException {
 		Project project = mock(Project.class);
 		project = ProjectFactory.fillRandomProject(project, true);

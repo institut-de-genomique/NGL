@@ -10,7 +10,6 @@ import fr.cea.ig.MongoDBDAO;
 import models.laboratory.common.instance.PropertyValue;
 import models.laboratory.parameter.propertyDefinitionsProtocol.PropertyDefinitionsProtocol;
 import models.utils.InstanceConstants;
-import play.Logger;
 import validation.ContextValidation;
 import validation.utils.ValidationConstants;
 import validation.utils.ValidationHelper;
@@ -45,12 +44,13 @@ public class ProtocolValidationHelper {
 		if(code == null){
 			contextValidation.addError("code", ValidationConstants.ERROR_BAD_FORMAT);
 		}
-		/* else{
+		else{
 			boolean hasValideCode =	Pattern.matches("^[a-z0-9-_.]+$",code);
 			if(!hasValideCode){
-				contextValidation.addError("code", ValidationConstants.ERROR_BAD_FORMAT);
+				contextValidation.addError("code", ValidationConstants.ERROR_BAD_FORMAT );
+				contextValidation.addError("code", "Format attendu : [a-z0-9-_.]" );
 			}
-		} */
+		} 
 	}
 
 	public static void validateProtocolProperties(ContextValidation contextValidation, Map<String, PropertyValue> propertiesMap){
@@ -66,7 +66,14 @@ public class ProtocolValidationHelper {
 	}
 	public static void validatePropertyExist (ContextValidation contextValidation,String code){
 		PropertyDefinitionsProtocol propertyDefinitionsProtocol = MongoDBDAO.findByCode(InstanceConstants.PARAMETER_COLL_NAME, PropertyDefinitionsProtocol.class, "property-definition-protocol");
-		if(!propertyDefinitionsProtocol.properties.containsKey(code)){
+		
+		if (propertyDefinitionsProtocol == null) {
+			contextValidation.addError("protocoles.properties", "Document Parameter : 'map-property-definitions' non trouvé.");
+		
+			return;
+		}
+
+		if (!propertyDefinitionsProtocol.properties.containsKey(code)){
 			contextValidation.addError("protocoles.properties", ValidationConstants.ERROR_VALUENOTAUTHORIZED_MSG, code);
 		}
 		

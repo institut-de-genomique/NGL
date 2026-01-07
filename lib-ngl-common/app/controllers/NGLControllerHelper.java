@@ -39,7 +39,7 @@ public class NGLControllerHelper {
 		List<Query> queries = new ArrayList<>();
 		try {
 			for (String keyValue : properties.keySet()) {
-				String[] key = keyValue.split("\\|",2);
+				String[] key = keyValue.split("\\|",3);
 				// Replace ".value" to deal with object_list
 				PropertyDefinition pd = PropertyDefinition.find.get().findUnique(key[0], level);
 				List<String> stringValues = properties.get(keyValue);
@@ -65,7 +65,12 @@ public class NGLControllerHelper {
 						// the test ensures that StringValues.size() == 1 so this test could be removed
 						// from the following if statements. It then follows that a string switch could be used.
 						if (key[1].equals("regex")) {
-							Pattern pattern = convertStringToPattern(stringValues.get(0));
+							Pattern pattern;
+							if(key.length == 3 && key[2].equals("i")){
+								pattern = Pattern.compile(stringValues.get(0), Pattern.CASE_INSENSITIVE);								
+							}else{
+								pattern = Pattern.compile(stringValues.get(0));
+							}
 							subQueries = DBQuery.regex(property, pattern);
 							queries.add(subQueries);							
 						} else if (key[1].equals("gte") && stringValues.size() == 1) {
@@ -95,6 +100,7 @@ public class NGLControllerHelper {
 					} else {
 						throw new RuntimeException("key not valid : "+keyValue+" or stringValues.size != 1 / "+stringValues.size());
 					}
+					
 					queries.add(subQueries);
 				}				
 			}

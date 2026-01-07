@@ -283,7 +283,7 @@ angular.module('home').controller('PCRAmplificationAndPurificationCtrl',['$scope
 	} else {
 		datatableConfig.columns.push({
 			"header" : Messages("containers.table.code"),
-			"property" : "inputContainer.support.code",
+			"property" : "inputContainer.code",
 			"order" : true,
 			"edit" : false,
 			"hide" : true,
@@ -459,16 +459,16 @@ angular.module('home').controller('PCRAmplificationAndPurificationCtrl',['$scope
 	
 	atmService.newAtomicTransfertMethod =  function(line, column){
 		var getLine = function(line){
-			if($scope.experiment.instrument.outContainerSupportCategoryCode 
-					=== $scope.experiment.instrument.inContainerSupportCategoryCode){
-				return line;
-			}else if($scope.experiment.instrument.outContainerSupportCategoryCode !== "tube" 
-				&& $scope.experiment.instrument.inContainerSupportCategoryCode === "tube") {
-				return undefined;
-			}else if($scope.experiment.instrument.outContainerSupportCategoryCode === "tube"){
+			var inputCategory = $scope.experiment.instrument.inContainerSupportCategoryCode;
+			var outputCategory = $scope.experiment.instrument.outContainerSupportCategoryCode;
+
+			if(outputCategory === "tube") {
 				return "1";
+			} else if(inputCategory === "tube") {
+				return undefined;
+			} else {
+				return line;
 			}
-			
 		}
 		var getColumn=getLine;
 		

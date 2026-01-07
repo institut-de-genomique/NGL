@@ -120,13 +120,13 @@ angular.module('home').controller('PcrAndIndexingCtrl',['$scope', '$parse',  '$f
 			         
 			         //--->  colonnes specifiques experience s'inserent ici  (outputUsed ??)
 			         
-			         //TEST NGL-3387: remplacer la propriété finalVolume par un attribut Volume avec les controles obligatoires
+			         //NGL-3387: remplacer la propriété finalVolume par un attribut Volume avec les controles obligatoires
 			         {
 						"header":Messages("containers.table.volume") + " (µL)",
 						"property":"outputContainerUsed.volume.value",
 						"order":true,
 						"edit":true,
-						"required":"isRequired('IP')", // doit être complété par validation par drools
+						"required":"isRequired('IP')", // doit être complété par validation par drools=> volumeValidation.drl
 						"defaultValues":"30",
 						"hide":true,
 						"type":"number",
@@ -396,13 +396,21 @@ angular.module('home').controller('PcrAndIndexingCtrl',['$scope', '$parse',  '$f
 			// 04/08/2022 NGL-3960 nvelles plaques Anchor
 			case 'illumina-anchor-strand-totrna-with-ribozeroplus':
 			case 'illumina-anchor-strand-mrna':
+				/*  NGL-4657 passage en V3 de toutes les plaques basées sur les index Illumina UDI
 				$scope.plates.push( {name:"IDT for Illumina Anchor DNA Unique Dual Indexes Set A", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_IDT_Anchor_Set_A() });
 				$scope.plates.push( {name:"IDT for Illumina Anchor DNA Unique Dual Indexes Set B", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_IDT_Anchor_Set_B() });
 				$scope.plates.push( {name:"IDT for Illumina Anchor DNA Unique Dual Indexes Set C", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_IDT_Anchor_Set_C() });
 				$scope.plates.push( {name:"IDT for Illumina Anchor DNA Unique Dual Indexes Set D", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_IDT_Anchor_Set_D() });
+				*/ 
+				$scope.plates.push( {name:"IDT for Illumina Anchor DNA Unique Dual Indexes Set A (V3)", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_Illumina_UDI_Set_A_V3() });
+				$scope.plates.push( {name:"IDT for Illumina Anchor DNA Unique Dual Indexes Set B (V3)", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_Illumina_UDI_Set_B_V3() });
+				$scope.plates.push( {name:"IDT for Illumina Anchor DNA Unique Dual Indexes Set C (V3)", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_Illumina_UDI_Set_C_V3() });
+				$scope.plates.push( {name:"IDT for Illumina Anchor DNA Unique Dual Indexes Set D (V3)", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_Illumina_UDI_Set_D_V3() });
 				break;
-			// 28/10/ 2022 NGL-3869 plaque Capture XT-HS2
+			// 28/10/2022 NGL-3869 plaque Capture XT-HS2
+			// 29/11/2024 NGL-4768 idem pour protocole sop-agilent-xt-hs2-mrna-lib-prep
 			case 'capture-wes-xt-hs2-bravows':
+			case 'sop-agilent-xt-hs2-mrna-lib-prep':
 				$scope.plates.push( {name:"Agilent SureSelect XT-HS2 Kit A [pl orange]", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_AglSureSelect_XTHS2_Kit_A() });
 				$scope.plates.push( {name:"Agilent SureSelect XT-HS2 Kit B [pl bleue]",  tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_AglSureSelect_XTHS2_Kit_B() });
 				$scope.plates.push( {name:"Agilent SureSelect XT-HS2 Kit C [pl verte]",  tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_AglSureSelect_XTHS2_Kit_C() });

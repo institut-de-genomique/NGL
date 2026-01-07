@@ -1,13 +1,12 @@
 "use strict";
 
-angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routeParams' , '$q', 'mainService', 'lists', 'tabService','messages','datatable',
-	function($http, $scope, $routeParams, $q, mainService, lists, tabService, messages, datatable) { 
+angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routeParams' , '$q', 'mainService', 'lists', 'tabService','messages', 'toolsServices', 'datatable',
+	function($http, $scope, $routeParams, $q, mainService, lists, tabService, messages, toolsServices, datatable) { 
 
     $scope.isRemovable = function() {
     	return $scope.submission != null;
     };
 
-    
 	var analyzesDTConfig = {
 			name:' projectsDT',
 			order :{by:'code',mode:'local', reverse:true},
@@ -16,7 +15,7 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 			},
 			pagination:{
 				active:true,
-				mode:'local',
+				mode:'remote',
                 numberRecordsPerPage: 100
 			},
 			select:{active:false},
@@ -24,29 +23,32 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 			cancel : {
 				showButton:true
 			},
-			hide:{
+			/*hide:{
 				active:false,
 				showButton:false
-			},
+			},*/
 			exportCSV:{
 				active:true
 			},
 			save : {
 				active:true,
-				showButton : false,
+				showButton : true,
 				changeClass : false,
 				url:function(line){
 					return jsRoutes.controllers.sra.analyzes.api.Analyzes.update(line.code).url; // jamais utilisé si mode local
+				},
+				callback: function (datatable, countError) {
+					$scope.updateCallback(datatable, countError);
 				},
 				method:'put',
 				value:function(line){
 					return line;
 				},
-				mode:'local',
+				mode:'remote',
 			},
 			edit : {
 				active:true,
-				showButton : false,
+				showButton : true,
 				withoutSelect : true,
 				columnMode : true,
 				lineMode : function(line){
@@ -106,20 +108,20 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 				        choiceInList : false  
 				       	});	
 			columns.push({
-						property     : "studyAccession",
-					    header       : Messages("analysis.studyAccession"),
+						property     : "studyIdentifier",
+					    header       : Messages("analysis.studyIdentifier"),
 				       	type         : "text",		    	  	
 				       	order        : true,
-				       	edit         : true,
+				       	edit         : false,
 				       	choiceInList : false  
 				       	});				        	    	
 		        			        
 			columns.push({
-						property     : "sampleAccession",
-						header       : Messages("analysis.sampleAccession"),
+						property     : "sampleIdentifier",
+						header       : Messages("analysis.sampleIdentifier"),
 						type         : "String",
 						hide         : true,
-						edit         : true,
+						edit         : false,
 						order        : false,
 						choiceInList : false
 						});	    
@@ -144,77 +146,12 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 						choiceInList:false
 						});	
 			columns.push({
-						property     : "comments",
-						header       : Messages("comments"),
-						type         : "text",
-						hide         : true,
-						edit         : false, // pas modifiable ici car uniquement dans vue details du study en passant par icone speciale
-						order        : false,
-						choiceInList : false,
-						filter       : "collect:'comment'",
-						listStyle    : 'bt-select',
-						});	
-			return columns;
-		};
-      
-	var getUmbrellaProjectColumns = function() {
-		var columns = [];
-			columns.push({
-						property     : "traceInformation.creationDate",
-						header       : Messages("traceInformation.creationDate"),
-						type         : "date",		    	  	
-						order        : true,
-						edit         : false,
-						choiceInList : false  
-						});
-			columns.push({
-						property     : "traceInformation.createUser",
-						header       : Messages("traceInformation.creationUser"),
-						type         : "date",		    	  	
-						order        : true,
-						edit         : false,
-						choiceInList : false  
-						});
-			columns.push({
-						property : "state.code",
-						header   : Messages("project.state.code"),
-						"filter" : "codes:'state'",
-						type     : "text",		    	  	
-						order    : true
-						});	
-			columns.push({
-						property   : "code",
-		  	        	header     : Messages("project.code"),
-				       	type       : "text",		    	  	
-				       	order      : true
-				        });	
-
-			columns.push({
-						property     : "childrenProjectAccessions",
-				       	header       : Messages("project.childrenProjectAccessions"),
-				       	type         : "text",		    	  	
-				       	order        : false,
-				       	edit         : false,
-				       	choiceInList : false  
-				       	}); 	
-			columns.push({
-						property     : "title",
-						header       : Messages("project.title"),
-					type :"text",	
-					hide:true,
-					order:true,
-					edit:true,
-					editTemplate:"<textarea class='form-control' #ng-model rows='1'></textarea>",
-					choiceInList:false
-						});	
-			columns.push({
-						property     : "description",
-						header       : Messages("project.description"),
+						property     : "dropBox",
+						header       : Messages("analysis.dropBox"),
 						type :"text",	
 						hide:true,
 						order:true,
-						edit:true,
-						editTemplate:"<textarea class='form-control' #ng-model rows='1'></textarea>",
+						edit:false,
 						choiceInList:false
 						});	
 			columns.push({
@@ -229,25 +166,25 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 						listStyle    : 'bt-select',
 						});	
 			return columns;
-  
 		};
-
-		var umbrellaProjectsDTConfig = {
-			name:' projectsDT',
+		
+		
+		var umbrellaProjectsDTConfig = { // on ne doit pas pouvoir editer car on construit umbrella et on envoie à l'EBI sans edition et validation utilisateur
+			name:' projectsDT',          // c'est juste pour la visualisation.
 			order :{by:'code',mode:'local', reverse:true},
 			search:{
 				url:jsRoutes.controllers.sra.projects.api.Projects.list()
 			},
 			pagination:{
-				active:true,
+				active: false,
 				mode:'local',
                 numberRecordsPerPage: 100
 			},
 			select:{active:true},
 			showTotalNumberRecords:true,
 			edit : {
-				active : false, // permettre edition des champs editables
-				showButton : true,// bouton d'edition visible
+				active : false,     // permettre edition des champs editables
+				showButton : false,  // bouton d'edition visible
 				withoutSelect : true,
 				columnMode : true
 			},
@@ -269,22 +206,265 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 				columnMode : true,
 			},
 			save : {
+				active      : false, // car l'umbrella est directement declaré à l'EBI. si modification alors passer par modifier à l'EBI.
+				showButton  : false,
+				mode        :'remote', 
+				changeClass : true, // pour mettre les lignes bien sauvegardees en verts et celles en echec en rouge
+				url:function(line){
+					// pour regler problème de mapping entre representation de umbrella dans datatable et dans model java :
+					$scope.toJsonUmbrellaModelOrThrow(line, $scope.errorDetails);
+					console.log("line dans bon model verifier si tous les champs =", line);
+					return jsRoutes.controllers.sra.projects.api.Projects.update(line.code).url; // jamais utilisé si mode local
+					// et si mode remote alors problème com.fasterxml.jackson.databind.JsonMappingException pour les champs locus_tag ...
+					// d'ou appel préalable de toJsonStudyModel;
+				},
+				method       :'put',
+				//withoutEdit:true, //??
+
+				value        :function(line){
+					return line;
+				},				
+				callback : function(datatable, errors) {
+					//console.log("XXXXXXXXXXXXXXXXX           datatable", datatable);
+					//console.log("XXXXXXXXXXXXXXXXX           errors", errors);
+					$scope.updateCallback(datatable, errors, $scope.messages);
+				}
+			},
+
+	};
+	
+
+	var getUmbrellaProjectColumns = function() {
+		var columns = [];
+			columns.push({
+						property     : "traceInformation.creationDate",
+						header       : Messages("traceInformation.creationDate"),
+						type         : "date",	
+						hide         : true,	    	  	
+						order        : true,
+						edit         : false,
+						choiceInList : false  
+						});
+			columns.push({
+						property     : "traceInformation.createUser",
+						header       : Messages("traceInformation.creationUser"),
+						type         : "date",		    	  	
+						hide         : true,	    	  	
+						order        : true,
+						edit         : false,
+						choiceInList : false  
+						});
+			columns.push({
+						header       : Messages("project.state.code"),
+						property     :"state.code",
+						"filter"     :"codes:'state'",
+						type         : "text",		    	  	
+						hide         : true,	    	  	
+						order        : true
+						});	
+			columns.push({
+						property   : "code",
+		  	        	header     : Messages("project.code"),
+				       	type       : "text",		    	  	
+						hide       : true,	    	  	
+				       	order      : true
+				        });		
+			columns.push({
+						property     : "firstSubmissionDate",
+						header       : Messages("firstSubmissionDate"),
+						type         : "date",	
+						hide         : true,	    	  	
+						order        : true,
+						edit         : false,
+						choiceInList : false  
+						});	
+			columns.push({
+						property     : "accession",
+					    header       : Messages("project.accession"),
+				        type         : "text",		    	  	
+						hide         : true,	    	  	
+				        order        : true,
+				        edit         : false,
+				        choiceInList : false  
+				       	});	
+// Dans nouveau model, uniquement des projects de type umbrella stoqués dans collection project			        	    	
+//			columns.push({
+//						property     : "submissionProjectType",
+//					    header       : Messages("project.submissionProjectType"),
+//				       	type         : "text",		    	  	
+//						hide         : true,	    	  	
+//				       	order        : true,
+//				       	edit         : false,
+//				       	choiceInList : false  
+//				       	});		
+		        			        			        
+			columns.push({
+						property     : "title",
+						header       : Messages("project.title"),
+						type :"text",	
+						hide:true,
+						order:true,
+						edit:true,  
+						editTemplate:"<textarea class='form-control' #ng-model rows='1'></textarea>",
+						choiceInList:false
+						});	    
+			columns.push({
+						property     : "description",
+						header       : Messages("project.description"),
+						type :"text",	
+						hide:true,
+						order:true,
+						edit:true,  
+						editTemplate:"<textarea class='form-control' #ng-model rows='1'></textarea>",
+						choiceInList:false
+						});	
+			columns.push({
+						property     : "parentProjectAccessions",
+				       	header       : Messages("project.parentProjectAccessions"),
+				       	type         : "text",		    	  	
+						hide         : true,	    	  	
+				       	order        : false,
+				       	edit         : false,
+				       	choiceInList : false  
+				       	}); 	
+			columns.push({
+						property     : "childrenProjectAccessions",
+				       	header       : Messages("project.childrenProjectAccessions"),
+				       	type         : "text",		    	  	
+						hide         : true,	    	  	
+				       	order        : false,
+				       	edit         : false,
+				       	choiceInList : false  
+				       	}); 	
+			columns.push({
+						property     : "idsPubmed",
+						header       : Messages("project.idsPubmed"),
+						type         : "text",
+						hide         : true,
+						edit         : false, 
+						order        : false,
+						choiceInList : false,
+						listStyle    : 'bt-select',
+						});
+			columns.push({
+						property     : "taxonId",
+						header       : Messages("project.taxonId"),
+						type         : "text",
+						hide         : true,
+						edit         : false, 
+						order        : true,
+						choiceInList : false,
+						});		
+			columns.push({
+						property     : "scientificName",
+						header       : Messages("project.scientificName"),
+						type         : "text",
+						hide         : true,
+						edit         : false, 
+						order        : true,
+						choiceInList : false,
+						});	
+			columns.push({property   : "attributes",
+					    header       : Messages("project.attributes"),
+					    //"filter":"codes:'state'",
+					    type         : "text",		    	  	
+					    order        : false, 
+					    edit         : false,  
+					   	hide         : true,
+						choiceInList : false,
+						editTemplate :"<textarea class='form-control' #ng-model rows='3'></textarea>",
+//						render       : function(data, edit) {
+//							              return toolsServices.getStringAttributes(data);
+//						             }
+				        });							
+			columns.push({property:"dropBox",
+						header: Messages("study.dropBox"),
+						type :"String",
+						hide:true,
+						edit:false,
+						order:false,
+						choiceInList:true,
+						listStyle:'bt-select',
+						possibleValues:'sraVariables.dropBox',
+				    	});						
+			columns.push({
+						property     : "comments",
+						header       : Messages("comments"),
+						type         : "text",
+						hide         : true,
+						edit         : false, // pas modifiable en consultation car uniquement dans vue detail
+						order        : false,
+						choiceInList : false,
+						filter       : "collect:'comment'",
+						listStyle    : 'bt-select',
+						});						
+			return columns;
+		};
+
+
+	var studiesDTConfig = {
+			name:'studiesDT',
+			order :{by:'code',mode:'local', reverse:true},
+			search:{
+				url:jsRoutes.controllers.sra.studies.api.Studies.list()
+			},
+			pagination:{
+				active:true,
+				mode:'local',
+                numberRecordsPerPage: 10
+			},
+			select:{active:false},
+			showTotalNumberRecords:true,
+			cancel : {
+				showButton:true
+			},
+			/*hide:{
 				active:false,
-				showButton : false,
+				showButton:false
+			},*/
+			exportCSV:{
+				active:true
+			},
+			edit : {
+				active:true,
+				showButton : true,
+				withoutSelect : true,
+				columnMode : true,
+				lineMode : function(line){
+					if((line.state.code === "NONE")||(line.state.code === "SUB-N"))
+						return true;
+					else 
+						return false;
+				}
+			},
+			save : {
+				active:true,
+				showButton : true,
 				changeClass : false,
 				url:function(line){
-					return jsRoutes.controllers.sra.projects.api.Projects.update(line.code).url; // jamais utilisé si mode local
+					// pour regler problème de mapping entre representation du study dans datatable et dans model java :
+					console.log("line avant sauvegarde = ", line);
+					$scope.toJsonStudyModelOrThrow(line, $scope.errorDetails);
+					console.log("line dans bon model =", line);
+					
+					return jsRoutes.controllers.sra.studies.api.Studies.update(line.code).url; // jamais utilisé si mode local 
+					// et si mode remote alors problème com.fasterxml.jackson.databind.JsonMappingException pour les champs locus_tag ...
+					// d'ou appel préalable de toJsonStudyModel;
 				},
 				method:'put',
 				value:function(line){
 					return line;
 				},
-				mode:'local',
+				mode:'remote',
+				callback : function(datatable, errors) {
+					//console.log("XXXXXXXXXXXXXXXXX           datatable", datatable);
+					//console.log("XXXXXXXXXXXXXXXXX           errors", errors);
+					$scope.updateCallback(datatable, errors);
+				}
 			},
-
 	};
 	
-	
+
 	var getStudyColumns = function() {
 		var columns = [];
 			columns.push({
@@ -304,11 +484,11 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 						choiceInList : false  
 						});
 			columns.push({
-						property : "state.code",
-						header   : Messages("study.state.code"),
-						"filter" : "codes:'state'",
-						type     : "text",		    	  	
-						order    : true
+						property     : "state.code",
+			    		"filter"     :"codes:'state'",
+						header       : Messages("study.state.code"),
+						type         : "text",		    	  	
+						order        : true
 						});	
 			columns.push({
 						property   : "code",
@@ -339,12 +519,20 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 				       	order        : true,
 				       	edit         : false,
 				       	choiceInList : false  
-				       	});				        	    	
+				       	});	
+			columns.push({
+						property     : "firstSubmissionDate",
+						header       : Messages("firstSubmissionDate"),
+						type         : "date",		    	  	
+						order        : true,
+						edit         : false,
+						choiceInList : false  
+						});			        	    	
 			columns.push({
 						property     : "releaseDate",
 					   	header       : Messages("study.releaseDate"),
 					    type         : "date",		    	  	
-					    order        : false,
+					    order        : true,
 					    edit         : false,
 					    choiceInList : false  
 						});	
@@ -362,22 +550,19 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 						type :"text",	
 						hide:true,
 						order:true,
-						edit:true,
+						edit:true,  
 						editTemplate:"<textarea class='form-control' #ng-model rows='1'></textarea>",
 						choiceInList:false
 						});	    
-			columns.push({
-						property     : "studyAbstract",
-						header       : Messages("study.description"),
+			columns.push({property:"description",            // mettre description et pas abstract car abstract sera synchronisé  sur description.
+						header: Messages("study.description"),
 						type :"text",	
 						hide:true,
 						order:true,
-						edit:true,
+						edit:true,  
 						editTemplate:"<textarea class='form-control' #ng-model rows='1'></textarea>",
 						choiceInList:false
-						});	
-				
-					      
+				    	});	 	      
 			columns.push({
 						property     : "existingStudyType",
 						header       : Messages("study.existingStudyType"),
@@ -395,97 +580,91 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 						header       : Messages("study.locusTagPrefixs"),
 						type         : "text",
 						hide         : true,
-						edit         : false, // study editable uniquement si SUB-N et à ce stade, project.xml n'existe pas et c'est dans ce fichier que ce champs apparait.
-						                      // De plus manip a faire si on voulait rendre ce champs editable. Il faudrait transformer ce champs en tableau 
-                                              // avant de le reinjecter dans study (voir interface update-ctrl.js)
+						edit         : true, 
 						order        : false,
 						choiceInList : false,
 						listStyle    : 'bt-select',
 						});
-								
+			columns.push({
+						property     : "parentProjectAccessions",
+						header       : Messages("study.parentProjectAccessions"),
+						type         : "text",	
+						hide         : true,
+						order        : true,
+						edit         : true,  // modifiable en update
+						editTemplate : "<textarea class='form-control' #ng-model rows='1'></textarea>",
+					    choiceInList : false
+						});
 			columns.push({
 						property     : "idsPubmed",
 						header       : Messages("study.idsPubmed"),
 						type         : "text",
-						hide         : true,
-						edit         : false, // study editable uniquement si SUB-N et à ce stade, project.xml n'existe pas et c'est dans ce fichier que ce champs apparait.
-						                      // De plus manip a faire si on voulait rendre ce champs editable. Il faudrait transformer ce champs en tableau 
-                                              // avant de le reinjecter dans study (voir interface update-ctrl.js)
+						hide         : false,
+						edit         : true, // study editable uniquement si SUB-N et à ce stade
 						order        : false,
 						choiceInList : false,
 						listStyle    : 'bt-select',
 						});
 			columns.push({
-						property     : "comments",
-						header       : Messages("comments"),
+						property     : "taxonId",
+						header       : Messages("project.taxonId"),
 						type         : "text",
-						hide         : true,
-						edit         : false, // pas modifiable ici car uniquement dans vue details du study en passant par icone speciale
-						order        : false,
+						hide         : false,
+						edit         : true, 
+						order        : true,
 						choiceInList : false,
-						filter       : "collect:'comment'",
-						listStyle    : 'bt-select',
 						});		
-			
+			columns.push({
+						property     : "scientificName",
+						header       : Messages("project.scientificName"),
+						type         : "text",
+						hide         : false,
+						edit         : false, 
+						order        : true,
+						choiceInList : false,
+						});	
+						
+			columns.push({property    : "dropBox",
+						header        : Messages("project.dropBox"),
+						type          : "String",
+						hide          : true,
+						edit          : false,
+						order         : false,
+						choiceInList  : true,
+						listStyle     : 'bt-select',
+						possibleValues: 'sraVariables.dropBox',
+				    	});		
+			columns.push({property    : "attributes",
+					    header        : Messages("study.attributes"),
+					    //"filter":"codes:'state'",
+					    type          : "text",		    	  	
+					    order         : false, 
+					    edit          : true,  
+					   	hide          : true,
+						choiceInList  : false,
+						editTemplate  :"<textarea class='form-control' #ng-model rows='3'></textarea>",
+//						render        : function(data, edit) {
+//							              return toolsServices.getStringAttributes(data);
+//						              },
+				        });	
+			columns.push({
+						property      : "comments",
+						header        : Messages("comments"),
+						type          : "text",
+						hide          : true,
+						edit          : false, // pas modifiable en consultation car uniquement dans vue detail
+						order         : false,
+						choiceInList  : false,
+						filter        : "collect:'comment'",
+						listStyle     : 'bt-select',
+						});	
+	
 			return columns;
 		};
-      
-	
-	var studiesDTConfig = {
-			name:'studiesDT',
-			order :{by:'code',mode:'local', reverse:true},
-			search:{
-				url:jsRoutes.controllers.sra.studies.api.Studies.list()
-			},
-			pagination:{
-				active:true,
-				mode:'local',
-                numberRecordsPerPage: 100
-			},
-			select:{active:false},
-			showTotalNumberRecords:true,
-			cancel : {
-				showButton:true
-			},
-			hide:{
-				active:false,
-				showButton:false
-			},
-			exportCSV:{
-				active:true
-			},
-			edit : {
-				active:true,
-				showButton : false,
-				withoutSelect : true,
-				columnMode : true,
-				lineMode : function(line){
-					if((line.state.code === "NONE")||(line.state.code === "SUB-N"))
-						return true;
-					else 
-						return false;
-				}
-			},
-			save : {
-				active:true,
-				showButton : false,
-				changeClass : false,
-				url:function(line){
-					return jsRoutes.controllers.sra.studies.api.Studies.update(line.code).url; // jamais utilisé si mode local
-				},
-				method:'put',
-				value:function(line){
-					return line;
-				},
-				mode:'local',
-			},
+      	
 
-	};
-	
 	
 //---------------------------------------------------------------------------------------------------
-
-
 
 	var samplesDTConfig = {
 			name:'sampleDT',
@@ -500,7 +679,7 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 			showTotalNumberRecords:true,
 			edit : {
 				active:true,
-				showButton : false,
+				showButton : true,
 				withoutSelect : true,
 				columnMode : true,
 				lineMode : function(line){
@@ -512,22 +691,22 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 			},
 			save : {
 				active:true,
-				// important de mettre en mode local pour rafraichissement de la page, mais sauvegarde globale via bouton
-				mode:'local',
-				showButton : false,
-				changeClass : false,				
-				url:function(line){
-					return jsRoutes.controllers.sra.samples.api.Samples.update(line.code).url; // jamais utilisé en mode local
+				mode:'remote',
+				batch: true,
+				showButton : true,
+				changeClass : false,
+				url:function(lineValue){
+					return jsRoutes.controllers.sra.samples.api.Samples.batchUpdate().url; 
 				},
-				method:'put',
-				value:function(line){
-					return line;
+				callback: function (datatable, countError) {
+					$scope.updateCallback(datatable, countError);
 				},
-			},
-
-			/*cancel : {
+				method:'put'
+				},
+			cancel : {
 				showButton:true
 			},
+			/*
 			hide:{
 				active:true
 			},
@@ -536,7 +715,12 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 				active:true
 			},
 			
-
+			pagination: {
+				active:true,
+				mode:'local',
+                numberRecordsPerPage: 250
+			},
+			
 			columns : [
 			 	{property:"traceInformation.creationDate",
 			       	header: Messages("sample.traceInformation.creationDate"),
@@ -637,6 +821,14 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 					editTemplate:"<textarea class='form-control' #ng-model rows='1'></textarea>",
 					choiceInList:false
 				},
+				{property     : "dropBox",
+					header       : Messages("sample.dropBox"),
+					type :"text",	
+					hide:true,
+					order:true,
+					edit:false,
+					choiceInList:false
+				},
 			    {property     : "comments",
 					header       : Messages("comments"),
 					type         : "text",
@@ -662,7 +854,7 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 			showTotalNumberRecords:true,
 			edit:{
 				active : true,
-				showButton : false,
+				showButton : true,
 				withoutSelect : true,
 				columnMode : true,
 				lineMode:function(line){
@@ -675,26 +867,33 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 			},
 			save : {
 				active:true,
-				mode:'local',
-				showButton : false,
+				mode:'remote',
+				batch: true,
+				showButton : true,
 				changeClass : false,
 				url:function(lineValue){
-					return jsRoutes.controllers.sra.experiments.api.Experiments.update(lineValue.code).url; // jamais utilisé en mode local
+					return jsRoutes.controllers.sra.experiments.api.Experiments.batchUpdate().url; // jamais utilisé en mode local
 				},
-				method:'put',
-				value:function(line){
-					return line;
+				callback: function (datatable, countError) {
+					$scope.updateCallback(datatable, countError);
 				},
+				method:'put'
 			},
-			/*cancel : {
+			cancel : {
 				showButton:true
 			},
+			/*
 			hide:{
 				active:true,
 				showButton:true
 			},*/
 			exportCSV:{
 				active:true
+			},
+			pagination: {
+				active:true,
+				mode:'local',
+                numberRecordsPerPage: 250
 			},
 			columns : [
 				{property:"traceInformation.creationDate",
@@ -859,6 +1058,14 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 					edit:false,
 					order:true
 				},
+				{property     : "dropBox",
+					header       : Messages("experiment.dropBox"),
+					type :"text",	
+					hide:true,
+					order:true,
+					edit:false,
+					choiceInList:false
+				},
 				{property     : "comments",
 					header       : Messages("comments"),
 					type         : "text",
@@ -869,11 +1076,10 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 					filter       : "collect:'comment'",
 					listStyle    : 'bt-select',
 				}
-				
 				]	        
 	};
 
-	var runsDTConfig = {
+	var runsDTConfig = {   // uniquement pour la consultation, pas d'edition ou de sauvegarde.
 			name:'runDT',
 			order :{by:'code',mode:'local', reverse:true},
 			search:{active:false},
@@ -885,7 +1091,7 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 			showTotalNumberRecords:true,
 			
 			edit : {
-				active:true,
+				active:false,
 				showButton : false,
 				withoutSelect : true,
 				columnMode : true
@@ -919,7 +1125,7 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 	};
 	
 	
-	var rawDatasDTConfig = {
+	var rawDatasDTConfig = {  // uniquement pour la consultation. Pas d'edition ou de save
 			name:'rawDataDT',
 			order :{by:'code', mode:'local', reverse:true},
 			search:{active:false},
@@ -944,25 +1150,6 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 			exportCSV:{
 				active:true
 			},
-			//url:function(lineValue){
-			//		return jsRoutes.controllers.sra.experiments.api.Experiments.update(lineValue.code).url; // jamais utilisé en mode local
-			//	},
-			
-//			remove : {
-//				active:false,
-//				withEdit:false, //to authorize to remove a line in edition mode
-//				showButton : false,
-//				mode:'local', //or local
-//				url:function(lineValue) { 
-//					return jsRoutes.controllers.sra.experiments.api.ExperimentsRawDatas.delete(lineValue.experimentCode, lineValue.relatifName).url;
-//				},
-//				callback : undefined, //used to have a callback after remove all element. the datatable is pass to callback method and number of error
-//				start:false,
-//				counter:0,
-//				number:0, //number of element in progress
-//				error:0								
-//			},
-			
 			columns : [
 				{property:"relatifName",
 					header: Messages("rawData.relatifName"),
@@ -976,7 +1163,70 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 				}
 				]	        
 	};	
-
+	
+	var laboReadsetsDTConfig = {  // uniquement pour la consultation. Pas d'edition ou de save
+			name:'laboReadsetDT',
+			order :{by:'code', mode:'local', reverse:true},
+			search:{active:false},
+			select:{active:false},
+			pagination:{
+				active:false,
+				mode:'local'
+			},
+			showTotalNumberRecords:true,
+			edit : {
+				active:false,
+				showButton :false,
+				withoutSelect : true,
+				columnMode : true
+			},
+			cancel : {
+				showButton:true
+			},
+			hide:{
+				active:true
+			},
+			exportCSV:{
+				active:true
+			},
+			columns : [
+				{property:"code",
+					header: Messages("readset.code"),
+					type :"text",		    	  	
+					order:true
+				},
+				{property:"sampleOnContainer.sampleCode",
+					header: Messages("nglbiSampleCode"),
+					type :"text",		    	  	
+					order:true
+				},
+				{property:"sampleOnContainer.taxonCode",
+					header: Messages("nglbiTaxonCode"),
+					type :"text",		    	  	
+					order:true
+				},
+				{property:"sampleOnContainer.ncbiScientificName",
+					header: Messages("nglbiNcbiScientificName"),
+					type :"text",		    	  	
+					order:true
+				},
+				{property:"sampleOnContainer.properties.devProdContext.value",
+					header: Messages("nglbiDevProdContext"),
+					type :"text",		    	  	
+					order:true
+				},	
+				{property:"sampleOnContainer.referenceCollab",
+					header: Messages("nglbiReferenceCollab"),
+					type :"text",		    	  	
+					order:true
+				},
+				{property:"properties.refCollabSub.value",
+					header: Messages("nglbiRefCollabSub"),
+					type :"text",		    	  	
+					order:true
+				}					
+				]	        
+	};
 
 //----------------------------------------------------------------------------------------
 	
@@ -984,9 +1234,26 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 	//---------------------------
 	
 	var init = function(){
-		$scope.alertUser = "";
+		// variables qui doivent etre definie dans le callback :
+		$scope.errorDetails = {};
+		$scope.userRegisterValidateError = false;
+		$scope.action = "NO_VALIDATE";
+		$scope.tableau_analyses = [];
+		$scope.tableau_studies = [];
+		$scope.tableau_samples = [];
+		$scope.tableau_experiments = [];
+		$scope.decompte = 1;
+		$scope.tableau_readsets = [];
+		$scope.h_nglbi_readset = {};
+		
+		$scope.dbSamples = {};
+		
 		$scope.messages = messages();
 		$scope.messages.clear();
+		$scope.decompte = 0;
+		
+		$scope.alertUser = "";
+
 		$scope.mainService = mainService;
 		$scope.mainService.stopEditMode();
 		$scope.sampleCheck=false;
@@ -1003,7 +1270,6 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 		$scope.isRunCheckable         = false;
 		$scope.isRawDataCheckable     = false;
 		$scope.allValidable           = false;
-
 		$scope.isAllValidable = function() {
 			//console.log("Dans isALLValidable = ");
 			if ( (($scope.isStudyCheckable && $scope.studyCheck)   || !$scope.studyCheckable) &&
@@ -1066,7 +1332,8 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 				$scope.countAnalysis =  1;
 			}			
 			$scope.countExperiment = $scope.submission.experimentCodes.length;
-			$scope.countRun = $scope.submission.runCodes.length;
+						$scope.countReadset = $scope.submission.experimentCodes.length;
+$scope.countRun = $scope.submission.runCodes.length;
 			$scope.countSample = $scope.submission.sampleCodes.length;
 
 //			console.log("init::$scope.countExperiment = " + $scope.submission.experimentCodes.length);
@@ -1092,6 +1359,11 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 				// initialisation de la variable sraVariables.librarySource utilisee dans experimentsDTConfig
 				$scope.sraVariables.librarySource = data;
 			});
+			$http.get(jsRoutes.controllers.sra.api.Variables.list().url, {params:{type:'dropBox'}})
+			.success(function(data) {
+				// initialisation de la variable sraVariables.dropBox 
+				$scope.sraVariables.dropBox = data;
+			});
 			$http.get(jsRoutes.controllers.sra.api.Variables.list().url, {params:{type:'libraryLayout'}})
 			.success(function(data) {
 				// initialisation de la variable sraVariables.libraryLayout utilisee dans experimentsDTConfig
@@ -1102,47 +1374,131 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 //				// initialisation de la variable sraVariables.libraryLayoutOrientation utilisee dans experimentsDTConfig
 //				$scope.sraVariables.libraryLayoutOrientation = data;
 //			});	
-			if($scope.submission.umbrellaCode != null && $scope.submission.umbrellaCode.trim().length != 0){
-				$http.get(jsRoutes.controllers.sra.projects.api.Projects.get($scope.submission.umbrellaCode).url).success(function(data)
-				{
-					$scope.umbrellaProjects = [];
-					$scope.umbrellaProjects.push(data);
-					//console.log("$scope.umbrellaProjects :" , $scope.umbrellaProjects);					
-					//Init datatable
-					$scope.umbrellaProjectDT = datatable(umbrellaProjectsDTConfig);
-					$scope.umbrellaProjectDT.setColumnsConfig(getUmbrellaProjectColumns());
-					$scope.umbrellaProjectDT.setData($scope.umbrellaProjects, $scope.umbrellaProjects.length);
-				});
-			}			
-			if($scope.submission.studyCode != null && $scope.submission.studyCode.trim().length != 0){
-				$http.get(jsRoutes.controllers.sra.studies.api.Studies.get($scope.submission.studyCode).url).success(function(data)
-				{
-					$scope.studies = [];
-					$scope.studies.push(data);
-//					console.log("$scope.submission.study: " + $scope.submission.studyCode);
-//					console.log("$scope.studies :" + $scope.studies);
+
+			$scope.initUmbrella();
+			$scope.initStudy();	
+			$scope.initAnalysis();	
+			$scope.initSamples();
+			$scope.initExperiments();
+			$scope.initNglBiReadsets();
+
+		}) // end http
+	};
+
+	$scope.toJsonStudyModelOrThrow = function(line, errorDetails) {
+		//console.log("dans toJsonStudyModelOrThrow, errorDetails=", errorDetails);
+		//console.log("dans toJsonStudyModelOrThrow, json=", line);
+
+		toolsServices.toJsonStudyModel(line, errorDetails);
+		//line.description = line.studyAbstract;   // mettre la description avec meme valeur que abstract => fait dans java
+		//console.log("dans toJsonStudyModelOrThrow, errorDetails=", errorDetails);
+		if((Object.keys(errorDetails)).length > 0) {
+			//console.log("AAAAAAAAAAAAAAAAAAA               J'ai bien une erreur de  PARSING");
+			$scope.messages = messages(); // si on re-sauve sans recharger page.
+			$scope.messages.clear();      // si on re-sauve sans recharger page.
+			$scope.messages.addDetails(errorDetails);
+			$scope.messages.setError("save");
+			$scope.studyDT.setSpinner(false);
+			$scope.treeLoadInProgress = false;
+			throw("Erreur de parsing");
+		} 
+	}; // end $scope.toJsonStudyModelOrThrow
+		
+	$scope.updateCallback=function(datatable, countError) {
+		$scope.messages = messages(); // si on re-sauve sans recharger page.
+		$scope.messages.clear();      // si on re-sauve sans recharger page.
+		//console.log(datatable);
+		//console.log(countError);
+		//console.log("dans callback, $scope.tableau_samples.length = ", $scope.tableau_samples.length);
+		//console.log("YYYYYYYY   TOTOTO   YYYYYYYYYYY    dans callback, displayResult : ", datatable.displayResult);
+		//console.log("xxxxxxxxxx    dans callback, displayResult.line : ", datatable.displayResult.line);
+		//console.log("eeeeeeeeeeeeee  dans callback scope.dbSamples = ", $scope.dbSamples);
+		for (var i = 0; i < datatable.displayResult.length; i++) {
+			var keysError =  Object.keys(datatable.displayResult[i].line.errors);
+			//console.log("eeeeeeeee keysError", keysError);
+			//console.log("eeeeeeeee keysError.length", keysError.length);
+			if ( keysError.length >= 1 ) {
+				// Recuperation message erreur :
+				var monObj = datatable.displayResult[i].line.errors;
+				//console.log("dans callback, monObj", monObj);
+				//console.log("dans callback, monObj.typeOf", monObj.typeOf);
+				//console.log("dans callback, monObj.hasOwnProperty()", monObj.hasOwnProperty());
+				for (var [key, values] of Object.entries(monObj)) {
+					var cle = `${key}`;
+					var values = `${values}`; 
+  					//console.log("xxxxxxxxxxx    cle = ", cle);
+					//console.log("xxxxxxxxxxx    values = ", values);
+					//console.log("monObjValues = ", monObj[cle]);
+					var monError = {};
+					monError[cle]=[values];
+					$scope.messages.addDetails(monError);
+				} // end for
+			} // end if						
+		}// end for
+		// Affichage message succes ou erreur :
+		// Dans le cas d'une exception, countError n'est pas definie :
+		if ( countError == undefined || countError == null || countError > 0) {
+			$scope.messages.setError("save");
+			$scope.treeLoadInProgress = false;
+			$scope.studyDT.setSpinner(false);
+			$scope.sampleDT.setSpinner(false);			
+			$scope.experimentDT.setSpinner(false);
+						$scope.readsetDT.setSpinner(false);					
+		} else {
+			$scope.messages.setSuccess("save");			
+		}
+	};
+
+
+	$scope.initUmbrella=function() {
+		if($scope.submission.umbrellaCode != null && $scope.submission.umbrellaCode.trim().length != 0){
+			$http.get(jsRoutes.controllers.sra.projects.api.Projects.get($scope.submission.umbrellaCode).url)
+			.success(function(data) {
+				$scope.umbrellaProjects = [];
+				$scope.umbrellaProjects.push(data);
+				//console.log("$scope.umbrellaProjects :" , $scope.umbrellaProjects);					
+				//Init datatable
+				$scope.umbrellaProjectDT = datatable(umbrellaProjectsDTConfig);
+				$scope.umbrellaProjectDT.setColumnsConfig(getUmbrellaProjectColumns());
+				$scope.umbrellaProjectDT.setData($scope.umbrellaProjects, $scope.umbrellaProjects.length);
+			});// end http
+		}			
+	};
+	
+    $scope.initStudy=function() {
+		if($scope.submission.studyCode != null && $scope.submission.studyCode.trim().length != 0){
+			$http.get(jsRoutes.controllers.sra.studies.api.Studies.get($scope.submission.studyCode).url)
+			.success(function(data) {
+				$scope.studies = [];
+				$scope.studies.push(data);
+//				console.log("$scope.submission.study: " + $scope.submission.studyCode);
+//				console.log("$scope.studies :" + $scope.studies);
 					
-					//Init datatable
-//					$scope.studyDT = datatable(studiesDTConfig);
-//					$scope.studyDT.setData($scope.studies, $scope.studies.length);
-					$scope.studyDT = datatable(studiesDTConfig);
-					$scope.studyDT.setColumnsConfig(getStudyColumns());
-					$scope.studyDT.setData($scope.studies, $scope.studies.length);
-					//if ( $scope.submission.state.code =='SUB-N' && $scope.submission.traceInformation.createUser === $scope.user) {
-					if ( $scope.submission.state.code =='SUB-N') {
-						$scope.isAllValidable();
-						$scope.isStudyCheckable = true;
-						//console.log("ok cond 1");
-						//console.log("!!!!  scope.isStudyCheckable= " + $scope.isStudyCheckable);
-						//console.log("!!!!! scope.isAllValidable = " + $scope.isAllValidable());
-					}
-				});
-			} else {
-				$scope.studyCheck = true;
-			}
-			if($scope.submission.analysisCode != null && $scope.submission.analysisCode.trim().length != 0){
-				$http.get(jsRoutes.controllers.sra.analyzes.api.Analyzes.get($scope.submission.analysisCode).url).success(function(data)
-				{
+				//Init datatable
+//				$scope.studyDT = datatable(studiesDTConfig);
+//				$scope.studyDT.setData($scope.studies, $scope.studies.length);
+				$scope.studyDT = datatable(studiesDTConfig);
+				$scope.studyDT.setColumnsConfig(getStudyColumns());
+				$scope.studyDT.setData($scope.studies, $scope.studies.length);
+				//if ( $scope.submission.state.code =='SUB-N' && $scope.submission.traceInformation.createUser === $scope.user) 
+				if ( $scope.submission.state.code =='SUB-N') {
+					$scope.isAllValidable();
+					$scope.isStudyCheckable = true;
+					//console.log("ok cond 1");
+					//console.log("!!!!  scope.isStudyCheckable= " + $scope.isStudyCheckable);
+					//console.log("!!!!! scope.isAllValidable = " + $scope.isAllValidable());
+				}
+			}); // end success
+		} else { // sinon, aucun studyCode
+			$scope.studyCheck = true;
+		}
+	};
+	
+	
+	$scope.initAnalysis=function(){
+		if($scope.submission.analysisCode != null && $scope.submission.analysisCode.trim().length != 0) {
+			$http.get(jsRoutes.controllers.sra.analyzes.api.Analyzes.get($scope.submission.analysisCode).url)
+			.success(function(data) {
 					$scope.analyzes = [];
 					$scope.analyzes.push(data);
 				
@@ -1163,396 +1519,362 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 					$scope.rawDataDT = datatable(rawDatasDTConfig);
 					$scope.rawDataDT.setData(maListRawDatas, maListRawDatas.length);
 					$scope.countRawData = maListRawDatas.length; 
-					//if ( $scope.submission.state.code =='SUB-N' && $scope.submission.traceInformation.createUser === $scope.user) {
 					if ( $scope.submission.state.code =='SUB-N') {
 						$scope.isAnalysisCheckable = true;
 						$scope.isRawDataCheckable = true;
 						$scope.isAllValidable();
 					}
-				});
-			} else {
-				$scope.analysisCheck = true;
-				if($scope.submission.experimentCodes== null|| $scope.submission.experimentCodes.length==0){
-					$scope.rawDataCheck = true;
-				}
-			}			
-
-
-			if($scope.submission.sampleCodes.length>0){
-				var nbElementByBatch = Math.ceil($scope.submission.sampleCodes.length / 6); //6 because 6 request max in parrallel with firefox and chrome
-				var queries = [];
-				for (var i = 0; i < 6 && $scope.submission.sampleCodes.length > 0; i++) {
-					var subSampleCodes = $scope.submission.sampleCodes.splice(0, nbElementByBatch);
-					//queries.push( $http.get(jsRoutes.controllers.sra.samples.api.Samples.list().url, {params: {listSampleCodes:subSampleCodes}}) );
-					queries.push( $http.get(jsRoutes.controllers.sra.samples.api.Samples.list().url, {params: {codes:subSampleCodes}}) );
-				}
-				$q.all(queries).then(function(results) {
-					var allData = [];
-					results.forEach(function(result){
-						allData = allData.concat(result.data);
-					});
-
-					$scope.samples = allData;
-
-//					console.log("scope.submission.sampleCodes: " + $scope.submission.sampleCodes);
-//					console.log("!!!!!!! scope.samples :" + $scope.samples);
-
-					//Init datatable
-					$scope.sampleDT = datatable(samplesDTConfig);
-					$scope.sampleDT.setData($scope.samples, $scope.samples.length);
-					//if ($scope.submission.state.code == 'SUB-N' && $scope.submission.traceInformation.createUser === $scope.user) {
-					if ($scope.submission.state.code == 'SUB-N') {
-						//console.log("ok cond 2");
-						$scope.isSampleCheckable = true;
-					}
-				});
-			} else {
-				$scope.sampleCheck = true;
+			}); // end http
+		} else { // sinon, aucune analyse
+			$scope.analysisCheck = true;
+			if($scope.submission.experimentCodes== null|| $scope.submission.experimentCodes.length==0) {
+				$scope.rawDataCheck = true;
 			}
+		} 	
+	};	
 
 
-			if($scope.submission.experimentCodes.length>0){
-				var nbElementByBatch = Math.ceil($scope.submission.experimentCodes.length / 6); //6 because 6 request max in parrallel with firefox and chrome
-				var queries = [];
-				for (var i = 0; i < 6 && $scope.submission.experimentCodes.length > 0; i++) {
-					var subExperimentCodes = $scope.submission.experimentCodes.splice(0, nbElementByBatch);
-					//queries.push( $http.get(jsRoutes.controllers.sra.experiments.api.Experiments.list().url, { params : { listExperimentCodes : subExperimentCodes } }) );
-					queries.push( $http.get(jsRoutes.controllers.sra.experiments.api.Experiments.list().url, { params : { codes : subExperimentCodes } }) );
-				}
-				$q.all(queries).then(function(results) {
-					var allData = [];
-					results.forEach(function(result){
-						allData = allData.concat(result.data);
-					});
-                    //console.log("XXXXXXXXXXXXXXXXXXXXXx");
+	$scope.initExperiments=function() {
+		if($scope.submission.experimentCodes.length>0) {
+			
+			var nbElementByBatch = Math.ceil($scope.submission.experimentCodes.length / 15); //6 because 6 request max in parrallel with firefox and chrome
+			var queries = [];
+			var tabExperiments = [];
+			tabExperiments = angular.copy($scope.submission.experimentCodes);
+
+			for (var i = 0; i < 15 && tabExperiments.length > 0; i++) {
+				var subExperimentCodes = tabExperiments.splice(0, nbElementByBatch);
+				//queries.push( $http.get(jsRoutes.controllers.sra.experiments.api.Experiments.list().url, { params : { listExperimentCodes : subExperimentCodes } }) );
+				queries.push( $http.get(jsRoutes.controllers.sra.experiments.api.Experiments.list().url, { params : { codes : subExperimentCodes } }) );
+			}
+			$q.all(queries)
+			.then(function(results) {
+				var allData = [];
+				results.forEach(function(result) {
+					allData = allData.concat(result.data);
+				});
+           		 //console.log("XXXXXXXXXXXXXXXXXXXXXx");
                     
-					$scope.experiments = allData;
-					//Init datatable
-					$scope.experimentDT = datatable(experimentsDTConfig);
-					$scope.experimentDT.setData($scope.experiments, $scope.experiments.length);
-					if($scope.submission.runCodes.length > 0 ) {
-						//Get Runs
-						$scope.runDT = datatable(runsDTConfig);
-						// Comme on a un seul run par experiment, on n'a pas besoin de boucler pour recuperer les données :
-						$scope.runDT.setData($scope.experiments, $scope.experiments.length);
+				$scope.experiments = allData;
+				//Init datatable
+				$scope.experimentDT = datatable(experimentsDTConfig);
+				$scope.experimentDT.setData($scope.experiments, $scope.experiments.length);
+				if($scope.submission.runCodes.length > 0 ) {
+					//Get Runs
+					$scope.runDT = datatable(runsDTConfig);
+					// Comme on a un seul run par experiment, on n'a pas besoin de boucler pour recuperer les données :
+					$scope.runDT.setData($scope.experiments, $scope.experiments.length);
 
 
-						// Get RawDatas : construction de la liste des rawData puis injection dans datatable :
-						var maListRawDatas = [];
-						for (var i=0; i<$scope.experiments.length; i++) {
-							var experiment = $scope.experiments[i];
-							var run = experiment.run;
-							for (var j=0; j<run.listRawData.length; j++) {
-								var rawdataPlus = run.listRawData[j];
-								//console.log("rawDataPlus = " + rawdataPlus.relatifName);
-								rawdataPlus.experimentCode = experiment.code;
-								//console.log("experimentCode = " +rawdataPlus.experimentCode);
-								//maListRawDatas.push(run.listRawData[j]);
-								maListRawDatas.push(rawdataPlus);
-							}
+					// Get RawDatas : construction de la liste des rawData puis injection dans datatable :
+					var maListRawDatas = [];
+					
+					for (var i=0; i<$scope.experiments.length; i++) {
+						var experiment = $scope.experiments[i];
+						var run = experiment.run;
+						for (var j=0; j<run.listRawData.length; j++) {
+							var rawdataPlus = run.listRawData[j];
+							//console.log("rawDataPlus = " + rawdataPlus.relatifName);
+							rawdataPlus.experimentCode = experiment.code;
+							//console.log("experimentCode = " +rawdataPlus.experimentCode);
+							//maListRawDatas.push(run.listRawData[j]);
+							maListRawDatas.push(rawdataPlus);
 						}
-						// Partie de la configuration (rawDatasDTConfig) à definir seulement
-						// lorsque $scope.submission est definit.
-						$scope.rawDataDT = datatable(rawDatasDTConfig);
-						//console.log("sortie de rawData " + $scope.submission.state.code);
-						$scope.rawDataDT.setData(maListRawDatas, maListRawDatas.length);
-						$scope.countRawData = maListRawDatas.length;
-						//if ($scope.submission.state.code == 'SUB-N' && $scope.submission.traceInformation.createUser === $scope.user) {
-						if ($scope.submission.state.code == 'SUB-N') {
-							//console.log("ok cond 3");
-							$scope.isExperimentCheckable = true;
-							$scope.isRunCheckable        = true;
-							$scope.isRawDataCheckable    = true;
-						}
-						//console.log("scope.isExperimentCheckable= "   + $scope.isExperimentCheckable );
-					} 
-				});	
-			} else {
-				$scope.experimentCheck = true;
-				$scope.runCheck = true;
-				if ($scope.submission.analysisCode == null || $scope.submission.analysisCode.trim().length == 0){
-					$scope.rawDataCheck = true;
-				}
-			}			
-		});
-
-	};
-
-	
-	function closeSubmission(tableau_analyzes, tableau_studies, tableau_samples, tableau_experiments){
-		// $scope.submission.state.code = "SUB-V";		
-		//$http.put(jsRoutes.controllers.sra.submissions.api.Submissions.update($scope.submission.code).url, $scope.submission)
-		var state = angular.copy($scope.submission.state);
-		state.code = "SUB-V";
-		$http.put(jsRoutes.controllers.sra.submissions.api.Submissions.updateState($scope.submission.code).url, state)
-		.success(function(data) {
-			//Set success message
-			$scope.messages.clazz="alert alert-success";
-			$scope.messages.text=Messages('submissions.msg.validate.success');
-			$scope.messages.open();
-	        $scope.treeLoadInProgress = false;
-	        $scope.submission.state.code="SUB-V";
-	        // rafraichissement des tableaux de la vue avec bons statuts: 
-	        if ((tableau_analyzes!=='undefined') && (tableau_analyzes.length > 0)) {
-	        	for (var i=0; i<tableau_analyzes.length; i++) {
-	        		tableau_analyzes[i].state.code=$scope.submission.state.code;
-	        	}
-	        	$scope.analysisDT.setData(tableau_analyzes, tableau_analyzes.length);
-	        	$scope.analysisDT.save(); // fait le save cote client mais n'utilise pas url et ne fait pas save dans database.
-	        }		
-	        if ((tableau_studies!=='undefined') && (tableau_studies.length > 0)) {
-	        	for (var i=0; i<tableau_studies.length; i++) {
-	        		tableau_studies[i].state.code=$scope.submission.state.code;
-	        	}
-	        	$scope.studyDT.setData(tableau_studies, tableau_studies.length);
-	        	$scope.studyDT.save(); // fait le save cote client mais n'utilise pas url et ne fait pas save dans database.
-	        }
-	        if ((tableau_samples!=='undefined') && (tableau_samples.length > 0)) {
-	        	for (var i=0; i<tableau_samples.length; i++) {
-	        		tableau_samples[i].state.code=$scope.submission.state.code;
-	        	}
-	        	$scope.sampleDT.setData(tableau_samples, tableau_samples.length);
-	        	$scope.sampleDT.save(); // fait le save cote client mais n'utilise pas url et ne fait pas save dans database.
-	        }
-	        if ((tableau_experiments!=='undefined') && (tableau_experiments.length > 0)) {
-	        	// initialisation inutile $scope.experimentDT = datatable(experimentsDTConfig);
-	        	for (var i=0; i<tableau_experiments.length; i++) {
-	        		tableau_experiments[i].state.code=$scope.submission.state.code;
-	        	}
-	        	$scope.experimentDT.setData(tableau_experiments, tableau_experiments.length);
-	        	// sauvegarde cote client des experiments avec bon statut :
-	        	$scope.experimentDT.save(); // fait le save cote client mais n'utilise pas url et ne fait pas save dans database.
-	        }
-
-		}).error(function(data){
-			$scope.messages.addDetails(data);
-			$scope.messages.setError("save");
-	        $scope.treeLoadInProgress = false;
-	        
-		});
-	};
-
-	//en Javascript, ce n'est pas vous qui choisissez le mode de passage ; 
-	//ça fonctionne un peu comme en Java[1] : 
-	//si c'est un type natif (Number, String, etc.) c'est passé par valeur, 
-	//tandis que si c'est un objet d'une classe à vous, c'est passé par référence.
-	// => d'ou l'importance du return ici
-	function processInSubmission(decompte, action, error, tableau_analyzes, tableau_studies, tableau_samples, tableau_experiments) { // pas d'indication de retour dans la signature.
-//		console.log("processInSubmission ::decompte "+ decompte);
-//		console.log("processInSubmission ::error "+ error);
-		
-		decompte = decompte - 1;
-		if (decompte === 0) {
-			if (error){
-				// afficher message d'erreur sans sauver la soumission.
-				$scope.messages.setError("save");
-				//console.log("TUTU       Erreur avant sauvegarde de la soumission");
-				$scope.treeLoadInProgress = false;
-				//throw("TUTU       Erreur avant sauvegarde de la soumission");
-			} else {
-				if ( action === "VALIDATE") {
-					// sauver la soumission dans base et afficher resultat de la requete 
-					closeSubmission(tableau_analyzes, tableau_studies, tableau_samples, tableau_experiments);
-				} else {
-					$scope.messages.clazz="alert alert-success";
-					$scope.messages.text=Messages('submissions.msg.save.success');
-					$scope.messages.open();
-			        $scope.treeLoadInProgress = false;
-				}
+					}
+					// Partie de la configuration (rawDatasDTConfig) à definir seulement
+					// lorsque $scope.submission est definit.
+					$scope.rawDataDT = datatable(rawDatasDTConfig);
+					//console.log("sortie de rawData " + $scope.submission.state.code);
+					$scope.rawDataDT.setData(maListRawDatas, maListRawDatas.length);
+					$scope.countRawData = maListRawDatas.length;
+					if ($scope.submission.state.code == 'SUB-N') {
+						//console.log("ok cond 3");
+						$scope.isExperimentCheckable = true;
+						$scope.isRunCheckable        = true;
+						$scope.isRawDataCheckable    = true;
+					}
+					//console.log("scope.isExperimentCheckable= "   + $scope.isExperimentCheckable );
+				} 
+			});	// end then
+		} else { //sinon, si aucun experiment
+			$scope.experimentCheck = true;
+			$scope.runCheck = true;
+			if ($scope.submission.analysisCode == null || $scope.submission.analysisCode.trim().length == 0){
+				$scope.rawDataCheck = true;
 			}
-		}
-		return decompte;
+		}			
 	};
+		
 
+	$scope.buildRequeteNglBiReadset = function(tab_all_readsetCodes, allRequestReadset, max) {
+		var tab_readsetCodes = []; // tableau provisoire pour construire requete
+
+		for (var i=0; i < tab_all_readsetCodes.length; i++) {
+			tab_readsetCodes.push(tab_all_readsetCodes[i]);
+			if(tab_readsetCodes.length > max) {
+				// construire requetes readsets
+				// On n'utilise pas la requete get qui nous ferait une requete par experiment.
+				//var request = $http.get(jsRoutes.controllers.readsets.api.ReadSets.get(experiment.readSetCode).url)
+				//var requestReadset = $http.get(jsRoutes.controllers.readsets.api.ReadSets.list().url,{params:{codes:tab_readsetCodes}})
+				var requestReadset = $http.get(jsRoutes.controllers.readsets.api.ReadSets.list().url,
+					{params:{codes:tab_readsetCodes, includes:["code", "sampleOnContainer", "properties" ]}})
+				.catch (error => {
+					console.log(error);
+					console.log(error.data);
+					$scope.messages.addDetails(error.data); 
+					return $q.reject(error);                // propage erreur, comme throw 
+				});
+				allRequestReadset.push(requestReadset);
+				// Reinitialiser
+				tab_readsetCodes = [];
+			}
+		}	
+		// correction effet de bord pour req readset:
+		if(tab_readsetCodes.length > 0) {
+			//var requestReadset = $http.get(jsRoutes.controllers.readsets.api.ReadSets.list().url,
+			//		{params:{codes:tab_readsetCodes}})
+			var requestReadset = $http.get(jsRoutes.controllers.readsets.api.ReadSets.list().url,
+					{params:{codes:tab_readsetCodes, includes:["code", "sampleOnContainer", "properties" ]}})
+
+			.catch (error => {
+				console.log(error);
+				console.log(error.data);
+				$scope.messages.addDetails(error.data); 
+				$scope.treeLoadInProgress = false;
+				return $q.reject(error);                // propage erreur, comme throw 
+			});
+			allRequestReadset.push(requestReadset);
+	     } // end correction effet de bord	
+	}// end buildRequeteReadset 	
 	
-	/* buttons section */
+	
+	$scope.buildRequeteNglSubReadset = function(tab_all_readsetCodes, allRequestReadset, max) {
+		var tab_readsetCodes = []; // tableau provisoire pour construire requete
+
+		for (var i=0; i < tab_all_readsetCodes.length; i++) {
+			tab_readsetCodes.push(tab_all_readsetCodes[i]);
+			if(tab_readsetCodes.length > max) {
+				// construire requetes readsets
+				// On n'utilise pas la requete get qui nous ferait une requete par experiment.
+				//var request = $http.get(jsRoutes.controllers.readsets.api.ReadSets.get(experiment.readSetCode).url)
+				//var requestReadset = $http.get(jsRoutes.controllers.readsets.api.ReadSets.list().url,{params:{codes:tab_readsetCodes}})
+				var requestReadset = $http.get$http.get(jsRoutes.controllers.sra.readsets.api.Readsets.list().url,
+				{params:{codes:tab_readsetCodes, includes:["code", "nglbiSampleCode", "nglbiTaxonCode", "nglbiScientificName", "nglbiReferenceCollab", "nglbiRefCollabSub" ]}})
+				.catch (error => {
+					console.log(error);
+					console.log(error.data);
+					$scope.messages.addDetails(error.data); 
+					return $q.reject(error);                // propage erreur, comme throw 
+				});
+				allRequestReadset.push(requestReadset);
+				// Reinitialiser
+				tab_readsetCodes = [];
+			}
+		}	
+		// correction effet de bord pour req readset:
+		if(tab_readsetCodes.length > 0) {
+			//var requestReadset = $http.get(jsRoutes.controllers.readsets.api.ReadSets.list().url,
+			//		{params:{codes:tab_readsetCodes}})
+			var requestReadset = $http.get(jsRoutes.controllers.sra.readsets.api.Readsets.list().url,
+			{params:{codes:tab_readsetCodes, includes:["code", "nglbiSampleCode", "nglbiTaxonCode", "nglbiScientificName", "nglbiReferenceCollab", "nglbiRefCollabSub" ]}})
+
+			.catch (error => {
+				console.log(error);
+				console.log(error.data);
+				$scope.messages.addDetails(error.data); 
+				$scope.treeLoadInProgress = false;
+				return $q.reject(error);                // propage erreur, comme throw 
+			});
+			allRequestReadset.push(requestReadset);
+	     } // end correction effet de bord	
+	}// end buildRequeteReadset 
+	
+			
+//	// si solution affichage mixte 
+//	$scope.initNglBiReadsetsMixteAndInitNglSubReadsetsMixte=function() {
+//		console.log("Dans initNglBiReadsetsMixteAndInitNglSubReadsetsMixte");
+//		if($scope.submission.experimentCodes.length>0) {
+//			var nglbi_queries = [];
+//			var nglsub_queries = [];
+//			$scope.tabReadsets = [];
+//			var tabReadsetCodes = [];
+//			var nglbi_hReadsets = {};
+//			tabReadsetCodes = angular.copy($scope.submission.experimentCodes);
+//			//console.log("dans initReadsets avec tabReadsets=", tabReadsets);
+//		    for(var i = 0; i < tabReadsetCodes.length; i++){
+//				tabReadsetCodes[i] = tabReadsetCodes[i].replace("exp_","");
+//			}
+//			//console.log("dans initReadsets avec tabReadsetCodes final=", tabReadsetCodes);
+//			$scope.buildRequeteNglBiReadset(tabReadsetCodes, nglbi_queries, 100);
+//			$scope.buildRequeteNglSubReadset(tabReadsetCodes, nglsub_queries, 100);
+//			$q.all(nglbi_queries)
+//			.then(nglbi_result => { 
+//				for (var j = 0; j < nglbi_result.length; j++) {
+//					for (var k = 0; k < nglbi_result[j].data.length; k++) {
+//						var readsetCode = nglbi_result[j].data[k].code;
+//						var readset = nglbi_result[j].data[k];
+//						//console.log("readset Code avant integration dans hash : " , readset.code);
+//						//Object.assign(readsets, {readsetCode: readset}); // ne marche pas prendre ecriture suivante :	
+//						nglbi_hReadsets[readsetCode] = readset;
+//					}
+//				}
+//				$q.all(nglsub_queries)
+//				.then(nglsub_result => { 
+//					for (var j = 0; j < nglsub_result.length; j++) {
+//						for (var k = 0; k < nglsub_result[j].data.length; k++) {
+//							var readsetCode = nglsub_result[j].data[k].code;
+//							var nglsub_readset = nglsub_result[j].data[k];
+//							console.log("nglsub_readset", nglsub_readset);
+//						    if(nglbi_hReadsets.hasOwnProperty(readsetCode)) {
+//							   	var labo_readset = nglbi_hReadsets[readsetCode];
+//							   	console.log("labo_readset", labo_readset);
+//							   	if (labo_readset.sampleOnContainer != null && 
+//						    	  	labo_readset.sampleOnContainer.properties != null &&
+//								  	labo_readset.sampleOnContainer.properties.devProdContext != null && 
+//								  	labo_readset.sampleOnContainer.properties.devProdContext.value != null ) {
+//								  		nglsub_readset.nglbiDevProdContext = labo_readset.sampleOnContainer.properties.devProdContext.value;		
+//							      	}
+//						    }
+//							//console.log("readset", readset);
+//							$scope.tabReadsets.push(readset);
+//							//Init datatable
+//							$scope.readsetDT = datatable(readsetsDTConfig);
+//							$scope.readsetDT.setData($scope.tabReadsets, $scope.tabReadsets.length);
+//						 }	
+//					}
+//					//console.log("$scope.tabReadsets=", $scope.tabReadsets);
+//					//console.log("$scope.readsetDT = ", $scope.readsetDT);
+//				}); // end then nglsub_results
+//			});	// end then nglbi_results
+//			
+//			//console.log("XXXXXXXXXXXXXXXXXXXXXx");
+//		}//end if($scope.submission.experimentCodes.length>0)
+//	};// end initNglBiReadsetsMixteAndInitNglSubReadsetsMixte
+	
+	
+	// solution affichage dynamique nglbiReadsets
+	$scope.initNglBiReadsets=function() {
+		console.log("Dans initNglBiReadsets");
+		if($scope.submission.experimentCodes.length>0) {
+			var nglbi_queries = [];
+			var nglsub_queries = [];
+			$scope.tabReadsets = [];
+			var tabReadsetCodes = [];
+			var nglbi_hReadsets = {};
+			tabReadsetCodes = angular.copy($scope.submission.experimentCodes);
+			//console.log("dans initReadsets avec tabReadsets=", tabReadsets);
+		    for(var i = 0; i < tabReadsetCodes.length; i++){
+				tabReadsetCodes[i] = tabReadsetCodes[i].replace("exp_","");
+			}
+			//console.log("dans initReadsets avec tabReadsetCodes final=", tabReadsetCodes);
+			$scope.buildRequeteNglBiReadset(tabReadsetCodes, nglbi_queries, 100);
+			$q.all(nglbi_queries)
+			.then(nglbi_result => { 
+				for (var j = 0; j < nglbi_result.length; j++) {
+					for (var k = 0; k < nglbi_result[j].data.length; k++) {
+						var readsetCode = nglbi_result[j].data[k].code;
+						var readset = nglbi_result[j].data[k];
+						//console.log("readset Code avant integration dans hash : " , readset.code);
+						//Object.assign(readsets, {readsetCode: readset}); // ne marche pas prendre ecriture suivante :	
+						nglbi_hReadsets[readsetCode] = readset;
+						$scope.tabReadsets.push(readset);
+						//console.log("readset=", readset);
+						//Init datatable
+						$scope.laboReadsetDT = datatable(laboReadsetsDTConfig);
+						$scope.laboReadsetDT.setData($scope.tabReadsets, $scope.tabReadsets.length);
+					}
+				}
+				//console.log("$scope.tabReadsets=", $scope.tabReadsets);
+				//console.log("$scope.laboReadsetDT = ", $scope.laboReadsetDT);
+			});	// end then nglbi_results			
+			//console.log("XXXXXXXXXXXXXXXXXXXXXx");
+		}//end if($scope.submission.experimentCodes.length>0)
+	};// end initNglBiReadsetsMixteAndInitNglSubReadsetsMixte
+	
+
+		
+	$scope.initSamples=function() {
+		if($scope.submission.sampleCodes.length>0){
+			var nbElementByBatch = Math.ceil($scope.submission.sampleCodes.length / 6); //6 because 6 request max in parrallel with firefox and chrome
+			var queries = [];
+			var tabSamples = [];
+			tabSamples = angular.copy($scope.submission.sampleCodes);
+			//console.log("tabSamples", tabSamples);
+			for (var i = 0; i < 6 && tabSamples.length > 0; i++) {
+				var subSampleCodes = tabSamples.splice(0, nbElementByBatch);
+				//queries.push( $http.get(jsRoutes.controllers.sra.samples.api.Samples.list().url, {params: {listSampleCodes:subSampleCodes}}) );
+				queries.push( $http.get(jsRoutes.controllers.sra.samples.api.Samples.list().url, {params: {codes:subSampleCodes}}) );
+			}
+			//console.log("tabSamples apres ", tabSamples);
+			//console.log("sscope.submission.sampleCodes apres ", $scope.submission.sampleCodes);
+
+			$q.all(queries).
+			then(function(results) {
+				var allData = [];
+				results.forEach(function(result) {
+					allData = allData.concat(result.data);
+				});
+				
+				$scope.samples = allData;
+
+//				console.log("scope.submission.sampleCodes: " + $scope.submission.sampleCodes);
+//				console.log("!!!!!!! scope.samples :" + $scope.samples);
+
+				//Init datatable
+				$scope.sampleDT = datatable(samplesDTConfig);
+				$scope.sampleDT.setData($scope.samples, $scope.samples.length);
+				//if ($scope.submission.state.code == 'SUB-N' && $scope.submission.traceInformation.createUser === $scope.user) 
+				if ($scope.submission.state.code == 'SUB-N') {
+					//console.log("ok cond 2");
+					$scope.isSampleCheckable = true;
+				}
+			}); // end then
+		} else {// si aucun samples
+			$scope.sampleCheck = true;
+		}
+	};
+	
+
+			
+	$scope.validate=function() {
+		//console.log("Dans validate");
+ 		//var state = angular.copy($scope.submission.state);
+		$scope.treeLoadInProgress = true;
+		$http.put(jsRoutes.controllers.sra.submissions.api.Submissions.validateAndUpdateState($scope.submission.code).url)
+		.success(function(data) {
+			// Recharger données avec bon status :
+			$scope.initUmbrella();
+			$scope.initStudy();	
+			$scope.initAnalysis();	
+			$scope.initSamples();
+			$scope.initExperiments();
+			//Set success message
+			$scope.messages = messages(); // si on re-sauve sans recharger page.
+			$scope.messages.clear();      // si on re-sauve sans recharger page.
+			$scope.messages.setSuccess("Succes validation de la soumission");
+			$scope.treeLoadInProgress = false;
+		}).error(function(data){
+			$scope.messages = messages(); // si on re-sauve sans recharger page.
+			$scope.messages.clear();      // si on re-sauve sans recharger page.
+			$scope.messages.addDetails(data);
+			$scope.messages.setError("Echec validation de la soumission");
+	        $scope.treeLoadInProgress = false;
+		});
+	};
+	
 	
 
 
 	$scope.userValidate = function() {
-		$scope.userRegisterValidate("VALIDATE");
+		$scope.action="VALIDATE";
+		$scope.userRegisterValidate($scope.action);
 	};
 
 	$scope.userRegister = function() {
-		$scope.userRegisterValidate("NO_VALIDATE");
+		$scope.action="NO_VALIDATE";
+		$scope.userRegisterValidate($scope.action);
 	};
 	
-	
-	$scope.userRegisterValidate = function(action){
-		$scope.messages.clear();
-//		console.log("Dans userValidate");
-//		
-//		console.log("userValidate::Submission.code :"+$scope.submission.code);
-//		console.log("userValidate::Submission.refSampleCodes :"+$scope.submission.refSampleCodes);
-//		console.log("userValidate::Submission.sampleCodes :"+$scope.submission.sampleCodes);
-//		console.log("userValidate::Submission.experimentCodes :"+ $scope.submission.experimentCodes);
-//		console.log("userValidate::Submission.runCodes :"+$scope.submission.runCodes);
-//		console.log("userValidate::Nombre de samples: " + $scope.countSample);
-//		console.log("userValidate::Nombre d'experiment: " + $scope.countExperiment);
-//		console.log("userValidate::Nombre de study " + $scope.countStudy);
-		
-        $scope.treeLoadInProgress = true;
-
-		
-		var error = false;
-		
-		if( $scope.countAnalysis != 0){
-			$scope.analysisDT.save();	// sauvegarde dans client des analyses avec valeurs editees (valeurs utilisateurs)	
-			tableau_analyzes = $scope.analysisDT.getData();
-		} else {
-			//console.log("userValidate:: $scope.countAnalysis == 0");
-		}
-		// Recuperation des studies :
-		if( $scope.countStudy != 0) {
-			//console.log("userValidate:: $scope.countStudy != 0");
-			$scope.studyDT.save();	// sauvegarde dans client des studies avec valeurs editees (valeurs utilisateurs)	
-			tableau_studies = $scope.studyDT.getData();
-		} else {
-			//console.log("userValidate:: $scope.countStudy == 0");
-		}
-
-		// Recuperation des samples :
-		if($scope.countSample != 0) {
-			//console.log("samples à sauver");
-			$scope.sampleDT.save();	// sauvegarde dans client des samples avec valeurs editees (valeurs utilisateurs)	
-			tableau_samples = $scope.sampleDT.getData();
-		} else {
-			//console.log("Aucun sample à sauver");
-		}
-		// Recuperation des experiments :	
-		if($scope.countExperiment) {
-			//console.log("experiments à sauver");
-			$scope.experimentDT.save();		// recuperation saisie utilisateur et sauvegarde dans client.
-			tableau_experiments = $scope.experimentDT.getData();
-		} else {
-			//console.log("Aucun experiment à sauver "+ $scope.submission.experimentCodes.length);
-		}
-		var decompte = tableau_samples.length +  tableau_experiments.length + tableau_studies.length + tableau_analyzes.length;
-		//console.log("decompte = " + decompte);
-		
-		// Mise à jour du status  des analyses :
-		for(var i = 0; i < tableau_analyzes.length ; i++){
-			// sauvegarde dans database asynchrone
-			$http.put(jsRoutes.controllers.sra.analyzes.api.Analyzes.update(tableau_analyzes[i].code).url, tableau_analyzes[i])
-			.success(function(data){
-				decompte = processInSubmission(decompte, action, error, tableau_analyzes, tableau_studies, tableau_samples, tableau_experiments);
-				
-			}).error(function(data){
-				$scope.messages.addDetails(data);
-				//$scope.messages.setError("save");
-				error = true;
-				decompte = processInSubmission(decompte, action, error, tableau_analyzes, tableau_studies, tableau_samples, tableau_experiments);
-		        $scope.treeLoadInProgress = false;
-			});			
-			//console.log("studyTitle = " + tableau_studies[i].title + " state = "+ tableau_studies[i].state.code);
-		}
-		if($scope.submission.analysisCode !=null){
-			$scope.analysisDT.setData(tableau_analyzes, tableau_analyzes.length);
-			// sauvegarde cote client des analyses avec bon statut
-			$scope.analysisDT.save(); // fait le save cote client mais n'utilise pas url et ne fait pas save dans database.
-		}		
-		 
-		//Mise à jour du status  des studies :
-		for(var i = 0; i < tableau_studies.length ; i++){
-			//console.log("studyCode = " + tableau_studies[i].code + " state = "+ tableau_studies[i].state.code);
-			//tableau_studies[i].state.code = "SUB-V";
-			//console.log("studyTitle = " + tableau_studies[i].title + " state = "+ tableau_studies[i].state.code);
-			//console.log("studyCode = " + tableau_studies[i].code + " state = "+ tableau_studies[i].state.code);
-			// sauvegarde dans database asynchrone
-			$http.put(jsRoutes.controllers.sra.studies.api.Studies.update(tableau_studies[i].code).url, tableau_studies[i])
-			.success(function(data){
-				//Set success message
-				//$scope.messages.clazz="alert alert-success";
-				//$scope.messages.text=Messages('submissions.msg.validate.success');
-				//$scope.messages.open();
-				decompte = processInSubmission(decompte, action, error, tableau_analyzes, tableau_studies, tableau_samples, tableau_experiments);
-				
-			}).error(function(data){
-				$scope.messages.addDetails(data);
-				//$scope.messages.setError("save");
-				error = true;
-				decompte = processInSubmission(decompte, action, error, tableau_analyzes, tableau_studies, tableau_samples, tableau_experiments);
-		        $scope.treeLoadInProgress = false;
-			});			
-			//console.log("studyTitle = " + tableau_studies[i].title + " state = "+ tableau_studies[i].state.code);
-		}
-		if($scope.submission.studyCode !=null){
-			$scope.studyDT.setData(tableau_studies, tableau_studies.length);
-			// sauvegarde cote client des studies avec bon statut
-			$scope.studyDT.save(); // fait le save cote client mais n'utilise pas url et ne fait pas save dans database.
-		}
-
-	
-
-		// Mise à jour du status  des samples :
-		for(var i = 0; i < tableau_samples.length ; i++){
-			//console.log("sampleCode = " + tableau_samples[i].code + " state = "+ tableau_samples[i].state.code);
-			//tableau_samples[i].state.code = "SUB-V";
-			//console.log("sampleTitle = " + tableau_samples[i].title + " state = "+ tableau_samples[i].state.code);
-			//console.log("sampleCode = " + tableau_samples[i].code + " state = "+ tableau_samples[i].state.code);
-			// sauvegarde dans database asynchrone
-			$http.put(jsRoutes.controllers.sra.samples.api.Samples.update(tableau_samples[i].code).url, tableau_samples[i])
-			.success(function(data){
-				//Set success message
-				//$scope.messages.clazz="alert alert-success";
-				//$scope.messages.text=Messages('submissions.msg.validate.success');
-				//$scope.messages.open();
-				decompte = processInSubmission(decompte, action, error, tableau_analyzes, tableau_studies, tableau_samples, tableau_experiments);
-			}).error(function(data){
-				$scope.messages.addDetails(data);
-				//$scope.messages.setError("save");
-				error = true;
-				decompte = processInSubmission(decompte, action, error, tableau_analyzes, tableau_studies, tableau_samples, tableau_experiments);
-		        $scope.treeLoadInProgress = false;
-			});			
-			//console.log("sampleTitle = " + tableau_samples[i].title + " state = "+ tableau_samples[i].state.code);
-		}
-		
-		if($scope.countSample != 0) {
-			$scope.sampleDT.setData(tableau_samples, tableau_samples.length);
-			// sauvegarde cote client des samples avec bon statut
-			$scope.sampleDT.save(); // fait le save cote client mais n'utilise pas url et ne fait pas save dans database.
-		}
-		// Mise à jour du statut des experiments :
-		for(var i = 0; i < tableau_experiments.length ; i++){
-			//console.log("a l'ind " + i + " experimentCode = " + tableau_experiments[i].code + " state = "+ tableau_experiments[i].state.code);
-			//tableau_experiments[i].state.code = "SUB-V";
-			//console.log("experimentCode = " + tableau_experiments[i].code + " state = "+ tableau_experiments[i].state.code);
-			// sauvegarde dans database :
-			//console.log("appel processInSubmission pour les experiments");
-
-			$http.put(jsRoutes.controllers.sra.experiments.api.Experiments.update(tableau_experiments[i].code).url, tableau_experiments[i]).success(function(data){
-				//console.log("LILI  success");
-				decompte = processInSubmission(decompte, action, error, tableau_analyzes, tableau_studies, tableau_samples, tableau_experiments);
-			}).error(function(data){
-				$scope.messages.addDetails(data);
-				//var maMap = new Map(); bad solution
-				//maMap.set("toto","titi");
-				//$scope.messages.addDetails(maMap);
-				// bad ecriture => $scope.messages.addDetails('keyTOTO', "valErroTOTO");
-
-//				var monError = {};
-//				monError['keyTiti']=["valErrorTiti"];
-//				$scope.messages.addDetails(monError);
-//				
-//				$scope.messages.addDetails({"keyToto":["valToto_1", "valToto_2"]});
-				
-				error = true;
-				//console.log("LILI echec");
-				decompte = processInSubmission(decompte, action, error, tableau_analyzes, tableau_studies, tableau_samples, tableau_experiments);
-				//$scope.messages.setError("save");
-		        $scope.treeLoadInProgress = false;
-			});			
-		}
-		if($scope.countExperiment != 0) {
-			// initialisation inutile $scope.experimentDT = datatable(experimentsDTConfig);
-			$scope.experimentDT.setData(tableau_experiments, tableau_experiments.length);
-			// sauvegarde cote client des experiments avec bon statut :
-			$scope.experimentDT.save(); // fait le save cote client mais n'utilise pas url et ne fait pas save dans database.
-		}
-		//mise a jour l'etat de submission a SUB-V realise dans closeSubmission appelé par processInSubmission
-
-	};
 
 	
 	$scope.cancel = function(){
@@ -1574,8 +1896,12 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 		if ($scope.rawDataDT) {
 			$scope.rawDataDT.cancel();
 		}
+		if ($scope.readsetDT) {
+			$scope.readsetDT.cancel();
+		}
 		$scope.mainService.stopEditMode();	
         $scope.treeLoadInProgress = false;
+        $scope.errorDetails = {};
 	};
 
 	
@@ -1680,6 +2006,18 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 		return value;
 	};
 	
+	
+	$scope.isAfficheReadset = function() {  
+		var value = false;
+		//console.log("$scope.countReadset=", $scope.countReadset);
+		//console.log("$scope.submission.state.code=", $scope.submission.state.code);
+		if ($scope.countReadset > 0 
+				&& $scope.submission.state.code == "SUB-N") {
+			value = true;
+		}
+		return value;
+	};
+	
 	$scope.isActiveAnalysis = function() {  
 		var value = false;
 		if ($scope.countAnalysis > 0){
@@ -1733,6 +2071,7 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 
 	// si on declare dans services => var sraVariables = {};
 	// si on declare dans le controlleur :
+	$scope.errorDetails = {};
 	$scope.sraVariables = {};
 //	$scope.form = {};
 	$scope.subList={};
@@ -1741,21 +2080,32 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 	//$scope.form.createUser = $scope.user;
 
 	//$scope.createUser = "sgas";  // instantié depuis la vue avec la directive ng-init et appel de setUserInScope
-	var tableau_analyzes = [];
-	var tableau_studies = [];
-	var tableau_samples = [];
-	var tableau_experiments = [];
+
 	init();  // il faut mettre definition des fonctions avant appel, sinon reconnait pas la fonction
 
 	//console.log($scope.submission);
-	
+		$scope.userRegisterValidateError = false;
+
 	// NGL-4235 
-	$scope.isShowConsigne=true;
+	$scope.isShowConsigne=false;
 	$scope.toggleShowConsigne=function(){
-		console.log("TOGGLE details-ctrl.js");
-		if ( $scope.isShowConsigne===false) { $scope.isShowConsigne=true}
-		else {$scope.isShowConsigne=false}
+		//console.log("TOGGLE details-ctrl.js");
+		if ( $scope.isShowConsigne===true) { 
+			$scope.isShowConsigne=false;
+		} else {
+			$scope.isShowConsigne=true;
+		}
 	};
+	
+	$scope.userRegisterValidateError = false;
+	
+	// NGL-5110
+	$scope.isShowNglbiInformations=false;
+	$scope.toggleShowNglbiInformations=function(){
+		//console.log("TOGGLE search-ctrl.js");
+		if ( $scope.isShowNglbiInformations===false) { $scope.isShowNglbiInformations=true}
+		else {$scope.isShowNglbiInformations=false}
+	};		
 	
 	
 }]).controller('CommentsCtrl',['$scope','$sce', '$http','lists','$parse','$filter','datatable', 
@@ -1855,7 +2205,15 @@ angular.module('home').controller('DetailsCtrl',[ '$http', '$scope', '$routePara
 			});
 		}
 	};
-
+				
+	// NGL-4708
+	$scope.isShowConsigne=false;
+	$scope.toggleShowConsigne=function(){
+		//console.log("TOGGLE search-ctrl.js");
+		if ( $scope.isShowConsigne===false) { $scope.isShowConsigne=true}
+		else {$scope.isShowConsigne=false}
+	};	
+	
 }]);
 
 

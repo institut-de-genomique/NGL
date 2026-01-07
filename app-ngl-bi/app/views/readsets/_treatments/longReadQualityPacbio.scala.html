@@ -1,0 +1,293 @@
+@()
+
+<div class="row">
+	<div class="col-md-12 col-lg-12">
+		<ul class="nav nav-tabs margin-bottom-5">
+			<li class="active"><a href="#" data-target="#ongGeneralTrait" data-toggle="tab">Général</a></li>
+			<li><a href="#" data-target="#length" data-toggle="tab">Length</a></li>
+			<li><a href="#" data-target="#quality" data-toggle="tab">Quality</a></li>
+			<li><a href="#" data-target="#gc" data-toggle="tab">%GC</a></li>
+		</ul>
+		<div class="tab-content">
+			<!-- Onglet General -->
+			<div class="tab-pane active" id="ongGeneralTrait">
+				<div class="row">
+					<div class="col-md-6 col-lg-6">
+						<table class="table table-condensed table-hover table-bordered">
+							<tbody>
+								<tr>
+									<th>@Messages("readsets.treatments.long_read_quality_pacbio.nbReads")</th>
+									<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.nbReads.value
+										| number}}</td>
+								<tr>
+
+								<tr>
+									<th>@Messages("readsets.treatments.long_read_quality_pacbio.nbBases")</th>
+									<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.nbBases.value
+										| number}}</td>
+								<tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+
+			<!-- Onglet Length -->
+			<div class="tab-pane" id="length">
+				<div class="row">
+					<div class="col-md-6 col-lg-6">
+						<table class="table table-condensed table-hover table-bordered">
+							<tbody>
+								<tr>
+									<th>@Messages("readsets.treatments.long_read_quality_pacbio.minSize")</th>
+									<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.minSize.value
+										| number}}</td>
+								<tr>
+								<tr>
+									<th>@Messages("readsets.treatments.long_read_quality_pacbio.maxSize")</th>
+									<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.maxSize.value
+										| number}}</td>
+								<tr>
+								<tr>
+									<th>@Messages("readsets.treatments.long_read_quality_pacbio.avgSize")</th>
+									<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.avgSize.value
+										| number}}</td>
+								<tr>
+								<tr>
+									<th>@Messages("readsets.treatments.long_read_quality_pacbio.Q1Size")</th>
+									<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.Q1Size.value
+										| number}}</td>
+								<tr>
+								<tr>
+									<th>@Messages("readsets.treatments.long_read_quality_pacbio.medianSize")</th>
+									<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.medianSize.value
+										| number}}</td>
+								<tr>
+								<tr>
+									<th>@Messages("readsets.treatments.long_read_quality_pacbio.Q3Size")</th>
+									<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.Q3Size.value
+										| number}}</td>
+								<tr>
+								<tr>
+									<th>@Messages("readsets.treatments.long_read_quality_pacbio.L10")</th>
+									<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.L10.value
+										| number}}</td>
+								<tr>
+								<tr>
+									<th>@Messages("readsets.treatments.long_read_quality_pacbio.L50")</th>
+									<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.L50.value
+										| number}}</td>
+								<tr>
+								<tr>
+									<th>@Messages("readsets.treatments.long_read_quality_pacbio.L90")</th>
+									<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.L90.value
+										| number}}</td>
+								<tr>
+								<tr>
+									<th>@Messages("readsets.treatments.long_read_quality_pacbio.N10")</th>
+									<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.N10.value
+										| number}}</td>
+								<tr>
+								<tr>
+									<th>@Messages("readsets.treatments.long_read_quality_pacbio.N50")</th>
+									<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.N50.value
+										| number}}</td>
+								<tr>
+								<tr>
+									<th>@Messages("readsets.treatments.long_read_quality_pacbio.N90")</th>
+									<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.N90.value
+										| number}}</td>
+								<tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-5 col-lg-5">
+						<!-- TODO : Ajouter nom de la propriété (en dessous / au dessus) -->
+						<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal"
+							ng-click="setImage(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.readLengthDistribution.value,'readLengthDistribution','',treament.code!=undefined?treament.code:treatments.getTreatment().code,
+											readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.readLengthDistribution.width,
+											readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.readLengthDistribution.height)">
+							<a href="#">
+								<img id="default_readLengthDistribution"
+									ng-src="data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.readLengthDistribution.value}}" />
+							</a>
+						</div>
+					</div>
+					<div class="col-md-5 col-lg-5">
+						<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal"
+							ng-click="setImage(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.weightedReadLengthDistribution.value,'weightedReadLengthDistribution','',treament.code!=undefined?treament.code:treatments.getTreatment().code,
+											readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.weightedReadLengthDistribution.width,
+											readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.weightedReadLengthDistribution.height)">
+							<a href="#">
+								<img id="default_weightedReadLengthDistribution"
+									ng-src="data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.weightedReadLengthDistribution.value}}" />
+							</a>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Onglet Quality -->
+			<div class="tab-pane" id="quality">
+				<div class="row">
+					<div class="col-md-6 col-lg-6">
+						<table class="table table-condensed table-hover table-bordered">
+							<tbody>
+								<tr>
+									<th>@Messages("readsets.treatments.long_read_quality_pacbio.minQuality")</th>
+									<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.minQuality.value
+										| number}}</td>
+								<tr>
+								<tr>
+									<th>@Messages("readsets.treatments.long_read_quality_pacbio.maxQuality")</th>
+									<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.maxQuality.value
+										| number}}</td>
+								<tr>
+									<tr>
+									<th>@Messages("readsets.treatments.long_read_quality_pacbio.avgQuality")</th>
+									<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.avgQuality.value
+										| number}}</td>
+								<tr>
+								<tr>
+									<th>@Messages("readsets.treatments.long_read_quality_pacbio.Q1Quality")</th>
+									<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.Q1Quality.value
+										| number}}</td>
+								<tr>
+								<tr>
+									<th>@Messages("readsets.treatments.long_read_quality_pacbio.medianQuality")
+									</th>
+									<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.medianQuality.value
+										| number}}</td>
+								<tr>
+								<tr>
+									<th>@Messages("readsets.treatments.long_read_quality_pacbio.Q3Quality")</th>
+									<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.Q3Quality.value
+										| number}}</td>
+								<tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-5 col-lg-5">
+						<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal"
+							ng-click="setImage(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.readQualityDistribution.value,'readQualityDistribution','',treament.code!=undefined?treament.code:treatments.getTreatment().code,
+											readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.readQualityDistribution.width,
+											readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.readQualityDistribution.height)">
+							<a href="#">
+								<img id="default_readQualityDistribution"
+									ng-src="data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.readQualityDistribution.value}}" />
+							</a>
+						</div>
+					</div>
+					<div class="col-md-5 col-lg-5">
+						<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal"
+							ng-click="setImage(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.readLengthVSQuality.value,'readLengthVSQuality','',treament.code!=undefined?treament.code:treatments.getTreatment().code,
+											readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.readLengthVSQuality.width,
+											readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.readLengthVSQuality.height)">
+							<a href="#">
+								<img id="default_readLengthVSQuality"
+									ng-src="data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.readLengthVSQuality.value}}" />
+							</a>
+						</div>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-5 col-lg-5">
+						<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal"
+							ng-click="setImage(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.baseQualityDistribution.value,'baseQualityDistribution','',treament.code!=undefined?treament.code:treatments.getTreatment().code,
+											readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.baseQualityDistribution.width,
+											readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.baseQualityDistribution.height)">
+							<a href="#">
+								<img id="default_baseQualityDistribution"
+									ng-src="data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.baseQualityDistribution.value}}" />
+							</a>
+						</div>
+					</div>
+					<div class="col-md-5 col-lg-5">
+						<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal"
+							ng-click="setImage(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.baseQualityVSPosition.value,'baseQualityVSPosition','',treament.code!=undefined?treament.code:treatments.getTreatment().code,
+											readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.baseQualityVSPosition.width,
+											readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.baseQualityVSPosition.height)">
+							<a href="#">
+								<img id="default_baseQualityVSPosition"
+									ng-src="data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.baseQualityVSPosition.value}}" />
+							</a>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Onglet %GC -->
+			<div class="tab-pane" id="gc">
+				<div class="row">
+					<div class="col-md-6 col-lg-6">
+						<table class="table table-condensed table-hover table-bordered">
+							<tbody>
+								<tr>
+									<th>@Messages("readsets.treatments.long_read_quality_pacbio.GCPercent")</th>
+									<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.GCPercent.value
+										| number}}</td>
+								<tr>
+								
+								<tr>
+									<th>@Messages("readsets.treatments.long_read_quality_pacbio.minGCPercent")
+									</th>
+									<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.minGCPercent.value
+										| number}}</td>
+								<tr>
+								<tr>
+									<th>@Messages("readsets.treatments.long_read_quality_pacbio.maxGCPercent")
+									</th>
+									<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.maxGCPercent.value
+										| number}}</td>
+								<tr>
+								<tr>
+									<th>@Messages("readsets.treatments.long_read_quality_pacbio.avgGCPercent")
+									</th>
+									<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.avgGCPercent.value
+										| number}}</td>
+								<tr>
+								<tr>
+									<th>@Messages("readsets.treatments.long_read_quality_pacbio.Q1GCPercent")</th>
+									<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.Q1GCPercent.value
+										| number}}</td>
+								<tr>
+								<tr>
+									<th>@Messages("readsets.treatments.long_read_quality_pacbio.medianGCPercent")
+									</th>
+									<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.medianGCPercent.value
+										| number}}</td>
+								<tr>
+								
+								<tr>
+									<th>@Messages("readsets.treatments.long_read_quality_pacbio.Q3GCPercent")</th>
+									<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.Q3GCPercent.value
+										| number}}</td>
+								<tr>
+								
+							</tbody>
+						</table>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal"
+						ng-click="setImage(readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.GCDistribution.value,'GCDistribution','',treament.code!=undefined?treament.code:treatments.getTreatment().code,
+											readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.GCDistribution.width,
+											readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.GCDistribution.height)">
+						<a href="#">
+							<img id="default_GCDistribution"
+								ng-src="data:image/png;base64,{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.GCDistribution.value}}" />
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

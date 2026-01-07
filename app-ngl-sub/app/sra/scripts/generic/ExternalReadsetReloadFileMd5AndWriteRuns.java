@@ -23,9 +23,9 @@ import fr.cea.ig.ngl.dao.readsets.ReadSetsDAO;
 import models.laboratory.run.instance.ReadSet;
 import models.sra.submit.sra.instance.RawData;
 import models.sra.submit.sra.instance.Run;
-import models.sra.submit.util.SraException;
-import services.CreateServices;
-import services.Tools;
+import services.sra.SraException;
+import sra.services.CreateServices;
+import sra.services.Tools;
 
 
 /*
@@ -228,7 +228,7 @@ public class ExternalReadsetReloadFileMd5AndWriteRuns extends Script<ExternalRea
 		List<Run> runs = getRuns(new File(cmdDirectory + "readset.txt"));
 		// correction des runs pour le md5 :
 		Map<String, String> mapMd5 = Tools.loadMd5File(new File(cmdDirectory + "md5.txt"));
-		for (Entry entry : mapMd5.entrySet()) {
+		for (Entry<String, String> entry : mapMd5.entrySet()) {
 			println(entry.getKey() + " " +entry.getValue());
 		}
 		for (Run run : runs) {

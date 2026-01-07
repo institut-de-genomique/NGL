@@ -45,7 +45,7 @@ public class ChangeRawLocationCNS extends ScriptWithArgs<ChangeRawLocationCNS.Ar
 						cns_directory="/env/cns/proj/" + lotseq_dir;
 					}
 					rawData.directory=cns_directory;
-					Logger.debug("ln -s "+cns_directory + File.separator + rawData.relatifName+" "+submission.submissionDirectory + File.separator + rawData.relatifName);
+					Logger.debug("ln -s "+cns_directory + File.separator + rawData.relatifName+" "+submission.submissionDirectory + "/" + rawData.relatifName);
 				}
 				
 				//Update experiment

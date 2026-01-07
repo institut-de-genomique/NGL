@@ -6,7 +6,7 @@
 	@columnSearchForm{
 		@formGroup{
 			<div class="form-control" bt-select placeholder='@Messages("search.placeholder.umbrellaProject")' title='@Messages("search.placeholder.umbrellaProject")'
-				textareaplaceholder='@Messages("search.textarea.placeholder.codesList")'
+				textareaplaceholder='@Messages("search.textarea.placeholder.namesList")'
 				multiple="true" textarea="true" filter="true" 
 				ng-model="searchService.form.names" 
 				bt-options="umbrellaProject.name for umbrellaProject in searchService.lists.getUmbrellaProjects()">
@@ -22,7 +22,30 @@
 				bt-options="umbrellaProject.code for umbrellaProject in searchService.lists.getUmbrellaProjects()">
 			</div>
 		}
-	}		
+	}	
+	@columnSearchForm{	
+		@formGroup{
+			<input 
+					class="form-control"
+					type="text"
+					ng-model="searchService.form.fromDate"
+					placeholder='@Messages("search.placeholder.fromDate")'
+					title='@Messages("search.placeholder.fromDate")'
+					date-timestamp
+			>					
+		}
+	}	
+	@columnSearchForm{	
+		@formGroup{
+			<input 	class="form-control"
+					type="text"
+					ng-model="searchService.form.toDate"
+					placeholder='@Messages("search.placeholder.toDate")' 
+					title='@Messages("search.placeholder.toDate")'
+					date-timestamp
+			>			
+		}
+	}	
 }
 
 @if(true) {
@@ -31,6 +54,7 @@
 		<div udt-form>	
 			<ul class="nav nav-tabs margin-bottom-5">
 				<li class="active"><a href="#" data-target="#filters" data-toggle="tab">@Messages("search.tab.filters")</a></li>
+				<li ng-if="searchService.getAddFiltersToForm().length > 0"><a href="#" data-target="#addfilters" data-toggle="tab">@Messages("search.tab.addfilters")</a></li>
 				<li ng-if="searchService.getAddColumnsToForm().length > 0"><a href="#" data-target="#addcolumns" data-toggle="tab">@Messages("search.tab.addcolumns")</a></li>  
 			</ul>
 			<div class="tab-content">
@@ -54,6 +78,32 @@
 						</div>		
 					</form>	
 				</div>
+
+				<div class="tab-pane" id="addfilters">
+					<form class="well well-small">
+							<div class="row">
+								<div class="col-md-2 col-lg-2" ng-repeat="filters in searchService.getAddFiltersToForm()">
+									<div class="form-group" ng-repeat="filter in filters">
+										<div udt-compile="filter.html"></div> <!-- used directive from datatable to compile html -->
+									</div>
+								</div>
+								
+								@columnSearchForm{
+								@formGroup{
+								<div class="btn-toolbar">
+									<button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="search()" class="btn btn-primary" >
+										<i class="fa fa-search"></i>
+									</button>
+									<button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="reset()"  class="btn btn-default">
+										<i class="fa fa-undo"></i>
+									</button>
+																	 
+								</div>	
+								}	
+							}
+							</div>			
+						</form>	
+					</div>
 
 				<div class="tab-pane" id="addcolumns">
 					<form class="well well-small">

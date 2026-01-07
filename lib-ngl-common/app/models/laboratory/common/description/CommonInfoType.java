@@ -100,6 +100,29 @@ public class CommonInfoType extends Model {
 		}	
 		return proDefinitions;
 	}
+	
+	/**
+	 * Filtered property definitions that are defined for all of the provided levels.
+	 * @param levels levels that must be defined for a property to be kept
+	 * @return       filtered properties
+	 */
+	public List<PropertyDefinition> getPropertyDefinitionByLevelStrict(Level.CODE... levels) {
+		List<PropertyDefinition> proDefinitions = new ArrayList<>();
+		for (PropertyDefinition propertyDefinition : propertiesDefinitions) {
+			boolean containsAll = true;
+			for (int i=0; i<levels.length; i++) {
+				Level level = new Level(levels[i]);
+				if (!propertyDefinition.levels.contains(level)) {
+					containsAll = false;
+					break;
+				}						
+			}
+			if (containsAll && propertyDefinition.levels.size()== levels.length) {
+				proDefinitions.add(propertyDefinition);
+			}
+		}	
+		return proDefinitions;
+	}
 
 	/**
 	 * Filtered property definitions that are defined for all of the provided levels.

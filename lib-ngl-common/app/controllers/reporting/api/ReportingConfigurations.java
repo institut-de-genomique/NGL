@@ -58,11 +58,18 @@ public class ReportingConfigurations extends DocumentController<ReportingConfigu
 		}
 	}
 	
+	private static Query getActiveQuery(boolean active) {
+		return active ? DBQuery.or(DBQuery.notExists("active"), DBQuery.is("active", true)) : DBQuery.is("active", false);
+	}
+	
 	private static Query getQuery(ConfigurationsSearchForm form) {
 		List<Query> queries = new ArrayList<>();
 		Query query = null;
 		if (CollectionUtils.isNotEmpty(form.pageCodes)) { //all
 			queries.add(DBQuery.in("pageCodes", form.pageCodes));
+		}
+		if(form.active != null) {
+			queries.add(getActiveQuery(form.active));					
 		}
 		if (queries.size() > 0) {
 			query = DBQuery.and(queries.toArray(new Query[queries.size()]));

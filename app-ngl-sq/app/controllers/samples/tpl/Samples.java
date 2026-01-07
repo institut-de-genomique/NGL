@@ -65,6 +65,9 @@ public class Samples extends NGLController implements NGLJavascript {
 				
 				controllers.projects.api.routes.javascript.Projects.list(),
 				
+				controllers.projects.api.routes.javascript.UmbrellaProjects.list(),
+				controllers.projects.api.routes.javascript.UmbrellaProjects.get(),
+				
 				controllers.samples.api.routes.javascript.Samples.list(),
 				controllers.samples.api.routes.javascript.Samples.get(),
 				controllers.samples.api.routes.javascript.Samples.update(),
@@ -92,8 +95,8 @@ public class Samples extends NGLController implements NGLJavascript {
 
 				controllers.resolutions.api.routes.javascript.Resolutions.list(),
 
-				controllers.protocols.api.routes.javascript.Protocols.list()
-				);
+				controllers.protocols.api.routes.javascript.Protocols.list(),
+				controllers.samples.api.routes.javascript.ImportTypes.list());
 	}
 	
 }

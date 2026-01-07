@@ -251,16 +251,16 @@
 				lists.refresh.types({objectTypeCode:"Run"},"runTypes");
 				lists.refresh.types({objectTypeCode:"ReadSet"},"readSetTypes");
 				lists.refresh.runs();
-				//NGL-3392 ajout mgi-sequencer
-				lists.refresh.instruments({categoryCodes:["illumina-sequencer","extseq","nanopore-sequencer", "opt-map-bionano", "mgi-sequencer"]});
+				//NGL-3392 ajout mgi-sequencer, NGL-4322 ajout pacbio-sequencer
+				lists.refresh.instruments({categoryCodes:["illumina-sequencer","extseq","nanopore-sequencer", "opt-map-bionano", "mgi-sequencer","pacbio-sequencer"]});
 				//TODO Warn if pass to one application page
-				lists.refresh.reportConfigs({pageCodes:["readsets"+"-"+mainService.getHomePage()]});
+				lists.refresh.reportConfigs({pageCodes:["readsets"+"-"+mainService.getHomePage()], active:true});
 				lists.refresh.reportConfigs({pageCodes:["readsets-addcolumns"]}, "readsets-addcolumns");
 				lists.refresh.filterConfigs({pageCodes:["readsets-addfilters"]}, "readsets-addfilters");
 				
 				lists.refresh.resolutions({objectTypeCode:"ReadSet"});
 				lists.refresh.context({categoryCode:"readset", typeCode:'context-description'});
-				
+				lists.refresh.umbrellaProjects();
 				lists.refresh.users();
 				isInit=true;
 			}

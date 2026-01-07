@@ -38,7 +38,15 @@ angular.module('home').controller('SpinColumnPurificationCtrl',['$scope', '$pars
 			 			 "render":"<div list-resize='cellValue' list-resize-min-size='3'>",
 			        	 "position":4,
 			        	 "extraHeaders":{0:Messages("experiments.inputs")}
-			         },
+			         }, {
+						"header":Messages("containers.table.storageCodeIn"),			        	 
+						"property":"inputContainer.support.storageCode",
+						"type":"text",
+						"order":true,
+						"hide":true,
+						"position":4.6,
+						"extraHeaders":{0:Messages("experiments.inputs")}
+					},	
 					 {
 			        	 "header":Messages("containers.table.concentration"),
 			        	 "property":"inputContainerUsed.concentration",
@@ -242,7 +250,7 @@ angular.module('home').controller('SpinColumnPurificationCtrl',['$scope', '$pars
 	} else {
 		datatableConfig.columns.push({
 			"header" : Messages("containers.table.code"),
-			"property" : "inputContainer.support.code",
+			"property" : "inputContainer.code",
 			"order" : true,
 			"edit" : false,
 			"hide" : true,

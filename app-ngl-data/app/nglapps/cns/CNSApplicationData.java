@@ -22,9 +22,9 @@ import services.description.instrument.InstrumentServiceCNS;
 import services.description.process.AbstractProcessService;
 import services.description.process.ProcessServiceCNS;
 import services.description.project.AbstractProjectService;
-// import services.description.project.AbstractUmbrellaProjectService;
+import services.description.project.AbstractUmbrellaProjectService;
 import services.description.project.ProjectServiceCNS;
-// import services.description.project.UmbrellaProjectServiceCNS;
+import services.description.project.UmbrellaProjectServiceCNS;
 import services.description.run.AbstractRunService;
 import services.description.run.AbstractTreatmentService;
 import services.description.run.RunServiceCNS;
@@ -42,6 +42,7 @@ import validation.ContextValidation;
 public class CNSApplicationData implements IApplicationData {
 
 	private NGLConfig config;
+
 
 	@Inject
 	public CNSApplicationData(NGLConfig config) {
@@ -93,10 +94,10 @@ public class CNSApplicationData implements IApplicationData {
 		return new ProjectServiceCNS();
 	}
 
-	// @Override
-	// public AbstractUmbrellaProjectService getUmbrellaProjectService() {
-	// 	return new UmbrellaProjectServiceCNS();
-	// }
+	@Override
+	public AbstractUmbrellaProjectService getUmbrellaProjectService() {
+		return new UmbrellaProjectServiceCNS();
+	}
 
 	@Override
 	public AbstractRunService getRunService() {
@@ -108,10 +109,6 @@ public class CNSApplicationData implements IApplicationData {
 		return new TreatmentServiceCNS();
 	}
 
-	@Override
-	public Consumer<ContextValidation> getResolutionService() {
-		return ResolutionService::saveResolutionsCNS;
-	}
 
 	@Override
 	public Consumer<ContextValidation> getProtocolService() {
@@ -133,6 +130,16 @@ public class CNSApplicationData implements IApplicationData {
 	@Override
 	public Consumer<ContextValidation> getPrinterService() {
 		return ctx -> PrinterCNS.main(ctx); 
+	}
+
+	@Override
+	public Consumer<ContextValidation> getResolutionServiceSQ() {
+		return ResolutionService::saveResolutionsSQCNS;
+	}
+
+	@Override
+	public Consumer<ContextValidation> getResolutionServiceBI() {
+		return ResolutionService::saveResolutionsBICNS;
 	}
 
 }

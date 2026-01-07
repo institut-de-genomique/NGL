@@ -1,0 +1,126 @@
+<div ng-init="treatmentCode='reviewing'">
+    <div class="row">
+        <div class="col-md-10 col-lg-10">
+            <br/>
+			<b>@Messages("analyses.treatments.reviewing.readsetsused") : </b>
+			{{analysis.treatments[treatmentCode].pairs.readsetsused.value}}
+			<br/>
+			<br/>
+			<b>EAR report : </b>
+			{{analysis.treatments[treatmentCode].pairs.earReport.value}}
+			<br/>
+			<br/>
+            <b>Result file : </b>
+            {{analysis.treatments[treatmentCode].pairs.resultFile.value}}
+            <br/>
+			<br/>
+            <b>Result directory : </b>
+            {{analysis.treatments[treatmentCode].pairs.resultDirectory.value}}
+            <br/>
+            <br/>
+			<br/>
+            <table class="table table-condensed table-hover table-bordered">
+                <thead>
+                    <tr>
+                        <th>@Messages("analyses.treatments.genomeContigsScaffolding.cumulativeSize")</th>
+                        <th>@Messages("analyses.treatments.genomeContigsScaffolding.n50")</th>
+                        <th>@Messages("analyses.treatments.genomeContigsScaffolding.n90")</th>
+                        <th>@Messages("analyses.treatments.genomeContigsScaffolding.l50")</th>
+                        <th>@Messages("analyses.treatments.genomeContigsScaffolding.l90")</th>
+                        <th>@Messages("analyses.treatments.genomeContigsScaffolding.auN")</th>
+                        <th>@Messages("analyses.treatments.genomeContigsScaffolding.maxSize")</th>
+                        <th>@Messages("analyses.treatments.genomeContigsScaffolding.nbscaffolds")</th>
+						<th>@Messages("analyses.treatments.reviewing.softwareVersion")</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{analysis.treatments[treatmentCode].pairs.cumulativeSize.value | number}}</td>
+                        <td>{{analysis.treatments[treatmentCode].pairs.n50.value | number}}</td>
+                        <td>{{analysis.treatments[treatmentCode].pairs.n90.value | number}}</td>
+                        <td>{{analysis.treatments[treatmentCode].pairs.l50.value | number}}</td>
+                        <td>{{analysis.treatments[treatmentCode].pairs.l90.value | number}}</td>
+                        <td>{{analysis.treatments[treatmentCode].pairs.auN.value | number}}</td>
+                        <td>{{analysis.treatments[treatmentCode].pairs.maxSize.value | number}}</td>
+                        <td>{{analysis.treatments[treatmentCode].pairs.nbscaffolds.value | number}}</td>
+						<td>{{analysis.treatments[treatmentCode].pairs.softwareVersion.value}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+	<br/>
+    <div class="row">
+        <div class="col-md-10 col-lg-10">
+            <table class="table table-condensed table-hover table-bordered">
+                <tr>
+                    <th>@Messages("analyses.treatments.assemblyQuality.selectedAssembly")</th>
+                    <td>{{analysis.treatments[treatmentCode].pairs.selectedAssembly.value}}</td>
+                </tr>
+                <tr>
+                    <th>@Messages("analyses.treatments.assemblyQuality.completion")</th>
+                    <td>{{analysis.treatments[treatmentCode].pairs.completion.value | number}}</td>
+                </tr>
+                <tr>
+                    <th>@Messages("analyses.treatments.assemblyQuality.merquryScore")</th>
+                    <td>{{analysis.treatments[treatmentCode].pairs.merquryScore.value | number:2}}</td>
+                </tr>
+                <tr>
+                    <th>@Messages("analyses.treatments.assemblyQuality.scoreBuscoEuk")</th>
+                    <td>{{analysis.treatments[treatmentCode].pairs.scoreBuscoEuk.value}}</td>
+                </tr>
+                <tr>
+                    <th>@Messages("analyses.treatments.assemblyQuality.scoreBuscoTaxon")</th>
+                    <td>{{analysis.treatments[treatmentCode].pairs.scoreBuscoTaxon.value}}</td>
+                </tr>
+                <tr>
+                    <th>@Messages("analyses.treatments.assemblyQuality.taxonBusco")</th>
+                    <td>{{analysis.treatments[treatmentCode].pairs.taxonBusco.value}}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+	<br/>
+    <div class="row">
+        <div class="col-md-4 col-lg-4">
+            <div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal"
+                ng-click="setImage(analysis.treatments[treatmentCode].pairs.contactMap.value,'contactMap','',
+                treatmentCode, analysis.treatments[treatmentCode].pairs.contactMap.width,
+                analysis.treatments[treatmentCode].pairs.contactMap.height)">
+                <a href="#">
+                    <img id="Contact map" ng-src="data:image/png;base64,{{analysis.treatments[treatmentCode].pairs.contactMap.value}}" />
+                    <p>@Messages("analyses.treatments.genomeContigsScaffolding.contactMap")</p>
+                </a>
+            </div>
+        </div>
+	</div>
+
+	<div class="row">
+        <div class="col-md-4 col-lg-4">
+            <div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal"
+                ng-click="setImage(analysis.treatments[treatmentCode].pairs.katGraph150.value,'katGraph150','',
+                treatmentCode, analysis.treatments[treatmentCode].pairs.katGraph150.width,
+                analysis.treatments[treatmentCode].pairs.katGraph150.height)">
+                <a href="#">
+                    <img id="katGraph150" ng-src="data:image/png;base64,{{analysis.treatments[treatmentCode].pairs.katGraph150.value}}" />
+                    <p>@Messages("analyses.treatments.assemblyQuality.katGraph150")</p>
+                </a>
+            </div>
+        </div>
+	</div>
+	
+	<div class="row">
+        <div class="col-md-4 col-lg-4">
+            <div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal"
+                ng-click="setImage(analysis.treatments[treatmentCode].pairs.katGraph300.value,'katGraph300','',
+                treatmentCode, analysis.treatments[treatmentCode].pairs.katGraph300.width,
+                analysis.treatments[treatmentCode].pairs.katGraph300.height)">
+                <a href="#">
+                    <img id="katGraph300" ng-src="data:image/png;base64,{{analysis.treatments[treatmentCode].pairs.katGraph300.value}}" />
+                    <p>@Messages("analyses.treatments.assemblyQuality.katGraph300")</p>
+                </a>
+            </div>
+        </div>
+	</div>
+	
+</div>

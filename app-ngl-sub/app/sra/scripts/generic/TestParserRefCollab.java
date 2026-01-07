@@ -12,12 +12,12 @@ import sra.parser.UserRefCollabTypeParser;
 public class TestParserRefCollab extends Script<TestParserRefCollab.MyParam>{
 	
 
-	private final UserRefCollabTypeParser        userRefCollabTypeParser;
+	// private final UserRefCollabTypeParser        userRefCollabTypeParser;
 
 	
 	@Inject
 	public TestParserRefCollab (UserRefCollabTypeParser        userRefCollabTypeParser) {
-		this.userRefCollabTypeParser    = userRefCollabTypeParser;
+		// this.userRefCollabTypeParser    = userRefCollabTypeParser;
 	}
 		
 	// ma structure de controle et stockage des arguments de l'url

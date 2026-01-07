@@ -1,0 +1,101 @@
+@this(ctx : fr.cea.ig.ngl.NGLApplication )
+@()
+@isCNGInstitute  = @{ "CNG" == ctx.nglConfig().getInstitute() }
+
+
+@labelPoolMode() = { 
+  @if(isCNGInstitute){
+    <label control-label>@Messages("experiments.pool.outputMode.CNG")</label>
+  } else {
+    <label control-label>@Messages("experiments.pool.outputMode.CNS")</label>
+  }
+}
+
+    <br/>
+    <div class="col-md-12 col-lg-12"> 
+        @labelPoolMode
+    </div>
+    <div class="col-md-12 col-lg-12 btn-block">
+        
+        <!-- mode ligne -->
+        <!-- NGL-5175 bouton choix de position départ -->
+        <div class="btn-group">
+            <select class="form-control input-sm" data-toggle="tooltip" title='@Messages("experiments.button.plate.computeLineMode.startPosition")'
+                    ng-model="startPositionLine"
+                    ng-change="setStartPositionLine(startPositionLine)"		
+                    ng-options="position for position in modeLinePlatePositions"
+                    ng-disabled="outputMode !== 'L' || manualPoolingStarted === true">	   							     	 
+            </select>
+        </div>
+
+        <!--class dynamique pour les boutons principaux.. ajout caller dans setOutputMode-->
+        <button class="btn" ng-class="getBtnClass(outputMode,'L')" data-toggle="tooltip" title='@Messages("experiments.button.plate.computeLineMode")'
+                ng-click="setOutputMode('L','computeLineMode')" 	
+                ng-disabled="poolingMode.code === 'NONE' || manualPoolingStarted === true">
+                  <i class="fa fa-magic"></i><i class="fa fa-arrow-right"></i>
+        </button>
+
+        <div class="btn-group">
+        <select class="form-control input-sm" data-toggle="tooltip" title='@Messages("experiments.button.plate.computeLineMode.advanced")'
+                ng-model="maxOutputColumn"
+                ng-change="setMaxOutputColumn(maxOutputColumn)"		
+                ng-options="column for column in maxColumns"
+                ng-disabled="outputMode !== 'L' || manualPoolingStarted === true">			    							     	 
+          </select>	
+        </div>
+    </div>
+    <br/>
+    <div class="col-md-12 col-lg-12 btn-block">
+        <!-- mode colonne -->
+        <!-- NGL-5175 bouton choix de position départ -->
+        <div class="btn-group">
+            <select class="form-control input-sm" data-toggle="tooltip" title='@Messages("experiments.button.plate.computeColumnMode.startPosition")'
+                    ng-model="startPositionColumn"
+                    ng-change="setStartPositionColumn(startPositionColumn)"		
+                    ng-options="position for position in modeColumnPlatePositions"
+                    ng-disabled="outputMode !== 'C' || manualPoolingStarted === true">	   							     	 
+             </select>
+        </div>
+
+        <!--class dynamique pour les boutons principaux.. ajout caller dans setOutputMode-->
+        <button class="btn"  ng-class="getBtnClass(outputMode,'C')" data-toggle="tooltip" title='@Messages("experiments.button.plate.computeColumnMode")'
+                ng-click="setOutputMode('C','computeColumnMode')" 
+                ng-disabled="poolingMode.code === 'NONE' || manualPoolingStarted === true">
+                  <i class="fa fa-magic"></i><i class="fa fa-arrow-down"></i>
+        </button>
+
+        <div class="btn-group">
+        <select class="form-control input-sm" data-toggle="tooltip" title='@Messages("experiments.button.plate.computeColumnMode.advanced")'
+                ng-model="maxOutputLine"
+                ng-change="setMaxOutputLine(maxOutputLine)"		
+                ng-options="line for line in maxLines"
+                ng-disabled="outputMode !== 'C' || manualPoolingStarted === true">	   							     	 
+         </select>
+        </div>
+    </div>
+
+    <!-- aide image modale (copiée depuis xtox.scala.html) -->
+    <div class="col-md-12 col-lg-12">
+    @if(isCNGInstitute){
+      <p><a class="fa fa-info-circle" ng-click="showModalHelp('#infoModaleOutputMode')" title='Aide @Messages("experiments.pool.outputMode.CNG")' href=""> Aide @Messages("experiments.pool.outputMode.CNG")</a></p>
+    } else {
+      <p><a class="fa fa-info-circle" ng-click="showModalHelp('#infoModaleOutputMode')" title='Aide @Messages("experiments.pool.outputMode.CNS")' href=""> Aide @Messages("experiments.pool.outputMode.CNS")</a></p>
+    }
+      <div id="infoModaleOutputMode" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" style="width:65%">
+          <div class="modal-content" > 
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+              @if(isCNGInstitute){
+                <h4 class="modal-title"><a class="fa fa-info-circle"> Aide @Messages("experiments.pool.outputMode.CNG")</a></h4>
+              } else {
+                <h4 class="modal-title"><a class="fa fa-info-circle"> Aide @Messages("experiments.pool.outputMode.CNS")</a></h4>
+              }
+            </div>
+            <div class="modal-body" style="padding:0px">
+              <img src="/assets/images/pool_help_outputMode.png" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>

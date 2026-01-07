@@ -209,7 +209,7 @@ angular.module('home').controller('AliquotingCtrl',['$scope', '$parse', 'atmToGe
 						"watch":true,
 						"choiceInList": true,
 						"listStyle":"bt-select",
-						"possibleValues":[{code:'fmol',name:'fmol'},{code:'ng',name:'ng'}],
+						"possibleValues":[{code:'ng',name:'ng'}, {code:'mg',name:'mg'},{code:'fmol',name:'fmol'}],
 						"extraHeaders":{0:Messages("experiments.outputs")}
 					},
 			        
@@ -295,7 +295,7 @@ angular.module('home').controller('AliquotingCtrl',['$scope', '$parse', 'atmToGe
 	//Init		
 	if($scope.experiment.instrument.inContainerSupportCategoryCode!=="tube"){
 		datatableConfigTubeConfig.columns.push({
-			"header" : Messages("containers.table.supportCode"),
+			"header" : Messages("containers.table.code"),
 			"property" : "inputContainer.code",
 			"order" : true,
 			"edit" : false,
@@ -307,54 +307,10 @@ angular.module('home').controller('AliquotingCtrl',['$scope', '$parse', 'atmToGe
 				0 : Messages("experiments.inputs")
 			}
 		});
-		
-		/*
-		datatableConfigTubeConfig.columns.push({
-			"header" : Messages("containers.table.supportCode"),
-			"property" : "inputContainer.support.code",
-			"order" : true,
-			"edit" : false,
-			"hide" : true,
-			"type" : "text",
-			"position" : 1,
-			"mergeCells" : true,
-			"extraHeaders" : {
-				0 : Messages("experiments.inputs")
-			}
-		});
-		
-		datatableConfigTubeConfig.columns.push({
-			"header" : Messages("containers.table.support.line"),
-			"property" : "inputContainer.support.line",
-			"order" : true,
-			"edit" : false,
-			"hide" : true,
-			"type" : "text",
-			"position" : 1.1,
-			"mergeCells" : true,
-			"extraHeaders" : {
-				0 : Messages("experiments.inputs")
-			}
-		});
-		datatableConfigTubeConfig.columns.push({
-			"header" : Messages("containers.table.support.column"),
-			"property" : "inputContainer.support.column*1",
-			"order" : true,
-			"edit" : false,
-			"hide" : true,
-			"type" : "number",
-			"position" : 1.2,
-			"mergeCells" : true,
-			"extraHeaders" : {
-				0 : Messages("experiments.inputs")
-			}
-		});
-		*/
-
 	} else {
 		datatableConfigTubeConfig.columns.push({
 			"header" : Messages("containers.table.code"),
-			"property" : "inputContainer.support.code",
+			"property" : "inputContainer.code",
 			"order" : true,
 			"edit" : false,
 			"hide" : true,
@@ -551,8 +507,8 @@ angular.module('home').controller('AliquotingCtrl',['$scope', '$parse', 'atmToGe
 
 		function updateQuantityUnit() {
 			var quantity = getQuantity();
-			var outputConcUnit = getQuantityUnit();
-			if(outputConcUnit) doComputation();
+			var outputConcUnit  = getQuantityUnit();
+			if(outputConcUnit ) doComputation();
 
 			//---
 
@@ -564,9 +520,8 @@ angular.module('home').controller('AliquotingCtrl',['$scope', '$parse', 'atmToGe
 				quantity.unit = computeUnit();
 				setQuantity(quantity);
 			}
-
 			function computeUnit() {
-				return (outputConcUnit === 'nM') ? 'fmol' : 'ng';
+				return (outputConcUnit  === 'nM') ? 'fmol' : 'ng';
 			}
 		}
 		

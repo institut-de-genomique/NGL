@@ -10,10 +10,8 @@ import javax.inject.Inject;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
-
+import controllers.sra.api.ExperimentAPI;
 import fr.cea.ig.lfw.controllers.scripts.buffered.ScriptNoArgs;
-//import fr.cea.ig.ngl.NGLApplication;
-import fr.cea.ig.ngl.dao.api.sra.ExperimentAPI;
 //import fr.cea.ig.ngl.dao.sra.ExperimentDAO;
 import sra.scripts.utils.CSVParsing;
 

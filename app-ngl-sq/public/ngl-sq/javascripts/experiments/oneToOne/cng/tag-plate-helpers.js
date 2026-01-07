@@ -24,17 +24,31 @@ angular.module('tools',[]).factory('tagPlates', ['$parse', '$filter','$http',
 		var factory = {
 				// ajoutée pour NGL-3515
 				// A utiliser quand les index contiennent la position dans leur nom
-				populateIndex_PlateNbcol:function(prefix, nbcol){
 				// pour une plaque complete 96: nbcol=12; pour une demi plaque (48 index) nbcol=6
+				// le prefix donné doit être celui du code et non pas celui du nom !!!
+				/* ajout flags 05/06/2024
+				   les positions standard sont sur 3 caracatères  quand la colone est <10 : (ex A01) 
+				               si ce n'est pas le cas => ajouter le flag optionnel nopad a 1
+				   les positions standard sont en majuscules A01 
+				               si ce n'est pas le cas => ajouter le flag optionnel lowercase a 1
+				*/
+				populateIndex_PlateNbcol:function(prefix, nbcol, nopad, lowercase){
 					var tags=[];
-					var lines = ["A","B","C","D","E","F","G","H"];
+					// 05/06/2024 ajout flag optionnel lowerCase pour les cas on a déclaré les index avec des positions en minuscules !!!
+					if (lowercase) {
+						var lines = ["a","b","c","d","e","f","g","h"];
+					} else {
+						var lines = ["A","B","C","D","E","F","G","H"];
+					}
 
 					for(var i = 1 ; i <= nbcol; i++){
 						for (var j=0; j < lines.length; j++){
 							var line = lines[j];
 							var tagCode = null;
-							if (i < 10){ tagCode = prefix+line+"0"+i;} 
+							// 05/06/2024 ajout flag pour les cas on a déclaré les index avec des positions sans 0
+							if (i < 10){ if (nopad){ tagCode = prefix+line+i} else { tagCode = prefix+line+"0"+i } }
 							else {       tagCode = prefix+line+i;}
+
 							console.log("adding tagcode "+tagCode);
 							tags.push(tagCode);
 						}
@@ -375,16 +389,42 @@ angular.module('tools',[]).factory('tagPlates', ['$parse', '$filter','$http',
 				populateIndex_RUDI_plate_H:function(){
 					return this.populateIndex_PlateNbcol("RUDI-H_",12);
 				},
+				// NGL-4567 8 plaques iMUDI
+				populateIndex_iMUDI_plate_A:function(){
+					return this.populateIndex_PlateNbcol("iMUDI-A_",12);
+				},
+				populateIndex_iMUDI_plate_B:function(){
+					return this.populateIndex_PlateNbcol("iMUDI-B_",12);
+				},
+				populateIndex_iMUDI_plate_C:function(){
+					return this.populateIndex_PlateNbcol("iMUDI-C_",12);
+				},
+				populateIndex_iMUDI_plate_D:function(){
+					return this.populateIndex_PlateNbcol("iMUDI-D_",12);
+				},
+				populateIndex_iMUDI_plate_E:function(){
+					return this.populateIndex_PlateNbcol("iMUDI-E_",12);
+				},
+				populateIndex_iMUDI_plate_F:function(){
+					return this.populateIndex_PlateNbcol("iMUDI-F_",12);
+				},
+				populateIndex_iMUDI_plate_G:function(){
+					return this.populateIndex_PlateNbcol("iMUDI-G_",12);
+				},
+				populateIndex_iMUDI_plate_H:function(){
+					return this.populateIndex_PlateNbcol("iMUDI-H_",12);
+				},
 				// NGL-3811 
 				// Note il y a eu des plaques set_C et set_D avec des index notés V2, et il y a eu des run/readset avec ces index
 				//      ces plaques on du être creées avant l'ajout de cette méthode...'
+				// 17/05/2024 renommage des methodes
 				populateIndex_IDT_Nextera_Set_A:function(){
 					return this.populateIndex_PlateRange("UDP0",1,96,"00");
 				},
 				populateIndex_IDT_Nextera_Set_B:function(){
 					return this.populateIndex_PlateRange("UDP0",97,192,"00");
 				},
-				/* 07/04/2023 NGL-4191 remplacerles 2 plaques C et D par les versions V2
+				/* 07/04/2023 NGL-4191 remplacer les 2 plaques C et D par les versions V2
 				populateIndex_IDT_Nextera_Set_C:function(){
 					return this.populateIndex_PlateRange("UDP0",193,288,"00");
 				},
@@ -392,7 +432,7 @@ angular.module('tools',[]).factory('tagPlates', ['$parse', '$filter','$http',
 					return this.populateIndex_PlateRange("UDP0",289,384,"00");
 				},
 				*/
-				populateIndex_IDT_Nextera_Set_CV2:function(){
+				populateIndex_IDT_Nextera_Set_C_V2:function(){
 					var tags=this.populateIndex_PlateRange("UDP0",193,288,"00");
 					// UDP0252V2 ; UDP0258V2 
 					// surcharger le tableau !!!
@@ -400,7 +440,7 @@ angular.module('tools',[]).factory('tagPlates', ['$parse', '$filter','$http',
 					tags[65]="UDP0258V2";
 					return tags;
 				},
-				populateIndex_IDT_Nextera_Set_DV2:function(){
+				populateIndex_IDT_Nextera_Set_D_V2:function(){
 					var tags=this.populateIndex_PlateRange("UDP0",289,384,"00");
 					// UDP0289V2; UDP0290V2; UDP0291V2; UDP0301V2
 					// surcharger le tableau !!!
@@ -411,8 +451,87 @@ angular.module('tools',[]).factory('tagPlates', ['$parse', '$filter','$http',
 					
 					return tags;
 				},
-				
-				
+				// NGL-4606 sets V3 pour illumina
+				populateIndex_Illumina_UDI_Set_A_V3:function(){
+					var tags= this.populateIndex_PlateRange("UDP0",1,96,"00");
+					// surcharger le tableau !!! 16 index V3
+					tags[2] ="UDP0003V3";
+					tags[4] ="UDP0005V3";
+					tags[45]="UDP0046V3";
+					tags[52]="UDP0053V3";
+					tags[53]="UDP0054V3";
+					tags[54]="UDP0055V3";
+					tags[55]="UDP0056V3";
+					tags[68]="UDP0069V3";
+					tags[69]="UDP0070V3";
+					tags[70]="UDP0071V3";
+					tags[71]="UDP0072V3";
+					tags[72]="UDP0073V3";
+					tags[73]="UDP0074V3";
+					tags[74]="UDP0075V3";
+					tags[75]="UDP0076V3";
+					tags[83]="UDP0084V3";
+					
+					return tags;
+				},
+				populateIndex_Illumina_UDI_Set_B_V3:function(){
+					var tags= this.populateIndex_PlateRange("UDP0",97,192,"00");
+					// surcharger le tableau !!! 7 index V3
+					tags[5] ="UDP0102V3";
+					tags[48]="UDP0145V3";
+					tags[49]="UDP0146V3";
+					tags[50]="UDP0147V3";
+					tags[51]="UDP0148V3";
+					tags[58]="UDP0155V3";
+					tags[82]="UDP0179V3";
+
+					return tags;
+				},
+				populateIndex_Illumina_UDI_Set_C_V3:function(){
+					var tags= this.populateIndex_PlateRange("UDP0",193,288,"00");
+					// surcharger le tableau !!!  21 index V3 et 2 index  V2
+					tags[0] ="UDP0193V3";
+					tags[1] ="UDP0194V3";
+					tags[2] ="UDP0195V3";
+					tags[3] ="UDP0196V3";
+					tags[25]="UDP0218V3";
+					tags[28]="UDP0221V3";
+					tags[29]="UDP0222V3";
+					tags[30]="UDP0223V3";
+					tags[31]="UDP0224V3";
+					tags[34]="UDP0227V3";
+					tags[49]="UDP0242V3";
+					tags[51]="UDP0244V3";
+					tags[59]="UDP0252V2"; // pas une coquille !!
+					tags[63]="UDP0256V3";
+					tags[65]="UDP0258V2"; // pas une coquille !!
+					tags[72]="UDP0265V3";
+					tags[73]="UDP0266V3";
+					tags[74]="UDP0267V3";
+					tags[75]="UDP0268V3";
+					tags[92]="UDP0285V3";
+					tags[93]="UDP0286V3";
+					tags[94]="UDP0287V3";
+					tags[95]="UDP0288V3";
+
+					return tags;
+				},
+				populateIndex_Illumina_UDI_Set_D_V3:function(){
+					var tags= this.populateIndex_PlateRange("UDP0",289,384,"00");
+					// surcharger le tableau !!! 6 index V3 et 4 index V2
+					tags[0] ="UDP0289V2"; // pas une coquille !!
+					tags[1] ="UDP0290V2"; // pas une coquille !!
+					tags[2] ="UDP0291V2"; // pas une coquille !!
+					tags[9] ="UDP0298V3";
+					tags[12]="UDP0301V2"; // pas une coquille !!
+					tags[32]="UDP0321V3";
+					tags[80]="UDP0369V3";
+					tags[81]="UDP0370V3";
+					tags[82]="UDP0371V3";
+					tags[83]="UDP0372V3";
+
+					return tags;
+				},
 				// NGL-3960 ajout: ce sont les memes plaques que Nextera !!!
 				populateIndex_IDT_Anchor_Set_A:function(){
 					return this.populateIndex_PlateRange("UDP0",1,96,"00");
@@ -426,6 +545,46 @@ angular.module('tools',[]).factory('tagPlates', ['$parse', '$filter','$http',
 				populateIndex_IDT_Anchor_Set_D:function(){
 					return this.populateIndex_PlateRange("UDP0",289,384,"00");
 				},
+				// NGL-4609 index NEB.. !! il faut nopad et lowerCase !!
+				populateIndex_NEBNext_UDI_set1:function(){
+					return this.populateIndex_PlateNbcol("neb-e7395-",12, 1,1);
+				},
+				populateIndex_NEBNext_UDI_set2:function(){
+					return this.populateIndex_PlateNbcol("neb-e7874-",12, 1,1);
+				},
+				populateIndex_NEBNext_UDI_set3:function(){
+					return this.populateIndex_PlateNbcol("neb-e7876-",12, 1,1);
+				},
+				populateIndex_NEBNext_UDI_set4:function(){
+					return this.populateIndex_PlateNbcol("neb-e7878-",12, 1,1);
+				},
+				// NGL-4600
+				populateIndex_IDT_mtDNAg_Set_A:function(){
+					return this.populateIndex_PlateRange("mtDg",1,96,"00");
+				},
+				populateIndex_IDT_mtDNAg_Set_B:function(){
+					return this.populateIndex_PlateRange("mtDg",97,192,"00");
+				},
+				populateIndex_IDT_mtDNAg_Set_C:function(){
+					return this.populateIndex_PlateRange("mtDg",193,288,"00");
+				},
+				populateIndex_IDT_mtDNAg_Set_D:function(){
+					return this.populateIndex_PlateRange("mtDg",289,384,"00");
+				},
+				// NGL-4905  en attente des codes definitifs...=mtDm ???
+				populateIndex_IDT_mtDNAm_Set_A:function(){
+					return this.populateIndex_PlateRange("mtDm",1,96,"00");
+				},
+				populateIndex_IDT_mtDNAm_Set_B:function(){
+					return this.populateIndex_PlateRange("mtDm",97,192,"00");
+				},
+				populateIndex_IDT_mtDNAm_Set_C:function(){
+					return this.populateIndex_PlateRange("mtDm",193,288,"00");
+				},
+				populateIndex_IDT_mtDNAm_Set_D:function(){
+					return this.populateIndex_PlateRange("mtDm",289,384,"00");
+				},
+
 				// plaque pour tests de developpement equipe NGL/ 1 colonne
 				populateIndex_NGLDEBUG8:function(){
 					var tags=[];
@@ -443,4 +602,5 @@ angular.module('tools',[]).factory('tagPlates', ['$parse', '$filter','$http',
 				}
 		}
 		return factory;
+		
 }]);

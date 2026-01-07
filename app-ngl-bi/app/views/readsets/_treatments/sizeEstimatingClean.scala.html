@@ -13,7 +13,35 @@
         </tr>
         </thead>
         <tbody>
-        <tr>
+            <tr>
+                <td><b></b></td>		
+                <td>
+                    
+                </td>
+                <td><b>@Messages("readsets.treatments.sizeEstimatingClean.tabP2heterozygosityRateMax")</b></td>
+                <td>
+                    {{readset.treatments[treatments.getTreatment().code].pairs.tabP2heterozygosityRateMax.value | number}} %
+                </td>
+            </tr>
+            <tr>
+                <td></td>		
+                <td>
+                </td>
+                <td><b>@Messages("readsets.treatments.sizeEstimatingClean.tabP2genomeHaploidLengthMax")</b></td>
+                <td>
+                    {{readset.treatments[treatments.getTreatment().code].pairs.tabP2genomeHaploidLengthMax.value | number}} bp
+                </td>
+            </tr>
+            <tr>
+                <td></td>		
+                <td>
+                </td>
+                <td><b>@Messages("readsets.treatments.sizeEstimatingClean.tabP2modelFitMax")</b></td>
+                <td>
+                    {{readset.treatments[treatments.getTreatment().code].pairs.tabP2modelFitMax.value | number}} %
+                </td>
+            </tr>
+            <tr>
             <td><b>@Messages("readsets.treatments.sizeEstimatingClean.genomeScope")</b></td>
             <td>
                 <div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
@@ -38,16 +66,6 @@
             </td>
             </tr>
             <tr>
-                <td><b>@Messages("readsets.treatments.sizeEstimatingClean.tabP1genomeHaploidLengthMax")</b></td>		
-                <td>
-                    {{readset.treatments[treatments.getTreatment().code].pairs.tabP1genomeHaploidLengthMax.value | number}}
-                </td>
-                <td><b>@Messages("readsets.treatments.sizeEstimatingClean.tabP2heterozygosityRateMax")</b></td>
-                <td>
-                    {{readset.treatments[treatments.getTreatment().code].pairs.tabP2heterozygosityRateMax.value | number}} %
-                </td>
-            </tr>
-            <tr>
                 <td><b>@Messages("readsets.treatments.sizeEstimatingClean.summaryFile")</b></td>
                 <td>
                     <iframe id="p1SummaryFile" class="col-md-12 col-lg-12" ng-bind-src="getTabP1SummaryFile(readset, treatments.getTreatment().code)" style="border:1;height:300px"></iframe> 
@@ -58,5 +76,9 @@
                 </td>
             </tr>
         </tbody>		
-    </table>			
+    </table>  
+    </br>
+    <b>@Messages("readsets.treatments.sizeEstimatingClean.basesTosequence")</b> : {{readset.treatments[treatments.getTreatment().code].pairs.basesTosequence.value | number}}
+    </br>
+    </br>
 </div>

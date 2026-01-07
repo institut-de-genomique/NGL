@@ -13,7 +13,13 @@
 				.success(function(data) {
 				// initialisation de la variable createService.sraVariables.exitingStudyType utilisée dans create.scala.html
 				createService.sraVariables.existingStudyType = data;																					
-				});			
+				});	
+				$http.get(jsRoutes.controllers.sra.api.Variables.list().url, {params:{type:'legendeDropBox'}})
+				.success(function(data) {
+				createService.sraVariables.legendeDropBox = data;	
+				createService.form.dropBox="Webin-9";  // pour avoir Webin-9 pré-séléctionné																		
+				createService.form.legendeDropBox="Webin-9";  // pour avoir Webin-9 pré-séléctionné																						
+				});		
 				isInit=true;
 			}
 		};
@@ -160,6 +166,16 @@
 						listStyle:'bt-select',
 						possibleValues:'releaseService.sraVariables.existingStudyType',
 				    	});
+				columns.push({property:"dropBox",
+						header: Messages("study.dropBox"),
+						type :"String",
+						hide:true,
+						edit:true,
+						order:false,
+						choiceInList:true,
+						listStyle:'bt-select',
+						possibleValues:'releaseService.sraVariables.dropBox',
+				    	});	
 		return columns;
 	};
 	

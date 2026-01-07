@@ -197,9 +197,9 @@
 			<div class="panel-body">
 				@formGroup{
 				<div class="form-group required {{getHasErrorClass('experimentForm', 'protocolCode')}}">
-					<label class="col-md-6 col-lg-6 control-label">@Messages("descriptions.select.project.code")</label>
+					<label class="col-md-6 col-lg-6 control-label">@Messages("descriptions.mapping.projects.type")</label>
 					<div class="col-md-6 col-lg-4">
-						<div ng-required=true bt-select placeholder='@Messages("descriptions.select.project.code")'
+						<div ng-required=true bt-select placeholder='@Messages("descriptions.select.project.type")'
 							class="form-control" filter="true"
 							ng-model="searchService.tabs.createMappingProject.entry.mapParameter"
 							bt-options="mapParameter.code as mapParameter.name for mapParameter in searchService.lists.getMapParameter()">

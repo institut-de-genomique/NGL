@@ -2,10 +2,10 @@ package models.sra.submit.sra.instance;
 
 import org.apache.commons.lang3.StringUtils;
 
-import models.sra.submit.util.VariableSRA;
 import play.Logger;
+import services.sra.SraValidationHelper;
+import services.sra.VariableSRA;
 import validation.ContextValidation;
-import validation.sra.SraValidationHelper;
 import validation.utils.ValidationHelper;
 
 public class UserExperimentExtendedType {
@@ -18,8 +18,8 @@ public class UserExperimentExtendedType {
 	private String title            = null;
 	private String spotLength       = null;
 	private String lastBaseCoordonnee = null;
-	private String studyAccession     = null;
-	private String sampleAccession    = null;
+	private String studyIdentifier     = null;
+	private String sampleIdentifier    = null;
 
 
 	public UserExperimentExtendedType() {
@@ -122,20 +122,20 @@ public class UserExperimentExtendedType {
 		this.nominalLength = nominalLength;
 	}
 	
-	public String getStudyAccession() {
-		return studyAccession;
+	public String getStudyIdentifier() {
+		return studyIdentifier;
 	}
 
-	public void setStudyAccession(String studyAccession) {
-		this.studyAccession = studyAccession;
+	public void setStudyIdentifier(String studyId) {
+		this.studyIdentifier = studyId;
 	}
 
-	public String getSampleAccession() {
-		return sampleAccession;
+	public String getSampleIdentifier() {
+		return sampleIdentifier;
 	}
 
-	public void setSampleAccession(String sampleAccession) {
-		this.sampleAccession = sampleAccession;
+	public void setSampleIdentifier(String sampleId) {
+		this.sampleIdentifier = sampleId;
 	}
 	
 	public void validate(ContextValidation contextValidation) {

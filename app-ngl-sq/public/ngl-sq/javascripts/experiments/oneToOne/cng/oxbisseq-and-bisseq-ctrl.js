@@ -206,7 +206,7 @@ angular.module('home').controller('OxBisseqAndBisseqCtrl',['$scope','$parse','$f
 	} else {
 		datatableConfig.columns.push({
 			"header" : Messages("containers.table.code"),
-			"property" : "inputContainer.support.code",
+			"property" : "inputContainer.code",
 			"order" : true,
 			"edit" : false,
 			"hide" : true,
@@ -467,8 +467,9 @@ angular.module('home').controller('OxBisseqAndBisseqCtrl',['$scope','$parse','$f
 	atmService.experimentToView($scope.experiment, $scope.experimentType);
 	
 	//02/09/2021 blocker la sortie strip-8 ( il n'y a que l'instrument 'main' )
+	// note 13/02/2024 il faudrait un watch !voir abc-ctrl.js
 	if ($scope.experiment.instrument.outContainerSupportCategoryCode === "strip-8"){
-		$scope.messages.setError(Messages('experiments.input.error.categoryCodeNotSupported'));		
+		$scope.messages.setError(Messages('experiments.output.error.supportCategory','strips'));		
 	} else {
 		$scope.messages.clear();
 		$scope.atmService = atmService;

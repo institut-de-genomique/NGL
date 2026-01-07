@@ -15,6 +15,7 @@ import fr.cea.ig.ngl.dao.permissions.PermissionAPI;
 import fr.cea.ig.ngl.dao.processes.ProcessesAPI;
 import fr.cea.ig.ngl.dao.projects.ProjectCommentsAPI;
 import fr.cea.ig.ngl.dao.projects.ProjectsAPI;
+import fr.cea.ig.ngl.dao.projects.UmbrellaProjectsAPI;
 import fr.cea.ig.ngl.dao.protocols.ProtocolsAPI;
 import fr.cea.ig.ngl.dao.readsets.FilesAPI;
 import fr.cea.ig.ngl.dao.readsets.ReadSetTreatmentsAPI;
@@ -34,12 +35,12 @@ public class APIs {
 	private final ContainersAPI              containerAPI;
 	private final ContainerSupportsAPI       containerSupportAPI;
 	private final PermissionAPI              permissionAPI;
+	private final UmbrellaProjectsAPI        umbrellaProjectAPI;
 	private final ProjectsAPI                projectAPI;
 	private final ProtocolsAPI               protocolAPI;
 	private final ReagentCatalogAPI          reagentCatalogAPI; 
 	private final ResolutionConfigurationAPI resolutionConfigurationAPI;
 	private final SamplesAPI                 sampleAPI;
-	private final SraParameterAPI            sraParameterAPI;
 	private final UserAPI                    userAPI;
 	private final ValuationCriteriaAPI       valuationCriteriaAPI;
 	private final ExperimentsAPI			 experimentAPI;
@@ -56,7 +57,7 @@ public class APIs {
 	private final ReadSetTreatmentsAPI       readsetTreatmentAPI;  
 	private final AnalysesAPI                analysesAPI;
     private final AnalysisTreatmentsAPI      analysisTreatmentsAPI;
-    private final fr.cea.ig.ngl.dao.analyses.FilesAPI analysisFilesAPI;  
+    private final fr.cea.ig.ngl.dao.analyses.FilesAPI    analysisFilesAPI; 
 	
     // The APIs being DAOAPI and not higher level APIs, the workflow can be seen as the API
 	private final ProjectWorkflows			projectWorkflow;
@@ -67,11 +68,11 @@ public class APIs {
 				ContainerSupportsAPI       containerSupportAPI,
 				PermissionAPI              permissionAPI,
 				ProjectsAPI                projectAPI,
+				UmbrellaProjectsAPI                umbrellaProjectAPI,
 				ProtocolsAPI               protocolAPI,
 				ReagentCatalogAPI          reagentCatalogAPI,
 				ResolutionConfigurationAPI resolutionConfigurationAPI,
 				SamplesAPI                 sampleAPI,
-				SraParameterAPI            sraParameterAPI,
 				UserAPI                    userAPI,
 				ValuationCriteriaAPI       valuationCriteriaAPI,
 				ExperimentsAPI			   experimentAPI,
@@ -89,18 +90,19 @@ public class APIs {
 				ProjectWorkflows		   projectWorkflow,
 				AnalysesAPI                analysesAPI,
                 AnalysisTreatmentsAPI      analysisTreatmentsAPI,
-                fr.cea.ig.ngl.dao.analyses.FilesAPI analysisFilesAPI) {
+                fr.cea.ig.ngl.dao.analyses.FilesAPI analysisFilesAPI
+                ) {
 		this.codeLabelAPI         = codeLabelAPI;
 		this.containerAPI         = containerAPI;
 		this.containerSupportAPI  = containerSupportAPI;
 		this.permissionAPI        = permissionAPI;
 		this.projectAPI           = projectAPI;
+		this.umbrellaProjectAPI = umbrellaProjectAPI;
 		this.protocolAPI          = protocolAPI; 
 		this.reagentCatalogAPI    = reagentCatalogAPI;
 		this.resolutionConfigurationAPI = resolutionConfigurationAPI;
 		this.userAPI              = userAPI;
 		this.sampleAPI            = sampleAPI;
-		this.sraParameterAPI      = sraParameterAPI;
 		this.valuationCriteriaAPI = valuationCriteriaAPI;
 		this.experimentAPI        = experimentAPI;
 		this.experimentReagentAPI = experimentReagentAPI;
@@ -125,11 +127,11 @@ public class APIs {
 	public ContainerSupportsAPI       containerSupport()        { return containerSupportAPI;        }
 	public PermissionAPI              permission()              { return permissionAPI;              }
 	public ProjectsAPI                project()                 { return projectAPI;                 }
+	public UmbrellaProjectsAPI        umbrellaProject()         { return umbrellaProjectAPI;         }
 	public ProtocolsAPI               protocol()                { return protocolAPI;                }
 	public ReagentCatalogAPI          reagentCatalog()          { return reagentCatalogAPI;          }
 	public ResolutionConfigurationAPI resolutionConfiguration() { return resolutionConfigurationAPI; }
 	public SamplesAPI                 sample()                  { return sampleAPI;                  }
-	public SraParameterAPI            sraParameter()            { return sraParameterAPI;            }
 	public UserAPI                    user()                    { return userAPI;                    }
 	public ValuationCriteriaAPI       valuationCriteria()       { return valuationCriteriaAPI;       }
 	public ExperimentsAPI			  experiment()   		    { return experimentAPI;       		 }
@@ -147,6 +149,6 @@ public class APIs {
 	public ProjectWorkflows			  projectWorkflow()			{ return projectWorkflow;			 }
 	public AnalysesAPI                analyses()                { return analysesAPI;                }
     public fr.cea.ig.ngl.dao.analyses.FilesAPI analysisFile()   { return analysisFilesAPI;           }
-    public AnalysisTreatmentsAPI       analysisTreatment()      { return analysisTreatmentsAPI;      }
+    public AnalysisTreatmentsAPI      analysisTreatment()       { return analysisTreatmentsAPI;      }
 	
 }

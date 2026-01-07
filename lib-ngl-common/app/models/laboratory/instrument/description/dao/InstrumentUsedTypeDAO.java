@@ -69,7 +69,7 @@ public class InstrumentUsedTypeDAO extends AbstractDAOCommonInfoType<InstrumentU
 	
 	public List<InstrumentUsedType> findByQueryParams(InstrumentUsedTypeQueryParams queryParams) {
 		StringBuilder sqlBuilder = new StringBuilder(sqlCommon);
-		sqlBuilder.append(" inner join instrument_category as ic on c.fk_instrument_category=ic.id");
+		sqlBuilder.append(" inner join instrument_category as ic on c.fk_instrument_category=ic.id left join property_definition as pd on pd.fk_common_info_type = t.id where 1=1");
 		List<String> parametersBuilder = new ArrayList<>();
 		List<SqlParameter> sqlParametersBuilder = new ArrayList<>();
 		
@@ -91,6 +91,16 @@ public class InstrumentUsedTypeDAO extends AbstractDAOCommonInfoType<InstrumentU
 			parametersBuilder.add(queryParams.categoryCode);
 			sqlParametersBuilder.add(new SqlParameter("cit.code", Types.VARCHAR));
 			sqlBuilder.append(" and ic.code = ?");
+		}
+		
+		if(queryParams.isPropertyDefinitionNameList()){
+			parametersBuilder.addAll(queryParams.propertyDefinitionNames);	
+			Stream.of(listToSqlParameters(queryParams.propertyDefinitionNames, "pd.name", Types.VARCHAR)).forEach(sqlParametersBuilder::add);
+			sqlBuilder.append(" and pd.name in (").append(listToParameters(queryParams.propertyDefinitionNames)).append(") ");
+		}else if(queryParams.isSinglePropertyDefinitionName()){
+			parametersBuilder.add(queryParams.propertyDefinitionName);
+			sqlParametersBuilder.add(new SqlParameter("pd.name", Types.VARCHAR));
+			sqlBuilder.append(" and pd.name = ?");
 		}
 		
 		String sql = sqlBuilder.toString();

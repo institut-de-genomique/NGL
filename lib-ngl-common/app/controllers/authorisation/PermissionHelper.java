@@ -1,7 +1,12 @@
 package controllers.authorisation;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
 import fr.cea.ig.authorization.IAuthorizator;
 import fr.cea.ig.play.IGGlobals;
+import models.administration.authorisation.Role;
 import models.utils.dao.DAOException;
 
 /**
@@ -18,7 +23,26 @@ public class PermissionHelper {
 		IAuthorizator authorizator = IGGlobals.instanceOf(IAuthorizator.class);
 		return authorizator.authorize(username, codePermission);
 	}
+	public static  Set<String> getPermission(String username) throws DAOException {
+		if (username == null) {
+			return null;
+		}			
+		IAuthorizator authorizator = IGGlobals.instanceOf(IAuthorizator.class);
+
+		return authorizator.getPermissions(username);
+	}
+
+public static String getRole(String username) throws DAOException {
+		List<Role> roles = Role.find.get().findByUserLogin(username);
+		List<String> roleLabel = new ArrayList<>();
 		
+		for (int i = 0; i < roles.size(); i++) {
+			roleLabel.add(roles.get(i).label);
+		}
+		
+		return "Rôle" + (roleLabel.size()>1?"s" : "") +" : "+ String.join(", ", roleLabel);
+	}
+			
 //	/*
 //	 * 
 //	 * @param ses the user session

@@ -140,7 +140,7 @@
 </div>
 
 <div class="row">
- <div class="col-md-13 col-lg-13">
+ <div class="col-md-10 col-lg-10">
  	<div class="panel panel-default">
 	<div class="panel-heading text-center"><strong>@Messages("analyses.treatments.wholeGenome.info")</strong></div>
 	 <table class="table table-condensed table-hover table-bordered">
@@ -152,7 +152,7 @@
 		</thead>
 		<tbody>
 		<tr>
-			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.fastqFiles.value}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.fastqFiles.value.replaceAll(","," ") }}</td>
 			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.filePath.value}}</td>
 		</tr>						
 	</tbody>

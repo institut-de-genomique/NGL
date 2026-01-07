@@ -52,7 +52,6 @@ public class ImportDataUtil {
 		
 		if (c.get(Calendar.HOUR_OF_DAY) > hour) {
 			int day = c.get(Calendar.DAY_OF_YEAR) + 1;
-
 			c.set(Calendar.DAY_OF_YEAR, day);
 			c.set(Calendar.HOUR_OF_DAY, hour);
 			c.set(Calendar.MINUTE, minutes);			
@@ -62,6 +61,28 @@ public class ImportDataUtil {
 		}
 
 		return Duration.create(c.getTimeInMillis() - System.currentTimeMillis(),TimeUnit.MILLISECONDS);
+	}
+	
+
+	/**
+	 * Méthode permettant de définir une heure (+ minutes) où on veut exécuter un CRON. 
+	 * @param hour L'heure à laquelle on veut lancer le CRON.
+	 * @param minutes Les minutes à laquelle on veut lancer le CRON.
+	 * 
+	 * @return Un objet "FiniteDuration" qui permettra de lancer le CRON à l'heure voulue.
+	 */	
+	public static FiniteDuration at(int hour, int minutes) {
+		Calendar dateLancementCron = Calendar.getInstance();
+		dateLancementCron.set(Calendar.HOUR_OF_DAY, hour);
+		dateLancementCron.set(Calendar.MINUTE, minutes);	
+		dateLancementCron.set(Calendar.SECOND, 0);
+		dateLancementCron.set(Calendar.MILLISECOND, 0);
+		
+		long maintenant = System.currentTimeMillis();  // new Date().getTime();
+		if( dateLancementCron.getTimeInMillis() < maintenant ) {
+			dateLancementCron.add(Calendar.DAY_OF_YEAR, 1);
+		}
+		return Duration.create(dateLancementCron.getTimeInMillis() - maintenant, TimeUnit.MILLISECONDS);	
 	}
 	
 	/**
@@ -75,7 +96,7 @@ public class ImportDataUtil {
 	public static FiniteDuration getDurationInMinute(int minutes) {
 		Calendar c = Calendar.getInstance();
 		int hour = c.get(Calendar.HOUR_OF_DAY);
-
+		
 		if (c.get(Calendar.MINUTE) > minutes) {
 			hour = hour + 1;
 

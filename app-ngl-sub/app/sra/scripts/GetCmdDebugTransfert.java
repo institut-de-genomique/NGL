@@ -21,12 +21,12 @@ import javax.inject.Inject;
 
 import org.mongojack.DBQuery;
 
+import controllers.sra.api.ExperimentAPI;
 import fr.cea.ig.lfw.controllers.scripts.buffered.Script;
-import fr.cea.ig.ngl.dao.api.sra.ExperimentAPI;
 import models.sra.submit.sra.instance.Experiment;
 import models.sra.submit.sra.instance.RawData;
-import models.sra.submit.util.SraException;
-import services.Tools;
+import services.sra.SraException;
+import sra.services.Tools;
 
 
 /*
@@ -103,6 +103,7 @@ public class GetCmdDebugTransfert extends Script<GetCmdDebugTransfert.Args> {
 				collabFileName = collabFileName.replaceAll("[^/]*/", "");  // prendre uniquement chemin relatif du fichier si chemin complet indiqué
 				if(!collabFileNames.contains(collabFileName)) {
 					collabFileNames.add(collabFileName);
+					logger.debug(collabFileName);
 				}	
 			}
 		} catch (IOException e) {
@@ -268,7 +269,6 @@ public class GetCmdDebugTransfert extends Script<GetCmdDebugTransfert.Args> {
 					}
 				}
 			}
-			output_buffer.close();
 		}
 		// ecriture du fichier delShellFile :
 		try (BufferedWriter output_buffer  = new BufferedWriter(new java.io.FileWriter(delShellFile))) {
@@ -280,7 +280,6 @@ public class GetCmdDebugTransfert extends Script<GetCmdDebugTransfert.Args> {
 
 			output_buffer.write("sed -e 's/^\\([^ ].*\\)$/rm \"\\1\"/' " + 
 					delFile.getName() + " | LD_PRELOAD=/usr/lib64/libpassinjector.so lftp -u " + "\"$LOGIN,@passfile=$HOME/.webinaccess@\"" +  "  \"$HOST\"");
-			output_buffer.close();
 		}
 	}
 	

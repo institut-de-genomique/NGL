@@ -9,19 +9,6 @@ import org.mongojack.DBCursor;
 import org.mongojack.DBQuery;
 import org.mongojack.DBUpdate;
 
-<<<<<<< HEAD:lib-ngl-common/off/migration/MigrationUpdateReadSetNbCycles.java
-import play.Logger;
-import play.Play;
-import play.libs.Akka;
-import play.mvc.Result;
-import rules.services.LazyRules6Actor;
-import rules.services.RulesActor6;
-import rules.services.RulesMessage;
-import akka.actor.ActorRef;
-import akka.actor.Props;
-
-=======
->>>>>>> master-isoprod-bi-2.1.X:lib-ngl-common/app/controllers/migration/MigrationUpdateReadSetNbCycles.java
 import com.mongodb.BasicDBObject;
 import com.mongodb.MongoException;
 

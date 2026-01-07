@@ -10,9 +10,11 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 
+import controllers.sra.api.SubmissionAPI;
 import fr.cea.ig.lfw.controllers.scripts.buffered.Script;
 import fr.cea.ig.ngl.NGLApplication;
-import fr.cea.ig.ngl.dao.api.sra.SubmissionAPI;
+import fr.cea.ig.ngl.dao.api.APIException;
+import fr.cea.ig.ngl.dao.api.APIValidationException;
 import models.sra.submit.sra.instance.Submission;
 import models.sra.submit.sra.instance.Submission.TypeRawDataSubmitted;
 import play.libs.Json;
@@ -46,7 +48,7 @@ public class RepriseHistoSubmissionForVersion_5_0 extends Script<RepriseHistoSub
 	}
 
 
-	public void repriseHistoSubmission() {
+	public void repriseHistoSubmission() throws APIValidationException, APIException {
 		Iterable<Submission> list_submission =  submissionAPI.dao_all();
 		println("Validations des submissions");	
 		int cp = 0;
@@ -83,7 +85,7 @@ public class RepriseHistoSubmissionForVersion_5_0 extends Script<RepriseHistoSub
 				println("Error pour " + submission.code);
 				println(Json.prettyPrint(app.errorsAsJson(contextValidation.getErrors())));	
 			} else {
-				submissionAPI.dao_saveObject(submission);				
+				submissionAPI.create(submission, user);				
 			}
 		}	
 		println("Fin de la reprise histo des submissions " + cpError + " error / "  + cp);				

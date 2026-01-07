@@ -521,6 +521,7 @@ public class InstanceHelpers {
 	}
 
 	//NGL-2733 new service with check tag and secondaryTag to replace old service
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	public static void _updateContentProperties(Set<String> projectCodes, 
 			Set<String> sampleCodes, 
 			Set<String> containerCodes,
@@ -652,19 +653,9 @@ public class InstanceHelpers {
 			Map<String, PropertyValue> updatedProperties, 
 			Set<String> deletedPropertyCodes,
 			ContextValidation validation) {
-		MongoDBDAO.find(InstanceConstants.SAMPLE_COLL_NAME,Sample.class, 
-				DBQuery.is("life.from.sampleCode", sample.code)
-				.in("life.from.projectCode", sample.projectCodes))
-		.cursor.forEach(updatedSample -> {
-			updatedSample.traceInformation.setTraceInformation(validation.getUser());
-			updatedSample.referenceCollab    = sample.referenceCollab;
-			updatedSample.taxonCode          = sample.taxonCode;
-			updatedSample.ncbiScientificName = sample.ncbiScientificName;
-			updatedSample.ncbiLineage        = sample.ncbiLineage;
-			updatedSample.properties         = InstanceHelpers.updateProperties(updatedSample.properties, updatedProperties, deletedPropertyCodes);
-			MongoDBDAO.update(InstanceConstants.SAMPLE_COLL_NAME,updatedSample);
-		});
-
+		
+		updateSampleProperties(sample, updatedProperties, deletedPropertyCodes, validation);
+		
 		MongoDBDAO.find(InstanceConstants.CONTAINER_COLL_NAME, Container.class, 
 				DBQuery.is("contents.sampleCode", sample.code)
 				.in("contents.projectCode", sample.projectCodes))
@@ -759,6 +750,24 @@ public class InstanceHelpers {
 					DBUpdate.set("sampleOnContainer", readset.sampleOnContainer)
 					.set("traceInformation",  readset.traceInformation));			
 		});	
+	}
+
+	public static void updateSampleProperties(Sample sample, 
+			Map<String, PropertyValue> updatedProperties, 
+			Set<String> deletedPropertyCodes,
+			ContextValidation validation) {
+		MongoDBDAO.find(InstanceConstants.SAMPLE_COLL_NAME,Sample.class, 
+				DBQuery.is("life.from.sampleCode", sample.code)
+				.in("life.from.projectCode", sample.projectCodes))
+		.cursor.forEach(updatedSample -> {
+			updatedSample.traceInformation.setTraceInformation(validation.getUser());
+			updatedSample.referenceCollab    = sample.referenceCollab;
+			updatedSample.taxonCode          = sample.taxonCode;
+			updatedSample.ncbiScientificName = sample.ncbiScientificName;
+			updatedSample.ncbiLineage        = sample.ncbiLineage;
+			updatedSample.properties         = InstanceHelpers.updateProperties(updatedSample.properties, updatedProperties, deletedPropertyCodes);
+			MongoDBDAO.update(InstanceConstants.SAMPLE_COLL_NAME,updatedSample);
+		});
 	}
 
 	/*

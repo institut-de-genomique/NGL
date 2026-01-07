@@ -1,0 +1,29 @@
+@()
+<div class="row">
+	<div class="col-md-12 col-lg-12">
+		<div class="tab-content">	
+			<div class="tab-pane" ng-class="{'active':readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default!==undefined}">
+				<div class="row">
+					<div class="col-md-12 col-lg-12">
+	  					<ul class="nav nav-tabs margin-bottom-5">
+	   						<li class="active"><a href="#" data-target="#metrics" data-toggle="tab">@Messages("readsets.treatments.wgsBarcoding.metrics")</a></li>
+	   						<li><a href="#" data-target="#krona" data-toggle="tab">@Messages("readsets.treatments.wgsBarcoding.krona")</a></li>   
+	   						<li><a href="#" data-target="#specificDbMapping" data-toggle="tab">@Messages("readsets.treatments.wgsBarcoding.specificDbMapping")</a></li>  
+	   					</ul>
+					<div class="tab-content">
+						<div class="tab-pane active" id="metrics">
+							@partials.wgsBarCodingPacbio_metrics()		
+						</div>
+						<div class="tab-pane" id="krona">
+							@partials.wgsBarCoding_krona()		
+						</div>
+						<div class="tab-pane" id="specificDbMapping">
+							@partials.wgsBarCoding_specificDbMappingLongRead()		
+						</div>
+					</div>
+					</div>
+				</div>
+			</div>	
+		</div>	
+	</div>			
+</div>

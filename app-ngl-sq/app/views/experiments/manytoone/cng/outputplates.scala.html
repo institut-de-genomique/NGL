@@ -64,13 +64,13 @@
 			<th style="width:70px;"><!-- FDS !!! problem graphique avec select: masque le contenu-->
 				@Messages("containers.table.support.line")
 			</th>
-			<th style="width:75px;">
+			<th style="width:70px;">
 				@Messages("containers.table.support.column")
 			</th>
 			<th>
 				@Messages("containers.table.concentration.shortLabel")
 			</th>
-			<th style="width: 90px;"><!-- FDS !!! problem graphique avec select: masque le contenu -->
+			<th style="width:90px;"><!-- FDS !!! problem graphique avec select: masque le contenu -->
 				@Messages("containers.table.concentration.unit.shortLabel")
 			</th>
 			<th>
@@ -176,15 +176,7 @@
 				<button class="btn btn-default btn-xs btn-block"  ng-click="atmService.data.deleteATM(atm)"
 				                                                  ng-show="isNewState()">
 					<i class="fa fa-trash-o"></i>
-				</button>
-				<!-- 03/05/2017 NGL-1197 ajout bouton copie volume pour CHAQUE ATM 
-				     26/09/2017 suppression car mise par erreur
-				<button class="btn btn-default btn-xs btn-block"  ng-click="copyVolumeToEngaged($parent.$parent.$index)" 
-				                                                  data-toggle="tooltip" title="@Messages("experiments.button.plate.copyVolumeTo") volume engag&eacute;"
-				                                                  ng-show="isNewState()">
-					<i class="fa fa-files-o"></i>
-				</button>	
-				 -->				
+				</button>				
 			</td>	
 				<td>
 					{{inputContainerUsed.code}}

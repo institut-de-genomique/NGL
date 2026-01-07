@@ -9,6 +9,9 @@ import models.utils.InstanceConstants;
 import fr.cea.ig.MongoDBDAO;
 import fr.cea.ig.ngl.dao.GenericMongoDAO;
 
+interface AbstractExperimentDAO {
+	
+}
 public class ExperimentDAO extends GenericMongoDAO<Experiment> {
 	
 	@Inject
@@ -16,7 +19,7 @@ public class ExperimentDAO extends GenericMongoDAO<Experiment> {
 		super(InstanceConstants.SRA_EXPERIMENT_COLL_NAME, Experiment.class);
 	}
 	
-    public void deleteObject(Query query) {
-        MongoDBDAO.delete(this.getCollectionName(), this.getElementClass(), query);
-    }
+//    public void deleteObjects(Query query) {
+//        MongoDBDAO.delete(this.getCollectionName(), this.getElementClass(), query);
+//    }
 }

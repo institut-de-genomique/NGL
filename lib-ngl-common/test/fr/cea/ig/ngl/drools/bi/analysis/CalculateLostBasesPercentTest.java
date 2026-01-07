@@ -53,7 +53,7 @@ public class CalculateLostBasesPercentTest extends JUnitTest {
 		PowerMockito.mockStatic(MongoDBDAO.class);
 		
 		// Initialisation de la base Drools.
-		Analysis analysis = AnalysisFactory.getRandomAnalysis();
+		Analysis analysis = AnalysisFactory.getRandomAnalysis(false);
 
 		session.insert(analysis);
 		

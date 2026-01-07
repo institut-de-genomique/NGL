@@ -1,8 +1,8 @@
 @()
- <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
 <div ng-repeat="trt in treatmentsFilter() | orderBy: 'controlName' | filter:filterTreatments" class="panel panel-default">
 
-	<div class="panel-heading" role="tab" id="heading{{trt.controlName}}">
+    <div class="panel-heading" role="tab" id="heading{{trt.controlName}}">
       <h4 class="panel-title">
         <a role="button" data-toggle="collapse" data-parent="#accordion" data-target="#{{trt.controlName}}" aria-expanded="true" aria-controls="{{trt.controlName}}">
          <i class="more-less glyphicon glyphicon-plus"></i>
@@ -42,8 +42,6 @@
  		</tbody>
 	 </table>
 	 </div>
-	 </div>
     </div>
-    </div>
-
-
+</div>
+</div>

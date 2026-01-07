@@ -17,7 +17,7 @@ import services.description.instrument.InstrumentServiceCNS;
 import services.description.process.AbstractProcessService;
 import services.description.process.ProcessServiceCNS;
 import services.description.project.AbstractProjectService;
-// import services.description.project.AbstractUmbrellaProjectService;
+import services.description.project.AbstractUmbrellaProjectService;
 import services.description.project.ProjectServiceCNS;
 import services.description.run.AbstractRunService;
 import services.description.run.AbstractTreatmentService;
@@ -144,10 +144,7 @@ public class TestApplicationData implements IApplicationData {
     // ---------------------------------------------------    
     
     
-	@Override
-	public Consumer<ContextValidation> getResolutionService() {
-		throw new RuntimeException("not implemented");		
-	}
+	
 
 	@Override
 	public Consumer<ContextValidation> getProtocolService() {
@@ -169,9 +166,21 @@ public class TestApplicationData implements IApplicationData {
 		throw new RuntimeException("not implemented");		
 	}
 
-    // @Override
-    // public AbstractUmbrellaProjectService getUmbrellaProjectService() {
-    //    throw new RuntimeException("not implemented");		
-    // }
+    @Override
+    public AbstractUmbrellaProjectService getUmbrellaProjectService() {
+       throw new RuntimeException("not implemented");		
+    }
+
+    @Override
+    public Consumer<ContextValidation> getResolutionServiceSQ() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getResolutionServiceSQ'");
+    }
+
+    @Override
+    public Consumer<ContextValidation> getResolutionServiceBI() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getResolutionServiceBI'");
+    }
 
 }

@@ -25,22 +25,22 @@
                     "hide":true
                 },
                 {
-                    "header":Messages("descriptions.treatments.table.type.code"),
-                    "property":"typeCode",
+                    "header":Messages("descriptions.treatments.table.type.names"),
+                    "property":"typeNames",
                     "order":true,
                     "position":3,
                     "type":"text",
+                    "filter": "split:','",
+                    "render":"<div list-resize='cellValue' vertical list-resize-min-size='10'>",
                     "mergeCells":true,
                     "hide":true
                 },
                 {
-                    "header":Messages("descriptions.treatments.table.type.names"),
-                    "property":"typeNames",
+                    "header":Messages("descriptions.treatments.table.type.code"),
+                    "property":"typeCode",
                     "order":true,
                     "position":4,
                     "type":"text",
-                    "filter": "split:','",
-                    "render":"<div list-resize='cellValue' vertical list-resize-min-size='10'>",
                     "mergeCells":true,
                     "hide":true
                 },
@@ -50,7 +50,6 @@
                     "order":true,
                     "position":5,
                     "type":"text",
-                    "filter": "getArray:'code'",
                     "render":"<div list-resize='cellValue' list-resize-min-size='5'>",
                     "mergeCells":true,
                     "hide":true
@@ -158,7 +157,8 @@
 
             return {
                 categories: lists.getTreatmentCategories,
-                types: getFilteredList("treatmentTypes", lists.getTreatmentTypes, function(){
+                types: lists.getTreatmentTypes,
+                uniqueTypeNames: getFilteredList("treatmentTypes", lists.getTreatmentTypes, function(){
                     return { categoryNames: searchService.form.categoryNames };
                 }, getUniqueNames)
             };
@@ -218,8 +218,12 @@
                             "typeName": rawTreatmentType.name, 
                             "typeCode": rawTreatmentType.code,
                             "typeNames": rawTreatmentType.names, 
-                            "typeContexts": rawTreatmentType.contexts,
+                            "typeContexts": rawTreatmentType.contexts.map(contextToString),
                         };
+                    }
+
+                    function contextToString(context) {
+                        return context.code + " (" + context.required + ")";
                     }
                 }
             };

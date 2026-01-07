@@ -289,11 +289,6 @@ public class StateNames {
 	public static final String SUBU_V = "SUBU-V";
 	
 	/**
-	 * Soumission de type update en attente pour étape "Send Meta Data" ({@link States#SUBU_SMD_IW}).
-	 */
-	public static final String  SUBU_SMD_IW = "SUBU-SMD-IW";
-	
-	/**
 	 * Soumission de type update en cours pour "Send Meta Data" ({@link States#SUBU_SMD_IP}).
 	 */
 	public static final String SUBU_SMD_IP = "SUBU-SMD-IP";
@@ -317,11 +312,6 @@ public class StateNames {
 	 * Nouvelle soumission de type release({@link States#SUBR_N}).
 	 */
 	public static final String SUBR_N = "SUBR-N";
-
-	/**
-	 * Soumission de type release en attente pour étape "Send Meta Data" ({@link States#SUBR_SMD_IW}).
-	 */
-	public static final String SUBR_SMD_IW  = "SUBR-SMD-IW";
 	
 	/**
 	 * Soumission de type release en cours pour "Send Meta Data" ({@link States#SUBR_SMD_IP}).
@@ -343,5 +333,4 @@ public class StateNames {
 	 */
 	public static final String SUBR_FE = "SUBR-FE";
 	
-
 }

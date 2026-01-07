@@ -13,9 +13,9 @@ import org.mongojack.DBQuery;
 import fr.cea.ig.MongoDBDAO;
 import fr.cea.ig.lfw.controllers.scripts.buffered.ScriptNoArgs;
 import models.sra.submit.sra.instance.Experiment;
-import models.sra.submit.util.SraException;
 import models.utils.InstanceConstants;
-import services.XmlServices;
+import services.sra.SraException;
+import sra.services.XmlServices;
 
 
 public class UpdateExperimentsEMOSE extends ScriptNoArgs {

@@ -19,13 +19,13 @@ import javax.inject.Inject;
 
 import org.mongojack.DBQuery;
 
+import controllers.sra.api.ExperimentAPI;
 import fr.cea.ig.lfw.controllers.scripts.buffered.Script;
 import fr.cea.ig.ngl.NGLApplication;
-import fr.cea.ig.ngl.dao.api.sra.ExperimentAPI;
 import models.sra.submit.sra.instance.Experiment;
 import models.sra.submit.sra.instance.RawData;
-import models.sra.submit.util.SraException;
 import play.libs.Json;
+import services.sra.SraException;
 import validation.ContextValidation;
 
 
@@ -171,9 +171,9 @@ public class CheckMd5sumAndCorrectNglsub extends Script<CheckMd5sumAndCorrectNgl
 				for (RawData rawData : experiment.run.listRawData) {
 					if(rawData.collabFileName.equals(collabFileName)) {
 						String md5Hex = collabFileNamesMd5.get(collabFileName);
-						String runAC = "NONE";
+						// String runAC = "NONE";
 						if (StringUtils.isNotBlank(experiment.run.accession)) {
-							runAC = experiment.run.accession;
+							// runAC = experiment.run.accession;
 						}
 						//printfln("md5Sum calcule %s pour collabFileName=%s avec AC=%s", md5Hex, rawData.collabFileName, runAC);
 						if (rawData.md5.equals(md5Hex)) {
@@ -190,6 +190,7 @@ public class CheckMd5sumAndCorrectNglsub extends Script<CheckMd5sumAndCorrectNgl
 									println("Error pour " + experiment.code);
 									println(Json.prettyPrint(app.errorsAsJson(ctxVal.getErrors())));				
 								} else {
+									//experimentAPI.create(experiment, user);				
 									experimentAPI.dao_saveObject(experiment);				
 								}
 							}

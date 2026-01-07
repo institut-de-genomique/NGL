@@ -1,10 +1,16 @@
 package controllers.commons.api;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.mongojack.DBQuery;
+import org.mongojack.DBQuery.Query;
 
+import controllers.ListObject;
 import controllers.NGLAPIController;
+
 import fr.cea.ig.MongoDBDAO;
 import fr.cea.ig.authentication.Authenticated;
 import fr.cea.ig.authorization.Authorized;
@@ -14,14 +20,18 @@ import fr.cea.ig.ngl.dao.api.APIValidationException;
 import fr.cea.ig.ngl.dao.parameters.MapParametersAPI;
 import fr.cea.ig.ngl.dao.parameters.ParametersAPI;
 import fr.cea.ig.ngl.dao.parameters.ParametersDAO;
+
 import models.laboratory.parameter.Parameter;
 import models.laboratory.parameter.map.MapParameter;
 import models.laboratory.parameter.map.MapParameterEntry;
 import models.utils.InstanceConstants;
 import models.utils.dao.DAOException;
+
 import play.data.Form;
 import play.libs.Json;
 import play.mvc.Result;
+
+import views.components.datatable.DatatableResponse;
 
 /* FDS/EJ 27/11/2018 Il faudra creer une ressource "Index/Tag" distincte des parametres avec sa propre collection Mongo...
  * au CNS il y des type de parametres qui n'ont rien a voir avec les tag/index de sequencage...
@@ -59,6 +69,30 @@ public class Parameters extends NGLAPIController<ParametersAPI, ParametersDAO, P
 	@Override
 	public Parameter updateImpl(String code) throws Exception, APIException, APIValidationException {
 		return api().update(null, null);
+	}
+
+	@Override
+	public Result list() {
+		Form<ParametersSearchForm> filledForm = filledFormQueryString(this.form(ParametersSearchForm.class), ParametersSearchForm.class);
+		ParametersSearchForm parametersSearch = filledForm.get();
+		return list(parametersSearch);
+	}
+
+	private Result list(ParametersSearchForm parametersSearch) {
+		Query query = parametersSearch.getQuery();
+		List<Parameter> values=MongoDBDAO.find(InstanceConstants.PARAMETER_COLL_NAME, Parameter.class, query).toList();
+		
+		if (parametersSearch.datatable) {
+		    return ok(Json.toJson(new DatatableResponse<>(values, values.size())));
+		} else if (parametersSearch.list) {
+		    List<ListObject> valuesListObject = new ArrayList<>();
+		    for (Parameter s : values) {
+		    	valuesListObject.add(new ListObject(s.code, s.name));
+		    }
+		    return ok(Json.toJson(valuesListObject));
+		} else {
+			return ok(Json.toJson(values));
+		}
 	}
 
 	private ParametersSaveForm getParametersSaveForm() {

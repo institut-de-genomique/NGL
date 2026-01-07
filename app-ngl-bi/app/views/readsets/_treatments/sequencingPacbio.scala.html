@@ -1,0 +1,33 @@
+@()
+
+<div class="col-md-12 col-lg-12">
+    <div class="row">
+        <div class="col-md-10 col-lg-10">
+            <br/>
+            <table class="table table-condensed table-hover table-bordered">
+                <thead>
+                    <tr>
+                        <th>@Messages("readsets.treatments.sequencing.hifiReads")</th>
+                        <th>@Messages("readsets.treatments.sequencing.hifiBases")</th>
+                        <th>@Messages("readsets.treatments.sequencing.percentHifiReads")</th>
+                        <th>@Messages("readsets.treatments.sequencing.percentHifiBases")</th>
+                        <th>@Messages("readsets.treatments.sequencing.medianHifiQuality")</th>
+                        <th>@Messages("readsets.treatments.sequencing.failBases")</th>
+                        <th>@Messages("readsets.treatments.sequencing.failReads")</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{readset.treatments.sequencing.default.hifiReads.value}}</td>
+                        <td>{{readset.treatments.sequencing.default.hifiBases.value}}</td>
+                        <td>{{readset.treatments.sequencing.default.percentHifiReads.value | number:2}}</td>
+                        <td>{{readset.treatments.sequencing.default.percentHifiBases.value | number:2}}</td>
+                        <td>{{readset.treatments.sequencing.default.medianHifiQuality.value | number:2}}</td>
+                        <td>{{readset.treatments.sequencing.default.failBases.value}}</td>
+                        <td>{{readset.treatments.sequencing.default.failReads.value}}</td>
+                    </tr>	
+                </tbody>
+            </table>    			
+        </div>
+        </div>
+</div>

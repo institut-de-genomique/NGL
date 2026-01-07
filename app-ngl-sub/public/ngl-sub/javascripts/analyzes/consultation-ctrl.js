@@ -74,17 +74,21 @@ angular.module('home').controller('ConsultationCtrl',[ '$http', '$scope', '$rout
 			    	  	header: Messages("analyzes.accession"),
 			    	  	type :"text",		    	  	
 			    	  	order:true});
-		columns.push({	property:"studyAccession",
-			    	  	header: Messages("analyzes.studyAccession"),
+		columns.push({	property:"studyIdentifier",
+			    	  	header: Messages("analyzes.studyIdentifier"),
 			    	  	type :"text",		    	  	
 			    	  	order:true});
-		columns.push({	property:"sampleAccession",
-			    	  	header: Messages("analyzes.sampleAccession"),
+		columns.push({	property:"sampleIdentifier",
+			    	  	header: Messages("analyzes.sampleIdentifier"),
 			    	  	type :"text",		    	  	
 			    	  	order:true});		
 		columns.push({	property:"state.code",
 						"filter":"codes:'state'",
 						header: Messages("analyzes.state"),
+						type :"text",
+						order:true});	
+		columns.push({	property:"dropBox",
+						header: Messages("analyzes.dropBox"),
 						type :"text",
 						order:true});	
 		columns.push({
@@ -116,6 +120,8 @@ angular.module('home').controller('ConsultationCtrl',[ '$http', '$scope', '$rout
 	$scope.search = function() {
 		//console.log("dans consultation-ctrl.search : projCode " + $scope.form.projCode);	
 		//console.log("dans consultation-ctrl.search : state !!!!!'" + $scope.form.state+"'");
+		console.log("dans consultation-ctrl.search : form= ", $scope.form);	
+
 		$scope.saveUserForm = angular.copy($scope.form);// sauver formulaire utilisateur initial avant modif dans replacePseudoStateCodesToStateCodesInFormulaire
 		toolsServices.replacePseudoStateCodesToStateCodesInFormulaire($scope.sraVariables.pseudoStateCodeToStateCodes, $scope.form);
 		//console.log("scope.form", $scope.form);

@@ -25,6 +25,20 @@
 				{{project}} ({{project|codes:'project'}})
 			</div>				
 			}
+			<div class="form-group" >
+				<span ng-if="hasProperties('ncbiPhylum')">
+					<label class="col-md-6 col-lg-6 control-label" >@Messages("containers.table.phylumScientific")</label>
+					<div class="col-md-6 col-lg-6"><p class="form-control-static" ng-bind="sample.properties.ncbiPhylum.value" /></div>
+				</span>
+			</div>
+			
+			<div class="form-group" >
+				<span ng-if="hasProperties('ncbiClass')">
+					<label class="col-md-6 col-lg-6 control-label" >@Messages("containers.table.classScientific")</label>
+					<div class="col-md-6 col-lg-6"><p class="form-control-static" ng-bind="sample.properties.ncbiClass.value" /></div>
+				</span>
+			</div>
+			
 			@columnLabelValue(Messages("samples.table.taxonCode")){	
 				<div class="form-control-static" ng-bind='sample.taxonCode' />
 			}			
@@ -33,6 +47,13 @@
 			}
 			@columnLabelValue(Messages("samples.table.ncbiLineage")){	
 				<div class="form-control-static" ng-bind='sample.ncbiLineage' />
+			}
+
+			@columnLabelValue(Messages("samples.table.resolutionCodes")){
+				<div bt-select class="form-control" ng-model="sample.resolutionCodes" multiple="true" 
+					bt-options="valid.code as valid.name group by valid.category.name for valid in lists.getResolutions()" 
+					ng-edit="mainService.isEditMode()">
+				</div>							
 			}
 		}
 		@column(){				
@@ -68,8 +89,8 @@
 		@column(){				
 		<div class="row">
 			
-					<div  class="col-md-12 col-lg-12" ng-repeat="(key, value) in sample.properties">
-							<property-value key-ng-model="key" value-ng-model="value"/>						
+					<div  class="col-md-12 col-lg-12" ng-repeat="(key, value) in orderedSampleProperties">
+						<property-value ng-if="isAllowedProperty(key)" key-ng-model="key" value-ng-model="value"/>						
 					</div>
 				
 			</div>

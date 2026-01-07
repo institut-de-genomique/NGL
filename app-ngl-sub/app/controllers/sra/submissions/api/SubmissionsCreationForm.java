@@ -11,17 +11,20 @@ public class SubmissionsCreationForm  extends DatatableForm {
 	public List<String> sampleCodes;
 	public String configurationCode;
 	public List<String> readSetCodes;
-	public String base64UserFileRefCollabToAc;
-	public String base64UserFileExperiments;
-	public String base64UserFileSamples;
-	public String base64UserFileReadSet;
-	public String base64UserFilePathcmap;
-	public String acStudy;
-	public String acSample;
-	public String analysisCode;
+	public String  base64UserFileRefCollabToEbiIdentifier;
+	public String  base64UserFileExperiments;
+	public String  base64UserFileSamples;
+	public String  base64UserFileReadSet;
+	public String  base64UserFilePathcmap;
+	public String  acStudy;
+	public String  acSample;
+	public String  analysisCode;
+	public boolean noCheckTaxonSampleCollab;
 	
 	public boolean bionanoCheck;
 	public boolean defaultCheck;
 	public boolean metadataCheck;
+	public boolean atlaseaCheck;
+	public String tolId;
 
 }

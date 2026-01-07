@@ -73,7 +73,8 @@ public class TestUserExperimentParser extends ScriptWithArgs<TestUserExperimentP
 
 
 	public void execute(MyParam args) throws Exception {
-		Map<String, UserExperimentType> mapUserExperiment = parseUserFileExperiment(args.fileName); 
+		// Map<String, UserExperimentType> mapUserExperiment = 
+		parseUserFileExperiment(args.fileName); 
 	}
 	
 }

@@ -41,6 +41,10 @@
 			</div>
 	</div>
 		</form>
+		<p><a class="fa fa-info-circle" ng-click="toggleIsShowInformation()" title="Information" href=""> Information Témoin négatif extraction_ADN (propriété obligatoire) :</a></p>
+		<div ng-show="isShowInformation">
+			l'échantillon <b>CDW_AAKK</b> est, exceptionnellement (et le seul), considéré comme <b>FICTIF</b> et <b>ignoré du pipeline BA</b> "check conta sur amplicons". Si, exceptionnellement, (manips de test en général), vous n'avez pas de T neg extraction dans votre manip, vous pouvez utiliser ce code échantillon.
+		</div>
 		<div class="col-md-12 col-lg-12" ultimate-datatable="atmService.data"></div>
 
 	</div>

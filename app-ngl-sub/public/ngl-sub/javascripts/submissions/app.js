@@ -20,6 +20,12 @@ angular.module('home', ['ngRoute', 'commonsServices', 'ultimateDataTableServices
 		controller : 'ActivateCtrl'
 	});
 	
+	$routeProvider.when('/sra/submissions/delete/home', {
+		// url qui va appeler controler java de type tpl
+		templateUrl : '/tpl/sra/submissions/delete',
+		controller : 'DeleteCtrl'
+	});	
+	
 	$routeProvider.when('/sra/submissions/consultation/home', {
 		// url qui va appeler controler java de type tpl
 		templateUrl : '/tpl/sra/submissions/consultation',

@@ -28,7 +28,7 @@ public final class StateFactory {
 		state.user = TestUtils.CURRENT_USER;
 
 		TransientState ts = new TransientState();
-		ts.code = "N";
+		ts.code = "IW-V";
 		ts.date = new Date();
 		ts.user = TestUtils.CURRENT_USER;
 
@@ -57,11 +57,27 @@ public final class StateFactory {
 		ts.user = TestUtils.CURRENT_USER;
 
 		Set<TransientState> hist = new HashSet<>();
-		hist.add(ts);
+		hist.add(getTransientState("N"));
 
 		state.historical = hist;
 
 		return state;
+	}
+
+	/**
+	 * getTransientState()
+	 * 
+	 * @param state
+	 * 
+	 * @return
+	 */
+	private static TransientState getTransientState(String state) {
+		TransientState ts = new TransientState();
+		ts.code = state;
+		ts.date = new Date();
+		ts.user = TestUtils.CURRENT_USER;
+
+		return ts;		
 	}
 
 	/**
@@ -74,13 +90,8 @@ public final class StateFactory {
 		state.code = "F";
 		state.date = new Date();
 
-		TransientState ts = new TransientState();
-		ts.code = "F";
-		ts.date = new Date();
-		ts.user = TestUtils.CURRENT_USER;
-
 		Set<TransientState> hist = new HashSet<>();
-		hist.add(ts);
+		hist.add(getTransientState("F"));
 
 		state.historical = hist;
 
@@ -97,13 +108,26 @@ public final class StateFactory {
 		state.code = "IP";
 		state.date = new Date();
 
-		TransientState ts = new TransientState();
-		ts.code = "IP";
-		ts.date = new Date();
-		ts.user = TestUtils.CURRENT_USER;
+		Set<TransientState> hist = new HashSet<>();
+		hist.add(getTransientState("IP"));
+
+		state.historical = hist;
+
+		return state;
+	}
+
+	/**
+	 * Méthode permettant de générer un objet state à l'état "IU" (in use).
+	 * 
+	 * @return Un objet "State" à l'état "IU" (in use).
+	 */
+	public static State getInUseState() {
+		State state = new State();
+		state.code = "IU";
+		state.date = new Date();
 
 		Set<TransientState> hist = new HashSet<>();
-		hist.add(ts);
+		hist.add(getTransientState("IU"));
 
 		state.historical = hist;
 
@@ -120,13 +144,134 @@ public final class StateFactory {
 		state.code = "N";
 		state.date = new Date();
 
-		TransientState ts = new TransientState();
-		ts.code = "N";
-		ts.date = new Date();
-		ts.user = TestUtils.CURRENT_USER;
+		Set<TransientState> hist = new HashSet<>();
+		hist.add(getTransientState("N"));
+
+		state.historical = hist;
+
+		return state;
+	}
+
+	/**
+	 * Méthode permettant de générer un objet state à l'état "IW-C" (in waiting container).
+	 * 
+	 * @return Un objet "State" à l'état "IW-C" (in waiting container).
+	 */
+	public static State getInWaitingContainerState() {
+		State state = new State();
+		state.code = "IW-C";
+		state.date = new Date();
 
 		Set<TransientState> hist = new HashSet<>();
-		hist.add(ts);
+		hist.add(getTransientState("IW-C"));
+
+		state.historical = hist;
+
+		return state;
+	}
+
+	/**
+	 * Méthode permettant de générer un objet state à l'état "IW-P" (in waiting process).
+	 * 
+	 * @return Un objet "State" à l'état "IW-P" (in waiting process).
+	 */
+	public static State getInWaitingProcessState() {
+		State state = new State();
+		state.code = "IW-P";
+		state.date = new Date();
+
+		Set<TransientState> hist = new HashSet<>();
+		hist.add(getTransientState("IW-P"));
+
+		state.historical = hist;
+
+		return state;
+	}
+
+	/**
+	 * Méthode permettant de générer un objet state à l'état "IS" (in stock).
+	 * 
+	 * @return Un objet "State" à l'état "IW-P" (in stock).
+	 */
+	public static State getInStockState() {
+		State state = new State();
+		state.code = "IS";
+		state.date = new Date();
+
+		Set<TransientState> hist = new HashSet<>();
+		hist.add(getTransientState("IS"));
+
+		state.historical = hist;
+
+		return state;
+	}
+
+	/**
+	 * Méthode permettant de générer un objet state à l'état "UA" (unavailable).
+	 * 
+	 * @return Un objet "State" à l'état "UA" (unavailable).
+	 */
+	public static State getUnavailableState() {
+		State state = new State();
+		state.code = "UA";
+		state.date = new Date();
+
+		Set<TransientState> hist = new HashSet<>();
+		hist.add(getTransientState("UA"));
+
+		state.historical = hist;
+
+		return state;
+	}
+
+	/**
+	 * Méthode permettant de générer un objet state à l'état "A" (available).
+	 * 
+	 * @return Un objet "State" à l'état "A" (available).
+	 */
+	public static State getAvailableState() {
+		State state = new State();
+		state.code = "A";
+		state.date = new Date();
+
+		Set<TransientState> hist = new HashSet<>();
+		hist.add(getTransientState("A"));
+
+		state.historical = hist;
+
+		return state;
+	}
+
+	/**
+	 * Méthode permettant de générer un objet state à l'état "IW-P" (in waiting experiment).
+	 * 
+	 * @return Un objet "State" à l'état "IW-P" (in waiting experiment).
+	 */
+	public static State getInWaitingExperimentState() {
+		State state = new State();
+		state.code = "IW-E";
+		state.date = new Date();
+
+		Set<TransientState> hist = new HashSet<>();
+		hist.add(getTransientState("IW-E"));
+
+		state.historical = hist;
+
+		return state;
+	}
+
+	/**
+	 * Méthode permettant de générer un objet state à l'état "IW-D" (in waiting dispatch).
+	 * 
+	 * @return Un objet "State" à l'état "IW-D" (in waiting dispatch).
+	 */
+	public static State getInWaitingDispatchState() {
+		State state = new State();
+		state.code = "IW-D";
+		state.date = new Date();
+
+		Set<TransientState> hist = new HashSet<>();
+		hist.add(getTransientState("IW-D"));
 
 		state.historical = hist;
 

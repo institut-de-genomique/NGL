@@ -1,4 +1,6 @@
-@()
+@(ctx : fr.cea.ig.ngl.NGLApplication)
+@isCNGInstitute  = @{ "CNG" == ctx.nglConfig().getInstitute() }
+@isCNSInstitute  = @{ "CNS" == ctx.nglConfig().getInstitute() }
 
 <div class="row" ng-if="run.categoryCode === 'illumina'" ng-controller="RunNGSRGIlluminaCtrl">
 	<div class="col-md-12 col-lg-12">
@@ -10,11 +12,27 @@
 		@details_custom_mgi_columns()
 	</div>
 </div>
-<div class="row" ng-if="run.categoryCode === 'nanopore'">
+
+@**NGL-4650 ajout controller pour CNG + passer isCNGInstitute au JS ( lequel??)
+la syntaxe   @(ng-controller="RunNGSRGValidAutoCtrl").when(isCNGInstitute)   ne marche pas  
+essai         ng-controller=@("RunNGSRGValidAutoCtrl".when(isCNGInstitute))  ng-init="initInstitute(@isCNGInstitute)"  OK au CNG mais pb CNS
+faire 2 cas distincts !!
+**@
+@if(isCNSInstitute){
+<div class="row" ng-if="run.categoryCode === 'nanopore'" >
 	<div class="col-md-12 col-lg-12">
 		@details_custom_nanopore_columns()
 	</div>
 </div>
+}
+@if(isCNGInstitute){
+<div class="row" ng-if="run.categoryCode === 'nanopore'" 
+                 ng-controller="RunNGSRGValidAutoCtrl" ng-init="initInstitute(@isCNGInstitute)">
+	<div class="col-md-12 col-lg-12">
+		@details_custom_nanopore_columns()
+	</div>
+</div>
+}
 
 <div class="row" ng-if="run.categoryCode === 'opgen'">
 	<div class="col-md-12 col-lg-12">
@@ -27,10 +45,24 @@
 		@details_custom_bionano_columns()
 	</div>
 </div>
-@**NGL-3967**@
-<div class="row" ng-if="run.categoryCode === 'pacbio'">
-	<div class="col-md-12 col-lg-12">
-		@details_custom_pacbio_columns()
+
+@** NGL-4649 ajout controller pour CNG
+la syntaxe   @(ng-controller="RunNGSRGValidAutoCtrl").when(isCNGInstitute)   ne marche pas  
+essai        ng-controller=@("RunNGSRGValidAutoCtrl".when(isCNGInstitute))   OK au CNG mais pb CNS?? 
+faire 2 cas distincts
+**@
+@if(isCNSInstitute){
+	<div class="row" ng-if="run.categoryCode === 'pacbio'" >
+		<div class="col-md-12 col-lg-12">
+			@details_custom_nanopore_columns()
+		</div>
 	</div>
-</div>
-		
+}
+@if(isCNGInstitute){
+	<div class="row" ng-if="run.categoryCode === 'pacbio'" 
+		             ng-controller="RunNGSRGValidAutoCtrl" ng-init="initInstitute(@isCNGInstitute)" >
+		<div class="col-md-12 col-lg-12">
+			@details_custom_nanopore_columns()
+		</div>
+	</div>
+}

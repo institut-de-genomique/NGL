@@ -215,43 +215,30 @@ angular.module('home').controller('ConsultationCtrl',
 
 
 		// Les 2 ecritures marchent :
-//		if ((typeof $scope.form.studyExternalId  === 'undefined' || $scope.form.studyExternalId  === null) &&
-//			(typeof $scope.form.sampleExternalId === 'undefined' || $scope.form.sampleExternalId === null) &&
-//			(typeof $scope.form.studyAccession   === 'undefined' || $scope.form.studyAccession   === null) &&
-//			(typeof $scope.form.sampleAccession  === 'undefined' || $scope.form.sampleAccession  === null) &&
+//		if ((typeof $scope.form.studyIdentifier  === 'undefined' || $scope.form.studyIdentifier   === null) &&
+//			(typeof $scope.form.sampleIdentifier  === 'undefined' || $scope.form.sampleIdentifier  === null) &&
 //		if	(typeof $scope.form.projCodes        === 'undefined' || $scope.form.projCodes        === null || $scope.form.projCodes.length <= 0 ) ) {
 //	
 		//NGL-3666
 		// imposer de definir au moins un code projet car sinon requete ne passe pas :
-		if (toolsServices.isBlank($scope.form.projCodes)  ) {
-			//console.log("Pas de code projet");
+//		if (toolsServices.isBlank($scope.form.projCodes)  ) {
+//			//console.log("Pas de code projet");
+		if (! $scope.form.projCodes             &&
+			! $scope.form.codes                 &&
+			! $scope.form.studyCodes            &&			
+			! $scope.form.studyIdentifiers      &&
+			! $scope.form.sampleCodes           &&
+			! $scope.form.sampleIdentifiers     &&
+			! $scope.form.submissionCodes       
+			) {
 			$scope.treeLoadInProgress = false;
-			$scope.messages.setError("Indiquez au moins un code projet pour votre recherche"); 
+			$scope.messages.setError("Ajouter un parametre de recherche"); 
 			$scope.bilansDT = datatable(bilansDTConfig);
 	    	$scope.bilansDT.setColumnsConfig(getBilanColumns());
-			throw "Veuillez definir un parametre";
-		} else {
-			//console.log("Definir au moins un code projet", $scope.form.projCodes.length);
+			throw "Ajoutez un parametre de recherche";
 		}
 		
-		if (! toolsServices.isBlank($scope.form.studyIdentifier)) {
-			//console.log("studyIdentifier bien recupere", $scope.form.studyIdentifier);
-			if(!$scope.form.studyIdentifier.startsWith('ERP') && !$scope.form.studyIdentifier.startsWith('PRJ')) {
-				$scope.treeLoadInProgress = false;
-				$scope.messages.setError("Votre identifier de study n'a pas la forme attendue 'ERP...' ou  'PRJ...'"); 
-				throw ("Votre identifier de study n'a pas la forme attendue 'ERP...' ou  'PRJ...'"); 
-			}
-		}
-		if (! toolsServices.isBlank($scope.form.sampleIdentifier)) {
-			if(!$scope.form.sampleIdentifier.startsWith('ERS') && !$scope.form.sampleIdentifier.startsWith('SAM')) {
-				$scope.treeLoadInProgress = false;
-				$scope.messages.setError("Votre identifier de sample n'a pas la forme attendue 'ERS...' ou  'SAM...'"); 
-				throw ("Votre identifier de sample n'a pas la forme attendue 'ERS...' ou  'SAM...'"); 
-			}
-		}
-
 		$scope.search_experiment_analysis();
-
 
 	}; // fin bouton $scope.search
 	
@@ -267,23 +254,26 @@ angular.module('home').controller('ConsultationCtrl',
 		
 //		console.log("Dans search_exp_readsets");
 //		console.log("Dans search_exp_readsets, scope.form = " + $scope.form);
-//		console.log("Dans search_exp_readsets, scope.form.studyAccession = " + $scope.form.studyAccession);
-//		console.log("Dans search_exp_readsets, scope.form.sampleAccession = " + $scope.form.sampleAccession);
+//		console.log("Dans search_exp_readsets, scope.form.studyIdentifier = " + $scope.form.studyIdentifier);
+//		console.log("Dans search_exp_readsets, scope.form.sampleIdentifier = " + $scope.form.sampleIdentifier);
 //		console.log("Dans search_exp_readsets, scope.form.projCodes = " + $scope.form.projCodes);
 		$scope.form.pseudoStateCodes = ['pseudo_ebiKnown']; // liste des stateCodescorrespondant à donnees soumises
 		//$scope.experimentsDT.search($scope.form); // ne pas utiliser car asynchrone et on est dans la suite 
 													// du code avant la fin de la requete.
 		var allRequestExp = [];
 //		var request = $http.get(jsRoutes.controllers.sra.experiments.api.Experiments.list().url,{
-//			params:{studyAccession:$scope.form.studyAccession, 
-//				    sampleAccession:$scope.form.sampleAccession, 
+//			params:{studyIdentifier:$scope.form.studyIdentifier, 
+//				    sampleIdentifier:$scope.form.sampleIdentifier, 
 //				    projCodes:$scope.form.projCodes,
 //				    stateCode:"ebiKnown"}})  // pour avoir bilan des données vraimment soumises 
-		var request = $http.get(jsRoutes.controllers.sra.experiments.api.Experiments.list().url,{
-			params:{studyIdentifier:$scope.form.studyIdentifier, 
-				    sampleIdentifier:$scope.form.sampleIdentifier, 
-				    projCodes:$scope.form.projCodes,
-				    pseudoStateCodes:$scope.form.pseudoStateCodes}})  // pour avoir bilan des données vraimment soumises 
+
+//		var request = $http.get(jsRoutes.controllers.sra.experiments.api.Experiments.list().url,{
+//			params:{studyIdentifier:$scope.form.studyIdentifier, 
+//				    sampleIdentifier:$scope.form.sampleIdentifier, 
+//				    projCodes:$scope.form.projCodes,
+//				    pseudoStateCodes:$scope.form.pseudoStateCodes}})  // pour avoir bilan des données vraimment soumises 
+
+		var request = $http.get(jsRoutes.controllers.sra.experiments.api.Experiments.list().url,{params: $scope.form})
 			.catch (error => {
 				console.log(error);
 				console.log(error.data);
@@ -313,11 +303,13 @@ angular.module('home').controller('ConsultationCtrl',
 			// construction des requetes pour analysis :
 			var allRequestAnalyzes = [];
 
-			var requestAnalyzes = $http.get(jsRoutes.controllers.sra.analyzes.api.Analyzes.list().url,{
-				params:{studyIdentifier:$scope.form.studyIdentifier, 
-				   	 	sampleIdentifier:$scope.form.sampleIdentifier, 
-				    	projCodes:$scope.form.projCodes,
-				    	pseudoStateCodes:$scope.form.pseudoStateCodes}})  // pour avoir bilan des données vraimment soumises 
+//			var requestAnalyzes = $http.get(jsRoutes.controllers.sra.analyzes.api.Analyzes.list().url,{
+//				params:{studyIdentifier:$scope.form.studyIdentifier, 
+//				   	 	sampleIdentifier:$scope.form.sampleIdentifier, 
+//				    	projCodes:$scope.form.projCodes,
+//				    	pseudoStateCodes:$scope.form.pseudoStateCodes}})  // pour avoir bilan des données vraimment soumises 
+
+			var requestAnalyzes = $http.get(jsRoutes.controllers.sra.analyzes.api.Analyzes.list().url,{params: $scope.form})
 				.catch (error => {
 				console.log(error);
 				console.log(error.data);
@@ -413,7 +405,9 @@ angular.module('home').controller('ConsultationCtrl',
 	$scope.buildRequests = function(resultExp, resultAnalyzes, allRequestReadset, allRequestStudy, allRequestSample, tab_experiments, tab_analyzes) {
 		var tab_all_readsetCodes = []; // tableau provisoire pour construire requete
 		var tab_all_studyAc      = []; // tableau provisoire pour construire requete
+		var h_all_studyIdentifier= {}; // hash provisoire pour construire requete
 		var tab_all_sampleAc     = []; // tableau provisoire pour construire requete
+		var h_all_sampleIdentifier= {}; // hash provisoire pour construire requete
 
 		var max = 100;             // maximum de donneés recherchées en une fois pour une requete.
 
@@ -421,16 +415,24 @@ angular.module('home').controller('ConsultationCtrl',
 //			console.log("XXXXXXXXXXXX    result[0].data[i].readSetCode=" , result[0].data[i].readSetCode)
 			tab_experiments.push(resultExp[0].data[i]);
 			tab_all_readsetCodes.push(resultExp[0].data[i].readSetCode);
-			tab_all_studyAc.push(resultExp[0].data[i].studyAccession); 
-			tab_all_sampleAc.push(resultExp[0].data[i].sampleAccession); 
+			if( ! h_all_studyIdentifier.hasOwnProperty(resultExp[0].data[i].studyIdentifier)) {
+				h_all_studyIdentifier[resultExp[0].data[i].studyIdentifier] = resultExp[0].data[i].studyIdentifier;
+			}
+			if( ! h_all_sampleIdentifier.hasOwnProperty(resultExp[0].data[i].sampleIdentifier)) {
+				h_all_sampleIdentifier[resultExp[0].data[i].sampleIdentifier] = resultExp[0].data[i].sampleIdentifier;
+			}			
 		}
 		
 		for (var i = 0; i < resultAnalyzes[0].data.length; i++) {
 //			console.log("XXXXXXXXXXXX    result[0].data[i].readSetCode=" , result[0].data[i].readSetCode)
 			var analysis = resultAnalyzes[0].data[i];
 			tab_analyzes.push(analysis);
-			tab_all_studyAc.push(analysis.studyAccession); 
-			tab_all_sampleAc.push(analysis.sampleAccession); 
+			if( ! h_all_studyIdentifier.hasOwnProperty(analysis.studyIdentifier)) {
+				h_all_studyIdentifier[analysis.studyIdentifier] = analysis.studyIdentifier;
+			}	
+			if( ! h_all_sampleIdentifier.hasOwnProperty(analysis.sampleIdentifier)) {
+				h_all_sampleIdentifier[analysis.sampleIdentifier] = analysis.sampleIdentifier;
+			}			
 			for (var j = 0; j < analysis.listRawData.length; j++) {
 				if (toolsServices.isNotBlank(analysis.listRawData[j].readsetCode)) {
 					tab_all_readsetCodes.push(analysis.listRawData[j].readsetCode);
@@ -438,8 +440,9 @@ angular.module('home').controller('ConsultationCtrl',
 			}
 		}
 		$scope.buildRequeteReadset(tab_all_readsetCodes, allRequestReadset, max);
-		$scope.buildRequeteStudyAc(tab_all_studyAc, allRequestStudy, max);
-		$scope.buildRequeteSampleAc(tab_all_sampleAc, allRequestSample, max);
+		//$scope.buildRequeteStudyAc(tab_all_studyAc, allRequestStudy, max);
+		$scope.buildRequeteStudyAc(Object.keys(h_all_studyIdentifier), allRequestStudy, max);
+		$scope.buildRequeteSampleAc(Object.keys(h_all_sampleIdentifier), allRequestSample, max);
 
 	}// end buildRequest
 	
@@ -496,7 +499,7 @@ angular.module('home').controller('ConsultationCtrl',
 			//NGL-3666
 			tab_studyAc.push(tab_all_studyAc[i]);
 			if(tab_studyAc.length > max) {
-				var requestStudy = $http.get(jsRoutes.controllers.sra.studies.api.Studies.list().url, {params:{accessions:tab_studyAc}})
+				var requestStudy = $http.get(jsRoutes.controllers.sra.studies.api.Studies.list().url, {params:{identifiers:tab_studyAc}})
 				.catch (error => {
 					console.log(error);
 					console.log(error.data);
@@ -513,7 +516,7 @@ angular.module('home').controller('ConsultationCtrl',
 		// correction effet de bord pour req studies:
 		if (tab_studyAc.length > 0) {
 			var requestStudy = $http.get(jsRoutes.controllers.sra.studies.api.Studies.list().url,
-					{params:{accessions:tab_studyAc, type:"Study"}})
+					{params:{identifiers:tab_studyAc}})
 			.catch (error => {
 				console.log(error);
 				console.log(error.data);
@@ -533,7 +536,7 @@ angular.module('home').controller('ConsultationCtrl',
 			tab_sampleAc.push(tab_all_sampleAc[i]);	
 			if(tab_sampleAc.length > max) {
 				// construire requetes sample internes (les ExternalSample ne nous interressent pas)
-				var requestSample = $http.get(jsRoutes.controllers.sra.samples.api.Samples.list().url, {params:{accessions:tab_sampleAc}})
+				var requestSample = $http.get(jsRoutes.controllers.sra.samples.api.Samples.list().url, {params:{identifiers:tab_sampleAc}})
 					.catch (error => {
 						console.log(error);
 						console.log(error.data);
@@ -552,7 +555,7 @@ angular.module('home').controller('ConsultationCtrl',
 		// correction effet de bord pour req samples:
 		if(tab_sampleAc.length > 0) {
 			var requestSample = $http.get(jsRoutes.controllers.sra.samples.api.Samples.list().url,
-					{params:{accessions:tab_sampleAc, type:"Sample"}})
+					{params:{identifiers:tab_sampleAc}})
 			.catch (error => {
 				console.log(error);
 				console.log(error.data);
@@ -571,18 +574,21 @@ angular.module('home').controller('ConsultationCtrl',
 			var exp = tab_experiments[j];
 			var date = tab_experiments[j].traceInformation.creationDate;
 			var readsetCode     = tab_experiments[j].readSetCode;
-			var studyAccession  = tab_experiments[j].studyAccession;
-			var sampleAccession = tab_experiments[j].sampleAccession;
+			var studyIdentifier  = tab_experiments[j].studyIdentifier;
+			var sampleIdentifier = tab_experiments[j].sampleIdentifier;
 						
-			//console.log("construction tableau bilans, experiment.sampleAccession = ", tab_experiments[j].sampleAccession);
+			//console.log("construction tableau bilans, experiment.sampleIdentifier = ", tab_experiments[j].sampleIdentifier);
 							
 
 			for(var k = 0; k < exp.run.listRawData.length; k++) {
-				var echantillon  = "-----";
-				var refCollabSub = "-----";
-				var studyExternalId = "-----";
+				var echantillon      = "-----";
+				var refCollabSub     = "-----";
+				var studyExternalId  = "-----";
+				var studyAC          = "-----";
 				var sampleExternalId = "-----";
+				var sampleAC         = "-----";
 				var analysisAc       = "-----";
+				
 				if(readsets.hasOwnProperty(readsetCode)) {
 					var readset = readsets[readsetCode];
 //					console.log("readsetCode recuperé du hash = " , readset);
@@ -597,17 +603,20 @@ angular.module('home').controller('ConsultationCtrl',
 //							console.log("HOURRAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", readset);
 					}
 				}
-				if(studies.hasOwnProperty(studyAccession)) {
-//					console.log("study trouve pour "                , studyAccession);
-//					console.log("studies[studyAccession] "          ,  studies[studyAccession]);
-//					console.log("studies[studyAccession].code "     , studies[studyAccession].code);
-//					console.log("studies[studyAccession].externalId", studies[studyAccession].externalId);
-					studyExternalId = studies[studyAccession].externalId;
+				if(studies.hasOwnProperty(studyIdentifier)) {
+//					console.log("study trouve pour "                , studyIdentifier);
+//					console.log("studies[studyIdentifier] "          ,  studies[studyAccession]);
+//					console.log("studies[studyIdentifier].code "     , studies[studyAccession].code);
+//					console.log("studies[studyIdentifier].externalId", studies[studyAccession].externalId);
+					studyExternalId = studies[studyIdentifier].externalId;
+					studyAC = studies[studyIdentifier].accession;
 				}
-				if(samples.hasOwnProperty(sampleAccession)) {
-//					console.log("sample trouve pour " , sampleAccession);
-//					console.log("sampleSame "         , samples[sampleAccession].externalId);
-					sampleExternalId = samples[sampleAccession].externalId;
+				if(samples.hasOwnProperty(sampleIdentifier)) {
+//					console.log("sample trouve pour " , sampleIdentifier);
+//					console.log("sampleSame "         , samples[sampleIdentifier].externalId);
+					sampleExternalId = samples[sampleIdentifier].externalId;
+					sampleAC = samples[sampleIdentifier].accession;
+
 				}
 								
 				var bilan = { rawData             : exp.run.listRawData[k].relatifName,
@@ -623,9 +632,9 @@ angular.module('home').controller('ConsultationCtrl',
 							  analysisAC      : analysisAc,
 							  experimentAC    : exp.accession,
 							  runAC           : exp.run.accession,
-							  studyAC         : exp.studyAccession,
+							  studyAC         : studyAC,
 							  studyExternalId : studyExternalId,
-							  sampleAC        : exp.sampleAccession,
+							  sampleAC        : sampleAC,
 							  sampleExternalId: sampleExternalId
 							};
 				 tab_bilans.push(bilan);			  

@@ -676,14 +676,14 @@ public class BilanProjectMetaG extends ScriptWithExcelBody{
 				Logger.error("NO KEY "+key);
 		}
 	}
-	private void getTreatmentRGProperties(String key, ReadSet readSet, Map<String,Integer> codeColumn, Row rowOutput, CreationHelper createHelper)
-	{
-		String value="";
-		if(readSet.treatments.get("ngsrg").results.get("default").containsKey(key)) 
-			value=readSet.treatments.get("ngsrg").results.get("default").get(key).getValue().toString();
-		createCell(value, key, codeColumn, rowOutput, createHelper);
+	// private void getTreatmentRGProperties(String key, ReadSet readSet, Map<String,Integer> codeColumn, Row rowOutput, CreationHelper createHelper)
+	// {
+	// 	String value="";
+	// 	if(readSet.treatments.get("ngsrg").results.get("default").containsKey(key)) 
+	// 		value=readSet.treatments.get("ngsrg").results.get("default").get(key).getValue().toString();
+	// 	createCell(value, key, codeColumn, rowOutput, createHelper);
 
-	}
+	// }
 
 	private void getTreatmentRGPropertiesNumeric(String key, ReadSet readSet, Map<String,Integer> codeColumn, Row rowOutput, CreationHelper createHelper)
 	{
@@ -710,13 +710,13 @@ public class BilanProjectMetaG extends ScriptWithExcelBody{
 		}
 		return "";
 	}
-	private String convertSetString(Set<String> listValue)
-	{
-		if(listValue!=null && listValue.size()>0) {
-			return String.join(",", listValue);
-		}
-		return "";
-	}
+	// private String convertSetString(Set<String> listValue)
+	// {
+	// 	if(listValue!=null && listValue.size()>0) {
+	// 		return String.join(",", listValue);
+	// 	}
+	// 	return "";
+	// }
 
 	private String convertSetCodeLabel(Set<String> listCode, Map<String,String> codeLabel)
 	{

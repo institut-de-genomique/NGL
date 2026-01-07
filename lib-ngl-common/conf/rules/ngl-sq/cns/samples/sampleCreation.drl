@@ -53,3 +53,125 @@ rule "set correct sample name "
 		}       
 	end	
 	
+rule "ATLASea convert collectHour properties"
+	@nglSQ( sampleCreation )
+	dialect "java"
+	salience 900
+	no-loop
+    when
+   	$sample : Sample($properties:properties, $properties!=null, typeCode=="biological-sample", $pv:properties.get("collectHour")!=null)
+   then
+    	Logger.debug("Convert collect hour for : "+$sample.code);
+    	String collectHourValue = $pv.value.toString();
+    	
+    	Logger.debug("Value to convert : "+collectHourValue);
+    	//Regex to check format hour
+    	if(!collectHourValue.matches("^([0-1][0-9]|2[0-3]):[0-5][0-9]$")){
+			try{
+				Long collectDateLong = Long.valueOf(collectHourValue);
+    			Date date = new Date(collectDateLong);
+				Logger.debug(date.toString());
+				SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+				String valueDate = sdf.format(date);
+				PropertySingleValue psv = new PropertySingleValue(valueDate);
+				$sample.properties.put("collectHour", psv);
+			} catch (NumberFormatException e) {
+				Logger.error("Error format "+e.getMessage());
+			}
+			
+    	}  	
+end
+
+rule "ATLASea Copy individualNumber property in referenceCollab attribute"
+	@nglSQ( sampleCreation )
+	dialect "java"
+	salience 900
+	no-loop
+    when
+    $sample : Sample(typeCode=="biological-sample", referenceCollab==null, $properties:properties, $properties!=null, $pv:properties.get("individualNumber")!=null)
+    then
+    	Logger.debug("Copy individualNumber property in referenceColla attribute for : "+$sample.code+" value" +$pv.value.toString());
+    	$sample.referenceCollab=$pv.value.toString();
+end
+
+rule "ATLASea check nom organism collab gender"
+	@nglSQ( sampleCreation )
+	dialect "java"
+	salience 900
+	no-loop
+    when
+    	$sample : Sample(typeCode=="biological-sample", importTypeCode=="reference-genome-biological-sample-reception", $properties:properties, $properties!=null, $pv:properties.get("collabScientificName")!=null)
+    	$projectCode : String(this in ('DKB')) from $sample.projectCodes
+    	$contextValidation:ContextValidation()
+    then
+    	Logger.debug("Check nom organism collab "+$sample.code);
+    	String collabScientificName = $pv.value.toString();
+    	if(collabScientificName.matches(".* sp\\. .*") || collabScientificName.matches(".* cf\\. .*") || collabScientificName.matches(".* aff\\. .*")){
+    		Logger.debug("Check sp "+collabScientificName);
+    		//Check no sample with this collabScientificName
+    		if (MongoDBDAO.checkObjectExist(InstanceConstants.SAMPLE_COLL_NAME, Sample.class,"properties.collabScientificName.value", collabScientificName)){
+    			$contextValidation.addErrors("collabScientificName "+$sample.code, "Incrément taxon existant pour le projet : "+collabScientificName, $sample.code+" / "+collabScientificName, "Sample");
+    		}
+    	}
+    	
+	end
+
+rule "ATLASea check individual number not exist"
+	@nglSQ( sampleCreation )
+	dialect "java"
+	salience 900
+	no-loop
+    when
+    	$sample : Sample(typeCode=="biological-sample", importTypeCode=="reference-genome-biological-sample-reception", $properties:properties, $properties!=null, $pv:properties.get("individualNumber")!=null)
+    	$projectCode : String(this in ('DKB')) from $sample.projectCodes
+    	$contextValidation:ContextValidation()
+    then
+    	Logger.debug("Check individual number already exist "+$sample.code);
+    	String individualNumber = $pv.value.toString();
+    	if(MongoDBDAO.checkObjectExist(InstanceConstants.SAMPLE_COLL_NAME, Sample.class,"properties.individualNumber.value", individualNumber)){
+    		$contextValidation.addErrors("individualNumber "+$sample.code, "Code unique individu déjà existant pour le projet : "+individualNumber, $sample.code+" / "+individualNumber, "Sample");
+    	}
+end
+
+
+//test Adel regle drools DKB
+
+rule "add taxon ID in sample DKB"
+@nglSQ(sampleCreation)
+    dialect "java"
+    salience 900
+    no-loop
+when
+    $sample : Sample(taxonCode == null)
+    $projectCode : String(this == "reference-genome-biological-sample-reception") from $sample.importTypeCode
+    $collabScientificName : String(this != null) from $sample.properties["collabScientificName"].value
+	$contextValidation:ContextValidation()
+then
+    // Vérifier si le nom contient "sp.", "cf." ou "aff."
+	
+
+    boolean nomOrgCollabGenre = $collabScientificName.contains(" sp.") || 
+                                $collabScientificName.contains(" cf.") || 
+                                $collabScientificName.contains(" aff.");
+
+    String taxonId = null;
+	// Début règle
+
+    if (!nomOrgCollabGenre) {
+
+   		taxonId = NCBITaxonomyServices.getCachedTaxonWithCollabScientificName($collabScientificName);
+
+    } else {
+        // Cas 2 : Nom scientifique approximatif 
+		String genre = $collabScientificName.replaceAll("\\s+(sp\\.|cf\\.|aff\\.).*", "").trim();
+        taxonId = NCBITaxonomyServices.getCachedTaxonWithCollabScientificName(genre);        
+    }
+
+    // Mise à jour du taxonCode si trouvé
+    if (taxonId != null) {
+		$sample.taxonCode = taxonId;
+    } else {
+		$contextValidation.addErrors("Pour le Nom organisme / collaborateur " + $collabScientificName, "Aucun taxon ID n'a été trouvé au NCBI. Veuillez le remplir manuellement dans la trame.");
+    }
+end
+

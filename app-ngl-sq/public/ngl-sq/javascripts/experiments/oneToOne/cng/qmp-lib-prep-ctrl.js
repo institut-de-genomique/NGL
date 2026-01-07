@@ -201,7 +201,7 @@ angular.module('home').controller('QmpLibPrepCtrl',['$scope', '$parse','atmToSin
 	} else {
 		datatableConfig.columns.push({
 			"header" : Messages("containers.table.code"),
-			"property" : "inputContainer.support.code",
+			"property" : "inputContainer.code",
 			"order" : true,
 			"edit" : false,
 			"hide" : true,

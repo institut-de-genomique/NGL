@@ -14,14 +14,17 @@ angular.module('ngl-sq.processesServices', [])
 				objectTypeCode : "Process"
 			});
 			lists.refresh.reportConfigs({
-				pageCodes : [ "processes-addcolumns" ]
+				pageCodes : [ "processes-addcolumns" ],
+				active:true
 			}, "processes-addcolumns");
 			lists.refresh.filterConfigs({
-				pageCodes : [ "processes-search-addfilters" ]
+				pageCodes : [ "processes-search-addfilters" ], 
+				active:true
 			}, "processes-search-addfilters");
 			
 			lists.refresh.resolutions({"objectTypeCode":"Process"}, "processResolutions");
-			
+			lists.refresh.umbrellaProjects();
+
 			isInit = true;
 		}
 	};

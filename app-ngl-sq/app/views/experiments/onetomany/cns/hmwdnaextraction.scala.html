@@ -1,6 +1,17 @@
 @()
 <div class="col-md-12 col-lg-12" ng-controller="HmwDnaExtractionCtrl">
-
+	<div class="row col-md-12 col-lg-12">
+		<p style="font-size: 20px;"><a class="fa fa-info-circle"  ng-click="toggleIsShowInformation()" title="Information" href="#"> Information</a></p>
+		<div ng-show="isShowInformation">
+			<p><a class="fa fa-info-circle"  title="Information" href="#"></a> Pour remplir <b>Volume engagé</b> et <b>Quantité engagée</b> dans une expérience "1 container entrée => donne N containers en sortie" :<br />
+				<b>Répéter la valeur sur les N lignes correspondant à un même container d'entrée.</b>
+				exemple : mon container d'entrée contient 100µl, <span style="color:darkorange">je prélève 60µl</span> pour le répartir en <span style="color:green">2 aliquots</span> respectivement de <span style="color:blue">50 et 10µl</span>.<br />
+				Je note alors <span style="color:darkorange">60 µl dans "Volume engagé"</span> et le <span style="color:darkorange">répète sur toutes les lignes qui correspondent à mon container d'entrée</span> (imaginez que la cellule aurait dû être fusionnée sur les N lignes).<br />
+				Je note <span style="color:blue">50µl en Volume Sortie</span> de la <span style="color:green">1ere ligne</span>, et <span style="color:blue">10µl en Volume Sortie</span> de la <span style="color:green">2ème ligne</span>.	
+			</p>
+		</div>
+	</div>
+	
 	<div class="row" ng-if="mainService.isEditMode()">
 			<div class="col-md-2 col-lg-2" ultimate-datatable="atmService.data.datatableParam" ></div>
 			<div class="col-md-1 col-lg-1" >

@@ -59,6 +59,18 @@ angular.module('home').controller('PrepPcrFreeCtrl',['$scope', '$parse',  '$filt
 			 			"render":"<div list-resize='cellValue' list-resize-min-size='3'>",
 			        	"extraHeaders":{0: inputExtraHeaders}
 				     },
+					 { // niveau process et content
+					   // processProperties présente a new et en cours et plus a terminé, c'est normal, la propriété passe sur le container enfant !!!
+						"header": Messages("containers.table.libProcessType"),
+						"property" : "inputContainerUsed.contents",
+						"filter" : "getArray:'processProperties.libProcessTypeCode.value' | unique | codes:'value'",
+						"order":true,
+						"edit":false,
+						"hide":true,
+						"type":"text",
+						"position":13,
+						"extraHeaders":{0:inputExtraHeaders}
+					},
 				   /*  { // sampleAliquoteCode 
 				        "header":Messages("containers.table.codeAliquot"),
 				 		"property": "inputContainer.contents", 
@@ -286,23 +298,22 @@ angular.module('home').controller('PrepPcrFreeCtrl',['$scope', '$parse',  '$filt
 	// FDS 16/03/2018 : NGL-1906. rechercher le  ngsRunWorkLabel positionné au niveau processus pour le copier dans robotRunCode (sauf s'il y en plusieurs!!)
 	$scope.$watch("experiment.instrument.code", function(newValue, OldValue){
 		if ((newValue) && (newValue !== null ) && ( newValue !== OldValue ))  {		
-			// exemple dans prepa-fc-ordered: var categoryCodes = $scope.$eval("getBasket().get()|getArray:'support.categoryCode'|unique",mainService);
-			// mais ici mainService n'est pas defini, et pas necessaire...
-			// obliger de passer par contents[0], mais normalement ne doit pas poser de probleme...
+			// passer par contents[0], mais normalement ne doit pas poser de probleme...(si le container est un pool homogène)
 			var workLabels= $scope.$eval("getBasket().get()|getArray:'contents[0].processProperties.ngsRunWorkLabel.value'|unique");
 			if ( workLabels.length > 1 ){
 				$scope.messages.clear();
+
 				$scope.messages.clazz = "alert alert-warning";
-				$scope.messages.text = "Plusieurs noms de travail (robot) trouvés parmi les containers d'entrée (info processus)";    
+				$scope.messages.text = "Plusieurs noms de travail (robot) différents trouvés parmi les containers en entrée (info processus)";    
 				$scope.messages.open();			
-			
-				//console.log('>1  run workLabel trouvé !!');	
+				
 			} else if ( workLabels.length === 1 ){
 				// verifier que TOUS les containers ont une valeur...
 				var contents= $scope.$eval("getBasket().get()|getArray:'contents[0]'");
 				var labels= $scope.$eval("getBasket().get()|getArray:'contents[0].processProperties.ngsRunWorkLabel.value'");
 				if ( labels.length < contents.length ) {
 					$scope.messages.clear();
+
 					$scope.messages.clazz = "alert alert-warning";
 					$scope.messages.text = "Certains containers en entrée n'ont pas de nom de travail run (robot) (info processus)";
 					$scope.messages.open();			
@@ -321,6 +332,122 @@ angular.module('home').controller('PrepPcrFreeCtrl',['$scope', '$parse',  '$filt
 			// si aucun workLabel ne rien faire
 		}
 	});
+
+	// NGL-4609 controler la cohérence des protocoles et des type librarycode ET construire la liste des plaques d'index
+	// peut on changer le protocole d'une expérience terminée ???? OUI mais alors processProperties.libProcessTypeCode n'est plus disponible !!!
+	$scope.$watch("experiment.protocolCode", function(newValue) {
+		// supprimer éventuel message précedent
+		$scope.messages.clear();
+
+		// autoriser en mode admin ??? Non car on est a l'etat terminé 
+		if ( $scope.isNewState() || $scope.isInProgressState() )  {	
+			console.log("selected Protocole= "+newValue);
+			
+			// reinitialiser les plaques
+			$scope.plates=[];
+			$scope.plates.push( {name: "---",                                           tagCategory: undefined,   tags: undefined });// entrée minimale pour "pas de choix"
+	
+			// et aussi le choix plaque/column 
+			$scope.tagPlateColumn = $scope.columns[0]; // defaut du select
+			$scope.tagPlate = $scope.plates[0]; // defaut du select
+
+			// nettoyer les tags // s'il y en a !!
+			if ( ($scope.tagPlateToClean !== undefined ) &&  ($scope.tagPlateColumnToClean !== undefined ) ){
+				tagService.unsetTags ($scope.tagPlateToClean, $scope.tagPlateColumnToClean, atmService, $scope.messages);
+			}
+
+			if ( newValue && (newValue !== undefined) ){ 
+				var consistancy=checkLibProcessTypeCodeConsistancy(newValue);
+				//  ne construire la liste que si c'est coherent
+				if (consistancy) {
+					buildPlateListFromProtocol(newValue);
+				} 
+			}
+		}
+	});
+
+	// NGL-4609 Warnings non bloquant pour l'instant !
+	var checkLibProcessTypeCodeConsistancy= function(protocolCode){
+		// map pour la liste des protocoles associés a chaque libProcessTypeCode !!! TENIR A JOUR !!!
+		var libProtoMap = new Map();
+		//libProtoMap.set('DA', ['1a-sop-ill-pcrfree', '1a-sop-ill-pcrfree-dap-plate']);  NGL-4777 protocole '1a-sop-ill-pcrfree' désactivé
+		libProtoMap.set('DA', ['1a-sop-ill-pcrfree-dap-plate']); 
+		libProtoMap.set('DL', ['illumina-dna-pcrfree']);
+		libProtoMap.set('DQ', ['nebnext-ultraii-dna-pcrfree']);
+		libProtoMap.set('DT', ['sop-nebnext-ultraii-fs-dna-pcrfree']); // NGL-4767 ajout
+
+		// !! en mode creation $scope.experiment.atomicTransfertMethod n'est pas encore chargé=> passer par Basket 
+		//  contents[0] ne doit pas poser de probleme...(si le container est un pool homogène)
+		if($scope.isCreationMode()){
+			var libProcessTypeCodes=$scope.$eval("getBasket().get()|getArray:'contents[0].processProperties.libProcessTypeCode.value'|unique");
+		} else {
+			// en mode edition d'une expérience a l'etat 'Nouveau'
+			var libProcessTypeCodes=$scope.$eval("atomicTransfertMethods|flatArray:'inputContainerUseds'|getArray:'contents[0].processProperties.libProcessTypeCode.value'|unique",$scope.experiment);			
+		}
+
+		if ( libProcessTypeCodes.length > 1 ){
+			$scope.messages.clazz = "alert alert-warning";
+			$scope.messages.text = "Plusieurs types processus banque différents trouvés parmi les containers en entrée.";    
+			$scope.messages.open();	
+			return false;	
+		} else {
+			var containersLibProcessTypeCode=libProcessTypeCodes[0];
+			console.log(">>>>"+containersLibProcessTypeCode);
+			var libCodes = Array.from( libProtoMap.keys() );
+			if ( libCodes.includes( containersLibProcessTypeCode ) ){ 
+				//console.log('type banque valide !!!');
+				console.log("protocole ="+ protocolCode);
+				var protos=libProtoMap.get( containersLibProcessTypeCode );
+				if ( ! protos.includes(protocolCode)){
+					$scope.messages.clazz = "alert alert-warning";
+					$scope.messages.text = "Le protocole choisi est incohérent avec le type processus banque du(des) container(s) en entrée.";    
+					$scope.messages.open();	
+					return false;	
+				}
+			} else {
+				$scope.messages.clazz = "alert alert-warning";
+				$scope.messages.text = "Type processus banque '"+ libProcessTypeCodes[0] +"' non valide trouvé parmi les containers en entrée.";    
+				$scope.messages.open();	
+				return false;
+			}
+		}
+		return true;
+	}
+
+	//initialiser les plaques
+	$scope.plates=[];
+	$scope.plates.push( {name: "---", tagCategory: undefined, tags: undefined }); // entrée minimale pour "pas de choix"
+	
+	// NGL-4609 liste des plaques proposées dépend du protocole choisi
+	var buildPlateListFromProtocol= function(protocolCode){
+
+		switch (protocolCode){
+			//case '1a-sop-ill-pcrfree': NGL-4777 protocole '1a-sop-ill-pcrfree' désactivé
+			case '1a-sop-ill-pcrfree-dap-plate':
+				// NGL-4778 2 plaques obsolètes supprimées de la liste
+				//$scope.plates.push( {name:"DAP TruSeq DNA HT (96 Indexes)",                 tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_XapTruSeqHT() });
+				//$scope.plates.push( {name:"IDT-ILMN TruSeq DNA UD Indexes (96 Indexes)",    tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_IdtTruSeq96() });
+				$scope.plates.push( {name:"IDT-ILMN TruSeq DNA UD Indexes (96 Indexes) V2", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_IdtTruSeq96V2() });
+				$scope.plates.push( {name:"IDT-ILMN TruSeq DNA UD Indexes (24 Indexes x4)", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_IdtTruSeq24x4() });
+				break;
+			case 'nebnext-ultraii-dna-pcrfree':
+			case 'sop-nebnext-ultraii-fs-dna-pcrfree': //NGL-4767 ajout case
+				$scope.plates.push( {name:"NEBNext UDI UMI Adaptors DNA (set1)", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_NEBNext_UDI_set1() });
+				$scope.plates.push( {name:"NEBNext UDI UMI Adaptors DNA (set2)", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_NEBNext_UDI_set2() });
+				$scope.plates.push( {name:"NEBNext UDI UMI Adaptors DNA (set3)", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_NEBNext_UDI_set3() });
+				$scope.plates.push( {name:"NEBNext UDI UMI Adaptors DNA (set4)", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_NEBNext_UDI_set4() });
+				break;
+			case 'illumina-dna-pcrfree':
+				/*cosmetique : modification du label ...v3 (Set A) --> ...Set A (V3) */
+				$scope.plates.push( {name:"Illumina Unique Dual Indexes Set A (V3)", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_Illumina_UDI_Set_A_V3() });
+				$scope.plates.push( {name:"Illumina Unique Dual Indexes Set B (V3)", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_Illumina_UDI_Set_B_V3() });
+				$scope.plates.push( {name:"Illumina Unique Dual Indexes Set C (V3)", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_Illumina_UDI_Set_C_V3() });
+				$scope.plates.push( {name:"Illumina Unique Dual Indexes Set D (V3)", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_Illumina_UDI_Set_D_V3() });
+				break;
+			default:
+				/// ????
+		}
+	};
 	
 	//Init
 	
@@ -349,12 +476,23 @@ angular.module('home').controller('PrepPcrFreeCtrl',['$scope', '$parse',  '$filt
 			// Ne pas utiliser bt-select...pour l'instant ref NGL-2246
 			//column.editTemplate='<div class="form-control" bt-select  #ng-model filter="true" bt-options="tag.code as tag.name for tag in lists.getTags()" udt-change="updatePropertyFromUDT(value,col)" /></div>';
 			column.editTemplate='<input class="form-control" type="text" #ng-model typeahead="tag.code as tag.name for tag in getTags() | filter:{groupNames:selectedTagGroup.value} | filter:{name:$viewValue} | limitTo:20" typeahead-min-length="1" udt-change="updatePropertyFromUDT(value,col)"/>';		}
+			
+			// FDS 16/05/2024 NON ca ne marche pas ici: on n'obtient pas la valeur voulue !!!
+			//column.thClass="columnWidth100px";
 		return column;
 	};
 
 	atmService.experimentToView($scope.experiment, $scope.experimentType);
 	
 	$scope.atmService = atmService;
+
+	// FDS  16/05/2024 forcer largeur de la colonne "Tag" 
+	var dtConfig = $scope.atmService.data.getConfig();
+
+	var indiceColonne = 13;
+	if (dtConfig.columns && dtConfig.columns[indiceColonne]) {
+		dtConfig.columns[indiceColonne].thClass="columnWidth70px"; /// numero de colonne hardcodé !! CA MARCHE !!
+	}
 	
 	var importData = function(){
 		$scope.messages.clear();
@@ -416,15 +554,6 @@ angular.module('home').controller('PrepPcrFreeCtrl',['$scope', '$parse',  '$filt
 	                 ];
 	
 	$scope.tagPlateColumn = $scope.columns[0]; // defaut du select
-	
-	// 12/04/2018 NGL-2012 ne rien mettre par defaut !!!
-	$scope.plates=[];
-	$scope.plates.push( {name: "---",                                           tagCategory: undefined,   tags: undefined });
-	$scope.plates.push( {name:"DAP TruSeq DNA HT (96 Indexes)",                 tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_XapTruSeqHT() });
-	$scope.plates.push( {name:"IDT-ILMN TruSeq DNA UD Indexes (96 Indexes)",    tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_IdtTruSeq96() });
-	$scope.plates.push( {name:"IDT-ILMN TruSeq DNA UD Indexes (96 Indexes) V2", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_IdtTruSeq96V2() });// ajout NGL-4038
-	$scope.plates.push( {name:"IDT-ILMN TruSeq DNA UD Indexes (24 Indexes x4)", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_IdtTruSeq24x4() });
-	
 	$scope.tagPlate = $scope.plates[0]; // defaut du select
 	
 	// NGL-2972 04/08/2020 mémorisation des choix pour le nettoyage éventuel....

@@ -270,6 +270,24 @@ rule "Copy moleculeQualityReport properties to ReadSet"
 		
 end
 
+//NGL-4937
+rule "Build localDataCloned property in readset"
+	@nglBI( F_RG_1 )
+	dialect "java"
+	salience 600
+	no-loop
+	when
+		$readset : ReadSet()
+	then
+		Logger.debug("Build localDataCloned property in readset");
+		boolean localDataClonedValue = false;
+		PropertySingleValue localDataCloned = new PropertySingleValue(localDataClonedValue);
+		MongoDBDAO.update(InstanceConstants.READSET_ILLUMINA_COLL_NAME, ReadSet.class, 
+				DBQuery.is("code", $readset.code),
+				DBUpdate.set("properties.localDataCloned", localDataCloned));
+end
+
+
 rule "Calculate runFractionPercentage for all readset"
 	@nglBI( F_RG_1 )
 	dialect "java"

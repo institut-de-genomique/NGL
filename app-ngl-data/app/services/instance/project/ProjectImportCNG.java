@@ -49,7 +49,7 @@ public class ProjectImportCNG extends AbstractImportDataCNG {
 	public void runImport(ContextValidation contextError) throws SQLException, DAOException, APIValidationException, APIException {
 		// FDS 17/07/2015 création de de 2 méthodes bien séparées
 		loadProjects(contextError);	 	
-		updateProjects(contextError);
+		// updateProjects(contextError);
 	}
 	
 	public void loadProjects(ContextValidation contextError) throws SQLException, DAOException, APIValidationException, APIException {
@@ -57,7 +57,7 @@ public class ProjectImportCNG extends AbstractImportDataCNG {
 		
 		//-1- chargement depuis la base source Postgresql
 		List<Project> projects = limsServices.findProjectToCreate(contextError, this.app.nglConfig().getString("ad.default.group.access"));
-		
+
 		logger.info("found "+projects.size() + " items");
 
 		//-2- sauvegarde dans la base cible MongoDb

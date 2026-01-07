@@ -28,16 +28,16 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import controllers.sra.api.AbstractSampleAPI;
+import controllers.sra.api.AbstractStudyAPI;
+import controllers.sra.api.ExperimentAPI;
+import controllers.sra.api.ReadsetAPI;
+import controllers.sra.api.SampleAPI;
+import controllers.sra.api.StudyAPI;
+import controllers.sra.api.SubmissionAPI;
 import fr.cea.ig.lfw.controllers.scripts.buffered.Script;
 import fr.cea.ig.lfw.utils.Iterables;
 import fr.cea.ig.lfw.utils.ZenIterable;
-import fr.cea.ig.ngl.dao.api.sra.AbstractSampleAPI;
-import fr.cea.ig.ngl.dao.api.sra.AbstractStudyAPI;
-import fr.cea.ig.ngl.dao.api.sra.ExperimentAPI;
-import fr.cea.ig.ngl.dao.api.sra.ReadsetAPI;
-import fr.cea.ig.ngl.dao.api.sra.SampleAPI;
-import fr.cea.ig.ngl.dao.api.sra.StudyAPI;
-import fr.cea.ig.ngl.dao.api.sra.SubmissionAPI;
 import fr.cea.ig.ngl.dao.readsets.ReadSetsAPI;
 import models.laboratory.common.instance.PropertyValue;
 import models.laboratory.common.instance.State;
@@ -51,11 +51,11 @@ import models.sra.submit.sra.instance.Run;
 import models.sra.submit.sra.instance.Sample;
 import models.sra.submit.sra.instance.Study;
 import models.sra.submit.sra.instance.Submission;
-import models.sra.submit.util.SraException;
 import play.libs.Json;
-import services.SraEbiAPI;
-import services.XmlToSra;
+import services.sra.SraException;
 import services.taxonomy.TaxonomyServices;
+import sra.services.SraEbiAPI;
+import sra.services.XmlToSra;
 import validation.ContextValidation;
 import fr.cea.ig.ngl.NGLApplication; // pour affichage du contextValidationError
 
@@ -125,7 +125,7 @@ public class ImportAcEbi extends Script<ImportAcEbi.Args> {
 
 		// lasy = paresseuse => initialisation paresseuse qui sera faite si on demande la Map.
 //		private Map<String, SubmissionInfo> submissionsInfos = MapUtils.lazyMap(new HashMap<>(), () -> new SubmissionInfo()); 
-		private String receiptDate = null;
+		// private String receiptDate = null;
 		private Date submissionDate = null;
 		private SubmissionInfo submissionInfos               = new SubmissionInfo();
 		private Map<String, StudyInfo> studiesInfos          = MapUtils.lazyMap(new HashMap<>(), () -> new StudyInfo()); 
@@ -133,13 +133,13 @@ public class ImportAcEbi extends Script<ImportAcEbi.Args> {
 		private Map<String, ExperimentInfo> experimentsInfos = MapUtils.lazyMap(new HashMap<>(), () -> new ExperimentInfo());
 		private Map<String, RunInfo> runsInfos               = MapUtils.lazyMap(new HashMap<>(), () -> new RunInfo());
 		
-		private String getStringSubmissionDate(){
-			return this.receiptDate;
-		}
+		// private String getStringSubmissionDate(){
+		// 	return this.receiptDate;
+		// }
 		
-		private void setStringSubmissionDate(String stringDate){
-			this.receiptDate = stringDate;
-		}
+		// private void setStringSubmissionDate(String stringDate){
+		// 	this.receiptDate = stringDate;
+		// }
 		
 		private Date getSubmissionDate(){
 			return this.submissionDate;
@@ -149,9 +149,9 @@ public class ImportAcEbi extends Script<ImportAcEbi.Args> {
 			this.submissionDate = this.dateFormat.parse(date);
 		}
 		
-		private void setSubmissionDate(Date date) throws ParseException {
-			this.submissionDate = date;
-		}
+		// private void setSubmissionDate(Date date) throws ParseException {
+		// 	this.submissionDate = date;
+		// }
 		
 		public String getStudyAccession(String code) {
 			if (studiesInfos.get(code) != null && studiesInfos.get(code).accession != null) {
@@ -299,7 +299,7 @@ public class ImportAcEbi extends Script<ImportAcEbi.Args> {
 	private final ReadSetsAPI      laboReadsetsAPI;
 	private final ReadsetAPI   	   readsetAPI;
 	private final NGLApplication   app;
-	private final TaxonomyServices taxonomyServices;
+	// private final TaxonomyServices taxonomyServices;
     private final SraEbiAPI           ebiAPI;
     
 	@Inject
@@ -324,7 +324,7 @@ public class ImportAcEbi extends Script<ImportAcEbi.Args> {
 		this.readsetAPI          = readsetAPI;
 		this.ebiAPI              = ebiAPI;
 		this.app                 = app;	
-		this.taxonomyServices    = taxonomyServices;
+		// this.taxonomyServices    = taxonomyServices;
 	}
 
 		
@@ -377,7 +377,7 @@ public class ImportAcEbi extends Script<ImportAcEbi.Args> {
 				ebiSuccess = true;
 			}
 			
-			retour.setStringSubmissionDate(racine.getAttribute("receiptDate"));
+			// retour.setStringSubmissionDate(racine.getAttribute("receiptDate"));
 			retour.setSubmissionDate(racine.getAttribute("receiptDate"));
 			
 			for (int i = 0; i<nbRacineNoeuds; i++) {
@@ -416,7 +416,7 @@ public class ImportAcEbi extends Script<ImportAcEbi.Args> {
 						retour.setRunAccession(code, accession);	
 						break;
 					default :
-						// Ignore other nodes
+						throw new SraException("Parsing d'un objet qui n'est pas prevu " + elt.getTagName().toUpperCase()+ " Passer par SraEbiAPI.EbiBrowserFetchEbiIdentifiers");
 					}
 				}
 			}  // end for  
@@ -644,29 +644,29 @@ public class ImportAcEbi extends Script<ImportAcEbi.Args> {
 			if(!projectCodes.contains(experiment.projectCode)) {
 				projectCodes.add(experiment.projectCode);
 			}
-			// completer experiment.studyAccession si besoin:
-			if (StringUtils.isBlank(experiment.studyAccession)) {
+			// completer experiment.studyIdentifier si besoin:
+			if (StringUtils.isBlank(experiment.studyIdentifier)) {
 				// Soit Study de type External et existe dans base à la création de la soumission, 
 				// soit Study deja soumis par nous et existe dans base à la création de la soumission
 				// soit Study dans la soumission courante et existe dans infosEbi:
 				if (StringUtil.isNotBlank(infosEbi.getStudyAccession(experiment.studyCode))) {
-					experiment.studyAccession = infosEbi.getStudyAccession(experiment.studyCode);
+					experiment.studyIdentifier = infosEbi.getStudyAccession(experiment.studyCode);
 				} else {
 					AbstractStudy absStudy = abstStudyAPI.get(experiment.studyCode);
-					experiment.studyAccession = absStudy.accession;
+					experiment.studyIdentifier = absStudy.accession;
 				}
 			}
 
-			// completer experiment.sampleAccession si besoin :
-			if (StringUtils.isBlank(experiment.sampleAccession)) {
+			// completer experiment.sampleIdentifier si besoin :
+			if (StringUtils.isBlank(experiment.sampleIdentifier)) {
 				// Soit Sample de type External et existe dans base à la création de la soumission, 
 				// soit Sample deja soumis par nous et existe dans base à la création de la soumission
 				// soit Sample dans la soumission courante et existe dans infosEbi:
 				if (StringUtil.isNotBlank(infosEbi.getSampleAccession(experiment.sampleCode))) {
-					experiment.sampleAccession = infosEbi.getSampleAccession(experiment.sampleCode);
+					experiment.sampleIdentifier = infosEbi.getSampleAccession(experiment.sampleCode);
 				} else {
 					AbstractSample absSample = abstSampleAPI.get(experiment.sampleCode);
-					experiment.sampleAccession = absSample.accession;
+					experiment.sampleIdentifier = absSample.accession;
 				}
 			}
 			
@@ -729,7 +729,7 @@ public class ImportAcEbi extends Script<ImportAcEbi.Args> {
 //		}
 
 		//final SimpleDateFormat    dateFormat     = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
-		final SimpleDateFormat    dateFormat     = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+		// final SimpleDateFormat    dateFormat     = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
 		for (String acRun : infosEbi.getRunAccessions()) {
 			if(StringUtil.isBlank(acRun)) {
@@ -877,9 +877,9 @@ public class ImportAcEbi extends Script<ImportAcEbi.Args> {
 			}			
 			for (Experiment experiment : allExperiments) {
 				// Ajouter à l'experiment le studyCode et le sampleCode avant de sauver:
-				AbstractStudy absStudy = abstStudyAPI.dao_findOne(DBQuery.is("accession", experiment.studyAccession));
+				AbstractStudy absStudy = abstStudyAPI.dao_findOne(DBQuery.is("accession", experiment.studyIdentifier));
 				experiment.studyCode = absStudy.code;
-				AbstractSample absSample = abstSampleAPI.dao_findOne(DBQuery.is("accession", experiment.sampleAccession));
+				AbstractSample absSample = abstSampleAPI.dao_findOne(DBQuery.is("accession", experiment.sampleIdentifier));
 				experiment.sampleCode = absSample.code;
 				experimentAPI.dao_saveObject(experiment);
 			}

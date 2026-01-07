@@ -15,11 +15,21 @@
 
 <!--debut-->
 
+
 @standard_header("sample", "TRUE"){ 
-  <button class="btn btn-default" 
-				data-toggle="modal" data-target="#commentModal" title="@Messages("button.addComment")"><i class="fa fa-comment"></i></button>
+  <!-- affichage uniquement si donnee releasable : sample avec state.code=SUB_F et date relase > date du jour : voir details.ctrl.js.$scope.isReleasable--> 
+  <button class="btn btn-default"  ng-if="isReleasable('@user')"  ng-click="userRelease()" data-toggle="tooltip" title="@Messages("button.release")" ><i class="fa fa-save"></i> @Messages("sampleButton.release")</button>
+  <button class="btn btn-default" data-toggle="modal" data-target="#commentModal" title="@Messages("button.addComment")"><i class="fa fa-comment"></i></button>
 
 }
+
+
+<!--Pour affichage d'un spinner-->
+<div class="inProgressSpinner" ng-if="treeLoadInProgress">
+<button class="btn btn-primary btn-lg">
+<i class="fa fa-spinner fa-spin fa-5x"></i>
+</button>
+</div>
 
  @** XXXXXXXX DETAILS SAMPLE XXXXXXXXXXXXXX **@
 
@@ -27,6 +37,11 @@
 
 <div class="row">
 	@column(){
+		
+		@* Ecriture de la ligne status : *@           
+ 		<div ng-if="visibility=='private'"> @simpleLine(Messages("study.visibility"),Messages("study.private"))</div>
+ 		<div ng-if="visibility=='public'"> @simpleLine(Messages("study.visibility"),Messages("study.public"))</div>
+ 		<div ng-if="visibility=='undefined'"> @simpleLine(Messages("study.visibility"),Messages("study.undefined"))</div>
 
 	    @* Ecriture des autres lignes code, state, title, abstract et description :*@
 
@@ -38,6 +53,8 @@
 		@line("sample.externalId")
 		@labelLine("sample.state")
 		@line("sample.title")
+		@line("sample.dropBox")
+		
 	}
 </div>
 

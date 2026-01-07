@@ -19,6 +19,9 @@ function String fungiCalculate(String readSetCode, Treatment treatment, String l
 		List<Map<String, Object>> keywordBilan = new ArrayList<Map<String, Object>>();
 		Logger.debug("Get from "+level);
 		String krona = new String(((PropertyFileValue)treatment.results.get(level).get("krona")).byteValue());
+		// NGL-4345 :
+		Long sampleInputValue = (Long) ((PropertySingleValue)treatment.results.get(level).get("sampleInput")).getValue();
+		Logger.debug("sampleInputValue = " + sampleInputValue);
 		
 		if(treatment.results.get(level).get("keywordBilan")!=null){
 			keywordBilan = ((PropertyObjectListValue)treatment.results.get(level).get("keywordBilan")).getValue();
@@ -45,7 +48,8 @@ function String fungiCalculate(String readSetCode, Treatment treatment, String l
 			if(m1.matches() || m2.matches() || m3.matches()){
 				value = (m1.matches())?m1.group(1):((m2.matches())?m2.group(1):m3.group(2));
 				Logger.debug("Value "+value);
-				fungiPercentValue = (Double.valueOf(value) / 20000) * 100;
+				// NGL-4345 :
+				fungiPercentValue = ( Double.valueOf(value) / sampleInputValue ) * 100;
 				Logger.debug("Match Group Fungi = "+fungiPercentValue);
 			}
 			

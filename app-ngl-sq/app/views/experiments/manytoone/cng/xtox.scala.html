@@ -1,96 +1,187 @@
-@this(inputtubes_ : inputtubes, outputtubes_ : outputtubes, inputplates_ : views.html.experiments.manytoone.defaults.partials.inputplates, outputplates_ : outputplates)
+@this(inputtubes_ : inputtubes, outputtubes_ : outputtubes, inputplates_ : views.html.experiments.manytoone.defaults.partials.inputplates, outputplates_ : outputplates, outputmodebuttons_ : views.html.experiments.manytoone.defaults.partials.outputmodebuttons)
 
 @()
-
-<!--- FDS 05/10/2016 cree pour gerer le cas des sorties tubes ou plaques et le pooling automatique--->
+<!-- FDS 05/10/2016 cree pour gerer le cas des sorties tubes ou plaques et le pooling automatique -->
+<!-- FDS 19/08/2025 suite au ticket NGL-5175 pour le CNS ajouter aussi startPositionColumn et StartPositionLine
+     => mise en code commun de fonctions dans details-ctrl.js; creation calculateATMPosition;...-->
 
 <div class="col-md-12 col-lg-12" ng-switch="supportCategoryCode">
-<div ng-switch-when="tube">
+<div ng-switch-when="tube"><!-- les inputs ne sont pas QUE des plaques : si mélange on passe ici (comment ???)-->
 	<ul class="nav nav-tabs margin-bottom-5" role="tablist">
-	  <li class="active"><a href="" role="tab" data-target="#tube" data-toggle="tab">@Messages("experiments.pools.design")</a></li>
-	  <li><a href="" role="tab"  data-target="#roadmap" data-toggle="tab" ng-click="atmService.data.updateDatatable()">@Messages("experiments.calculation.sheet")</a></li>  
+	  <li class="active"><a href="" role="tab" data-target="#tube"     data-toggle="tab">@Messages("experiments.pools.design")</a></li>
+	  <li>               <a href="" role="tab"  data-target="#roadmap" data-toggle="tab" ng-click="atmService.data.updateDatatable()">@Messages("experiments.calculation.sheet")</a></li>  
 	</ul>
 	
 	<div class="tab-content"  >
-		<div class="tab-pane active" id="tube">
+		<div class="tab-pane active" id="tube"><!-- onglet 1 -->
 			<div class="row">
-			<div class="col-md-12 col-lg-12">
-			<div class="row">
-			<div class="col-md-10 col-lg-10" ng-if="mainService.isEditMode() && isNewState()">
-			<!-- InputContainers table -->
-				@inputtubes_()
+				<div class="col-md-12 col-lg-12">
+					<div class="row">
+						<div class="col-md-10 col-lg-10" ng-if="mainService.isEditMode() && isNewState()">
+							<!-- InputContainers table -->
+							@inputtubes_()
+						</div>
+						<div class="col-md-2 col-lg-2" ng-if="mainService.isEditMode() && isNewState()">
+						<!-- Drop buttons -->	
+						<!-- NGL-4764 ajouter la condition sur output mode !!!!!!!!!!!! réservé a sortie sur plaque -->
+						<!-- NGL-5175 utiliser isNotReadyPooling et doPooling-->
+			  				<div class="page-header">
+								<button class="btn btn-default btn-lg btn-block" id="pool" title="Pool" 
+				 						ng-click="doPooling()" 
+										ng-disabled="isNotReadyPooling()">
+										<i class="fa fa-sign-in fa-2x"></i>
+						 		</button>
+			  				</div>
+			 				<label for="selectPoolMode">Pool Mode</label>
+			  				<select class="form-control input-sm" id="selectPoolMode" 
+			  						ng-model="poolingMode"
+			  						ng-change="setPoolingMode(poolingMode)"		
+									ng-options="mode as mode.name for mode in poolingModes track by mode.code">  			    							     	 
+			  				</select>	
+
+			 				<!-- NGL-4764 n'afficher que si outputContainer est une plaque -->
+							<!-- NGL-5175 creation d'un partial pour les boutons de choix et parametrage de l'outputmode -->
+							<div class="row" ng-if="plateUtils.isPlate()">
+								@outputmodebuttons_()
+							</div>
+						</div>
+					</div>
+				</div>
 			</div>
-			<div class="col-md-2 col-lg-2" ng-if="mainService.isEditMode() && isNewState()">
-			<!-- Drop buttons -->	
-			  <div class="page-header">
-				 <button class="btn btn-default btn-lg btn-block" ng-click="atmService.data.dropInSelectInputContainer()" 
-				                                                  ng-disabled="!atmService.data.isSelectInputContainers()">
-				 <i class="fa fa-sign-in fa-2x"></i>
-				 </button>
-			  </div>
-			</div>
-			</div>
+
 			<!-- OutputContainers table -->
 			<div class="row">
-			<div class="col-md-12 col-lg-12 flowcellTable"  ng-switch="atmService.outputContainerSupportCategoryCode">
-	            <div ng-switch-when="96-well-plate">
-				   @outputplates_()
+				<div class="col-md-12 col-lg-12 flowcellTable"  ng-switch="atmService.outputContainerSupportCategoryCode">
+	            	<div ng-switch-when="96-well-plate">
+				 		@outputplates_()
+					</div>
+					<div ng-switch-when="tube">
+				  		 @outputtubes_()
+					</div>
 				</div>
-				<div ng-switch-when="tube">
-				   @outputtubes_()
-				</div>
-			</div>
-		</div>	
-		</div>
-		</div>
+			</div>	
 		</div>		
 			
-		<div class="tab-pane" id="roadmap">
-		<div class="row roadmap">
-			<div class="col-md-12 col-lg-12" ultimate-datatable="atmService.data.datatable"></div>
+		<div class="tab-pane" id="roadmap"><!-- onglet 2 -->
+			<div class="row roadmap">
+				<div class="col-md-12 col-lg-12" ultimate-datatable="atmService.data.datatable"></div>
+			</div>
 		</div>
-		</div>
+
+		<!-- pas d'onglet src_dest si tubes en entree-->
 	</div>		
-</div>
+</div><!-- fin tube-->
 	
-<div ng-switch-when="96-well-plate">
-<!--- FDS 25/08/2016 MODIF des colonnes pour cause de chevauchement a l'affichage-->
-<ul class="nav nav-tabs margin-bottom-5" role="tablist">
-  <li class="active"><a href="" role="tab" data-target="#plate" data-toggle="tab">@Messages("experiments.pools.design")</a></li>
-  <li><a href="" role="tab"  data-target="#roadmap" data-toggle="tab" ng-click="atmService.data.updateDatatable()">@Messages("experiments.calculation.sheet")</a></li>
-  <li><a href="" role="tab"  data-target="#src_dest" data-toggle="tab">@Messages("experiments.src_dest.sheet")</a></li>
-</ul>
+<div ng-switch-when="96-well-plate"><!-- les inputs sont des plaques -->
+	<ul class="nav nav-tabs margin-bottom-5" role="tablist">
+ 		<li class="active"><a href="" role="tab" data-target="#plate"    data-toggle="tab">@Messages("experiments.pools.design")</a></li>
+  		<li>               <a href="" role="tab" data-target="#roadmap"  data-toggle="tab" ng-click="atmService.data.updateDatatable()">@Messages("experiments.calculation.sheet")</a></li>
+  		<!-- 23/10/2024 onglet inutile pour les tubes en sortie !!!
+       	NGL-4845 / NGL-4049 remettre les plaques dans l'ordre si necessaire -->
+  	<li ng-if="plateUtils.isPlate()"><a href="" role="tab" data-target="#src_dest" data-toggle="tab" ng-click="SetInputPlatesOrderIfNeeded()">@Messages("experiments.src_dest.sheet")</a></li>
+	</ul>
 
 <div class="tab-content">
-	<div class="tab-pane active" id="plate">
-		<div class="row"  ng-if="mainService.isEditMode() && isNewState()">
-		<div class="col-md-11 col-lg-11"> 
-			@inputplates_()
-		</div>
-		<div class="col-md-1 col-lg-1"> 
-			<div class="page-header">
-			  <!-- desactiver si pooling mode libre et rien selectionné OU pooling auto et qq chose selectionné OU pas de choix fait -->
-			  <button class="btn btn-default btn-sm btn-block"         
-			          ng-click="doPooling()"
-			          ng-disabled="(!atmService.data.isSelectInputContainers() && (poolingMode.code ==='MOUSE'))||(atmService.data.isSelectInputContainers() && (poolingMode.code !=='MOUSE')) || (poolingMode === null)">
-			  <i class="fa fa-sign-in fa-2x"></i>
-			  </button>	
-			  <label for="selectPoolMode">Pool Mode</label>
-			  <select class="form-control input-sm" id="selectPoolMode"
-	  					ng-model="poolingMode"
+	<div class="tab-pane active" id="plate"><!--onglet 1 -->
+	    <div class="row"  ng-if="mainService.isEditMode() && isNewState()">
+			<div class="col-md-10 col-lg-10"> 
+				@inputplates_()
+			</div>
+			<div class="col-md-2 col-lg-2"> 
+				<!-- Drop buttons -->
+				<div class="page-header">
+			 		 <!-- 29/02/2025 creation isNotReadyPooling() dans x-to-plates-ctrl.js pour les cas ou le pooling n'est pas possible-->
+			  		<button class="btn btn-default btn-sm btn-block" id="pool" title="Pool"  
+			  			ng-click="doPooling()" 
+						ng-disabled="isNotReadyPooling()">
+	 					<i class="fa fa-sign-in fa-2x"></i>
+	  		  		</button>
+				</div>
+
+				<label for="selectPoolMode">Pool Mode</label>
+				<select class="form-control input-sm" id="selectPoolMode" 
+						ng-model="poolingMode"
 	  					ng-change="setPoolingMode(poolingMode)"		
-						ng-options="mode as mode.name for mode in poolingModes track by mode.code">  	
-						<option value="">---</option>  			    							     	 
-	          </select>	
-	        </div>
-			<button class="btn btn-default btn-sm btn-block" 
-			        ng-repeat="supportCode in atmService.data.inputContainerSupports" type="button" 
-				    ng-class="atmService.data.getPlateBtnClass(supportCode)" 
-				    ng-click="atmService.data.setCurrentSupportCode(supportCode)">
-				{{supportCode}}
-			</button>	
-		</div>
-		</div>	
+						ng-options="mode as mode.name for mode in poolingModes track by mode.code">  			    							     	 
+	        	</select>	
+			
+				<!-- NG-4764 n'afficher que si outputContainer est une plaque -->
+				<!-- NGL-5175 creation d'un partial pour les boutons de choix et parametrage de l'outputmode -->
+				<div class="row" ng-if="plateUtils.isPlate()">
+					@outputmodebuttons_()
+				</div>
+
+				<!-- liste des plaques a pooler: afficher aussi si on poole vers des tubes/strips !!!! -->
+				<br/>
+				
+				<!-- NGL-4845 le pooling en mode C9 est tres particulier il est a cheval sur plusieurs plaques !! 
+			    	 05/03/2025 ce code est neutralisé puisque le cas 2 plaques est bloqué dans x-to-plates-ctrl.js
+			    	   if ($scope.nbInputContainerSupports != 3)
+				-->
+				<div ng-if="isAutoPoolingC9_2plates()">
+					<label control-label>Disposition des plaques d'entrée</label>
+				
+					<div class="col-md-4 col-lg-4" style="margin-bottom: 10px"; >
+					<!-- si ng-model reference un objet et non pas une value donc checked ne peut etre vérifié ??
+						value est inutile dans ce cas!!!-->
+						<input type="radio" checked="checked" ng-model="C9_2PlatesDispo" value="1_144" style="margin-left:5px;"  
+							ng-change="toggleDispo('1_144')" 
+							ng-disabled="autoPoolingDone === true"/>
+						<table>
+							<tr><td><i class="fa fa-square"></i><i class="fa fa-square"></i></td></tr>
+							<tr><td><i class="fa fa-square"></i><i class="fa fa-square-o"></i></td></tr>
+						</table>
+					</div>
+
+					<div class="col-md-4 col-lg-4" style="margin-bottom: 10px"; >
+						<input type="radio" ng-model="C9_2PlatesDispo" value="49_192" style="margin-left:5px;"
+							ng-change="toggleDispo('49_192')"  
+							ng-disabled="autoPoolingDone === true"/>
+						<table>
+							<tr><td><i class="fa fa-square"></i><i class="fa fa-square-o"></i></td></tr>
+							<tr><td><i class="fa fa-square"></i><i class="fa fa-square"></i></td></tr>
+						</table>
+					</div>
+
+					<div id="switch" style="margin-bottom: 10px";>
+						<button class="btn btn-sm" 
+							ng-click="toggleInputPlatesOrder(0,1)" 
+							ng-disabled="autoPoolingDone === true">
+							<i class="fa fa-sort"></i>&nbsp;Changer l'ordre des plaques 1/2
+						</button>
+					</div>
+				</div>
+
+				<!-- NGL-5049 pooling en mode C9 avec 3 plaques: boutons permettant a l'utilisateur de customiser l'ordre des plaques--->
+				<div ng-if="isAutoPoolingC9_3plates()">
+					<div id="switch" style="margin-bottom: 10px";>
+						<button class="btn btn-sm" 
+							ng-click="toggleInputPlatesOrder(0,1)" 
+							ng-disabled="autoPoolingDone === true">
+							<i class="fa fa-sort"></i>&nbsp;Inverser plaques 1 et 2
+						</button>
+						<button class="btn btn-sm" 
+							ng-click="toggleInputPlatesOrder(1,2)" 
+							ng-disabled="autoPoolingDone === true">
+							<i class="fa fa-sort"></i>&nbsp;Inverser plaques 2 et 3
+						</button>
+					</div>
+				</div>
+
+				<div id="listePlates">
+					<!-- NGL-4845: ng-repeat ne listait pas les plaques dans l'ordre alphabétique des barcodes
+					==> creation dans atomicTransfereServices.java d'une nouvelle methode getCurrentSupportCodeSorted
+						appelée dans inputplates.scala.html -->
+					<button class="btn btn-default btn-sm" 
+						ng-repeat="supportCode in atmService.data.inputContainerSupports"
+						ng-class="atmService.data.getPlateBtnClass(supportCode)" 
+						ng-click="atmService.data.setCurrentSupportCode(supportCode)">
+						{{$index+1}} - {{supportCode}}
+					</button>	
+				</div>
+			</div><!-- fin col md 2-->
+		</div><!--end isEditMode-->
+
 		<div class="row">
 			<div class="col-md-12 col-lg-12 flowcellTable"  ng-switch="atmService.outputContainerSupportCategoryCode">
             <div ng-switch-when="96-well-plate">
@@ -99,20 +190,21 @@
 			<div ng-switch-when="tube">
 			   @outputtubes_()
 			</div>
+			<!-- !!! pas de strip-8 : non géré !!!!-->
 			</div>
 		</div>
-	</div>
+	</div><!--fin tab plate-->
 	
-	<div class="tab-pane" id="roadmap">
+	<div class="tab-pane" id="roadmap"><!--onglet 2 -->
 	<div class="row roadmap">
 		<div class="col-md-12 col-lg-12" ultimate-datatable="atmService.data.datatable"></div>
 	</div>
-	</div>
+	</div><!--fin tab roadmap-->
 	
-	
-	<div class="tab-pane" id="src_dest">
-	<div class="row roadmap">
-	<div class="col-md-4 col-lg-4">
+	<div class="tab-pane" id="src_dest"><!--onglet 3 -->
+	<div class="row roadmap"><!-- ??? pourquoi cette class roadmap ici ??????-->
+		<!-- SOURCE -->
+		<div class="col-md-4 col-lg-4">
 		<table class="table table-bordered">
 			<thead>
 				<tr>
@@ -123,9 +215,8 @@
 						@Messages("experiments.src_dest.source")
 					</th>											
 				</tr>
-				</thead>	
-				<!--  containerSupport et pas container -->			
-				<tr ng-model="containerSupport" ng-repeat="containerSupport in getInputContainerSupports() | orderBy track by $index" >
+			</thead>	
+				<tr ng-model="containerSupport" ng-repeat="containerSupport in inputContainerSupports track by $index" >	
 					<td>
 						{{containerSupport}}
 					</td>
@@ -133,11 +224,13 @@
 						{{$index+1}}
 					</td>									
 				</tr>				
-			</table>
+		</table>
 		</div>
-	<!--  ajout ng-switch car il faut un label dans le cas des tubes en sortie -->
-	<div class="col-md-4 col-lg-4"  ng-switch="atmService.outputContainerSupportCategoryCode">
-	<div ng-switch-when="96-well-plate">
+		<!-- DESTINATION -->
+		<!--  ajout ng-switch car il faut un label dans le cas des tubes en sortie -->
+		<!--  23/10/2024 contradictoire avec le fait que l'onglet est inutile pour les tubes de sortie !!!! -->
+		<div class="col-md-4 col-lg-4"  ng-switch="atmService.outputContainerSupportCategoryCode">
+		<div ng-switch-when="96-well-plate">
 		<table class="table table-bordered">
 			<thead>
 				<tr>
@@ -153,8 +246,8 @@
 					</th>	
 					 -->										
 				</tr>
-				</thead>				
-				<tr ng-model="containerSupport" ng-repeat="containerSupport in getDistinctOutputContainerSupports()  | orderBy track by $index" >
+			</thead>				
+				<tr ng-model="containerSupport" ng-repeat="containerSupport in getDistinctOutputContainerSupports() | orderBy track by $index" >
 					<td>
 						{{containerSupport.code}}
 					</td>
@@ -167,8 +260,9 @@
 					</td>		
 					-->							
 				</tr>				
-			</table>
-		</div>	
+		</table>
+		</div><!--end plate-->	
+
 		<div ng-switch-when="tube">
 		<table class="table table-bordered">
 			<thead>
@@ -197,12 +291,18 @@
 					</td>								
 				</tr>				
 			</table>
-		</div>
-		</div>
-		</div >
-	</div>
-	</div>
-</div>
+		</div><!--end tube-->
+
+		</div><!--end switch-->
+	</div ><!---end row-->
+	</div><!--fin tab src_dest-->
+
+</div><!--fin tab content-->
+</div><!--fin plate-->
+
+<!-- FDS 10/2024: essai ng-switch-default OUI ca marche mais pour l'instant tous les cas passent dans les 2 when existants--->
+<div ng-switch-default>
+	INPUT SUPPORT CATEGORYCODE NOT SUPPORTED
 </div>
 
-</div>
+</div><!--fin switch supportCategoryCode  -->

@@ -58,7 +58,7 @@
 			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 		  </div>
 		  <div class="modal-body">
-				<p> Vous ne pouvez pas supprimer ce type d'expérience car le protocole est déjà utilisé dans une ou plusieurs expérience(s) de ce type</p>
+				<h4> Vous ne pouvez pas supprimer ce type d'expérience car le protocole est déjà utilisé dans une ou plusieurs expérience(s) de ce type</h4>
 		  </div>
 		  <div class="modal-footer">
 			<button  class="btn btn-primary" data-dismiss="modal" aria-hidden="true">OK</i></button>
@@ -67,14 +67,14 @@
 	</div>
 </div>
 
-<div class="modal fade" id="affichageAlertRemove" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<div class="modal fade" id="affichageAlertRemoveExperiment" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 	<div class="modal-dialog">
 		<div class="modal-content">
 		  <div class="modal-header">
 			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 		  </div>
 		  <div class="modal-body">
-				<p> Vous ne pouvez pas supprimer ce protocole car le protocole est déjà utilisé dans une ou plusieurs expérience(s) </p>
+				<h4> Vous ne pouvez pas supprimer ce protocole car le protocole est déjà utilisé dans une ou plusieurs expérience(s) </h4>
 		  </div>
 		  <div class="modal-footer">
 			<button  class="btn btn-primary" data-dismiss="modal" aria-hidden="true">OK</button>
@@ -126,7 +126,7 @@
 					<label class="col-md-6 col-lg-6 control-label">@Messages("descriptions.protocols.table.name")</label>
 					<div ng-class="{'has-error': errorName}" class="col-md-5 col-lg-5">
 						<div ng-switch on="isSaved">
-							<input  ng-switch-when="false" class="form-control" type="text" ng-model="protocol.name"></input>
+							<input  ng-switch-when="false" class="form-control" type="text" ng-model="protocol.name" placeholder='@Messages("descriptions.protocols.table.name")'></input>
 							<p      ng-switch-when="true" class="form-control-static" type="text" ng-bind="protocol.name" ></p>
 						</div>
 					</div>
@@ -139,7 +139,7 @@
 					<label class="col-md-6 col-lg-6 control-label">@Messages("descriptions.protocols.table.code")</label>
 					<div ng-class="{'has-error': errorCode}" class="col-md-5 col-lg-5">
 						<div ng-switch on="isSaved">
-							<input  ng-switch-when="false" class="form-control" type="text" ng-model="protocol.code"></input>
+							<input  ng-switch-when="false" class="form-control" type="text" ng-model="protocol.code" placeholder="Format attendu : [a-z0-9-_.]"></input>
 						<p      ng-switch-when="true" class="form-control-static" type="text" ng-bind="protocol.code" ></p>
 					</div>
 					</div>

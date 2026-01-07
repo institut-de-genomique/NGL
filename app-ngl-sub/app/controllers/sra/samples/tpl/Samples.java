@@ -68,8 +68,9 @@ public class Samples extends NGLController implements NGLJavascript  {
 				controllers.sra.samples.api.routes.javascript.Samples.get(),
 				controllers.sra.samples.tpl.routes.javascript.Samples.get(),
 				controllers.sra.samples.api.routes.javascript.Samples.list(),
+				controllers.sra.samples.api.routes.javascript.Samples.batchUpdate(),
 				controllers.sra.samples.api.routes.javascript.Samples.update(),
-				controllers.sra.samples.api.routes.javascript.Samples.save(),
+				//controllers.sra.samples.api.routes.javascript.Samples.save(),
 				controllers.sra.samples.api.routes.javascript.Samples.loadUserFileSample(),
 				controllers.authorisation.routes.javascript.User.get(),
 				controllers.sra.samples.api.routes.javascript.SampleComments.save(),
@@ -79,6 +80,8 @@ public class Samples extends NGLController implements NGLJavascript  {
   				controllers.sra.experiments.api.routes.javascript.Experiments.get(),
   				controllers.sra.analyzes.api.routes.javascript.Analyzes.list(),
   				controllers.sra.analyzes.api.routes.javascript.Analyzes.get(),
+  				controllers.sra.submissions.api.routes.javascript.Submissions.createFromSample(),
+  				controllers.sra.submissions.api.routes.javascript.Submissions.createFromSampleRelease(),
 				controllers.sra.submissions.api.routes.javascript.Submissions.createForUpdate(),
   				controllers.sra.submissions.api.routes.javascript.Submissions.updateState());
 	}

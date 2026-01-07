@@ -10,9 +10,9 @@ import fr.cea.ig.MongoDBDAO;
 import fr.cea.ig.lfw.controllers.scripts.buffered.ScriptNoArgs;
 import mail.MailServiceException;
 import models.sra.submit.sra.instance.Submission;
-import models.sra.submit.util.SraException;
 import models.utils.InstanceConstants;
-import sra.api.submission.SubmissionNewAPI;
+import services.sra.SraException;
+import sra.api.SubmissionNewAPI;
 import validation.ContextValidation;
 
 public class Reload_AC_CFM extends ScriptNoArgs {
@@ -44,7 +44,7 @@ public class Reload_AC_CFM extends ScriptNoArgs {
 //			File fileEbi = new File("/env/cns/home/sgas/debug_CFM",  "listAC_" + submission.code + ".txt");
 			String user = "ngsrg";
 			ContextValidation ctxVal = ContextValidation.createUndefinedContext(user);
-			this.submissionNewAPI.loadEbiResponseAC(ctxVal, submission);
+			this.submissionNewAPI.loadRespEbiForCreation(ctxVal, submission);
 		}	
 	}
 		

@@ -1,0 +1,105 @@
+@()
+@()
+<div ng-init="treatmentCode='assemblyHaplotypicDuplicationPurge'">
+<div class="row">
+<div class="col-md-9 col-lg-9">
+	 <br/>
+	 <strong></strong>
+	 <br/><br/>  
+	 <table class="table table-condensed table-hover table-bordered">
+			<tr>
+				<th>@Messages("analyses.treatments.assemblyHaplotypicDuplicationPurge.softwareVersion")</th> 
+				<td>{{analysis.treatments[treatmentCode].pairs.softwareVersion.value }}</td>
+			</tr>
+			<tr>
+				<th>@Messages("analyses.treatments.assemblyHaplotypicDuplicationPurge.selectedAssembly")</th> 
+				<td>{{analysis.treatments[treatmentCode].pairs.selectedAssembly.value }}</td>	
+			</tr>
+			<tr>
+				<th>@Messages("analyses.treatments.assemblyHaplotypicDuplicationPurge.cumulativeSize")</th>
+				<td>{{analysis.treatments[treatmentCode].pairs.cumulativeSize.value | number}}</td>
+			</tr>
+			<tr>
+				<th>@Messages("analyses.treatments.assemblyHaplotypicDuplicationPurge.n50")</th> 
+				<td>{{analysis.treatments[treatmentCode].pairs.n50.value | number}}</td>	
+			</tr> 
+			<tr>
+				<th>@Messages("analyses.treatments.assemblyHaplotypicDuplicationPurge.n90")</th>
+				<td>{{analysis.treatments[treatmentCode].pairs.n90.value | number}}</td>
+			</tr> 
+			<tr>
+				<th>@Messages("analyses.treatments.assemblyHaplotypicDuplicationPurge.l50")</th>
+				<td>{{analysis.treatments[treatmentCode].pairs.l50.value | number}}</td>	
+			</tr> 
+			<tr>
+				<th>@Messages("analyses.treatments.assemblyHaplotypicDuplicationPurge.l90")</th>
+				<td>{{analysis.treatments[treatmentCode].pairs.l90.value | number}}</td>
+			</tr> 
+			<tr>		
+				<th>@Messages("analyses.treatments.assemblyHaplotypicDuplicationPurge.auN")</th>
+				<td>{{analysis.treatments[treatmentCode].pairs.auN.value | number}}</td>
+			</tr> 	
+			<tr>	
+				<th>@Messages("analyses.treatments.assemblyHaplotypicDuplicationPurge.maxSize")</th>
+				<td>{{analysis.treatments[treatmentCode].pairs.maxSize.value | number}}</td>
+			</tr> 
+			<tr>						
+				<th>@Messages("analyses.treatments.assemblyHaplotypicDuplicationPurge.nbcontigs")</th>	
+				<td>{{analysis.treatments[treatmentCode].pairs.nbContigs.value | number}}</td>
+			</tr> 
+	 </table>
+ </div>	
+</div>
+
+<br/><br/>  
+<div class="row">
+<div class="col-md-9 col-lg-9">
+	<div class="panel-heading">
+		<strong>@Messages("analyses.treatments.assemblyHaplotypicDuplicationPurge.hapdup")</strong>
+	</div>
+<table class="table table-condensed table-hover table-bordered">
+	<thead>
+		<tr>
+	   </tr>
+	   <tr>
+			<th class="text-center">@Messages("analyses.treatments.assemblyHaplotypicDuplicationPurge.hapdup.cumulativeSize")</th>
+			<th class="text-center">@Messages("analyses.treatments.assemblyHaplotypicDuplicationPurge.hapdup.n50")</th>
+			<th class="text-center">@Messages("analyses.treatments.assemblyHaplotypicDuplicationPurge.hapdup.n90")</th>
+			<th class="text-center">@Messages("analyses.treatments.assemblyHaplotypicDuplicationPurge.hapdup.l50")</th>
+			<th class="text-center">@Messages("analyses.treatments.assemblyHaplotypicDuplicationPurge.hapdup.l90")</th>
+			<th class="text-center">@Messages("analyses.treatments.assemblyHaplotypicDuplicationPurge.hapdup.auN")</th>
+			<th class="text-center">@Messages("analyses.treatments.assemblyHaplotypicDuplicationPurge.hapdup.maxSize")</th>
+			<th class="text-center">@Messages("analyses.treatments.assemblyHaplotypicDuplicationPurge.hapdup.nbseq")</th>
+	   </tr>
+	</thead>
+	<tbody>
+		<tr ng-repeat="hapdup in analysis.treatments[treatmentCode].pairs.hapdup.value">
+			<td class="text-center">{{hapdup.cumulativeSize | number}}</td>
+			<td class="text-center">{{hapdup.n50 | number}}</td>
+			<td class="text-center">{{hapdup.n90 | number}}</td>
+			<td class="text-center">{{hapdup.l50 | number}}</td>
+			<td class="text-center">{{hapdup.l90 | number}}</td>
+			<td class="text-center">{{hapdup.auN | number}}</td>
+			<td class="text-center">{{hapdup.maxSize | number}}</td>
+			<td class="text-center">{{hapdup.nbseq | number}}</td>
+		</tr>
+	</tbody>
+</table>
+</div>	
+</div>
+
+
+<div class="row">
+    <div class="col-md-4 col-lg-4">
+	    <div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+	    ng-click="setImage(analysis.treatments[treament.code!=undefined?treament.code:treatmentCode].pairs.purgeGraph.value,'purge dups graphe','',treament.code!=undefined?treament.code:treatmentCode,
+	    analysis.treatments[treament.code!=undefined?treament.code:treatmentCode].pairs.purgeGraph.width,
+	    analysis.treatments[treament.code!=undefined?treament.code:treatmentCode].pairs.purgeGraph.height)">
+		 <a href="#">
+		    <img id="purge dups graphe" ng-src="data:image/png;base64,{{analysis.treatments[treament.code!=undefined?treament.code:treatmentCode].pairs.purgeGraph.value}}" />
+		    <p>@Messages("analyses.treatments.assemblyHaplotypicDuplicationPurge.purgeGraph")</p>
+		 </a>   
+	    </div>
+    </div>
+</div>
+</div>

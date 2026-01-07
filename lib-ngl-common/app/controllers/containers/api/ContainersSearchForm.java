@@ -48,9 +48,12 @@ public class ContainersSearchForm extends DBObjectListForm<Container> {
 	public Set<String> sampleTypeCodes;
 	public String contentsSampleCode;
 	public Set<String> contentsSampleCodes;
+
+	public String importTypeCode; 
+	public Set<String> importTypeCodes;
 	
 	public String ncbiScientificNameRegex;
-	public Set<String> ncbiScientificNameRegexs;
+	public List<String> ncbiScientificNames;
 
 	public String categoryCode;
 	public String nextExperimentTypeCode;
@@ -74,6 +77,7 @@ public class ContainersSearchForm extends DBObjectListForm<Container> {
 	public String createUser; 
 	public List<String> createUsers;
 	public List<String> stateResolutionCodes;
+	public List<String> umbrellaCodes;
 	
 	public String commentRegex;
 	
@@ -143,18 +147,8 @@ public class ContainersSearchForm extends DBObjectListForm<Container> {
 			queryElts.add(DBQuery.regex("contents.ncbiScientificName", Pattern.compile(this.ncbiScientificNameRegex)));
 		}
 
-		if(CollectionUtils.isNotEmpty(this.ncbiScientificNameRegexs)) {
-			DBQuery.Query queryTmp = DBQuery.empty();
-			Iterator<String> iterator = this.ncbiScientificNameRegexs.iterator();
-
-			while (iterator.hasNext()) {
-				String ncbiNameLoop = iterator.next();
-				queryTmp.or(
-					DBQuery.regex("contents.ncbiScientificName", Pattern.compile(ncbiNameLoop))
-				);
-			}
-
-			queryElts.add(queryTmp);
+		if(CollectionUtils.isNotEmpty(this.ncbiScientificNames)) {
+			queryElts.add(DBQuery.in("contents.ncbiScientificName", this.ncbiScientificNames));
 		}
 		
 		if(CollectionUtils.isNotEmpty(this.codes)){
@@ -163,6 +157,12 @@ public class ContainersSearchForm extends DBObjectListForm<Container> {
 			queryElts.add(DBQuery.is("code", this.code));
 		}else if(StringUtils.isNotBlank(this.codeRegex)){
 			queryElts.add(DBQuery.regex("code", Pattern.compile(this.codeRegex)));
+		}
+
+		if(CollectionUtils.isNotEmpty(this.importTypeCodes)){
+			queryElts.add(DBQuery.in("importTypeCode", this.importTypeCodes));
+		}else if(StringUtils.isNotBlank(this.importTypeCode)){
+			queryElts.add(DBQuery.is("importTypeCode", this.importTypeCode));
 		}
 		
 		if(StringUtils.isNotBlank(this.treeOfLifePathRegex)){

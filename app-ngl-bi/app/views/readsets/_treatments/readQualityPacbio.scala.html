@@ -7,48 +7,52 @@
 				<caption><h3>@Messages("readsets.treatments.read_quality_pacbio.legende_1")</h3></caption>
 			<tbody>
 				<tr>
-					<th>@Messages("readsets.treatments.read_quality_pacbio.reads.nbRead")</th>
-					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['read-quality-pacbio'].value.reads.nbBases | number}}</td>				
+					<th>@Messages("readsets.treatments.read_quality_pacbio.reads.nbReads")</th>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.reads.value.nbReads | number}}</td>				
 				<tr>					
 				<tr>
 					<th>@Messages("readsets.treatments.read_quality_pacbio.reads.maxSize")</th>
-					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['read-quality-pacbio'].value.reads.maxSize | number}}</td>				
-				<tr>	
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.reads.value.maxSize | number}}</td>				
+				<tr>
+				<tr>
+					<th>@Messages("readsets.treatments.read_quality_pacbio.reads.medianSize")</th>
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.reads.value.medianSize | number}}</td>				
+				<tr>
 				<tr>
 					<th>@Messages("readsets.treatments.read_quality_pacbio.reads.nbBases")</th>
-					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['read-quality-pacbio'].value.reads.nbBases | number}}</td>				
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.reads.value.nbBases | number}}</td>				
 				<tr>	
 				<tr>
 					<th>@Messages("readsets.treatments.read_quality_pacbio.reads.nbReadsOver50kb")</th>
-					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['read-quality-pacbio'].value.reads.nbReadsOver50kb | number}}</td>				
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.reads.value.nbReadsOver50kb | number}}</td>				
 				<tr>
 				<tr>
 					<th>@Messages("readsets.treatments.read_quality_pacbio.reads.nbReadsOver10kb")</th>
-					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['read-quality-pacbio'].value.reads.nbReadsOver10kb | number}}</td>				
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.reads.value.nbReadsOver10kb | number}}</td>				
 				<tr>
 				<tr>
 					<th>@Messages("readsets.treatments.read_quality_pacbio.reads.qualityAvg")</th>
-					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['read-quality-pacbio'].value.reads.qualityAvg | number}}</td>				
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.reads.value.qualityAvg | number}}</td>				
 				<tr>
 				<tr>
 					<th>@Messages("readsets.treatments.read_quality_pacbio.reads.avgSize")</th>
-					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['read-quality-pacbio'].value.reads.avgSize | number}}</td>				
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.reads.value.avgSize | number}}</td>				
 				<tr>
 				<tr>
 					<th>@Messages("readsets.treatments.read_quality_pacbio.reads.GCPercent")</th>
-					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['read-quality-pacbio'].value.reads.GCPercent | number:3}}</td>				
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.reads.value.GCPercent | number:3}}</td>				
 				<tr>
 				<tr>
 					<th>@Messages("readsets.treatments.read_quality_pacbio.reads.N50")</th>
-					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['read-quality-pacbio'].value.reads.N50 | number}}</td>				
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.reads.value.N50 | number}}</td>				
 				<tr>				
 				<tr>
 					<th>@Messages("readsets.treatments.read_quality_pacbio.reads.nbReadsOver30kb")</th>
-					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['read-quality-pacbio'].value.reads.nbReadsOver30kb | number}}</td>				
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.reads.value.nbReadsOver30kb | number}}</td>				
 				<tr>	
 				<tr>
 					<th>@Messages("readsets.treatments.read_quality_pacbio.reads.nbReadsOver100kb")</th>
-					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default['read-quality-pacbio'].value.reads.nbReadsOver100kb | number}}</td>				
+					<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.reads.value.nbReadsOver100kb | number}}</td>				
 				<tr>	
 					
 			</tbody>

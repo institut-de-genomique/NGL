@@ -1,6 +1,5 @@
 package models.sra.submit.sra.instance;
 
-import fr.cea.ig.ngl.dao.api.sra.ExternalSampleAPI;
 import models.laboratory.common.description.ObjectType;
 import models.laboratory.common.instance.State;
 import models.utils.InstanceConstants;
@@ -10,6 +9,8 @@ import validation.utils.ValidationHelper;
 import static ngl.refactoring.state.SRASubmissionStateNames.SUB_F;
 
 import org.apache.commons.lang3.StringUtils;
+
+import controllers.sra.api.ExternalSampleAPI;
 
 public class ExternalSample extends AbstractSample {
 	

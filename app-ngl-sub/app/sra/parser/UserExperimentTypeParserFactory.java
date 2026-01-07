@@ -5,8 +5,8 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 
 import models.sra.submit.sra.instance.UserExperimentType;
-import models.sra.submit.util.SraException;
-import services.IUserObjectFactory;
+import services.sra.SraException;
+import sra.services.IUserObjectFactory;
 
 
 public class UserExperimentTypeParserFactory implements IUserObjectFactory<UserExperimentType> {

@@ -62,7 +62,7 @@ public class TaxonomyServicesTest {
 
         // on definit un alias : quand on rencontrera dans le code l'appel ncbiTaxonomyServices.getTaxon(taxonCode), celui-ci sera 
         // remplacé par return(taxonNCBI)
-        when(ncbiTaxonomyServices.getTaxon(taxonCode)).thenReturn(ncbiTaxon);
+        when(ncbiTaxonomyServices.getUniqueTaxon(taxonCode)).thenReturn(ncbiTaxon);
 
         
         // code qui va etre executé en remplacant dans ce code les methodes par leurs alias definies ci-dessus
@@ -95,7 +95,7 @@ public class TaxonomyServicesTest {
         
         // on definit un alias : quand on rencontrera dans le code l'appel ncbiTaxonomyServices.getTaxon(taxonCode), celui-ci sera 
         // remplacé par return(ncbiTaxon)
-        when(ncbiTaxonomyServices.getTaxon(taxonCode)).thenReturn(ncbiTaxon);
+        when(ncbiTaxonomyServices.getUniqueTaxon(taxonCode)).thenReturn(ncbiTaxon);
         when(ebiTaxonomyServices.getTaxon(taxonCode)).thenReturn(ebiTaxon);
 
         // code qui va etre executé en remplacant dans ce code les methodes par leurs alias definies ci-dessus
@@ -128,7 +128,7 @@ public class TaxonomyServicesTest {
         
         // on definit un alias : quand on rencontrera dans le code l'appel ncbiTaxonomyServices.getTaxon(taxonCode), celui-ci sera 
         // remplacé par return(ncbiTaxon)
-        when(ncbiTaxonomyServices.getTaxon(taxonCode)).thenReturn(ncbiTaxon);
+        when(ncbiTaxonomyServices.getUniqueTaxon(taxonCode)).thenReturn(ncbiTaxon);
         when(ebiTaxonomyServices.getTaxon(taxonCode)).thenReturn(ebiTaxon);
 
         // code qui va etre executé en remplacant dans ce code les methodes par leurs alias definies ci-dessus

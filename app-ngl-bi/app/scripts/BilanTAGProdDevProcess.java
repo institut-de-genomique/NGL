@@ -106,31 +106,31 @@ public class BilanTAGProdDevProcess extends ScriptNoArgs{
 	}
 
 
-	private Process getProcess(ReadSet rs)
-	{
-		Query dbQuery = DBQuery.in("sampleCodes", rs.sampleCode).or(DBQuery.in("inputContainerCode",rs.sampleOnContainer.containerCode), DBQuery.in("outputContainerCodes",rs.sampleOnContainer.containerCode));
-		List<Process> process = MongoDBDAO.find(InstanceConstants.PROCESS_COLL_NAME, Process.class, dbQuery).toList();
+	// private Process getProcess(ReadSet rs)
+	// {
+	// 	Query dbQuery = DBQuery.in("sampleCodes", rs.sampleCode).or(DBQuery.in("inputContainerCode",rs.sampleOnContainer.containerCode), DBQuery.in("outputContainerCodes",rs.sampleOnContainer.containerCode));
+	// 	List<Process> process = MongoDBDAO.find(InstanceConstants.PROCESS_COLL_NAME, Process.class, dbQuery).toList();
 
-		if(process.size()==1) {
-			return process.get(0);
-		}else if(process.size()>1) {
-			if(rs.sampleOnContainer.properties.containsKey("tag")) {
-				dbQuery.is("sampleOnInputContainer.properties.tag.value", rs.sampleOnContainer.properties.get("tag").getValue());
-			}
-			process=MongoDBDAO.find(InstanceConstants.PROCESS_COLL_NAME, Process.class, dbQuery).toList();
-			if(process.size()==1) {
-				return process.get(0);
-			}else if(process.size()>1){
-				return null;
-			}else {
-				return null;
-			}
-		}else {
-			return null;
-		}
+	// 	if(process.size()==1) {
+	// 		return process.get(0);
+	// 	}else if(process.size()>1) {
+	// 		if(rs.sampleOnContainer.properties.containsKey("tag")) {
+	// 			dbQuery.is("sampleOnInputContainer.properties.tag.value", rs.sampleOnContainer.properties.get("tag").getValue());
+	// 		}
+	// 		process=MongoDBDAO.find(InstanceConstants.PROCESS_COLL_NAME, Process.class, dbQuery).toList();
+	// 		if(process.size()==1) {
+	// 			return process.get(0);
+	// 		}else if(process.size()>1){
+	// 			return null;
+	// 		}else {
+	// 			return null;
+	// 		}
+	// 	}else {
+	// 		return null;
+	// 	}
 
 
-	}
+	// }
 
 	List<Process> getMultipleProcess(ReadSet rs)
 	{

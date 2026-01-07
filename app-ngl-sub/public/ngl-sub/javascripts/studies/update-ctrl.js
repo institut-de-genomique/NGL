@@ -24,11 +24,11 @@ angular.module('home').controller('UpdateCtrl',
 						choiceInList : false  
 						});
 			columns.push({
-						property : "state.code",
-						header   : Messages("study.state.code"),
-						"filter" : "codes:'state'",
-						type     : "text",		    	  	
-						order    : true
+						property     : "state.code",
+						header       : Messages("study.state.code"),
+						"filter"     : "codes:'state'",
+						type         : "text",		    	  	
+						order        : true
 						});	
 			columns.push({
 						property   : "code",
@@ -87,22 +87,22 @@ angular.module('home').controller('UpdateCtrl',
 			columns.push({
 						property     : "title",
 						header       : Messages("study.title"),
-							type :"text",	
-						hide:true,
-						order:true,
-						edit:true,
-						editTemplate:"<textarea class='form-control' #ng-model rows='1'></textarea>",
-						choiceInList:false
+						type         : "text",	
+						hide         : true,
+						order        : true,
+						edit         : true,
+						editTemplate : "<textarea class='form-control' #ng-model rows='1'></textarea>",
+						choiceInList : false
 						});	    
 			columns.push({
-						property     : "studyAbstract",
+						property     : "description",
 						header       : Messages("study.AbstractDescription"),
-						type :"text",	
-						hide:true,
-						order:true,
-						edit:true,
-						editTemplate:"<textarea class='form-control' #ng-model rows='1'></textarea>",
-						choiceInList:false
+						type         : "text",	
+						hide         : true,
+						order        : true,
+						edit         : true,
+						editTemplate :"<textarea class='form-control' #ng-model rows='1'></textarea>",
+						choiceInList : false
 						});	
 				
 					      
@@ -121,22 +121,32 @@ angular.module('home').controller('UpdateCtrl',
 			columns.push({
 						property     : "locusTagPrefixs",
 						header       : Messages("study.locusTagPrefixs"),
-						type :"text",	
-						hide:true,
-						order:true,
-						edit:true,  // modifiable en update
-						editTemplate:"<textarea class='form-control' #ng-model rows='1'></textarea>",
-					choiceInList:false
+						type         : "text",	
+						hide         : true,
+						order        : true,
+						edit         : true,  // modifiable en update
+						editTemplate : "<textarea class='form-control' #ng-model rows='1'></textarea>",
+					    choiceInList : false
+						});
+			columns.push({
+						property     : "parentProjectAccessions",
+						header       : Messages("study.parentProjectAccessions"),
+						type         : "text",	
+						hide         : true,
+						order        : true,
+						edit         : true,  // modifiable en update
+						editTemplate : "<textarea class='form-control' #ng-model rows='1'></textarea>",
+					    choiceInList : false
 						});
 			columns.push({
 						property     : "idsPubmed",
 						header       : Messages("study.idsPubmed"),
-						type :"text",	
-						hide:true,
-						order:true,
-						edit:true,  // modifiable en update
-						editTemplate:"<textarea class='form-control' #ng-model rows='1'></textarea>",
-						choiceInList:false
+						type         : "text",	
+						hide         : true,
+						order        : true,
+						edit         : true,  // modifiable en update
+						editTemplate : "<textarea class='form-control' #ng-model rows='1'></textarea>",
+						choiceInList : false
 						});
 			columns.push({
 						property     : "taxonId",
@@ -150,13 +160,25 @@ angular.module('home').controller('UpdateCtrl',
 			columns.push({
 						property     : "scientificName",
 						header       : Messages("project.scientificName"),
-						type :"text",	
-						hide:true,
-						order:true,
-						edit:true,  // modifiable en update
-						editTemplate:"<textarea class='form-control' #ng-model rows='1'></textarea>",
-						choiceInList:false
-						});		
+						type         : "text",	
+						hide         : true,
+						order        : true,
+						edit         : false,  // synchronisé avec taxonId
+						editTemplate  :"<textarea class='form-control' #ng-model rows='1'></textarea>",
+                        });
+			columns.push({
+						property     : "attributes",
+						header       : Messages("study.attributes"),
+						type         : "text",	
+						hide         : true,
+						order        : true,
+						edit         : true,  // modifiable en update
+						editTemplate : "<textarea class='form-control' #ng-model rows='3'></textarea>",
+						//render       : function(data, edit) {
+						//	              return toolsServices.getStringAttributes(data);
+                        //               },
+						choiceInList : false,
+						});				
 			return columns;
 		};
       
@@ -175,8 +197,8 @@ angular.module('home').controller('UpdateCtrl',
 			select:{active:true},
 			showTotalNumberRecords:true,
 			edit : {
-				active:true, // permettre edition des champs editables
-				showButton : true,// bouton d'edition visible
+				active        : true,  // permettre edition des champs editables
+				showButton    : true,  // bouton d'edition visible
 				withoutSelect : true,
 				columnMode : true,
 				lineMode : function(line) {
@@ -218,11 +240,20 @@ angular.module('home').controller('UpdateCtrl',
 				showButton : false,
 				changeClass : false,
 				url:function(line){
-					return jsRoutes.controllers.sra.studies.api.Studies.update(line.code).url; // jamais utilisé si mode local
+					
+					console.log("++++++++++++++++++++++                 JE PASSE PAR LE url:function(line) DU DATATABLE  !!!! ");
+					// pour regler problème de mapping entre representation du study dans datatable et dans model java :
+					//$scope.toJsonStudyModelOrThrow(line, $scope.errorDetails);
+					//return jsRoutes.controllers.sra.studies.api.Studies.update(line.code).url; // jamais utilisé si mode local
 				},
 				method:'put',
 				value:function(line){
+					console.log("++++++++++++++++++++++                 JE PASSE PAR LE value:function(line) DU DATATABLE  !!!! ");
 					return line;
+				},
+				callback : function(datatable, errors) {
+					console.log("++++++++++++++++++++++                 JE PASSE PAR LE callback DU DATATABLE  !!!! ");
+					$scope.updateCallback(datatable, errors);
 				},
 				mode:'local',
 			},
@@ -235,16 +266,18 @@ angular.module('home').controller('UpdateCtrl',
 	// Initialisations :
 	//------------------
 	//console.log("Dans update-ctrl.js");
+	$scope.errorDetails = {};
 	$scope.messages = messages();	
 	$scope.messages.clear();
 	$scope.form = {};  // important. 
 	//$scope.form.createUser = $scope.user; // suppression du controle utilisateur
-
+	$scope.treeLoadInProgress = false;
+	//console.log("Dans consultation-ctrl.js, scope.treeLoadInProgress = "   , $scope.treeLoadInProgress);
+	
 	// Oeration update possible uniquement sur Study (pas sur ExternalStudy) dans etat SUB-F :
 	$scope.form.stateCode ="SUB-F";
 	$scope.form.type="Study"; // important de ne pas proposer ExternalStudy pour update.
 	$scope.sraVariables = {};
-	
 	// Pour avoir les onglets a gauche de la page :
 	if(angular.isUndefined(mainService.getHomePage())){
 		mainService.setHomePage('update');
@@ -288,7 +321,67 @@ angular.module('home').controller('UpdateCtrl',
 	
 	// Definitions methodes :
 	//-----------------------
+	$scope.toJsonStudyModelOrThrow = function(line, errorDetails) {
+		//console.log("dans toJsonStudyModelOrThrow, errorDetails=", errorDetails);
+		//console.log("dans toJsonStudyModelOrThrow, json=", line);
+
+		toolsServices.toJsonStudyModel(line, errorDetails);
+		//line.description = line.studyAbstract;   // mettre la description avec meme valeur que abstract => fait dans java
+		//console.log("dans toJsonStudyModelOrThrow, errorDetails=", errorDetails);
+		if((Object.keys(errorDetails)).length > 0) {
+			//console.log("AAAAAAAAAAAAAAAAAAA               J'ai bien une erreur de  PARSING");
+			$scope.messages = messages(); // si on re-sauve sans recharger page.
+			$scope.messages.clear();      // si on re-sauve sans recharger page.
+			$scope.messages.addDetails(errorDetails);
+			$scope.messages.setError("save");
+			$scope.studiesDT.setSpinner(false);
+			$scope.treeLoadInProgress = false;
+			throw("Erreur de parsing");
+		} 
+	}; // end $scope.toJsonStudyModelOrThrow
+		
+	$scope.updateCallback = function(datatable, countError) {
+		$scope.messages = messages(); // si on re-sauve sans recharger page.
+		$scope.messages.clear();      // si on re-sauve sans recharger page.
+		//console.log(datatable);
+//		console.log(countError);
+//		console.log("YYYYYYYY   TOTOTO   YYYYYYYYYYY    dans callback, displayResult : ", datatable.displayResult);
+//		console.log("xxxxxxxxxx    dans callback, displayResult.line : ", datatable.displayResult.line);
+		//console.log("eeeeeeeeeeeeee  dans callback scope.dbSamples = ", $scope.dbSamples);
+		for (var i = 0; i < datatable.displayResult.length; i++) {
+			var keysError =  Object.keys(datatable.displayResult[i].line.errors);
+//			console.log("eeeeeeeee keysError", keysError);
+//			console.log("eeeeeeeee keysError.length", keysError.length);
+			if ( keysError.length >= 1 ) {
+				// Recuperation message erreur :
+				var monObj = datatable.displayResult[i].line.errors;
+//				console.log("dans callback, monObj", monObj);
+//				console.log("dans callback, monObj.typeOf", monObj.typeOf);
+//				console.log("dans callback, monObj.hasOwnProperty()", monObj.hasOwnProperty());
+				for (var [key, values] of Object.entries(monObj)) {
+					var cle = `${key}`;
+					var values = `${values}`; 
+//  				console.log("xxxxxxxxxxx    cle = ", cle);
+//					console.log("xxxxxxxxxxx    values = ", values);
+//					console.log("monObjValues = ", monObj[cle]);
+					var monError = {};
+					monError[cle]=[values];
+					$scope.messages.addDetails(monError);
+				} // end for
+			} // end if						
+		}// end for
+		// Affichage message succes ou erreur :
+		// Dans le cas d'une exception, countError n'est pas definie :
+		if ( countError == undefined || countError == null || countError > 0) {
+			$scope.messages.setError("save");
+			$scope.treeLoadInProgress = false;
+			$scope.studiesDT.setSpinner(false);
+		} else {
+			$scope.messages.setSuccess("save");			
+		}
+	}; // end updateCallback
 	
+		
 	// methode appelée depuis la vue avec la directive ng-init
 	$scope.setUserInScope = function(user) {
 		$scope.user = user;
@@ -300,7 +393,7 @@ angular.module('home').controller('UpdateCtrl',
 		$scope.messages.clear();
 		//console.log("Dans update-ctrl.search");
 		//console.log("user", $scope.user)
-		if (! $scope.form.accession && ! $scope.form.externalId ) {
+		if (! $scope.form.identifier) {
 			$scope.messages.setError(Messages("AbsenceSearchParameter"));
 			console.log("update-ctrl.$scope.messages = ", $scope.messages);
 			// annuler spinner si besoin
@@ -325,22 +418,33 @@ angular.module('home').controller('UpdateCtrl',
 		$scope.messages.clear();
 		$scope.form.stateCode ="SUB-F";
 		$scope.form.type="Study"; // important de ne pas proposer ExternalStudy pour update 
+		$scope.treeLoadInProgress = false;
+		$scope.errorDetails = {};
 	};
 
 
 	$scope.submit = function() {
 		$scope.messages = messages();
 		$scope.messages.clear();
+		$scope.errorDetails = {}; // important de le mettre ici si après une erreur on retente un submit sans recharger page
+
 		//console.log("YYYYYYYYYY Dans update-ctrl.submit");
 		mainService.setForm($scope.form);
+		//$scope.treeLoadInProgress = true;
+		$scope.studiesDT.setSpinner(true);
 		// sauvegarde des données en local (mode local le save de getColumnStudy) 
 		// (si mode remote, les donnees sont bien sauvées dans base avec valeurs editées mais 
 		// le datatable utilisé ici ne contient pas les modifs des utilisateurs 
 		// => en mode remote, dans le datatable, le modele n'est pas synchronisé avec la vue.
 		// En mode local, dans le datatable, le modele est synchronisé avec la vue et contient bien 
 		// les modifications des utilisateurs, en revanche pas de sauvegarde dans la base !
-		// ici la sauvegarde du study se fait au moment de la creation de la soumission dans la partie java.
+		// ici la sauvegarde du study en base se fait au moment de la creation de la soumission dans la partie java.
+		
+		// Attention, lorsqu'on sauve un study en mode local, AllResult contient tous les champs alors que displayResult ne contient pas les
+		// champs de type list ou objet s'ils n'ont pas été modifiés par les utilisateurs. Apres un save local dans le datatable, prendre
+		// les données dans AllResult (et non dans displayResult) et transformer dans bon type si besoin avant de sauvegarder en base.
 
+		console.log("$scope.studiesDT avant save du datatable ", $scope.studiesDT);
 		$scope.studiesDT.save(); 
 		$scope.tab_studies = $scope.studiesDT.getData();
 		if(!$scope.tab_studies || $scope.tab_studies.length < 1) {
@@ -348,124 +452,88 @@ angular.module('home').controller('UpdateCtrl',
 			$scope.messages.setError(Messages("AbsenceDonneePourUpdate"));
 			throw(Messages("AbsenceDonneePourUpdate"));
 		}
-		var tabRequestCreateForUpdate = [];
-		
-		//console.log("YYYYYYYYYY Dans update-ctrl.submit: nb_study=" + $scope.tab_bilans.length);
-		// declencher creation d'un objet submission pour update :
-		var study = $scope.tab_studies[0];  // requete avec ERP ou PRJEB qui renvoie un seul resultat
-        console.log("xxxxxxxx userStudy.releaseDate=", study.releaseDate);
-		console.log("releaseDate="+study.releaseDate);
-		console.log("releaseDate="+ moment(study.releaseDate).calendar());
-		console.log("date.now="+ Date.now());
-		console.log("releaseDate.endOf="+ moment(study.releaseDate).endOf('day'));
-		console.log("releaseDate.fromNow="+ moment(study.releaseDate).fromNow());
-		console.log("releaseDate.endOf.fromNow="+ moment(study.releaseDate).endOf('day').fromNow());
-		
-		console.log(moment (study.releaseDate, "YYYY-MM-DD", true) .isValid ());
-		console.log(moment (study.releaseDate, "DD/MM/YYYY", true) .isValid ());
-		
-		console.log (moment (study.releaseDate). format ('DD/MM/YYYY'));
-		
-		
-
-		if(toolsServices.isNotBlank(study.locusTagPrefixs)) {
-			console.log("typeOf study.locusTagPrefixs", typeof study.locusTagPrefixs);
-			console.log(study.locusTagPrefixs);
-			// si on edite la valeur de locusTagPrefixs dans datatable alors string, et sinon array d'ou teste sur le type :
-			if(typeof study.locusTagPrefixs === 'string' || study.locusTagPrefixs instanceof String) {
-				var strLocusTagPrefixs = study.locusTagPrefixs.replace(/,\s*$/, "");
-				strLocusTagPrefixs = strLocusTagPrefixs.replace(/,\s*$/, "");
-				delete study.locusTagPrefixs;
-				study.locusTagPrefixs = strLocusTagPrefixs.split(','); 
-		    	// Preferer boucle for au forEach ici car passage par valeur du locusTag d'ou modification dans le forEach qu'il faut sauvegarder
-            	// hors de la boucle forEach. De plus, boucle for plus efficace.
-				for(var i= 0; i < study.locusTagPrefixs.length; i++) {
-     				study.locusTagPrefixs[i] = toolsServices.clean(study.locusTagPrefixs[i]);
-				}
-			}
-		} else {
-			delete study.locusTagPrefixs;
+		console.log("$scope.studiesDT apres save du datatable ", $scope.studiesDT);
+		for(var i= 0; i < $scope.tab_studies.length; i++) {
+			var study = $scope.tab_studies[i];
+			//pour regler problème de mapping entre representation du study dans datatable et dans model java :
+			$scope.toJsonStudyModelOrThrow(study, $scope.errorDetails);
 		}
-		
 	
-		if(toolsServices.isNotBlank(study.idsPubmed)) {
-			console.log("typeOf study.idsPubmed", typeof study.idsPubmed);
-			console.log(study.idsPubmed);
-			// si on edite la valeur de idsPubmed dans datatable alors string, et sinon array d'ou teste sur le type :
-			if(typeof study.idsPubmed === 'string' || study.idsPubmed instanceof String) {
-				var strIdsPubmed = study.idsPubmed.replace(/,\s*$/, "");
-				strIdsPubmed = strIdsPubmed.replace(/,\s*$/, "");
-				delete study.idsPubmed;
-				study.idsPubmed = strIdsPubmed.split(','); 
-		    	// Preferer boucle for au forEach ici car passage par valeur du idPubmed d'ou modification dans le forEach qu'il faut sauvegarder
-            	// hors de la boucle forEach. De plus, boucle for plus efficace.
-				for(var i= 0; i < study.idsPubmed.length; i++) {
-     				study.idsPubmed[i] = toolsServices.clean(study.idsPubmed[i]);
-				}
-			}
-		} else {
-			delete study.idsPubmed;
-		}
-			
-		
-		study.description = study.studyAbstract;	// important de remettre la description avec meme valeur que abstract.	
-		// mise à jour du study et project dans base qui se fait dans createSubmission() appelé par createForUpdate
+	
+		var study = $scope.tab_studies[0];
+		//console.log("study pour sauvegarde en base = ", umbrella);
+		var tabRequestCreateForUpdate = [];
 
+//		console.log("HHHHHHHHHHHHHHH                         YYYYYYYYYYYYYYYYYY           study= ", study)
+//      console.log("xxxxxxxx userStudy.releaseDate=", study.releaseDate);
+//		console.log("releaseDate="+study.releaseDate);
+//		console.log("releaseDate="+ moment(study.releaseDate).calendar());
+//		console.log("date.now="+ Date.now());
+//		console.log("releaseDate.endOf="+ moment(study.releaseDate).endOf('day'));
+//		console.log("releaseDate.fromNow="+ moment(study.releaseDate).fromNow());
+//		console.log("releaseDate.endOf.fromNow="+ moment(study.releaseDate).endOf('day').fromNow());		
+//		console.log(moment (study.releaseDate, "YYYY-MM-DD", true) .isValid ());
+//		console.log(moment (study.releaseDate, "DD/MM/YYYY", true) .isValid ());
+//		console.log (moment (study.releaseDate). format ('DD/MM/YYYY'));
+
+	
 		var args = {
 			study       : study,
 			samples     : [],
 			experiments : []
-		};			
-
+		};		
+		
 		// declencher creation d'un objet submission pour update et sauvegarde du study passés dans args
 		var request = $http.put(jsRoutes.controllers.sra.submissions.api.Submissions.createForUpdate().url, args);
-//		.catch (error => {
-//			console.log(error);
-//			$scope.messages.addDetails(error.data); 
-//			return $q.reject(error);                // propage erreur, comme throw 
-//		});
 		tabRequestCreateForUpdate.push(request);
 		$q.all(tabRequestCreateForUpdate)
 		.then(result => { // result de l'operation precedente, cad la creation de la soumission
-				console.log("result_2 = " + result); 	
+				//console.log("result_2 = " + result); 	
 				//console.log("result_2 = " + result[0].data); 	
 				//console.log("result_2 = " + result[0].data.code); 	
 				var submission = result[0].data;
-				var submissionCode = result[0].data.code;
-				var submissionState = angular.copy(result[0].data.state);
-				submissionState.code = "SUBU-SMD-IW";
-				$scope.messages.setSuccess("La soumission " + submissionCode + " pour la mise a jour à l'EBI des données du tableau est en cours de traitement"); 
-				return $http.put(jsRoutes.controllers.sra.submissions.api.Submissions.updateState(submissionCode).url, submissionState);					
-		}).then(result => { // result de l'operation precedente cad la mise à jour de l'etat de la soumission
-				console.log("result_3 = " + result); 	
-				//console.log("result_3 = " + result.data); 
-				var submissionCode = result.data.code;
-				$scope.messages.setSuccess("La soumission " + submissionCode + " pour la mise a jour à l'EBI des données du tableau est en cours de traitement"); 
-				// rafraichissement tableau avec nouveaux status: 
-//				$scope.tab_studies.forEach(function(study) {
-//					study.state.code="SUBU-SMD-IW";	
-//				});
-//				$scope.studiesDT.setData($scope.tab_studies, $scope.tab_studies.length);	
-
-				// mieux de passer par valeur en base car ecrasement de userReleaseDate si < dbReleaseDate
-				var tab_codes = [];
-				$scope.studiesDT = datatable($scope.studiesDTConfig);
-				$scope.studiesDT.setColumnsConfig($scope.getStudyColumns());
-				for(var i= 0; i < $scope.tab_studies.length; i++) {
-					tab_codes.push($scope.tab_studies[i].code);
-				}
-				$scope.studiesDT.search({codes:tab_codes});	
-								
+				//var submissionCode = result[0].data.code;				
+				$scope.messages.setSuccess("Le study " + study.code + " a bien été mis à jour à l'EBI via la soumission "  + submission.code + " voir ebiReport " + submission.submissionDirectory + "/" + submission.ebiResult); 
+				//$scope.treeLoadInProgress = false;	
+				$scope.studiesDT.setSpinner(false);
+//
+//				return $http.put(jsRoutes.controllers.sra.submissions.api.Submissions.updateState(submissionCode).url, submissionState);					
+//		}).then(result => { // result de l'operation precedente cad la mise à jour de l'etat de la soumission
+//				//console.log("result_3 = " + result); 	
+//				//console.log("result_3 = " + result.data); 
+//				var submissionCode = result.data.code;
+//				$scope.messages.setSuccess("La soumission " + submissionCode + " pour la mise a jour à l'EBI des données du tableau est en cours de traitement"); 
+//				// mieux de passer par valeur en base car ecrasement de userReleaseDate si < dbReleaseDate
+//				var tab_codes = [];
+//				$scope.studiesDT = datatable($scope.studiesDTConfig);
+//				$scope.studiesDT.setColumnsConfig($scope.getStudyColumns());
+//				for(var i= 0; i < $scope.tab_studies.length; i++) {
+//					tab_codes.push($scope.tab_studies[i].code);
+//				}
+//				$scope.studiesDT.search({codes:tab_codes});	
+//				$scope.treeLoadInProgress = false;					
 		}).catch(error => { 
 			$scope.messages.addDetails(error.data); 
-			$scope.messages.setError("Erreur de sauvegarde");   // important pour avoir le message.
+			$scope.messages.setError("Erreur "); 
 			// Pas bonne idée car si message d'erreur bien que l'utilisateur voit sa saisie erronnée dans le tableau
 			// affichage données originales dans base si donnée modifiées par user non validees
-			//$scope.studiesDT.setData($scope.tab_studies_ori, $scope.tab_studies_ori.length);				
+			//$scope.studiesDT.setData($scope.tab_studies_ori, $scope.tab_studies_ori.length);	
+			//$scope.treeLoadInProgress = false;
+			$scope.studiesDT.setSpinner(false);
+
+			
 		});
 	
 	};// end $scope.submit
 
+
+	// NGL-4708
+	$scope.isShowConsigne=false;
+	$scope.toggleShowConsigne=function(){
+		//console.log("TOGGLE search-ctrl.js");
+		if ( $scope.isShowConsigne===false) { $scope.isShowConsigne=true}
+		else {$scope.isShowConsigne=false}
+	};
 
 }]);
 

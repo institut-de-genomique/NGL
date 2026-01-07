@@ -177,6 +177,9 @@ reagent.receptions.menu.state = Changement d''Etat
 reagent.receptions.menu.create = Création (manuelle)
 reagent.receptions.menu.new_from_file = Création (via un import fichier)
 
+reagents.menu.doc.global = Documentation globale (mars 2021)
+reagents.menu.doc.guide_receptif = Guide d''utilisation Réception réactifs (mars 2021)
+
 reagent.receptions.page.tab.search = Rechercher une réception de boite ou réactif
 reagent.receptions.page.tab.state = Changement d''Etat réception de boite ou réactif
 reagent.receptions.page.tab.create = Déclarer une réception de boîte ou réactif

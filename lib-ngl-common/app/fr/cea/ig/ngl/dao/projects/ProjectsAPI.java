@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.apache.commons.lang3.StringUtils;
+import org.mongojack.DBQuery.Query;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.typesafe.config.ConfigFactory;
@@ -46,11 +47,9 @@ public class ProjectsAPI extends GenericAPI<ProjectsDAO, Project> {
 
 	private static final play.Logger.ALogger logger = play.Logger.of(ProjectsAPI.class);
 
-	private static final List<String> authorizedUpdateFields = Arrays.asList("name", "comments", "typeCode", "categoryCode",
-			"properties.archiveHistory.value", "properties.synchroProj.value", "lastSampleCode", "properties.qtreeQuota.rawdata",
-			"properties.qtreeQuota.scratch", "properties.qtreeQuota.proj");
+	private static final List<String> authorizedUpdateFields = Arrays.asList("name", "comments", "typeCode", "categoryCode", "lastSampleCode");
 
-	private final static List<String> defaultKeys = Arrays.asList("code", "name", "typeCode", "categoryCode", "comments"); // TODO
+	private final static List<String> defaultKeys = Arrays.asList("code", "name", "typeCode", "categoryCode", "comments"); 
 
 	private final ProjectWorkflows workflows;
 
@@ -78,6 +77,10 @@ public class ProjectsAPI extends GenericAPI<ProjectsDAO, Project> {
 
 	public Iterable<Project> all() throws APIException {
 		return dao.all();
+	}
+	
+	public Iterable<Project> find(Query query) throws APIException {
+		return dao.find(query);
 	}
 
 	public void setMailServices(MailServices mailServices) {
@@ -290,7 +293,6 @@ public class ProjectsAPI extends GenericAPI<ProjectsDAO, Project> {
 		}
 
 		ProjectValidationHelper.validatePropertiesRequired(ctxVal, project.typeCode, input.properties, fields);
-		ProjectValidationHelper.validateArchiveProperties(ctxVal, project.code, project.typeCode, input.properties, false);
 
 		if (ctxVal.hasErrors()) {
 			throw new APIValidationException(INVALID_INPUT_ERROR_MSG, ctxVal.getErrors());

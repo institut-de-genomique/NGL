@@ -62,10 +62,14 @@ public class ExcelFileService extends FileService {
 	@Override
 	public void analyse() {
 		try {
-			// compute header label and column position
+			long startGlobal = System.currentTimeMillis(); // Début analyse
+    		logger.info("[TIMER] Début exécution globale de l'importation");
+
+    
 			Sheet sheet = getSheet(0);
 			headerByIndex = convertRow(sheet.getRow(0));
 			updateHeaderConfiguration();
+
 			if (headerByIndex == null) {
 				contextValidation.addError("Headers", "not found");
 				return;
@@ -73,18 +77,25 @@ public class ExcelFileService extends FileService {
 			Iterator<Row> iti = sheet.rowIterator();
 			iti.next();
 			while (iti.hasNext()) {
+				
+				
 				Row row = iti.next();
 				Map<Integer, String> rowMap = convertRow(row);
 				if (rowMap != null) {
+					
 					contextValidation.addKeyToRootKeyName("line " + (row.getRowNum()+1));
 					treatLine(rowMap);
 					contextValidation.removeKeyFromRootKeyName("line " + (row.getRowNum()+1));
 				}
+				
 			}
 			if (!contextValidation.hasErrors()) {
 				consolidateObjects();
 				saveObjects();
-			}				
+			}	
+			long endGlobal = System.currentTimeMillis(); // Fin analyse
+			logger.info("[TIMER] Exécution complète de l'importation - Durée totale : " + (endGlobal - startGlobal) + " ms");
+					
 		} catch(Exception e) {
 			logger.error("Error import file "+e.getMessage(),e);
 			contextValidation.addError("Exception contact your administrator", e.getMessage());

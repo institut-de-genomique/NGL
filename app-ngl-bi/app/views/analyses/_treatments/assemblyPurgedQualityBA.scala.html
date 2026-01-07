@@ -1,0 +1,77 @@
+@()
+<div ng-init="treatmentCode='assemblyPurgedQuality'">
+<div class="row">
+<div class="col-md-9 col-lg-9">
+    <br />
+    <br />
+	<br/>
+    <b>Readsets used : </b>
+    {{analysis.treatments[treatmentCode].pairs.readsetsused.value}}
+    <br />
+    <br />
+	 <strong></strong>
+	 <br/><br/>  
+	 <table class="table table-condensed table-hover table-bordered">
+			<tr>
+				<th>@Messages("analyses.treatments.assemblyQuality.selectedAssembly")</th> 
+				<td>{{analysis.treatments[treatmentCode].pairs.selectedAssembly.value}}</td>
+			</tr>
+			<tr>
+				<th>@Messages("analyses.treatments.assemblyQuality.completion")</th> 
+				<td>{{analysis.treatments[treatmentCode].pairs.completion.value | number}}</td>
+			</tr>
+			<tr>
+				<th>@Messages("analyses.treatments.assemblyQuality.merquryScore")</th> 
+				<td>{{analysis.treatments[treatmentCode].pairs.merquryScore.value | number:2}}
+			</tr>
+		
+			<!--th>@Messages("analyses.treatments.assemblyQuality.buscoScore")</th--> 
+			<tr>
+				<th>@Messages("analyses.treatments.assemblyQuality.scoreBuscoEuk")</th>
+				<td>{{analysis.treatments[treatmentCode].pairs.scoreBuscoEuk.value}}</td>
+			</tr> 
+			
+			<tr>
+				<th>@Messages("analyses.treatments.assemblyQuality.scoreBuscoTaxon")</th>
+				<td>{{analysis.treatments[treatmentCode].pairs.scoreBuscoTaxon.value}}</td>
+			</tr> 
+			
+			<tr>
+				<th>@Messages("analyses.treatments.assemblyQuality.taxonBusco")</th> 
+				<td>{{analysis.treatments[treatmentCode].pairs.taxonBusco.value}}</td>	
+			</tr>
+	 </table>
+ </div>	
+</div>
+
+
+
+<div class="row">
+    <div class="col-md-4 col-lg-4">
+	    <div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+	    ng-click="setImage(analysis.treatments[treament.code!=undefined?treament.code:treatmentCode].pairs.katGraph150.value,'katGraph150','',treament.code!=undefined?treament.code:treatmentCode,
+	    analysis.treatments[treament.code!=undefined?treament.code:treatmentCode].pairs.katGraph150.width,
+	    analysis.treatments[treament.code!=undefined?treament.code:treatmentCode].pairs.katGraph150.height)">
+		 <a href="#">
+		    <img id="pairs_katGraph150" ng-src="data:image/png;base64,{{analysis.treatments[treament.code!=undefined?treament.code:treatmentCode].pairs.katGraph150.value}}" />
+		    <p>@Messages("analyses.treatments.assemblyQuality.katGraph150")</p>
+		 </a>   
+	    </div>
+    </div>
+</div>
+    <br />
+	<br/>
+<div class="row">
+    <div class="col-md-4 col-lg-4">
+	    <div class="thumbnail" data-target="#myImageModal" role="button" data-toggle="modal" 
+	    ng-click="setImage(analysis.treatments[treament.code!=undefined?treament.code:treatmentCode].pairs.katGraph300.value,'katGraph300','',treament.code!=undefined?treament.code:treatmentCode,
+	    analysis.treatments[treament.code!=undefined?treament.code:treatmentCode].pairs.katGraph300.width,
+	    analysis.treatments[treament.code!=undefined?treament.code:treatmentCode].pairs.katGraph300.height)">
+		 <a href="#">
+		    <img id="pairs_katGraph300" ng-src="data:image/png;base64,{{analysis.treatments[treament.code!=undefined?treament.code:treatmentCode].pairs.katGraph300.value}}" />
+		    <p>@Messages("analyses.treatments.assemblyQuality.katGraph300")</p>
+		 </a>   
+	    </div>
+    </div>
+</div>
+</div>

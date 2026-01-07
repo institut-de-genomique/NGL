@@ -1,0 +1,53 @@
+@this()
+@()
+@import views.html.helper._
+
+@user            = @{ fr.cea.ig.authentication.Authentication.getUser() }
+
+
+@form() = {
+	
+	@columnSearchForm{
+		@formGroup{
+			<textarea class="form-control" rows="2" ng-model="submissionCode" placeholder='@Messages("delete.placeholder.submissionCode")' ></textarea>
+		}
+	}
+	
+}
+
+<div class="row">
+<div class="col-md-12 col-lg-12"  messages="messages"></div>
+</div>
+
+<div class="row"> 
+	<div class="col-md-12 col-lg-12">
+		<div dt-form>	
+			<div class="tab-content">
+				<div class="tab-pane active" id="filters">
+					<form name="configurationForm" class="well well-small">
+						<div class="row">
+						@form
+						@columnSearchForm{
+							@formGroup{
+							<div class="btn-toolbar">
+								<!--button type="submit" title='@Messages("button.delete")'  ng-click="delete()" data-toggle="tooltip" class="btn btn-primary" >
+									<i class="fa fa-save"></i>
+								</button-->
+								<button class="btn btn-default" title='@Messages("button.deleteSubmission")' ng-click="delete()">
+									<i class="fa fa-trash-o"></i>
+								</button>						    	
+
+								<button title='@Messages("button.reset")' ng-click="reset()" data-toggle="tooltip"  class="btn btn-default">
+									<i class="fa fa-undo"></i>
+								</button>						 	
+							</div>	
+							}	
+						}
+						</div>		
+					</form>	
+				</div>
+			</div>
+		</div>
+	</div>
+</div> 
+

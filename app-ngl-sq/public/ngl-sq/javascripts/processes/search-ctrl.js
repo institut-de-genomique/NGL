@@ -1,5 +1,5 @@
 "use strict"
-angular.module('home').controller('SearchCtrl', ['$scope','$location','$routeParams', 'datatable','lists','$filter','$http','mainService','tabService','processesSearchService', function($scope,$location,$routeParams, datatable, lists,$filter,$http,mainService,tabService,processesSearchService) {
+angular.module('home').controller('SearchCtrl', ['$scope','$location','$routeParams', 'datatable','lists','$filter','$http','mainService','tabService','processesSearchService', 'projectSearchFromUmbrella', function($scope,$location,$routeParams, datatable, lists,$filter,$http,mainService,tabService,processesSearchService, projectSearchFromUmbrella) {
 	$scope.datatableConfig = {
 			search:{
 				url:jsRoutes.controllers.processes.api.Processes.list()
@@ -53,6 +53,11 @@ angular.module('home').controller('SearchCtrl', ['$scope','$location','$routePar
 		if ( $scope.isShowConsigne===false) { $scope.isShowConsigne=true}
 		else {$scope.isShowConsigne=false}
 	}
+
+	$scope.selectProjetsFromUmbrellas = function() {
+		var projCodes = projectSearchFromUmbrella.search($scope.searchService.form.umbrellaCodes);
+		$scope.searchService.form.projectCodes = projCodes;
+	}
 	
 	//init
 	if(angular.isUndefined($scope.getHomePage())){
@@ -77,7 +82,7 @@ angular.module('home').controller('SearchCtrl', ['$scope','$location','$routePar
 	
 }]);
 
-angular.module('home').controller('SearchStateCtrl', ['$scope','$location','$routeParams', '$q', 'datatable','lists','$filter','$http','mainService','tabService','processesSearchService', function($scope,$location,$routeParams,$q,datatable, lists,$filter,$http,mainService,tabService,processesSearchService) {
+angular.module('home').controller('SearchStateCtrl', ['$scope','$location','$routeParams', '$q', 'datatable','lists','$filter','$http','mainService','tabService','processesSearchService', 'projectSearchFromUmbrella', function($scope,$location,$routeParams,$q,datatable, lists,$filter,$http,mainService,tabService,processesSearchService, projectSearchFromUmbrella) {
 	$scope.datatableConfig = {
 			search:{
 				url:jsRoutes.controllers.processes.api.Processes.list()
@@ -162,6 +167,11 @@ angular.module('home').controller('SearchStateCtrl', ['$scope','$location','$rou
 			}
 	};
 
+	$scope.selectProjetsFromUmbrellas = function() {
+		var projCodes = projectSearchFromUmbrella.search($scope.searchService.form.umbrellaCodes);
+		$scope.searchService.form.projectCodes = projCodes;
+	}
+
 	$scope.reset = function(){
 		$scope.searchService.resetForm();
 		$scope.searchService.resetTextareas();	
@@ -196,7 +206,7 @@ angular.module('home').controller('SearchStateCtrl', ['$scope','$location','$rou
 }]);
 
 
-angular.module('home').controller('SearchRemoveCtrl', ['$scope','$location','$routeParams', 'datatable','lists','$filter','$http','mainService','tabService','processesSearchService', function($scope,$location,$routeParams, datatable, lists,$filter,$http,mainService,tabService,processesSearchService) {
+angular.module('home').controller('SearchRemoveCtrl', ['$scope','$location','$routeParams', 'datatable','lists','$filter','$http','mainService','tabService','processesSearchService', 'projectSearchFromUmbrella', function($scope,$location,$routeParams, datatable, lists,$filter,$http,mainService,tabService,processesSearchService, projectSearchFromUmbrella) {
 	$scope.datatableConfig = {
 			search:{
 				url:jsRoutes.controllers.processes.api.Processes.list()
@@ -231,6 +241,11 @@ angular.module('home').controller('SearchRemoveCtrl', ['$scope','$location','$ro
 				"searchService":processesSearchService
 			}
 	};
+
+	$scope.selectProjetsFromUmbrellas = function() {
+		var projCodes = projectSearchFromUmbrella.search($scope.searchService.form.umbrellaCodes);
+		$scope.searchService.form.projectCodes = projCodes;
+	}
 
 	$scope.reset = function(){
 		$scope.searchService.resetForm();

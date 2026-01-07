@@ -24,6 +24,7 @@ import models.laboratory.run.instance.ReadSet;
 import ngl.refactoring.state.AnalysisStateNames;
 import validation.ContextValidation;
 import validation.common.instance.CommonValidationHelper;
+import validation.run.instance.AnalysisValidationHelper;
 import workflows.analyses.AnalysisWorkflows;
 
 public class AnalysesAPI extends GenericAPI<AnalysesDAO, Analysis> {
@@ -32,6 +33,15 @@ public class AnalysesAPI extends GenericAPI<AnalysesDAO, Analysis> {
     private final static List<String> authorizedUpdateFields = Arrays.asList("code",
                                                                              "masterReadSetCodes",
                                                                              "readSetCodes");
+    private final static List<String> defaultKeys = Arrays.asList("code",
+    		"typeCode",
+    		"masterReadSetCodes",
+    		"readSetCodes",
+    		"projectCodes",
+    		"sampleCodes",
+    		"state",
+    		"valuation",
+    		"traceInformation");
     
     private final AnalysisWorkflows workflows;
     private final ReadSetsDAO readSetDao;
@@ -50,8 +60,7 @@ public class AnalysesAPI extends GenericAPI<AnalysesDAO, Analysis> {
 
     @Override
     protected List<String> defaultKeys() {
-        // return Arrays.asList("*");
-        return null;
+    	return defaultKeys;
     }
 
     private Analysis addCodesToAnalysis(Analysis input) {
@@ -166,6 +175,23 @@ public class AnalysesAPI extends GenericAPI<AnalysesDAO, Analysis> {
             }
         }
     }
+    
+    public Analysis updateProperty(String code, String propertyName, PropertyValue propertyValue, String currentUser) throws APIException, APIValidationException {
+        Analysis analysis = get(code);
+        if (analysis == null) throw new APIException(dao.getElementClass().getSimpleName() + " with code " + code + " not exist"); 
+        
+        ContextValidation ctxVal = ContextValidation.createUpdateContext(currentUser); 
+        analysis.properties.put(propertyName, propertyValue);
+        AnalysisValidationHelper.validateAnalysisTypeRequired(ctxVal, analysis.typeCode, analysis.properties);
+        
+        if (ctxVal.hasErrors()) throw new APIValidationException(GenericAPI.INVALID_INPUT_ERROR_MSG, ctxVal.getErrors());
+        
+        TraceInformation ti = analysis.traceInformation;
+        ti.modificationStamp(ctxVal, currentUser);
+        dao.updateObject(DBQuery.and(DBQuery.is("code", analysis.code)), 
+                         DBUpdate.set("properties", analysis.properties).set("traceInformation", ti));
+        return get(analysis.code);
+    }
 
     public Analysis updateProperties(String code, Map<String, PropertyValue> properties, String currentUser) throws APIException, APIValidationException {
         Analysis analysis = get(code);
@@ -174,6 +200,7 @@ public class AnalysesAPI extends GenericAPI<AnalysesDAO, Analysis> {
         } else {
             ContextValidation ctxVal = ContextValidation.createUpdateContext(currentUser); 
             // GA: AnalysisValidationHelper.validateAnalysisType(objectInDB.typeCode, properties, ctxVal);
+            AnalysisValidationHelper.validateAnalysisTypeRequired(ctxVal, analysis.typeCode, properties);
             if (!ctxVal.hasErrors()) {
                 TraceInformation ti = analysis.traceInformation;
                 ti.modificationStamp(ctxVal, currentUser);
@@ -224,4 +251,5 @@ public class AnalysesAPI extends GenericAPI<AnalysesDAO, Analysis> {
             }
         }
     }
+
 }

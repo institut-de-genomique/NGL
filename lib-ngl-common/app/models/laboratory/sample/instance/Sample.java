@@ -2,10 +2,12 @@ package models.laboratory.sample.instance;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -188,6 +190,16 @@ path: ",CO-0000140,BUP_AAAA",
 	private Date processesToLaunchDate;
 	
 	/**
+     * Extra info.
+     */
+    public Set<String> resolutionCodes;
+    
+    /**
+     * History
+     */
+    public List<ResolutionHistoryEntry> resolutionHistory;
+	
+	/**
 	 * Constructs a new Sample.
 	 */
 	public Sample() {
@@ -208,6 +220,7 @@ path: ",CO-0000140,BUP_AAAA",
 		ValidationHelper      .validateNotEmpty                  (contextValidation, name, "name");
 		ValidationHelper	  .validateNotEmpty					 (contextValidation, referenceCollab, "referenceCollab");
 		//NGL-4046 : ajout validation taxonCode
+		SampleValidationHelper.validateCodeSyntax				 (contextValidation, code);
 		SampleValidationHelper.validateTaxonCode                 (contextValidation, taxonCode);
 		SampleValidationHelper.validateSampleCategoryCodeRequired(contextValidation, categoryCode);
 		CommonValidationHelper.validateProjectCodes              (contextValidation, projectCodes);
@@ -239,9 +252,29 @@ path: ",CO-0000140,BUP_AAAA",
 	}
 
 	public void setProcessesToLaunchDate(Date processesToLaunchDate) {
-		if (!this.projectCodes.contains("CEA")) {
+		if (Stream.of("CEA", "CEC", "CEE", "CED", "CSN").noneMatch(this.projectCodes::contains)) {
 			this.processesToLaunchDate = processesToLaunchDate;
 		}
 	}
+	
+	/**
+	 * null-safe function to add a resolutionCode to this valuation.
+	 * @param resolutionCode code resolution
+	 */
+	public void addResolution(String resolutionCode) {
+		if(this.resolutionCodes == null)
+			this.resolutionCodes = new HashSet<>(1);
+		this.resolutionCodes.add(resolutionCode);
+	}
+
+	
+    public String getTaxonCode() {
+        return taxonCode;
+    }
+
+    
+    public void setTaxonCode(String taxonCode) {
+        this.taxonCode = taxonCode;
+    }
 
 }

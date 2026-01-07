@@ -46,7 +46,10 @@ import validation.ContextValidation;
  *  shortName: OPTIO- automatiquement calculé au CNG pour le séquencage illumina si categoryCode=SINGLE-INDEX, DUAL-INDEX ou MID<br>
  *                    (NB dans ce cas s'il est présent une alerte affiche qu'il sera ignoré)
  *                    doit etre fourni dans les autres cas (erreur si manquant)<br>
+ * 
  *  supplierName et supplier-indexName peuvent etre manquants tous les 2. mais supplierName peut etre présent seul<br>
+ *  NGL-4644 pour les index de type "index-pacbio-sequencing", supplier-indexName est obligatoire
+ * 
  *  groupNames: OBLIG -liste des groupes auquel appartient l'index (kits au CNRGH...): valeurs séparées par ","<br>
  *  
  * Règle additionnelle (NGL-2450): le couple shortName + séquence doit être unique pour une catégorie d'index donné<br>
@@ -72,10 +75,11 @@ import validation.ContextValidation;
 
 public class InsertSequencingIndex extends	 ScriptWithArgsAndBody<InsertSequencingIndex.Args> {
 	// structure de controle et stockage des arguments attendus dans l'url. Declarer les champs public.
+	// supression static ??? idem
 	public static class Args {
 		public String typeCode;
 		public boolean simul;     // ajout NGL-3299 pour simulation insertion
-		public boolean auto;      // ajout NGL-3334 pour calculer les shortName automatiquement au CNS aussi ( toujours vrai pour CNG)
+		public boolean auto;      // ajout NGL-3334 pour calculer les shortName automatiquement
 	}
 	
 	private final NGLConfig config; // pour récupérer l'institute
@@ -116,6 +120,7 @@ public class InsertSequencingIndex extends	 ScriptWithArgsAndBody<InsertSequenci
 				XSSFSheet sheet=workbook.getSheet("index");
 				if ( null != sheet ) {	
 					failedIndex = insertIndexes(sheet, args.typeCode, args.simul, args.auto);
+
 					if(failedIndex.size() != 0) {
 						println("Warning: some indexes have not been imported:");
 						println(failedIndex.toString()); // affichage de la liste des index non crees
@@ -138,8 +143,8 @@ public class InsertSequencingIndex extends	 ScriptWithArgsAndBody<InsertSequenci
 	 * @param sheet            Onglet Excel a traiter
 	 * @param typeCode         type d'index
 	 * @param simul            flag pour insertion ou non
-	 * @param auto             flag pour calcul automatique des shortNames ( qq soit la valeur, pour CNG toujours vrai !)
-	 * @return  liste des index non-insérés
+	 * @param auto             flag pour calcul automatique des shortNames si possible
+	 * @return                 liste des index non-insérés
 	 */
 	private List<String> insertIndexes(XSSFSheet sheet, String typeCode, boolean simul, boolean auto ) {
 		List<String> failedIndex = new ArrayList<>();
@@ -161,10 +166,10 @@ public class InsertSequencingIndex extends	 ScriptWithArgsAndBody<InsertSequenci
 		mapNGL2455.put("GTAGAGGA-GCGTAAGA","DUAL400");// remplace DUAL324 à supprimer!!
 		
 		String institute= config.getInstitute();
-		////  PB !!! if (institute.equals("CNG")) { auto=true; } // au CNG toujours calculer les shortNames quand c'est possible (IND, DUAL, MID)
-
+	
 		sheet.rowIterator().forEachRemaining(row -> {
 			ContextValidation ctxVal = ContextValidation.createCreationContext(user);// doit etre dans la boucle
+			boolean autook=true;// ajouté pour contourner le problem de auto pas modifiable...doit etre dans la boucle
 			
 			if (row.getRowNum() == 0) {return; }// sauter la ligne header
 			
@@ -197,38 +202,43 @@ public class InsertSequencingIndex extends	 ScriptWithArgsAndBody<InsertSequenci
 			index.categoryCode =getValFromRow(row, 2,"categoryCode", true); if ( null==index.categoryCode) { failedIndex.add(index.code); return;} // col C=2
 			index.sequence     =getValFromRow(row, 3,"sequence",true);      if ( null==index.sequence) { failedIndex.add(index.code); return;}     // col D=3
 			
-			// 17/03/2021 déplacé ici car un cas spécial est apparu pour les index "Chromium" (NGL-3205)
-			Boolean isChromium=false;
-			// groupNames est obligatoire !!
+			// 17/03/2021 les index "Chromium" (NGL-3205) ne suivent pas la numérotation DUALXXX 
+			// 28/02/2024 les index Mitochongevity ne suivent pas la numérotation DUALXXX 
+			// se baser sur le nom du groupe=> groupNames est obligatoire 
 			if ( null == getValFromRow(row, 7,"groupNames", true)) { failedIndex.add(index.code); return;}                                         //col H=7
 			else {
+				// si d'autre groupes a exception arrivent utiliser une liste/map !!
+				if (getValFromRow(row, 7,"groupNames", true).matches("(.*)Chromium(.*)")) { 
+					autook = false;
+					println("line ("+excelRow+"): groupNames matche Chromium");
+				}
+
+				if (getValFromRow(row, 7,"groupNames", true).matches("(.*)Mitochongevity(.*)")) { 
+					autook = false;
+					println("line ("+excelRow+"): groupNames matche Mitochongevity!");
+				}
+
 				String[] groups=getValFromRow(row, 7,"groupNames", false).split(",");
 				index.groupNames=Arrays.asList(groups);
-				
-				if (getValFromRow(row, 7,"groupNames", true).matches("(.*)Chromium(.*)")) { 
-					isChromium=true;
-					println("line ("+excelRow+"): groupNames isChromium !!");
-				}
 			}
 			
-			// pas de calcul de shortName pour les POOL-INDEX
-			// NGL-3205  pas de calcul non plus pour les index "Chromium" [ !!! il y a des Chromium POOL-INDEX et DUAL-INDEX  attention a l'ordre du test ]
-			
-			//NGL-3334 faire les attributions automatiques de shortName aussi pour le CNS si auto=true
-			if ( (auto || institute.equals("CNG") ) &&
+			// pas de shortName automatique pour les POOL-INDEX
+			// NGL-3205 pas de shortName automatique non plus pour les index "Chromium" [ !!! il y a des Chromium POOL-INDEX et DUAL-INDEX  attention a l'ordre du test ]
+			// SUPSQCNG-1408 pas de shortName automatique non plus pour les index "du projet Mitochongevity 
+			if ( auto && autook &&
 				 typeCode.equals("index-illumina-sequencing") && 
-				 ! isChromium &&
 				 ! index.categoryCode.equals("POOL-INDEX") ) {
 				// si shortName present=> warning...
 				if ( null != getValFromRow(row, 4,"shortName",false)) { println("line ("+excelRow+"): Warning ! shortName will be computed, provided ("+ getValFromRow(row, 4,"shortName",false) +") value is ignored.");} // col E=4
 				index.shortName=getIlluminaIndexShortName (index.sequence, index.categoryCode, excelRow );
 				if ( null == index.shortName) { failedIndex.add(index.code); return;}
 			} else {
-				// donc on est ici dans les cas :  auto=false
-				//                                 typeCode=index-nanopore-sequencing
-				//                                 isChromium
-				//                                 categoryCode=POOL-INDEX                                 
-				// ==> le shortName fourni sera utilisé !!
+				/* donc on est ici dans les cas :  
+				   auto=false  ou  cas speciaux: chromium, Mitochongevity,   ou 
+				   typeCode=index-nanopore-sequencing  ou  typeCode=index-mgi-sequencing   ou typeCode=index-pacbio-sequencing ou
+				   categoryCode=POOL-INDEX                                 
+				      ==> le shortName fourni sera utilisé !!
+				*/
 				
 				index.shortName=getValFromRow(row, 4,"shortName",true);   
 				if ( null==index.shortName) { failedIndex.add(index.code); return;} // shortName DOIT exister
@@ -236,19 +246,45 @@ public class InsertSequencingIndex extends	 ScriptWithArgsAndBody<InsertSequenci
 			println("line ("+excelRow+"): shortName="+index.shortName);
 			
 			String suppName = getValFromRow(row, 5,"supplierName",false);                                                                          // col F=5
-			String suppIndexName = getValFromRow(row, 6,"index-supplierName",false);                                                               // col G=6
-			if ( null != suppName) {  
-				index.supplierName=suppName;
-				index.supplierIndexName=suppIndexName;
-			} else {
-				if ( null != suppIndexName) {
-					println("line ("+excelRow+"): Index name without supplierName is ignored.");
+			String suppIndexName = getValFromRow(row, 6,"index-supplierName",false);     
+			
+			// Pour PacBio il est obligatoire d'avoir 'supplier name' ET 'supplier index name'. Pourquoi????
+			if ( isPacBio(typeCode) ){
+				if ( null == suppName) {
+					println("line ("+excelRow+"): supplier name is mandatory for index-pacbio-sequencing.");
 					failedIndex.add(index.code); 
 					return;
 				}
+				if ( null == suppIndexName) {
+					println("line ("+excelRow+"): supplier index name is mandatory for index-pacbio-sequencing.");
+					failedIndex.add(index.code); 
+					return;
+				}
+				// si on arrive ici c'est qu'on a les 2 !!!
+				index.supplierName=suppName; 
+				index.supplierIndexName=suppIndexName;
+			} else {
+				if ( null != suppName) {  
+					index.supplierName=suppName; 
+					// !! bug vu dans le ticket d'insertion NGL-4930; 
+					if ( null == suppIndexName) {
+						println("line ("+excelRow+"): no supplier index name provided.");
+					} else {
+						index.supplierIndexName=suppIndexName;
+					}
+				} else {
+					// pas de supplier Name fourni
+					if ( null != suppIndexName) {
+						// si un nom d'index est fourni c'est incohérent !
+						println("line ("+excelRow+"): supplier index name without supplier name is not allowed.");
+						failedIndex.add(index.code); 
+						return;
+					} 
+				}
 			}
 			
-			//-2- controles...
+			//-2- controles  base de données
+
 			// --a-- code doit etre unique donc ne pas déja exister dans la collection
 			if (MongoDBDAO.checkObjectExistByCode(InstanceConstants.PARAMETER_COLL_NAME, Parameter.class, index.code)){
 				println("line ("+excelRow+"): index code '" + index.code + "' already exists"); 
@@ -429,5 +465,9 @@ public class InsertSequencingIndex extends	 ScriptWithArgsAndBody<InsertSequenci
             if (entry.getKey().equals(sequence)) return entry.getValue();
         }
 		return null;
+	}
+
+	private Boolean isPacBio(String typeCode) {
+		return typeCode.equals("index-pacbio-sequencing")? true: false; 
 	}
 }

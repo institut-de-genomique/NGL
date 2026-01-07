@@ -20,8 +20,9 @@ import services.description.instrument.InstrumentServiceCNG;
 import services.description.process.AbstractProcessService;
 import services.description.process.ProcessServiceCNG;
 import services.description.project.AbstractProjectService;
-// import services.description.project.AbstractUmbrellaProjectService;
+import services.description.project.AbstractUmbrellaProjectService;
 import services.description.project.ProjectServiceCNG;
+import services.description.project.UmbrellaProjectServiceCNG;
 import services.description.run.AbstractRunService;
 import services.description.run.AbstractTreatmentService;
 import services.description.run.RunServiceCNG;
@@ -98,8 +99,13 @@ public class CNGApplicationData implements IApplicationData {
 	}
 
 	@Override
-	public Consumer<ContextValidation> getResolutionService() {
-		return ResolutionService::saveResolutionsCNG;
+	public Consumer<ContextValidation> getResolutionServiceSQ() {
+		return ResolutionService::saveResolutionsSQCNG;
+	}
+
+	@Override
+	public Consumer<ContextValidation> getResolutionServiceBI() {
+		return ResolutionService::saveResolutionsBICNG;
 	}
 
 	@Override
@@ -122,9 +128,9 @@ public class CNGApplicationData implements IApplicationData {
 		return ctx -> {};
 	}
 
-	// @Override
-	// public AbstractUmbrellaProjectService getUmbrellaProjectService() {
-	// 	return null;
-	// }
+	@Override
+	public AbstractUmbrellaProjectService getUmbrellaProjectService() {
+		return new UmbrellaProjectServiceCNG();
+	}
 	
 }

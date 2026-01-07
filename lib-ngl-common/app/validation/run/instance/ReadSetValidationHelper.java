@@ -137,7 +137,6 @@ public class ReadSetValidationHelper {
 	 * @param contextValidation validation context
 	 * @param readSet         readSet with current state
 	 * @param nextState         new state
-	 * @param context           "workflow" or "controllers"
 	 */
 	public static void validateNextState(ContextValidation contextValidation, ReadSet readSet, State nextState) {
 		CommonValidationHelper.validateStateRequired(contextValidation, ObjectType.CODE.ReadSet, nextState);

@@ -408,12 +408,17 @@ angular.module('home').controller('CNSPlatesToPlateCtrl',['$scope' ,'$http','$pa
 		$scope.fileUtils.generateSampleSheet({type:$scope.experiment.typeCode})
 	}
 
-	
-	$scope.setAdditionnalButtons([{
-			isDisabled : function(){return $scope.isNewState();} ,
-			isShow:function(){return !$scope.isNewState();},
-			click:generateSampleSheetPlateToPlate,
-			label:Messages("experiments.sampleSheet")
-		}]);
+	var isFireflyPlatesToPlate = (
+	$scope.experiment.instrument.typeCode === 'firefly' &&
+	$scope.experiment.typeCode === 'plates-to-plate'
+);
+	if (!isFireflyPlatesToPlate) {
+		$scope.setAdditionnalButtons([{
+				isDisabled : function(){return $scope.isNewState();} ,
+				isShow:function(){return !$scope.isNewState();},
+				click:generateSampleSheetPlateToPlate,
+				label:Messages("experiments.sampleSheet")
+			}]);
+	}
 	
 }]);

@@ -12,9 +12,9 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 
+import controllers.sra.api.ConfigurationAPI;
+import controllers.sra.api.SubmissionAPI;
 import fr.cea.ig.lfw.controllers.scripts.buffered.ScriptNoArgs;
-import fr.cea.ig.ngl.dao.api.sra.ConfigurationAPI;
-import fr.cea.ig.ngl.dao.api.sra.SubmissionAPI;
 import models.sra.submit.sra.instance.Configuration;
 import models.sra.submit.sra.instance.Submission;
 import models.sra.submit.sra.instance.UserRefCollabType;
@@ -61,9 +61,9 @@ public class ListeRefCollab extends ScriptNoArgs {
 		List<String> listSubCodes = new ArrayList<String>();
 		listSubCodes.add("CNS_BYQ_AWF_24RF4HJFI");
 
-		java.util.Date courantDate = new java.util.Date();
+		// java.util.Date courantDate = new java.util.Date();
 
-		File fileSubmission_ok = new File("C:\\Users\\sgas\\debug\\refCollab.txt");
+		File fileSubmission_ok = new File("C:\\Users\\sgas.IBFJ-EVRY\\debug\\refCollab.txt");
 		Iterable<Submission> iterable = submissionAPI.dao_all();
 		try (BufferedWriter output_buffer = new BufferedWriter(new java.io.FileWriter(fileSubmission_ok))) {
 			
@@ -71,12 +71,12 @@ public class ListeRefCollab extends ScriptNoArgs {
 				if (!submission.type.equals(Submission.Type.CREATION)) {
 					continue;
 				}
-				if(submission.mapUserRefCollab!= null) {
-					for (Entry<String, UserRefCollabType> mapentry : submission.mapUserRefCollab.entrySet()) {
+				if(submission.userRefCollabs != null) {
+					for (UserRefCollabType userRefCollab : submission.userRefCollabs) {
 						cp++;
 						//output_buffer.write("refCollab = "+ mapentry.getKey() + "\n");
-						output_buffer.write(mapentry.getKey() + "\n");
-						println(mapentry.getKey() + "\n");
+						output_buffer.write(userRefCollab.getRefCollabName() + "\n");
+						println(userRefCollab.getRefCollabName() + "\n");
 
 				    }
 				} else {

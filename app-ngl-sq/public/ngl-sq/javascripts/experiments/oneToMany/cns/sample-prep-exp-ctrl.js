@@ -8,7 +8,7 @@ angular.module('home').controller('SamplePrepExpCtrl',['$scope', '$parse', 'atmT
 			columns:[   
 					 {
 			        	 "header":Messages("containers.table.code"),
-			        	 "property":"inputContainer.support.code",
+			        	 "property":"inputContainer.code",
 			        	 "order":true,
 						 "edit":false,
 						 "hide":true,
@@ -78,7 +78,7 @@ angular.module('home').controller('SamplePrepExpCtrl',['$scope', '$parse', 'atmT
 			columns:[   
 					 {
 			        	 "header":Messages("containers.table.code"),
-			        	 "property":"inputContainer.support.code",
+			        	 "property":"inputContainer.code",
 			        	 "order":true,
 						 "edit":false,
 						 "hide":true,
@@ -123,6 +123,39 @@ angular.module('home').controller('SamplePrepExpCtrl',['$scope', '$parse', 'atmT
 			        	 "position":4,
 			        	 "extraHeaders":{0:Messages("experiments.inputs")}
 			         },
+					 {
+						"header":Messages("containers.table.volume") + " (µL)",
+						"property":"inputContainerUsed.volume.value",
+						"order":true,
+						"edit":false,
+						"hide":true,
+						"type":"number",
+						"mergeCells" : true,
+						"position":6,
+						"extraHeaders":{0:Messages("experiments.inputs")}
+					},
+					{
+						"header":Messages("containers.table.quantity"),
+						"property":"inputContainerUsed.quantity.value",
+						"order":true,
+						"edit":false,
+						"hide":true,
+						"type":"number",
+						"mergeCells" : true,
+						"position":6.5,
+						"extraHeaders":{0:Messages("experiments.inputs")}
+					},
+					{
+						"header":Messages("containers.table.quantity.unit"),
+						"property":"inputContainerUsed.quantity.unit",
+						"order":true,
+						"edit":false,
+						"hide":true,
+						"type":"text",
+						"mergeCells" : true,
+						"position":7,
+						"extraHeaders":{0:Messages("experiments.inputs")}
+					},
 			         {
 				         "header":Messages("containers.table.biologicalMaterialQuantity"),
 			        	 "property":"inputContainer.properties.biologicalMaterialQuantity.value",
@@ -131,10 +164,9 @@ angular.module('home').controller('SamplePrepExpCtrl',['$scope', '$parse', 'atmT
 						 "hide":true,
 			        	 "type":"text",
 			        	 "mergeCells" : true,
-			        	 "position":5,
+			        	 "position":8,
 			        	 "extraHeaders":{0:Messages("experiments.inputs")}
-				     },
-			       
+				     },	
 			         {
 			        	 "header":Messages("containers.table.state.code"),
 			        	 "property":"inputContainer.state.code",
@@ -143,7 +175,7 @@ angular.module('home').controller('SamplePrepExpCtrl',['$scope', '$parse', 'atmT
 						 "hide":true,
 			        	 "type":"text",
 			        	 "filter":"codes:'state'",
-			        	 "position":7,
+			        	 "position":11,
 			        	 "extraHeaders":{0:Messages("experiments.inputs")}
 			         },		
 			         
@@ -239,11 +271,12 @@ angular.module('home').controller('SamplePrepExpCtrl',['$scope', '$parse', 'atmT
 
 	};	
 	
-	
 	$scope.$on('save', function(e, callbackFunction) {	
 		console.log("call event save on tube-to-tubes");
+
 		$scope.atmService.viewToExperiment($scope.experiment);
-		$scope.$emit('childSaved', callbackFunction);
+
+		$scope.$emit('childSaved', callbackFunction);				
 	});
 	
 	

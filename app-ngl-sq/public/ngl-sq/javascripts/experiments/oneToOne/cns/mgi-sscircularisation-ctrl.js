@@ -291,7 +291,7 @@ angular.module('home').controller('MGISSCircularisationCtrl',['$scope', '$parse'
 	} else {
 		datatableConfig.columns.push({
 			"header" : Messages("containers.table.code"),
-			"property" : "inputContainer.support.code",
+			"property" : "inputContainer.code",
 			"order" : true,
 			"edit" : false,
 			"hide" : true,
@@ -371,6 +371,7 @@ angular.module('home').controller('MGISSCircularisationCtrl',['$scope', '$parse'
 	var atmService = atmToSingleDatatable($scope, datatableConfig);
 	//defined new atomictransfertMethod
 	atmService.newAtomicTransfertMethod =  function(line, column){
+		// NGL-5093 : problème pour terminer l'expérience quand mélange de puits et de plaques non traité car technologie abandonnée
 		var getLine = function(line){
 			if($scope.experiment.instrument.outContainerSupportCategoryCode 
 					=== $scope.experiment.instrument.inContainerSupportCategoryCode){

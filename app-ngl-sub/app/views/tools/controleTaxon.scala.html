@@ -1,0 +1,20 @@
+@()
+@**NGL-4952**@
+
+<div class="row">
+	<div class="col-md-12 col-lg-12">
+		<p><a class="fa fa-exclamation-triangle" style="color:red" ng-click="toggleShowConsigne()" title="Controle des taxons des samples des collaborateurs" href=""> Controle des taxons des samples des collaborateurs</a></span></p>
+		<div ng-show="isShowConsigne">
+			
+<p>Ce contrôle vérifie lors de la création de la soumission ou d'une mise à jour des experiments, 
+que le taxon code du readset est identique au taxon code indiqué dans le sample du collaborateur. 
+Si le taxon code du readset est différent de celui du sample du collaborateur, 
+cela peut signifier que le readset n'a pas été assigné au bon sample du collaborateur. 
+Il appartient alors à l'utilisateur de corriger sa soumission. Mais la différence peut aussi être du au fait, 
+que le taxon code du readset dans NGL-BI n'est pas à jour, et doit être remplacé par le nouveau taxon code indiqué par la taxonomie du NCBI. 
+L'utilisateur doit alors demander une actualisation des taxon code dans NGL-BI avant de refaire sa soumission. 
+L'utilisateur peut ignorer ce contrôle des taxon code.<p>
+		</div>
+	</div>
+</div>
+@**END NGL-4952**@

@@ -36,8 +36,8 @@ public class DroolsInjector {
      * 
      * @param testClass Le nom de la classe de test qu'on lance.
      * 
-     * @throws IOException 
-     * @throws DroolsParserException 
+     * @throws IOException io exception
+     * @throws DroolsParserException parser exception
      */
     public void initDrools(Object testClass) throws DroolsParserException, IOException {
         if (testClass == null) {
@@ -58,8 +58,8 @@ public class DroolsInjector {
      * @param fileNames La liste des fichiers Drools qu'on veut utiliser pour nos tests.
      * @return Un objet 'DroolsSession' qui représente la base de connaissances Drools qu'on veut créer.
      * 
-     * @throws IOException 
-     * @throws DroolsParserException 
+     * @throws IOException io exception
+     * @throws DroolsParserException parser exception
      */
     public static DroolsSession initKnowledgeBase(Iterable<String> fileNames) throws DroolsParserException, IOException {
     	KnowledgeBuilderImpl builder = new KnowledgeBuilderImpl();

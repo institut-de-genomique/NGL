@@ -241,11 +241,17 @@ angular.module('home').controller('MgiDepotCtrl',['$scope', '$parse','$http','at
 			console.log('setting current date as default');
 			// dans le javascript positionner une valeur en millisecondes en utilisant la librairie moment.js
 			// le rendu au format date est executé par la directive date-timestamp (dateTimestamp) ou date-timestamp2 (dateTimestamp2) 
-			var curdateMS= moment().valueOf();
-			$parse("experimentProperties.runStartDate.value").assign($scope.experiment, curdateMS);
+			/* !!!!!!!!!    SUPSQCNG-902 le timestamp doit etre arrondi pour que NGSRG retrouve le fichier du run
+			   garder le code ci-dessous qui effectue l'arrondi !!!!!!! */
+			var format = Messages("date.format").toUpperCase();
+			var curdateMS_round = moment().format(format);
+			curdateMS_round = moment(curdateMS_round, format).valueOf();
+			console.log('timestamp arrondi='+curdateMS_round);
+			//var curdateMS_exact= moment().valueOf();
+			//console.log('timestamp exact  ='+curdateMS_exact);
+
+			$parse("experimentProperties.runStartDate.value").assign($scope.experiment, curdateMS_round);
 		}
 	}
-
-	
 
 }]);

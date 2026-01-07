@@ -11,22 +11,25 @@ import org.mongojack.DBQuery.Query;
 
 import controllers.DBObjectListForm;
 import controllers.sra.api.ISraSearchForm;
+//import controllers.sra.api.SraSearchForm;
+import controllers.sra.tools.Tools;
 import models.sra.submit.sra.instance.AbstractSample;
+import models.sra.submit.sra.instance.Project;
 
 // devrait s'appeler AbstractSamplesSearchForm
 public class SamplesSearchForm extends DBObjectListForm<AbstractSample> implements ISraSearchForm { 
 	//public String projCode;
-	public List<String> projCodes = new ArrayList<>();
-	public List<String> stateCodes = new ArrayList<>(); 
+	public List<String> projCodes        = new ArrayList<>();
+	public List<String> stateCodes       = new ArrayList<>(); 
 	public List<String> pseudoStateCodes = new ArrayList<>(); 
-	public String stateCode = null;
-	public List<String> accessions = new ArrayList<>();
-	public String accessionRegex;
-	public List<String> codes = new ArrayList<>();
+	public String stateCode              = null;
+	public List<String> codes            = new ArrayList<>();
 	public String codeRegex;
-	public String externalId        = null;
-	public List<String> externalIds = new ArrayList<>();
-	public String externalIdRegex;
+	public List<String> submissionCodes  = new ArrayList<>();
+	public String submissionCodeRegex;	
+	public String identifier             = null;
+	public List<String> identifiers      = new ArrayList<>();
+	public String identifierRegex;	
 	public String type;            // si on veut selectionner Sample ou ExternalSample
 	public String createUser;      // pour recherche pour un proprietaire (update-ctrl.js)
 	public String base64UserFileSample;
@@ -77,22 +80,41 @@ public class SamplesSearchForm extends DBObjectListForm<AbstractSample> implemen
 		if(StringUtils.isNotBlank(this.createUser)) {
 			queries.add(DBQuery.in("traceInformation.createUser", this.createUser));
 		}
+		if(CollectionUtils.isNotEmpty(this.submissionCodes)) {
+			List<String> sampleCodes = new ArrayList<String>();
+			Tools.completeListSampleCodesFromSubmissionCodes(this.submissionCodes, sampleCodes);
+			queries.add(DBQuery.in("code", sampleCodes));
+		} else if(StringUtils.isNotBlank(this.submissionCodeRegex)) {
+			List<String> sampleCodes = new ArrayList<String>();
+			Tools.completeListSampleCodesFromSubmissionRegex(this.submissionCodeRegex, sampleCodes);
+			queries.add(DBQuery.in("code", sampleCodes));
+		}		
 		if(CollectionUtils.isNotEmpty(this.codes)) {
 			queries.add(DBQuery.in("code", this.codes));
 		} else if(StringUtils.isNotBlank(this.codeRegex)) {
 			queries.add(DBQuery.regex("code", Pattern.compile(this.codeRegex)));
 		}
-		if(CollectionUtils.isNotEmpty(this.accessions)) {
-			queries.add(DBQuery.in("accession", this.accessions));
-		} else if(StringUtils.isNotBlank(this.accessionRegex)){
-			queries.add(DBQuery.regex("accession", Pattern.compile(this.accessionRegex)));
-		}
-		if (StringUtils.isNotBlank(this.externalId)) {
-			queries.add(DBQuery.in("externalId", this.externalId));
-		} else if(CollectionUtils.isNotEmpty(this.externalIds)) {
-			queries.add(DBQuery.in("externalId", this.externalIds));
-		} else if(StringUtils.isNotBlank(this.externalIdRegex)){
-			queries.add(DBQuery.regex("externalId", Pattern.compile(this.externalIdRegex)));
+		if (StringUtils.isNotBlank(this.identifier)) {
+            queries.add(DBQuery.or(DBQuery.in("accession", identifier),DBQuery.in("externalId", identifier)));
+		} else if (CollectionUtils.isNotEmpty(this.identifiers)) {
+			List<String> identifiers_ERS     = new ArrayList<>();
+			List<String> identifiers_SAM     = new ArrayList<>();
+			for(String identifier : this.identifiers) {
+				if(identifier.startsWith("SAM")) {
+					identifiers_SAM.add(identifier);
+				} else {
+					identifiers_ERS.add(identifier);
+				}
+			}
+            queries.add(DBQuery.or(DBQuery.in("accession", identifiers_ERS),DBQuery.in("externalId", identifiers_SAM)));
+		} else if(StringUtils.isNotBlank(this.identifierRegex)) {
+			// ne passe pas car trop volumineux, il faut distinguer les 2 cas :
+            //queries.add(DBQuery.or(DBQuery.in("accession", Pattern.compile(this.identifierRegex)),DBQuery.in("externalId", Pattern.compile(this.identifierRegex)));
+			if (this.identifierRegex.startsWith("SAM")) {
+				queries.add(DBQuery.regex("externalId", Pattern.compile(this.identifierRegex)));
+			} else {
+				queries.add(DBQuery.regex("accession", Pattern.compile(this.identifierRegex)));
+			} 
 		}
 		if (StringUtils.isNotBlank(this.type)) { //all
 			queries.add(DBQuery.in("_type", this.type));
@@ -104,4 +126,6 @@ public class SamplesSearchForm extends DBObjectListForm<AbstractSample> implemen
 
 		return query;
 	}
+	
+
 }

@@ -2,7 +2,8 @@
 @(defaultGroupAccess: String, ouGroupLaboName: String, groupAllAdmins: String)
 @user            = @{ fr.cea.ig.authentication.Authentication.getUser() }
 
-@isCNSInstitute  = @{ "CNS" == ctx.nglConfig().getInstitute() }
+@isCNSInstitute  = @{ ctx.nglConfig().isCNSInstitute() }
+@isChefProjet = @{ controllers.authorisation.PermissionHelper.checkPermission(user, "chef-projet")   }
 
 @column()(value: Html) = {
 <div class="col-md-4 col-lg-4">
@@ -14,7 +15,7 @@
 	<div class="col-md-12 col-lg-12 ">
 		<div class="page-header" ng-init="init('@groupAllAdmins', '@isCNSInstitute')">
 			<div class="btn-toolbar pull-right">
-				<button class="btn btn-default" ng-if="mainService.isEditMode()" ng-click="update()"
+				<button class="btn btn-default" ng-if="mainService.isEditMode()" ng-click="update(@isChefProjet)"
 					data-toggle="tooltip" title="@Messages(" button.validate")"><i class="fa fa-save"></i>
 					@Messages("button.validate")</button>
 				<button class="btn btn-default" ng-if="mainService.isEditMode()" ng-click="cancel()"
@@ -76,16 +77,12 @@
 										<p class="form-control-static">{{project.name}}</p>
 									}
 
-									@views.html.helper.columnLabelValue(Messages("projects.state.code")){
-										<p class="form-control-static">{{project.state.code | codes:'state'}}</p>
-									}
+									@views.html.helper.columnLabelValue(Messages("projects.properties.bioProjectManager")){
+										<p class="form-control-static">{{project.properties.bioProjectManager.value}}</p>
+									}	
 
-									@views.html.helper.columnLabelValue(Messages("projects.type")){
-										<p class="form-control-static">{{project.typeCode | codes:'type'}}</p>
-									}
-
-									@views.html.helper.columnLabelValue(Messages("projects.category.type")){
-										<p class="form-control-static">{{project.categoryCode | codes:'project_cat'}}</p>
+									@views.html.helper.columnLabelValue(Messages("projects.properties.infoProjectManager")){
+										<p class="form-control-static">{{project.properties.infoProjectManager.value}}</p>
 									}
 
 									@views.html.helper.columnLabelValue(Messages("projects.description")){
@@ -93,23 +90,83 @@
 									}
 
 									@if(isCNSInstitute){
-										@views.html.helper.columnLabelValue(Messages("projects.umbrellaProjectCode")){
-											<a ng-click="openUmbrella(project.umbrellaProjectCode)">
-												<p class="form-control-static">{{umbrellaProjectName}}</p>
-											</a>
+											<div class="form-group">
+												<label class="col-md-6 col-lg-6 control-label">@Messages("projects.technicalDescription")</label>
+												<div class="col-md-6 col-lg-6">
+													@if(isChefProjet) {
+														<div ng-switch on="mainService.isEditMode()">
+															<p class="form-control-static" ng-switch-when="false">
+																<a ng-href="data:application/{{project.properties.dt.extension}};base64,{{project.properties.dt.value}}" download="{{project.properties.dt.fullname}}">
+																	{{project.properties.dt.fullname}}
+																</a>
+															</p>
+															<div>
+																<input id="importFile" type="file" class="form-control" ng-show="project.properties.dt == undefined" base64-file="project.properties.dt" ng-switch-when="true" />
+																
+																<a ng-href="data:application/{{project.properties.dt.extension}};base64,{{project.properties.dt.value}}" ng-show="project.properties.dt != undefined" ng-switch-when="true" download="{{project.properties.dt.fullname}}">
+																	{{project.properties.dt.fullname}}
+																</a>
+																<button class="btn btn-default" ng-click="removeDT()" ng-show="project.properties.dt != undefined" ng-switch-when="true" data-toggle="tooltip" title="@Messages("plates.button.delete")"><i class="fa fa-trash-o"></i></button>
+															</div>
+														</div>
+													} else {
+														<p class="form-control-static">
+															<a ng-href="data:application/{{project.properties.dt.extension}};base64,{{project.properties.dt.value}}" download="{{project.properties.dt.fullname}}">
+																{{project.properties.dt.fullname}}
+															</a>
+														</p>
+													}
+												</div>
+											</div>
 										}
-									}
 								}
 
 
 								@column(){
-									@views.html.helper.columnLabelValue(Messages("projects.traceInformation.creationDate")){
-									<p class="form-control-static">
-										{{project.traceInformation.creationDate | date:'@Messages("date.format")'}}</p>
+									@if(isCNSInstitute){
+										@views.html.helper.columnLabelValue(Messages("projects.umbrellaProjectCode")){
+											<a style="cursor: pointer" ng-click="openUmbrella(project.umbrellaProjectCode)">
+												<p class="form-control-static">{{umbrellaProjectName}}</p>
+											</a>
+										}
 									}
 
-									@views.html.helper.columnLabelValue(Messages("projects.traceInformation.createUser")){
-										<p class="form-control-static">{{project.traceInformation.createUser}}</p>
+									@if(isCNSInstitute){
+										@views.html.helper.columnLabelValue(Messages("projects.genre")){
+											@if(isChefProjet) {
+												<div ng-switch on="mainService.isEditMode()">
+													<p class="form-control-static" ng-switch-when="false">{{project.properties.genre.value}}</p>
+
+													<div class="form-control" bt-select class="form-control" ng-switch-when="true" ng-model="project.properties.genre.value" bt-options="genre.code as genre.name for genre in searchService.lists.getGenre()"></div>
+												</div>
+											} else {
+												<p class="form-control-static">{{project.properties.genre.value}}</p>
+											}
+										}
+
+										@views.html.helper.columnLabelValue(Messages("projects.properties.financingSource")){
+											@if(isChefProjet) {
+												<div ng-switch on="mainService.isEditMode()">
+													<p class="form-control-static" ng-switch-when="false">{{project.properties.financingSource.value}}</p>
+
+													<input type="text" class="form-control" ng-switch-when="true" ng-model="project.properties.financingSource.value">
+												</div>
+											} else {
+												<p class="form-control-static">{{project.properties.financingSource.value}}</p>
+											}
+										}
+										
+										@views.html.helper.columnLabelValue(Messages("projects.properties.os")){
+											@if(isChefProjet) {
+												<div ng-switch on="mainService.isEditMode()">
+													<p class="form-control-static" ng-switch-when="false">{{project.properties.os.value}}</p>
+
+													<input type="text" class="form-control" ng-switch-when="true" ng-model="project.properties.os.value">
+												</div>
+											} else {
+												<p class="form-control-static">{{project.properties.os.value}}</p>
+											}
+										}
 									}
 
 									@views.html.helper.columnLabelValue(Messages("projects.lastSampleCode")){
@@ -124,53 +181,27 @@
 												ng-model="project.nbCharactersInSampleCode">
 										</div>
 									}	
-
-									@if(isCNSInstitute){
-										@views.html.helper.columnLabelValue(Messages("projects.properties.financingSource")){
-											<div ng-switch on="mainService.isEditMode()">
-												<p class="form-control-static" ng-switch-when="false">{{project.properties.financingSource.value}}</p>
-
-												<input type="text" class="form-control" ng-switch-when="true" ng-model="project.properties.financingSource.value">
-											</div>
-										}
-										
-										@views.html.helper.columnLabelValue(Messages("projects.properties.os")){
-											<div ng-switch on="mainService.isEditMode()">
-												<p class="form-control-static" ng-switch-when="false">{{project.properties.os.value}}</p>
-
-												<input type="text" class="form-control" ng-switch-when="true" ng-model="project.properties.os.value">
-											</div>
-										}										
-										
-										@views.html.helper.columnLabelValue(Messages("projects.technicalDescription")){
-											<div ng-switch on="mainService.isEditMode()">
-												<p class="form-control-static" ng-switch-when="false">
-													<a ng-href="data:application/{{project.properties.technicalDescription.extension}};base64,{{project.properties.technicalDescription.value}}" download="{{project.properties.technicalDescription.fullname}}">
-														{{project.properties.technicalDescription.fullname}}
-													</a>
-												</p>
-												<div style="display: inline-flex">
-													<input id="importFile" type="file" class="form-control" base64-file="project.properties.technicalDescription" ng-switch-when="true" />
-													<button class="btn btn-default" ng-click="removeDT()" ng-switch-when="true" data-toggle="tooltip" ng-show="project.properties.technicalDescription !== undefined" title="@Messages("plates.button.delete")"><i class="fa fa-trash-o"></i></button>
-												</div>
-											</div>
-										}
-									}
 								}
 
-								@if(isCNSInstitute){
-									@column(){
-										@views.html.helper.columnLabelValue(Messages("projects.properties.bioProjectManager")){
-											<p class="form-control-static">{{project.properties.bioProjectManager.value}}</p>
-										}	
+								@column(){
+									@views.html.helper.columnLabelValue(Messages("projects.traceInformation.creationDate")){
+										<p class="form-control-static">{{project.traceInformation.creationDate | date:'@Messages("date.format")'}}</p>
+									}
+	
+									@views.html.helper.columnLabelValue(Messages("projects.traceInformation.createUser")){
+										<p class="form-control-static">{{project.traceInformation.createUser}}</p>
+									}
 
-										@views.html.helper.columnLabelValue(Messages("projects.properties.infoProjectManager")){
-											<p class="form-control-static">{{project.properties.infoProjectManager.value}}</p>
-										}
-										
-										@views.html.helper.columnLabelValue(Messages("projects.genre")){
-											<p class="form-control-static">{{project.properties.genre.value}}</p>
-										}
+									@views.html.helper.columnLabelValue(Messages("projects.state.code")){
+										<p class="form-control-static">{{project.state.code | codes:'state'}}</p>
+									}
+
+									@views.html.helper.columnLabelValue(Messages("projects.type")){
+										<p class="form-control-static">{{project.typeCode | codes:'type'}}</p>
+									}
+
+									@views.html.helper.columnLabelValue(Messages("projects.category.type")){
+										<p class="form-control-static">{{project.categoryCode | codes:'project_cat'}}</p>
 									}
 								}
 							</div>
@@ -327,72 +358,56 @@
 							<div class="row">
 								@column(){
 								<div class="form-group">
-									<label ng-show="project.properties.synchroProj!=undefined"
+									<label ng-show="project.systemParameters.synchroProj!=undefined"
 										class="col-md-6 col-lg-6 control-label">@Messages("projects.synchroProj")</label>
 									<div class="col-md-6 col-lg-6">
 										<p class="form-control-static"
-											ng-show="project.properties.synchroProj!=undefined" ng-switch
-											on="project.properties.synchroProj.value">
+											ng-show="project.systemParameters.synchroProj!=undefined" ng-switch
+											on="project.systemParameters.synchroProj">
 											<i ng-switch-when="true" class="fa fa-check-square-o  fa-lg"></i>
 											<i ng-switch-default class="fa fa-square-o  fa-lg"></i>
 										</p>
 									</div>
 								</div>
-
-								<!-- TODO EJACOBY AD-->
-								<div ng-show="project.properties.unixGroup.value !== undefined">
-									@views.html.helper.columnLabelValue(Messages("projects.unixGroup")){
-									<div ng-switch on="mainService.isEditMode()">
-										<p class="form-control-static" ng-switch-when="false">
-											{{project.properties.unixGroup.value}}</p>
-										<div ng-switch-when="true">
-											<div bt-select class="form-control"
-												ng-model="project.properties.unixGroup.value"
-												bt-options='v.code as v.code for v in lists.getValues({propertyDefinitionCode:"unixGroup"},"unixGroup")'>
-											</div>
-										</div>
-									</div>
-									}
-								</div>
 								}
 							</div>
 							<div class="row">
 								@column(){
-									<span ng-if="project.properties.qtreeQuota.value.proj != undefined">
+									<span ng-if="project.systemParameters.qtreeQuota.proj != undefined">
 										@views.html.helper.columnLabelValue(Messages("projects.properties.projQtreeQuota")){
-											<div ng-switch on="mainService.isEditMode()">
+											<div ng-class="{'has-error': errorProj}" ng-switch on="mainService.isEditMode()">
 												<p class="form-control-static" ng-switch-when="false">
-													{{project.properties.qtreeQuota.value.proj}}</p>
+													{{project.systemParameters.qtreeQuota.proj}}</p>
 												<input type="text" class="form-control" ng-switch-when="true"
-													ng-model="project.properties.qtreeQuota.value.proj">
+													ng-model="project.systemParameters.qtreeQuota.proj">
 											</div>
 										}
 									</span>
 
-									<span ng-if="project.properties.qtreeQuota.value.rawdata != undefined">
+									<span ng-if="project.systemParameters.qtreeQuota.rawdata != undefined">
 										@views.html.helper.columnLabelValue(Messages("projects.properties.rawdataQtreeQuota")){
-											<div ng-switch on="mainService.isEditMode()">
+											<div ng-class="{'has-error': errorRawdata}" ng-switch on="mainService.isEditMode()">
 												<p class="form-control-static" ng-switch-when="false">
-													{{project.properties.qtreeQuota.value.rawdata}}</p>
+													{{project.systemParameters.qtreeQuota.rawdata}}</p>
 												<input type="text" class="form-control" ng-switch-when="true"
-													ng-model="project.properties.qtreeQuota.value.rawdata">
+													ng-model="project.systemParameters.qtreeQuota.rawdata">
 											</div>
 										}
 									</span>
 
-									<span ng-if="project.properties.qtreeQuota.value.scratch != undefined">
+									<span ng-if="project.systemParameters.qtreeQuota.scratch != undefined">
 									@views.html.helper.columnLabelValue(Messages("projects.properties.scratchQtreeQuota")){
-										<div ng-switch on="mainService.isEditMode()">
+										<div ng-class="{'has-error': errorScratch}" ng-switch on="mainService.isEditMode()">
 											<p class="form-control-static" ng-switch-when="false">
-												{{project.properties.qtreeQuota.value.scratch}}</p>
+												{{project.systemParameters.qtreeQuota.scratch}}</p>
 											<input type="text" class="form-control" ng-switch-when="true"
-												ng-model="project.properties.qtreeQuota.value.scratch">
+												ng-model="project.systemParameters.qtreeQuota.scratch">
 										</div>
 									}
 									</span>
 								}
 							</div>
-							<div class="row" ng-if="project.properties.archiveHistory.value.length > 0">
+							<div class="row" ng-if="project.systemParameters.archiveHistory.length > 0">
 								<div class="col-md-3 col-lg-3">
 									<h3>Historique d'archivage</h3>
 									<table class="table table-condensed table-hover table-bordered">
@@ -406,7 +421,7 @@
 											</tr>
 										</thead>
 										<tbody>
-											<tr ng-repeat="archive in project.properties.archiveHistory.value | orderBy: '-date'">
+											<tr ng-repeat="archive in project.systemParameters.archiveHistory | orderBy: '-date'">
 												<td>{{archive.date| date:'@Messages("datetime.format")'}}</td>
 												<td>{{archive.action}}</td>
 												<td>{{archive.projArchiveId}}</td>

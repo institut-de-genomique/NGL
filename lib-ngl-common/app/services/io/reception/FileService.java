@@ -23,8 +23,10 @@ import models.laboratory.reception.instance.PropertyValueFieldConfiguration;
 import models.laboratory.reception.instance.ReceptionConfiguration;
 import models.laboratory.reception.instance.ReceptionConfiguration.Action;
 import models.laboratory.reception.instance.TagExcelFieldConfiguration;
+import models.laboratory.reception.instance.TagExcelLightFieldConfiguration;
 import models.laboratory.sample.instance.Sample;
 import models.utils.CodeHelper;
+import play.Logger;
 import services.io.reception.mapping.ContainerMapping;
 import services.io.reception.mapping.SampleMapping;
 import services.io.reception.mapping.SupportMapping;
@@ -88,7 +90,7 @@ public abstract class FileService {
 //	}
 	private Mapping<? extends DBObject> mappingFactory(String objectType) {
 		switch (Mapping.Keys.valueOf(objectType)) {
-		case sample    : return new SampleMapping   (objects, configuration.configs.get(objectType), configuration.action, contextValidation);
+		case sample    : return new SampleMapping   (objects, configuration.configs.get(objectType), configuration.action, contextValidation, configuration);
 		case support   : return new SupportMapping  (objects, configuration.configs.get(objectType), configuration.action, contextValidation);
 		case container : return new ContainerMapping(objects, configuration.configs.get(objectType), configuration.action, contextValidation);
 		default        :
@@ -136,9 +138,7 @@ public abstract class FileService {
 		Map<String, DBObject> objectInLine = new HashMap<>(0);
 		for (String s : objectTypes) 
 			objectInLine.put(s, mappings.get(s).convertToDBObject(rowMap));
-		
 		consolidateCodesOnLineObject(objectInLine);			
-
 		objectInLine.entrySet()
 		.stream().forEach(entry -> {
 			String s = entry.getKey();
@@ -232,6 +232,13 @@ public abstract class FileService {
 			Map<String, DBObject> supports = objects.get(Mapping.Keys.support.toString());
 			supports.values().forEach(c -> {
 				((SupportMapping)mappings.get(Mapping.Keys.support.toString())).consolidate((ContainerSupport)c);
+			});
+		}
+		/// consolidate sample
+		if (configuration.configs.containsKey(Mapping.Keys.sample.toString())) {
+			Map<String, DBObject> supports = objects.get(Mapping.Keys.sample.toString());
+			supports.values().forEach(s -> {
+				((SampleMapping)mappings.get(Mapping.Keys.sample.toString())).consolidate((Sample)s);
 			});
 		}
 	}
@@ -377,6 +384,8 @@ public abstract class FileService {
 			});
 		} else if (TagExcelFieldConfiguration.class.isAssignableFrom(afc.getClass())) {
 			updateTagExcelConfigurationHeader((TagExcelFieldConfiguration)afc);
+		} else if (TagExcelLightFieldConfiguration.class.isAssignableFrom(afc.getClass())) {
+			updateTagExcelLightConfigurationHeader((TagExcelLightFieldConfiguration)afc);
 		}
 	}
 
@@ -388,6 +397,14 @@ public abstract class FileService {
 			efc.headerValue = headerByIndex.get(efc.cellSequence);
 		} else {
 			contextValidation.addError("Headers","not found header for cell position "+efc.cellSequence);
+		}
+	}
+	
+	private void updateTagExcelLightConfigurationHeader(TagExcelLightFieldConfiguration efc) {
+		if (headerByIndex.containsKey(efc.cellPosition)) {
+			efc.headerValue = headerByIndex.get(efc.cellPosition);
+		} else {
+			contextValidation.addError("Headers","not found header for cell position "+efc.cellPosition);
 		}
 	}
 	

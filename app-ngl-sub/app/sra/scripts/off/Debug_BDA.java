@@ -4,11 +4,11 @@ package sra.scripts.off;
 import javax.inject.Inject;
 //import org.mongojack.DBQuery;
 
+import controllers.sra.api.ExperimentAPI;
+import controllers.sra.api.SubmissionAPI;
 //import fr.cea.ig.lfw.controllers.scripts.buffered.Script;
 import fr.cea.ig.lfw.controllers.scripts.chunked.ScriptWithArgs;
 import fr.cea.ig.ngl.NGLApplication;
-import fr.cea.ig.ngl.dao.api.sra.ExperimentAPI;
-import fr.cea.ig.ngl.dao.api.sra.SubmissionAPI;
 import models.sra.submit.sra.instance.Experiment;
 import models.sra.submit.sra.instance.RawData;
 import models.sra.submit.sra.instance.Submission;
@@ -52,6 +52,7 @@ public class Debug_BDA extends ScriptWithArgs<Debug_BDA.MyParam> {
 
 	@Override
 	public void execute(MyParam args) throws Exception {
+		String user = "ngsrg";
 		Submission submission = submissionAPI.dao_getObject(args.submissionCode);
 		for (String expCode : submission.experimentCodes) {
 			Experiment experiment = experimentAPI.get(expCode);
@@ -64,7 +65,7 @@ public class Debug_BDA extends ScriptWithArgs<Debug_BDA.MyParam> {
 				rawData.md5="";
 				rawData.extention="fastq";
 			}
-			experimentAPI.dao_saveObject(experiment);
+			experimentAPI.update(experiment, user);
 		}
 	}
 

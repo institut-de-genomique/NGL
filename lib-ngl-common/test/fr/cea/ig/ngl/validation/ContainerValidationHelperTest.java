@@ -1,6 +1,6 @@
 package fr.cea.ig.ngl.validation;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.List;
 
@@ -18,11 +18,11 @@ import fr.cea.ig.ngl.utils.TestUtils;
 import models.laboratory.common.instance.State;
 import models.laboratory.container.instance.Container;
 import models.laboratory.container.instance.Content;
-import ngl.refactoring.state.ContainerStateNames;
 import validation.ContextValidation;
 import validation.common.instance.CommonValidationHelper;
 import validation.container.instance.ContainerValidationHelper;
 import validation.container.instance.ContentValidationHelper;
+import validation.utils.ValidationConstants;
 
 /**
  * Test du helper de validation de l'entité CONTAINER.
@@ -55,7 +55,7 @@ public class ContainerValidationHelperTest {
     }
 
     @Test
-    public void testValidateContentsInvalidPercentage() {
+    public void testValidateContentsInvalidCasPercentage() {
         ContextValidation ctxVal = ContextValidation.createUndefinedContext(TestUtils.CURRENT_USER);
         List<Content> contents = ContentFactory.getRandomContentList(false);
         String importTypeCode = "importTypeCode-TEST";
@@ -86,38 +86,498 @@ public class ContainerValidationHelperTest {
     }
 
     @Test
-    public void testValidateNextStateValid() {
-        // On valide pour le moment uniquement le passage IW_P -> A.
-
+    public void testValidateContentPercentageSumValid() {
         ContextValidation ctxVal = ContextValidation.createUndefinedContext(TestUtils.CURRENT_USER);
-        String context = ContainerValidationHelper.STATE_CONTEXT_WORKFLOW;
-        Container container = ContainerFactory.getRandomContainer(ContainerStateNames.IW_P);
+        List<Content> contents = ContentFactory.getRandomContentList(true);
         
-        State nextState = new State();
-        nextState.code = "A";
+        ContainerValidationHelper.validateContentPercentageSum(contents, ctxVal);
 
-        ContainerValidationHelper.validateNextState(ctxVal, container, nextState, context);
-
-        assertTrue("Context has errors", !ctxVal.hasErrors());
+        assertTrue("Context has error", !ctxVal.hasErrors());
     }
 
     @Test
-    public void testValidateNextStateInvalid() {
-        // On valide pour le moment uniquement le passage IW_P -> IW_E.
-
+    public void testValidateContentPercentageSumInvalid() {
         ContextValidation ctxVal = ContextValidation.createUndefinedContext(TestUtils.CURRENT_USER);
-        String context = ContainerValidationHelper.STATE_CONTEXT_WORKFLOW;
-        Container container = ContainerFactory.getRandomContainer(ContainerStateNames.IW_P);
+        List<Content> contents = ContentFactory.getRandomContentList(false);
         
-        State nextState = new State();
-        nextState.code = "IW_E";
-
-        ContainerValidationHelper.validateNextState(ctxVal, container, nextState, context);
+        ContainerValidationHelper.validateContentPercentageSum(contents, ctxVal);
 
         assertTrue("Context has no errors", ctxVal.hasErrors());
     }
 
-    // validateContentPercentageSum testée par le test de la méthode validateContents.
+    // Test sur les changements d'états autorisés.
 
-    // validateState testée par le test de la méthode validateContainerStateRequired.
+    // Cas du context "STATE_CONTEXT_WORKFLOW".
+
+    // Etat initial : IW-P.
+
+    @Test
+    public void testValidateStateValidPassageIWPVersAStateWorkflow() {
+        ContextValidation ctxVal = ContextValidation.createUndefinedContext(TestUtils.CURRENT_USER);
+
+        State currentState = StateFactory.getInWaitingProcessState();
+        State newState = StateFactory.getAvailableState();
+
+        Container container = ContainerFactory.getRandomContainer(currentState.code);
+        String context = ContainerValidationHelper.STATE_CONTEXT_WORKFLOW;
+
+        ContainerValidationHelper.validateNextState(ctxVal, container, newState, context);
+
+        assertTrue("Context has error", !ctxVal.hasErrors());
+    }
+
+    // Etat initial : A.
+
+    @Test
+    public void testValidateStateValidPassageAVersIWEStateWorkflow() {
+        ContextValidation ctxVal = ContextValidation.createUndefinedContext(TestUtils.CURRENT_USER);
+
+        State currentState = StateFactory.getAvailableState();
+        State newState = StateFactory.getInWaitingExperimentState();
+
+        Container container = ContainerFactory.getRandomContainer(currentState.code);
+        String context = ContainerValidationHelper.STATE_CONTEXT_WORKFLOW;
+
+        ContainerValidationHelper.validateNextState(ctxVal, container, newState, context);
+
+        assertTrue("Context has error", !ctxVal.hasErrors());
+    }
+
+    @Test
+    public void testValidateStateValidPassageAVersIUStateWorkflow() {
+        ContextValidation ctxVal = ContextValidation.createUndefinedContext(TestUtils.CURRENT_USER);
+
+        State currentState = StateFactory.getAvailableState();
+        State newState = StateFactory.getInUseState();
+
+        Container container = ContainerFactory.getRandomContainer(currentState.code);
+        String context = ContainerValidationHelper.STATE_CONTEXT_WORKFLOW;
+
+        ContainerValidationHelper.validateNextState(ctxVal, container, newState, context);
+
+        assertTrue("Context has error", !ctxVal.hasErrors());
+    }
+
+    @Test
+    public void testValidateStateValidPassageAVersIWDStateWorkflow() {
+        ContextValidation ctxVal = ContextValidation.createUndefinedContext(TestUtils.CURRENT_USER);
+
+        State currentState = StateFactory.getAvailableState();
+        State newState = StateFactory.getInWaitingDispatchState();
+
+        Container container = ContainerFactory.getRandomContainer(currentState.code);
+        String context = ContainerValidationHelper.STATE_CONTEXT_WORKFLOW;
+
+        ContainerValidationHelper.validateNextState(ctxVal, container, newState, context);
+
+        assertTrue("Context has error", !ctxVal.hasErrors());
+    }
+
+    // Cas d'erreur avec comme état initial "A".
+
+    @Test
+    public void testValidateStateInvalidPassageAVersUAStateWorkflow() {
+        ContextValidation ctxVal = ContextValidation.createUndefinedContext(TestUtils.CURRENT_USER);
+
+        State currentState = StateFactory.getAvailableState();
+        State newState = StateFactory.getUnavailableState();
+
+        Container container = ContainerFactory.getRandomContainer(currentState.code);
+        String context = ContainerValidationHelper.STATE_CONTEXT_WORKFLOW;
+
+        ContainerValidationHelper.validateNextState(ctxVal, container, newState, context);
+
+        assertTrue("Context has no error", ctxVal.hasErrors());
+
+        assertNotNull("Context has not the 'code' error", ctxVal.getErrors().get("code"));
+        assertNotNull("Error 'code' has no message", ctxVal.getErrors().get("code").get(0));
+        assertTrue("Message does not contain the right error message", ctxVal.getErrors().get("code").get(0).message().contains(ValidationConstants.ERROR_BADSTATE_MSG));
+    }
+
+    // Etat initial : IW-E.
+
+    @Test
+    public void testValidateStateValidPassageIWEVersIUStateWorkflow() {
+        ContextValidation ctxVal = ContextValidation.createUndefinedContext(TestUtils.CURRENT_USER);
+
+        State currentState = StateFactory.getInWaitingExperimentState();
+        State newState = StateFactory.getInUseState();
+
+        Container container = ContainerFactory.getRandomContainer(currentState.code);
+        String context = ContainerValidationHelper.STATE_CONTEXT_WORKFLOW;
+
+        ContainerValidationHelper.validateNextState(ctxVal, container, newState, context);
+
+        assertTrue("Context has error", !ctxVal.hasErrors());
+    }
+
+    @Test
+    public void testValidateStateValidPassageIWEVersIWDStateWorkflow() {
+        ContextValidation ctxVal = ContextValidation.createUndefinedContext(TestUtils.CURRENT_USER);
+
+        State currentState = StateFactory.getInWaitingExperimentState();
+        State newState = StateFactory.getInWaitingDispatchState();
+
+        Container container = ContainerFactory.getRandomContainer(currentState.code);
+        String context = ContainerValidationHelper.STATE_CONTEXT_WORKFLOW;
+
+        ContainerValidationHelper.validateNextState(ctxVal, container, newState, context);
+
+        assertTrue("Context has error", !ctxVal.hasErrors());
+    }
+
+    @Test
+    public void testValidateStateValidPassageIWEVersAStateWorkflow() {
+        ContextValidation ctxVal = ContextValidation.createUndefinedContext(TestUtils.CURRENT_USER);
+
+        State currentState = StateFactory.getInWaitingExperimentState();
+        State newState = StateFactory.getAvailableState();
+
+        Container container = ContainerFactory.getRandomContainer(currentState.code);
+        String context = ContainerValidationHelper.STATE_CONTEXT_WORKFLOW;
+
+        ContainerValidationHelper.validateNextState(ctxVal, container, newState, context);
+
+        assertTrue("Context has error", !ctxVal.hasErrors());
+    }
+
+    // Cas d'erreur avec comme état initial "IW-E".
+
+    @Test
+    public void testValidateStateInvalidPassageIWEVersUAStateWorkflow() {
+        ContextValidation ctxVal = ContextValidation.createUndefinedContext(TestUtils.CURRENT_USER);
+
+        State currentState = StateFactory.getInWaitingExperimentState();
+        State newState = StateFactory.getUnavailableState();
+
+        Container container = ContainerFactory.getRandomContainer(currentState.code);
+        String context = ContainerValidationHelper.STATE_CONTEXT_WORKFLOW;
+
+        ContainerValidationHelper.validateNextState(ctxVal, container, newState, context);
+
+        assertTrue("Context has no error", ctxVal.hasErrors());
+
+        assertNotNull("Context has not the 'code' error", ctxVal.getErrors().get("code"));
+        assertNotNull("Error 'code' has no message", ctxVal.getErrors().get("code").get(0));
+        assertTrue("Message does not contain the right error message", ctxVal.getErrors().get("code").get(0).message().contains(ValidationConstants.ERROR_BADSTATE_MSG));
+    }
+
+    @Test
+    public void testValidateStateInvalidPassageIWEVersIWPStateWorkflow() {
+        ContextValidation ctxVal = ContextValidation.createUndefinedContext(TestUtils.CURRENT_USER);
+
+        State currentState = StateFactory.getInWaitingExperimentState();
+        State newState = StateFactory.getInWaitingProcessState();
+
+        Container container = ContainerFactory.getRandomContainer(currentState.code);
+        String context = ContainerValidationHelper.STATE_CONTEXT_WORKFLOW;
+
+        ContainerValidationHelper.validateNextState(ctxVal, container, newState, context);
+
+        assertTrue("Context has no error", ctxVal.hasErrors());
+
+        assertNotNull("Context has not the 'code' error", ctxVal.getErrors().get("code"));
+        assertNotNull("Error 'code' has no message", ctxVal.getErrors().get("code").get(0));
+        assertTrue("Message does not contain the right error message", ctxVal.getErrors().get("code").get(0).message().contains(ValidationConstants.ERROR_BADSTATE_MSG));
+    }
+
+    // Etat initial : IU.
+
+    @Test
+    public void testValidateStateValidPassageIUVersIWDStateWorkflow() {
+        ContextValidation ctxVal = ContextValidation.createUndefinedContext(TestUtils.CURRENT_USER);
+
+        State currentState = StateFactory.getInUseState();
+        State newState = StateFactory.getInWaitingDispatchState();
+
+        Container container = ContainerFactory.getRandomContainer(currentState.code);
+        String context = ContainerValidationHelper.STATE_CONTEXT_WORKFLOW;
+
+        ContainerValidationHelper.validateNextState(ctxVal, container, newState, context);
+
+        assertTrue("Context has error", !ctxVal.hasErrors());
+    }
+
+    // Cas d'erreur avec comme état initial "IU".
+
+    @Test
+    public void testValidateStateInvalidPassageIUVersUAStateWorkflow() {
+        ContextValidation ctxVal = ContextValidation.createUndefinedContext(TestUtils.CURRENT_USER);
+
+        State currentState = StateFactory.getInUseState();
+        State newState = StateFactory.getUnavailableState();
+
+        Container container = ContainerFactory.getRandomContainer(currentState.code);
+        String context = ContainerValidationHelper.STATE_CONTEXT_WORKFLOW;
+
+        ContainerValidationHelper.validateNextState(ctxVal, container, newState, context);
+
+        assertTrue("Context has no error", ctxVal.hasErrors());
+
+        assertNotNull("Context has not the 'code' error", ctxVal.getErrors().get("code"));
+        assertNotNull("Error 'code' has no message", ctxVal.getErrors().get("code").get(0));
+        assertTrue("Message does not contain the right error message", ctxVal.getErrors().get("code").get(0).message().contains(ValidationConstants.ERROR_BADSTATE_MSG));
+    }
+
+    // Cas du context "STATE_CONTEXT_CONTROLLER".
+
+    // Etat initial : "IW-P".
+
+    @Test
+    public void testValidateStateValidPassageIWPVersUAStateController() {
+        ContextValidation ctxVal = ContextValidation.createUndefinedContext(TestUtils.CURRENT_USER);
+
+        State currentState = StateFactory.getInWaitingProcessState();
+        State newState = StateFactory.getUnavailableState();
+
+        Container container = ContainerFactory.getRandomContainer(currentState.code);
+        String context = ContainerValidationHelper.STATE_CONTEXT_CONTROLLER;
+
+        ContainerValidationHelper.validateNextState(ctxVal, container, newState, context);
+
+        assertTrue("Context has error", !ctxVal.hasErrors());
+    }
+
+    @Test
+    public void testValidateStateValidPassageIWPVersISStateController() {
+        ContextValidation ctxVal = ContextValidation.createUndefinedContext(TestUtils.CURRENT_USER);
+
+        State currentState = StateFactory.getInWaitingProcessState();
+        State newState = StateFactory.getInStockState();
+
+        Container container = ContainerFactory.getRandomContainer(currentState.code);
+        String context = ContainerValidationHelper.STATE_CONTEXT_CONTROLLER;
+
+        ContainerValidationHelper.validateNextState(ctxVal, container, newState, context);
+
+        assertTrue("Context has error", !ctxVal.hasErrors());
+    }
+
+    // Etat initial : "IW-D".
+
+    @Test
+    public void testValidateStateValidPassageIWDVersUAStateController() {
+        ContextValidation ctxVal = ContextValidation.createUndefinedContext(TestUtils.CURRENT_USER);
+
+        State currentState = StateFactory.getInWaitingDispatchState();
+        State newState = StateFactory.getUnavailableState();
+
+        Container container = ContainerFactory.getRandomContainer(currentState.code);
+        String context = ContainerValidationHelper.STATE_CONTEXT_CONTROLLER;
+
+        ContainerValidationHelper.validateNextState(ctxVal, container, newState, context);
+
+        assertTrue("Context has error", !ctxVal.hasErrors());
+    }
+
+    @Test
+    public void testValidateStateValidPassageIWDVersISStateController() {
+        ContextValidation ctxVal = ContextValidation.createUndefinedContext(TestUtils.CURRENT_USER);
+
+        State currentState = StateFactory.getInWaitingDispatchState();
+        State newState = StateFactory.getInStockState();
+
+        Container container = ContainerFactory.getRandomContainer(currentState.code);
+        String context = ContainerValidationHelper.STATE_CONTEXT_CONTROLLER;
+
+        ContainerValidationHelper.validateNextState(ctxVal, container, newState, context);
+
+        assertTrue("Context has error", !ctxVal.hasErrors());
+    }
+
+    @Test
+    public void testValidateStateValidPassageIWDVersAStateController() {
+        ContextValidation ctxVal = ContextValidation.createUndefinedContext(TestUtils.CURRENT_USER);
+
+        State currentState = StateFactory.getInWaitingDispatchState();
+        State newState = StateFactory.getAvailableState();
+
+        Container container = ContainerFactory.getRandomContainer(currentState.code);
+        String context = ContainerValidationHelper.STATE_CONTEXT_CONTROLLER;
+
+        ContainerValidationHelper.validateNextState(ctxVal, container, newState, context);
+
+        assertTrue("Context has error", !ctxVal.hasErrors());
+    }
+
+    @Test
+    public void testValidateStateValidPassageIWDVersIWPStateController() {
+        ContextValidation ctxVal = ContextValidation.createUndefinedContext(TestUtils.CURRENT_USER);
+
+        State currentState = StateFactory.getInWaitingDispatchState();
+        State newState = StateFactory.getInWaitingProcessState();
+
+        Container container = ContainerFactory.getRandomContainer(currentState.code);
+        String context = ContainerValidationHelper.STATE_CONTEXT_CONTROLLER;
+
+        ContainerValidationHelper.validateNextState(ctxVal, container, newState, context);
+
+        assertTrue("Context has error", !ctxVal.hasErrors());
+    }
+
+    // Etat initial : "IS".
+
+    @Test
+    public void testValidateStateValidPassageISVersUAStateController() {
+        ContextValidation ctxVal = ContextValidation.createUndefinedContext(TestUtils.CURRENT_USER);
+
+        State currentState = StateFactory.getInStockState();
+        State newState = StateFactory.getUnavailableState();
+
+        Container container = ContainerFactory.getRandomContainer(currentState.code);
+        String context = ContainerValidationHelper.STATE_CONTEXT_CONTROLLER;
+
+        ContainerValidationHelper.validateNextState(ctxVal, container, newState, context);
+
+        assertTrue("Context has error", !ctxVal.hasErrors());
+    }
+
+    @Test
+    public void testValidateStateValidPassageISVersIWPStateController() {
+        ContextValidation ctxVal = ContextValidation.createUndefinedContext(TestUtils.CURRENT_USER);
+
+        State currentState = StateFactory.getInStockState();
+        State newState = StateFactory.getInWaitingProcessState();
+
+        Container container = ContainerFactory.getRandomContainer(currentState.code);
+        String context = ContainerValidationHelper.STATE_CONTEXT_CONTROLLER;
+
+        ContainerValidationHelper.validateNextState(ctxVal, container, newState, context);
+
+        assertTrue("Context has error", !ctxVal.hasErrors());
+    }
+
+    // Etat initial : "UA".
+
+    @Test
+    public void testValidateStateValidPassageUAVersIWPStateController() {
+        ContextValidation ctxVal = ContextValidation.createUndefinedContext(TestUtils.CURRENT_USER);
+
+        State currentState = StateFactory.getUnavailableState();
+        State newState = StateFactory.getInWaitingProcessState();
+
+        Container container = ContainerFactory.getRandomContainer(currentState.code);
+        String context = ContainerValidationHelper.STATE_CONTEXT_CONTROLLER;
+
+        ContainerValidationHelper.validateNextState(ctxVal, container, newState, context);
+
+        assertTrue("Context has error", !ctxVal.hasErrors());
+    }
+
+    @Test
+    public void testValidateStateValidPassageUAVersISStateController() {
+        ContextValidation ctxVal = ContextValidation.createUndefinedContext(TestUtils.CURRENT_USER);
+
+        State currentState = StateFactory.getUnavailableState();
+        State newState = StateFactory.getInStockState();
+
+        Container container = ContainerFactory.getRandomContainer(currentState.code);
+        String context = ContainerValidationHelper.STATE_CONTEXT_CONTROLLER;
+
+        ContainerValidationHelper.validateNextState(ctxVal, container, newState, context);
+
+        assertTrue("Context has error", !ctxVal.hasErrors());
+    }
+
+    // Etat initial : "N".
+
+    @Test
+    public void testValidateStateValidPassageNVersUAStateController() {
+        ContextValidation ctxVal = ContextValidation.createUndefinedContext(TestUtils.CURRENT_USER);
+
+        State currentState = StateFactory.getNewState();
+        State newState = StateFactory.getUnavailableState();
+
+        Container container = ContainerFactory.getRandomContainer(currentState.code);
+        String context = ContainerValidationHelper.STATE_CONTEXT_CONTROLLER;
+
+        ContainerValidationHelper.validateNextState(ctxVal, container, newState, context);
+
+        assertTrue("Context has error", !ctxVal.hasErrors());
+    }
+
+    @Test
+    public void testValidateStateValidPassageNVersISStateController() {
+        ContextValidation ctxVal = ContextValidation.createUndefinedContext(TestUtils.CURRENT_USER);
+
+        State currentState = StateFactory.getNewState();
+        State newState = StateFactory.getInStockState();
+
+        Container container = ContainerFactory.getRandomContainer(currentState.code);
+        String context = ContainerValidationHelper.STATE_CONTEXT_CONTROLLER;
+
+        ContainerValidationHelper.validateNextState(ctxVal, container, newState, context);
+
+        assertTrue("Context has error", !ctxVal.hasErrors());
+    }
+
+    @Test
+    public void testValidateStateValidPassageNVersAStateController() {
+        ContextValidation ctxVal = ContextValidation.createUndefinedContext(TestUtils.CURRENT_USER);
+
+        State currentState = StateFactory.getNewState();
+        State newState = StateFactory.getAvailableState();
+
+        Container container = ContainerFactory.getRandomContainer(currentState.code);
+        String context = ContainerValidationHelper.STATE_CONTEXT_CONTROLLER;
+
+        ContainerValidationHelper.validateNextState(ctxVal, container, newState, context);
+
+        assertTrue("Context has error", !ctxVal.hasErrors());
+    }
+
+    @Test
+    public void testValidateStateValidPassageNVersIWPStateController() {
+        ContextValidation ctxVal = ContextValidation.createUndefinedContext(TestUtils.CURRENT_USER);
+
+        State currentState = StateFactory.getNewState();
+        State newState = StateFactory.getInWaitingProcessState();
+
+        Container container = ContainerFactory.getRandomContainer(currentState.code);
+        String context = ContainerValidationHelper.STATE_CONTEXT_CONTROLLER;
+
+        ContainerValidationHelper.validateNextState(ctxVal, container, newState, context);
+
+        assertTrue("Context has error", !ctxVal.hasErrors());
+    }
+
+    // Cas d'erreur
+
+    @Test
+    public void testValidateStateInValidIWEStateController() {
+        ContextValidation ctxVal = ContextValidation.createUndefinedContext(TestUtils.CURRENT_USER);
+
+        State currentState = StateFactory.getInWaitingExperimentState();
+        State newState = StateFactory.getUnavailableState();
+
+        Container container = ContainerFactory.getRandomContainer(currentState.code);
+        String context = ContainerValidationHelper.STATE_CONTEXT_CONTROLLER;
+
+        ContainerValidationHelper.validateNextState(ctxVal, container, newState, context);
+
+        assertTrue("Context has no error", ctxVal.hasErrors());
+
+        assertNotNull("Context has not the 'code' error", ctxVal.getErrors().get("code"));
+        assertNotNull("Error 'code' has no message", ctxVal.getErrors().get("code").get(0));
+        assertTrue("Message does not contain the right error message", ctxVal.getErrors().get("code").get(0).message().contains(ValidationConstants.ERROR_BADSTATE_MSG));
+    }
+
+    @Test
+    public void testValidateStateInValidIUStateController() {
+        ContextValidation ctxVal = ContextValidation.createUndefinedContext(TestUtils.CURRENT_USER);
+
+        State currentState = StateFactory.getInUseState();
+        State newState = StateFactory.getUnavailableState();
+
+        Container container = ContainerFactory.getRandomContainer(currentState.code);
+        String context = ContainerValidationHelper.STATE_CONTEXT_CONTROLLER;
+
+        ContainerValidationHelper.validateNextState(ctxVal, container, newState, context);
+
+        assertTrue("Context has no error", ctxVal.hasErrors());
+
+        assertNotNull("Context has not the 'code' error", ctxVal.getErrors().get("code"));
+        assertNotNull("Error 'code' has no message", ctxVal.getErrors().get("code").get(0));
+        assertTrue("Message does not contain the right error message", ctxVal.getErrors().get("code").get(0).message().contains(ValidationConstants.ERROR_BADSTATE_MSG));
+    }
 }

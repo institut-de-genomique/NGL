@@ -1,5 +1,25 @@
 package rules
 
+//NGL-4650 ajout
+rule "Init Lane Run Nanopore CNG"
+	@nglBI(F_S_1)
+	@nglSQ(F_S_1)
+	dialect "java"
+	salience 900
+	no-loop
+	when  
+		$run:Run(categoryCode=="nanopore",lanes==null)
+	then
+		$run.lanes = new ArrayList<Lane>();
+		Lane lane = new Lane();
+		lane.number = 1;
+		lane.readSetCodes = new ArrayList<String>();
+		$run.lanes.add(lane);
+		MongoDBDAO.update(InstanceConstants.RUN_ILLUMINA_COLL_NAME, Run.class
+					,DBQuery.is("code",$run.code)
+					,DBUpdate.set("lanes",$run.lanes));
+end
+
 rule "Create ReadSet Nanopore CNG"
 	@nglBI(F_S_1)
 	@nglSQ(F_S_1)
@@ -53,9 +73,13 @@ rule "Create ReadSet Nanopore CNG"
 	    	ContextValidation localContextError = ContextValidation.createCreationContext("nsgrg");
 			localContextError.setContextObjects($contextError.getContextObjects());
 	    	InstanceHelpers.save(InstanceConstants.READSET_ILLUMINA_COLL_NAME,readSet,localContextError,true);
+
+			//add readsetCode to lane. memes corrections qu'au CNS!!
+			$run.lanes.get(0).readSetCodes.add(readSet.code);
+
 	    	MongoDBDAO.update(InstanceConstants.RUN_ILLUMINA_COLL_NAME, Run.class
 					,DBQuery.is("code",$run.code)
-					,DBUpdate.addToSet("sampleCodes", $content.sampleCode).addToSet("projectCodes",$content.projectCode));
+					,DBUpdate.addToSet("sampleCodes", $content.sampleCode).addToSet("projectCodes",$content.projectCode).set("lanes",$run.lanes));
 			}
 	    
 end

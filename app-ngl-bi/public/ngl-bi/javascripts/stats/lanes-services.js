@@ -96,23 +96,21 @@ factory('chartsLanesService', ['$http', '$q','$parse', '$window', '$filter', 'da
 				}
 				display+="</tr></thead><tbody>";
 				var mapData = getDataLane(value.lanes,treatment,valueColumn);
-				for (var i = 0; i < mapData.keys().length; i++) {
-					var key = mapData.keys()[i];
+
+				mapData.forEach(function(value, key) {
 					display += "<tr><td>"+key+"</td>";
-					var tabData = mapData.get(key);
-					for(var t=0; t<tabData.length; t++){
-						display+="<td>{{"+tabData[t]+"|number:2}}</td>";
+					for(var t=0; t<value.length; t++){
+						display+="<td>{{"+value[t]+"|number:2}}</td>";
 					}
 					display+="</tr>";
-				} 
+				});
+
 				display +="</tbody></table>";
 				
 				if(mapData.size==0)
 					display="";
 				return display;
-			}
-				
-				
+			}		
 		},
     	"header": function(){return statsConfigs.label},
     	"type":"text",
@@ -187,7 +185,6 @@ factory('chartsLanesService', ['$http', '$q','$parse', '$window', '$filter', 'da
 			readsetDatatable.config.spinner.start = false;
 			computeChart();
 		});
-		
 	};	
 	
 	var computeExcludeData = function(property){
@@ -222,21 +219,23 @@ factory('chartsLanesService', ['$http', '$q','$parse', '$window', '$filter', 'da
 			computeAllData(data);
 		}
 		
-		for(var i = 0; i < allData.laneData.keys().length; i++){
-			var key = allData.laneData.keys()[i];
+		//1- creations DES graphes
+		allData.laneData.forEach(function (value,key){
 			if(propertyGroupGetter!=undefined){
-				charts.push(getChartGroup(key, allDataGroup.laneDataGroup.get(key),propertyGroupGetter));
+				charts.push(getChartGroup(key, value, propertyGroupGetter));
 			}else{
-				charts.push(getChart(allData.laneData.get(key)));
+				console.log( 'ajout du graphe dans tableau')
+				charts.push(getChart( value ));
 			}
-		}
+		});
+
+		//2- creation du graph Moyen
 		if(propertyGroupGetter!=undefined){
 			chartMean=getChartMeanGroup(allDataGroup.dataGroup,propertyGroupGetter);
 		}else{
 			chartMean=getChartMean(allData.data);
 		}
 	};
-	
 	
 	var computeAllData = function(dataRun)
 	{

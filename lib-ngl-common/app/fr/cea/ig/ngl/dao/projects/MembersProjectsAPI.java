@@ -15,7 +15,6 @@ import validation.ContextValidation;
  * API to manage member user project
  * 
  * @author ejacoby
- *
  */
 @Singleton
 public class MembersProjectsAPI {
@@ -35,34 +34,35 @@ public class MembersProjectsAPI {
 	}
 
 	public Members create(Members members, String currentUser) throws APIValidationException {
-//		ContextValidation ctxVal = new ContextValidation(currentUser);
-//		ctxVal.setCreationMode();
 		ContextValidation ctxVal = ContextValidation.createCreationContext(currentUser);
 		members.validate(ctxVal);
-		if (ctxVal.hasErrors())
-			throw new APIValidationException("invalid input", ctxVal.getErrors());
+
+		if (ctxVal.hasErrors()) {
+			throw new APIValidationException("Invalid members object", ctxVal.getErrors());
+		}
+
 		return dao.saveObject(members);
 	}
 
 	public Members update(Members members, String currentUser) throws APIValidationException {
-//		ContextValidation ctxVal = new ContextValidation(currentUser); 
-//		ctxVal.setUpdateMode();
 	    ContextValidation ctxVal = ContextValidation.createUpdateContext(currentUser);
+		
 		members.validate(ctxVal);
-		if (ctxVal.hasErrors()) 
-			throw new APIValidationException("Invalid Members object", ctxVal.getErrors());		
-		dao.updateObject(members);
-		return members;
+		
+		if (ctxVal.hasErrors()) {
+			throw new APIValidationException("Invalid members object", ctxVal.getErrors());	
+		}
+
+		return dao.updateObject(members);
 	}
 	
-	public void delete(String projectCode, String login, String type)
-	{
+	public void delete(String projectCode, String login, String type) {
 		dao.removeObject(projectCode, login, type);
 	}
-
 	
 	/**
 	 * Get members by project code.
+	 * 
 	 * @param code code of Project instance
 	 * @return     project members
 	 */
@@ -71,7 +71,8 @@ public class MembersProjectsAPI {
 	}
 	
 	/**
-	 * Get UserMembers of Project. 
+	 * Get UserMembers of Project.
+	 *  
 	 * @param login user login
 	 * @return      user members
 	 */
@@ -81,6 +82,7 @@ public class MembersProjectsAPI {
 	
 	/**
 	 * Get all UserMembers from group.
+	 * 
 	 * @param groupName group name
 	 * @return          user members
 	 */
@@ -88,12 +90,19 @@ public class MembersProjectsAPI {
 		return userDao.findByGroup(groupName);
 	}
 	
+	/**
+	 * 
+	 * 
+	 * @param ouName
+	 * @return
+	 */
 	public List<UserMembers> getUserMembersByOrganizationUnit(String ouName) {
 		return userDao.findByOrganizationUnit(ouName);
 	}
 	
 	/**
 	 * Get all group from organization unit.
+	 * 
 	 * @param ouName organization unit name
 	 * @return       groups of the organization unit
 	 */
@@ -101,9 +110,14 @@ public class MembersProjectsAPI {
 		return groupDao.findGroups(ouName);
 	}
 	
-	public List<GroupMembers> getGroupMembers(String ouName, String pattern)
-	{
+	/**
+	 * 
+	 * 
+	 * @param ouName
+	 * @param pattern
+	 * @return
+	 */
+	public List<GroupMembers> getGroupMembers(String ouName, String pattern) {
 		return groupDao.findGroups(ouName, pattern);
 	}
-	
 }

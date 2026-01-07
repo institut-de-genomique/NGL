@@ -36,6 +36,8 @@
         <script src="@routes.Assets.at("ngl-sq/javascripts/descriptions/mapping-projects/mapping-projects-ctrl.js")" type="text/javascript" charset="utf-8"></script>
         <script src="@routes.Assets.at("ngl-sq/javascripts/descriptions/processes-service.js")" type="text/javascript" charset="utf-8"></script>
         <script src="@routes.Assets.at("ngl-sq/javascripts/descriptions/processes-ctrl.js")" type="text/javascript" charset="utf-8"></script>
+        <script src="@routes.Assets.at("ngl-sq/javascripts/descriptions/processes-graph-service.js")" type="text/javascript" charset="utf-8"></script>
+        <script src="@routes.Assets.at("ngl-sq/javascripts/descriptions/processes-graph-ctrl.js")" type="text/javascript" charset="utf-8"></script>
     } else {
         <script src="@routes.Assets.at("ngl-sq/javascripts/descriptions/app.min.js")" type="text/javascript" charset="utf-8"></script>
         
@@ -61,9 +63,14 @@
         <script src="@routes.Assets.at("ngl-sq/javascripts/descriptions/mapping-projects/mapping-projects-ctrl.min.js")" type="text/javascript" charset="utf-8"></script>
         <script src="@routes.Assets.at("ngl-sq/javascripts/descriptions/processes-service.min.js")" type="text/javascript" charset="utf-8"></script>
         <script src="@routes.Assets.at("ngl-sq/javascripts/descriptions/processes-ctrl.min.js")" type="text/javascript" charset="utf-8"></script>
+        <script src="@routes.Assets.at("ngl-sq/javascripts/descriptions/processes-graph-service.min.js")" type="text/javascript" charset="utf-8"></script>
+        <script src="@routes.Assets.at("ngl-sq/javascripts/descriptions/processes-graph-ctrl.min.js")" type="text/javascript" charset="utf-8"></script>
     }
 
     <script src="@controllers.descriptions.tpl.routes.Descriptions.javascriptRoutes" type="text/javascript" charset="utf-8"></script>
+    <script src="@helper.getAsset("javascripts","cytoscape","3.2.8","cytoscape_3.2.8.min.js")" type="text/javascript" charset="utf-8"></script>
+    <script src="@helper.getAsset("javascripts","dagre","0.7.4","dagre_0.7.4.js")" type="text/javascript" charset="utf-8"></script>
+    <script src="@helper.getAsset("javascripts","cytoscape-dagre","0.8.2","cytoscape-dagre_0.8.2.js")" type="text/javascript" charset="utf-8"></script>
 }
 
 @css() = {

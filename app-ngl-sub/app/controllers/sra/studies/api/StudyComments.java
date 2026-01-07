@@ -3,14 +3,13 @@ package controllers.sra.studies.api;
 import javax.inject.Inject;
 
 import controllers.NGLController;
+import controllers.sra.api.AbstractStudyAPI;
 import fr.cea.ig.authentication.Authenticated;
 import fr.cea.ig.authorization.Authorized;
 import fr.cea.ig.ngl.NGLApplication;
 import fr.cea.ig.ngl.dao.api.APIException;
 import fr.cea.ig.ngl.dao.api.APISemanticException;
 import fr.cea.ig.ngl.dao.api.APIValidationException;
-import fr.cea.ig.ngl.dao.api.sra.AbstractStudyAPI;
-import fr.cea.ig.ngl.dao.api.sra.StudyCommentsAPI;
 import fr.cea.ig.ngl.support.NGLForms;
 import models.laboratory.common.instance.Comment;
 import models.sra.submit.sra.instance.AbstractStudy;

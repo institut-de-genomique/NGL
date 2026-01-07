@@ -1,5 +1,6 @@
 @(typeForm: String)
 @user = @{ fr.cea.ig.authentication.Authentication.getUser() }
+@isChefProjet = @{ controllers.authorisation.PermissionHelper.checkPermission(user, "chef-projet")   }
 
 @column()(value: Html) = {
 <div class="col-md-4 col-lg-4">
@@ -33,6 +34,9 @@
 		<div class="col-md-12 col-lg-12" messages="messages"></div>
 	</div>
 
+	<!-- Désactivé sur demande de Julie pour le moment. -->
+	<!-- <div class="alert alert-warning" ng-show="umbrellaProject.properties.dt != undefined && mainService.isEditMode()"><b>Un fichier a été importé, pensez à sauvegarder le projet</b></div> -->
+
 	<div class="row">
 		<div class="col-md-12 col-lg-12">
 			<form class="form-horizontal">
@@ -42,35 +46,46 @@
 							<p class="form-control-static">{{umbrellaProject.name}}</p>
 						}
 
-						@views.html.helper.columnLabelValue(Messages("umbrellaProject.typeCode")){
-							<p class="form-control-static">{{umbrellaProject.typeCode | codes:'type'}}</p>
-						}
-
-						@views.html.helper.columnLabelValue(Messages("umbrellaProject.category.type")){
-							<p class="form-control-static">{{umbrellaProject.categoryCode | codes:'umbrella_project_cat'}}</p>
+						@views.html.helper.columnLabelValue(Messages("umbrellaProjects.applicant")){
+							<p class="form-control-static">{{umbrellaProject.applicants[0].nom}} {{umbrellaProject.applicants[0].prenom}}</p>
+						}	
+						
+						@views.html.helper.columnLabelValue(Messages("umbrellaProjects.affiliation")){
+							<p class="form-control-static">{{umbrellaProject.applicants[0].affiliation}}</p>
 						}
 
 						@views.html.helper.columnLabelValue(Messages("umbrellaProjects.description")){
 							<p class="form-control-static">{{umbrellaProject.description}}</p>
 						}
 
-						@views.html.helper.columnLabelValue(Messages("umbrellaProjects.applicant")){
-							<p class="form-control-static">{{umbrellaProject.properties.applicant.value}}</p>
-						}
-
-						@views.html.helper.columnLabelValue(Messages("umbrellaProjects.technicalDescription")){
-							<div ng-switch on="mainService.isEditMode()">
-								<p class="form-control-static" ng-switch-when="false">
-									<a ng-href="data:application/{{umbrellaProject.properties.technicalDescription.extension}};base64,{{umbrellaProject.properties.technicalDescription.value}}" download="{{umbrellaProject.properties.technicalDescription.fullname}}">
-										{{umbrellaProject.properties.technicalDescription.fullname}}
-									</a>
-								</p>
-								<div style="display: inline-flex">
-									<input id="importFile" type="file" class="form-control" base64-file="umbrellaProject.properties.technicalDescription" ng-switch-when="true" />
-									<button class="btn btn-default" ng-click="removeDT()" ng-switch-when="true" data-toggle="tooltip" ng-show="umbrellaProject.properties.technicalDescription !== undefined" title="@Messages("plates.button.delete")"><i class="fa fa-trash-o"></i></button>
-								</div>
+						<div class="form-group">
+							<label class="col-md-6 col-lg-6 control-label">@Messages("umbrellaProjects.technicalDescription")</label>
+							<div class="col-md-6 col-lg-6">
+								@if(isChefProjet) {
+									<div ng-switch on="mainService.isEditMode()">
+										<p class="form-control-static" ng-switch-when="false">
+											<a ng-href="data:application/{{umbrellaProject.properties.dt.extension}};base64,{{umbrellaProject.properties.dt.value}}" download="{{umbrellaProject.properties.dt.fullname}}">
+												{{umbrellaProject.properties.dt.fullname}}
+											</a>
+										</p>
+										<div>
+											<input id="importFile" type="file" class="form-control" ng-show="umbrellaProject.properties.dt == undefined" base64-file="umbrellaProject.properties.dt" ng-switch-when="true" />
+											
+											<a ng-href="data:application/{{umbrellaProject.properties.dt.extension}};base64,{{umbrellaProject.properties.dt.value}}" ng-show="umbrellaProject.properties.dt != undefined" ng-switch-when="true" download="{{project.properties.dt.fullname}}">
+												{{umbrellaProject.properties.dt.fullname}}
+											</a>
+											<button class="btn btn-default" ng-click="removeDT()" ng-show="umbrellaProject.properties.dt != undefined" ng-switch-when="true" data-toggle="tooltip" title="@Messages("umbrellaProject.button.delete")"><i class="fa fa-trash-o"></i></button>
+										</div>
+									</div>
+								} else {
+									<p class="form-control-static">
+										<a ng-href="data:application/{{project.properties.dt.extension}};base64,{{project.properties.dt.value}}" download="{{project.properties.dt.fullname}}">
+											{{project.properties.dt.fullname}}
+										</a>
+									</p>
+								}
 							</div>
-						}
+						</div>
 					}
 
 					@column(){
@@ -93,43 +108,28 @@
 							{{umbrellaProject.traceInformation.createUser}}
 						</p>
 						}
+
+						@views.html.helper.columnLabelValue(Messages("umbrellaProject.typeCode")){
+							<p class="form-control-static">{{umbrellaProject.typeCode | codes:'type'}}</p>
+						}
+
+						@views.html.helper.columnLabelValue(Messages("umbrellaProject.category.type")){
+							<p class="form-control-static">{{umbrellaProject.categoryCode | codes:'umbrella_project_cat'}}</p>
+						}
 					}
 				</div>
 			</form>
 		</div>
 	</div>
 
-	<span ng-if="associatedProjects && associatedProjects.length > 0">
-		<h2>Projets associés</h2>
+	<span ng-if="associatedProjects && associatedProjects && associatedProjects.length > 0">
+		<h2>Projets associés ({{associatedProjectsDT.allResult.length}})</h2>
 
 		<button ng-click="showProjects()" class="btn btn-default" >@Messages("button.projects.show")</button>
 
 		<br /><br />
 
-		<div class="row"> 
-			<div class="col-md-12 col-lg-12">
-			<table class="table table-condensed table-hover table-bordered">
-				<thead>
-					<tr>
-						<th>Code projet</th>
-						<th>Nom projet</th>
-						<th>OS</th>
-						<th>Genre</th>
-						<th>Source financement</th>				
-					</tr>
-				</thead>
-				<tbody>
-					<tr ng-repeat="project in associatedProjects">
-						<td>{{ project.code }}</td>
-						<td>{{ project.name }}</td>
-						<td>{{ project.properties.financingSource.value }}</td>
-						<td>{{ project.genre.name }}</td>
-						<td>{{ project.properties.financingSource.value }}</td>
-					</tr>					
-				</tbody>
-			</table>
-			</div>	
-		</div>
+		<div ultimate-datatable="associatedProjectsDT"></div>
 	</span>
 
 	@partials.commentSection(user)

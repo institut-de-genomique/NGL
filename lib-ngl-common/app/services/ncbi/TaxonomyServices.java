@@ -23,6 +23,12 @@ import org.xml.sax.SAXException;
 import fr.cea.ig.ngl.NGLApplication;
 import play.libs.ws.WSResponse;
 
+// utiliser de preference services.taxonomy.TaxonomyServices;
+/**
+* @deprecated Use {@link #services.taxonomy.TaxonomyServices;} instead
+* 
+**/
+@Deprecated 
 public class TaxonomyServices {
 
 	private static final play.Logger.ALogger logger = play.Logger.of(TaxonomyServices.class);
@@ -71,8 +77,8 @@ public class TaxonomyServices {
 	 * NGL-2533 : bug max connection (en attendant de trouver la bonne procédure pour interroger NCBI)
 	 * methode getNCBITaxon met à jour tous les samples uniquement lorsque toutes les requêtes au NCBI sont passées
 	 * Si plus de 10 mises à jours de taxon demandées les requêtes n'aboutissent jamais car nb de connexion max atteint
-	 * @param taxonCode
-	 * @return
+	 * @param taxonCode  code taxon
+	 * @return NCBITaxon
 	 */
 	public NCBITaxon _getNCBITaxon(String taxonCode) {
 		if (taxonCode != null) {

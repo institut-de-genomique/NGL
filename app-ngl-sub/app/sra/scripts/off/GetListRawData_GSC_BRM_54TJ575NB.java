@@ -6,11 +6,11 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import controllers.sra.api.ExperimentAPI;
+import controllers.sra.api.SubmissionAPI;
 import fr.cea.ig.lfw.controllers.scripts.buffered.ScriptNoArgs;
 import fr.cea.ig.ngl.NGLApplication;
-import fr.cea.ig.ngl.dao.api.sra.ExperimentAPI;
-import fr.cea.ig.ngl.dao.api.sra.SubmissionAPI;
-import services.ScriptTools;
+import sra.services.ScriptTools;
 
 
 /*
@@ -26,8 +26,8 @@ import services.ScriptTools;
 public class GetListRawData_GSC_BRM_54TJ575NB extends ScriptNoArgs {
 //	private static final play.Logger.ALogger logger = play.Logger.of(Debug_BDA.class);
 
-	private final SubmissionAPI     submissionAPI;
-	private final ExperimentAPI     experimentAPI;
+	// private final SubmissionAPI     submissionAPI;
+	// private final ExperimentAPI     experimentAPI;
 //	private final NGLApplication    app;
 	private final ScriptTools       scriptTools;
 	@Inject
@@ -36,8 +36,8 @@ public class GetListRawData_GSC_BRM_54TJ575NB extends ScriptNoArgs {
 					 ScriptTools       scriptTools,
 					 NGLApplication    app) {
 
-		this.submissionAPI     = submissionAPI;
-		this.experimentAPI     = experimentAPI;
+		// this.submissionAPI     = submissionAPI;
+		// this.experimentAPI     = experimentAPI;
 		this.scriptTools       = scriptTools;
 //		this.app               = app;
 	}

@@ -32,8 +32,13 @@
 			<div class="form-control" bt-select ng-model="createService.form.librarySource" placeholder='@Messages("create.placeholder.librarySource")' bt-options="librarySource.code as librarySource.name for librarySource in createService.sraVariables.librarySource" required></div>			
 		}	
 		@formGroup{
+			<div class="form-control"  bt-select ng-model="createService.form.dropBox" placeholder='@Messages("create.placeholder.dropBox")' bt-options="legendeDropBox.name as legendeDropBox.code for legendeDropBox in createService.sraVariables.legendeDropBox"  required></div>			
+		}
+
+		@formGroup{
 			<textarea class="form-control" rows="2" ng-model="createService.form.libraryConstructionProtocol" placeholder='@Messages("create.placeholder.libraryConstructionProtocol")' ></textarea>
-		}	
+		}
+		
 	}
 
 	

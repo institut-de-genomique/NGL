@@ -32,6 +32,9 @@ angular.module('commonsServices').factory('propertyDefinitions', ['$http', funct
 					+'<div ng-if="valueNgModel._type === \'single\'">'
 						+'<single value-ng-model="valueNgModel" key-ng-model="keyNgModel"/>'
 					+'</div>'
+					+'<div ng-if="valueNgModel._type === \'list\'">'   // Ajout de la directive list
+						+'<list value-ng-model="valueNgModel" key-ng-model="keyNgModel"/>'
+					+'</div>'
 		};
 }]).directive('objectList',[ function() {
 	return {
@@ -122,4 +125,15 @@ angular.module('commonsServices').factory('propertyDefinitions', ['$http', funct
 			scope.propertyDefinitions = propertyDefinitions;
 		}
 		};
+}]).directive('list', [function() {
+	return {
+		restrict: 'EA',
+		scope: {
+			valueNgModel :'=',
+			keyNgModel : '='   
+		},
+		template: 
+			'<label class="col-md-6 col-lg-6 control-label"> {{keyNgModel|codes:\'property_definition\'}}</label>'
+			+'<p class="col-md-6 col-lg-6 form-control-static" ng-bind=valueNgModel.value></p>'
+	};
 }]);

@@ -1,0 +1,39 @@
+@()
+
+<br/>
+<br/>
+<br/>
+<div class="row">		
+	<div class="col-md-10 col-lg-10">
+	<div class="panel panel-default">
+		  <div class="panel-heading"><strong>@Messages("readsets.treatments.WgsBarcoding.specificDbMapping")</strong></div>					  	
+			<table class="table table-condensed table-hover table-bordered">
+	   			<thead>
+				<tr>
+					<th>@Messages("readsets.treatments.WgsBarcoding.specificDbMapping.sequenceId")</th>
+					<th>@Messages("readsets.treatments.WgsBarcoding.specificDbMapping.reference")</th>
+					<th>@Messages("readsets.treatments.WgsBarcoding.specificDbMapping.sequenceSize")</th>
+					<th>@Messages("readsets.treatments.WgsBarcoding.specificDbMapping.referenceSize")</th>	
+					<th>@Messages("readsets.treatments.WgsBarcoding.specificDbMapping.alignSize")</th>	
+					<th>@Messages("readsets.treatments.WgsBarcoding.specificDbMapping.identityPercent")</th>	
+					<th>@Messages("readsets.treatments.WgsBarcoding.specificDbMapping.taxonRef")</th>	
+					<th>@Messages("readsets.treatments.WgsBarcoding.specificDbMapping.typeSeqRef")</th>
+
+				</tr>
+	   			</thead>
+	   			<tbody>
+				<tr ng-repeat="value in readset.treatments[treatments.getTreatment().code].default.specificDbMapping.value">
+					<td>{{value.sequenceId }}</td>
+					<td>{{value.reference }}</td>
+					<td>{{value.sequenceSize | number }}</td>
+					<td>{{value.referenceSize | number}}</td>
+					<td>{{value.alignSize | number}}</td>
+					<td>{{value.identityPercent| number:2}}</td>
+					<td>{{value.taxonRef }}</td>
+					<td>{{value.typeSeqRef }}</td>
+		 		</tr>
+				</tbody>		
+			</table>			
+ 		  </div>
+	</div>
+ </div>

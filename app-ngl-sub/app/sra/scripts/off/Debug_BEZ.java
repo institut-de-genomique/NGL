@@ -7,11 +7,11 @@ import java.util.List;
 import javax.inject.Inject;
 //import org.mongojack.DBQuery;
 
+import controllers.sra.api.ExperimentAPI;
+import controllers.sra.api.SubmissionAPI;
 //import fr.cea.ig.lfw.controllers.scripts.buffered.Script;
 import fr.cea.ig.lfw.controllers.scripts.chunked.ScriptWithArgs;
 import fr.cea.ig.ngl.NGLApplication;
-import fr.cea.ig.ngl.dao.api.sra.ExperimentAPI;
-import fr.cea.ig.ngl.dao.api.sra.SubmissionAPI;
 import models.sra.submit.sra.instance.Submission;
 
 
@@ -20,7 +20,7 @@ public class Debug_BEZ extends ScriptWithArgs<Debug_BEZ.MyParam> {
 //	private static final play.Logger.ALogger logger = play.Logger.of(Debug_BDA.class);
 
 	private final SubmissionAPI     submissionAPI;
-	private final ExperimentAPI     experimentAPI;
+	// private final ExperimentAPI     experimentAPI;
 //	private final NGLApplication    app;
 
 	@Inject
@@ -29,7 +29,7 @@ public class Debug_BEZ extends ScriptWithArgs<Debug_BEZ.MyParam> {
 					 NGLApplication    app) {
 
 		this.submissionAPI     = submissionAPI;
-		this.experimentAPI     = experimentAPI;
+		// this.experimentAPI     = experimentAPI;
 //		this.app               = app;
 	}
 

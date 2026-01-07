@@ -6,13 +6,14 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 
-
+import controllers.sra.api.ExperimentAPI;
 import fr.cea.ig.lfw.controllers.scripts.buffered.ScriptNoArgs;
-import fr.cea.ig.ngl.dao.api.sra.ExperimentAPI;
 import models.sra.submit.sra.instance.Experiment;
 
 /*
@@ -25,7 +26,7 @@ import models.sra.submit.sra.instance.Experiment;
  *
  */
 public class Test_bilan_submission_annee extends ScriptNoArgs {
-	private static final play.Logger.ALogger logger = play.Logger.of(Test_bilan_submission_annee.class);
+	// private static final play.Logger.ALogger logger = play.Logger.of(Test_bilan_submission_annee.class);
 	private final ExperimentAPI     experimentAPI;
 	
 	@Inject
@@ -36,25 +37,29 @@ public class Test_bilan_submission_annee extends ScriptNoArgs {
 		
 	}
 
-    public class Infos {
+    private static class Infos {
     	public int annee = 0;
 		public int count_readset = 0;
 		public int count_readsetRepriseHisto = 0;
 
-		public Infos(int annee, int count_readset) {
-			this.annee = annee;
-			this.count_readset = count_readset;
-			this.count_readsetRepriseHisto = 0;
-		}
+//		public Infos(int annee, int count_readset) {
+//			this.annee = annee;
+//			this.count_readset = count_readset;
+//			this.count_readsetRepriseHisto = 0;
+//		}
 		public Infos(int annee) {
 			this.annee = annee;
 		}	
-		
+		@Override
 		public boolean equals(Object obj) {
 			return  (obj instanceof Infos) &&
 					(((Infos)obj).annee == this.annee);
 		}
-
+		
+		@Override
+		public int hashCode() {
+			return Objects.hash(annee);
+		}
 
     }
     
@@ -96,6 +101,7 @@ public class Test_bilan_submission_annee extends ScriptNoArgs {
 				}
 			}
 		}
+		
 //		Exemple sans passer par des lambda:
 //		Comparator< ? extends Infos> x; // n'importe quel type qui etend Infos 
 //		Comparator< ? super Infos> y;// n'importe quel type qui est une super class de Infos 

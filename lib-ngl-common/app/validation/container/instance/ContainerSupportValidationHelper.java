@@ -67,8 +67,7 @@ public class ContainerSupportValidationHelper {
 	 *         validateCategoryCodeAgainstSupportCategoryCode has already been validated !!!!
 	 * @author F. Dos Santos
 	 * @param contextValidation validation context
-	 * @param container
-	 * @param support
+	 * @param support support
 	 *   exemples:
 	 *      support tube           valid values: line=1 / column=1
 	 *      support strip-8        valid values: line=1 / column in [1-8]

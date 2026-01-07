@@ -44,7 +44,7 @@ public class IGBodyParsers {
 	  
 	}
 	
-/**
+	/**
 	 * 15 mb buffer json parser.
 	 * Allows replacement of annotations @BodyParser.Of(value = BodyParser.Json.class, maxLength = 10000 * 1024)
 	 * by @BodyParser.Of(value = IGBodyParser.Json10MB).
@@ -54,6 +54,20 @@ public class IGBodyParsers {
 		@Inject
 	    public Json15MB(HttpErrorHandler errorHandler) {
 	        super(15 * 1024 * 1024, errorHandler);
+	    }
+	  
+	}
+	
+	/**
+	 * 100 mb buffer json parser.
+	 * Allows replacement of annotations @BodyParser.Of(value = BodyParser.Json.class, maxLength = 100 * 1024 * 1024)
+	 * by @BodyParser.Of(value = IGBodyParser.Json10MB).
+	 */
+	public static class Json100MB extends BodyParser.Json {
+		
+		@Inject
+	    public Json100MB(HttpErrorHandler errorHandler) {
+	        super(100 * 1024 * 1024, errorHandler);
 	    }
 	  
 	}

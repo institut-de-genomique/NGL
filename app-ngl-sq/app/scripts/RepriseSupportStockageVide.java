@@ -34,7 +34,7 @@ public class RepriseSupportStockageVide extends	ScriptWithArgs<RepriseSupportSto
 	public void execute(Args args) throws Exception {
 		logger.error("Début du script");
 
-		// gestionExperienceQC();
+		gestionExperienceQC();
 
 		gestionExperienceNonQC();
 

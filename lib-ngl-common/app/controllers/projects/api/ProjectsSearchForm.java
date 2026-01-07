@@ -28,6 +28,8 @@ public class ProjectsSearchForm extends DBObjectListForm<Project> {
 	public List<String> projectCodes;
 	public String projectCode;
 
+	public List<String> codes;
+
 	public List<String> stateCodes;
 	public String stateCode;
 
@@ -39,13 +41,15 @@ public class ProjectsSearchForm extends DBObjectListForm<Project> {
 	
 	public Boolean isBiologicalAnalysis;
 	
+	public Boolean isSynchroProj;
+	
+	public Boolean isArchiveHistory;
+	
 	public Date fromDate;
 	
 	public Date toDate;
 
 	public List<String> umbrellaCodes;
-
-	public List<String> unixGroups;
 	
 	public Map<String, List<String>> properties = new HashMap<>();
 	
@@ -62,6 +66,8 @@ public class ProjectsSearchForm extends DBObjectListForm<Project> {
 		
 		if(CollectionUtils.isNotEmpty(this.projectCodes)){
 			queries.add(DBQuery.in("code", this.projectCodes));
+		} else if(CollectionUtils.isNotEmpty(this.codes)){
+			queries.add(DBQuery.in("code", this.codes));
 		} else if(StringUtils.isNotBlank(this.projectCode)){
 			queries.add(DBQuery.is("code", this.projectCode));
 		}
@@ -82,15 +88,22 @@ public class ProjectsSearchForm extends DBObjectListForm<Project> {
 			queries.add(DBQuery.is("bioinformaticParameters.biologicalAnalysis", this.isBiologicalAnalysis));
 		}
 		
+		if(this.isSynchroProj != null) {
+			queries.add(DBQuery.is("systemParameters.synchroProj", this.isSynchroProj));
+		}
+		
+		if(this.isArchiveHistory != null) {
+			if(this.isArchiveHistory) {
+				queries.add(DBQuery.exists("systemParameters.archiveHistory"));
+			} else {
+				queries.add(DBQuery.notExists("systemParameters.archiveHistory"));
+			}
+		}
+		
 		if (StringUtils.isNotBlank(this.stateCode)) { //all
 			queries.add(DBQuery.is("state.code", this.stateCode));
 		} else if (CollectionUtils.isNotEmpty(this.stateCodes)) { //all
 			queries.add(DBQuery.in("state.code", this.stateCodes));
-		}
-		
-		// EJACOBY AD
-		if (CollectionUtils.isNotEmpty(this.unixGroups)) {
-			queries.add(DBQuery.in("properties.unixGroup.value", this.unixGroups));
 		}
 		
 		if (CollectionUtils.isNotEmpty(this.typeCodes)) { //all

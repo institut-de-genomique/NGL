@@ -19,9 +19,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import controllers.DBObjectListForm;
 import controllers.ListObject;
 import models.laboratory.parameter.Parameter;
-import models.laboratory.protocol.instance.Protocol;
-import play.Logger;
-import play.libs.Json;
 
 public class ParametersSearchForm extends DBObjectListForm<Parameter>{
 	
@@ -43,6 +40,9 @@ public class ParametersSearchForm extends DBObjectListForm<Parameter>{
 	public Set<String> shortNames; //textarea
 	public String shortNameRegex;  //regex
 	
+	public Set<String> supplierIndexNames;
+	public String supplierIndexNameRegex;
+	
 	public Set<String> groupNames;  // drop down multiple
 	public String supplierNameRegex;//regex
 	
@@ -58,7 +58,6 @@ public class ParametersSearchForm extends DBObjectListForm<Parameter>{
 
 	/**
 	 * build a query from a Form
-	 * @param form
 	 * @return query
 	 */
 	@Override
@@ -117,6 +116,12 @@ public class ParametersSearchForm extends DBObjectListForm<Parameter>{
 		
 		if(StringUtils.isNotBlank(this.supplierNameRegex)){
 			queries.add(DBQuery.regex("supplierName", Pattern.compile(this.supplierNameRegex)));
+		}
+		
+		if(CollectionUtils.isNotEmpty(this.supplierIndexNames)){
+			queries.add(DBQuery.in("supplierIndexName", this.supplierIndexNames));
+		} else if(StringUtils.isNotBlank(this.supplierIndexNameRegex)){
+			queries.add(DBQuery.regex("supplierIndexName", Pattern.compile(this.supplierIndexNameRegex)));
 		}
 		
 		if(null != this.size ) {

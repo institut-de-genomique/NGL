@@ -170,7 +170,7 @@ public abstract class NGLAPIController<T extends GenericAPI<U, V>, U extends Gen
     @BodyParser.Of(value = IGBodyParsers.Json15MB.class)
     public Result update(String code) {
         try {
-        	Logger.debug("Update controller "+code);
+        	Logger.debug("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ    Update controller "+code);
             V object = updateImpl(code);
             return okAsJson(object);
         } catch (APIValidationException e) {

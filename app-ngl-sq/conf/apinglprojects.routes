@@ -1,2 +1,6 @@
 #projects
 GET		/api/projects												controllers.projects.api.Projects.list()
+
+#umbrellaProject api
+GET    	/api/umbrellaprojects               			controllers.projects.api.UmbrellaProjects.list()
+GET    	/api/umbrellaprojects/:code               		controllers.projects.api.UmbrellaProjects.get(code: java.lang.String)

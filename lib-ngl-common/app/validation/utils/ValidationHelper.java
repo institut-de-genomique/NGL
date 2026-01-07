@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
+import java.util.stream.Stream;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -119,7 +120,7 @@ public class ValidationHelper {
 //			if (inputProperties.containsKey(key)) {
 //				inputProperties.remove(key);
 //			}
-			logger.info("removing tested property {}", key);
+			// logger.info("removing tested property {}", key);
 			inputProperties.remove(key);
 		}		
 		// treat other property not defined
@@ -404,6 +405,51 @@ public class ValidationHelper {
 	}
 	
 	/**
+	 * Negative from method {@link ValidationHelper#isEmpty}
+	 * @param object to test for emptiness
+	 * @return  true if the object is not considered empty, false otherwise
+	 */
+	public static boolean isNotEmpty(Object object) {
+		return !isEmpty(object);
+	}
+	
+	/**
+	 * Tests for emptiness for a list of objects {@link ValidationHelper#isEmpty}
+	 * @param objects to test for emptiness
+	 * @return true if at least one object is considered empty, false otherwise
+	 */
+	public static boolean isAnyEmpty(Object...objects) {
+		return Stream.of(objects).anyMatch(ValidationHelper::isEmpty);
+	}
+	
+	/**
+	 * Tests for not emptiness for a list of objects {@link ValidationHelper#isNotEmpty}
+	 * @param objects to test for emptiness
+	 * @return true if at least one object is considered not empty, false otherwise
+	 */
+	public static boolean isAnyNotEmpty(Object...objects) {
+		return Stream.of(objects).anyMatch(ValidationHelper::isNotEmpty);
+	}
+	
+	/**
+	 * Tests for emptiness for a list of objects {@link ValidationHelper#isEmpty}
+	 * @param objects to test for emptiness
+	 * @return true if every object is considered empty, false otherwise
+	 */
+	public static boolean areAllEmpty(Object...objects) {
+		return Stream.of(objects).allMatch(ValidationHelper::isEmpty);
+	}
+	
+	/**
+	 * Tests for emptiness for a list of objects {@link ValidationHelper#isEmpty}
+	 * @param objects to test for emptiness
+	 * @return true if no object is considered empty, false otherwise
+	 */
+	public static boolean areNoneEmpty(Object...objects) {
+		return Stream.of(objects).noneMatch(ValidationHelper::isEmpty);
+	}
+	
+	/**
 	 * Returns null if the argument is empty ({@link #isEmpty}), or the original object if not empty. 
 	 * @param object object to test
 	 * @return       null if the object is empty, the object otherwise 
@@ -641,7 +687,7 @@ public class ValidationHelper {
 			if (propertyValue._type == null || !propertyValue._type.equals(propDef.propertyValueType)) {
 				logger.error("checkType - property type error {} : {}, expected {} got {}", propDef.code, propertyValue.value, propDef.propertyValueType, propertyValue._type);
 				// GA: à activer si la prod se passe bien
-				// contextValidation.addErrors(propDef.code, ERROR_PROPERTY_TYPE, propertyValue.value, propDef.propertyValueType,propertyValue._type);
+				contextValidation.addError(propDef.code, ValidationConstants.ERROR_PROPERTY_TYPE, propertyValue.value + "/" + propDef.propertyValueType + "/" + propertyValue._type);
 				isSame = false;
 			}
 		}

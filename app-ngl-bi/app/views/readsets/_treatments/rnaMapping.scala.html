@@ -1,0 +1,52 @@
+<div class="col-md-6 col-lg-6">
+	<div class="panel panel-default">
+        <table class="table table-condensed table-hover table-bordered">
+            <tbody>
+                    <tr>
+					    <th>@Messages("readsets.treatments.rnamaping.alignedReadsPercent")</th>
+					    <td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.alignedReadsPercent.value | number:2}} %</td>		
+                    </tr>	
+                    <tr>
+					    <th>@Messages("readsets.treatments.rnamaping.transcriptsNumber")</th>
+					    <td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.transcriptsNumber.value}}</td>
+                    </tr>	
+                    <tr>
+					    <th>@Messages("readsets.treatments.rnamaping.averageTranscriptsSize")</th>
+					    <td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.averageTranscriptsSize.value}}</td>
+                    </tr>	
+                    <tr>
+					    <th>@Messages("readsets.treatments.rnamaping.medTranscriptsSize")</th>
+					    <td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.medTranscriptsSize.value}}</td>
+                    </tr>	
+                    <tr>
+					    <th>@Messages("readsets.treatments.rnamaping.maxTranscriptsSize")</th>
+					    <td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.maxTranscriptsSize.value}}</td>
+                    </tr>	
+                    <tr>
+					    <th>@Messages("readsets.treatments.rnamaping.n50Transcripts")</th>
+					    <td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.n50Transcripts.value}}</td>
+                    </tr>
+                    <tr>
+					    <th>@Messages("readsets.treatments.rnamaping.averageExonNumber")</th>
+					    <td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.averageExonNumber.value | number:2}}</td>
+                    </tr>
+                    <tr>
+					    <th>@Messages("readsets.treatments.rnamaping.specificBuscoResult")</th>
+					    <td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.specificBuscoResult.value }}</td>
+                    </tr>		
+                    <tr>
+					    <th>@Messages("readsets.treatments.rnamaping.eukaryotaBuscoResult")</th>
+					    <td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.eukaryotaBuscoResult.value }}</td>
+                    </tr>	
+                    <tr>
+					    <th>@Messages("readsets.treatments.rnamaping.assemblyFile")</th>
+					    <td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.assemblyFile.value }}</td>
+                    </tr>	
+                    <tr>
+					    <th>@Messages("readsets.treatments.rnamaping.softwareVersion")</th>
+					    <td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].pairs.softwareVersion .value }}</td>
+                    </tr>	   
+            </tbody>
+        </table>
+	</div>
+</div>

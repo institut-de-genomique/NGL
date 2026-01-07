@@ -13,11 +13,6 @@ import javax.inject.Inject;
 
 import fr.cea.ig.lfw.controllers.scripts.buffered.Script;
 import fr.cea.ig.ngl.NGLApplication;
-import fr.cea.ig.ngl.dao.api.sra.AbstractSampleAPI;
-//import fr.cea.ig.ngl.dao.api.sra.AbstractStudyAPI;
-//import fr.cea.ig.ngl.dao.api.sra.ConfigurationAPI;
-//import fr.cea.ig.ngl.dao.api.sra.ExperimentAPI;
-import fr.cea.ig.ngl.dao.api.sra.SampleAPI;
 import models.sra.submit.sra.instance.AbstractSample;
 import models.sra.submit.sra.instance.ExternalSample;
 import models.sra.submit.sra.instance.Sample;
@@ -27,12 +22,14 @@ import models.sra.submit.sra.instance.Sample;
 //import models.sra.submit.sra.instance.Experiment;
 import validation.ContextValidation;
 import play.libs.Json;
-import services.SraEbiAPI;
-import services.XmlToSra;
+import sra.services.SraEbiAPI;
+import sra.services.XmlToSra;
 
 import org.apache.commons.lang3.StringUtils;
 import org.mongojack.DBQuery;
-import org.mongojack.DBUpdate;
+
+import controllers.sra.api.AbstractSampleAPI;
+import controllers.sra.api.SampleAPI;
 
 
 /*
@@ -142,10 +139,13 @@ public class RepriseHistoAttributeSample extends Script<RepriseHistoAttributeSam
 							println(Json.prettyPrint(app.errorsAsJson(contextValidation.getErrors())));				
 						} else {
 							printfln("ok pour sauvegarde dans db de sample.code=%s", sample.code);	
-							sampleAPI.dao_update(DBQuery.is("code", sample.code),
-								DBUpdate.set("attributes", sample.attributes)
-									.set("traceInformation.modifyDate", sampleDb.traceInformation.modifyDate)
-									.set("traceInformation.modifyUser", sampleDb.traceInformation.modifyUser));
+//							sampleAPI.dao_update(DBQuery.is("code", sample.code),
+//								DBUpdate.set("attributes", sample.attributes)
+//									.set("traceInformation.modifyDate", sampleDb.traceInformation.modifyDate)
+//									.set("traceInformation.modifyUser", sampleDb.traceInformation.modifyUser));
+							sample.traceInformation.modifyDate = sampleDb.traceInformation.modifyDate;
+							sample.traceInformation.modifyUser = sampleDb.traceInformation.modifyUser;
+							sampleAPI.update(sample, user);
 						}
 					}
 				}

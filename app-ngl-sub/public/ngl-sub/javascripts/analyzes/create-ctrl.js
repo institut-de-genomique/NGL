@@ -9,6 +9,7 @@ angular.module('home').controller('CreateCtrl',[ '$http', '$scope', '$routeParam
 	$scope.messages.clear();
 	$scope.form = {};
 	$scope.lists = lists;
+	$scope.sraVariables = {};
 	$scope.treeLoadInProgress = false;
 
 	if(angular.isUndefined(mainService.getHomePage())){
@@ -19,7 +20,14 @@ angular.module('home').controller('CreateCtrl',[ '$http', '$scope', '$routeParam
 	
 	//	Initialisation ProjectCodes:
 	$scope.lists.refresh.projects();
-	
+		
+	$http.get(jsRoutes.controllers.sra.api.Variables.list().url, {params:{type:'legendeDropBox'}})
+		.success(function(data) {
+		$scope.sraVariables.legendeDropBox = data;	
+		$scope.form.dropBox="Webin-9";  // pour avoir Webin-9 pré-séléctionné																		
+		$scope.form.legendeDropBox="Webin-9";  // pour avoir Webin-9 pré-séléctionné																					
+	});	
+		
 
 	$scope.save = function(){
 		$scope.messages = messages();	
@@ -32,7 +40,7 @@ angular.module('home').controller('CreateCtrl',[ '$http', '$scope', '$routeParam
 //		console.log("typeof undefined : '" + typeof undefined + "'");
 		
 
-
+		$scope.form.dropBox = $scope.form.legendeDropBox;
 		console.log("scope.form=", $scope.form);
 		mainService.setForm($scope.form);
 		console.log("mainService.getForm=", mainService.getForm());
@@ -55,7 +63,7 @@ angular.module('home').controller('CreateCtrl',[ '$http', '$scope', '$routeParam
 				//$scope.resetUserData();
 				//$scope.messages.clear();
 				//angular.element('#idUserFileReadSet')[0].value = null;
-				//angular.element('#idUserFileRefCollabToAc')[0].value = null;
+				//angular.element('#idUserFileRefCollabToEbiIdentifier')[0].value = null;
 			});
 	};
 	

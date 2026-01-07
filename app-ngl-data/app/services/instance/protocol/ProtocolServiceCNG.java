@@ -18,6 +18,9 @@ import models.utils.InstanceConstants;
 import models.utils.InstanceHelpers;
 import validation.ContextValidation;
 
+/*
+ * OBSOLETE: l'ajout de nouveau protocole se fait via l'UI !!!
+ */
 public class ProtocolServiceCNG {	
 
 	private static final play.Logger.ALogger logger = play.Logger.of(ProtocolServiceCNG.class);
@@ -26,12 +29,13 @@ public class ProtocolServiceCNG {
 	
 	public static void main(ContextValidation ctx) {	
 
-		logger.info("Start to create protocols collection for "+institute+"...");
-		logger.info("Remove protocol");
+		logger.info(institute+" Start to create protocols collection");
+		logger.info("1- Remove protocols");
 		removeProtocols(ctx);
-		logger.info("Save protocols ...");
+
+		logger.info("2- Save protocols");
 		saveProtocols(ctx);
-		logger.info(institute+" Protocols collection creation is done!");
+		logger.info(institute+" Protocols collection creation done!");
 	}
 	
 	private static void removeProtocols(ContextValidation ctx) {
@@ -69,11 +73,11 @@ public class ProtocolServiceCNG {
 				asList("denat-dil-lib")));
 		
 		// protocole quand le labo n'a pas "encore" fourni de nom specifique...
-
 		lp.add(newProtocol("sop-en-attente","SOP en attente","?","1","production", 
 				asList("normalization-and-pooling",
 					   "aliquoting",
 					   "tubes-to-plate",
+					   "tubes-to-strip",
 					   "plate-to-tubes",
 					   "plates-to-plate",
 					   "x-to-plate",
@@ -143,7 +147,6 @@ public class ProtocolServiceCNG {
 					   "wg-chromium-lib-prep")));
 		
 		// 30/03/2017 ajout protocoles pour Nanopore
-		//cdna-synthesis, 18/06/2019 suppression caractere blanc final excedentaire dans name
 		lp.add(newProtocol("1d-strand-switching","1D strand switching","?","1","production",
 				asList("cdna-synthesis")));
 		
@@ -274,7 +277,7 @@ public class ProtocolServiceCNG {
 					   "capture",
 					   "pcr-and-indexing",
 					   "fluo-quantification",
-					   "labchip-migration-profile")));  
+					   "labchip-migration-profile"), Boolean.FALSE));  // NGL-4506 27/02/2024 inactivation
 		
 		// 18/06/2018 NGL-2129
 		lp.add(newProtocol("1-dna-a-1-sop-sp-capture-3ug-bravo","1_DNA_A_1_SOP_SP_Capture_3µg_Bravo","?","1","production",
@@ -357,9 +360,9 @@ public class ProtocolServiceCNG {
 		lp.add(newProtocol("nugen-trumethyl-oxbs-module", "NuGen TruMethyl oxBS module","?","1","production",
 				asList("bisulfite-oxbisulfite-conversion")));
 		
-		// 13/04/2022 ajout protocole LowPass-seq-Nextera-XT-DNA  NGL-3811
+		// 13/04/2022 ajout protocole LowPass-seq-Nextera-XT-DNA  NGL-3811; NGL-4506 04/03/2024 désactivation
 		lp.add(newProtocol("lowpass-seq-nextera-xt-dna", "LowPass-seq-Nextera-XT-DNA","?","1","production",
-				asList("prep-lowpass-wg")));
+				asList("prep-lowpass-wg"), false));
 		
 		// 07/04/2023 ajout protocole LowPass-seq-ILL-DNA-Prep  NGL-4191
 		lp.add(newProtocol("lowpass-seq-ill-dna-prep", "LowPass-seq-ILL-DNA-Prep","?","1","production",
@@ -382,6 +385,38 @@ public class ProtocolServiceCNG {
 						"pcr-and-indexing",
 						"capture",
 						"pcr-and-purification")));
+
+		// 16/01/2024 PacBio
+		lp.add(newProtocol("revio-polymerase-kit-ptr", "Revio polymerase kit", "?", "1", "production", 
+				asList("abc")));
+		
+        lp.add(newProtocol("revio-seq-plate", "Revio Sequencing Plate", "?", "1", "production", 
+				asList("prep-seq-plate-pacbio")));	
+
+        lp.add(newProtocol("revio-depot", "Dépot Revio", "?", "1", "production",
+				asList("pacbio-depot")));
+		
+		// NGL-4584
+		lp.add(newProtocol("pacbio-fragmentation-ptr", "Fragmentation PacBio", "?", "1", "production",
+				asList("pacbio-fragmentation")));
+
+		// NGL-4585
+		lp.add(newProtocol("wg-smrtbell-prep-kit-3.0", "WG SMRTbell prep kit 3.0", "?", "1", "production",
+				asList("pacbio-library")));
+
+		// 15/05/2024 ajout 2 protocoles lowinput NGL-4609
+		lp.add(newProtocol("nebnext-ultraii-dna-pcrfree", "NEBNext Ultra II DNA PCR-free", "?", "1", "production", 
+				asList("prep-pcr-free")));
+
+		lp.add(newProtocol("illumina-dna-pcrfree", "Illumina DNA PCR-free", "?", "1", "production", 
+				asList("prep-pcr-free")));
+
+		// 31/07/2024 AmpliSeq Mitochondrie
+		lp.add(newProtocol("ampliseq-genome-mitochondrie", "AmpliSeq Génome Mitochondrie", "?", "1", "production", 
+				asList("prep-ampliseq-mitochondria")));
+
+		lp.add(newProtocol("ampliseq-methylome-mitochondrie", "AmpliSeq Méthylome Mitochondrie", "?", "1", "production", 
+				asList("prep-ampliseq-mitochondria")));
 		
 		
 		//------------Experiences de Control Qualité------------------------------
@@ -390,7 +425,7 @@ public class ProtocolServiceCNG {
 		
 		lp.add(newProtocol("3a-kapa-qPCR-240715","3A_KAPA_qPCR_240715", "?","1","production",
 				asList("qpcr-quantification")));
-		
+
 		// 01/09/2016 ajout 
 		lp.add(newProtocol("labchip-gx","LabChiP_GX", "?","1","production",
 				asList("labchip-migration-profile")));
@@ -413,6 +448,16 @@ public class ProtocolServiceCNG {
 		
 		lp.add(newProtocol("quantit-br","Quant-iT BR", "?","1","production",
 				asList("fluo-quantification")));
+
+		// 05/09/2024 NGL-4579
+		lp.add(newProtocol("tapestation","TapeStation", "?","1","production",
+				asList("tapestation-migration-profile")));
+
+		// 05/09/2024 NGL-4581
+		lp.add(newProtocol("gdna-165kb-femto-pulse-protocol","gDNA 165 kb", "?","1","production",
+				asList("femto-pulse-migration-profile")));		
+
+
 		
 		//------------Experiences de Purification-----------------------------
 		// 30/03/2017 ajout Protocole pour Sizing 

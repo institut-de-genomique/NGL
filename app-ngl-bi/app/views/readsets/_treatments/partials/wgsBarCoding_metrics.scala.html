@@ -1,0 +1,236 @@
+@()
+
+<br/>
+<br/>
+<br/>
+
+<div class="row">
+	<div class="col-md-7 col-lg-7">
+		<div class="panel panel-default">
+			<div class="panel-heading"><strong>@Messages("readsets.treatments.WgsBarcoding")</strong></div>
+			<table class="table table-condensed table-hover table-bordered">
+				<thead></thead>
+				<tbody>
+					<tr>
+						<th>@Messages("readsets.treatments.WgsBarcoding.researchedTaxon")</th>
+						<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.researchedTaxon.value}}
+						</td>
+					</tr>
+					<tr>
+						<th>@Messages("readsets.treatments.WgsBarcoding.taxonFound")</th>
+						<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.taxonFound.value}}
+						</td>
+					</tr>
+					<tr>
+						<th>@Messages("readsets.treatments.WgsBarcoding.dataBaseVersion")</th>
+						<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.dataBaseVersion.value}}
+						</td>
+					</tr>
+					<tr>
+						<th>@Messages("readsets.treatments.WgsBarcoding.software")</th>
+						<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.software.value
+							}}</td>
+					</tr>
+					<tr>
+						<th>@Messages("readsets.treatments.WgsBarcoding.sampleInput")</th>
+						<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.sampleInput.value
+							| number}}</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+	<div class="col-md-4 col-lg-4">
+		<div class="panel panel-default">
+			<div class="panel-heading"><strong>@Messages("readsets.treatments.WgsBarcoding.dbspecies")</strong></div>
+			<table class="table table-condensed table-hover table-bordered">
+				<thead>
+					<tr>
+						<th>@Messages("readsets.treatments.WgsBarcoding.dbspecies.dbname")</th>
+						<th>@Messages("readsets.treatments.WgsBarcoding.dbspecies.speciesnumber")</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr ng-repeat="value in readset.treatments[treatments.getTreatment().code].default.dbspecies.value">
+						<td>{{value.dbname}}</td>
+						<td>{{value.speciesnumber | number}}</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>
+
+<br/>
+
+<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+	<div class="panel panel-default">
+		<div class="panel-heading" role="tab" id="headinghomology18S">
+			<h4 class="panel-title">
+				<a role="button" data-toggle="collapse" data-parent="#accordion" data-target="#homology18S" aria-expanded="true" aria-controls="homology18S">
+				<i class="more-less glyphicon glyphicon-plus"></i>
+				@Messages("readsets.treatments.WgsBarcoding.homology18S")
+			</a>
+			</h4>
+		</div>
+		
+		<div id="homology18S" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headinghomology18S">
+			<div class="panel-body">
+				<table class="table table-condensed table-hover table-bordered text-center">
+					<thead>
+				 <tr>
+					 <th>@Messages("readsets.treatments.WgsBarcoding.homology18S.species")</th>
+					 <th>@Messages("readsets.treatments.WgsBarcoding.homology18S.alignSize")</th>
+					 <th>@Messages("readsets.treatments.WgsBarcoding.homology18S.alignIdentityPercent")</th>	
+					 <th>@Messages("readsets.treatments.WgsBarcoding.homology18S.speciesdb")</th>	
+					 <th>@Messages("readsets.treatments.WgsBarcoding.homology18S.homologousdb")</th>	
+				 </tr>
+					</thead>
+					<tbody>
+				 <tr ng-repeat="value in readset.treatments[treatments.getTreatment().code].default.homology18S.value|orderBy:'alignSize':true">
+					 <td>{{value.species}}</td>
+					 <td>{{value.alignSize | number}}</td>
+					 <td>{{value.alignIdentityPercent | number:2}}</td>
+					 <td>{{value.speciesdb}}</td>
+					 <td>{{value.homologousdb}}</td>
+				  </tr>
+				 </tbody>		
+				 </table>
+			</div>
+		</div>
+	</div>
+	
+	<div class="panel panel-default">
+		<div class="panel-heading" role="tab" id="headinghomologyOther">
+			<h4 class="panel-title">
+				<a role="button" data-toggle="collapse" data-parent="#accordion" data-target="#homologyOther" aria-expanded="true" aria-controls="homologyOther">
+				<i class="more-less glyphicon glyphicon-plus"></i>
+				@Messages("readsets.treatments.WgsBarcoding.homologyOther")
+			</a>
+			</h4>
+		</div>
+	
+		<div id="homologyOther" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headinghomologyOther">
+			<div class="panel-body">
+				<table class="table table-condensed table-hover table-bordered text-center">
+					<thead>
+						<tr>
+							<th>@Messages("readsets.treatments.WgsBarcoding.homologyOther.species")</th>
+							<th>@Messages("readsets.treatments.WgsBarcoding.homologyOther.alignSize")</th>
+							<th>@Messages("readsets.treatments.WgsBarcoding.homologyOther.alignIdentityPercent")</th>	
+							<th>@Messages("readsets.treatments.WgsBarcoding.homologyOther.speciesdb")</th>	
+							<th>@Messages("readsets.treatments.WgsBarcoding.homologyOther.homologousdb")</th>	
+						</tr>
+						</thead>
+						<tbody>
+						<tr ng-repeat="value in readset.treatments[treatments.getTreatment().code].default.homologyOther.value|orderBy:'alignSize':true | limitTo:limit">
+							<td>{{value.species}}</td>
+							<td>{{value.alignSize | number}}</td>
+							<td>{{value.alignIdentityPercent | number:2}}</td>
+							<td>{{value.speciesdb}}</td>
+							<td>{{value.homologousdb}}</td>
+						</tr>
+				 </tbody>		
+				 </table>
+
+				 <button ng-click="stopLimit()">{{textLimit}}</button>
+			</div>
+		</div>
+	</div>
+
+</div>
+
+<div class="row">
+	<div class="col-md-7 col-lg-7">
+	<div class="panel panel-default">
+		  <div class="panel-heading"><strong>@Messages("readsets.treatments.WgsBarcoding.scaffold")</strong></div>
+			<table class="table table-condensed table-hover table-bordered">
+	   		<thead>
+			<tr>
+				<th>@Messages("readsets.treatments.WgsBarcoding.scaffold.nb")</th>
+				<th>@Messages("readsets.treatments.WgsBarcoding.scaffold.min")</th>
+				<th>@Messages("readsets.treatments.WgsBarcoding.scaffold.max")</th>	
+			</tr>
+	   		</thead>
+	   		<tbody>
+			<tr>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.scaffold.value.nb | number}}</td>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.scaffold.value.min | number}}</td>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.scaffold.value.max | number}}</td>
+		 	</tr>
+			</tbody>
+			</table>
+ 		  </div>
+	</div>
+ </div>
+
+<br/>
+<br/>
+<br/>
+
+<div class="row">
+	<div class="col-md-7 col-lg-7">
+	<div class="panel panel-default">
+		  <div class="panel-heading"><strong>@Messages("readsets.treatments.WgsBarcoding.scaffoldClean")</strong></div>					  	
+			<table class="table table-condensed table-hover table-bordered">
+	   		<thead>
+			<tr>
+				<th>@Messages("readsets.treatments.WgsBarcoding.scaffoldClean.nb")</th>
+				<th>@Messages("readsets.treatments.WgsBarcoding.scaffoldClean.min")</th>
+				<th>@Messages("readsets.treatments.WgsBarcoding.scaffoldClean.max")</th>	
+			</tr>
+	   		</thead>
+	   		<tbody>
+			<tr>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.scaffoldClean.value.nb | number}}</td>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.scaffoldClean.value.min | number}}</td>
+				<td>{{readset.treatments[treament.code!=undefined?treament.code:treatments.getTreatment().code].default.scaffoldClean.value.max | number}}</td>
+		 	</tr>
+			</tbody>
+			</table>
+ 		  </div>
+	</div>
+ </div>
+
+
+<br/>
+<br/>
+<br/>
+
+<div class="row">
+	<div class="col-md-35 col-lg-35">
+	<div class="panel panel-default">
+		  <div class="panel-heading"><strong>@Messages("readsets.treatments.WgsBarcoding.assignation")</strong></div>					  	
+			<table class="table table-condensed table-hover table-bordered">
+	   			<thead>
+				<tr>
+					<th>@Messages("readsets.treatments.WgsBarcoding.assignation.id")</th>
+					<th>@Messages("readsets.treatments.WgsBarcoding.assignation.refLen")</th>
+					<th>@Messages("readsets.treatments.WgsBarcoding.assignation.lenRef")</th>
+					<th>@Messages("readsets.treatments.WgsBarcoding.assignation.count")</th>	
+					<th>@Messages("readsets.treatments.WgsBarcoding.assignation.percentIdentity")</th>	
+					<th>@Messages("readsets.treatments.WgsBarcoding.assignation.percentLen")</th>	
+					<th>@Messages("readsets.treatments.WgsBarcoding.assignation.nbBestHit")</th>	
+					<th>@Messages("readsets.treatments.WgsBarcoding.assignation.db")</th>
+					<th>@Messages("readsets.treatments.WgsBarcoding.assignation.taxon")</th>	
+
+				</tr>
+	   			</thead>
+	   			<tbody>
+				<tr ng-repeat="value in readset.treatments[treatments.getTreatment().code].default.assignation.value">
+					<td>{{value.id | number}}</td>
+					<td>{{value.len }}</td>
+					<td>{{value.lenRef }}</td>
+					<td>{{value.count | number}}</td>
+					<td>{{value.percentIdentity | number}}</td>
+					<td>{{value.percentLen| number}}</td>
+					<td>{{value.nbBestHit | number}}</td>
+					<td>{{value.db }}</td>
+					<td><a href="{{ncbiUrl + value.taxon.replace(' ','+') }}" target="_blank">{{value.taxon}}</a></td>
+		 		</tr>
+				</tbody>
+			</table>
+ 		  </div>
+	</div>
+ </div>

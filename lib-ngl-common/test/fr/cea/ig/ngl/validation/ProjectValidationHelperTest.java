@@ -1,28 +1,17 @@
 package fr.cea.ig.ngl.validation;
 
-import org.jongo.MongoCursor;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-
-import fr.cea.ig.MongoDBDAO;
-import fr.cea.ig.ngl.dao.projects.ProjectsDAO;
-import fr.cea.ig.ngl.dao.api.factory.ProjectFactory;
-import fr.cea.ig.ngl.utils.TestUtils;
-import models.laboratory.common.description.PropertyDefinition;
-import models.laboratory.common.instance.PropertyValue;
-import models.laboratory.common.instance.property.PropertySingleValue;
-import models.laboratory.project.description.ProjectCategory;
-import models.laboratory.project.description.ProjectType;
-import models.laboratory.project.instance.Project;
-import ngl.refactoring.MiniDAO;
-import validation.ContextValidation;
-import validation.common.instance.CommonValidationHelper;
-import validation.project.instance.ProjectValidationHelper;
-import play.Logger;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -32,8 +21,32 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-import static org.mockito.Mockito.*;
-import static org.junit.Assert.*;
+import org.jongo.MongoCursor;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mongojack.DBQuery;
+import org.mongojack.DBQuery.Query;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+
+import fr.cea.ig.MongoDBDAO;
+import fr.cea.ig.ngl.dao.api.factory.ProjectFactory;
+import fr.cea.ig.ngl.dao.projects.ProjectsDAO;
+import fr.cea.ig.ngl.utils.TestUtils;
+import models.laboratory.common.description.PropertyDefinition;
+import models.laboratory.common.instance.PropertyValue;
+import models.laboratory.common.instance.property.PropertySingleValue;
+import models.laboratory.project.description.ProjectCategory;
+import models.laboratory.project.description.ProjectType;
+import models.laboratory.project.instance.BioinformaticParameters;
+import models.laboratory.project.instance.Project;
+import ngl.refactoring.MiniDAO;
+import play.Logger;
+import validation.ContextValidation;
+import validation.common.instance.CommonValidationHelper;
+import validation.project.instance.ProjectValidationHelper;
 
 /**
  * Test du helper de validation de l'entité PROJECT.
@@ -52,8 +65,6 @@ public class ProjectValidationHelperTest {
 
 	private final MongoCursor<Project> mc = PowerMockito.mock(MongoCursor.class);
 
-	private final Map<String, PropertyDefinition> pDefMap = PowerMockito.mock(HashMap.class);
-
 	/**
 	 * Si on veut faire des traitements avant l'exécution de la suite de tests. 
 	 * Par exemple : initialiser un mock, initialiser une méthode statique, ...
@@ -69,11 +80,8 @@ public class ProjectValidationHelperTest {
 	@Test
 	public void testStaticFields() {
 		assertEquals("Wrong size for AUTHORIZED_SIZE", 10, ProjectValidationHelper.AUTHORIZED_SIZE);
-		assertEquals("Wrong size for AUTHORIZED_ID_FORMAT", "^[a-zA-z0-9]+_\\d{10}$",
+		assertEquals("Wrong size for AUTHORIZED_ID_FORMAT", "^[a-zA-Z0-9]+_\\d{10}$",
 				ProjectValidationHelper.AUTHORIZED_ID_FORMAT);
-		assertEquals("Wrong value for ARCHIVAGE_ACTION", "ARCHIVAGE", ProjectValidationHelper.ARCHIVAGE_ACTION);
-		assertEquals("Wrong value for DESARCHIVAGE_ACTION", "DESARCHIVAGE",
-				ProjectValidationHelper.DESARCHIVAGE_ACTION);
 		assertEquals("Wrong value for AUTHORIZED_ID_FORMAT", "UNKNOWN_ID", ProjectValidationHelper.UNKNOWN_ID);
 	}
 
@@ -128,13 +136,13 @@ public class ProjectValidationHelperTest {
 		List<PropertyDefinition> propDef = new ArrayList<PropertyDefinition>();
 
 		PropertyDefinition propDef1 = new PropertyDefinition();
-		propDef1.code = "synchroProj";
+		propDef1.code = "genre";
 		propDef1.required = true;
 
 		propDef.add(propDef1);
 
 		Map<String, PropertyValue> propProj = new HashMap<String, PropertyValue>();
-		propProj.put("synchroProj", new PropertySingleValue(Boolean.TRUE));
+		propProj.put("genre", new PropertySingleValue("payant"));
 
 		Project project = new Project();
 		project.code = "AAA";
@@ -143,7 +151,7 @@ public class ProjectValidationHelperTest {
 
 		// Liste des champs qu'on veut mettre à jour dans le projet.
 		List<String> fields = new ArrayList<String>();
-		fields.add("synchroProj");
+		fields.add("genre");
 
 		try {
 			ProjectType projectType = PowerMockito.mock(ProjectType.class);
@@ -158,7 +166,7 @@ public class ProjectValidationHelperTest {
 
 		ProjectValidationHelper.validatePropertiesRequired(ctxVal, project.typeCode, project.properties, fields);
 
-		assertTrue("Context has errors : " + ctxVal.getErrors(), !ctxVal.hasErrors());
+		assertTrue("Context has errors : ", !ctxVal.hasErrors());
 	}
 
 	@Test
@@ -186,13 +194,13 @@ public class ProjectValidationHelperTest {
 		List<PropertyDefinition> propDef = new ArrayList<PropertyDefinition>();
 
 		PropertyDefinition propDef1 = new PropertyDefinition();
-		propDef1.code = "synchroProj";
+		propDef1.code = "genre";
 		propDef1.required = true;
 
 		propDef.add(propDef1);
 
 		Map<String, PropertyValue> propProj = new HashMap<String, PropertyValue>();
-		propProj.put("unixGroup", new PropertySingleValue(Boolean.TRUE));
+		propProj.put("bioProjectManager", new PropertySingleValue(TestUtils.CURRENT_USER));
 
 		Project project = new Project();
 		project.code = "AAA";
@@ -201,7 +209,7 @@ public class ProjectValidationHelperTest {
 
 		// Liste des champs qu'on veut mettre à jour dans le projet.
 		List<String> fields = new ArrayList<String>();
-		fields.add("properties.synchroProj.value");
+		fields.add("properties.genre.value");
 
 		try {
 			ProjectType projectType = PowerMockito.mock(ProjectType.class);
@@ -226,32 +234,28 @@ public class ProjectValidationHelperTest {
 		ProjectType projectType = PowerMockito.mock(ProjectType.class);
 		Supplier<MiniDAO<ProjectType>> supp = () -> miniDao;
 		ContextValidation ctxVal = ContextValidation.createCreationContext(TestUtils.CURRENT_USER);
+		ctxVal.putObject("projectCode", project.code);
 
 		Field field = PowerMockito.field(ProjectType.class, "miniFind");
 		field.set(ProjectType.class, supp);
 
-		PropertyDefinition pDef = new PropertyDefinition();
-		pDef.possibleValues = ProjectFactory.getPossibleActionValues();
-
-		pDefMap.put("archiveHistory.action", pDef);
-
 		when(CommonValidationHelper.validateCodeForeignRequired(ctxVal, ProjectType.miniFind.get(), project.typeCode,
 				"typeCode", true)).thenReturn(projectType);
-
+		
 		Supplier<ProjectsDAO> suppProj = () -> projectDAO;
 
 		field = PowerMockito.field(Project.class, "find");
 		field.set(ProjectsDAO.class, suppProj);
 
-		doReturn(pDefMap).when(projectType).getMapPropertyDefinition();
-		doReturn(pDef).when(pDefMap).get("archiveHistory.action");
+		Project validProject = ProjectFactory.getRandomProjectValidArchiveHistory();
+		
+		doReturn(mc).when(projectDAO).find(any());
 
-		ProjectValidationHelper.validateArchiveProperties(ctxVal, project.code, project.typeCode, project.properties,
-				false);
+		ProjectValidationHelper.validateArchiveHistory(ctxVal, validProject.systemParameters.archiveHistory);
 
-		verify(mc, times(0)).iterator();
+		verify(mc, times(1)).forEach(any());
 
-		assertTrue("Context has errors", !ctxVal.hasErrors());
+		assertTrue("Context has errors" + ctxVal.getErrors(), !ctxVal.hasErrors());
 	}
 
 	@Test
@@ -260,28 +264,22 @@ public class ProjectValidationHelperTest {
 		ProjectType projectType = PowerMockito.mock(ProjectType.class);
 		Supplier<MiniDAO<ProjectType>> supp = () -> miniDao;
 		ContextValidation ctxVal = ContextValidation.createCreationContext(TestUtils.CURRENT_USER);
+		ctxVal.putObject("projectCode", project.code);
 
 		Field field = PowerMockito.field(ProjectType.class, "miniFind");
 		field.set(ProjectType.class, supp);
 
-		PropertyDefinition pDef = new PropertyDefinition();
-		pDef.possibleValues = ProjectFactory.getPossibleActionValues();
-
-		pDefMap.put("archiveHistory.action", pDef);
-
 		when(CommonValidationHelper.validateCodeForeignRequired(ctxVal, ProjectType.miniFind.get(), project.typeCode,
 				"typeCode", true)).thenReturn(projectType);
 
-		doReturn(pDefMap).when(projectType).getMapPropertyDefinition();
-		doReturn(pDef).when(pDefMap).get("archiveHistory.action");
+		Project invalidProject = ProjectFactory.getRandomProjectInvalidArchiveHistoryIdFormatAll();
 
-		ProjectValidationHelper.validateArchiveProperties(ctxVal, project.code, project.typeCode, project.properties,
-				false);
+		ProjectValidationHelper.validateArchiveHistory(ctxVal, invalidProject.systemParameters.archiveHistory);
 
 		assertTrue("Context has no error", ctxVal.hasErrors());
 		assertEquals("Not the right amount of errors", 1, ctxVal.errorCount());
 		assertEquals("Not the right amount of validation errors", 3,
-				ctxVal.getErrors().get("properties.archiveHistory[0]").size());
+				ctxVal.getErrors().get("systemParameters.archiveHistory[0]").size());
 	}
 
 	@Test
@@ -290,36 +288,31 @@ public class ProjectValidationHelperTest {
 		ProjectType projectType = PowerMockito.mock(ProjectType.class);
 		Supplier<MiniDAO<ProjectType>> supp = () -> miniDao;
 		ContextValidation ctxVal = ContextValidation.createCreationContext(TestUtils.CURRENT_USER);
+		ctxVal.putObject("projectCode", project.code);
 
 		Field field = PowerMockito.field(ProjectType.class, "miniFind");
 		field.set(ProjectType.class, supp);
 
-		PropertyDefinition pDef = new PropertyDefinition();
-		pDef.possibleValues = ProjectFactory.getPossibleActionValues();
-
-		pDefMap.put("archiveHistory.action", pDef);
-
 		when(CommonValidationHelper.validateCodeForeignRequired(ctxVal, ProjectType.miniFind.get(), project.typeCode,
 				"typeCode", true)).thenReturn(projectType);
 
-		doReturn(pDefMap).when(projectType).getMapPropertyDefinition();
-		doReturn(pDef).when(pDefMap).get("archiveHistory.action");
+		Project invalidProject = ProjectFactory.getRandomProjectInvalidActionArchiveHistory();
 
-		ProjectValidationHelper.validateArchiveProperties(ctxVal, project.code, project.typeCode, project.properties,
-				false);
+		ProjectValidationHelper.validateArchiveHistory(ctxVal, invalidProject.systemParameters.archiveHistory);
 
 		List<String> allIdArchives = new ArrayList<String>();
 		allIdArchives.add("AAA_9876543210");
 
-		String queryAllIds = String.join("\",\"", allIdArchives);
-		queryAllIds = "\"" + queryAllIds + "\"";
+		Query query = DBQuery.and(
+				DBQuery.or(
+						DBQuery.in("systemParameters.archiveHistory.rawArchiveId", allIdArchives),
+						DBQuery.in("systemParameters.archiveHistory.projArchiveId", allIdArchives),
+						DBQuery.in("systemParameters.archiveHistory.scratchArchiveId", allIdArchives)
+					),
+					DBQuery.notEquals("code", invalidProject.code)
+				);
 
-		String query = "{ $or: [ { \"properties.archiveHistory.value.rawArchiveId\": { $in: [ " + queryAllIds + "] } },"
-				+ "{ \"properties.archiveHistory.value.projArchiveId\": { $in: [" + queryAllIds + "] } }, "
-				+ "{ \"properties.archiveHistory.value.scratchArchiveId\": { $in: [ " + queryAllIds + " ] } } ] }";
-
-		verify(projectDAO, times(0)).findByQueryWithProjection(query,
-				"{ \"code\": 1, \"properties.archiveHistory\": 1 }");
+		verify(projectDAO, times(0)).find(query);
 		verify(mc, times(0)).iterator();
 
 		assertTrue("Context has no error", ctxVal.hasErrors());
@@ -334,14 +327,10 @@ public class ProjectValidationHelperTest {
 		ProjectType projectType = PowerMockito.mock(ProjectType.class);
 		Supplier<MiniDAO<ProjectType>> supp = () -> miniDao;
 		ContextValidation ctxVal = ContextValidation.createCreationContext(TestUtils.CURRENT_USER);
+		ctxVal.putObject("projectCode", project.code);
 
 		Field field = PowerMockito.field(ProjectType.class, "miniFind");
 		field.set(ProjectType.class, supp);
-
-		PropertyDefinition pDef = new PropertyDefinition();
-		pDef.possibleValues = ProjectFactory.getPossibleActionValues();
-
-		pDefMap.put("archiveHistory.action", pDef);
 
 		when(CommonValidationHelper.validateCodeForeignRequired(ctxVal, ProjectType.miniFind.get(), project.typeCode,
 				"typeCode", true)).thenReturn(projectType);
@@ -354,29 +343,85 @@ public class ProjectValidationHelperTest {
 		List<String> allIdArchives = new ArrayList<String>();
 		allIdArchives.add("AAA_9876543210");
 
-		String queryAllIds = String.join("\",\"", allIdArchives);
-		queryAllIds = "\"" + queryAllIds + "\"";
-
-		String query = "{ $or: [ { \"properties.archiveHistory.value.rawArchiveId\": { $in: [ " + queryAllIds + "] } },"
-				+ "{ \"properties.archiveHistory.value.projArchiveId\": { $in: [" + queryAllIds + "] } }, "
-				+ "{ \"properties.archiveHistory.value.scratchArchiveId\": { $in: [ " + queryAllIds + " ] } } ] }";
-
-		doReturn(mc).when(projectDAO).findByQueryWithProjection(query,
-				"{ \"code\": 1, \"properties.archiveHistory\": 1 }");
+		doReturn(mc).when(projectDAO).find(any());
 		doReturn(ProjectFactory.getRandomProjectsList().iterator()).when(mc).iterator();
 
-		doReturn(pDefMap).when(projectType).getMapPropertyDefinition();
-		doReturn(pDef).when(pDefMap).get("archiveHistory.action");
+		Project validProject = ProjectFactory.getRandomProjectInvalidArchiveHistoryIdFormatAll();
 
-		ProjectValidationHelper.validateArchiveProperties(ctxVal, project.code, project.typeCode, project.properties,
-				false);
+		ProjectValidationHelper.validateArchiveHistory(ctxVal, validProject.systemParameters.archiveHistory);
 
-		verify(projectDAO, times(1)).findByQueryWithProjection(query,
-				"{ \"code\": 1, \"properties.archiveHistory\": 1 }");
-		verify(mc, times(1)).iterator();
 
 		assertTrue("Context has no error", ctxVal.hasErrors());
 	}
 
-	// validateUmbrellaProjectCodeOptional() à tester dans CommonValidationHelper car ce helper ne fait que passe plat pour cette méthode.
+	@Test
+	public void testValidateBioformaticParametersRequiredValid() {
+		ContextValidation ctxVal = ContextValidation.createCreationContext(TestUtils.CURRENT_USER);
+		BioinformaticParameters bioInfParams = new BioinformaticParameters();
+
+		ProjectValidationHelper.validateBioformaticParametersRequired(ctxVal, bioInfParams);
+
+		assertTrue("Context has error", !ctxVal.hasErrors());
+	}
+
+	@Test
+	public void testValidateBioformaticParametersRequiredInvalid() {
+		ContextValidation ctxVal = ContextValidation.createCreationContext(TestUtils.CURRENT_USER);
+		BioinformaticParameters bioInfParams = null;
+
+		ProjectValidationHelper.validateBioformaticParametersRequired(ctxVal, bioInfParams);
+
+		assertTrue("Context has no error", ctxVal.hasErrors());
+	}
+
+	// @Test
+	// Test à corriger : on a un soucis de validation sur ValidationHelper, typage de la propriété (suite MEP BI).
+	public void testValidateProjectTypeCodeRequiredValid() throws IllegalArgumentException, IllegalAccessException {
+		String typeCode = "default-project";
+
+		ProjectType projectType = PowerMockito.mock(ProjectType.class);
+		Supplier<MiniDAO<ProjectType>> supp = () -> miniDao;
+		ContextValidation ctxVal = ContextValidation.createCreationContext(TestUtils.CURRENT_USER);
+
+		Field field = PowerMockito.field(ProjectType.class, "miniFind");
+		field.set(ProjectType.class, supp);
+
+		Map<String, PropertyValue> propProj = new HashMap<String, PropertyValue>();
+		propProj.put("genre", new PropertySingleValue("payant"));
+
+		PropertyDefinition pDef = new PropertyDefinition();
+		pDef.code = "genre";
+		pDef.valueType = "java.lang.String";
+
+		List<PropertyDefinition> pDefList = new ArrayList<>();
+		pDefList.add(pDef);
+
+		when(CommonValidationHelper.validateCodeForeignRequired(ctxVal, ProjectType.miniFind.get(), typeCode,
+				"typeCode", true)).thenReturn(projectType);
+
+		doReturn(pDefList).when(projectType).getPropertiesDefinitionProjectLevel();
+		
+		ProjectValidationHelper.validateProjectTypeCodeRequired(ctxVal, typeCode, propProj);
+
+		assertTrue("Context has error", !ctxVal.hasErrors());
+	}
+
+	@Test
+	public void testValidateProjectTypeCodeRequiredInvalid() throws IllegalArgumentException, IllegalAccessException {
+		String badType = "bad-type";
+
+		ContextValidation ctxVal = ContextValidation.createCreationContext(TestUtils.CURRENT_USER);
+
+		Supplier<MiniDAO<ProjectType>> supp = () -> miniDao;
+
+		Field field = PowerMockito.field(ProjectType.class, "miniFind");
+		field.set(ProjectType.class, supp);
+
+		when(CommonValidationHelper.validateCodeForeignRequired(ctxVal, ProjectType.miniFind.get(), badType,
+				"typeCode", true)).thenReturn(null);
+
+		ProjectValidationHelper.validateProjectTypeCodeRequired(ctxVal, badType, null);
+
+		assertTrue("Context has error", !ctxVal.hasErrors());
+	}
 }

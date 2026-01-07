@@ -50,7 +50,7 @@ public class AnalysisTreatments extends NGLController implements NGLForms {
     public Result get(String parentCode, String code) {
         return globalExceptionHandler(() -> {
             if (api.checkObjectExist(parentCode, code)) {
-                return okAsJson(analysesApi.get(parentCode));
+                return okAsJson(api.getSubObject(analysesApi.get(parentCode), code)); 
             } else {
                 return notFound();
             }
@@ -72,7 +72,7 @@ public class AnalysisTreatments extends NGLController implements NGLForms {
 
     @Authenticated
     @Authorized.Write
-    @BodyParser.Of(value = IGBodyParsers.Json5MB.class)
+    @BodyParser.Of(value = IGBodyParsers.Json100MB.class)
     public Result save(String parentCode) {
         return globalExceptionHandler(() -> {
             Analysis objectInDB = analysesApi.get(parentCode);
@@ -91,7 +91,7 @@ public class AnalysisTreatments extends NGLController implements NGLForms {
     
     @Authenticated
     @Authorized.Write
-    @BodyParser.Of(value = IGBodyParsers.Json5MB.class)
+    @BodyParser.Of(value = IGBodyParsers.Json100MB.class)
     public Result update(String parentCode, String code){
         return globalExceptionHandler(() -> {
             if(api.checkObjectExist(parentCode, code)) {

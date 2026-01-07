@@ -3,7 +3,7 @@ package sra.scripts.generic;
 import javax.inject.Inject;
 
 import fr.cea.ig.lfw.controllers.scripts.buffered.ScriptNoArgs;
-import services.SraEbiAPI;
+import sra.services.SraEbiAPI;
 
 public class TestEbiAPI extends ScriptNoArgs {
 	private final SraEbiAPI ebiAPI;	

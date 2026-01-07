@@ -9,10 +9,10 @@ import javax.inject.Inject;
 
 import org.mongojack.DBQuery;
 
+import controllers.sra.api.ExperimentAPI;
+import controllers.sra.api.SubmissionAPI;
 import fr.cea.ig.lfw.controllers.scripts.buffered.ScriptNoArgs;
 import fr.cea.ig.ngl.NGLApplication;
-import fr.cea.ig.ngl.dao.api.sra.ExperimentAPI;
-import fr.cea.ig.ngl.dao.api.sra.SubmissionAPI;
 import models.sra.submit.sra.instance.Experiment;
 import models.sra.submit.sra.instance.Submission;
 
@@ -60,7 +60,7 @@ public class Delete_runs_tara extends ScriptNoArgs {
 				}
 				experiment.run.accession = "suppressed_" + experiment.run.accession;
 				experiment.run.code = "suppressed_" + experiment.run.code;
-				experimentAPI.dao_saveObject(experiment);
+				experimentAPI.update(experiment, "ngsrg");
 				printfln("ok pour sauvegarde de la l'experiment=%s", experiment.code +
 						" avec run.accession " + experiment.run.accession + " et run.code = "+ experiment.run.code);	
 

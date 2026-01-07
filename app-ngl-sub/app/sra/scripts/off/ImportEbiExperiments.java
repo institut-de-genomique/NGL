@@ -4,14 +4,14 @@ package sra.scripts.off;
 import java.util.List;
 import javax.inject.Inject;
 
+import controllers.sra.api.ExperimentAPI;
 import fr.cea.ig.lfw.controllers.scripts.buffered.Script;
 import fr.cea.ig.ngl.NGLApplication;
-import fr.cea.ig.ngl.dao.api.sra.ExperimentAPI;
 //import models.sra.submit.common.instance.Sample;
 import models.sra.submit.sra.instance.Experiment;
 import play.libs.Json;
-import services.SraEbiAPI;
-import services.XmlToSra;
+import sra.services.SraEbiAPI;
+import sra.services.XmlToSra;
 import validation.ContextValidation;
 import models.laboratory.common.instance.State;
 
@@ -85,7 +85,7 @@ public class ImportEbiExperiments extends Script<ImportEbiExperiments.Args> {
 					throw new RuntimeException("Tentativee de sauvegarde dans la base d'un experiment deja present dans NGL-SUB. experimentCode="+ experiment.code + " et experimentAC="+experiment.accession);
 				}
 				printfln("sauvegarde dans la base de l'experiment avec AC = %s et code =%s", experiment.accession , experiment.code); 
-				experimentAPI.dao_saveObject(experiment);
+				experimentAPI.update(experiment, user);
 				
 			}
 		}	

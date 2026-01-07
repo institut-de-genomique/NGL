@@ -1,0 +1,84 @@
+@()
+<div ng-init="treatmentCode='genomeReadsAssembly'">
+<div class="row">
+<div class="col-md-7 col-lg-7">
+    <br />
+    <br />
+	<br/>
+    <b>Readsets used : </b>
+    {{analysis.treatments[treatmentCode].pairs.readsetsused.value}}
+    <br />
+    <br />
+	<strong></strong>
+	<br/><br/>
+	<table class="table table-condensed table-hover table-bordered">
+		<thead>
+		<tr>
+			<th>@Messages("analyses.treatments.genomeReadsAssembly.assembly.assemblerParams")</th> 
+			<th>@Messages("analyses.treatments.genomeReadsAssembly.assembly.cumulativeSize")</th> 
+			<th>@Messages("analyses.treatments.genomeReadsAssembly.assembly.genomesize")</th> 
+			<!--th>@Messages("analyses.treatments.genomeReadsAssembly.assembly.readscoverage")</th--> 
+			<th>@Messages("analyses.treatments.genomeReadsAssembly.assembly.n50")</th> 
+			<th>@Messages("analyses.treatments.genomeReadsAssembly.assembly.n90")</th>
+			<th>@Messages("analyses.treatments.genomeReadsAssembly.assembly.l50")</th>
+			<th>@Messages("analyses.treatments.genomeReadsAssembly.assembly.l90")</th>	
+			<th>@Messages("analyses.treatments.genomeReadsAssembly.assembly.auN")</th>		
+			<th>@Messages("analyses.treatments.genomeReadsAssembly.assembly.maxSize")</th>						
+			<th>@Messages("analyses.treatments.genomeReadsAssembly.assembly.nbcontigs")</th> 
+			<th>@Messages("analyses.treatments.genomeReadsAssembly.assembly.assemblerVersion")</th> 
+
+	
+		</tr>
+		</thead>
+		<tbody>
+		<tr ng-repeat="value in analysis.treatments[treatmentCode].pairs.assembly.value">
+			<td>{{value.assemblerParams }}</td>	
+			<td>{{value.cumulativeSize | number}}</td>
+			<td>{{value.genomesize | number}}</td>
+			<!--td>{{value.readscoverage | number}}</td-->
+			<td>{{value.n50 | number}}</td>	
+			<td>{{value.n90 | number}}</td>
+			<td>{{value.l50 | number}}</td>	
+			<td>{{value.l90 | number}}</td>
+			<td>{{value.auN | number}}</td>
+			<td>{{value.maxSize | number}}</td>
+			<td>{{value.nbcontigs | number}}</td>	
+			<td>{{value.assemblerVersion }}</td>	
+
+		</tr>						
+	</tbody>
+	 </table>
+</div>	 
+
+<div class="col-md-7 col-lg-7">
+	<br/>
+	<strong></strong>
+	<br/><br/>
+	<table class="table table-condensed table-hover table-bordered">
+		<thead>
+		<tr>
+			<th>@Messages("analyses.treatments.genomeReadsAssembly.reads.nbreads")</th> 
+			<th>@Messages("analyses.treatments.genomeReadsAssembly.reads.cumulativeSize")</th> 
+			<th>@Messages("analyses.treatments.genomeReadsAssembly.reads.coverage")</th> 			
+			<th>@Messages("analyses.treatments.genomeReadsAssembly.reads.n50")</th> 
+			<th>@Messages("analyses.treatments.genomeReadsAssembly.reads.minSize")</th>
+			<th>@Messages("analyses.treatments.genomeReadsAssembly.reads.maxSize")</th>
+			<th>@Messages("analyses.treatments.genomeReadsAssembly.reads.meanSize")</th>	
+				
+		</tr>
+		</thead>
+		<tbody>
+		<tr ng-repeat="value in analysis.treatments[treatmentCode].pairs.reads.value">
+			<td>{{value.nbreads | number}}</td>
+			<td>{{value.cumulativeSize | number}}</td>	
+			<td>{{value.coverage | number}}</td>	
+			<td>{{value.n50 | number}}</td>	
+			<td>{{value.minSize | number}}</td>
+			<td>{{value.maxSize | number}}</td>	
+			<td>{{value.meanSize | number:2}}</td>
+		</tr>						
+	</tbody>
+	</table>
+</div>	 
+</div>
+</div>

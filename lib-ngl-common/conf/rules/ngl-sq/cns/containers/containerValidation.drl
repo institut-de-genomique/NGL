@@ -14,3 +14,38 @@ rule "Lors d'un import tara microbiome, on valide que le code ne contient pas qu
     then		
 		$contextError.addError("code", "Oubli de code bipé : code à SAMEA");
 	end
+	
+rule "convert packingHour properties"
+	@nglSQ( containerValidationImport )
+	dialect "java"
+	salience 900
+	no-loop
+    when
+    	$container : Container($properties:properties, $properties!=null, $pv:properties.get("packingHour")!=null)
+    	$contextValidation:ContextValidation()
+    then
+    	Logger.debug("Convert collect hour for : "+$container.code);
+    	String packingHourValue = $pv.value.toString();
+    	
+    	Logger.debug("Value to convert : "+packingHourValue);
+    	//Regex to check format hour
+    	if(!packingHourValue.matches("^([0-1][0-9]|2[0-3]):[0-5][0-9]$")){
+			try{
+				Long packingDateLong = Long.valueOf(packingHourValue);
+    			Date date = new Date(packingDateLong);
+				Logger.debug(date.toString());
+				SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+				String valueDate = sdf.format(date);
+				PropertySingleValue psv = new PropertySingleValue(valueDate);
+				$container.properties.put("packingHour", psv);
+				if(!valueDate.matches("^([0-1][0-9]|2[0-3]):[0-5][0-9]$")){
+					$contextValidation.addErrors("packingHour "+$container.code, "Not valid value");
+				}
+			} catch (NumberFormatException e) {
+				Logger.error("Error format "+e.getMessage());
+				$contextValidation.addErrors("packingHour "+$container.code, "Mauvais format heure "+packingHourValue);
+			}
+			
+    	}
+end
+	

@@ -187,6 +187,17 @@
 						<td class="col-md-4 col-lg-4" >
 							<label class="col-md-3 col-lg-3 control-label">@Messages("containers.table.referenceCollab")</label>
 							<div class="col-md-9 col-lg-9"><p class="form-control-static" ng-bind="content.referenceCollab" /></div>
+
+							<span ng-if="hasProperties('ncbiPhylum')">
+								<label class="col-md-3 col-lg-3 control-label" >@Messages("containers.table.phylumScientific")</label>
+								<div class="col-md-9 col-lg-9"><p class="form-control-static" ng-bind="content.properties.ncbiPhylum.value" /></div>
+							</span>
+							
+
+							<span ng-if="hasProperties('ncbiClass')">
+								<label class="col-md-3 col-lg-3 control-label" >@Messages("containers.table.classScientific")</label>
+								<div class="col-md-9 col-lg-9"><p class="form-control-static" ng-bind="content.properties.ncbiClass.value" /></div>
+							</span>
 								
 							<label class="col-md-3 col-lg-3 control-label" >@Messages("containers.table.taxonCode")</label>
 							<div class="col-md-9 col-lg-9"><p class="form-control-static" ng-bind="content.taxonCode" /></div>
@@ -194,11 +205,12 @@
 							<label class="col-md-3 col-lg-3 control-label" >@Messages("containers.table.ncbiScientificName")</label>
 							<div class="col-md-9 col-lg-9"><p class="form-control-static" ng-bind="content.ncbiScientificName" /></div>
 
+							
 						</td>
 						<td ng-bind="content.sampleTypeCode|codes:'type'" />
 						<td>
 							<div ng-repeat="(key, value) in content.properties">
-								<property-value key-ng-model="key" value-ng-model="value"/>
+								<property-value ng-if="isAllowedProperty(key)" key-ng-model="key" value-ng-model="value"/>
 							</div>
 						</td>
 					</tr>

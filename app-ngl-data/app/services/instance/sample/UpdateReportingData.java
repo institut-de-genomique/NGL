@@ -14,7 +14,10 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.mongojack.*;
+import org.mongojack.DBQuery.Query;
+
 import com.mongodb.*;
 import com.typesafe.config.ConfigFactory;
 
@@ -25,6 +28,7 @@ import fr.cea.ig.ngl.NGLConfig;
 import mail.MailServiceException;
 import mail.MailServices;
 import models.laboratory.common.instance.PropertyValue;
+import models.laboratory.common.instance.State;
 import models.laboratory.experiment.description.ExperimentType;
 import models.laboratory.experiment.instance.*;
 import models.laboratory.processes.instance.Process;
@@ -34,8 +38,11 @@ import models.laboratory.sample.instance.reporting.*;
 import models.utils.InstanceConstants;
 import models.utils.dao.DAOException;
 import net.sourceforge.htmlunit.corejs.javascript.tools.shell.Global;
+import play.Logger;
 import rules.services.RulesException;
 import services.instance.AbstractImportData;
+import services.instance.ImportDataCNG;
+import services.instance.ImportDataCNS;
 import validation.ContextValidation;
 import workflows.process.ProcWorkflowHelper;
 
@@ -57,7 +64,7 @@ public class UpdateReportingData extends AbstractImportData {
 	static public class DureeSample {
 
 		public Date startDate;
-		
+
 		public Date endDate;
 
 		public long duration;
@@ -102,7 +109,7 @@ public class UpdateReportingData extends AbstractImportData {
 	@Inject
 	public UpdateReportingData(NGLApplication app, NGLConfig config) {
 		super("UpdateReportingData", app);
-		
+
 		this.LAUNCH_DATE = new Date();
 		this.procWorkflowHelper = app.injector().instanceOf(ProcWorkflowHelper.class);
 		this.NGL_CONFIG = config;
@@ -115,7 +122,7 @@ public class UpdateReportingData extends AbstractImportData {
 		this.LAUNCH_DATE = new Date();
 
 		final long start = System.currentTimeMillis();
-		
+
 		warningMailSent = false;
 
 		handleClearCollections();
@@ -126,7 +133,7 @@ public class UpdateReportingData extends AbstractImportData {
 
 		long end = System.currentTimeMillis();
 		Date END_CRON_DATE = new Date();
-		
+
 		handleRequestDuration(Global.class, start, end);
 
 		buildAndSendMail(END_CRON_DATE, NB_TOTAL);
@@ -183,7 +190,7 @@ public class UpdateReportingData extends AbstractImportData {
 				} catch(Throwable e) {
 					e.printStackTrace();
 					handleSampleError(sample, e, contextError);
-					
+
 					setProcessLaunchDateToNow(sample.code);
 				}
 			});
@@ -247,14 +254,14 @@ public class UpdateReportingData extends AbstractImportData {
 		Date currentDate = new Date();
 
 		DBUpdate.Builder dbUpdate = DBUpdate.set("processesUpdatedDate", LAUNCH_DATE)
-											.set("sampleProcessesFinishUpdateDate", currentDate);
+				.set("sampleProcessesFinishUpdateDate", currentDate);
 
 		if (unset) {
 			dbUpdate = dbUpdate.unset("processes")
-							   .unset("processesStatistics");
+					.unset("processesStatistics");
 		} else {
 			dbUpdate = dbUpdate.set("processes", sample.processes)
-							   .set("processesStatistics", sample.processesStatistics);
+					.set("processesStatistics", sample.processesStatistics);
 		}
 
 		MongoDBDAO.update(InstanceConstants.SAMPLE_COLL_NAME, Sample.class, DBQuery.is("code", sample.code), dbUpdate);
@@ -297,6 +304,14 @@ public class UpdateReportingData extends AbstractImportData {
 	public void clearMapSampleDuration() {
 		MAP_SAMPLE_DURATION.clear();
 	}
+	
+	private MongoDBResult<Sample> getSamplesToUpdateResult() {
+		return MongoDBDAO.find(InstanceConstants.SAMPLE_COLL_NAME, Sample.class,
+				DBQuery.exists("processesToLaunchDate")
+				.notEquals("processesToLaunchDate", null)
+				.notIn("projectCodes", "CEA", "CEC", "CEE", "CED", "CSN")
+				);
+	}
 
 	/**
 	 * Méthode permettant de récupérer en base le nombre de samples à mettre à jour.
@@ -305,12 +320,7 @@ public class UpdateReportingData extends AbstractImportData {
 	 * @return Le nombre de samples à mettre à jour.
 	 */
 	private int getSamplesToUpdateSize() {
-		return MongoDBDAO.find(InstanceConstants.SAMPLE_COLL_NAME, Sample.class, 
-			DBQuery.exists("processesToLaunchDate")
-				   .notEquals("processesToLaunchDate", null)
-				   .notIn("projectCodes", "CEA")
-		)
-		.count();
+		return getSamplesToUpdateResult().count();
 	}
 
 	/**
@@ -320,14 +330,10 @@ public class UpdateReportingData extends AbstractImportData {
 	private void getSamplesToUpdate() {
 		SAMPLE_LIST.clear();
 
-		List<Sample> sampleList = MongoDBDAO.find(InstanceConstants.SAMPLE_COLL_NAME, Sample.class, 
-			DBQuery.exists("processesToLaunchDate")
-				   .notEquals("processesToLaunchDate", null)
-				   .notIn("projectCodes", "CEA")
-		)
-		.sort("processesToLaunchDate", Sort.ASC)
-		.limit(100)
-		.toList();
+		List<Sample> sampleList =getSamplesToUpdateResult()
+				.sort("processesToLaunchDate", Sort.ASC)
+				.limit(100)
+				.toList();
 
 		SAMPLE_LIST.addAll(sampleList); 
 	}
@@ -354,7 +360,7 @@ public class UpdateReportingData extends AbstractImportData {
 	 */
 	private void handleSampleError(Sample sample, Throwable e, ContextValidation contextValidation) {
 		logger.error("Erreur sur le sample '" + sample.code + "' : " + e.getMessage());
-		
+
 		if (e.getMessage() != null) {
 			contextValidation.addError(sample.code, e.getMessage());
 		} else {
@@ -450,7 +456,7 @@ public class UpdateReportingData extends AbstractImportData {
 	 */
 	public String buildMailBody(Date END_CRON_DATE, int NB_TOTAL) throws UnsupportedEncodingException {
 		StringBuilder message = new StringBuilder();
-		
+
 		Long dureeGlobale = MAP_DURATION.get("Global");
 		Double dureeGlobaleHeure = Double.valueOf(dureeGlobale != null ? (dureeGlobale / 3600.0) : 0);
 		DecimalFormat decForm = new DecimalFormat("##.##");
@@ -527,10 +533,10 @@ public class UpdateReportingData extends AbstractImportData {
 		final HashSet<String> DESTINATAIRES = getEmailDestinataires();
 		final String ENVIRONMENT = getEnvironment();
 		final String INSTITUTE = getInstitute();
+		final String SUBJECT = "[NGL-DATA] [" + ENVIRONMENT + "] [" + INSTITUTE + "] Exécution de UpdateReportingData terminée";
 
 		try {
 			String message = buildMailBody(END_CRON_DATE, NB_TOTAL);
-			String subject = "[NGL-DATA] [" + ENVIRONMENT + "] [" + INSTITUTE + "] Exécution de UpdateReportingData terminée";
 
 			if (needAttachment()) {		
 				Date currentDate = new Date();
@@ -538,22 +544,32 @@ public class UpdateReportingData extends AbstractImportData {
 				String attachment = buildMailAttachment();
 				String fileName = "rapport-reporting-nocturne_UpdateReportingData_" + currentDate.getTime() + ".txt";
 
-				BufferedWriter writer = new BufferedWriter(new FileWriter(tmpDirectory() + fileName));
-				writer.write(attachment);
-				writer.close();
+				try {
+					BufferedWriter writer = new BufferedWriter(new FileWriter(tmpDirectory() + fileName));
+	
+					writer.write(attachment);
+					writer.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 
 				File file = new File(tmpDirectory() + fileName);
+
+				if (!file.exists()) {
+					Logger.error("Erreur lors de l'écriture du fichier de log. Il n'a pas été créé.");
+				}
+				
 				int ALMOST_ONE_MB = 900000;
 
 				if (file.length() > ALMOST_ONE_MB) {
 					message += "Le fichier de log est trop volumineux. Il est disponible &agrave; cette adresse : " + file.getAbsolutePath();
 
-					mailServices.sendMail(EXPEDITEUR, DESTINATAIRES, subject, message);
+					mailServices.sendMail(EXPEDITEUR, DESTINATAIRES, SUBJECT, message);
 				} else {
-					mailServices.sendMail(EXPEDITEUR, DESTINATAIRES, subject, message, file);
+					mailServices.sendMail(EXPEDITEUR, DESTINATAIRES, SUBJECT, message, file);
 				}	
 			} else {
-				mailServices.sendMail(EXPEDITEUR, DESTINATAIRES, subject, message);
+				mailServices.sendMail(EXPEDITEUR, DESTINATAIRES, SUBJECT, message);
 			}
 		} catch (IOException | MailServiceException e) {
 			e.printStackTrace();
@@ -613,7 +629,7 @@ public class UpdateReportingData extends AbstractImportData {
 	public void clearProcessesToLaunchDate(String sampleCode) {
 		MongoDBDAO.update(InstanceConstants.SAMPLE_COLL_NAME, Sample.class, DBQuery.is("code", sampleCode), DBUpdate.unset("processesToLaunchDate"));
 	}
-	
+
 	/**
 	 * Méthode permettant de lancer le calcul du champ "processes" d'un sample.
 	 * 
@@ -622,10 +638,10 @@ public class UpdateReportingData extends AbstractImportData {
 	public void updateProcesses(Sample sample) {
 		List<Process> processes = MongoDBDAO.find(InstanceConstants.PROCESS_COLL_NAME, Process.class, DBQuery.in("sampleCodes", sample.code))
 				.toList();
-		
+
 		sample.processes = processes.parallelStream()
-					.map(process -> convertToSampleProcess(sample, process))
-					.collect(Collectors.toList());
+				.map(process -> convertToSampleProcess(sample, process))
+				.collect(Collectors.toList());
 
 		handleReadsetBeforeMarch2015(sample);
 
@@ -646,7 +662,7 @@ public class UpdateReportingData extends AbstractImportData {
 
 			if (sample.traceInformation.creationDate.before(march2015)) {
 				SampleProcess spWithoutProcess = getReadSetBeforeNGLSQ(sample);
-	
+
 				if (spWithoutProcess != null) {
 					sample.processes.add(spWithoutProcess);
 				}
@@ -687,7 +703,7 @@ public class UpdateReportingData extends AbstractImportData {
 		sampleProcess.state.historical=null;
 		sampleProcess.traceInformation= process.traceInformation;
 		sampleProcess.sampleOnInputContainer = process.sampleOnInputContainer;
-		
+
 		if (process.properties != null && process.properties.size() > 0) {
 			sampleProcess.properties = process.properties;			
 		}
@@ -715,9 +731,9 @@ public class UpdateReportingData extends AbstractImportData {
 
 		if (process.experimentCodes != null && process.experimentCodes.size() > 0 && transformationCodes != null && transformationCodes.size() > 0) {
 			nbExp = MongoDBDAO.find(InstanceConstants.EXPERIMENT_COLL_NAME, Experiment.class, DBQuery.in("code", process.experimentCodes)
-						.in("typeCode", transformationCodes)
-						.in("state.code", Arrays.asList("IP","F"))).count();
-			
+					.in("typeCode", transformationCodes)
+					.in("state.code", Arrays.asList("IP","F"))).count();
+
 			try {
 				sampleProcess.progressInPercent = (new BigDecimal((nbExp.floatValue() / Integer.valueOf(nbExpPositionInProcessType.get(process.typeCode)).floatValue())*100.00)).setScale(0, BigDecimal.ROUND_HALF_UP).intValue();
 			} catch (Exception e) {
@@ -729,7 +745,7 @@ public class UpdateReportingData extends AbstractImportData {
 
 		return sampleProcess;
 	}
-			
+
 	/**
 	 * Méthode permettant de récupérer une liste de codes transformation (type d'expériences) à partir d'un process en entrée.
 	 * 
@@ -745,11 +761,11 @@ public class UpdateReportingData extends AbstractImportData {
 		} else {
 			transformationCodes = ExperimentType.find.get().findByProcessTypeCode(process.typeCode,true).stream().map(e -> e.code).collect(Collectors.toList());
 			transformationCodesByProcessTypeCode.put(process.typeCode, transformationCodes);
-			
+
 			Integer nbPos = ExperimentType.find.get().countDistinctExperimentPositionInProcessType(process.typeCode);
 			nbExpPositionInProcessType.put(process.typeCode, nbPos);
 		}
-		
+
 		return transformationCodes;
 	}
 
@@ -767,14 +783,14 @@ public class UpdateReportingData extends AbstractImportData {
 		List<SampleExperiment> sampleExperiments = new ArrayList<>();
 
 		MongoDBDAO.find(InstanceConstants.EXPERIMENT_COLL_NAME, Experiment.class, DBQuery.in("code", process.experimentCodes))
-			.cursor.forEach(experiment -> {
-				sampleExperiments.addAll(convertToSampleExperiments(process, experiment));
-			}
-		);
+		.cursor.forEach(experiment -> {
+			sampleExperiments.addAll(convertToSampleExperiments(process, experiment));
+		}
+				);
 
 		return sampleExperiments;
 	}
-	
+
 	/**
 	 * Méthode utilisée pour créer une liste d'objets "SampleExperiment" à partir d'un process donné et d'une expérience.
 	 * 
@@ -789,7 +805,7 @@ public class UpdateReportingData extends AbstractImportData {
 		List<SampleExperiment> sampleExperiments = new ArrayList<>();
 		Set<String> containerCodes = new TreeSet<>();
 		containerCodes.add(process.inputContainerCode);
-		
+
 		if (process.outputContainerCodes != null) {
 			containerCodes.addAll(process.outputContainerCodes);
 		}
@@ -805,7 +821,7 @@ public class UpdateReportingData extends AbstractImportData {
 						sampleExperiment.state= experiment.state;
 						sampleExperiment.state.historical=null;
 						sampleExperiment.status= experiment.status;
-						
+
 						sampleExperiment.traceInformation= experiment.traceInformation;
 						sampleExperiment.protocolCode = experiment.protocolCode;
 						sampleExperiment.properties = computeExperimentProperties(experiment, icu, null);
@@ -824,7 +840,7 @@ public class UpdateReportingData extends AbstractImportData {
 								sampleExperiment.state= experiment.state;
 								sampleExperiment.state.historical=null;
 								sampleExperiment.status= experiment.status;
-								
+
 								sampleExperiment.traceInformation= experiment.traceInformation;
 								sampleExperiment.protocolCode = experiment.protocolCode;
 								sampleExperiment.properties = computeExperimentProperties(experiment, icu, ocu);
@@ -851,7 +867,7 @@ public class UpdateReportingData extends AbstractImportData {
 						sampleExperiment.state= experiment.state;
 						sampleExperiment.state.historical=null;
 						sampleExperiment.status= experiment.status;
-						
+
 						sampleExperiment.traceInformation= experiment.traceInformation;
 						sampleExperiment.protocolCode = experiment.protocolCode;
 						sampleExperiment.properties = computeExperimentProperties(experiment, icu, null);
@@ -860,7 +876,7 @@ public class UpdateReportingData extends AbstractImportData {
 				});	
 			}
 		});
-		
+
 		return sampleExperiments;
 	}
 
@@ -906,7 +922,7 @@ public class UpdateReportingData extends AbstractImportData {
 				.filter(entry -> entry.getValue() != null && !entry.getValue()._type.equals(PropertyValue.imgType) && !entry.getValue()._type.equals(PropertyValue.fileType))
 				.collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
 	}
-	
+
 	/**
 	 * Méthode permettant de transformer à partir d'un sample et d'un process une liste d'objets "SampleReadSet".
 	 * 
@@ -918,10 +934,10 @@ public class UpdateReportingData extends AbstractImportData {
 	private List<SampleReadSet> getSampleReadSets(Sample sample, Process process) {
 		List<SampleReadSet> sampleReadSets = new ArrayList<>();
 		Set<String> tags = procWorkflowHelper.getTagAssignFromProcessContainersUpdateReporting(process);
-		
+
 		BasicDBObject keys = new BasicDBObject();
 		keys.put("treatments", 0);
-		
+
 		MongoDBDAO.find(InstanceConstants.READSET_ILLUMINA_COLL_NAME,ReadSet.class,	
 				DBQuery.in("sampleOnContainer.containerCode", process.outputContainerCodes).in("sampleCode", process.sampleCodes).in("projectCode", process.projectCodes),
 				keys)
@@ -962,13 +978,16 @@ public class UpdateReportingData extends AbstractImportData {
 		sampleReadSet.runCode = readset.runCode;
 		sampleReadSet.runTypeCode = readset.runTypeCode;
 		sampleReadSet.runSequencingStartDate = readset.runSequencingStartDate;
-		
+		if(readset.submissionState != null && StringUtils.isNotBlank(readset.submissionState.code)) { 
+			sampleReadSet.submissionState = State.cloneState(readset.submissionState); 
+		}
+
 		sampleReadSet.productionValuation = readset.productionValuation;   
 		sampleReadSet.bioinformaticValuation = readset.bioinformaticValuation; 
 		sampleReadSet.sampleOnContainer = readset.sampleOnContainer; 
 
 		BasicDBObject keys = new BasicDBObject();
-		
+
 		if(readset.typeCode.equals("rsnanopore")) {
 			keys.put("code", 1);
 			keys.put("treatments.readQuality.default.1DForward", 1);
@@ -979,11 +998,26 @@ public class UpdateReportingData extends AbstractImportData {
 			keys.put("treatments.ngsrg.code", 1);
 			keys.put("treatments.ngsrg.typeCode", 1);
 			keys.put("treatments.ngsrg.categoryCode", 1);
-		}else {
+			keys.put("treatments.global", 1);
+		}else if(readset.typeCode.equals("rspacbio")) {
+			keys.put("code", 1);
+			keys.put("treatments.sequencing",1);
+			keys.put("treatments.global", 1);
+		}else if(readset.typeCode.equals("rsillumina")){
 			keys.put("code", 1);
 			keys.put("treatments.ngsrg", 1);
+			keys.put("treatments.sizeEstimatingClean.code", 1);
+			keys.put("treatments.sizeEstimatingClean.typeCode", 1);
+			keys.put("treatments.sizeEstimatingClean.categoryCode", 1);
+			keys.put("treatments.sizeEstimatingClean.pairs.basesTosequence", 1);
+			keys.put("treatments.sizeEstimatingClean.pairs.tabP2genomeHaploidLengthMax", 1); 
+			keys.put("treatments.global", 1);
+		}else{
+			keys.put("code", 1);
+			keys.put("treatments.ngsrg", 1);
+			keys.put("treatments.global", 1);
 		}
-		
+
 		ReadSet rs = MongoDBDAO.findByCode(InstanceConstants.READSET_ILLUMINA_COLL_NAME,ReadSet.class, readset.code, keys);
 		sampleReadSet.treatments = rs.treatments;
 
@@ -1007,15 +1041,15 @@ public class UpdateReportingData extends AbstractImportData {
 			Date march2015 = sdf.parse("2015/03/30");
 
 			MongoDBDAO.find(InstanceConstants.READSET_ILLUMINA_COLL_NAME,
-						ReadSet.class,
-						DBQuery .lessThan("runSequencingStartDate", march2015)
-								.is("sampleCode", sample.code)).toList().forEach(readset -> {
-				list.add(convertToSampleReadSet(readset));		
-			}); 
+					ReadSet.class,
+					DBQuery .lessThan("runSequencingStartDate", march2015)
+					.is("sampleCode", sample.code)).toList().forEach(readset -> {
+						list.add(convertToSampleReadSet(readset));		
+					}); 
 		} catch (ParseException e) {
 			handleSampleError(sample, e);
 		}
-					
+
 		SampleProcess sampleProcess = null;
 
 		if (CollectionUtils.isNotEmpty(list)) {
@@ -1023,7 +1057,7 @@ public class UpdateReportingData extends AbstractImportData {
 			sampleProcess.typeCode = "Old LIMS";
 			sampleProcess.readsets = list;
 		}
-			
+
 		return sampleProcess;
 	}
 }

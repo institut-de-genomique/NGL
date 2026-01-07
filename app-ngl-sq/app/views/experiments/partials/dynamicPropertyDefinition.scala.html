@@ -19,16 +19,16 @@
 		       -  Expériences CNS Bionano.java et Nanopore.java
                -  Run AbstractTreatmentService.java et TreatmentServiceCNS.java
          -->
-		<input
+		<input  ng-if="experiment.@{name}[propertyDef.code] == undefined"
 				name="@{name}{{propertyDef.code}}" ng-required="propertyDef.required" 
 				type="file" ng-switch-when="true" base64-file="experiment.@{name}[propertyDef.code]" />
-		<div ng-switch-when="false" ng-if="experiment.@{name}[propertyDef.code] !== undefined">
-			<a target="_blank" ng-href="data:application/{{experiment.@{name}[propertyDef.code].extension}};base64,{{experiment.@{name}[expp.code].value}}">
-				{{experiment.@{name}[expp.code].fullname}}
+		<div ng-if="experiment.@{name}[propertyDef.code] !== undefined">
+			<a ng-href="data:application/{{experiment.@{name}[propertyDef.code].extension}};base64,{{experiment.@{name}[propertyDef.code].value}}" download="{{experiment.@{name}[propertyDef.code].fullname}}">
+				{{experiment.@{name}[propertyDef.code].fullname}}
 			</a>
 		</div>
-		<button ng-switch-when="false" ng-if="isEditModeAvailable()" class="btn btn-default btn-xs"
-				ng-show="experiment.@{name}[propertyDef.code] !== undefined" 
+		<button ng-if="isEditModeAvailable()" class="btn btn-default btn-xs"
+				ng-show="experiment.@{name}[propertyDef.code] !== undefined && mainService.isEditMode()" 
 				ng-click="experiment.@{name}[propertyDef.code] = undefined" ><i class="fa fa-trash-o"></i>
 		</button>
 	</div>
@@ -36,10 +36,10 @@
 
 <div ng-switch-when="java.awt.Image" class="col-md-6 col-lg-6">
 	<div ng-switch on="mainService.isEditMode()">
-		<input 
+		<input ng-if="experiment.@{name}[propertyDef.code] == undefined"
 			name="@{name}{{propertyDef.code}}" ng-required="propertyDef.required"
 			type="file" ng-switch-when="true" base64-img="experiment.@{name}[propertyDef.code]" />
-		<div ng-switch-when="false" ng-click="setImage(experiment.@{name}[propertyDef.code].value,
+		<div ng-click="setImage(experiment.@{name}[propertyDef.code].value,
 			experiment.@{name}[propertyDef.code].fullname,
 			experiment.@{name}[propertyDef.code].width,
 			experiment.@{name}[propertyDef.code].height)" 
@@ -51,8 +51,8 @@
 				</a>
 			</div>
 		</div>
-		<button ng-switch-when="false" ng-if="isEditModeAvailable()" class="btn btn-default btn-xs"  
-				ng-show="experiment.@{name}[propertyDef.code] !== undefined" 
+		<button ng-if="isEditModeAvailable()" class="btn btn-default btn-xs"
+				ng-show="experiment.@{name}[propertyDef.code] !== undefined && mainService.isEditMode()" 
 				ng-click="experiment.@{name}[propertyDef.code] = undefined" ><i class="fa fa-trash-o"></i>
 		</button>
 	</div>

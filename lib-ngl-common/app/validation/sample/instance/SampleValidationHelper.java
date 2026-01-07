@@ -6,26 +6,27 @@ import static validation.common.instance.CommonValidationHelper.FIELD_EXPERIMENT
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-
-import fr.cea.ig.MongoDBDAO;//FDS
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 import org.mongojack.DBQuery;//FDS
 
+import fr.cea.ig.MongoDBDAO;//FDS
 import models.laboratory.common.description.PropertyDefinition;
 import models.laboratory.common.instance.PropertyValue;
+import models.laboratory.experiment.instance.Experiment; //FDS
 import models.laboratory.sample.description.ImportType;
 import models.laboratory.sample.description.SampleCategory;
 import models.laboratory.sample.description.SampleType;
 import models.laboratory.sample.instance.Sample;
-import models.laboratory.experiment.instance.Experiment; //FDS
 import validation.ContextValidation;
 import validation.common.instance.CommonValidationHelper;
 import validation.utils.ValidationConstants;
 import validation.utils.ValidationHelper;
 
 public class SampleValidationHelper {
+	
+	private static final Pattern SAMPLE_CODE_SYNTAX = Pattern.compile("^[A-Za-z0-9]");
 
 	// ---------------------------------------------------------------------
 	// renamed and arguments reordered
@@ -187,5 +188,15 @@ public class SampleValidationHelper {
 			  contextValidation.addError(rootKeyName, "error.validationexp.sample.alreadyused",sampleCode);
 			}
 		}
+	}
+
+	public static void validateCodeSyntax(ContextValidation contextValidation, String code) {
+		if(contextValidation.isCreationMode()) {
+			if(isInvalidMaterialCode(code)) contextValidation.addError("code", "error.sample.code.syntax", code);
+		}
+	}
+
+	private static boolean isInvalidMaterialCode(String code) {
+		return !SAMPLE_CODE_SYNTAX.matcher(code).find();
 	}
 }

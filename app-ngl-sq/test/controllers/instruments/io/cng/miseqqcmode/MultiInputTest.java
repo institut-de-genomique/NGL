@@ -56,7 +56,7 @@ public class MultiInputTest {
 		List<PropertyFileValue> pfvs = new ArrayList<>();
 		ContextValidation contextValidation = ContextValidation.createUndefinedContext(TestUtils.CURRENT_USER);
 		
-		Map<String, PropertyFileValue> globalFilesMap = new MultiInput().getGlobalFilesMap(pfvs, contextValidation);
+		Map<String, PropertyFileValue> globalFilesMap = new MultiInput().getGlobalFilesMap(null, pfvs, contextValidation);
 		
 		assertNotNull(globalFilesMap);
 		assertTrue(globalFilesMap.isEmpty());
@@ -71,7 +71,7 @@ public class MultiInputTest {
 				PropertyFileValueFactory.getRandomPropertyFileValue("Summary.htm"));
 		ContextValidation contextValidation = ContextValidation.createUndefinedContext(TestUtils.CURRENT_USER);
 		
-		Map<String, PropertyFileValue> globalFilesMap = new MultiInput().getGlobalFilesMap(pfvs, contextValidation);
+		Map<String, PropertyFileValue> globalFilesMap = new MultiInput().getGlobalFilesMap(null, pfvs, contextValidation);
 		
 		assertNotNull(globalFilesMap);
 		assertFalse(globalFilesMap.isEmpty());
@@ -91,7 +91,7 @@ public class MultiInputTest {
 				);
 		ContextValidation contextValidation = ContextValidation.createUndefinedContext(TestUtils.CURRENT_USER);
 		
-		Map<String, PropertyFileValue> globalFilesMap = new MultiInput().getGlobalFilesMap(pfvs, contextValidation);
+		Map<String, PropertyFileValue> globalFilesMap = new MultiInput().getGlobalFilesMap(null, pfvs, contextValidation);
 		
 		assertNotNull(globalFilesMap);
 		assertFalse(globalFilesMap.isEmpty());
@@ -131,7 +131,7 @@ public class MultiInputTest {
 	    exceptionRule.expectMessage("HtmlValues should be null on Summary.htm parsing!");
 	    
 	    MultiInput multiInput = new MultiInput();
-	    multiInput.setHtmlValues(new HtmlValues("1", "1"));
+	    multiInput.setHtmlValues(new HtmlValues(1, 1));
 	    
 	    multiInput.importGlobalFile(experiment, pfv, "Summary.htm", contextValidation);
 	}
@@ -167,7 +167,7 @@ public class MultiInputTest {
 				);
 		ContextValidation contextValidation = ContextValidation.createUndefinedContext(TestUtils.CURRENT_USER);
 		
-		Map<String, PropertyFileValue> positionsMap = new MultiInput().getPositionsMap(pfvs, contextValidation);
+		Map<String, PropertyFileValue> positionsMap = new MultiInput().getPositionsMap(null, pfvs, contextValidation);
 		
 		assertNotNull(positionsMap);
 		assertTrue(positionsMap.isEmpty());
@@ -189,7 +189,7 @@ public class MultiInputTest {
 				PropertyFileValueFactory.getRandomPropertyFileValue("A005R4G-Z1_S57.summary.csv"));
 		ContextValidation contextValidation = ContextValidation.createUndefinedContext(TestUtils.CURRENT_USER);
 		
-		Map<String, PropertyFileValue> positionsMap = new MultiInput().getPositionsMap(pfvs, contextValidation);
+		Map<String, PropertyFileValue> positionsMap = new MultiInput().getPositionsMap(null, pfvs, contextValidation);
 		
 		assertNotNull(positionsMap);
 		assertTrue(positionsMap.isEmpty());
@@ -228,7 +228,7 @@ public class MultiInputTest {
 		ContextValidation contextValidation = ContextValidation.createUndefinedContext(TestUtils.CURRENT_USER);
 		
 		Map<String, PropertyFileValue> positionsMap = new MultiInput()
-				.getPositionsMap(Arrays.asList(A1, A2, A3, A4, A5, A6), contextValidation);
+				.getPositionsMap(null, Arrays.asList(A1, A2, A3, A4, A5, A6), contextValidation);
 		
 		assertNotNull(positionsMap);
 		assertFalse(positionsMap.isEmpty());
@@ -283,7 +283,7 @@ public class MultiInputTest {
 		ContextValidation contextValidation = ContextValidation.createUndefinedContext(TestUtils.CURRENT_USER);
 		
 		MultiInput multiInput = new MultiInput();
-	    multiInput.setHtmlValues(new HtmlValues("10007482", "9644803"));
+	    multiInput.setHtmlValues(new HtmlValues(10007482, 9644803));
 		
 		Experiment experimentReturned = multiInput.importPartialFile(experiment, pfv, icu, contextValidation);
 		assertSame(experiment, experimentReturned);

@@ -58,6 +58,7 @@ public class Experiments extends NGLController implements NGLJavascript  {
 						controllers.sra.experiments.api.routes.javascript.Experiments.get(),
 						controllers.sra.experiments.tpl.routes.javascript.Experiments.get(),
 						controllers.sra.experiments.api.routes.javascript.Experiments.list(),
+						controllers.sra.experiments.api.routes.javascript.Experiments.batchUpdate(),
 						controllers.sra.experiments.api.routes.javascript.Experiments.update(),
 						controllers.authorisation.routes.javascript.User.get(),
 						controllers.sra.experiments.api.routes.javascript.ExperimentComments.save(),

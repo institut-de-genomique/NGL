@@ -85,6 +85,8 @@ public class Processes extends NGLController implements NGLJavascript {
 				controllers.commons.api.routes.javascript.CommonInfoTypes.list(),
 				controllers.commons.api.routes.javascript.Values.list(),
 				controllers.projects.api.routes.javascript.Projects.list(),
+				controllers.projects.api.routes.javascript.UmbrellaProjects.list(),
+				controllers.projects.api.routes.javascript.UmbrellaProjects.get(),
 				controllers.samples.api.routes.javascript.Samples.list(),
 				controllers.experiments.api.routes.javascript.Experiments.list(),
 				controllers.containers.api.routes.javascript.ContainerSupports.list(),
@@ -105,7 +107,8 @@ public class Processes extends NGLController implements NGLJavascript {
 	      		controllers.containers.api.routes.javascript.ContainerCategories.list(),
 	      		controllers.experiments.api.routes.javascript.ExperimentTypeNodes.get(),
   	    		
-				controllers.protocols.api.routes.javascript.Protocols.list());
+				controllers.protocols.api.routes.javascript.Protocols.list(),
+				controllers.samples.api.routes.javascript.ImportTypes.list());
 				
 	}
 

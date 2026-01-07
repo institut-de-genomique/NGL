@@ -1,11 +1,31 @@
 "use strict";
 
-angular.module('biCommonsServices', []).
-    	factory('treatments',['$q','$http','$filter', function($q,$http,$filter){
+angular.module('biCommonsServices', [])
+.constant('CONSTS', {
+    TREATMENT_TYPES: {
+        GENOME_DENOVO_ASSEMBLY: "genome-denovo-assembly"
+    },
+	WORKFLOWS: {
+	    GENOME_DENOVO_ASSEMBLY: [
+	        "IP-LRA", "F-LRA", "FE-LRA", "IWP-LRA", 
+	        "IP-SCAF", "F-SCAF", "FE-SCAF", "IWP-SCAF", 
+	        "IP-CUR", "F-CUR", "FE-CUR", "IWP-CUR", 
+	        "IP-REV", "F-REV", "FE-REV", "IWP-REV", 
+	        "F-SUB"
+	    ]
+	},
+    UI_COMPONENTS: {
+        ACCORDION: "accordion",
+        TAB: "tab",
+        PILL: "pill"
+    }
+})
+.factory('treatments',['$q','$http','$filter', 'CONSTS', function($q, $http, $filter, CONSTS){
     		var _treatments = [];
     		var _allTreatments = {};
     		var _treatment = {};    		
     		var codeLastActive = undefined;
+			var _viewMode = CONSTS.UI_COMPONENTS.PILL;
     		/**
     		 * Set one element of list active
     		 */
@@ -50,6 +70,7 @@ angular.module('biCommonsServices', []).
     		function init(treatments, url, msgkey, excludes){
     			_treatment = {};
     			_treatments = [];
+				setViewMode(CONSTS.UI_COMPONENTS.PILL);
     			var queries = [];
 				
     			for(var key in _allTreatments){
@@ -109,27 +130,90 @@ angular.module('biCommonsServices', []).
     		function getTreatments(){
     			return _treatments;
     		};
+			
+			function setViewMode(viewMode){
+				_viewMode = viewMode;
+			};
+			
+			function getViewMode(){
+				return _viewMode;
+			};
     		
     		return {
     			init : init,
     			activeTreatment : activeTreatment,
     			getTreatment : getTreatment,
-    			getTreatments : getTreatments
+    			getTreatments : getTreatments,
+				setViewMode : setViewMode,
+				getViewMode : getViewMode,
+				CONSTS: CONSTS
     		};
     	}]).directive('treatments', function() {
-    		return {
-    			restrict: 'A',
-    			scope: {
-    				treatments: '=treatments'
-    				},
-    			template: '<ul class="nav nav-tabs">'+
-    				      '<li ng-repeat="treament in treatments.getTreatments()" ng-class="treament.clazz">'+
-    					  '<a href="#" ng-click="treatments.activeTreatment(treament)" >{{treament.code}}</a></li>'+		   
-    					  '</ul>'+
-    					  '<div class="tab-content">'+
-    					  '<div class="tab-pane active" ng-include="treatments.getTreatment().url"/>'
-    			};
-    	}).directive('ngBindSrc', ['$parse',function($parse){ //used to include krona
+			    return {
+			      restrict: 'A',
+			      scope: {
+			        treatments: '='
+			      },
+			      compile: function(element, attrs) {
+
+					var template = 
+						'<div ng-if="treatments.getViewMode() == treatments.CONSTS.UI_COMPONENTS.PILL">'+					
+							'<ul class="nav nav-pills margin-bottom-15">'+
+								'<li ng-repeat="treament in treatments.getTreatments()" ng-class="treament.clazz">'+
+									'<a href="#" ng-click="treatments.activeTreatment(treament)">{{treament.name}}</a>'+
+								'</li>'+		   		
+							'</ul>'+
+							'<div class="tab-content">'+
+								'<div class="tab-pane active" ng-include="treatments.getTreatment().url"></div>'+		
+							'</div>'+
+						'</div>'+
+					    '<div ng-if="treatments.getViewMode() == treatments.CONSTS.UI_COMPONENTS.TAB">' +
+					        '<ul class="nav nav-tabs margin-bottom-15">' +
+					            '<li ng-repeat="treatment in treatments.getTreatments()" ng-class="treatment.clazz">' +
+					                '<a href="#" ng-click="treatments.activeTreatment(treatment)">{{treatment.name}}</a>' +
+					            '</li>' +
+					        '</ul>' +
+					        '<div class="tab-content">' +
+					            '<div class="tab-pane active" ng-include="treatments.getTreatment().url"></div>' +
+					        '</div>' +
+					    '</div>' +
+					    '<div ng-if="treatments.getViewMode() == treatments.CONSTS.UI_COMPONENTS.ACCORDION">' +
+					        '<div class="panel-group" id="accordion" role="tablist" >' +
+					            '<div class="panel panel-default" ng-repeat="treatment in treatments.getTreatments() track by $index">' +
+					                '<div class="panel-heading" role="tab" id="heading_{{treatment.code}}">' +
+					                    '<h5 class="panel-title">' +
+					                        '<a role="button" data-toggle="collapse" class="accordion-plus-toggle collapsed"' +
+					                           'data-parent="#accordion" href="#collapse_{{treatment.code}}"' +
+					                           'aria-expanded="false" aria-controls="collapse_{{treatment.code}}">{{treatment.name}}</a>' +
+					                    '</h5>' +
+					                '</div>' +
+					                '<div id="collapse_{{treatment.code}}" class="panel-collapse collapse" role="tabpanel" ' +
+					                     'aria-labelledby="heading_{{treatment.code}}">' +
+					                    '<div class="panel-body" ng-include="treatment.url"></div>' +
+					                '</div>' +
+					            '</div>' +
+					        '</div>' +
+					    '</div>';
+
+			        element.html(template);
+					
+					// without changing the URL
+					element.on('click', 'a[data-toggle="collapse"]', function(event) {
+					    event.preventDefault();
+					    var target = angular.element(this).attr('href');
+					    var targetElement = angular.element(target);
+						var heading = targetElement.parent().find('.panel-heading'); 
+					    var isCollapsed = targetElement.hasClass('in');
+
+					    if (!isCollapsed) {
+					        targetElement.collapse('show');
+					    } else {
+					        targetElement.collapse('hide');
+					    }
+					});
+					}
+			      };
+			  }).directive('ngBindSrc', ['$parse',function($parse){ //used to include krona
     		return {
     			restrict: 'A',
     			link: function(scope, element, attr) {
@@ -362,4 +446,3 @@ angular.module('biCommonsServices', []).
   		    			+'</div>'  		    			
     			};    			
     	});
-

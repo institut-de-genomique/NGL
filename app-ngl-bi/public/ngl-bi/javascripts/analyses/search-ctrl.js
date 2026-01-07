@@ -1,6 +1,6 @@
 "use strict";
-angular.module('home').controller('SearchCtrl',['$scope', '$routeParams', 'datatable', 'mainService', 'tabService', 'analysisSearchService',  'valuationService',
-                                                function($scope, $routeParams, datatable, mainService, tabService, analysisSearchService, valuationService) {
+angular.module('home').controller('SearchCtrl',['$scope', '$routeParams', 'datatable', 'mainService', 'tabService', 'analysisSearchService',  'valuationService', 'projectSearchFromUmbrella',
+                                                function($scope, $routeParams, datatable, mainService, tabService, analysisSearchService, valuationService, projectSearchFromUmbrella) {
 	
 	var datatableConfig = {
 			name:"Analyses",
@@ -30,6 +30,11 @@ angular.module('home').controller('SearchCtrl',['$scope', '$routeParams', 'datat
 			}
 	};
 
+	$scope.selectProjetsFromUmbrellas = function() {
+		var projCodes = projectSearchFromUmbrella.search($scope.searchService.form.umbrellaCodes);
+		$scope.searchService.form.projectCodes = projCodes;
+	}
+
 	$scope.search = function(){
 		$scope.searchService.search();
 	};
@@ -47,7 +52,6 @@ angular.module('home').controller('SearchCtrl',['$scope', '$routeParams', 'datat
 	
 	$scope.searchService = analysisSearchService;	
 	$scope.searchService.init($routeParams, datatableConfig);
-	
 	$scope.valuationService = valuationService();
 	
 	if($scope.searchService.isRouteParam){
@@ -55,8 +59,8 @@ angular.module('home').controller('SearchCtrl',['$scope', '$routeParams', 'datat
 	}
 }]);
 
-angular.module('home').controller('SearchValuationCtrl', ['$scope', '$routeParams', 'datatable', 'mainService', 'tabService', 'analysisSearchService', 'valuationService',
-                                                          function($scope, $routeParams, datatable, mainService, tabService, analysisSearchService, valuationService) {
+angular.module('home').controller('SearchValuationCtrl', ['$scope', '$routeParams', 'datatable', 'mainService', 'tabService', 'analysisSearchService', 'valuationService', 'projectSearchFromUmbrella',
+                                                          function($scope, $routeParams, datatable, mainService, tabService, analysisSearchService, valuationService, projectSearchFromUmbrella) {
 	
 	var datatableConfig = {
 			pagination:{mode:'local'},
@@ -90,6 +94,11 @@ angular.module('home').controller('SearchValuationCtrl', ['$scope', '$routeParam
 	$scope.search = function(){
 		$scope.searchService.search();
 	};
+
+	$scope.selectProjetsFromUmbrellas = function() {
+		var projCodes = projectSearchFromUmbrella.search($scope.searchService.form.umbrellaCodes);
+		$scope.searchService.form.projectCodes = projCodes;
+	}
 	
 	$scope.reset = function(){
 		$scope.searchService.resetForm();
@@ -110,8 +119,8 @@ angular.module('home').controller('SearchValuationCtrl', ['$scope', '$routeParam
 	$scope.search();
 }]);
 
-angular.module('home').controller('SearchStateCtrl', ['$scope', '$routeParams', 'datatable', 'mainService', 'tabService', 'analysisSearchService', 
-                                                      function($scope, $routeParams, datatable, mainService, tabService, analysisSearchService) {
+angular.module('home').controller('SearchStateCtrl', ['$scope', '$routeParams', 'datatable', 'mainService', 'tabService', 'analysisSearchService', 'projectSearchFromUmbrella', 
+                                                      function($scope, $routeParams, datatable, mainService, tabService, analysisSearchService, projectSearchFromUmbrella) {
 	
 	var datatableConfig = {
 			pagination:{mode:'local'},
@@ -141,6 +150,11 @@ angular.module('home').controller('SearchStateCtrl', ['$scope', '$routeParams', 
 			},
 			messages : {active:true}
 	};
+
+	$scope.selectProjetsFromUmbrellas = function() {
+		var projCodes = projectSearchFromUmbrella.search($scope.searchService.form.umbrellaCodes);
+		$scope.searchService.form.projectCodes = projCodes;
+	}
 
 	$scope.search = function(){
 		$scope.searchService.search($scope.datatable);

@@ -3,7 +3,7 @@ package sra.scripts;
 import javax.inject.Inject;
 
 import fr.cea.ig.lfw.controllers.scripts.buffered.ScriptNoArgs;
-import services.SraEbiAPI;
+import sra.services.SraEbiAPI;
 
 
 //http://localhost:9000/sra/scripts/run/sra.scripts.TestEbiAPI

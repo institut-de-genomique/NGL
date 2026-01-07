@@ -41,6 +41,7 @@ public class Project extends DBObject implements IValidation {
 	public Map<String, PropertyValue> properties;
 	public String                     umbrellaProjectCode;
 	public BioinformaticParameters    bioinformaticParameters;
+	public SystemParameters    	  	  systemParameters;
 	public String                     lastSampleCode;
 	public Integer                    nbCharactersInSampleCode = 4;
 	public List<String>               authorizedUsers;
@@ -63,7 +64,7 @@ public class Project extends DBObject implements IValidation {
 		CommonValidationHelper .validateStateRequired                (contextValidation, typeCode, state);
 		ProjectValidationHelper.validateUmbrellaProjectCodeOptional  (contextValidation, umbrellaProjectCode);
 		ProjectValidationHelper.validateBioformaticParametersRequired(contextValidation, bioinformaticParameters);
-		ProjectValidationHelper.validateArchiveProperties			 (contextValidation, code, typeCode, properties, true);
+		ProjectValidationHelper.validateSystemParametersRequired	 (contextValidation, code, systemParameters);
 		ProjectValidationHelper.validateAnalysisTypes				 (contextValidation, typeCode, bioinformaticParameters, properties);
 	}
 }

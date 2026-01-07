@@ -521,12 +521,16 @@ public class DeleteRessourceAndUpdateLaunchDate extends ScriptWithArgsAndBody<De
 			List<Sample> sampleList = MongoDBDAO.find(InstanceConstants.SAMPLE_COLL_NAME, Sample.class, DBQuery.in("code", res)).toList();
 
 			sampleList.forEach(sample -> {
-				println("Champ 'processesToLaunchDate' mis à jour sur le sample '" + sample.code + "'.");
-
 				sample.setProcessesToLaunchDate(new Date());
 
 				if (!simulation) {
-					MongoDBDAO.update(InstanceConstants.SAMPLE_COLL_NAME, sample);
+					if (sample.getProcessesToLaunchDate() != null) {
+						println("Champ 'processesToLaunchDate' mis à jour sur le sample '" + sample.code + "'.");
+
+						MongoDBDAO.update(InstanceConstants.SAMPLE_COLL_NAME, sample);
+					} else {
+						logger.debug("Champ 'processesToLaunchDate' non mis à jour sur le sample '" + sample.code + "' (rappel : projet CEA ignoré).");
+					}
 				}
 			});
 
@@ -584,7 +588,7 @@ public class DeleteRessourceAndUpdateLaunchDate extends ScriptWithArgsAndBody<De
 
 				sample.setProcessesToLaunchDate(new Date());
 
-				if (!simulation) {
+				if (!simulation && sample.getProcessesToLaunchDate() != null) {
 					MongoDBDAO.update(InstanceConstants.SAMPLE_COLL_NAME, sample);
 				}
 			});
@@ -647,7 +651,7 @@ public class DeleteRessourceAndUpdateLaunchDate extends ScriptWithArgsAndBody<De
 
 				sample.setProcessesToLaunchDate(new Date());
 
-				if (!simulation) {
+				if (!simulation && sample.getProcessesToLaunchDate() != null) {
 					MongoDBDAO.update(InstanceConstants.SAMPLE_COLL_NAME, sample);
 				}
 			});

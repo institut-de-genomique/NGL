@@ -4,9 +4,10 @@
 archives.page.title=Archives
 
 #archives filter value
-archives.input_radio.0 = Tout
-archives.input_radio.1 = Archivés
-archives.input_radio.2 = Non Archivés
+#archives.input_radio.0 = Tout          // impossible d'afficher toutes les données de rs
+#archives.input_radio.1 = Archivés      // impossible d'afficher toutes les données de rs clonés
+archives.input_radio.2 = Données à archiver
+archives.input_radio.3 = Données à cloner
 
 #archives - datatable
 archives.table.runcode=Run
@@ -15,9 +16,6 @@ archives.table.readsetcode=Readset
 archives.table.path=Emplacement
 archives.table.date=Date d''archivage
 archives.table.backupid=ID archive
-
-
-date.format=dd/MM/yyyy
 
 
 

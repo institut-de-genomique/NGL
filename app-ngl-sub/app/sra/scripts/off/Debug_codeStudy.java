@@ -12,12 +12,12 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.mongojack.DBQuery;
 
+import controllers.sra.api.AbstractSampleAPI;
+import controllers.sra.api.AbstractStudyAPI;
+import controllers.sra.api.ExperimentAPI;
+import controllers.sra.api.SubmissionAPI;
 import fr.cea.ig.lfw.controllers.scripts.buffered.ScriptNoArgs;
 import fr.cea.ig.ngl.NGLApplication;
-import fr.cea.ig.ngl.dao.api.sra.AbstractSampleAPI;
-import fr.cea.ig.ngl.dao.api.sra.AbstractStudyAPI;
-import fr.cea.ig.ngl.dao.api.sra.ExperimentAPI;
-import fr.cea.ig.ngl.dao.api.sra.SubmissionAPI;
 import models.sra.submit.sra.instance.AbstractStudy;
 import models.sra.submit.sra.instance.Experiment;
 import play.libs.Json;
@@ -34,8 +34,8 @@ import validation.ContextValidation;
 public class Debug_codeStudy extends ScriptNoArgs {
 //	private static final play.Logger.ALogger logger = play.Logger.of(Debug_BDA.class);
 	private final AbstractStudyAPI   abstractStudyAPI;
-	private final AbstractSampleAPI  abstractSampleAPI;
-	private final SubmissionAPI     submissionAPI;
+	// private final AbstractSampleAPI  abstractSampleAPI;
+	// private final SubmissionAPI     submissionAPI;
 	private final ExperimentAPI     experimentAPI;
 	private final NGLApplication    app;
 	private static final play.Logger.ALogger logger = play.Logger.of(Debug_codeStudy.class);
@@ -47,8 +47,8 @@ public class Debug_codeStudy extends ScriptNoArgs {
 					 AbstractSampleAPI     abstractSampleAPI,
 					 NGLApplication    app) {
 		this.abstractStudyAPI  = abstractStudyAPI;
-		this.abstractSampleAPI = abstractSampleAPI;
-		this.submissionAPI     = submissionAPI;
+		// this.abstractSampleAPI = abstractSampleAPI;
+		// this.submissionAPI     = submissionAPI;
 		this.experimentAPI     = experimentAPI;
 		this.app               = app;
 	}

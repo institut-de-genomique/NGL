@@ -32,10 +32,11 @@ public final class ReadsetFactory {
 	 * 
 	 * @param withId Booléen permettant de savoir si le readset généré a un id ou non.
 	 * @param date La date de création à mettre au readset généré.
+	 * @param laneNumber
 	 * 
 	 * @return Un objet "Readset" aléatoire.
 	 */
-	public static ReadSet getRandomReadset(boolean withId, Date date) {
+	public static ReadSet getRandomReadset(boolean withId, Date date, int laneNumber) {
 		ReadSet readset = new ReadSet();
 		
 		TraceInformation traceInformation = new TraceInformation();
@@ -64,6 +65,7 @@ public final class ReadsetFactory {
 		
 		readset.runTypeCode = "RGAIIx";
 		readset.sampleCode = "ARG_APD";
+		readset.laneNumber = laneNumber;
 		
 		Map<String, Treatment> treatments = new HashMap<String, Treatment>();	
 		treatments.put("test", TreatmentFactory.getRandomTreatment());
@@ -166,7 +168,7 @@ public final class ReadsetFactory {
 		List<ReadSet> res = new ArrayList<>();
 
 		for (int i = 0; i < TestUtils.LIST_SIZE; i++) {
-			res.add(getRandomReadset(true, date));
+			res.add(getRandomReadset(true, date, 1));
 		}
 
 		return res;

@@ -1,27 +1,18 @@
 package fr.cea.ig.ngl.dao.protocols;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.inject.Inject;
 
-import org.mongojack.DBCursor;
-
-import fr.cea.ig.MongoDBDAO;
-import fr.cea.ig.MongoDBResult;
 import fr.cea.ig.ngl.dao.api.APIException;
 import fr.cea.ig.ngl.dao.api.APIValidationException;
 import fr.cea.ig.ngl.dao.api.GenericAPI;
 import fr.cea.ig.ngl.dao.descriptionHistories.DescriptionHistoriesAPI;
 import models.laboratory.descriptionHistory.instance.DescriptionHistory;
 import models.laboratory.protocol.instance.Protocol;
-import models.laboratory.run.instance.Analysis;
-import models.utils.InstanceConstants;
 import models.utils.dao.DAOException;
-import play.Logger;
 import validation.ContextValidation;
 
 public class ProtocolsAPI extends GenericAPI<ProtocolsDAO, Protocol> {
@@ -59,10 +50,14 @@ public class ProtocolsAPI extends GenericAPI<ProtocolsDAO, Protocol> {
 	public Protocol create(Protocol input, String currentUser) throws APIException {
 		ContextValidation ctxVal = ContextValidation.createCreationContext(currentUser);
 		input.validate(ctxVal);
+		if (input._id != null){
+			throw new APIValidationException(INVALID_INPUT_ERROR_MSG + ctxVal.getErrors(), ctxVal.getErrors());	
+		} 
+		
 		if (!ctxVal.hasErrors()) {
 			return dao.saveObject(input);
 		} else {
-			throw new APIValidationException(INVALID_INPUT_ERROR_MSG, ctxVal.getErrors());
+			throw new APIValidationException(INVALID_INPUT_ERROR_MSG + ctxVal.getErrors(), ctxVal.getErrors());
 		}
 	}
 

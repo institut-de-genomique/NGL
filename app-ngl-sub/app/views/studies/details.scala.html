@@ -18,11 +18,17 @@
 @standard_header("study", "TRUE"){ 
   <!-- affichage uniquement si donnee releasable : study avec state.code=SUB_F et date relase > date du jour : voir details.ctrl.js.$scope.isReleasable--> 
   <button class="btn btn-default"  ng-if="isReleasable('@user')"  ng-click="userRelease()" data-toggle="tooltip" title="@Messages("button.release")" ><i class="fa fa-save"></i> @Messages("button.release")</button>
-  <button class="btn btn-default" 
-				data-toggle="modal" data-target="#commentModal" title="@Messages("button.addComment")"><i class="fa fa-comment"></i></button>
+  <button class="btn btn-default" data-toggle="modal" data-target="#commentModal" title="@Messages("button.addComment")"><i class="fa fa-comment"></i></button>
 
 }
 
+
+<!--Pour affichage d'un spinner-->
+<div class="inProgressSpinner" ng-if="treeLoadInProgress">
+<button class="btn btn-primary btn-lg">
+<i class="fa fa-spinner fa-spin fa-5x"></i>
+</button>
+</div>
 
 <form class="form-horizontal" name="studyForm">
 
@@ -48,6 +54,7 @@
 		@line("study.locusTagPrefixs", "strLocusTagPrefixs")
 		@line("study.idsPubmed", "strIdsPubmed")
 		@line("study.description")
+		@line("study.dropBox")	
 	}
 </div>
 
@@ -88,6 +95,8 @@
 			<li ng-if="isDataNotActiveExperiment()"><a  href="#" data-target="#experiment" data-toggle="tab">@Messages("studies.tabs.experiment")</a></li>
 			<li><a a href="#" data-target="#run" data-toggle="tab">@Messages("studies.tabs.run")</a></li>
 			<li><a a href="#" data-target="#rawData" data-toggle="tab">@Messages("studies.tabs.rawData")</a></li>
+			<li><a a href="#" data-target="#sample" data-toggle="tab">@Messages("studies.tabs.sample")</a></li>
+
 		</ul>
 	
 
@@ -107,6 +116,9 @@
 			
 			<div class="tab-pane" id="rawData">
 				<div ultimate-datatable="rawDataDT"></div>
+			</div>
+			<div class="tab-pane" id="sample">
+				<div ultimate-datatable="sampleDT"></div>
 			</div>
 		</div>
 	</div>

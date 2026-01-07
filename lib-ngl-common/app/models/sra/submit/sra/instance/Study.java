@@ -8,17 +8,19 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
-import fr.cea.ig.ngl.dao.api.sra.AbstractStudyAPI;
-import fr.cea.ig.ngl.dao.api.sra.StudyAPI;
+import controllers.sra.api.AbstractStudyAPI;
+import controllers.sra.api.StudyAPI;
 import models.laboratory.common.description.ObjectType;
-import models.sra.submit.util.VariableSRA;
 import models.utils.InstanceConstants;
+import services.sra.SraException;
+import services.sra.SraValidationHelper;
+import services.sra.VariableSRA;
 import validation.ContextValidation;
 import validation.common.instance.CommonValidationHelper;
-import validation.sra.SraValidationHelper;
 import validation.utils.ValidationHelper;
 
 public class Study extends AbstractStudy  {
+	 private static final play.Logger.ALogger logger = play.Logger.of(Study.class);
 
 	// StudyType
 	//public String alias;             // required mais remplacé par code herité de DBObject, et valeur = study_projectCode_num
@@ -33,20 +35,34 @@ public class Study extends AbstractStudy  {
   	public String centerName = VariableSRA.centerName;        // required pour nos stats valeur fixee à GSC */
     public String centerProjectName;      // required pour nos stats valeur fixée à projectCode
  	public List <String> projectCodes = new ArrayList<>();    // required pour nos stats  
-	public List<String> locusTagPrefixs;     // champs pouvant etre rempli lors d'une mise à jour uniquement
-	public List<String> idsPubmed;           // champs pouvant etre rempli lors d'une mise à jour uniquement
+	public List<String> locusTagPrefixs;     
+	public List<String> ebiLocusTagPrefixs;   // champs utilisé pour contourné bug si update (NGL-5020)
+	public List<String> idsPubmed;           
     // et heritage de state et traceInformation.
 	public static final String initialStateCode = "NONE";
 	//public String adminComment; // deja dans AbstractStudy
     public String taxonId;          // dans le cas des project ERGA, les projects  peuvent etre associés à un taxonId et a scientificName
     public String scientificName;   // dans le cas des project ERGA, les projects  peuvent etre associés à un taxonId et a scientificName
+	// NGL-4911 : ajout parent umbrella mais pas children car reserve pour umbrella dans classe Project
+	public List<String> parentProjectAccessions;  // numéros d'accession de la forme PRJEB du project parent (pour les project umbrella avec parent)
+    public List<EmailAlert> emailAlerts = new ArrayList<EmailAlert>();  // liste des alertes email envoyés aux utilisateurs pour indiquer que le study va etre mis en public
+    //NGL-4708
+  	// Representation sous forme de String de listStudyAttributes , pour affichage et edition dans datatable. 
+    //public String attributes;       // champs pouvant etre rempli lors d'une mise à jour uniquement
+    
+    //public List<Attribute>  attributes; //NGL-4708
+    public String  attributes; //NGL-4708
+    
 
-	
-	public Study() {
+ 	// NGL-4593
+    public String dropBox;
+    
+ 
+    public Study() {
 		super(AbstractStudy.studyType);
 	}
-	
-	
+
+
 	public void validateInvariants(ContextValidation contextValidation) {
 		//logger.debug("!!!!!!!!!!!! Dans Study.validateInvariants");
 
@@ -104,6 +120,7 @@ public class Study extends AbstractStudy  {
 				}
 				if (StringUtils.isNotBlank(locusTag)) {
 					if ( ! locusTag.matches("([a-zA-Z_0-9]|-)+")) {
+						logger.debug("XXXXXXXXXXXXXXXXX   locusTag contient caractere non attendu");
 						contextValidation.addError("locusTagPrefixs", "'" +locusTag + "' contient un caratere non attendu, (autre que [a-zA-Z_0-9]|-)");
 					}
 				}
@@ -120,15 +137,47 @@ public class Study extends AbstractStudy  {
 			}
 		}
 		
-
+		if(this.parentProjectAccessions != null) {
+			for(String parentProjectAccession : this.parentProjectAccessions) {
+				//logger.debug("XXXXXXXXXXXXXXXXX   locusTag='" + locusTag + "'");
+				if( StringUtils.isBlank(parentProjectAccession) ) {
+					contextValidation.addError("parentProjectAccession", " avec donnee sans caractere visible");
+				}
+				if (StringUtils.isNotBlank(parentProjectAccession)) {
+					if ( ! parentProjectAccession.matches("^PRJ([a-zA-Z_0-9]|)+$")) {
+						logger.debug("XXXXXXXXXXXXXXXXX   parentProjectAccession contient caractere non attendu");
+						contextValidation.addError("parentProjectAccessions", "'" + parentProjectAccession + "' contient un caratere non attendu, (autre que PRJ([a-zA-Z_0-9]|)+");
+					}
+				}
+			}
+			// verifier qu'il n'y pas de doublon dans la liste des parentProjectAccessions:
+			Set<String> set = new HashSet<String>(this.parentProjectAccessions);
+			if(set.size() < this.parentProjectAccessions.size()) {
+				String liste_parents = "";
+				for (String c: this.parentProjectAccessions) {
+					liste_parents += c + ", \n";
+				}
+				liste_parents = liste_parents.replaceFirst(",\\s*$", ""); // oter ',' terminale si besoin
+				contextValidation.addError("parentProjectAccessions", " Il existe des doublons dans la liste " + liste_parents);
+			}
+		}		
+		
+		
+		if(StringUtils.isNotBlank(this.taxonId)) {
+			if(! this.taxonId.matches("^\\d+$")) {
+				contextValidation.addError("taxonId", " qui ne correspond pas a un entier");
+			}
+		}
+		
 		if(this.idsPubmed != null) {
 			for(String idPubmed : this.idsPubmed) {
-				//logger.debug("XXXXXXXXXXXXXXXXX   locusTag='" + locusTag + "'");
+				//logger.debug("XXXXXXXXXXXXXXXXX   idPubmed='" + idPubmed + "'");
 				if( StringUtils.isBlank(idPubmed) ) {
-					contextValidation.addError("idsPubmed", " avec donnee sans caractere visible");
+					contextValidation.addError("idPubmed", " avec donnee sans caractere visible");
 				}
 				if (StringUtils.isNotBlank(idPubmed)) {
 					if ( ! idPubmed.matches("([0-9])+")) {
+						//logger.debug("XXXXXXXXXXXXXXXXX   idPubmed contient caractere non attendu");
 						contextValidation.addError("idsPubmed", "'" +idPubmed + "' contient un caratere non attendu, (autre que [0-9])");
 					}
 				}
@@ -145,7 +194,20 @@ public class Study extends AbstractStudy  {
 			}
 		}
 		
-	
+		//NGL-4708
+//		if(this.attributes != null && ! this.attributes.isEmpty()) {
+//			//logger.debug("Avant de valider les attributes, ctxVal contient :");
+//			//contextValidation.displayErrors(logger, "debug");
+//			//logger.debug("End ctxVal");
+//
+//			SraValidationHelper   .validateProjectAttributes (contextValidation, "attributes", this._getChaineAttributes());
+//		}
+		// NGL-4593
+		if(StringUtils.isBlank(this.dropBox)) {
+			contextValidation.addError("dropBox", "absente du study");
+		}
+		SraValidationHelper   .validateProjectAttributes (contextValidation, "attributes", this.attributes);
+
 	}
 	
 	private void validateCreation(ContextValidation contextValidation) {
@@ -156,9 +218,9 @@ public class Study extends AbstractStudy  {
 		if(studyAPI.dao_checkObjectExist("code", code)) {
 			contextValidation.addError("code", code + " existe deja dans la base de données et MODE CREATION");
 		}	
-		boolean copy = false;
+		// boolean copy = false;
 		if (contextValidation.getObject("copy")!= null && (boolean) contextValidation.getObject("copy")) {
-			copy = true;
+			// copy = true;
 		}
 // On peut avoir un import de study soumis hors NGL-SUB		
 //		if(! copy) {
@@ -196,9 +258,9 @@ public class Study extends AbstractStudy  {
 
 	@Override
 	public void validate(ContextValidation contextValidation) {
-		String mess = "validation du study ";
+		contextValidation = contextValidation.appendPath("study");
 		if (StringUtils.isNotBlank(code)) {
-			mess += "." + code;
+			contextValidation = contextValidation.appendPath(code);	
 		}
 		switch (contextValidation.getMode()) {
 		case CREATION:
@@ -215,7 +277,26 @@ public class Study extends AbstractStudy  {
 			break;	
 		} 
 		validateInvariants(contextValidation);
-		contextValidation.removeKeyFromRootKeyName(mess);
-
 	}
+	
+//	public String _getChaineAttributes() {
+//		//logger.debug("kkkkkkkkkkkkkkkkkkkkkkk                 passage dans getAttributes");
+//		String stringAttributes="";
+//		if(this.attributes != null) {
+//			for (Attribute att: this.attributes) {
+//				stringAttributes += att.toString();
+//			}
+//		}
+//		//stringAttributes = "<PROJECT_ATTRIBUTE><TAG>Funding Acknowledgement</TAG><VALUE>This research has received funding from the European Union's Horizon 2020 Research and Innovation Programme under grant agreement No 862923 (project AtlantECO). This output reflects only the author's view and the European Union cannot be held responsible for any use that may be made of the information contained therein. (https://cordis.europa.eu/project/id/862923)</VALUE></PROJECT_ATTRIBUTE>\\n\\n<PROJECT_ATTRIBUTE><TAG>Data Policy</TAG><VALUE>The AtlantECO Consortium relies on the fair, open and inclusive collaboration among its Partners, and the exploitation of jointly owned results, which is governed by the adoption of AtlantECO's Data Sharing and Publication Best Practices (https://doi.org/10.5281/zenodo.7791092).</VALUE></PROJECT_ATTRIBUTE>";
+//		return stringAttributes;
+//	}
+//	
+//	public void _setChaineAttributes(String value, ContextValidation ctxVal) {
+//		//logger.debug("kkkkkkkkkkkkkkkkkkkkkkk                 passage dans setAttributes avec value='{}'", value);
+//		//appel suivant ne marche pas
+//		this.attributes = SraValidationHelper.getProjectAttributes(value, ctxVal);
+//		//appel suivant ne marche pas meme si definit dans la classe
+//		//getProjectAttributes(value);
+//	}
+
 }

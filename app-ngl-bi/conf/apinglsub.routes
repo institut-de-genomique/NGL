@@ -1,0 +1,7 @@
+
+#-----------------------
+# SRA Readsets (NGL-SUB)
+#-----------------------
+GET         /api/sra/readsets                       controllers.sra.readsets.api.Readsets.list()
+#http://localhost:9000/api/sra/readsets/BGC_FOSW_8_C3PWEACXX.IND6
+GET		    /api/sra/readsets/:code					controllers.sra.readsets.api.Readsets.get(code: java.lang.String)

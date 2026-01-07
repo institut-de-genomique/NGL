@@ -366,21 +366,21 @@ public class ExperimentTypeDAO extends AbstractDAOCommonInfoType<ExperimentType>
 		return findPreviousExperimentTypeForAnExperimentTypeCodeAndProcessTypeCode(code, processTypeCode, null);
 	}
 	
-	private String sqlInListWorkaround(List<String> codes, List<SqlParameter> sqlParameters, List<Object> parameters) {
-		StringBuilder builder = new StringBuilder("(");
-		boolean isFirst=true;
-		for(String code: codes) {
-			if(isFirst) {
-				isFirst = false;
-			}else {
-				builder.append(",");
-			}
-			builder.append("?");
-			sqlParameters.add(new SqlParameter(Types.VARCHAR));
-			parameters.add(code);
-		}
-		return builder.append(")").toString();
-	}
+	// private String sqlInListWorkaround(List<String> codes, List<SqlParameter> sqlParameters, List<Object> parameters) {
+	// 	StringBuilder builder = new StringBuilder("(");
+	// 	boolean isFirst=true;
+	// 	for(String code: codes) {
+	// 		if(isFirst) {
+	// 			isFirst = false;
+	// 		}else {
+	// 			builder.append(",");
+	// 		}
+	// 		builder.append("?");
+	// 		sqlParameters.add(new SqlParameter(Types.VARCHAR));
+	// 		parameters.add(code);
+	// 	}
+	// 	return builder.append(")").toString();
+	// }
 	
 	public List<ExperimentType> findWithoutExtTo(String code, List<String> codes, String instrumentTypeCode, List<String> instrumentTypeCodes, String propertyDefinitionName, List<String> propertyDefinitionNames) {
 		Object[] parameters = new Object[0];

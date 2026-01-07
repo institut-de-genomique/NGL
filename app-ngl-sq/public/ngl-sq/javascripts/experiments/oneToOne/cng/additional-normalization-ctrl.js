@@ -219,12 +219,14 @@ angular.module('home').controller('AdditionalNormalizationCtrl',['$scope', '$par
 				dynamic:true,
 			},
 			// ajout boutons 11/09/2018
+			// NGL-5145 ajout buttonCopyPositionajouter + le test du type de sortie 22/07/2025
 			otherButtons: {
-                active: ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F')),
+                active: ($scope.isEditModeAvailable() && $scope.isWorkflowModeAvailable('F') && ($scope.experiment.instrument.outContainerSupportCategoryCode !== "tube")),
                 complex:true,
                 template:''
                 	+$scope.plateUtils.templates.buttonLineMode()
                 	+$scope.plateUtils.templates.buttonColumnMode()
+					+$scope.plateUtils.templates.buttonCopyPosition()
 			}
 	}; // fin struct datatableConfig
 	

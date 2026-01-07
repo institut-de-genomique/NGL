@@ -1,0 +1,21 @@
+@()
+<div class="row">
+	<div class="col-md-6 col-lg-6">
+		<table class="table table-condensed table-hover table-bordered table-striped datatable">
+			<thead>
+				<tr>
+					<th>@Messages("samples.resolutionhistory.codes")</th>
+					<th>@Messages("samples.resolutionhistory.date")</th>
+					<th>@Messages("samples.resolutionhistory.who")</th>					
+				</tr>
+			</thead>
+			<tbody>
+				<tr ng-repeat="entry in sample.resolutionHistory | orderBy:'index'">
+					<td list-resize="entry.resolutionCodes | codes:'resolution'" list-resize-min-size='5' below vertical/>
+					<td ng-bind="entry.date|date:'@Messages("datetime.format")'" />
+					<td ng-bind="entry.user" />					
+				</tr>							
+			</tbody>
+		</table>
+	</div>				
+</div>

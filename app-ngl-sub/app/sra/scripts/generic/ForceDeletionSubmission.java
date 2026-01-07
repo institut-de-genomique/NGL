@@ -5,20 +5,20 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.mongojack.DBQuery;
 
+import controllers.sra.api.AbstractSampleAPI;
+import controllers.sra.api.AbstractStudyAPI;
+import controllers.sra.api.ExperimentAPI;
+import controllers.sra.api.SubmissionAPI;
 import fr.cea.ig.MongoDBDAO;
 import fr.cea.ig.lfw.controllers.scripts.buffered.Script;
-import fr.cea.ig.ngl.dao.api.sra.AbstractSampleAPI;
-import fr.cea.ig.ngl.dao.api.sra.AbstractStudyAPI;
-import fr.cea.ig.ngl.dao.api.sra.ExperimentAPI;
-import fr.cea.ig.ngl.dao.api.sra.SubmissionAPI;
 import models.laboratory.common.instance.State;
 import models.sra.submit.sra.instance.AbstractSample;
 import models.sra.submit.sra.instance.AbstractStudy;
 import models.sra.submit.sra.instance.Experiment;
 import models.sra.submit.sra.instance.Submission;
 import models.utils.InstanceConstants;
-import sra.api.submission.SubmissionNewAPI;
-import sra.api.submission.SubmissionNewAPITools;
+import sra.api.SubmissionNewAPI;
+import sra.api.SubmissionNewAPITools;
 
 //http://localhost:9000/sra/scripts/run/sra.scripts.generic.ForceDeletionSubmission?codes=code_soumission_1
 

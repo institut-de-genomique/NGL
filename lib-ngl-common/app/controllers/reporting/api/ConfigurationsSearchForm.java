@@ -8,5 +8,7 @@ import controllers.ListForm;
 public class ConfigurationsSearchForm  extends ListForm{
 
 	public List<String> pageCodes;
+	
+	public Boolean active;
 
 }

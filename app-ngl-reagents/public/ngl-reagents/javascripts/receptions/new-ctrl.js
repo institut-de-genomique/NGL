@@ -109,6 +109,10 @@ angular.module('home').controller('NewFromFileCtrl', ['$scope', '$http','$filter
 		{
 			code: 'nanopore-reagents-reception', 
 			name:'Atelier Nanopore'
+		},
+		{
+			code: 'pacbio-reagents-reception',
+			name: 'Atelier PacBio'
 		}
 	];
 	

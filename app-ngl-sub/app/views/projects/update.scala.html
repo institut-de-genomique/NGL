@@ -1,20 +1,21 @@
 @this()
 @()
 @import views.html.helper._
+@import views.html.tools.projectAttributesInstructions
 
 @user            = @{ fr.cea.ig.authentication.Authentication.getUser() }
 
 @formUpdate() = {
 
 
+
+	
 	@columnSearchForm{
-		@formGroup{					
-			<bt-input  class="form-control"  input-ng-model="form.accessionRegex" textarea-ng-model="form.accessions" 
-			title='@Messages("consultation.textarea-placeholder.umbrellaProjectAccessions")'  
-			textarea-placeholder-ng-model='@Messages("consultation.textarea-placeholder.umbrellaProjectAccessions")'  
-			placeholder='@Messages("consultation.placeholder.umbrellaProjectAccessions")' >
-			</bt-input>					
-		}
+		@formGroup{
+			<input type="text" class="form-control" ng-model="form.accession" placeholder='@Messages("consultation.placeholder.umbrellaProjectAccession")' >	
+		}	
+	}	
+	@columnSearchForm{
 	}	
 		
 	@columnSearchForm{
@@ -40,8 +41,7 @@
 
 	@columnSearchForm{
 	}	
-	@columnSearchForm{
-	}
+
 	@columnSearchForm{
 	}
 
@@ -54,7 +54,9 @@
 				<i class="fa fa-save"></i>
 			</button>	
 		</div>				
-	}		
+	}
+	@projectAttributesInstructions()	
+		
 }
 
 
@@ -69,7 +71,7 @@ qui permet d'installer $user dans le scope-->
 
 <span ng-init="setUserInScope('@user')"></span>
 
-<div><br><br><h4 class="text-warning">Attention, vous pouvez seulement ajouter des projects enfants et des identifiants PUBMED, si vous voulez en supprimer, il faut faire un ticket JIRA</h4><br><br></div>
+<div><br><br><h4 class="text-warning">Attention, vous pouvez ajouter des projects enfants et des identifiants PUBMED, mais si vous voulez en supprimer, il faut faire un ticket JIRA</h4><br><br></div>
 	
 <div class="row"> 
 	<div class="col-md-12 col-lg-12" ultimate-datatable="projectsDT">

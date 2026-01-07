@@ -1,20 +1,36 @@
 package services.taxonomy;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.net.HttpURLConnection;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Queue;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.Semaphore;
+import com.fasterxml.jackson.databind.JsonNode;
+import play.libs.Json;
+
 import javax.inject.Inject;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import org.apache.commons.lang3.StringUtils;
@@ -24,8 +40,23 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
 import fr.cea.ig.ngl.NGLApplication;
+import play.Logger;
 import play.libs.ws.WSResponse;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URLEncoder;
+import java.net.URL;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import java.util.concurrent.locks.*;
 
 
 
@@ -39,6 +70,13 @@ public class NCBITaxonomyServices {
 	static final String errorAkaMessage = "Taxon renvoye par serveur different du taxon demande ";
 	public static final String defaultErrorFormat = "Probleme de format pour le taxonCode ";
 	public static final String defaultErrorMessage = "Recuperation invalide sur les serveurs NCBI et EBI du taxon ";
+	private static final String URLNCBICOLLABSCIENTIFICNAME = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=taxonomy&term=";
+	private static final Map<String, Future<String>> taxonCache = new ConcurrentHashMap<>();
+    private static final ExecutorService apiExecutor = Executors.newFixedThreadPool(3); // Limite à 3 requêtes simultanées
+    private static final Semaphore apiLimiter = new Semaphore(3); // Max 3 appels simultanés
+	private static final String URLEBICOLLABSCIENTIFICNAME = "  https://www.ebi.ac.uk/ena/taxonomy/rest/scientific-name/";
+    private static final Queue<String> retryQueue = new ConcurrentLinkedQueue<>();
+
 
 	private final NGLApplication app;
 
@@ -50,104 +88,32 @@ public class NCBITaxonomyServices {
 	
 	private String getValue(Document doc, String expression) throws XPathExpressionException {
 		XPath xPath =  XPathFactory.newInstance().newXPath();
-		//String expression = "/TaxaSet/Taxon/ScientificName";
-		//read a string value
+
 		if (doc != null) {
 			String value = xPath.compile(expression).evaluate(doc);
 			if (StringUtils.isNotBlank(value)) {
 				return value;
 			}
 		}
+
 		return null;				
 	}
 	
 	
 	private String getValue(Element eltTaxon, String expression) throws XPathExpressionException {
 		XPath xPath =  XPathFactory.newInstance().newXPath();
-		//String expression = "ScientificName";
-		//read a string value
+		
 		if (eltTaxon != null) {
 			String value = xPath.compile(expression).evaluate(eltTaxon);
 			if (StringUtils.isNotBlank(value)) {
 				return value;
 			}
 		}
+
 		return null;				
 	}
 	
-	public Taxon getTaxon(String taxonCodeInput) {
-		if (taxonCodeInput == null) {
-			return null;
-		}
-		if(StringUtils.isBlank(taxonCodeInput)) {
-			return null;
-		}
-
-		String taxonCode = taxonCodeInput.trim();
 	
-		if(taxonCodeInput.equals("-1") || ! taxonCode.matches("^\\d+$")) {
-			logger.debug("Presence d'un taxonId avec format non attendu " + taxonCodeInput);
-			Taxon taxon = new Taxon(taxonCode);
-			taxon.error = true;
-			taxon.errorMessage = defaultErrorFormat + taxonCode;
-			return taxon;
-		}
-		//logger.debug("Recherche du taxon au NCBI pour le code : {}", taxonCode);
-		String url = URLNCBI + "&id=" + taxonCode;
-		//logger.debug("accessing taxon " + url);
-		CompletionStage<WSResponse> homePage = app.ws().url(url).get();
-		CompletionStage<Document> xml = homePage.thenApplyAsync(response -> {
-			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-			try {
-				DocumentBuilder db = dbf.newDocumentBuilder();
-				Document doc = db.parse(new InputSource(new StringReader(response.getBody())));
-				return doc;
-			} catch (ParserConfigurationException | IOException | SAXException e) {
-				logger.debug("Probleme lors de la recuperation au NCBI du taxon " +  taxonCode);
-				throw new RuntimeException(e);
-			}
-		});
-		try {
-			//logger.debug("Creation du ncbi_taxon ", taxonCode);
-			Document doc = xml.toCompletableFuture().get();
-			Taxon taxon = new Taxon(taxonCode);
-			taxon.error = false;
-			if (StringUtils.isNotBlank(getValue(doc, "/eFetchResult/ERROR"))) {
-				taxon.error = true;
-				taxon.errorMessage = "Le taxon " + taxonCode + " est en erreur : " + getValue(doc, "/eFetchResult/ERROR");
-				return taxon;
-			}
-			if (StringUtils.isBlank(getValue(doc, "/TaxaSet/Taxon"))                || 
-				StringUtils.isBlank(getValue(doc, "/TaxaSet/Taxon/ScientificName")) ||
-				StringUtils.isBlank(getValue(doc, "/TaxaSet/Taxon/Lineage")) ) {	
-				taxon.error = true;
-				taxon.errorMessage += "Le taxon " + taxonCode + " n'est pas valide sur le serveur";
-			} else {
-				String taxId = getValue(doc, "/TaxaSet/Taxon/TaxId");
-				if( ! taxonCode.equals(taxId)) {	
-					taxon.error = true;
-					taxon.errorMessage = errorAkaMessage + "(demande=" + taxonCode + " et retour serveur=" + taxId + ")";
-				}
-				// ajout
-				String rank = getValue(doc, "/TaxaSet/Taxon/Rank");
-				if(StringUtils.isNotBlank(rank)) {
-					if (rank.contains("species") || rank.equals("varietas") || rank.equals("strain")) {
-						taxon.submittable = true;
-						//logger.debug("xxxxxxxxxxxxxxxx   rank = " + rank + " submittable");
-					} else {
-						taxon.submittable = false;
-						//logger.debug("xxxxxxxxxxxxxxxx   rank = " + rank + " noSubmittable");
-					}
-				}
-				taxon.scientificName = getValue(doc, "/TaxaSet/Taxon/ScientificName");
-				taxon.lineage = getValue(doc, "/TaxaSet/Taxon/Lineage");
-			}
-			return taxon;
-		} catch (InterruptedException | ExecutionException | XPathExpressionException e) {
-			throw new RuntimeException(e);
-		} 
-
-	}
 
 	public  Map<String, Taxon> getTaxons(List<String> taxonCodesInput) {
 		List<String> taxonCodes = new ArrayList<String>();
@@ -157,17 +123,16 @@ public class NCBITaxonomyServices {
 			}
 		}
 		Map<String, Taxon> mapTaxons = new HashMap<>();   // map des taxons recuperes au ncbi
-		if (taxonCodes.size() == 0) {
-			//return null;
-		}
+		
 		if (taxonCodes.size() == 1 ) {
 			String taxonCode = taxonCodes.get(0).trim();
-			Taxon taxon = getTaxon(taxonCode);
+			Taxon taxon = getUniqueTaxon(taxonCode);
 			if( ! mapTaxons.containsKey(taxon.code)) {
 				mapTaxons.put(taxonCode, taxon);
 			}
 			return mapTaxons;
 		}
+
 		List<String>uniqTaxonCodes = new ArrayList<String>();
 		List<String> uniqTaxonCodesBugFormat =  new ArrayList<String>(); // liste unique des taxonCode ne repondant pas au format attendu
 
@@ -184,8 +149,6 @@ public class NCBITaxonomyServices {
 				}
 			}
 		}
-		//logger.debug("Dans getTaxons taxonCodes.size()= " + taxonCodes.size());
-		//logger.debug("Dans getTaxons uniqTaxonCodes.size()= " + uniqTaxonCodes.size());
 
 		mapTaxons = bodyGetTaxons(uniqTaxonCodes);
 		List<String>uniqTaxonCodes_2 = new ArrayList<String>();
@@ -217,7 +180,6 @@ public class NCBITaxonomyServices {
 		// Ajouter taxon en erreur si taxon demandé n'apparait pas dans la map des taxons :
 		for (String taxonCode : taxonCodes) {
 			if(!mapTaxons.containsKey(taxonCode)) {
-				//logger.debug("ZZZZZZZZZZZZZZ   ajout " +  taxonCode +  " en erreur dans mapTaxons");
 				Taxon taxon = new Taxon(taxonCode);
 				taxon.error = true;
 				taxon.errorMessage =  defaultErrorMessage + taxonCode;;
@@ -228,9 +190,10 @@ public class NCBITaxonomyServices {
 	}
 
 
-	public List<Taxon> execCmd(String url) { 
+	public List<Taxon> getTaxon(String url) { 
+
 		List<Taxon> listTaxons = new ArrayList<Taxon>();
-		//logger.debug("accessing taxon " + url);
+
 		CompletionStage<WSResponse> homePage = app.ws().url(url).get();
 		CompletionStage<Document> xml = homePage.thenApplyAsync(response -> {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -245,9 +208,6 @@ public class NCBITaxonomyServices {
 		try {
 			Document doc = xml.toCompletableFuture().get();
 			final Element racine = doc.getDocumentElement();
-			//Affichage de l'élément racine
-			//logger.debug("\n*************RACINE************");
-			//logger.debug(racine.getNodeName());
 			 
 			//récupération des taxons dans le document :
 			final NodeList racineNoeuds = racine.getChildNodes();
@@ -255,39 +215,18 @@ public class NCBITaxonomyServices {
 			for (int i = 0; i < nbRacineNoeuds; i++) {
 				if(racineNoeuds.item(i).getNodeType() == Node.ELEMENT_NODE) {
 					final Element eltTaxon = (Element) racineNoeuds.item(i);
-					//Affichage d'un taxon
-					//logger.debug("\n*************Taxon************");
-					// possible de parser directement le document mais plus compacte et lisible de passer par getValue
-//					String taxId="";
-//					if (eltTaxon.getElementsByTagName("TaxId").item(0) != null) {
-//						taxId =  eltTaxon.getElementsByTagName("TaxId").item(0).getTextContent();
-//						//logger.debug("taxId !!!!!!!!!!!!! : " + taxId);
-//					}	
+					
 					String taxId =  getValue(eltTaxon, "TaxId");
 					String scientificName =  getValue(eltTaxon, "ScientificName");
 					String lineage =  getValue(eltTaxon, "Lineage");
 					String aka =  getValue(eltTaxon, "AkaTaxIds/TaxId");
 					String rank = getValue(eltTaxon, "Rank");
 					
-//					List<String>akaTaxIds = new ArrayList<String>();
-//					final Element eltAkaTaxIds = (Element) eltTaxon.getElementsByTagName("AkaTaxIds").item(0);
-//					if (eltAkaTaxIds != null) {
-//						final NodeList racine_TaxIds = eltAkaTaxIds.getElementsByTagName("TaxId");
-//						final int nb_akaTaxId = racine_TaxIds.getLength();
-//						for (int j = 0; j<nb_akaTaxId; j++) {
-//							//logger.debug("ALERTE ALIAS : taxonId "+ taxId + " avec alias " + getValue(eltAkaTaxIds, "TaxId"));
-//							if(StringUtils.isNotBlank(getValue(eltAkaTaxIds, "TaxId"))) {
-//								akaTaxIds.add(getValue(eltAkaTaxIds, "TaxId"));
-//							}
-//						}
-//					}
-					
 					Taxon taxon = new Taxon(taxId);
 					taxon.error = false;
 					if ( StringUtils.isBlank(taxId) || StringUtils.isBlank(scientificName) || StringUtils.isBlank(lineage) ) {	
 						taxon.error = true;
 						taxon.errorMessage += "Le taxon " + taxId + " n'est pas valide sur le serveur";
-						logger.debug("Error");
 					} else {
 						taxon.scientificName = scientificName;
 						taxon.lineage = lineage;
@@ -295,12 +234,74 @@ public class NCBITaxonomyServices {
 							taxon.akaTaxId = aka;
 							taxon.error = true;
 							taxon.errorMessage=errorAkaMessage + "(demande=" + aka + " et retour serveur=" + taxId + ")";
-							logger.debug("hhhhhhhhhhhhhhhhhh         "+ taxon.errorMessage);
 						}
+
+										
+					Node element = racineNoeuds.item(i);
+					NodeList elementList = element.getChildNodes();
+					int nbElements = elementList.getLength();
+					
+
+					for (int j = 0; j < nbElements; j++) {
+						Node childNode = elementList.item(j);
+
+						if(childNode.getNodeType() == Node.ELEMENT_NODE) {
+							if (childNode.getNodeName().equals("Rank") && childNode.getTextContent().equals("phylum")) {
+								taxon.phylum = scientificName;
+							}
+
+							if (childNode.getNodeName().equals("LineageEx")) {
+								NodeList lineageList = childNode.getChildNodes();
+								int nbElementsLineage = lineageList.getLength();
+
+								for (int k = 0; k < nbElementsLineage; k++) {
+									Node childNodeLineage = lineageList.item(k);
+
+									if (childNodeLineage.getNodeName().equals("Taxon")) {
+										NodeList taxonList = childNodeLineage.getChildNodes();
+										int nbElementsTaxon = taxonList.getLength();
+										String scientificNamePhylum = null;
+										String scientificNameClass = null;
+		
+										for (int l = 0; l < nbElementsTaxon; l++) {
+											Node childNodeTaxon = taxonList.item(l);
+
+											if (childNodeTaxon.getNodeName().equals("ScientificName")) {
+												scientificNamePhylum = childNodeTaxon.getTextContent();
+												scientificNameClass = childNodeTaxon.getTextContent();
+											}
+
+											if (childNodeTaxon.getNodeName().equals("Rank") && childNodeTaxon.getTextContent().equals("phylum")) {
+												if (scientificNamePhylum != null) {
+													taxon.phylum = scientificNamePhylum;
+												} else {
+													Logger.error("Aucun scientific name du phylum n'a été trouvé pour le taxon: "+taxon.code);
+												}
+
+											}
+											if (childNodeTaxon.getNodeName().equals("Rank") && childNodeTaxon.getTextContent().equals("class")) {
+												if (scientificNameClass != null) {
+													taxon.classTaxon = scientificNameClass;
+												
+												} else {
+													Logger.error("Aucun scientific name du rang class n'a trouvé pour le taxon: "+taxon.code);
+												}
+
+											}
+										}
+
+
+									}
+								}
+							}
+						}
+					}
+
 					}	
 					if(StringUtils.isNotBlank(rank)) {
 						taxon.rank = rank;
 					}
+					
 					listTaxons.add(taxon);
 				}				
 			}
@@ -309,16 +310,168 @@ public class NCBITaxonomyServices {
 			throw new RuntimeException(e);
 		} 
 	} 
+
+	public Taxon getUniqueTaxon(String taxonCodeInput) {
+		if (taxonCodeInput == null) {
+			return null;
+		}
+		if(StringUtils.isBlank(taxonCodeInput)) {
+			return null;
+		}
+
+		String taxonCode = taxonCodeInput.trim();
 	
+		if(taxonCodeInput.equals("-1") || ! taxonCode.matches("^\\d+$")) {
+			logger.debug("Presence d'un taxonId avec format non attendu " + taxonCodeInput);
+			Taxon taxon = new Taxon(taxonCode);
+			taxon.error = true;
+			taxon.errorMessage = defaultErrorFormat + taxonCode;
+			return taxon;
+		}
+		String url = URLNCBI + "&id=" + taxonCode;
+		CompletionStage<WSResponse> homePage = app.ws().url(url).get();
+		CompletionStage<Document> xml = homePage.thenApplyAsync(response -> {
+			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			try {
+				DocumentBuilder db = dbf.newDocumentBuilder();
+				Document doc = db.parse(new InputSource(new StringReader(response.getBody())));
+				return doc;
+			} catch (ParserConfigurationException | IOException | SAXException e) {
+				logger.debug("Probleme lors de la recuperation au NCBI du taxon " +  taxonCode);
+				throw new RuntimeException(e);
+			}
+		});
+		try {
+			Document doc = xml.toCompletableFuture().get();
+			Taxon taxon = new Taxon(taxonCode);
+			taxon.error = false;
+			if (StringUtils.isNotBlank(getValue(doc, "/eFetchResult/ERROR"))) {
+				taxon.error = true;
+				taxon.errorMessage = "Le taxon " + taxonCode + " est en erreur : " + getValue(doc, "/eFetchResult/ERROR");
+				return taxon;
+			}
+			if ((StringUtils.isBlank(getValue(doc, "/TaxaSet/Taxon"))               || 
+				StringUtils.isBlank(getValue(doc, "/TaxaSet/Taxon/ScientificName")) ||
+				StringUtils.isBlank(getValue(doc, "/TaxaSet/Taxon/Lineage")))       &&
+				!"superkingdom".equals(getValue(doc, "/TaxaSet/Taxon/Rank"))) {	
+				taxon.error = true;
+				taxon.errorMessage += "Le taxon " + taxonCode + " n'est pas valide sur le serveur";
+			} else if ("superkingdom".equals(getValue(doc, "/TaxaSet/Taxon/Rank")) && (StringUtils.isBlank(getValue(doc, "/TaxaSet/Taxon/TaxId")) || StringUtils.isBlank(getValue(doc, "/TaxaSet/Taxon/ScientificName")))) {
+				taxon.error = true;
+				taxon.errorMessage += "Le taxon " + taxonCode + " n'est pas valide sur le serveur";
+			} else {       
+				String taxId = getValue(doc, "/TaxaSet/Taxon/TaxId");
+				if( ! taxonCode.equals(taxId)) {	
+					taxon.error = true;
+					taxon.errorMessage = errorAkaMessage + "(demande=" + taxonCode + " et retour serveur=" + taxId + ")";
+				}
+				// ajout
+				String rank = getValue(doc, "/TaxaSet/Taxon/Rank");
+				if(StringUtils.isNotBlank(rank)) {
+					if (rank.contains("species") || rank.equals("varietas") || rank.equals("strain")) {
+						taxon.submittable = true;
+					} else {
+						taxon.submittable = false;
+					}
+				}
+				taxon.scientificName = getValue(doc, "/TaxaSet/Taxon/ScientificName");
+
+				if ("superkingdom".equals(getValue(doc, "/TaxaSet/Taxon/Rank"))) {
+					taxon.lineage = "lineage:superkingdom";
+				} else {
+					taxon.lineage = getValue(doc, "/TaxaSet/Taxon/Lineage");
+
+					final Element docElement = doc.getDocumentElement();
+					
+					NodeList elementList = docElement.getChildNodes();
+					int nbElements = elementList.getLength();
+
+					for (int j = 0; j < nbElements; j++) {
+						Node childNode = elementList.item(j);
+
+						NodeList firstTaxonList = childNode.getChildNodes();
+						int taxonlength = firstTaxonList.getLength();
+						for (int m = 0; m < taxonlength; m++) {
+							Node taxonNode = firstTaxonList.item(m);
+
+							if (taxonNode.getNodeType() == Node.ELEMENT_NODE) {
+
+								if (taxonNode.getNodeName().equals("Rank")
+										&& taxonNode.getTextContent().equals("phylum")) {
+									taxon.phylum = taxon.scientificName;
+								}
+
+								if (taxonNode.getNodeName().equals("LineageEx")) {
+									NodeList lineageList = taxonNode.getChildNodes();
+									int nbElementsLineage = lineageList.getLength();
+
+									for (int k = 0; k < nbElementsLineage; k++) {
+										Node childNodeLineage = lineageList.item(k);
+
+										if (childNodeLineage.getNodeName().equals("Taxon")) {
+											NodeList taxonList = childNodeLineage.getChildNodes();
+											int nbElementsTaxon = taxonList.getLength();
+											String scientificNamePhylum = "";
+											String scientificNameClass = "";
+
+											for (int l = 0; l < nbElementsTaxon; l++) {
+												Node childNodeTaxon = taxonList.item(l);
+
+												if (childNodeTaxon.getNodeName().equals("ScientificName")) {
+													scientificNamePhylum = childNodeTaxon.getTextContent();
+													scientificNameClass = childNodeTaxon.getTextContent();
+												}
+
+												if (childNodeTaxon.getNodeName().equals("Rank")
+														&& childNodeTaxon.getTextContent().equals("phylum")) {
+													if (scientificNamePhylum != null) {
+														taxon.phylum = scientificNamePhylum;
+													} else {
+														Logger.error(
+																"phylum trouvé mais aucun scientific name trouvé pour le taxon: "
+																		+ taxon.code);
+													}													
+												}
+												if (childNodeTaxon.getNodeName().equals("Rank")
+														&& childNodeTaxon.getTextContent().equals("class")) {
+													if (scientificNameClass != null) {
+														taxon.classTaxon = scientificNameClass;
+													} else {
+														Logger.error(
+																"class trouvé mais aucun scientific name trouvé pour le taxon: "
+																		+ taxon.code);
+													}
+
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+
+				
+
+
+
+			}
+			return taxon;
+		} catch (InterruptedException | ExecutionException | XPathExpressionException e) {
+			throw new RuntimeException(e);
+		} 
+
+	}
 	
 	private Map<String, Taxon> bodyGetTaxons(List<String> uniqTaxonCodes) {
 		String url = URLNCBI + "&id=";
 		int initialCountCharUrl = url.length();
 		int countCharUrl = url.length();
 		int countExec = 0;
-		//logger.debug("Dans bodyGetTaxons uniqTaxonCodes.size()= " + uniqTaxonCodes.size());
 		
 		Map<String, Taxon> mapTaxons = new HashMap<>();   // map des taxons recuperes au ncbi
+		@SuppressWarnings("unused")
 		int countTaxonInUrl = 0;
 		boolean taxonInteret = false;
 		for (String taxonCode : uniqTaxonCodes) {	
@@ -328,14 +481,13 @@ public class NCBITaxonomyServices {
 
 			if (countCharUrl > maxSizeUrl) {
 				// derniere virgule dans l'url qui ne gene pas 
-				//logger.debug("Recherche des taxons au NCBI url=" +  url);
 				if(taxonInteret) {
 					logger.debug("url=" + url);
 					taxonInteret = false;
 				}
 				countExec++;
-				logger.debug("getTaxons avec "+ countTaxonInUrl + " taxons dans url");
-				List<Taxon> listTaxons = execCmd(url);
+
+				List<Taxon> listTaxons = getTaxon(url);
 				int i = 0;
 				for(Taxon taxon : listTaxons) {
 					if(StringUtils.isNotBlank(taxon.akaTaxId)) {
@@ -364,11 +516,11 @@ public class NCBITaxonomyServices {
 				logger.debug("url dans correctionEffetBord = " + url);
 				taxonInteret = false;
 			}
-			//logger.debug("Dans correction effets de bords : Recherche des taxons au NCBI url=" +  url);
 			countExec++;
-			//logger.debug("correction effet de bord : getTaxons avec "+ countTaxonInUrl + " taxons dans url");
-			List<Taxon> listTaxons = execCmd(url);
+			
+			List<Taxon> listTaxons = getTaxon(url);
 			int i = 0;
+
 			for(Taxon taxon : listTaxons) {
 				if(StringUtils.isNotBlank(taxon.akaTaxId)) {
 					if( ! mapTaxons.containsKey(taxon.akaTaxId)) {
@@ -384,9 +536,144 @@ public class NCBITaxonomyServices {
 			}
 			logger.debug("Recuperation de "+ i + " taxons dans listTaxons");
 		}
+
 		logger.debug("Nombre de connection au NCBI = " + countExec );
 		return mapTaxons;
 	}
 
+	public static String getCachedTaxonWithCollabScientificName(String collabScientificName) {
+		try {
+            // Vérifier si la valeur est déjà en cache
+            if (taxonCache.containsKey(collabScientificName)) {
+                return taxonCache.get(collabScientificName).get(); // Attendre le résultat du Future
+            }
+
+            // Exécuter l'appel API en arrière-plan si non trouvé
+            Future<String> futureTaxon = apiExecutor.submit(() -> getTaxonWithRetry(collabScientificName));
+            taxonCache.put(collabScientificName, futureTaxon);
+            return futureTaxon.get(); // Attendre la fin de l'exécution
+
+        } catch (Exception e) {
+            retryQueue.add(collabScientificName);
+            return null;
+        }
+    }	
+
+	private static String getTaxonWithRetry(String collabScientificName) {
+        int maxRetries = 5;
+        int delayBetweenRetries = 2000; // Commence avec 2 secondes
+
+        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                return getTaxonWithCollabScientificName(collabScientificName);
+            } catch (IOException e) {
+                if (e.getMessage().contains("429")) { // API surchargée
+                    logger.warn("[HTTP 429] Trop de requêtes, tentative " + attempt + "/" + maxRetries);
+                    try {
+                        Thread.sleep(delayBetweenRetries);
+                        delayBetweenRetries *= 2; // Augmente le délai à chaque échec
+                    } catch (InterruptedException ignored) {}
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        retryQueue.add(collabScientificName); // Ajoute à la file d'attente des échecs
+        return null;
+    }
+
+	public static String getTaxonWithCollabScientificName(String collabScientificName) throws IOException, InterruptedException {
+        apiLimiter.acquire();
+        try {
+            String encodedName = URLEncoder.encode(collabScientificName, "UTF-8").replace("+", "%20");
+            String requestUrl = URLNCBICOLLABSCIENTIFICNAME + encodedName;
+
+            HttpURLConnection connection = (HttpURLConnection) new URL(requestUrl).openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(5000);
+
+            int responseCode = connection.getResponseCode();
+            if (responseCode == 429) {
+                throw new IOException("HTTP 429 Too Many Requests");
+            }
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            StringBuilder response = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                response.append(line);
+            }
+            reader.close();
+
+            String taxonId = extractTaxonId(response.toString());
+       	 	if (taxonId != null && !taxonId.isEmpty()) {
+            	return taxonId;
+        }
+
+		String ebiUrl = URLEBICOLLABSCIENTIFICNAME + encodedName;
+        HttpURLConnection ebiConnection = (HttpURLConnection) new URL(ebiUrl).openConnection();
+        ebiConnection.setRequestMethod("GET");
+        ebiConnection.setConnectTimeout(5000);
+        ebiConnection.setReadTimeout(5000);
+
+        int ebiResponseCode = ebiConnection.getResponseCode();
+        if (ebiResponseCode != 200) {
+            return null;
+        }
+
+        BufferedReader ebiReader = new BufferedReader(new InputStreamReader(ebiConnection.getInputStream()));
+        StringBuilder ebiResponse = new StringBuilder();
+        while ((line = ebiReader.readLine()) != null) {
+            ebiResponse.append(line);
+        }
+        ebiReader.close();
+
+        return extractTaxonIdFromEbi(ebiResponse.toString());
+
+        } finally {
+            apiLimiter.release();
+        }
+    }
+	
+	private static String extractTaxonIdFromEbi(String jsonResponse) {
+    try {
+        JsonNode root = Json.parse(jsonResponse);
+        if (root.isArray() && root.size() > 0) {
+            JsonNode first = root.get(0);
+            JsonNode taxIdNode = first.get("taxId");
+            if (taxIdNode != null) {
+                return taxIdNode.asText();
+            }
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    return null;
 }
 
+    /**
+     * Extrait le TaxonID depuis la réponse XML de l'API
+     */
+	private static String extractTaxonId(String xmlResponse) {
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document document = builder.parse(new ByteArrayInputStream(xmlResponse.getBytes("UTF-8")));
+
+            NodeList idNodes = document.getElementsByTagName("Id");
+            if (idNodes.getLength() > 0) {
+                return idNodes.item(0).getTextContent();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+}
+
+
+	

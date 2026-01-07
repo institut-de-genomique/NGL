@@ -295,14 +295,19 @@ angular.module('home').controller('PrepLowpassWgCtrl',['$scope', '$parse',  '$fi
 	$scope.tagPlateColumn = {name:'1', position:0};
 
 	$scope.plates=[];
-	$scope.plates.push( {name: "---",                         tagCategory: undefined,   tags: undefined });
+	$scope.plates.push( {name: "---", tagCategory: undefined, tags: undefined }); // entrée minimale pour "pas de choix"
+	/* NGL-4657 passage en V3 de toutes les plaques basées sur les index Illumina UDI
 	$scope.plates.push( {name:"IDT for Illumina Nextera DNA Unique Dual Indexes Set A", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_IDT_Nextera_Set_A() });
 	$scope.plates.push( {name:"IDT for Illumina Nextera DNA Unique Dual Indexes Set B", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_IDT_Nextera_Set_B() });
-	// 07/04/2023 NGL-4191 remplacer les anciennes plaque C et D par les nouvelles versions
-	//$scope.plates.push( {name:"IDT for Illumina Nextera DNA Unique Dual Indexes Set C", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_IDT_Nextera_Set_C() });
-	//$scope.plates.push( {name:"IDT for Illumina Nextera DNA Unique Dual Indexes Set D", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_IDT_Nextera_Set_D() });
-	$scope.plates.push( {name:"IDT for Illumina Nextera DNA Unique Dual Indexes Set C V2", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_IDT_Nextera_Set_CV2() });
-	$scope.plates.push( {name:"IDT for Illumina Nextera DNA Unique Dual Indexes Set D V2", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_IDT_Nextera_Set_DV2() }); 
+	// 07/04/2023 NGL-4191 remplacer les anciennes plaque C et D par les nouvelles versions V2
+	$scope.plates.push( {name:"IDT for Illumina Nextera DNA Unique Dual Indexes Set C V2", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_IDT_Nextera_Set_C_V2() });
+	$scope.plates.push( {name:"IDT for Illumina Nextera DNA Unique Dual Indexes Set D V2", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_IDT_Nextera_Set_D_V2() }); 
+	*/
+	$scope.plates.push( {name:"IDT for Illumina Nextera DNA Unique Dual Indexes Set A (V3)", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_Illumina_UDI_Set_A_V3() });
+	$scope.plates.push( {name:"IDT for Illumina Nextera DNA Unique Dual Indexes Set B (V3)", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_Illumina_UDI_Set_B_V3() });
+	$scope.plates.push( {name:"IDT for Illumina Nextera DNA Unique Dual Indexes Set C (V3)", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_Illumina_UDI_Set_C_V3() });
+	$scope.plates.push( {name:"IDT for Illumina Nextera DNA Unique Dual Indexes Set D (V3)", tagCategory:"DUAL-INDEX", tags: tagPlates.populateIndex_Illumina_UDI_Set_D_V3() })
+	
 	$scope.tagPlate = $scope.plates[0]; // defaut du select
 	
 	// NGL-2944 11/05/2020 mémorisation des choix pour le nettoyage éventuel....

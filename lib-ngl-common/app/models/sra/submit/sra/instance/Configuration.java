@@ -5,17 +5,17 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import controllers.sra.api.ConfigurationAPI;
 import fr.cea.ig.DBObject;
-import fr.cea.ig.ngl.dao.api.sra.ConfigurationAPI;
 import models.laboratory.common.description.ObjectType;
 import models.laboratory.common.instance.State;
 import models.laboratory.common.instance.TraceInformation;
-import models.sra.submit.util.VariableSRA;
 import models.utils.InstanceConstants;
+import services.sra.SraValidationHelper;
+import services.sra.VariableSRA;
 import validation.ContextValidation;
 import validation.IValidation;
 import validation.common.instance.CommonValidationHelper;
-import validation.sra.SraValidationHelper;
 import validation.utils.ValidationHelper;
 
 
@@ -75,7 +75,9 @@ public class Configuration extends DBObject implements IValidation {
 	public TraceInformation traceInformation = new TraceInformation(); // Reference sur "models.laboratory.common.instance.TraceInformation" 
 	// pour loguer les dernieres modifications utilisateurs
 
-
+	// NGL-4593
+    public String dropBox;
+    
 	public void validateInvariants(ContextValidation contextValidation) {
 		// Ajouter l'objet au contexte de validation seulement si objet ext
 		// pour ex pour validation de submission qui va avoir besoin d'ajouter des objets 
@@ -122,9 +124,9 @@ public class Configuration extends DBObject implements IValidation {
 		}	
 
 		// On teste la création selon le mode copy :
-		Boolean copy = false;
+		// Boolean copy = false;
 		if (contextValidation.getObject("copy") != null && contextValidation.getObject("copy") == (Boolean) true) {
-			copy = true;
+			// copy = true;
 		}	
 	}
 	

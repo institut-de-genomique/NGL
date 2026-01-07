@@ -26,7 +26,10 @@ import fr.cea.ig.DBObject;
 	@JsonSubTypes.Type(value =  models.laboratory.parameter.map.MapParameter          .class, name = "map-parameter"),
 	@JsonSubTypes.Type(value =  models.laboratory.parameter.context.ContextDescription.class, name = "context-description"),
 	@JsonSubTypes.Type(value =  models.laboratory.parameter.map.MapQPCR.               class, name = "map-qpcr-parameter"),
+	@JsonSubTypes.Type(value =  models.laboratory.parameter.map.MapQPCRconvert.        class, name = "map-qpcr-convert-parameter"), // NGL-4902
 	@JsonSubTypes.Type(value =  models.laboratory.parameter.propertyDefinitionsProtocol.PropertyDefinitionsProtocol.   class, name = "map-property-definitions"),
+	@JsonSubTypes.Type(value =  models.laboratory.parameter.atsValues.AtsZone.   class, name = "value-atlasea-zone"),
+
 
 })
 public abstract class Parameter extends DBObject implements IValidation, ITracingAccess {

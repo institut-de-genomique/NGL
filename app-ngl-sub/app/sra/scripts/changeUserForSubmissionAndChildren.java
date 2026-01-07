@@ -9,19 +9,21 @@ import org.apache.commons.lang3.StringUtils;
 import org.mongojack.DBQuery;
 import org.mongojack.DBUpdate;
 
+import controllers.sra.api.AbstractSampleAPI;
+import controllers.sra.api.AbstractStudyAPI;
+import controllers.sra.api.ExperimentAPI;
+import controllers.sra.api.ReadsetAPI;
+import controllers.sra.api.SubmissionAPI;
 import fr.cea.ig.lfw.controllers.scripts.buffered.Script;
-import fr.cea.ig.ngl.dao.api.sra.AbstractSampleAPI;
-import fr.cea.ig.ngl.dao.api.sra.AbstractStudyAPI;
-import fr.cea.ig.ngl.dao.api.sra.ExperimentAPI;
-import fr.cea.ig.ngl.dao.api.sra.ReadsetAPI;
-import fr.cea.ig.ngl.dao.api.sra.SubmissionAPI;
+import fr.cea.ig.ngl.dao.api.APIException;
+import fr.cea.ig.ngl.dao.api.APIValidationException;
 import fr.cea.ig.ngl.dao.readsets.ReadSetsDAO;
 import models.sra.submit.sra.instance.AbstractSample;
 import models.sra.submit.sra.instance.AbstractStudy;
 import models.sra.submit.sra.instance.Experiment;
 import models.sra.submit.sra.instance.Submission;
-import models.sra.submit.util.SraException;
-import services.SraEbiAPI;
+import services.sra.SraException;
+import sra.services.SraEbiAPI;
 
 
 /*
@@ -74,7 +76,7 @@ public class changeUserForSubmissionAndChildren extends Script<changeUserForSubm
 		submissionAPI.dao_saveObject(submission);
 	}
 	
-	public void updateStudyForUser(List<String> studyCodes, String user) {
+	public void updateStudyForUser(List<String> studyCodes, String user) throws APIValidationException, APIException {
 		for (String studyCode : studyCodes) {
 			AbstractStudy study = abstractStudyAPI.dao_getObject(studyCode);
 			study.traceInformation.createUser = user;
@@ -86,15 +88,17 @@ public class changeUserForSubmissionAndChildren extends Script<changeUserForSubm
 		for (String  sampleCode : sampleCodes) {
 			AbstractSample sample = abstractSampleAPI.dao_getObject(sampleCode);
 			sample.traceInformation.createUser = user;
+			//abstractSampleAPI.create(sample, user);
 			abstractSampleAPI.dao_saveObject(sample);
 		}
 	}			
 	
-	public void updateExperimentAndReadsetForUser(List<String> experimentCodes, String user) {
+	public void updateExperimentAndReadsetForUser(List<String> experimentCodes, String user) throws APIValidationException, APIException {
 		for (String experimentCode : experimentCodes) {	
 			Experiment experiment = experimentAPI.get(experimentCode);
 			experiment.traceInformation.createUser = user;
 			experimentAPI.dao_saveObject(experiment);
+			//experimentAPI.create(experiment, user);
 			
 			// mettre a jour la collection ngl-bi.ReadSetIllumina pour submissionUser si besoin
 			// Pour les 454, le readsetCode n'existe pas forcement dans la collection, ne pas declencher erreur

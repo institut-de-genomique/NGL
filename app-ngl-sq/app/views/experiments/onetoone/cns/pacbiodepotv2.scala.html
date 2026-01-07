@@ -1,0 +1,43 @@
+@()
+<div class="col-md-12 col-lg-12" ng-controller="PacBioDepotV2Ctrl">
+	<!-- NGL-5002 Ajout info message -->
+	<div>		
+		<p><a class="fa fa-info-circle" style="color:red" ng-click="toggleIsShowInformation()" title="Information" href=""> Infos importantes sur Activation NGS-RG et nomenclature SMRT Cell si run KO</a></p>
+		<div ng-show="isShowInformation">
+			<ul>
+			<li><p><b>Dans le cas où on souhaite effectuer des analyses en local sur le séquenceur avant que le run soit pris en charge par NGS-RG :</b></p>
+				<p><ol>
+				<li>Lors de la création d'expérience, renseigner les différents champs requis et <b>décocher Activation NGS-RG</b>. Sauvegarder. L'expérience est à "Nouveau".</li> 
+				<li>Une fois les analyses en local (sur le séquenceur) terminées, revenir sur l'expérience, <b>éditer, recocher Activation NGS-RG et renseigner le code <br/>
+					SMRT Cell</b> (<i>que vous trouvez dans SMRTlink > Data Management > Status > "Cell Id"</i>).<b>Sauvegarder</b>. L'expérience reste à "Nouveau", <b>NE PAS DEMARRER</b>.</li>
+				<li>Les joe poursuivent la procédure habituelle (renseignent ou surchargent le code SMRT Cell, démarrent et terminent l'expérience).</li>
+				<li>Les utilisateurs reviendront ensuite sur l'expérience pour orienter les containers (et cocher terminer processus). </li>
+				</ol></p>
+			</li>
+			<li><p><b>Dans le cas où on ne souhaite pas effectuer d'analyses sur le séquenceur en amont du NGS-RG :</b></p> 
+				<p><ul>Laisser Activation NGS-RG coché et laisser l'expérience à "Nouveau". Poursuivre avec les points 3/ et 4/ ci-dessus.</ul></p>
+			</li>
+			<li><p><b>Dans le cas d'un run qui plante </b>(<i>et pour lesquels les joe ne peuvent pas récupérer le code smrtCell</i>) :</p>
+				<p><ul>Les utilisateurs doivent mettre le statut à KO + résolution adaptée, puis renseigner un faux code smrtCell = "KO" suivi de la date au format AAAAMMJJ <br/>
+					suivi de la position (ligne) sur la plaque de séquençage (A ou B ou C ou D) (exemple : <b>KO20240605B</b>). Il doivent ensuite terminer l'expérience.</ul></p>
+			</li>		  
+			</ul></p>
+		</div>
+	</div>
+	
+	<!-- Add Runs -->
+	<div class="row col-md-3 col-lg-3">
+		<div id="panel_runs" class="panel panel-default text-center" ng-if="runs.length > 0">
+		<div class="panel-heading">
+			<strong>@Messages("experiments.select.run") </strong>
+		</div>
+		<div class="panel-body">
+			<div class="row" ng-repeat="run in runs"><a href="#" ng-click="goToBi(run.code)">{{run.code}}</a></div>
+		</div>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-md-12 col-lg-12" ultimate-datatable="atmService.data"></div>
+	</div>	
+</div>

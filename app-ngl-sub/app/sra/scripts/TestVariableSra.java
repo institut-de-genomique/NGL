@@ -8,7 +8,7 @@ import java.util.Map.Entry;
 import javax.inject.Inject;
 
 import fr.cea.ig.lfw.controllers.scripts.buffered.ScriptNoArgs;
-import models.sra.submit.util.VariableSRA;
+import services.sra.VariableSRA;
 
 /*
  * Script test pour variableSra

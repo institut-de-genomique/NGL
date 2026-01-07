@@ -9,5 +9,6 @@ public class Archive {
 	public String path;
 	public Date date;
 	public String id;
+	public String clonePath;
 	
 }

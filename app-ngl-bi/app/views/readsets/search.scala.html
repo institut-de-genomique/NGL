@@ -1,12 +1,29 @@
-@this()
+@this(ctx : fr.cea.ig.ngl.NGLApplication)
 @()
+@import views.html.helper._
+
+@isCNSInstitute  = @{ "CNS" == ctx.nglConfig().getInstitute() }
 
 @import views.html.helper._
 @form() = {
+	@if(isCNSInstitute){
+		<div class="row" style="margin-bottom: 10px; padding-left: 9px">
+			@columnSearchForm{	
+				<div class='form-control' bt-select filter='true' ng-model='searchService.form.umbrellaCodes' 
+								placeholder='Nom umbrella' multiple='true' ng-change='selectProjetsFromUmbrellas()' 
+								bt-options='umbrellaProject.code as umbrellaProject.name for umbrellaProject in searchService.lists.getUmbrellaProjects()'>
+				</div>
+			}
+		</div>
+	}
 
 	@columnSearchForm{
 		@formGroup{
-			<div class="form-control" bt-select ng-model="searchService.form.projectCodes" multiple="true" textarea="true" filter="true" placeholder='@Messages("search.placeholder.projects")' bt-options="project.code as project|formatProjectListLabel for project in searchService.lists.getProjects()" ng-change="searchService.resetSampleCodes()"></div>			
+			<div class="form-control" bt-select  placeholder='@Messages("search.placeholder.projects")' title='@Messages("search.placeholder.projects")'
+				textarea="true" multiple="true"  filter="true" textareaplaceholder='@Messages("search.textarea.placeholder.codesList")'
+				ng-model="searchService.form.projectCodes"  bt-options="project.code as project|formatProjectListLabel for project in searchService.lists.getProjects()" 
+				ng-change="searchService.resetSampleCodes()">
+			</div>			
 		}
 		
 		@formGroup{
@@ -19,26 +36,36 @@
 	}
 	@columnSearchForm{
 		@formGroup{
-			<div class="form-control" bt-select ng-model="searchService.form.sampleCodes" multiple="true" textarea="true" filter="true" placeholder='@Messages("search.placeholder.samples")' bt-options="sample.code as sample.code for sample in searchService.lists.getSamples()" ng-focus="searchService.refreshSamples()"></div>			
+			<div class="form-control" bt-select  placeholder='@Messages("search.placeholder.samples")' title='@Messages("search.placeholder.samples")'
+				textarea="true" multiple="true" filter="true" textareaplaceholder='@Messages("search.textarea.placeholder.codesList")'
+				ng-model="searchService.form.sampleCodes" bt-options="sample.code as sample.code for sample in searchService.lists.getSamples()" 
+				ng-focus="searchService.refreshSamples()">
+			</div>			
 		}
 		
 		@formGroup{
 			<bt-input class="form-control" placeholder='@Messages("search.placeholder.taxonCode")' title='@Messages("search.placeholder.taxonCode")'
-					  input-ng-model="searchService.form.taxonCode" 
-					  textarea-ng-model="searchService.form.taxonCodes">
+				textarea-placeholder-ng-model='@Messages("search.textarea.placeholder.codesList")'
+				input-ng-model="searchService.form.taxonCode" 
+				textarea-ng-model="searchService.form.taxonCodes">
 			</bt-input>
 		}
 
 		@formGroup{
 			<bt-input class="form-control" placeholder='@Messages("search.placeholder.ncbiScientificNameRegex")' title='@Messages("search.placeholder.ncbiScientificNameRegex")'
-					  input-ng-model="searchService.form.ncbiScientificNameRegex" 
-					  textarea-ng-model="searchService.form.ncbiScientificNameRegexs">
+				textarea-placeholder-ng-model='@Messages("search.textarea.placeholder.labelsList")'
+				input-ng-model="searchService.form.ncbiScientificNameRegex" 
+				textarea-ng-model="searchService.form.ncbiScientificNames">
 			</bt-input>	
 		}		
 	}
 	@columnSearchForm{
 		@formGroup{			
-			<bt-input type="text" class="form-control" input-ng-model="searchService.form.regexCode" textarea-ng-model="searchService.form.codes" placeholder='@Messages("search.placeholder.readset.regexCode")'></bt-input>
+			<bt-input class="form-control" placeholder='@Messages("search.placeholder.readset.regexCode")' title='@Messages("search.placeholder.readset.regexCode")'
+				textarea-placeholder-ng-model='@Messages("search.textarea.placeholder.codesList")'
+				input-ng-model="searchService.form.regexCode" 
+				textarea-ng-model="searchService.form.codes" >
+			</bt-input>
 		}
 
 		@formGroup{
@@ -72,7 +99,11 @@
 		}
 
 		@formGroup{
-			<bt-input type="text" class="form-control" input-ng-model="searchService.form.regexSupportCode" textarea-ng-model="searchService.form.supportCodes" placeholder='@Messages("search.placeholder.containerSupport")'></bt-input>
+			<bt-input class="form-control" placeholder='@Messages("search.placeholder.containerSupport")' title='@Messages("search.placeholder.containerSupport")'
+				textarea-placeholder-ng-model='@Messages("search.textarea.placeholder.codesList")'
+				input-ng-model="searchService.form.regexSupportCode" 
+				textarea-ng-model="searchService.form.supportCodes">
+			</bt-input>
 		}
 	}
 	@columnSearchForm{
@@ -81,7 +112,10 @@
 		}
 		
 		@formGroup{
-			<div class="form-control" bt-select ng-model="searchService.form.runCodes" multiple="true" textarea="true" filter="true" placeholder='@Messages("search.placeholder.run")' bt-options="run.code as run.name for run in searchService.lists.getRuns()  |orderBy:'name':true"  ></div>			
+			<div class="form-control" bt-select placeholder='@Messages("search.placeholder.run")' title='@Messages("search.placeholder.run")'
+			textarea="true" multiple="true" filter="true" textareaplaceholder='@Messages("search.textarea.placeholder.codesList")'
+			ng-model="searchService.form.runCodes"   bt-options="run.code as run.name for run in searchService.lists.getRuns()  |orderBy:'name':true"  >
+			</div>			
 		}
 
 		@formGroup{	
@@ -92,7 +126,7 @@
 
 @buttons() = {
 	@formGroup{
-		<div class="form-control" bt-select ng-model="searchService.reportingConfigurationCode" ng-change="searchService.updateColumn()" placeholder="@Messages("search.placeholder.reporting.configuration")" bt-options="valid.code as valid.name for valid in searchService.lists.get('reportConfigs')" ng-if="searchService.lists.get('reportConfigs').length > 0"></div>
+		<div class="form-control" bt-select ng-model="searchService.reportingConfigurationCode" ng-change="searchService.updateColumn()" placeholder="@Messages("search.placeholder.reporting.configuration")" bt-options="valid.code as valid.name for valid in searchService.lists.get('reportConfigs')"></div>
 	}	
 }
 

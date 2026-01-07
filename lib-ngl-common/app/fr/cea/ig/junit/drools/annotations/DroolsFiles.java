@@ -16,6 +16,7 @@ public @interface DroolsFiles {
 
     /**
      * Liste des fichiers Drools à utiliser pendant les tests de la classe.
+     * @return value
      */
     String[] value();
 }

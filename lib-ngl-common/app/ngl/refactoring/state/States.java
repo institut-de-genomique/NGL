@@ -316,11 +316,6 @@ public class States {
 	public static final State SUBR_N;	
 	
 	/**
-	 * In waiting for send meta data  ({@link States#SUBR_SMD_IW}). 
-	 */
-	public static final State SUBR_SMD_IW;	
-	
-	/**
 	 * Running for send meta data ({@link States#SUBR_SMD_IP}). 
 	 */
 	public static final State SUBR_SMD_IP;	
@@ -352,11 +347,6 @@ public class States {
 	public static final State SUBU_V;	
 	
 	/**
-	 * In waiting for send meta data  ({@link States#SUBU_SMD_IW}). 
-	 */
-	public static final State SUBU_SMD_IW;	
-	
-	/**
 	 * Running for send meta data ({@link States#SUBU_SMD_IP}). 
 	 */
 	public static final State SUBU_SMD_IP;	
@@ -375,8 +365,6 @@ public class States {
 	 * Finished for send meta data  ({@link States#SUBU_FE}). 
 	 */
 	public static final State SUBU_FE;	
-			
-
 			
 
 	
@@ -587,14 +575,12 @@ public class States {
 
 			SUBU_N       = newState(StateNames.SUBU_N,      "update - new",                                             true, 2020, StateCategories.N,  true,  FG_NONE),
 			SUBU_V       = newState(StateNames.SUBU_V,      "update - validé utilisateur",                              true, 2021, StateCategories.IW, true,  FG_NONE),
-			SUBU_SMD_IW  = newState(StateNames.SUBU_SMD_IW, "update - en cours (en attente envoie des métadonnées)",    true, 2022, StateCategories.IW, true,  FG_NONE),
 			SUBU_SMD_IP  = newState(StateNames.SUBU_SMD_IP, "update - en cours (envoie des métadonnées)",               true, 2023, StateCategories.IP, true,  FG_NONE),
 			SUBU_SMD_F   = newState(StateNames.SUBU_SMD_F,  "update - en cours (fin envoie des métadonnées)",           true, 2024, StateCategories.F,  true,  FG_NONE),
 			SUBU_SMD_FE  = newState(StateNames.SUBU_SMD_FE, "update - echec (echec envoie des métadonnées)",            true, 2025, StateCategories.F,  true,  FG_NONE),
 			SUBU_FE      = newState(StateNames.SUBU_FE,	    "update - echec (echec recuperation des AC)",               true, 2026, StateCategories.F,  true,  FG_NONE),
 			
 			SUBR_N       = newState(StateNames.SUBR_N,      "release - new",                                            true, 2040, StateCategories.N,  true,  FG_NONE),
-			SUBR_SMD_IW  = newState(StateNames.SUBR_SMD_IW, "release - en cours (en attente envoie des métadonnées)",   true, 2041, StateCategories.IW, true,  FG_NONE),
 			SUBR_SMD_IP  = newState(StateNames.SUBR_SMD_IP, "release - en cours (envoie des métadonnées)",              true, 2042, StateCategories.IP, true,  FG_NONE),
 			SUBR_SMD_F   = newState(StateNames.SUBR_SMD_F,  "release - en cours (fin envoie des métadonnées)",          true, 2043, StateCategories.F,  true,  FG_NONE),
 			SUBR_SMD_FE  = newState(StateNames.SUBR_SMD_FE, "release - echec (echec envoie des métadonnées)",           true, 2044, StateCategories.F,  true,  FG_NONE),

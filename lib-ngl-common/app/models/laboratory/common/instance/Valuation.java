@@ -185,10 +185,12 @@ public class Valuation implements IValidation {
 	}
 	
 	/**
-	 * Create a new Valuation from this one, with a copy of current history + the new valuation.</br>
+	 * <p>
+	 * Create a new Valuation from this one, with a copy of current history + the new valuation.<br>
 	 * If current history is null, it will be initiated with :
 	 * <li>current valuation</li>
 	 * <li>next valuation</li>
+	 * </p>
 	 * @param user
 	 * @param valid
 	 * @param date
@@ -201,23 +203,25 @@ public class Valuation implements IValidation {
 	}
 	
 	/**
-	 * Create history for current valuation from a previous valuation.</br>
+	 * Create history for current valuation from a previous valuation.<br>
 	 * If validity changed, return this Valuation with user and date actualized, 
 	 * and the history copied and actualized from the previous valuation,
-	 * else return this valuation with no modifications at all.</br>
-	 * </br>
-	 * Correct way to use:</br>
+	 * else return this valuation with no modifications at all.<br>
+	 * <br>
+	 * Correct way to use:<br>
 	 * {@code
 	 * Valuation nextValuation = nextValuation.createHistoryFrom(previousValuation, <String>);
-	 * }</br>
-	 * </br>
+	 * }<br>
+	 * <br>
 	 * To create next valuation from the previous one, prefer to use :
+	 * <ul>
 	 * <li>previousValuation.{@link #withValues(String, TBoolean, Date)}</li>
 	 * <li>previousValuation.{@link #withValuesFrom(Valuation)}</li>
 	 * <li>previousValuation.{@link #asValidated(String, Date)}</li>
 	 * <li>previousValuation.{@link #asInvalidated(String, Date)}</li>
+	 * </ul>
 	 * @param previousValuation the previous valuation in history
-	 * @param user
+	 * @param user user
 	 * @return Valuation
 	 */
 	public Valuation createHistoryFrom(Valuation previousValuation, String user) {
@@ -225,17 +229,19 @@ public class Valuation implements IValidation {
 	}
 	
 	/**
-	 * Get a valuation from this one, with given values.</br>
+	 * <p>
+	 * Get a valuation from this one, with given values.<br>
 	 * If validity changed, return a new Valuation with history copied and updated from this valuation,
-	 * else return this valuation with modified values.</br>
-	 * </br>
-	 * Correct way to use:</br>
+	 * else return this valuation with modified values.<br>
+	 * <br>
+	 * Correct way to use:<br>
 	 * {@code
 	 * Valuation nextValuation = previousValuation.withValues(<String>, <TBoolean>, <Date>);
 	 * }
-	 * @param user
-	 * @param valid
-	 * @param date
+	 * </p>
+	 * @param user user
+	 * @param valid valid
+	 * @param date date
 	 * @return Valuation
 	 */
 	public Valuation withValues(String user, TBoolean valid, Date date) {
@@ -243,15 +249,17 @@ public class Valuation implements IValidation {
 	}
 	
 	/**
-	 * Get a valuation from this one, with values copied from supplied valuation.</br>
+	 * <p>
+	 * Get a valuation from this one, with values copied from supplied valuation.<br>
 	 * If validity changed, return a new Valuation with history copied and updated from this valuation,
-	 * else return this valuation with modified values.</br>
-	 * </br>
-	 * Correct way to use:</br>
+	 * else return this valuation with modified values.<br>
+	 * <br>
+	 * Correct way to use:<br>
 	 * {@code
 	 * Valuation nextValuation = previousValuation.withValuesFrom(otherValuation);
 	 * }
-	 * @param valuation
+	 * </p>
+	 * @param valuation valuation
 	 * @return Valuation
 	 */
 	public Valuation withValuesFrom(Valuation valuation) {
@@ -259,16 +267,18 @@ public class Valuation implements IValidation {
 	}
 	
 	/**
-	 * Get a valid valuation from this one, with given values.</br>
+	 * <p>
+	 * Get a valid valuation from this one, with given values.<br>
 	 * If validity changed, return a new Valuation with history copied and updated from this valuation,
-	 * else return this valuation with modified values.</br>
-	 * </br>
-	 * Correct way to use:</br>
+	 * else return this valuation with modified values.<br>
+	 * <br>
+	 * Correct way to use:<br>
 	 * {@code
 	 * Valuation validatedValuation = previousValuation.asValidated(<String>, <Date>);
 	 * }
-	 * @param user
-	 * @param date
+	 * </p>
+	 * @param user user
+	 * @param date date
 	 * @return Valuation
 	 * @see #asValidated(String)
 	 * @see #asInvalidated(String, Date)
@@ -278,16 +288,18 @@ public class Valuation implements IValidation {
 	}
 	
 	/**
-	 * Get a valid valuation from this one, with given values.</br>
+	 * <p>
+	 * Get a valid valuation from this one, with given values.<br>
 	 * If validity changed, return a new Valuation with history copied and updated from this valuation,
-	 * else return this valuation with modified values.</br>
-	 * The date is updated with {@code new Date()}.</br>
-	 * </br>
-	 * Correct way to use:</br>
+	 * else return this valuation with modified values.<br>
+	 * The date is updated with {@code new Date()}.<br>
+	 * <br>
+	 * Correct way to use:<br>
 	 * {@code
 	 * Valuation validatedValuation = previousValuation.asValidated(<String>);
 	 * }
-	 * @param user
+	 * </p>
+	 * @param user user
 	 * @return valuation
 	 */
 	public Valuation asValidated(String user) {
@@ -295,16 +307,18 @@ public class Valuation implements IValidation {
 	}
 	
 	/**
-	 * Get an invalid valuation from this one, with given values.</br>
+	 * <p>
+	 * Get an invalid valuation from this one, with given values.<br>
 	 * If validity changed, return a new Valuation with history copied and updated from this valuation,
-	 * else return this valuation with modified values.</br>
-	 * </br>
-	 * Correct way to use:</br>
+	 * else return this valuation with modified values.<br>
+	 * <br>
+	 * Correct way to use:<br>
 	 * {@code
 	 * Valuation invalidatedValuation = previousValuation.asInvalidated(<String>, <Date>);
 	 * }
-	 * @param user
-	 * @param date
+	 * </p>
+	 * @param user user
+	 * @param date date
 	 * @return Valuation
 	 * @see #asInvalidated(String)
 	 * @see #asValidated(String, Date)
@@ -314,16 +328,18 @@ public class Valuation implements IValidation {
 	}
 	
 	/**
-	 * Get an invalid valuation from this one, with given values.</br>
+	 * <p>
+	 * Get an invalid valuation from this one, with given values.<br>
 	 * If validity changed, return a new Valuation with history copied and updated from this valuation,
-	 * else return this valuation with modified values.</br>
-	 * The date is updated with {@code new Date()}.</br>
-	 * </br>
-	 * Correct way to use:</br>
+	 * else return this valuation with modified values.<br>
+	 * The date is updated with {@code new Date()}.<br>
+	 * <br>
+	 * Correct way to use:<br>
 	 * {@code
 	 * Valuation invalidatedValuation = previousValuation.asInvalidated(<String>);
 	 * }
-	 * @param user
+	 * </p>
+	 * @param user user
 	 * @return Valuation
 	 */
 	public Valuation asInvalidated(String user) {
@@ -332,7 +348,7 @@ public class Valuation implements IValidation {
 	
 	/**
 	 * null-safe function to add a resolutionCode to this valuation.
-	 * @param resolutionCode
+	 * @param resolutionCode code resolution
 	 */
 	public void addResolution(String resolutionCode) {
 		if(this.resolutionCodes == null)
@@ -342,7 +358,7 @@ public class Valuation implements IValidation {
 	
 	/**
 	 * shortcut to test <b>"{@code valuationA.valid.equals(valid)}"</b>.
-	 * @param valid
+	 * @param valid is valid?
 	 * @return true if same validity
 	 */
 	public boolean is(TBoolean valid) {
@@ -351,7 +367,7 @@ public class Valuation implements IValidation {
 	
 	/**
 	 * shortcut to test <b>"{@code !valuationA.valid.equals(valid)}"</b>.
-	 * @param valid
+	 * @param valid is valid?
 	 * @return true if different validity
 	 */
 	public boolean isnt(TBoolean valid) {
@@ -360,7 +376,7 @@ public class Valuation implements IValidation {
 	
 	/**
 	 * shortcut to test <b>"{@code valuationA.valid.equals(valuationB.valid)}"</b>.
-	 * @param valuation
+	 * @param valuation valuation
 	 * @return true if the given valuation has same validity
 	 */
 	public boolean isEquivalentOf(Valuation valuation) {
@@ -369,7 +385,7 @@ public class Valuation implements IValidation {
 	
 	/**
 	 * shortcut to test <b>"{@code !valuationA.valid.equals(valuationB.valid)}"</b>.
-	 * @param valuation
+	 * @param valuation valuation
 	 * @return true if the given valuation hasn't same validity
 	 */
 	public boolean isntEquivalentOf(Valuation valuation) {

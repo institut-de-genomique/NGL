@@ -17,6 +17,7 @@ import org.springframework.jdbc.support.MetaDataAccessException;
 
 import fr.cea.ig.lfw.utils.Iterables;
 import models.utils.ListObject;
+import play.Logger;
 
 /**
  * Generic operations for SimpleDAO

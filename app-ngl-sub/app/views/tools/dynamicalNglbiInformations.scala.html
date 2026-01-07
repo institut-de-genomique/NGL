@@ -1,0 +1,22 @@
+@()
+@**NGL-5110**@
+
+<div class="row">
+	<div class="col-md-12 col-lg-12">
+		<p><a class="fa fa-exclamation-triangle" style="color:red" ng-click="toggleShowNglbiInformations()" title="Dynamical NGL-BI informations" href=""> Dynamical NGL-BI informations</a></span></p>
+		<div ng-show="isShowNglbiInformations">
+<B>			
+<p>Attention, <U>Les informations dans cet onglet sont récupérées dynamiquement depuis NGL-BI</U> </p>
+<p> Les informations de NGL-BI qui sont utilisées à la construction de la soumission et qui sont présentées dans cet onglet, 
+ne sont pas stockées dans NGL-SUB. 
+Si des modifications sont faites dans NGLBI après la construction de la soumission, ces informations ne correspondent plus 
+à celles utilisées à la construction de la soumission, et a celles presentes à l'EBI'. 
+De meme, si des mises à jour des données sont réalisées dans NGL-SUB, avec des changement de references aux samples de soumission, 
+les informations de cet onglet ne correspondent plus aux données soumises.</p>
+</B>
+<p></p>
+
+		</div>
+	</div>
+</div>
+@**END NGL-5110**@

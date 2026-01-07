@@ -75,14 +75,25 @@ public class EBITaxonomyServices {
 				}
 				return taxon;						
 			}
-			if(	!ebiJsonNodeTaxon.has("taxId")          || 
-					!ebiJsonNodeTaxon.has("submittable")    ||
-					!ebiJsonNodeTaxon.has("scientificName") || 
-					!ebiJsonNodeTaxon.has("lineage")) {
+
+			if((!ebiJsonNodeTaxon.has("taxId")          || 
+				!ebiJsonNodeTaxon.has("submittable")    ||
+				!ebiJsonNodeTaxon.has("scientificName") || 
+				!ebiJsonNodeTaxon.has("lineage"))       &&
+				!"superkingdom".equals(ebiJsonNodeTaxon.get("rank").asText())) {
+
+				taxon.error = true;
+				taxon.errorMessage = "Le taxon " + taxonCode + " n'est pas valide sur le serveur";
+			} else if ("superkingdom".equals(ebiJsonNodeTaxon.get("rank").asText()) && (!ebiJsonNodeTaxon.has("taxId") || !ebiJsonNodeTaxon.has("scientificName"))) {
 				taxon.error = true;
 				taxon.errorMessage = "Le taxon " + taxonCode + " n'est pas valide sur le serveur";
 			} else {
-				taxon.lineage = ebiJsonNodeTaxon.get("lineage").asText();
+				if ("superkingdom".equals(ebiJsonNodeTaxon.get("rank").asText())) {
+					taxon.lineage = "lineage:superkingdom";
+				} else {
+					taxon.lineage = ebiJsonNodeTaxon.get("lineage").asText();
+				}
+
 				taxon.scientificName = ebiJsonNodeTaxon.get("scientificName").asText();
 				if (ebiJsonNodeTaxon.get("submittable").asText().equals("true")) {
 					taxon.submittable = true;

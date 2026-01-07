@@ -149,7 +149,7 @@ angular.module('home').controller('DetailsCtrl', ["descriptionsProtocolsSearchSe
                                     return querysave();
                                 } else {
                                     $scope.validationMessage.setError("save");
-                                    angular.element('#affichageAlert').modal('show');
+                                    angular.element('#affichageAlertRemoveExperiment').modal('show');
                                     saveInProgress = false;
                                 }
                             });
@@ -214,7 +214,7 @@ angular.module('home').controller('DetailsCtrl', ["descriptionsProtocolsSearchSe
 
                         //bloquage suppression via l'affichage d'une pop up
                         $scope.validationMessage.setError("Echec de suppression");
-                        angular.element('#affichageAlertRemove').modal('show');
+                        angular.element('#affichageAlertRemoveExperiment').modal('show');
                         saveInProgress = false;
                     }
                 });
@@ -227,8 +227,8 @@ angular.module('home').controller('DetailsCtrl', ["descriptionsProtocolsSearchSe
                         $scope.warningMessage.setWarning("Suppression en cours...");
                         setTimeout($window.location.href ="/descriptions/protocols/home",45000);
                     }).error(function(data, status, headers, config) {
-                        $scope.messages.setError("Echec de suppression");
-                        $scope.messages.setDetails(data);
+                        $scope.validationMessage.setError("Echec de suppression");
+                        $scope.validationMessage.setDetails(data);
                     
                 });
             }

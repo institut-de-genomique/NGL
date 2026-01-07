@@ -7,21 +7,24 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import controllers.sra.api.ExperimentAPI;
 import fr.cea.ig.DBObject;
-import fr.cea.ig.ngl.dao.api.sra.ExperimentAPI;
 import models.laboratory.common.instance.Comment;
 import models.laboratory.common.instance.State;
 import models.laboratory.common.instance.TraceInformation;
-import models.sra.submit.util.VariableSRA;
 import models.utils.InstanceConstants;
+import services.sra.SraValidationHelper;
+import services.sra.VariableSRA;
 import validation.ContextValidation;
 import validation.IValidation;
 import validation.common.instance.CommonValidationHelper;
-import validation.sra.SraValidationHelper;
 import validation.utils.ValidationHelper;
 
 // Declaration d'une collection Experiment (herite de DBObject)
 public class Experiment extends DBObject implements IValidation, IStateReference {
+	@SuppressWarnings("unused")
+	private static final play.Logger.ALogger  logger = play.Logger.of(Experiment.class);
+
 	// ExperimentType
 	//public String alias;         // required mais remplacé par code herité de DBObject, et valeur = projectCode_num
 	public String projectCode = null;     // required pour nos stats
@@ -47,8 +50,10 @@ public class Experiment extends DBObject implements IValidation, IStateReference
 									   // ou si utilisation d'un sampleAC soumis par les collaborateurs.
 	public String studyCode = null;    // champs qui peut etre null, si rappatriement à partir de l'EBI
 	                                   // ou si utilisation d'un sampleAC soumis par les collaborateurs.
-	public String sampleAccession = null;  // champs qui doit etre renseigné si state > SUB-F
-	public String studyAccession = null;
+
+	public String sampleIdentifier = null;  // champs qui doit etre renseigné si state > SUB-F
+	public String studyIdentifier  = null;  // champs qui doit etre renseigné si state > SUB-F
+
 	public String readSetCode = null;
 	public List<ReadSpec> readSpecs = new ArrayList<>();
 	public Run run = null; // le run est rattache à l'experiment
@@ -56,16 +61,14 @@ public class Experiment extends DBObject implements IValidation, IStateReference
 							 // pour gerer les differents etats de l'objet.
 	
 	public String adminComment; // commentaire privé "reprise historique"				
-	public TraceInformation traceInformation = new TraceInformation();// .Reference sur "models.laboratory.common.instance.TraceInformation" 
-		// pour loguer les dernieres modifications utilisateurs
+	public TraceInformation traceInformation = new TraceInformation();
 	
-	// champs releaseDate uniquement sur le study
-	@Deprecated
 	public Date releaseDate; 
-	
+	public boolean consolidatedPublicStatus; // mis à true si releaseDate > date du jour. Rempli par crons.
 	public Date firstSubmissionDate; 
     public List<Comment>comments = new ArrayList<Comment>();// commentaires des utilisateurs.
-
+	// NGL-4593
+    public String dropBox;
 
 	@Override
 	public State getState() {
@@ -86,6 +89,7 @@ public class Experiment extends DBObject implements IValidation, IStateReference
 
 	// Verifie validite de l'experiment sans verifier validite du run associé :
 	public void validateInvariantsNoRun(ContextValidation contextValidation) {
+		//logger.debug("!!!!     entree dans experiment.validate.validateInvariantsNoRun");
 		boolean copy = false;
 		if (contextValidation.getObject("copy")!= null && (boolean) contextValidation.getObject("copy")) {
 			copy = true;
@@ -114,52 +118,66 @@ public class Experiment extends DBObject implements IValidation, IStateReference
 		//ValidationHelper.required(contextValidation, this.libraryName , "libraryName");
 		//ValidationHelper.required(contextValidation, this.libraryConstructionProtocol , "libraryConstructionProtocol");
 		SraValidationHelper.requiredAndConstraint(contextValidation, this.typePlatform, VariableSRA.mapTypePlatform(), "typePlatform");
-		if(copy) {
+		// autoriser valeur instrument model "unspecified" si mode copy de vieux experiments(454) ou si update ou release de vieux experiments
+		if ( copy || state.code.startsWith("SUBU-") || state.code.startsWith("SUBR-") ) {
+			//logger.debug("recherche de l'instrument model dans allInstrumentModel");
 			SraValidationHelper.requiredAndConstraint(contextValidation, this.instrumentModel, VariableSRA.mapAllInstrumentModel(), "allInstrumentModel");
 		} else {
+			//logger.debug("recherche de l'instrument model dans instrumentModel");
 			SraValidationHelper.requiredAndConstraint(contextValidation, this.instrumentModel, VariableSRA.mapInstrumentModel(), "instrumentModel");
 		}
-		// L'un des champs sampleAccession ou sampleCode doit etre defini :
-		if (StringUtils.isBlank(this.sampleAccession)) {
+		// L'un des champs sampleIdentifier ou sampleCode doit etre defini :
+		if (StringUtils.isBlank(this.sampleIdentifier)) {
 			ValidationHelper.validateNotEmpty(contextValidation, this.sampleCode , "sampleCode");
 		} 
 		if (StringUtils.isBlank(this.sampleCode)) {
-			ValidationHelper.validateNotEmpty(contextValidation, this.sampleAccession , "sampleAccession");
+			ValidationHelper.validateNotEmpty(contextValidation, this.sampleIdentifier , "sampleAccession");
 			
 		}
 		// le champs sampleAccession est contraint
-		if (StringUtils.isNotBlank(this.sampleAccession)) {
-			if( ! (sampleAccession.startsWith("ERS") || sampleAccession.startsWith("SAM")) ) {
-				contextValidation.addError("sampleAccession",  " avec valeur '" + this.sampleAccession + "' qui ne commence pas par ERS ou SAM");
+		if (StringUtils.isNotBlank(this.sampleIdentifier)) {
+			if( ! (sampleIdentifier.startsWith("ERS") || sampleIdentifier.startsWith("SRS") || sampleIdentifier.startsWith("SAM")) ) {
+				contextValidation.addError("sampleIdentifier",  " avec valeur '" + this.sampleIdentifier + "' qui ne commence pas par ERS ou SRS ou SAM");
 			}
 		}
-		// L'un des champs studyAccession ou studyCode doit etre defini :
-		if (StringUtils.isBlank(this.studyAccession)) {
+		// L'un des champs studyIdentifier ou studyCode doit etre defini :
+		if (StringUtils.isBlank(this.studyIdentifier)) {
 			ValidationHelper.validateNotEmpty(contextValidation, this.studyCode , "studyCode");
 		}
 		if (StringUtils.isBlank(this.studyCode)) {
-			ValidationHelper.validateNotEmpty(contextValidation, this.studyAccession , "studyAccession");
+			ValidationHelper.validateNotEmpty(contextValidation, this.studyIdentifier , "studyAccession");
 		}	
 		// Le champs studyAccession est contraint
-		if (StringUtils.isNotBlank(this.studyAccession)) {
-			if( ! (studyAccession.startsWith("ERP") || studyAccession.startsWith("PRJ")) ) {
-				contextValidation.addError("studyAccession", " avec valeur '" + this.studyAccession + "' qui ne commence pas par ERP ou PRJ ");
+		if (StringUtils.isNotBlank(this.studyIdentifier)) {
+			if( ! (studyIdentifier.startsWith("ERP") || studyIdentifier.startsWith("PRJ")) ) {
+				contextValidation.addError("studyIdentifier", " avec valeur '" + this.studyIdentifier + "' qui ne commence pas par ERP ou PRJ ");
 			}
 		}
 
+		
 		ValidationHelper.validateNotEmpty(contextValidation, this.readSetCode , "readSetCode");
 		// Dans le cas des illumina ou LS454
-		if (! "OXFORD_NANOPORE".equalsIgnoreCase(this.typePlatform)) {
+		if (! "OXFORD_NANOPORE".equalsIgnoreCase(this.typePlatform) 
+		 && ! "PACBIO_SMRT".equalsIgnoreCase(this.typePlatform)
+		 && ! "DNBSEQ".equalsIgnoreCase(this.typePlatform)) {
 			if ("illumina".equalsIgnoreCase(this.typePlatform)) {
-			ValidationHelper.validateNotEmpty(contextValidation, this.spotLength , "spotLength");
-			}
-			if (StringUtils.isNotBlank(this.libraryLayout) && libraryLayout.equalsIgnoreCase("paired")){
-				// Verifer que lastBaseCoord est bien renseigné ssi Illumina et paired:
-				ValidationHelper.validateNotEmpty(contextValidation, this.lastBaseCoord , "lastBaseCoord");	
-				// controle sur libraryLayoutNominalLength retiré car champs supprimé à l'EBI voir ticket NGL-4084
-				//ValidationHelper.validateNotEmpty(contextValidation, this.libraryLayoutNominalLength , "libraryLayoutNominalLength");
+				//ValidationHelper.validateNotEmpty(contextValidation, this.spotLength , "spotLength");
+				// NGL-4630 : preciser champs dans SUB et dans BI
+				if ( this.spotLength == null) {
+					contextValidation.addError("spotLength (nbCycle) :",  "doit etre renseigne");	
+				}
+				if (StringUtils.isNotBlank(this.libraryLayout) && libraryLayout.equalsIgnoreCase("paired")) {
+					// Verifer que lastBaseCoord est bien renseigné ssi Illumina et paired:
+					//ValidationHelper.validateNotEmpty(contextValidation, this.lastBaseCoord , "lastBaseCoord");
+					// NGL-4630 : preciser champs dans SUB et dans BI
+					if ( this.lastBaseCoord == null) {
+						contextValidation.addError("lastBaseCoord (nbCycleRead1) :",  "doit etre renseigne");	
+					}
+					// controle sur libraryLayoutNominalLength retiré car champs supprimé à l'EBI voir ticket NGL-4084
+					//ValidationHelper.validateNotEmpty(contextValidation, this.libraryLayoutNominalLength , "libraryLayoutNominalLength");
+				}
 				SraValidationHelper.requiredAndConstraint(contextValidation, this.libraryLayoutOrientation, VariableSRA.mapLibraryLayoutOrientation(), "libraryLayoutOrientation");
-			}
+			} 
 		}
 		// Si nanopore pas de readspec et pas spotLength, lastBasecoord, et libraryLayoutNominalLength
 		// Verifier les readSpec :
@@ -167,6 +185,8 @@ public class Experiment extends DBObject implements IValidation, IStateReference
 		CommonValidationHelper.validateCodePrimary(contextValidation, this, InstanceConstants.SRA_EXPERIMENT_COLL_NAME);
 		CommonValidationHelper.validateIdPrimary(contextValidation, this);
 		CommonValidationHelper.validateTraceInformationRequired(contextValidation, traceInformation);
+
+		
 	}
 	
 	
@@ -175,12 +195,14 @@ public class Experiment extends DBObject implements IValidation, IStateReference
 		contextValidation = contextValidation.appendPath("experiment");
 		if (ValidationHelper.validateNotEmpty(contextValidation, code, "code")) 
 			contextValidation = contextValidation.appendPath(code);
-		if (! "OXFORD_NANOPORE".equalsIgnoreCase(typePlatform)) { 
+		if (! "OXFORD_NANOPORE".equalsIgnoreCase(typePlatform) 
+			&& ! "PACBIO_SMRT".equalsIgnoreCase(this.typePlatform)
+			&& ! "DNBSEQ".equalsIgnoreCase(this.typePlatform)) { 
 			//pas mis dans validateLight car il existe dans reprise historique des illumina et LS454 sans lastBaseCoord 
 			ValidationHelper.validateNotEmpty(contextValidation, lastBaseCoord , "lastBaseCoord");	
 		}
 		if (ValidationHelper.validateNotEmpty(contextValidation, run, "run")
-				&& ValidationHelper.validateNotEmpty(contextValidation, run.code, "run"))
+				&& ValidationHelper.validateNotEmpty(contextValidation, run.code, "run")) 
 			run.validate(contextValidation);
 		
 	}
@@ -218,6 +240,7 @@ public class Experiment extends DBObject implements IValidation, IStateReference
 
 	@Override
 	public void validate(ContextValidation contextValidation) {
+		//logger.debug("XXXXXXXXXXXXXXXXXXXXXXXXXXXX               Entree dans validate de Experiment pour " + code);
 		switch (contextValidation.getMode()) {
 		case CREATION:
 			validateCreation(contextValidation);

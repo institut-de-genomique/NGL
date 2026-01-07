@@ -17,7 +17,7 @@ import services.description.instrument.InstrumentServiceCNG;
 import services.description.process.AbstractProcessService;
 import services.description.process.ProcessServiceCNG;
 import services.description.project.AbstractProjectService;
-// import services.description.project.AbstractUmbrellaProjectService;
+import services.description.project.AbstractUmbrellaProjectService;
 import services.description.project.ProjectServiceCNG;
 import services.description.run.AbstractRunService;
 import services.description.run.AbstractTreatmentService;
@@ -95,11 +95,7 @@ public class CNGApplicationData implements IApplicationData {
 		return new TreatmentServiceCNG();
 	}
 
-	@Override
-	public Consumer<ContextValidation> getResolutionService() {
-	    throw new RuntimeException("not implemented");
-//		return ResolutionService::saveResolutionsCNG;
-	}
+	
 
 	@Override
 	public Consumer<ContextValidation> getProtocolService() {
@@ -123,9 +119,21 @@ public class CNGApplicationData implements IApplicationData {
 		return ctx -> {};
 	}
 
-	// @Override
-	// public AbstractUmbrellaProjectService getUmbrellaProjectService() {
-	// 	throw new RuntimeException("not implemented");
-	// }
+	@Override
+	public AbstractUmbrellaProjectService getUmbrellaProjectService() {
+		throw new RuntimeException("not implemented");
+	}
+
+	@Override
+	public Consumer<ContextValidation> getResolutionServiceSQ() {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'getResolutionServiceSQ'");
+	}
+
+	@Override
+	public Consumer<ContextValidation> getResolutionServiceBI() {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'getResolutionServiceBI'");
+	}
 	
 }

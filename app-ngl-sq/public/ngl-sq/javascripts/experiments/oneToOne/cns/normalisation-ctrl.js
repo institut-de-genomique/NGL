@@ -36,20 +36,15 @@ angular.module('home').controller('NormalisationCtrl',['$q', '$scope' ,'$http','
 					"render":"<div list-resize='cellValue' list-resize-min-size='3'>",
 					"position":4,
 					"extraHeaders":{0:Messages("experiments.inputs")}
-				},
-				/*
-			         {
-			        	"header":Messages("containers.table.tags"),
-			 			"property": "inputContainer.contents",
-			 			"filter": "getArray:'properties.tag.value'",
-			 			"order":true,
-			 			"hide":true,
-			 			"type":"text",
-			 			"position":4,
-			 			"render":"<div list-resize='cellValue | unique' ' list-resize-min-size='3'>",
-			        	 "extraHeaders":{0:Messages("experiments.inputs")}
-			         },
-				 */			 
+				},  {
+					"header":Messages("containers.table.storageCodeIn"),			        	 
+					"property":"inputContainer.support.storageCode",
+					"type":"text",
+					"order":true,
+					"hide":true,
+					"position":4.6,
+					"extraHeaders":{0:Messages("experiments.inputs")}
+				},			 
 				{
 					"header" : Messages("containers.table.concentration"),
 					"property": "inputContainerUsed.concentration.value",
@@ -588,7 +583,7 @@ angular.module('home').controller('NormalisationCtrl',['$q', '$scope' ,'$http','
 	} else {
 		datatableConfig.columns.push({
 			"header" : Messages("containers.table.code"),
-			"property" : "inputContainer.support.code",
+			"property" : "inputContainer.code",
 			"order" : true,
 			"edit" : false,
 			"hide" : true,
@@ -683,21 +678,16 @@ angular.module('home').controller('NormalisationCtrl',['$q', '$scope' ,'$http','
 	// defined new atomictransfertMethod
 	atmService.newAtomicTransfertMethod =  function(line, column){
 		var getLine = function(line){
-			//In et OUT sont de même catégorie
-			if($scope.experiment.instrument.outContainerSupportCategoryCode 
-					=== $scope.experiment.instrument.inContainerSupportCategoryCode){
-				return line;
-			}else 
-				//In tube et OUT différent de tube
-				if($scope.experiment.instrument.outContainerSupportCategoryCode !== "tube" 
-					&& $scope.experiment.instrument.inContainerSupportCategoryCode === "tube") {
-					return undefined;
-				}else 
-					//IN tube
-					if($scope.experiment.instrument.outContainerSupportCategoryCode === "tube"){
-						return "1";
-					}
+			var inputCategory = $scope.experiment.instrument.inContainerSupportCategoryCode;
+			var outputCategory = $scope.experiment.instrument.outContainerSupportCategoryCode;
 
+			if(outputCategory === "tube") {
+				return "1";
+			} else if(inputCategory === "tube") {
+				return undefined;
+			} else {
+				return line;
+			}
 		}
 
 		var getColumn=getLine;
@@ -1140,7 +1130,7 @@ angular.module('home').controller('NormalisationCtrl',['$q', '$scope' ,'$http','
 					isShow:function(){return !$scope.isNewState();},
 					click:generateSampleSheetNormalisationPostPCR,
 					label:Messages("experiments.sampleSheet")+" normalisation post PCR"
-				}]);
+			}]);
 			}
 		}
 	}

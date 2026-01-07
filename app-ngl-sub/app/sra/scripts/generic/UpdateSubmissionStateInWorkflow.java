@@ -1,19 +1,20 @@
 package sra.scripts.generic;
 
 import javax.inject.Inject;
+
+import controllers.sra.api.SubmissionAPI;
 import fr.cea.ig.lfw.controllers.scripts.buffered.Script;
-import fr.cea.ig.ngl.dao.api.sra.SubmissionAPI;
 import models.laboratory.common.instance.State;
 import models.sra.submit.sra.instance.Submission;
-import services.Tools;
+import sra.services.Tools;
+import sra.workflows.SubmissionWorkflows;
 import validation.ContextValidation;
-import workflows.sra.submission.SubmissionWorkflows;
 //import workflows.sra.submission.SubmissionWorkflowsHelper;
 
 /**
  * Script a lancer pour avoir les numeros d'accession associés à une soumission ou plusieurs soumissions.
  * Exemple de lancement :
- * {@literal http://localhost:9000/sra/scripts/run/sra.scripts.UpdateSubmissionStateInWorkflow?codes=GSC_BBA_42BJ137CW&state=SUB-SRD-IP}
+ * {@literal http://localhost:9000/sra/scripts/run/sra.scripts.generic.UpdateSubmissionStateInWorkflow?codes=GSC_BBA_42BJ137CW&state=SUB-SRD-IP}
  * 
  * @author sgas
  *
@@ -23,6 +24,7 @@ public class UpdateSubmissionStateInWorkflow extends Script<UpdateSubmissionStat
 
 	private final SubmissionWorkflows submissionWorkflows;
 	private final SubmissionAPI submissionAPI;
+	private static final play.Logger.ALogger logger = play.Logger.of(UpdateSubmissionStateInWorkflow.class);
 
 
 	@Inject
@@ -69,7 +71,13 @@ public class UpdateSubmissionStateInWorkflow extends Script<UpdateSubmissionStat
 			ContextValidation contextValidation = ContextValidation.createUpdateContext(user);
 			State state = new State(stateValue, user);
 			submissionWorkflows.setState(contextValidation, submission, state);
-			printfln("Soumission '%s' mise dans l'etat '%s' ", submission.code, args.state);
+			if (contextValidation.hasErrors()) {
+				contextValidation.displayErrors(logger, "debug");
+			} else {
+				printfln("Soumission '%s' mise dans l'etat '%s' ", submission.code, args.state);
+			}
+			
+			
 		}
 	}
 

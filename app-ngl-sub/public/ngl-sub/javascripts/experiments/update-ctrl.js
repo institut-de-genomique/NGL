@@ -105,6 +105,7 @@ angular.module('home').controller('UpdateCtrl',
 	$scope.messages.clear();	
 	$scope.form = {};   // important, utilisé dans api.experiments.list puis api.experiments.getQuery
 	$scope.form2 = {};  // important, utilise pour determination lignes editable et surcharge données utilisateur
+	$scope.form3 = {}; 
 	$scope.lists = lists;
 	$scope.form.stateCode ="SUB-F";  
 	$scope.sraVariables = {};
@@ -115,7 +116,16 @@ angular.module('home').controller('UpdateCtrl',
 		tabService.addTabs({label:Messages('experiments.menu.update'),href:jsRoutes.controllers.sra.experiments.tpl.Experiments.home("update").url,remove:true});
 		tabService.activeTab(0); //  active l'onglet en le mettant en bleu
 	}
-
+	
+	$scope.treeLoadInProgress = false;
+	
+	$scope.isClickable=function() {
+		if ($scope.treeLoadInProgress){
+			return false;
+		}
+		return true;
+	}
+	
 // Initialisation ProjectCodes:
 	$scope.lists.refresh.projects();	
 	lists.refresh.states({objectTypeCode:"SRASubmission"});
@@ -151,13 +161,19 @@ angular.module('home').controller('UpdateCtrl',
 
 // initialisation typeParser
 	$scope.typeParser = "userExperimentExtended";
-	//$scope.treeLoadInProgress = false;
 
 // ---------------------------------------------------------------------------------------------------
 
 	// Definitions des methodes :
 	// ---------------------------
-	
+	// NGL-4952 
+	$scope.isShowConsigne=false;
+	$scope.toggleShowConsigne=function(){
+		//console.log("TOGGLE search-ctrl.js");
+		if ( $scope.isShowConsigne===false) { 
+			$scope.isShowConsigne=true}
+		else {$scope.isShowConsigne=false}
+	};	
 	
 	// methode appelée depuis la vue avec la directive ng-init
 	$scope.setUserInScope = function(user) {
@@ -166,6 +182,7 @@ angular.module('home').controller('UpdateCtrl',
 	};
 	
 	$scope.errorCallback = function(error) {
+		$scope.treeLoadInProgress = false;
 		console.log("error : ", error);
 		$scope.messages.addDetails(error.data);
 		$scope.messages.setError("PROBLEME dans userFileExperiment :");
@@ -176,21 +193,28 @@ angular.module('home').controller('UpdateCtrl',
 		//console.log("Dans update-ctrl.search");
 		$scope.messages = messages();
 		$scope.messages.clear();
-		//$scope.treeLoadInProgress = true;
 
-		if (! $scope.form.accessionRegex   && 
-			! $scope.form.projCodes        &&
-			! $scope.form.accessions       && 
-			! $scope.form.studyIdentifier  &&
-			! $scope.form.sampleIdentifier &&
-			! $scope.form.codeRegex        &&
-			! $scope.form.codes) {			
+		if (! $scope.form.projCodes             &&
+			! $scope.form.codes                 &&
+			! $scope.form.codeRegex             &&
+			! $scope.form.accessions            && 
+			! $scope.form.accessionRegex        && 
+			! $scope.form.studyCodes            &&			
+			! $scope.form.studyCodeRegex        &&
+			! $scope.form.studyIdentifiers      &&
+			! $scope.form.studyIdentifierRegex  &&
+			! $scope.form.sampleCodes           &&
+			! $scope.form.sampleCodeRegex       &&
+			! $scope.form.sampleIdentifiers     &&
+			! $scope.form.sampleIdentifierRegex &&
+			! $scope.form.submissionCodes       &&
+			! $scope.form.submissionCodeRegex 			 
+			) {		
 			//console.log("Aucun parametre => envoyer message erreur");
 			$scope.reset(); // a mettre avant setError car annule messages
 			$scope.messages.setError(Messages("AbsenceSearchParameter"));
 			//console.log("update-ctrl.$scope.messages = ", $scope.messages);
 			// annuler spinner si besoin
-			//$scope.treeLoadInProgress = false;
 			throw("Aucun parametre pour la recherche des experiments à updater"); 
 		} 
 		$scope.form.stateCode="SUB-F";
@@ -209,7 +233,7 @@ angular.module('home').controller('UpdateCtrl',
 		
 		if (toolsServices.isNotBlank($scope.form2.userFileExperiment) &&
 			toolsServices.isNotBlank($scope.form2.userFileExperiment.value)) {
-				//console.log("Recuperation de $scope.base64UserFileExperiment");
+				console.log("Recuperation de $scope.base64UserFileExperiment");
 				$scope.base64UserFileExperiment = $scope.form2.userFileExperiment.value;
 
 		} 
@@ -223,8 +247,7 @@ angular.module('home').controller('UpdateCtrl',
 		$scope.saveUserForm = angular.copy($scope.form);// sauver formulaire utilisateur initial avant modif dans replacePseudoStateCodesToStateCodesInFormulaire
 		toolsServices.replacePseudoStateCodesToStateCodesInFormulaire($scope.sraVariables.pseudoStateCodeToStateCodes, $scope.form);
 		$scope.formSearch = angular.copy($scope.form);
-		$scope.formUpdate = angular.copy($scope.form);
-		
+	
 		//$scope.form = {};
 		//console.log("$scope.form" ,$scope.form);
 		//console.log("$scope.formSearch" ,$scope.formSearch);
@@ -243,8 +266,8 @@ angular.module('home').controller('UpdateCtrl',
 			if(toolsServices.isNotBlank($scope.base64UserFileExperiment)) {
 				//console.log("IIIIIIIIIII             Dans search, $scope.mapUserExperiments=", $scope.mapUserExperiments);
 				services.loadUserExperimentInfosAndAdd2ExperimentsDT($scope.typeParser, $scope.base64UserFileExperiment, $scope.experiments_db, 
-																   			 $scope.mapUserExperiments, $scope.user, 
-																   			 $scope.form2.editableStateCode, $scope.experimentsDT, $scope.messages);
+																     $scope.mapUserExperiments, $scope.user, 
+																   	 $scope.form2.editableStateCode, $scope.experimentsDT, $scope.messages);
 			} else {
 				$scope.experimentsDT.setData($scope.experiments_db, $scope.experiments_db.length);
 			}
@@ -252,15 +275,13 @@ angular.module('home').controller('UpdateCtrl',
 			console.log("error : ", error);
 			$scope.messages.addDetails(error);
 			$scope.messages.setError("PROBLEME lors de la recuperation des experiments de la base de données :");
-			//$scope.treeLoadInProgress = false;
 		});
-		//$scope.treeLoadInProgress = false;
 	}; // end search
 		
 	$scope.reset = function() {
+		$scope.treeLoadInProgress = false;
 		$scope.form = {};
 		$scope.tab_experiments = []; 
-		//$scope.treeLoadInProgress = false;
 		// $scope.experimentsDT = null; // ne marche pas datatable
 		$scope.experimentsDT = datatable(experimentsDTConfig);
 		$scope.experimentsDT.setColumnsConfig(services.getExperimentColumnsForUpdate());
@@ -268,68 +289,45 @@ angular.module('home').controller('UpdateCtrl',
 		$scope.messages.clear();
 		$scope.form.stateCode = "SUB-F";
 		$scope.form2 = {};
+		$scope.form3 = {};
 		$scope.form2.editableStateCode = "SUB-F";
 		//$scope.form2.editableCreateUser = $scope.user;// pour rendre surchageable par userExperimentFile
 	}; // end reset
 	
 
-
-	
-
 	
 	// declencher creation d'un objet submission pour update :
-	$scope.build_and_exec_submission = function(tab_experiments) {
+	$scope.build_and_exec_submission = function(tab_experiments, noCheckTaxonSampleCollab) {
+		
+		
 		var args = {
-			project     : null,
-			study       : null,
-			samples     : [],
-			experiments : tab_experiments
+			noCheckTaxonSampleCollab : noCheckTaxonSampleCollab,
+			project                  : null,
+			study                    : null,
+			samples                  : [],
+			experiments              : tab_experiments
 		};
-	
+		//console.log("dans build_and_exec_submission, noCheckTaxonSampleCollab=", noCheckTaxonSampleCollab);
+
 		// appeler url pour creation d'un objet submission pour update :
 		$http.put(jsRoutes.controllers.sra.submissions.api.Submissions.createForUpdate().url, args)
 		.success(function(data) { 
-		
-			console.log("yyyyyyyy dans success, data = ", data); 	
+			//var submission = data;
 			var submission = data;
 			var submissionCode = data.code;
-			var submissionState = angular.copy(data.state);				
-			submissionState.code = "SUBU-SMD-IW";
-			// $scope.messages.setSuccess("La soumission " + submissionCode
-			// + " pour la mise a jour à l'EBI des données du tableau est en
-			// cours de traitement");
-			$http.put(jsRoutes.controllers.sra.submissions.api.Submissions.updateState(submissionCode).url, submissionState)
-			.success(function(data) { 
-				// Pas de recuperation d'erreur si requete ci-dessous : 
-				//$http.put(jsRoutes.controllers.sra.submissions.api.Submissions.updateState(submissionCode).url, "toto")
-				//.success(function(data) { 
-				console.log("zzzzzzzzzzzz dans success, data=", data);
-				var submissionCode = data.code;
-				$scope.messages.setSuccess("La soumission " + submissionCode + " pour la mise a jour à l'EBI des données du tableau est en cours de traitement"); 
-				// rafraichissement tableau avec nouveaux status et nouveau studyCode et sampleCode : 
-				var tab_codes = [];
-				$scope.experimentsDT = datatable(experimentsDTConfig);
-				$scope.experimentsDT.setColumnsConfig(services.getExperimentColumnsForUpdate());
-				for(var i= 0; i < tab_experiments.length; i++){
-					tab_codes.push(tab_experiments[i].code);
-				}
-				$scope.experimentsDT.search({codes:tab_codes});		
-			}).error(function(error) {
-				// testé avec experiment deja dans soumission => ok  
-				console.log("ZZZZZZZZZZZZZZ dans error,  error= ", error);
-				$scope.messages.addDetails(error);
-				$scope.messages.setError("Probleme pour le changement de status de la soumission");
-				// var submissionCode = error.data.code;
-				//$scope.messages.setError("Soumission " + submissionCode + " qui n'a pas pu
-				// etre mise dans le bon etat, mais experiment sauve dans base avec ses
-				// modifications");
-				//$scope.treeLoadInProgress = false;
-			});
+			$scope.messages.setSuccess("Les experiments du tableau ont bien été mis à jour à l'EBI via la soumission "  + submission.code + " voir ebiReport " + submission.submissionDirectory + "/" + submission.ebiResult); 
+			$scope.treeLoadInProgress = false;	
+			$scope.experimentsDT.setSpinner(false);
+
 		}).error(function(error) {
+			$scope.experimentsDT.setSpinner(false);
+			$scope.treeLoadInProgress = false;
 			console.log("YYYYYYYYYYYYYYYYYYYYYYYYY dans error ");
 			console.log("error = ", error);
 			$scope.messages.addDetails(error); 
-			$scope.messages.setError("Erreur creation de la soumission"); 
+			$scope.messages.setError("Erreur "); 
+			$scope.experimentsDT.setSpinner(false);
+
 		});
 	
 	}; // end build_and_exec_submission
@@ -339,7 +337,10 @@ angular.module('home').controller('UpdateCtrl',
 		//console.log("Dans update-ctrl.submit");
 		$scope.messages = messages();	// enleve le message mais pas la partie details + efficace d'utiliser $scope.messages.clear();
 		$scope.messages.clear();
-		//$scope.treeLoadInProgress = true;
+		$scope.experimentsDT.setSpinner(true);
+		$scope.treeLoadInProgress = true;
+
+		$scope.formUpdate = angular.copy($scope.form);
 		mainService.setForm($scope.formUpdate);
 		// sauvegarde des données en local (mode local le save de getExperimentColumnForUpdate)
 		// (si mode remote, les donnees sont bien sauvées dans base avec valeurs
@@ -358,9 +359,12 @@ angular.module('home').controller('UpdateCtrl',
 			$scope.messages.setError(Messages("AbsenceDonneePourUpdate"));
 			throw(Messages("AbsenceDonneePourUpdate"));
 		}
+		// instantier ici le noCheckTaxonSampleCollab :
+		$scope.noCheckTaxonSampleCollab = $scope.form3.noCheckTaxonSampleCollab;
+		//console.log("dans submit, $scope.noCheckTaxonSampleCollab=", $scope.noCheckTaxonSampleCollab);
+
 		// declencher creation d'un objet submission pour update et rafraichir tableau des experiments:
-		$scope.build_and_exec_submission(tab_experiments);
-		//$scope.treeLoadInProgress = false;
+		$scope.build_and_exec_submission(tab_experiments, $scope.noCheckTaxonSampleCollab);
 
 	}; // end $scope.submit
 	

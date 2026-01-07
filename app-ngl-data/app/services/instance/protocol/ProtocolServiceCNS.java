@@ -61,14 +61,16 @@ public class ProtocolServiceCNS {
         lp.add(newProtocol("hiseq_4000_system_guide", "Illumina Hiseq 4000 system guide", "path8", "1", "production", InstanceFactory.setExperimentTypeCodes("prepa-fc-ordered", "illumina-depot"), false));
         
         //NovaSeq
-        lp.add(newProtocol("Illumina NovaSeq 6000 system guide", "Illumina NovaSeq 6000 system guide", "path8", "1", "production", InstanceFactory.setExperimentTypeCodes("prepa-fc-ordered", "illumina-depot")));    
+        lp.add(newProtocol("illumina-novaSeq-6000-system-guide", "Illumina NovaSeq 6000 system guide", "path8", "1", "production", InstanceFactory.setExperimentTypeCodes("prepa-fc-ordered", "illumina-depot")));    
 
+        // NGL-4740
+        lp.add(newProtocol("illumina-novaseq-x-plus-system-guide", "Illumina NovaSeq X Plus system guide", "path8", "1", "production", InstanceFactory.setExperimentTypeCodes("prepa-fc-ordered", "illumina-depot")));    
 
         //Nanopore
         lp.add(newProtocol("R9-1D-ligation",            "R9-1D ligation",               "path7", "1", "production", InstanceFactory.setExperimentTypeCodes("nanopore-library", "nanopore-final-ligation"), concatMap(newPSV("libraryProtocol", "R9-1D ligation")),false));
         lp.add(newProtocol("R9-1D-transposition",       "R9-1D transposition",          "path7", "1", "production", InstanceFactory.setExperimentTypeCodes("nanopore-library", "nanopore-final-ligation"), concatMap(newPSV("libraryProtocol", "R9-1D transposition")),false));
-        lp.add(newProtocol("R9-Long-Read 1D",           "R9-Long Read 1D",              "path7", "1", "production", InstanceFactory.setExperimentTypeCodes("nanopore-library", "nanopore-final-ligation"), concatMap(newPSV("libraryProtocol", "R9-Long Read 1D")),false));
-        lp.add(newProtocol("R9-Long-Read 2D",           "R9-Long Read 2D",              "path7", "1", "production", InstanceFactory.setExperimentTypeCodes("nanopore-library", "nanopore-final-ligation"), concatMap(newPSV("libraryProtocol", "R9-Long Read 2D")),false));
+        lp.add(newProtocol("r9-long-read-1d",           "R9-Long Read 1D",              "path7", "1", "production", InstanceFactory.setExperimentTypeCodes("nanopore-library", "nanopore-final-ligation"), concatMap(newPSV("libraryProtocol", "R9-Long Read 1D")),false));
+        lp.add(newProtocol("r9-long-read-2d",           "R9-Long Read 2D",              "path7", "1", "production", InstanceFactory.setExperimentTypeCodes("nanopore-library", "nanopore-final-ligation"), concatMap(newPSV("libraryProtocol", "R9-Long Read 2D")),false));
         lp.add(newProtocol("R9-Low-input",              "R9-Low input",                 "path7", "1", "production", InstanceFactory.setExperimentTypeCodes("nanopore-library", "nanopore-final-ligation"), concatMap(newPSV("libraryProtocol", "R9-Low input")),false));
         lp.add(newProtocol("R9-2D",                     "R9-2D",                        "path7", "1", "production", InstanceFactory.setExperimentTypeCodes("nanopore-library", "nanopore-final-ligation"), concatMap(newPSV("libraryProtocol", "R9-2D")),false));
         lp.add(newProtocol("1D2-library",               "Banque 1D²",                   "path7", "1", "production", InstanceFactory.setExperimentTypeCodes("nanopore-library", "nanopore-final-ligation"), concatMap(newPSV("libraryProtocol", "Banque 1D²")),false));
@@ -94,7 +96,10 @@ public class ProtocolServiceCNS {
         lp.add(newProtocol("genomic-dna-ligation-sqk-lsk112", "Genomic DNA by Ligation (SQK-LSK112)", "path7", "1", "production", InstanceFactory.setExperimentTypeCodes("nanopore-frg", "nanopore-dna-reparation", "nanopore-reparation-and-end-prep", "nanopore-end-prep", "nanopore-pre-pcr-ligation", "nanopore-pcr", "nanopore-barcode-ligation", "nanopore-final-ligation", "nanopore-library", "nanopore-depot"), concatMap(newPSV("libraryProtocol", "Genomic DNA by Ligation (SQK-LSK112)"))));
         //NGL-3934
         lp.add(newProtocol("genomic-dna-ligation-sqk-lsk114", "Genomic DNA by Ligation (SQK-LSK114)", "path7", "1", "production", InstanceFactory.setExperimentTypeCodes( "nanopore-reparation-and-end-prep", "nanopore-final-ligation", "nanopore-depot"), concatMap(newPSV("libraryProtocol", "Genomic DNA by Ligation (SQK-LSK114)"))));
+        // NGL-4326
+        lp.add(newProtocol("sqk-lsk114-criobe", "SQK-LSK114 (adaptation CRIOBE)", "path7", "1", "production", InstanceFactory.setExperimentTypeCodes( "nanopore-reparation-and-end-prep", "nanopore-final-ligation", "nanopore-barcode-ligation", "nanopore-depot"), concatMap(newPSV("libraryProtocol", "SQK-LSK114 (adaptation CRIOBE)"))));
         
+
         // NGL-3565
         lp.add(newProtocol("genomic-dna-ligation-sqk-q20ea", "Genomic DNA by ligation using Q20+ Early Access Kit (SQK-Q20EA)", "path7", "1", "production", InstanceFactory.setExperimentTypeCodes("nanopore-frg", "nanopore-dna-reparation", "nanopore-reparation-and-end-prep", "nanopore-end-prep", "nanopore-pre-pcr-ligation", "nanopore-pcr", "nanopore-barcode-ligation", "nanopore-final-ligation", "nanopore-library", "nanopore-depot"), concatMap(newPSV("libraryProtocol", "Genomic DNA by ligation using Q20+"))));
 
@@ -116,7 +121,7 @@ public class ProtocolServiceCNS {
         lp.add(newProtocol("native-barcoding-kit96-gdna-sqk-nbd112.96",      "Native Barcoding Kit 96 with genomic DNA (SQK-NBD112.96)",     "path7","1", "production", InstanceFactory.setExperimentTypeCodes("nanopore-frg", "nanopore-dna-reparation", "nanopore-reparation-and-end-prep", "nanopore-end-prep", "nanopore-pre-pcr-ligation", "nanopore-pcr", "nanopore-barcode-ligation", "nanopore-final-ligation", "nanopore-library", "nanopore-depot"), concatMap(newPSV("libraryProtocol", "Native Barcoding Kit 96 with genomic DNA (SQK-NBD112.96)" ))));
          lp.add(newProtocol("native-barcoding-kit24-gdna-sqk-nbd112.24",      "Native Barcoding Kit 24 with genomic DNA (SQK-NBD112.24)",     "path7","1", "production", InstanceFactory.setExperimentTypeCodes("nanopore-frg", "nanopore-dna-reparation", "nanopore-reparation-and-end-prep", "nanopore-end-prep", "nanopore-pre-pcr-ligation", "nanopore-pcr", "nanopore-barcode-ligation", "nanopore-final-ligation", "nanopore-library", "nanopore-depot"), concatMap(newPSV("libraryProtocol", "Native Barcoding Kit 24 with genomic DNA (SQK-NBD112.24)" ))));
         
-        lp.add(newProtocol("cdna-pcr-sequencing-sqk-pcs-108)",                          "cDNA-PCR Sequencing (SQK-PCS108)",                                 "path7", "1", "production", InstanceFactory.setExperimentTypeCodes("nanopore-frg", "nanopore-dna-reparation", "nanopore-reparation-and-end-prep", "nanopore-end-prep", "nanopore-pre-pcr-ligation", "nanopore-pcr", "nanopore-barcode-ligation", "nanopore-final-ligation", "nanopore-library", "nanopore-depot"), concatMap(newPSV("libraryProtocol", "cDNA-PCR Sequencing (SQK-PCS108)"))));
+        lp.add(newProtocol("cdna-pcr-sequencing-sqk-pcs-108",                          "cDNA-PCR Sequencing (SQK-PCS108)",                                 "path7", "1", "production", InstanceFactory.setExperimentTypeCodes("nanopore-frg", "nanopore-dna-reparation", "nanopore-reparation-and-end-prep", "nanopore-end-prep", "nanopore-pre-pcr-ligation", "nanopore-pcr", "nanopore-barcode-ligation", "nanopore-final-ligation", "nanopore-library", "nanopore-depot"), concatMap(newPSV("libraryProtocol", "cDNA-PCR Sequencing (SQK-PCS108)"))));
         lp.add(newProtocol("direct-cdna-sequencing-sqk-dcs108",                         "Direct cDNA Sequencing (SQK-DCS108)",                              "path7", "1", "production", InstanceFactory.setExperimentTypeCodes("nanopore-frg", "nanopore-dna-reparation", "nanopore-reparation-and-end-prep", "nanopore-end-prep", "nanopore-pre-pcr-ligation", "nanopore-pcr", "nanopore-barcode-ligation", "nanopore-final-ligation", "nanopore-library", "nanopore-depot"), concatMap(newPSV("libraryProtocol", "Direct cDNA Sequencing (SQK-DCS108)"))));
         lp.add(newProtocol("direct-rna-sequencing-sqk-rna001",                          "Direct RNA sequencing (SQK-RNA001)",                               "path7", "1", "production", InstanceFactory.setExperimentTypeCodes("nanopore-frg", "nanopore-dna-reparation", "nanopore-reparation-and-end-prep", "nanopore-end-prep", "nanopore-pre-pcr-ligation", "nanopore-pcr", "nanopore-barcode-ligation", "nanopore-final-ligation", "nanopore-library", "nanopore-depot"), concatMap(newPSV("libraryProtocol", "Direct RNA sequencing (SQK-RNA001)"))));
         lp.add(newProtocol("cdna-by-ligation-sqk-lsk108-1d",                            "1D cDNA by ligation (SQK-LSK108)",                                 "path7", "1", "production", InstanceFactory.setExperimentTypeCodes("nanopore-frg", "nanopore-dna-reparation", "nanopore-reparation-and-end-prep", "nanopore-end-prep", "nanopore-pre-pcr-ligation", "nanopore-pcr", "nanopore-barcode-ligation", "nanopore-final-ligation", "nanopore-library", "nanopore-depot"), concatMap(newPSV("libraryProtocol", "1D cDNA by ligation (SQK-LSK108)"))));        
@@ -201,11 +206,18 @@ public class ProtocolServiceCNS {
         //NGL 4138
         lp.add(newProtocol("quick-dna-fecal-soil-microbe-zymo-research", "Quick-DNA Fecal/soil Microbe Zymo research", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("dna-extraction"), concatMap(newPSV("extractionProtocol", "Quick-DNA Fecal/soil"))));
         lp.add(newProtocol("prod_ill_banques_adngacineto_100_v3", "Prod_ILL_Banques_ADNgAcineto_100_v3", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("dna-extraction")));
+        // NGL-4524
+        lp.add(newProtocol("nucleospin-edna-water", "NucleoSpin eDNA Water", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("dna-extraction"), concatMap(newPSV("extractionProtocol", "NucleoSpin eDNA Water"))));
+
+        // NGL-4789
+        lp.add(newProtocol("dnabsolute", "DNAbsolute", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("hmw-dna-extraction"),concatMap(newPSV("extractionProtocol", "DNAbsolute"))));
 
         lp.add(newProtocol("fast_prep_grinding", "Broyage Fast Prep", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("grinding")));
         lp.add(newProtocol("nitrogen-grinding", "Broyage azote (mortier pilon)", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("grinding")));
         lp.add(newProtocol("powersoil-vortex-grinding", "Broyage vortex Powersoil", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("grinding")));
         lp.add(newProtocol("potter-grinding", "Broyage Potter", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("grinding")));
+        // NGL-4452
+        lp.add(newProtocol("vortex-grinding", "Broyage Vortex", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("grinding")));
         
         lp.add(newProtocol("plant-leave-v1", "Plant Leave_v1", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("hmw-dna-extraction"),concatMap(newPSV("extractionProtocol", "Plant Leave_v1"))));
         lp.add(newProtocol("powersoil-v1", "Powersoil_v1", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("hmw-dna-extraction"), concatMap(newPSV("extractionProtocol", "Powersoil_v1"))));
@@ -220,12 +232,19 @@ public class ProtocolServiceCNS {
         lp.add(newProtocol("silex-v1", "SILEX_v1", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("hmw-dna-extraction"), concatMap(newPSV("extractionProtocol", "SILEX_v1"))));
         // NGL-4275
         lp.add(newProtocol("ramya-v1", "Ramya_v1", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("hmw-dna-extraction"), concatMap(newPSV("extractionProtocol", "Ramya_v1"))));
-        
+        // NGL-4385
+        lp.add(newProtocol("virus-fecl3", "Virus FeCl3", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("hmw-dna-extraction"), concatMap(newPSV("extractionProtocol", "Virus FeCl3"))));
+        // NGL-4392
+        lp.add(newProtocol("sds-tip", "SDS Tip", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("hmw-dna-extraction"), concatMap(newPSV("extractionProtocol", "SDS Tip"))));
+
         // NGL-3882
         // lp.add(newProtocol("autre-hmw", "Autre", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("hmw-dna-extraction"), concatMap(newPSV("extractionProtocol", "Autre"))));
          // Ce protocole devra être utilisé si on demande un proto Autre pour les autres expce d'extraction "total-rna-extraction" ou dna-extraction"
          lp.add(newProtocol("other-extraction-protocol", "Autre", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("hmw-dna-extraction","total-rna-extraction","dna-extraction","dna-rna-extraction"), concatMap(newPSV("extractionProtocol", "Autre"))));
-        //NGL-4167
+        // NGL-4418
+        lp.add(newProtocol("molsc_v1", "MoLSC_v1", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("hmw-dna-extraction"), concatMap(newPSV("extractionProtocol", "MoLSC_v1"))));
+        
+         //NGL-4167
         lp.add(newProtocol("other-library-protocol", "Autre", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("nanopore-final-ligation","nanopore-library","dna-illumina-indexed-library","dna-pacbio-library","nanopore-cdna-synthesis"), concatMap(newPSV("libraryProtocol", "Autre"))));
         lp.add(newProtocol("other-prep-hic-protocol", "Autre", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("hi-c-prep"), concatMap(newPSV("prepHicProtocol", "Autre"))));
         
@@ -321,7 +340,6 @@ public class ProtocolServiceCNS {
         lp.add(newProtocol("Amplif_ptr_Sox_144-4newProtocol",   "Amplif ptr Sox 144-4newProtocol",  "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("sizing")));
         lp.add(newProtocol("Decoupe_sur_gel",                   "Découpe sur gel",                  "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("sizing")));
 
-
         /*if(ConfigFactory.load().getString("ngl.env").equals("PROD") ){
             lp.add(newProtocol("Spri_select", "Spri select", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("sizing", "spri-select")));     
         }else if(ConfigFactory.load().getString("ngl.env").equals("DEV") ){         
@@ -335,9 +353,9 @@ public class ProtocolServiceCNS {
         
         
         
-        lp.add(newProtocol("Autre", "Autre", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("fragmentation","pcr-amplification-and-purification","indexing-and-pcr-amplification", "precipitation-purification", "cdna-synthesis", "nanopore-barcode-ligation", "nanopore-dna-reparation", "nanopore-end-prep", "nanopore-frg", "nanopore-pcr", "nanopore-pre-pcr-ligation", "nanopore-reparation-and-end-prep", "ampure", "dnase-treatment", "nanopore-sizing", "nuclease-treatment", "post-pcr-ampure", "rrna-depletion", "small-and-large-rna-purification", "spin-column-purification", "wga-debranching", "fluo-quantification", "qpcr-quantification", "reception-fluo-quantification", "grinding", "sample-prep-exp", "sizing", "small-and-large-rna-isolation", "spri-select", "tag-pcr", "wga-amplification")));
+        lp.add(newProtocol("Autre", "Autre", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("fragmentation","pcr-amplification-and-purification","indexing-and-pcr-amplification", "precipitation-purification", "cdna-synthesis", "nanopore-barcode-ligation", "nanopore-dna-reparation", "nanopore-end-prep", "nanopore-frg", "nanopore-pcr", "nanopore-pre-pcr-ligation", "nanopore-reparation-and-end-prep", "ampure", "dnase-treatment", "nanopore-sizing", "post-pcr-ampure", "rrna-depletion", "small-and-large-rna-purification", "spin-column-purification", "wga-debranching", "fluo-quantification", "qpcr-quantification", "reception-fluo-quantification", "grinding", "sample-prep-exp", "sizing", "small-and-large-rna-isolation", "spri-select", "tag-pcr", "wga-amplification")));
         
-        lp.add(newProtocol("Bq_Low cost_ptr_148_3",          "Bq_Low cost_ptr_148_3",           "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("dna-illumina-indexed-library", "fragmentation"), concatMap(newPSV("libraryProtocol", "Bq low cost")), false));
+        lp.add(newProtocol("bq_Low_cost_ptr_148_3",          "Bq_Low cost_ptr_148_3",           "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("dna-illumina-indexed-library", "fragmentation"), concatMap(newPSV("libraryProtocol", "Bq low cost")), false));
         lp.add(newProtocol("Bq_NEB_Next_Ultra_II_ptr_151_1", "Bq_NEB Next Ultra II ptr_151_1",  "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("dna-illumina-indexed-library", "fragmentation"), concatMap(newPSV("libraryProtocol", "Bq NEB Next Ultra II")), false));
 
         lp.add(newProtocol("Bq_NEB_Reagent_ptr_143_4", "Bq_NEB Reagent ptr_143_4", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("dna-illumina-indexed-library", "fragmentation"), concatMap(newPSV("libraryProtocol", "Bq NEB Reagent"))));
@@ -390,6 +408,16 @@ public class ProtocolServiceCNS {
                            concatMap(newPSV("rnaLibProtocol","Illumina Stranded Total RNA Prep, Ligation"),
                                      newPSV("strandOrientation", "reverse"),
                                      newPSV("cDNAsynthesisType", "random")
+                                    ),
+                            false
+                          )
+        );
+        // NGL-4380
+        lp.add(newProtocol("prod-ill-bqarn-illuminastrandedmrna-179-v1", "Prod_ILL_BqARN_Illumina_Stranded_mRNA_Prep_179_v1", "path2", "1", "production",
+                           InstanceFactory.setExperimentTypeCodes("rna-illumina-library", "indexing-and-pcr-amplification"),
+                           concatMap(newPSV("rnaLibProtocol","Illumina Stranded mRNA Prep, Ligation"),
+                                     newPSV("strandOrientation", "reverse"),
+                                     newPSV("cDNAsynthesisType", "random")
                                     )
                           )
         );
@@ -397,6 +425,16 @@ public class ProtocolServiceCNS {
         lp.add(newProtocol("illumina-stranded-mrna-prep-ligation", "Illumina Stranded mRNA Prep, Ligation", "path2", "1", "production",
                            InstanceFactory.setExperimentTypeCodes("rna-illumina-library", "indexing-and-pcr-amplification"),
                            concatMap(newPSV("rnaLibProtocol","Illumina Stranded mRNA Prep, Ligation"),
+                                     newPSV("strandOrientation", "reverse"),
+                                     newPSV("cDNAsynthesisType", "random")
+                         ),
+                         false
+               )
+        );
+        // NGL-4380
+        lp.add(newProtocol("prod-ill-bqarn-illuminastrandedtotalrna-178-v1", "Prod_ILL_BqARN_Illumina_Stranded_TotalRNA_Prep_178_v1", "path2", "1", "production",
+                           InstanceFactory.setExperimentTypeCodes("rna-illumina-library", "indexing-and-pcr-amplification"),
+                           concatMap(newPSV("rnaLibProtocol","Illumina Stranded Total RNA Prep, Ligation"),
                                      newPSV("strandOrientation", "reverse"),
                                      newPSV("cDNAsynthesisType", "random")
                          )
@@ -477,7 +515,9 @@ comme le protocole est demandé dans l'exp de banque RNA, les prop. suivantes so
         lp.add(newProtocol("zymoclean-dna", "Zymoclean DNA", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("spin-column-purification")));
         lp.add(newProtocol("qiaamp-dna",    "QIAamp DNA",    "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("spin-column-purification")));
         lp.add(newProtocol("one-step-pcr-inhibitor",    "One Step PCR Inhibitor",    "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("spin-column-purification")));
-
+        //NGL-4683 
+        lp.add(newProtocol("dneasy-powerclean-pro-cleanup-kit", "DNeasy PowerClean Pro Cleanup Kit", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("spin-column-purification")));
+        
         lp.add(newProtocol("chromium-10x", "Chromium 10x", "path1", "1", "production", InstanceFactory.setExperimentTypeCodes("dna-illumina-indexed-library", "pcr-amplification-and-purification"), concatMap(newPSV("libraryProtocol", "Chromium 10x"))));
 
         lp.add(newProtocol("rna-extraction-from-trizol-filter-with-dnase", "Extraction ARN à partir de filtres en Trizol avec DNAse sur colonne", "path1", "1", "production", InstanceFactory.setExperimentTypeCodes("total-rna-extraction")));
@@ -487,10 +527,12 @@ comme le protocole est demandé dans l'exp de banque RNA, les prop. suivantes so
         lp.add(newProtocol("nucleospin-rna", "Nucléospin RNA", "path1", "1", "production", InstanceFactory.setExperimentTypeCodes("total-rna-extraction"), concatMap(newPSV("extractionProtocol", "Nucléospin RNA"))));
         lp.add(newProtocol("rneasy-rna", "Rneasy RNA", "path1", "1", "production", InstanceFactory.setExperimentTypeCodes("total-rna-extraction"), concatMap(newPSV("extractionProtocol", "Rneasy RNA"))));
         lp.add(newProtocol("quick-miniprep-rna-zr-duet", "Quick Miniprep RNA (ZR-Duet)", "path1", "1", "production", InstanceFactory.setExperimentTypeCodes("total-rna-extraction"), concatMap(newPSV("extractionProtocol", "Quick Miniprep RNA (ZR-Duet)"))));
+        // NGL-4387
+        lp.add(newProtocol("rneasy-plus-univ", "RNeasy Plus Univ", "path1", "1", "production", InstanceFactory.setExperimentTypeCodes("total-rna-extraction"), concatMap(newPSV("extractionProtocol", "RNeasy Plus Univ"))));
 
         lp.add(newProtocol("Bq_PCR_free", "Bq_PCR_free", "path1", "1", "production", InstanceFactory.setExperimentTypeCodes("dna-illumina-indexed-library", "fragmentation"), concatMap(newPSV("libraryProtocol", "Bq PCR free")), false));
 
-        lp.add(newProtocol("amplif_bq_hi-c", "Amplif. bq Hi-C", "path1", "1", "production", InstanceFactory.setExperimentTypeCodes("pcr-amplification-and-purification")));
+        lp.add(newProtocol("amplif_bq_hi-c", "Amplif. bq Hi-C", "path1", "1", "production", InstanceFactory.setExperimentTypeCodes("pcr-amplification-and-purification", "additional-pcr-amplification")));
 
         //NGL-2717 puis désactivation dans NGL-3840
         lp.add(newProtocol("bq_hi-c", "Bq Hi-C", "path1", "1", "production", InstanceFactory.setExperimentTypeCodes("dna-illumina-indexed-library", "fragmentation"), concatMap(newPSV("libraryProtocol", "Bq Hi-C")), false));
@@ -500,22 +542,22 @@ comme le protocole est demandé dans l'exp de banque RNA, les prop. suivantes so
           
         
         //Protocol HiC NGL-3367
-        lp.add(newProtocol("hi-c-dovetail-animal-tissue", "Hi-C Dovetail - Tissu animal", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("sample-prep-exp")));
-        lp.add(newProtocol("hi-c-dovetail-plant-tissue", "Hi-C Dovetail - Tissu plante", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("sample-prep-exp")));
-        lp.add(newProtocol("hi-c-dovetail-cell-culture", "Hi-C Dovetail - Culture cellulaire", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("sample-prep-exp")));
-        lp.add(newProtocol("hi-c-dovetail-blood", "Hi-C Dovetail - sang", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("sample-prep-exp")));
-        lp.add(newProtocol("hic-arima-animal-tissue-large", "Hi-C Arima - Tissu animal (large)", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("sample-prep-exp")));
-        lp.add(newProtocol("hic-arima-animal-tissue-small", "Hi-C Arima - Tissu animal (small)", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("sample-prep-exp")));
-        lp.add(newProtocol("hic-arima-plant-tissue", "Hi-C Arima - Tissu plante", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("sample-prep-exp")));
-        lp.add(newProtocol("hic-arima-animal-cells", "Hi-C Arima - Cellules animales", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("sample-prep-exp")));
-        lp.add(newProtocol("hic-arima-mammalian-cell-lines", "Hi-C Arima - Mammalian Cell lines", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("sample-prep-exp")));
-        lp.add(newProtocol("omni-c-dovetail-nucleated-blood", "Omni-C Dovetail - Nucleated Blood", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("sample-prep-exp")));
-        lp.add(newProtocol("omni-c-dovetail-animal-tissue-except-insects-and-marine-invertebrates", "Omni-C Dovetail - Animal Tissue (other than insects and marine invertebrates)", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("sample-prep-exp")));
-        lp.add(newProtocol("omni-c-dovetail-insects-and-marine-invertebrates", "Omni-C Dovetail - Insects and marine invertebrates", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("sample-prep-exp")));
-        lp.add(newProtocol("omni-c-dovetail-plant", "Omni-C Dovetail - Plant", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("sample-prep-exp")));
-        lp.add(newProtocol("omni-c-dovetail-mammalian-cells", "Omni-C Dovetail - Mammalian Cells", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("sample-prep-exp")));
-        lp.add(newProtocol("omni-c-dovetail-mammalian-tissue", "Omni-C Dovetail - Mammalian Tissue", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("sample-prep-exp")));
-        lp.add(newProtocol("omni-c-dovetail-mammalian-blood", "Omni-C Dovetail - Mammalian blood", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("sample-prep-exp")));
+        lp.add(newProtocol("hi-c-dovetail-animal-tissue", "Hi-C Dovetail - Tissu animal", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("sample-prep-exp"), concatMap(newPSV("prepEchProtocol", "Hi-C Dovetail - Tissu animal"))));
+        lp.add(newProtocol("hi-c-dovetail-plant-tissue", "Hi-C Dovetail - Tissu plante", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("sample-prep-exp"), concatMap(newPSV("prepEchProtocol", "Hi-C Dovetail - Tissu plante"))));
+        lp.add(newProtocol("hi-c-dovetail-cell-culture", "Hi-C Dovetail - Culture cellulaire", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("sample-prep-exp"), concatMap(newPSV("prepEchProtocol", "Hi-C Dovetail - Culture cellulaire"))));
+        lp.add(newProtocol("hi-c-dovetail-blood", "Hi-C Dovetail - sang", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("sample-prep-exp"), concatMap(newPSV("prepEchProtocol", "Hi-C Dovetail - sang"))));
+        lp.add(newProtocol("hic-arima-animal-tissue-large", "Hi-C Arima - Tissu animal (large)", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("sample-prep-exp"), concatMap(newPSV("prepEchProtocol", "Hi-C Arima - Tissu animal (large)"))));
+        lp.add(newProtocol("hic-arima-animal-tissue-small", "Hi-C Arima - Tissu animal (small)", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("sample-prep-exp"), concatMap(newPSV("prepEchProtocol", "Hi-C Arima - Tissu animal (small)"))));
+        lp.add(newProtocol("hic-arima-plant-tissue", "Hi-C Arima - Tissu plante", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("sample-prep-exp"), concatMap(newPSV("prepEchProtocol", "Hi-C Arima - Tissu plante"))));
+        lp.add(newProtocol("hic-arima-animal-cells", "Hi-C Arima - Cellules animales", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("sample-prep-exp"), concatMap(newPSV("prepEchProtocol", "Hi-C Arima - Cellules animales"))));
+        lp.add(newProtocol("hic-arima-mammalian-cell-lines", "Hi-C Arima - Mammalian Cell lines", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("sample-prep-exp"), concatMap(newPSV("prepEchProtocol", "Hi-C Arima - Mammalian Cell lines"))));
+        lp.add(newProtocol("omni-c-dovetail-nucleated-blood", "Omni-C Dovetail - Nucleated Blood", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("sample-prep-exp"), concatMap(newPSV("prepEchProtocol", "Omni-C Dovetail - Nucleated Blood"))));
+        lp.add(newProtocol("omni-c-dovetail-animal-tissue-except-insects-and-marine-invertebrates", "Omni-C Dovetail - Animal Tissue (other than insects and marine invertebrates)", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("sample-prep-exp"), concatMap(newPSV("prepEchProtocol", "Omni-C Dovetail - Animal Tissue (other than insects and marine invertebrates)"))));
+        lp.add(newProtocol("omni-c-dovetail-insects-and-marine-invertebrates", "Omni-C Dovetail - Insects and marine invertebrates", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("sample-prep-exp"), concatMap(newPSV("prepEchProtocol", "Omni-C Dovetail - Insects and marine invertebrates"))));
+        lp.add(newProtocol("omni-c-dovetail-plant", "Omni-C Dovetail - Plant", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("sample-prep-exp"), concatMap(newPSV("prepEchProtocol", "Omni-C Dovetail - Plant"))));
+        lp.add(newProtocol("omni-c-dovetail-mammalian-cells", "Omni-C Dovetail - Mammalian Cells", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("sample-prep-exp"), concatMap(newPSV("prepEchProtocol", "Omni-C Dovetail - Mammalian Cells"))));
+        lp.add(newProtocol("omni-c-dovetail-mammalian-tissue", "Omni-C Dovetail - Mammalian Tissue", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("sample-prep-exp"), concatMap(newPSV("prepEchProtocol", "Omni-C Dovetail - Mammalian Tissue"))));
+        lp.add(newProtocol("omni-c-dovetail-mammalian-blood", "Omni-C Dovetail - Mammalian blood", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("sample-prep-exp"), concatMap(newPSV("prepEchProtocol", "Omni-C Dovetail - Mammalian blood"))));
         
         //NGL-3501 FDS 04/08/2021: code propriété non conforme "prep-hi-c-protocol" => "prepHicProtocol"
         lp.add(newProtocol("dovetail-hi-c", "Dovetail Hi-C", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("hi-c-prep"),concatMap(newPSV("prepHicProtocol", "Dovetail Hi-C"))));
@@ -565,14 +607,18 @@ comme le protocole est demandé dans l'exp de banque RNA, les prop. suivantes so
         // NGL-3374
         lp.add(newProtocol("yeast-bacteria-fastselect-depletion", "Levure & Bactérie FastSelect", "path7", "1", "production", InstanceFactory.setExperimentTypeCodes("rrna-depletion"), concatMap(newPSV("depletionMethod", "Levure et Bactérie FastSelect")), false)); 
         lp.add(newProtocol("bacteria-fastselect-depletion", "Bactérie FastSelect", "path7", "1", "production", InstanceFactory.setExperimentTypeCodes("rrna-depletion"), concatMap(newPSV("depletionMethod", "Bactérie FastSelect")))); 
-        lp.add(newProtocol("bacteria-nebnext-depletion", "Bactérie NEBNext", "path7", "1", "production", InstanceFactory.setExperimentTypeCodes("rrna-depletion"), concatMap(newPSV("depletionMethod", "Bactérie NEBNext")))); 
+        lp.add(newProtocol("bacteria-nebnext-depletion", "Bactérie NEBNext", "path7", "1", "production", InstanceFactory.setExperimentTypeCodes("rrna-depletion"), concatMap(newPSV("depletionMethod", "Bactérie NEBNext")), false)); 
+        // NGL-4380
+        lp.add(newProtocol("prod-ill-bqarn-depletionarnrproc-neb-169-v2", "Prod_ILL_BqARN_DéplétionARNrProc-NEB_169_v2", "path7", "1", "production", InstanceFactory.setExperimentTypeCodes("rrna-depletion"), concatMap(newPSV("depletionMethod", "Bactérie NEBNext")))); 
         lp.add(newProtocol("bacteria-ribozero-depletion", "Bactérie Ribozéro", "path7", "1", "production", InstanceFactory.setExperimentTypeCodes("rrna-depletion"), concatMap(newPSV("depletionMethod", "Bactérie Ribozéro")))); 
         lp.add(newProtocol("insect-fastselect-depletion", "Insecte FastSelect", "path7", "1", "production", InstanceFactory.setExperimentTypeCodes("rrna-depletion"), concatMap(newPSV("depletionMethod", "Insecte FastSelect")))); 
         lp.add(newProtocol("plant-fastselect-depletion", "Plante FastSelect", "path7", "1", "production", InstanceFactory.setExperimentTypeCodes("rrna-depletion"), concatMap(newPSV("depletionMethod", "Plante FastSelect")))); 
         lp.add(newProtocol("nuclease-tex-depletion", "Nuclease TEX", "path7", "1", "production", InstanceFactory.setExperimentTypeCodes("rrna-depletion"), concatMap(newPSV("depletionMethod", "Nuclease TEX")))); 
         lp.add(newProtocol("dev-ill-bqarn-ribodeplet-bact-lev-qiagen-173-v1", "Dev_ILL_BqARN_RiboDeplet-Bact-Lev-QIAGEN_FastSelect_173_v1", "path7", "1", "production", InstanceFactory.setExperimentTypeCodes("rrna-depletion"), concatMap(newPSV("depletionMethod", "Levure et Bactérie FastSelect"))));
         // NGL-4276
-        lp.add(newProtocol("ribozero-plus-microbiome-depletion", "RiboZero Plus Microbiome", "path7", "1", "production", InstanceFactory.setExperimentTypeCodes("rrna-depletion"), concatMap(newPSV("depletionMethod", "RiboZero Plus Microbiome"))));
+        lp.add(newProtocol("ribozero-plus-microbiome-depletion", "RiboZero Plus Microbiome", "path7", "1", "production", InstanceFactory.setExperimentTypeCodes("rrna-depletion"), concatMap(newPSV("depletionMethod", "RiboZero Plus Microbiome")), false));
+        // NGL-4380
+        lp.add(newProtocol("prod-ill-bqarn-depletribozeroplusmicrobiome-177-v1", "Prod_ILL_BqARN_DéplétionARNrRibozeroPlusMicrobiome_Illumina_177_v1", "path7", "1", "production", InstanceFactory.setExperimentTypeCodes("rrna-depletion"), concatMap(newPSV("depletionMethod", "RiboZero Plus Microbiome"))));
         
         // NGL-2840 - Gestion du Femto Pulse.
         lp.add(newProtocol("gdna-165kb-femto-pulse-protocol", "gDNA 165 kb", "path7", "1", "production", InstanceFactory.setExperimentTypeCodes("chip-migration"))); 
@@ -599,11 +645,36 @@ comme le protocole est demandé dans l'exp de banque RNA, les prop. suivantes so
         lp.add(newProtocol("ptr_pool_mgi","POOL MGI","path7", "1", "production", InstanceFactory.setExperimentTypeCodes("mgi-pool")));
         lp.add(newProtocol("annexe-ssdna-mgi-v1","Annexe_ssDNA_MGI_v1","path7", "1", "production", InstanceFactory.setExperimentTypeCodes("fluo-quantification")));
         
-        //PacBio
-        lp.add(newProtocol("hifi-wg-or-metag-pacbio-library", "HIFI - Whole Genome and Metagenome library", "path7", "1", "production", InstanceFactory.setExperimentTypeCodes("fragmentation","dna-pacbio-library"), concatMap(newPSV("libraryProtocol", "HIFI - Whole Genome and Metagenome library")))); 
-        lp.add(newProtocol("pacbio-smrt-cell-prep-and-sequencing", "PacBio SMRT Cell prep and sequencing", "path7", "1", "production", InstanceFactory.setExperimentTypeCodes("prep-smrt-cell","pacbio-depot"))); 
-        lp.add(newProtocol("nuclease-treatment", "Traitement Nucléase", "path7", "1", "production", InstanceFactory.setExperimentTypeCodes("nuclease-treatment"))); 
+        // NGL-4350
+        lp.add(newProtocol("dnbseq-g400-std-high-throughput-seq","DNBSEQ-G400RS Std High-throughput (Rapid) Sequencing","path7", "1", "production", InstanceFactory.setExperimentTypeCodes("mgi-sscircularisation", "mgi-nanoballs", "mgi-prepa-fc", "mgi-depot")));
         
+        //PacBio
+        lp.add(newProtocol("hifi-wg-or-metag-pacbio-library", "HIFI - Whole Genome and Metagenome library", "path7", "1", "production", InstanceFactory.setExperimentTypeCodes("fragmentation","dna-pacbio-library", "pacbio-depot-v2", "prep-seq-plate-pacbio", "pacbio-refragmentation"), concatMap(newPSV("libraryProtocol", "HIFI - Whole Genome and Metagenome library")))); 
+        lp.add(newProtocol("pacbio-smrt-cell-prep-and-sequencing", "PacBio SMRT Cell prep and sequencing", "path7", "1", "production", InstanceFactory.setExperimentTypeCodes("prep-smrt-cell","pacbio-depot"))); 
+        // Désactivé dans le NGL-4399.
+        // lp.add(newProtocol("nuclease-treatment", "Traitement Nucléase", "path7", "1", "production", InstanceFactory.setExperimentTypeCodes("nuclease-treatment"))); 
+        
+        // NGL-4331
+        lp.add(newProtocol("smrt-bell-cleanup", "SMRT-Bell-Cleanup", "path7", "1", "production", InstanceFactory.setExperimentTypeCodes("ampure"))); 
+        lp.add(newProtocol("ampure-pb-beads", "Ampure-PB-Beads", "path7", "1", "production", InstanceFactory.setExperimentTypeCodes("ampure"))); 
+
+        // NGL-4408
+        lp.add(newProtocol("revio-polymerase-kit-ptr", "Revio polymerase kit", "path7", "1", "production", InstanceFactory.setExperimentTypeCodes("abc"))); 
+        
+        // NGL-4400
+        lp.add(newProtocol("pacbio-sizing-ptr", "sizing pacbio", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("nanopore-sizing")));
+        lp.add(newProtocol("pre-shearing-hifi-wg-or-metag-pacbio-library", "Pré-Shearing - HIFI Whole Genome and Metagenome library", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("fragmentation")));
+
+        // NGL-4477
+        lp.add(newProtocol("biomasher2_grinding", "broyage BioMasherII", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("grinding")));
+
+        lp.add(newProtocol("nuclei-isolation-omni-c", "NI-OmniC", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("nuclei-isolation"), concatMap(newPSV("nucleisolationProtocol", "NI-OmniC"))));
+        lp.add(newProtocol("nuclei-isolation-arima", "NI-Arima", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("nuclei-isolation"), concatMap(newPSV("nucleisolationProtocol", "NI-Arima"))));
+
+        lp.add(newProtocol("omnic-dovetail-ni-plant", "OmniC Dovetail NI Plant", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("sample-prep-exp"), concatMap(newPSV("prepEchProtocol", "OmniC Dovetail NI Plant"))));
+        
+        // NGL-4776
+        lp.add(newProtocol("hifi-ultra-low-dna-input-pacbio-library", "HIFI library Ultra Low DNA Input", "path2", "1", "production", InstanceFactory.setExperimentTypeCodes("fragmentation", "dna-pacbio-library", "pacbio-depot-v2", "prep-seq-plate-pacbio", "pacbio-refragmentation"), concatMap(newPSV("libraryProtocol", "Ultra Low DNA"))));
 
         if(ConfigFactory.load().getString("ngl.env").equals("PROD") ){
 

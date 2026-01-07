@@ -62,21 +62,26 @@ angular.module('home').controller('OneToVoidQPCRQuantificationCNGCtrl',['$scope'
 	});
 	$scope.atmService.data.setColumnsConfig(columns);
 	
-	// ce code permet de filtrer les inputContainers dans l'expérience et ne garde que ceux qui correspondent au secteur choisi
+	// Filtrer les inputContainers dans l'expérience et ne garder que ceux qui correspondent au secteur choisi
 	$scope.$on('updateInstrumentProperty', function(e, pName) {
 		console.log("call event updateInstrumentProperty "+pName);
 		
-		if($scope.isCreationMode() && pName === 'sector96'){
-			console.log("update sector96 "+$scope.experiment.instrumentProperties[pName].value);
+		if($scope.isCreationMode() && pName === 'sector96'){	
 			var sector96 = $scope.experiment.instrumentProperties[pName].value
+			console.log("update sector96 "+ sector96);
+
+			// ajout NGL-4902
+			resetMappingModeSelect();
+
 			var data = $scope.atmService.data.getData();
-			
 			if(data){
 				var newData = [];
 				angular.forEach(data, function(value){
 					if(value.inputContainer.support.column*1 <= 6 && sector96 === '1-48'){
 						this.push(value);
 					}else if(value.inputContainer.support.column*1 > 6 && sector96 === '49-96'){
+						this.push(value);
+					} else if (sector96 === '1-96'){ // NGL-4635 ajout du cas 1-96 ==> on ne fait aucun filtrage on garde tous les inputContainers
 						this.push(value);
 					}
 				}, newData);
@@ -96,7 +101,6 @@ angular.module('home').controller('OneToVoidQPCRQuantificationCNGCtrl',['$scope'
 				
 				// 18/02/2021: la copie de la concentration ne doit etre faite que si l'utilisateur le demande explicitement ??
 				if(concentration1){
-					
 					// ATTENTION ne pas lier assignation de concentration et calcul quantité !!!
 					$parse("newConcentration").assign(inputContainerUsed, concentration1);
 					
@@ -126,51 +130,42 @@ angular.module('home').controller('OneToVoidQPCRQuantificationCNGCtrl',['$scope'
 					}
 				} else {
 					inputContainerUsed.newConcentration = null;
-					inputContainerUsed.newQuantity = null; // necessaire ici ??
+					inputContainerUsed.newQuantity = null;
 				}
 			}
 		});
 	};
 	
 	//NGL-2237 ajout parametre !! voir CNS/reception-fluo-quantification-ctrl.js
-	// 28/01/2019 NGL-2368/NGL-2389 ajout  tecan+lightcycler =>ProdTecan
-	// 30/03/2020 NGL-2897 il n'y a pas de Prod Tecan  c'est du dev !!! Renommer
-	// 08/04/2020 NGL-2928 ; changer 'mode' et ajouter 'mappingMode'  (pour gérer les 2 nouveaux type de fichiers)
-	// 28/04/2020 le fichier "standard n'est pas retenu (pour l'instant), mais la stucture  générale reste (voir aussi qpc-nb-cycle-setting-ctrl.js)
 	// FDS 08/04/2020 NGL-2928 ; changer 'mode' et ajouter 'mappingMode'  (pour gérer les 2 nouveaux type de fichiers)
 	//     28/04/2020 le fichier "standard n'est pas retenu (pour l'instant), mais la stucture  générale reste (voir aussi qpc-nb-cycle-setting-ctrl.js)
 	// 23/06/2022 mettre a jour la propriété mapQpcrParameter  
-	var importData = function(mode,mappingMode){
-		console.log("importData =>"+mode + "/"+ mappingMode );
+	// NGL-4902 nouveau mode de mapping 'ProdBravoConvertMt' => reorganiser le code !!!
+	var importData = function(mode, mappingModeCode){
+		console.log("importData =>"+mode + "/"+ mappingModeCode );
 		$scope.messages.clear();
 		
-		if       (mode === "mapping" && mappingMode === "ProdBravo") { uploadFile=$scope.fileProd;}
-		else if  (mode === "mapping" && mappingMode === "DevBravo")  { uploadFile=$scope.fileDev; }
-		else if  (mode === "mapping" && mappingMode === "DevTecan")  { uploadFile=$scope.fileDevTecan; }
-		//else if  (mode === "standard")                               { uploadFile=$scope.fileLightcycler; }
-		
+		uploadFile=$scope.qpcrFile;
 		console.log("uploading file :"+uploadFile.fullname);
-		$http.post(jsRoutes.controllers.instruments.io.IO.importFile($scope.experiment.code).url+"?mode="+mode+"&mappingMode="+mappingMode,  uploadFile )
+
+		// le secteur n'est pas passé en paramètre, importFile le récupère dans l'expérience
+		// NGL-4902 passer mappingModeCode (=parameterCode)
+		$http.post(jsRoutes.controllers.instruments.io.IO.importFile($scope.experiment.code).url+"?mode="+mode+"&parameterCode="+mappingModeCode,  uploadFile )
 		.success(function(data, status, headers, config) {
 			$scope.messages.clazz="alert alert-success";
 			$scope.messages.text=Messages('experiments.msg.import.success');
 			$scope.messages.showDetails = false;
 			$scope.messages.open();	
+
 			//only atm because we cannot override directly experiment on scope.parent
 			$scope.experiment.atomicTransfertMethods = data.atomicTransfertMethods;
 			
-			$scope.fileProd = undefined;
-			$scope.fileDev = undefined;
-			$scope.fileDevTecan = undefined;
-			// $scope.fileLightcycler = undefined; // NGL-2928 pas pour l'instant
-			
-			angular.element('#importFileProd')[0].value = null;
-			angular.element('#importFileDev')[0].value = null;
-			angular.element('#importFileDevTecan')[0].value = null;
-			// angular.element('#importFileLightcycler')[0].value = null; // NGL-2928 pas pour l'instant
-			
 			// ajout pour NGL-3736
-			updateMapQpcrParameter(mappingMode); 
+			updateMapQpcrParameter(mappingModeCode); 
+
+			// reinitialiser les elements qui servent a importer
+			$scope.qpcrFile= undefined;
+			angular.element('#importQpcrFile')[0].value = null; // le input id dans le scala
 			
 			$scope.$emit('refresh');
 		})
@@ -180,15 +175,9 @@ angular.module('home').controller('OneToVoidQPCRQuantificationCNGCtrl',['$scope'
 			$scope.messages.setDetails(data);
 			$scope.messages.open();	
 			
-			$scope.fileProd = undefined;
-			$scope.fileDev = undefined;
-			$scope.fileDevTecan = undefined;
-			// $scope.fileLightcycler = undefined;// NGL-2928 pas pour l'instant
-			
-			angular.element('#importFileProd')[0].value = null;
-			angular.element('#importFileDev')[0].value = null;
-			angular.element('#importFileDevTecan')[0].value = null;
-			// angular.element('#importFileLightcycler')[0].value = null;// NGL-2928 pas pour l'instant
+			// reinitialiser les elements qui servent a importer
+			$scope.qpcrFile= undefined;
+			angular.element('#importQpcrFile')[0].value = null; // le input id dans le scala
 		});
 	};
 	
@@ -196,44 +185,8 @@ angular.module('home').controller('OneToVoidQPCRQuantificationCNGCtrl',['$scope'
 	// 28/01/2019 NGL-2368/NGL-2389 ajout  tecan+lihtcycler =>ProdTecan
 	// 30/03/2020 correction isShowBravo et isShowTecan
 	// FDS 08/04/2020 NGL-2928 ajouts pour import fichier lightCycler480ii seul=standard
-	//     28/04/2020 pas pour l'instant
+	// NGL_4902 : grosses modifications... EN COURS !!!!
 	$scope.buttons= {
-		isShowBravo:function(){
-			return ( $scope.buttons.isBravo() && ( ($scope.isInProgressState() && !$scope.mainService.isEditMode() ) || Permissions.check("admin") ) );
-		},
-		isShowTecan:function(){
-			return ( $scope.buttons.isTecan() && ( ($scope.isInProgressState() && !$scope.mainService.isEditMode() ) || Permissions.check("admin") ) );
-		},
-		/* NGL-2928 pas pour l'instant
-		isShowLightcycler:function(){
-				return ( $scope.buttons.isLightcycler() && ( ($scope.isInProgressState() && !$scope.mainService.isEditMode() ) || Permissions.check("admin") ) );
-		}, */
-		isFileSetProd:function(){
-			return ($scope.fileProd ===null || $scope.fileProd === undefined)?"disabled":"";
-		},
-		isFileSetDev:function(){
-			return ($scope.fileDev === null || $scope.fileDev === undefined)?"disabled":"";
-		},
-		isFileSetDevTecan:function(){
-			return ($scope.fileDevTecan === null || $scope.fileDevTecan === undefined)?"disabled":"";
-		},
-		/* NGL-2928 pas pour l'instant
-		isFileSetLightcycler:function(){
-			return ($scope.fileLightcycler === null || $scope.fileLightcycler === undefined)?"disabled":"";
-		},*/
-		clickProd:function(){ 
-			return importData("mapping","ProdBravo");
-		},
-		clickDev:function() { 
-			return importData("mapping","DevBravo");
-		},
-		clickDevTecan:function(){ 
-			return importData("mapping","DevTecan");
-		},
-		/* NGL-2928 pas pour l'instant
-		clickLightcycler:function(){ 
-			return importData("standard",null);
-		},*/
 		isTecan:function(){
 			return ($scope.experiment.instrument.typeCode === 'tecan-evo-150-and-qpcr-lightcycler-480II');
 		},
@@ -243,7 +196,29 @@ angular.module('home').controller('OneToVoidQPCRQuantificationCNGCtrl',['$scope'
 		/* NGL-2928 pas pour l'instant
 		isLightcycler:function(){
 			return ($scope.experiment.instrument.typeCode === 'qpcr-lightcycler-480II');
-		}*/
+		},
+		*/
+		// NGL-4635 . !!!! au demarrrage pas encore définie !!!!! donc return false....
+		isFullPlate:function(){
+			return ($scope.experiment.instrumentProperties.sector96.value === '1-96');
+		},
+		isShowBravo:function(){
+			return ( $scope.buttons.isBravo() && ( ($scope.isInProgressState() && !$scope.mainService.isEditMode() ) || Permissions.check("admin") ) );
+		},
+		isShowTecan:function(){
+			return ( $scope.buttons.isTecan() && ( ($scope.isInProgressState() && !$scope.mainService.isEditMode() ) || Permissions.check("admin") ) );
+		},
+		/* NGL-2928 pas pour l'instant
+		isShowLightcycler:function(){
+				return ( $scope.buttons.isLightcycler() && ( ($scope.isInProgressState() && !$scope.mainService.isEditMode() ) || Permissions.check("admin") ) );
+		}, 
+		*/
+		isFileSet:function(){
+			return ($scope.qpcrFile === null || $scope.qpcrFile === undefined)?"disabled":"";
+		},
+		clickImport:function(){ 
+			return importData("mapping",$scope.mappingMode.code);
+		}
 	};
 	
 	
@@ -290,30 +265,51 @@ angular.module('home').controller('OneToVoidQPCRQuantificationCNGCtrl',['$scope'
 	};
 	
 
-	// NGL-3736
-	var updateMapQpcrParameter = function (mappingMode){
-		var mapQpcrParameterCode = getMapQpcrParameterCode(mappingMode);
-		setQpcrParameterName(mapQpcrParameterCode);
+	// NGL-3736 stocker dans l'expérience le choix de l'utilisateur
+	var updateMapQpcrParameter = function (mappingModeCode){
+		var match = $scope.qpcrParameters.find(function (element) {
+			return element.code === mappingModeCode;
+		});
+		// on affiche le nom du mapQpcrParameter
+		$parse("instrumentProperties.mapQpcrParameter.value").assign($scope.experiment, match.name);
 	};
-	
-	//attention les codes des parameters sont hardcodés dans Qpcrlightcycler480iiAloneInput.java  !!!!
-	var getMapQpcrParameterCode = function(mappingMode){
-		var mapQpcrParameterCode =undefined;
-		switch (mappingMode) {
-			case 'ProdBravo':  mapQpcrParameterCode ='bravo_5_50'; break;
-			case 'DevBravo' :  mapQpcrParameterCode ='bravo_10_100';break;
-			case 'DevTecan' :  mapQpcrParameterCode ='tecan_10_100';break;
-		}
-		return mapQpcrParameterCode;
+
+	//NGL-4902---------------------------------------------------------------------------------
+    $scope.mappingMode=null;
+
+	function resetMappingModeSelect(){
+		if (      $scope.buttons.isTecan() && ! $scope.buttons.isFullPlate() ){ $scope.mappingMode=$scope.tecanMappingModes_halfPlate[0]; }
+		else if ( $scope.buttons.isBravo() && ! $scope.buttons.isFullPlate() ){ $scope.mappingMode=$scope.bravoMappingModes_halfPlate[0]; }
+		else if ( $scope.buttons.isBravo() &&   $scope.buttons.isFullPlate() ){ $scope.mappingMode=$scope.bravoMappingModes_fullPlate[0]; }
+	}
+
+	$scope.setMappingMode=function(mode){
+		$scope.mappingMode=mode; //!!! pourquoi l'assignation par ng-model ne le fait pas automatiquement ????
+		console.log ( "mapping mode code="+$scope.mappingMode.code);
 	};
-	
-	var setQpcrParameterName = function (mapQpcrParameterCode ){
-			var match = $scope.qpcrParameters.find(function (element) {
-						return element.code === mapQpcrParameterCode;
-			});
-			$parse("instrumentProperties.mapQpcrParameter.value").assign($scope.experiment, match.name);
-	};
-	
+
+	// ajouter dans le libelle le facteur correctif !!!! garder en coherence avec la valeur dans map-qpcr-parameter
+	$scope.mappingModes=[
+		{ robot:'bravo', type:'half', code:'bravo_5_50',       name:'Prod - dilutions 5.000 et 50.000 (facteur correctif:570)'},
+		{ robot:'bravo', type:'half', code:'bravo_10_100',     name:"Dev  - dilutions 10.000 et 100.000(facteur correctif:470)"} ,
+		{ robot:'bravo', type:'full', code:'bravo_10',         name:'Prod - dilution 10.000 (facteur correctif:570)'},
+		{ robot:'tecan', type:'half', code:'tecan_10_100',    name:'Dev  - dilutions 10.000 et 100.000 (facteur correctif:470)'},
+	];
+
+	$scope.tecanMappingModes_halfPlate=$scope.mappingModes.filter(tecanHalfPlate);
+	$scope.bravoMappingModes_fullPlate=$scope.mappingModes.filter(bravoFullPlate);
+	$scope.bravoMappingModes_halfPlate=$scope.mappingModes.filter(bravoHalfPlate);
+
+	function bravoFullPlate(value) {
+		return (value.robot === 'bravo' && value.type === 'full');
+	}
+	function bravoHalfPlate(value) {
+		return (value.robot === 'bravo' && value.type === 'half');
+	}
+	function tecanHalfPlate(value) {
+		return (value.robot === 'tecan' && value.type === 'half');
+	}
+
 	// promise pour map-qpcr-parameter
 	function fetchQpcrParameters() {
 		return  $http.get(jsRoutes.controllers.commons.api.Parameters.list().url,{ params:{typeCodes:['map-qpcr-parameter']} })

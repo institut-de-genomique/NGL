@@ -1,8 +1,8 @@
 "use strict";
  
  angular.module('ngl-sq.descriptionsServices.instruments', []).
-	factory('descriptionsInstrumentsSearchService', ['$http', 'mainService', 'lists', 'datatable', 
-		                         function($http,   mainService,   lists,   datatable){
+	factory('descriptionsInstrumentsSearchService', ['$http', '$filter', 'mainService', 'lists', 'datatable', 
+		                         function($http, $filter, mainService,   lists,   datatable){
 
 		var getColumns = function(tab){
             if(tab === 'categories') return getCategoriesColumns();
@@ -466,7 +466,29 @@
                     route: getInstrumentUsedTypesRoute(),
                     form: {},
                     lists: {
-                        types: lists.getInstrumentUsedTypes
+                        categories: lists.getInstrumentCategories,
+                        types: getListForTab("instrumentUsedTypes(tabProperties)", lists.getInstrumentUsedTypes, function(){
+                            return { categoryCodes: searchService.tabs.properties.form.categoryCodes };
+                        }),
+                        propertyDefinitions: getListForTab("propertyDefinitions(tabProperties)", lists.getPropertyDefinitions, function(){
+                            var form = { objectTypeCode :  'Instrument' };
+                            if(isInstrumentTypeCodesSelected()) addInstrumentTypeNamesToForm();
+                            return form;
+
+                            //---
+
+                            function isInstrumentTypeCodesSelected(){
+                                return searchService.tabs.properties.form.codes;
+                            } 
+
+                            function addInstrumentTypeNamesToForm() {
+                                form.typeNames = searchService.tabs.properties.form.codes.map(toNames);
+                            }
+
+                            function toNames(propertyCode){
+                                return $filter('codes')(propertyCode,'type');
+                            }
+                        })
                     }
                 };
             }

@@ -2,10 +2,10 @@ package models.sra.submit.sra.instance;
 
 import org.apache.commons.lang3.StringUtils;
 
-import models.sra.submit.util.VariableSRA;
 import play.Logger;
+import services.sra.SraValidationHelper;
+import services.sra.VariableSRA;
 import validation.ContextValidation;
-import validation.sra.SraValidationHelper;
 import validation.utils.ValidationHelper;
 
 public class UserExperimentType {

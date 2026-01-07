@@ -48,9 +48,10 @@ runs.table.iaifb=Internal And Illumina Filter Base (Gb)
 runs.table.q30=Q30
 
 #archives filter value
-archives.input_radio.0 = All
-archives.input_radio.1 = Backed Up
+#archives.input_radio.0 = All
+#archives.input_radio.1 = Backed Up
 archives.input_radio.2 = Non Backed Up
+archives.input_radio.3 = Non Cloned
 
 #archives - datatable
 archives.table.runcode=Run Code
@@ -64,8 +65,6 @@ archives.table.backupid=Backup Id
 property.nbRead.label=Nb Read
 property.asciiEncoding.label=ASCII Encoding
 property.label.label=Label
-
-date.format=MM/dd/yyyy
 
 
 

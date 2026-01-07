@@ -17,15 +17,17 @@ import views.html.containerSupports.search;
 public class ContainerSupports extends NGLController implements NGLJavascript {
 	
 	private final home        home;
+	private final search      search;
 	private final details     details;
 	private final homeScanner homeScanner;
 	
 	@Inject
-	public ContainerSupports(NGLApplication app, home home, details details, homeScanner homeScanner) {
+	public ContainerSupports(NGLApplication app, home home, search search, details details, homeScanner homeScanner) {
 		super(app);
 		this.home        = home;
 		this.details     = details;
 		this.homeScanner = homeScanner;
+		this.search = search;
 	}
 	
 	@Authenticated
@@ -62,6 +64,8 @@ public class ContainerSupports extends NGLController implements NGLJavascript {
   	    return jsRoutes(controllers.containers.tpl.routes.javascript.ContainerSupports.search(),
   	    				controllers.containers.tpl.routes.javascript.ContainerSupports.home(),
   	    				controllers.printing.tpl.routes.javascript.Printing.home(),
+						  controllers.projects.api.routes.javascript.UmbrellaProjects.list(),
+						  controllers.projects.api.routes.javascript.UmbrellaProjects.get(),
   	    				controllers.containers.tpl.routes.javascript.ContainerSupports.homeScanner(),
   	    				controllers.containers.tpl.routes.javascript.ContainerSupports.details(),
   	    				controllers.containers.api.routes.javascript.ContainerSupports.list(),

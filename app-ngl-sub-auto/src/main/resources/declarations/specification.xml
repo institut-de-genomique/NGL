@@ -146,6 +146,7 @@ H:\birdsSpec.xsd">
 			<KeyValueElement key="-F" value="&quot;EXPERIMENT=@%xmlExperiments%&quot;" parameterName="xmlExperiments"/>
 			<KeyValueElement key="-F" value="&quot;RUN=@%xmlRuns%&quot;" parameterName="xmlRuns"/>
 			<KeyValueElement key="-F" value="&quot;PROJECT=@%xmlUmbrella%&quot;" parameterName="xmlUmbrella"/>
+			<KeyValueElement key="-F" value="&quot;PROJECT=@%xmlUmbrella%&quot;" parameterName="xmlProjects"/>
 			<KeyValueElement key="-F" value="&quot;ANALYSIS=@%xmlAnalysis%&quot;" parameterName="xmlAnalysis"/>
 			<LineElement line="-k" parameterName="optK" />
 			<LineElement line="%ebiResult%" parameterName="listAC"/>

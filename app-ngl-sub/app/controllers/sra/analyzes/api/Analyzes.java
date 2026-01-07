@@ -7,12 +7,12 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import controllers.NGLAPIController;
 import controllers.QueryFieldsForm;
+import controllers.sra.api.AnalysisAPI;
 import fr.cea.ig.authentication.Authenticated;
 import fr.cea.ig.authorization.Authorized;
 import fr.cea.ig.ngl.NGLApplication;
 import fr.cea.ig.ngl.dao.api.APIException;
 import fr.cea.ig.ngl.dao.api.APIValidationException;
-import fr.cea.ig.ngl.dao.api.sra.AnalysisAPI;
 import fr.cea.ig.ngl.dao.sra.AnalysisDAO;
 import models.sra.submit.sra.instance.Analysis;
 import play.data.Form;
@@ -98,12 +98,12 @@ public class Analyzes extends NGLAPIController<AnalysisAPI, AnalysisDAO, Analysi
 		if(StringUtils.isNotBlank(userAnalysis.code) && ! userAnalysis.code.equals(code)) {
 			throw new Exception("analysis.code :  valeur " + userAnalysis.code + " != du code indiqué dans la route "  + code);
 		}
-		boolean copy = false;
+		// boolean copy = false;
 		if (queryFieldsForm.fields == null) {	
 			return api().update(userAnalysis, getCurrentUser(), false);
 		} 
 		if(queryFieldsForm.fields.contains("copy")) {
-			copy = true;
+			// copy = true;
 			queryFieldsForm.fields.remove("copy");
 			return api().update(userAnalysis, getCurrentUser(), true);
 		} 

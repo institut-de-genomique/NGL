@@ -67,6 +67,8 @@ public class Containers extends NGLController implements NGLJavascript {
                 		controllers.containers.tpl.routes.javascript.Containers.details(),
                 		controllers.containers.tpl.routes.javascript.ContainerSupports.get(),
                 		controllers.containers.tpl.routes.javascript.Containers.newFromFile(),
+                        controllers.projects.api.routes.javascript.UmbrellaProjects.list(),
+				controllers.projects.api.routes.javascript.UmbrellaProjects.get(),
                 		controllers.printing.tpl.routes.javascript.Printing.home(),
                 		controllers.containers.api.routes.javascript.Containers.get(),
                 		controllers.containers.api.routes.javascript.Containers.update(),
@@ -105,7 +107,8 @@ public class Containers extends NGLController implements NGLJavascript {
                 		controllers.printing.api.routes.javascript.Tags.list(),
                 		controllers.printing.api.routes.javascript.Tags.print(),
                 		controllers.printing.tpl.routes.javascript.Printing.home(),
-                		controllers.commons.api.routes.javascript.Parameters.list());
+                		controllers.commons.api.routes.javascript.Parameters.list(),
+                        controllers.samples.api.routes.javascript.ImportTypes.list());
     }
     
     /*public Result javascriptRoutes() {

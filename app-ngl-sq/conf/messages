@@ -28,7 +28,7 @@ containerSupports.tabs.general = Général
 containerSupports.tabs.storages = Historique de stockages
 containerSupports.tabs.workflow = Infos workflow
 containerSupports.tabs.search = Recherche Supports
-containerSupports.tabs.state = Changement d'Etat Supports
+containerSupports.tabs.state = Changement d''Etat Supports
 containerSupports.tabs.scanner = Recherche par Code Barre
 
 
@@ -110,7 +110,6 @@ containers.tabs.new = Création / mise à jour depuis fichier
 
 #Containers table
 containers.table.code = Code Container
-# NOTE FDS: pourquoi ces 2 déclarations quasi identiques...
 containers.table.categoryCode = Catégorie Support
 containers.table.supportCategoryCode = Catégorie support
 containers.table.projectCodes = Projet(s)
@@ -125,6 +124,9 @@ containers.table.state.code = Etat container
 containers.table.stateCode = Etat
 containers.table.creationDate = Création container
 containers.table.finalConcentration = Conc. finale
+# NGL-4701 - Labels légèrement différents de ceux du dessus, demandés par Julie.
+containers.table.fromPurificationTypeCode = Issu du type purif
+containers.table.fromTransfertTypeCode = Issu du type transfert
 containers.table.concentration.shortLabel = Conc.
 containers.table.concentration.unit = Unité Concentration
 containers.table.concentration.unit.shortLabel = Unité Conc.
@@ -132,10 +134,16 @@ containers.table.concentration = Concentration
 containers.table.concentration.value= Concentration Container
 containers.table.concentration.pool= conc. Pool calculée
 containers.table.volume = Volume
+containers.table.volumeSortie = Volume en sortie
 containers.table.volume.provided = Volume fourni
+containers.table.idPlaqueSequencage = ID plaque sequencage
+containers.table.positionOnSeqPlate = Position sur la plaque de séquençage
+containers.table.ABCplateConcentration = Concentration on plate
 containers.table.quantity = Quantité
+containers.properties.eukNbCells = Nb cellules eucaryotes
+containers.table.quantitySortie = Quantité en sortie
 containers.table.finalQuantity = Qté finale
-containers.table.inputQuantity = Qté engagé
+containers.table.inputQuantity = Qté engagée
 containers.table.quantity.unit = Unité Quantité
 containers.table.inputQuantity.unit = Unité Quantité engagée
 containers.table.inputVolume  = Volume engagé
@@ -146,9 +154,9 @@ containers.table.well = Puit
 containers.table.container.out.code = Container (Sortie)
 containers.table.container.in.code = Container (Entrée)
 containers.table.loadingConcentration.unit = Unité Concentration de chargement
-# NOTE FDS: pourquoi  ces 2 declarations quasi identiques...
 containers.table.support.name = Support container
 containers.table.supportCode = Support container
+containers.table.container = Container
 containers.table.support.out.code = Support sortie
 containers.table.support.in.code = Support entrée
 containers.table.support.categoryCode = Catégorie support
@@ -172,6 +180,7 @@ containers.table.percentageInsidePool = % au sein du pool
 containers.table.percentageInsidePoolLongLabel = Pourcentage au sein du pool
 containers.table.codeAliquot = Code aliquot
 containers.table.storageCode = Stockage
+containers.table.storageCodeIn = Stockage Container IN
 containers.table.status = Statut
 containers.table.dispatch = Orientation
 containers.table.libProcessType = Type processus banque	
@@ -185,6 +194,7 @@ containers.table.sizeqc = Taille QC
 containers.table.treeOfLife = Arbre de vie
 containers.table.properties = Autres Propriétés
 containers.table.comments = Commentaires
+containers.table.containerComments = Commentaire container
 containers.table.contents.length = Nb de contents
 containers.table.contents = Contents
 containers.table.percents = Pourcentage
@@ -192,6 +202,8 @@ containers.table.sampleDetail = Détails Echantillon
 containers.table.referenceCollab = Réf. collab
 containers.table.taxonCode= Taxon Id
 containers.table.ncbiScientificName= Taxon
+containers.table.phylumScientific = Taxon phylum
+containers.table.classScientific = Taxon class
 containers.table.workName = Label de travail 
 containers.table.workNameInit = Label de travail (ssCircu. ou pool)
 containers.table.expectedCoverage= Couv. souhaitée
@@ -201,9 +213,15 @@ containers.table.expectedBaits=Baits (sondes) prévues
 containers.table.baits=Baits (sondes)
 containers.table.captureProtocol=Protocole / Kit
 containers.table.importTypeCode = Type d''import
+containers.table.extractionBlankSampleCode = Code éch. témoin négatif extraction
 containers.table.fluoroskanLine = Ligne (plq fluoroskan)
 containers.table.fluoroskanColumn = Colonne (plq fluoroskan)
-containers.table.biologicalMaterialQuantity = Quantité matériel biologique
+containers.table.femtopulseLine = Ligne (plq femtopulse)
+containers.table.femtopulseColumn = Colonne (plq femtopulse)
+containers.table.tapestationLine = Ligne (tapestation)
+containers.table.tapestationColumn = Colonne (tapestation)
+containers.table.biologicalMaterialQuantity = Quantité (cellules ou autres) de matériel biologique
+containers.table.biologicalMaterialQuantity.input = Quantité (cellules ou autres) de matériel biologique engagé
 containers.table.libraryProtocol = Protocole banque
 container.from = issu de
 
@@ -351,7 +369,7 @@ processes.table.resolutionCode = Résolution
 processes.table.resolutionCodes = Résolutions
 processes.table.creationDate = Date de création processus
 processes.table.endDate = Date de fin processus
-processes.table.assignDate = Date d'assignation container
+processes.table.assignDate = Date d''assignation container
 processes.table.createUser = Processus créé par
 processes.table.comments = Commentaires
 processes.table.container.state = Etat container
@@ -521,6 +539,8 @@ experiments.button.plate.computeLineMode = Calcul position plaque en mode ligne
 experiments.button.plate.computeColumnMode = Calcul position plaque en mode colonne
 experiments.button.plate.computeLineMode.advanced = Choix de la colonne max.
 experiments.button.plate.computeColumnMode.advanced = Choix de la ligne max.
+experiments.button.plate.computeLineMode.startPosition = Choix du puits de départ
+experiments.button.plate.computecolumnMode.startPosition = Choix du puits de départ
 experiments.button.plate.copyMode = X/Y
 experiments.button.plate.copyMode.title = Copy position container en entrée vers container en sortie
 
@@ -528,6 +548,8 @@ experiments.button.plate.copyVolume = Copy volume container en entrée vers cont
 experiments.button.plate.copyVolumeTo = Copy volume container en entrée vers
 experiments.button.plate.copySizeTo = Copy taille container en entrée vers
 
+experiments.button.plate.copyVolumeToInput = Copie Volume container en entrée vers Volume engagé
+experiments.button.plate.copyVolumeToInput.title = Volume
 experiments.button.plate.copyQuantity = Quantité
 experiments.button.plate.copyQuantity.title = Copie Quantité container en entrée vers Quantité à engager
 experiments.button.plate.copyVolumeDnaIlluminaBq = Copie Volume container en entrée vers Volume engagé
@@ -552,9 +574,10 @@ experiments.msg.details = [détails]
 experiments.msg.empty.save.error = Incomplet - Sauvegarde échouée
 experiments.msg.nocontainer.save.error = Il faut au moins un container dans l''expérience 
 experiments.msg.mandatoryField.save.error= Champ obligatoire: '{0}'
+experiments.msg.missingUnit.save.error= Des unités sont manquantes dans les quantités d''entrée ou de sortie
 
 experiments.msg.generateSampleSheet.success = Feuille de route envoyée
-experiments.msg.generateSampleSheet.error = Echec de l'envoi de la feuille de route
+experiments.msg.generateSampleSheet.error = Echec de l''envoi de la feuille de route
 
 experiments.select.experimentType = Type d''expérience
 experiments.select.experimentType.purifications = Purification
@@ -587,21 +610,21 @@ experiments.table.creationDate = Date de création exp.
 experiments.table.createUser = Expérience créée par
 experiments.table.status = Statut
 
-experiments.input.error.instrument-input.mixte = Présence de différentes catégories de support (tube, plaque 96) : incompatible avec le type d'instrument
+experiments.input.error.instrument-input.mixte = Présence de différentes catégories de support (tube, plaque 96) : incompatible avec le type d''instrument
 experiments.input.error.instrument-input.only-tubes = Pour ce type d''expérience, cet instrument ne prend que des tubes en entrée 
 experiments.input.error.only-tubes = Seuls des tubes peuvent entrer dans cette expérience
 experiments.input.error.only-tubes-or-strips = Seuls des tubes ou des strips peuvent entrer dans cette expérience
 experiments.input.error.only-tubes-or-plates = Seuls des tubes ou des plaques peuvent entrer dans cette expérience
 experiments.input.error.only-plates = Seules des plaques peuvent entrer dans cette expérience
 experiments.input.error.only-1-plate = Une seule plaque peut entrer dans cette expérience
-experiments.input.error.categoryCodeNotSupported= Contenant de sortie non gérée par cette expérience
 experiments.input.error.must-be-same-out = Les categories de container en entrée et en sortie doivent être les mêmes
 experiments.input.error.maxContainers = Maximum {0} container(s) en entrée
+experiments.input.error.max1Container = Attention, vous avez mis plusieurs containers en entrée, or cette expérience n'accepte qu'un seul container
 experiments.input.error.maxSupports = Maximum {0} support(s) en entrée
 experiments.input.error.notExpected = Cas entrée / sortie non géré pour la feuille de route
-experiments.input.error.no-tube-and-plaque = Le mode tubes (en entrée) => vers plaque (en sortie) n'est pas encore géré
+experiments.input.error.no-tube-and-plaque = Le mode tubes (en entrée) => vers plaque (en sortie) n''est pas encore géré
 
-experiments.input.warn.unquantifiableSample = Présence d'échantillons avec conc nulle en entrée. Présence d'échantillon(s) non quantifiable(s) ou oubli quantif?
+experiments.input.warn.unquantifiableSample = Présence d''échantillons avec conc nulle en entrée. Présence d''échantillon(s) non quantifiable(s) ou oubli quantif?
 experiments.input.warn.homogene-secondary-tags = Attention, présence de tag secondaires sur une partie de la plaque de sortie seulement. Si cela est voulu, ignorez ce message.
 
 experiments.output.error.must-have-inputConc = Impossible de noter une concentration en sortie si la concentration en entrée est nulle!
@@ -615,7 +638,9 @@ experiments.atm.error.storageCode.withoutContainer=Différent(s) storageCode(s) 
 
 experiments.finalResolutionModal.title = Veuillez définir le statut de l''expérience :
 
+containers.table.outputNumber.pacbio = Nb puits
 containers.table.outputNumber = Nb aliquots
+containers.table.outputNumberNuclei = Nb container(s) en sortie
 experiments.supports.outputNumber = Nb supports en sortie
 
 experiment.dispatch.title = Orientation des containers : 
@@ -627,6 +652,10 @@ experiment.panel.traceInformation = Info
 experiment.valuationCopyToInput.title = Copie de la valeur de validité au sein du container : 
 
 experiments.error.imageSize = L''expérience est trop volumineuse (vérifiez par exemple que, si vous importez des images, elles sont au format .jpg ou .png)
+
+#FDS NGL-5175, labels differents demandés!!
+experiments.pool.outputMode.CNG = Output mode
+experiments.pool.outputMode.CNS = Renseigner paramètres de sortie plaque
 
 #reagents
 reagents.table.kitname = Nom du kit
@@ -687,14 +716,18 @@ docs.schema-processus.repriseNorm=Schémas processus Normalisation puis Séquen�
 docs.schema-processus.sequencing=Schémas processus Séquençage
 docs.schema-processus.QMPSeq=Schémas processus QMPseq
 docs.schema-processus.LowPass=Schéma processus LowPass-WG
-docs.schema-processus.RNAseq-Anchor=Schéma processus Prep. Lib RNAseq (Anchor)
+docs.schema-processus.RNAseq-Anchor=Schémas processus Prep. Lib RNAseq (Anchor ou XT-HS2)
 docs.schema-processus.Capture-XT-HS2=Schéma processus CAPTURE XT-HS2
 docs.schema-processus.MetaG=Schéma processus Méta G
+docs.schema-processus.PacBio=Schémas processus PacBio
+docs.schema-processus.AmpliSeq-Mitochondrie-longread-genome=Schéma processus AmpliSeq Mitochondrie longread génome
+docs.schema-processus.AmpliSeq-Mitochondrie-longread-methylome=Schéma processus AmpliSeq Mitochondrie longread méthylome
 
 docs.list-libraryProcessTypeCodes=Liste des Types de processus banque
 
 # docs CNS (pas de sous menus pour l'instant)
 docs.workflows=Workflows
+docs.regex=Regex filtre de recherche et fonctionnalités tableau
 docs.nanopore=Déclaration Séquençage Nanopore (2016)
 docs.readset.change-property=Changer la propriété prod / dev d''un readset via son processus
 docs.opticalmapping.opgen=Déclaration Optical mapping Opgen (2015)
@@ -708,7 +741,7 @@ docs.processes.nanopore = Schémas processus Nanopore (2020)
 docs.processes.metabarcoding = Schéma processus Banque Illumina > MetaB double PCR (Nested) (2018)
 docs.processes.hic = Schémas processus Hi-C (juillet 2021)
 docs.processes.extr.arn = Schéma processus Extraction ARN 17-200 et >200nt (2017)
-docs.processes.pacbio = Schémas processus Banque PacBio (2022)
+docs.processes.pacbio = Schémas processus Banque PacBio (2025)
 docs.processes.mgi = Schémas processus MGI (2023)
 docs.errors.autocorrect = Cas d''erreurs auto-corrigeables CNS
 
@@ -741,7 +774,7 @@ button.regaent.reception.add = Ajouter des réceptions de réactif
 
 
 #select pour choix de colonne de plaque d'index
-select.msg.error.wrongStartColumn.tagPlate= La colonne {0} ne permet pas d'attribuer un index à chaque puit de librairie
+select.msg.error.wrongStartColumn.tagPlate= La colonne {0} ne permet pas d''attribuer un index à chaque puit de librairie
 select.msg.error.emptyStartColumn.tagPlate= La colonne {0} de la plaque d''index ''{1}'' est vide
 select.msg.error.notEnoughTags.tagPlate= La plaque d''index ''{0}'' ne contient pas assez d''index pour cette expérience
 
@@ -797,6 +830,8 @@ experiment.msg.badformat = Le format du champ ''{0}'' n''est pas valide (attendu
 experiment.msg.futurDate = La date du champ ''{0}'' ne doit pas être dans le futur
 experiment.msg.pastDate =  La date du champ ''{0}'' ne doit pas être dans le passé
 
+experiment.msg.import.femto.pulse.profil.position.duplication = Attention doublon de positions ''{0}'' dans les images importées
+
 io.error.instance.notexist = La classe ''{0}'' n''existe pas 
 io.error.resultat.notexist = ''{0}'' n''existe pas
 
@@ -822,6 +857,7 @@ samples.tabs.general = Général
 samples.tabs.treeoflife = Arbre de Vie Echantillon
 samples.tabs.workflow = Infos Processus
 samples.tabs.search = Recherche Echantillon
+samples.tabs.resolutionhistory = Historique des résolutions
 
 ##sample table
 samples.table.projectCode = Projet
@@ -833,6 +869,8 @@ samples.table.referenceCollab = Ref. collaborateur
 samples.table.taxonCode = Taxon ID
 samples.table.ncbiScientifiName = Taxon
 samples.table.ncbiLineage = Lignée
+samples.table.stateResolutions = Résolutions
+samples.table.resolutionCodes = Résolutions
 samples.table.code = Echantillon
 samples.table.projectCodes = Projet(s)
 samples.table.creationDate = Date de création
@@ -848,7 +886,6 @@ samples.table.comments = Commentaires
 samples.table.process = Processus
 samples.table.currentExperiment = Exp. courante
 samples.table.readsets = Readsets
-samples.table.stateResolutions = Résolutions
 
 samples.placeholder.fromDate = Echantillon depuis le (jj/mm/aaaa)
 samples.placeholder.toDate = Echantillon jusqu''au (jj/mm/aaaa)
@@ -863,6 +900,12 @@ samples.placeholder.ncbiScientificNameRegex = Regex taxon
 samples.placeholder.taxonCode = Taxon ID
 samples.title.taxonCode.textarea = Liste exacte de taxons ID
 samples.placeholder.typeCodes = Types échantillon
+samples.placeholder.resolutionCodes = Résolution échantillon (dernière)
+samples.placeholder.resolutionCodes.title = Résolution échantillon courante (la dernière de l''historique)
+
+samples.resolutionhistory.codes = Résolution(s)
+samples.resolutionhistory.date = Date
+samples.resolutionhistory.who = Par
 
 ###########################NGL-836: Indexes
 # aussi appeles tags (!!!) ne pas confondre avec les tags (étiquettes d'impression)
@@ -932,6 +975,8 @@ descriptions.select.instruments.category = Catégorie d''Instrument
 descriptions.select.instruments.type = Type d''Instrument
 descriptions.select.instruments.name = Instrument
 descriptions.select.properties.type = Type d''Instrument
+descriptions.select.properties.category = Catégorie d''Instrument
+descriptions.select.properties.property.definitions = Propriétés d''Instrument
 descriptions.select.support.categories.type = Type d''Instrument
 
 descriptions.instruments.table.active = Actif ?
@@ -988,6 +1033,10 @@ descriptions.imports.table.property.definitions.active = Actif ?
 descriptions.imports.table.property.definitions.levels.code = Niveaux de la propriété
 descriptions.imports.table.property.definitions.value.type = Type de la propriété
 descriptions.imports.table.property.definitions.value.possibles = Liste de valeurs
+descriptions.imports.table.property.definitions.value.displayUnit = Unité d''affichage
+descriptions.imports.table.property.definitions.value.saveUnit = Unité de stockage
+descriptions.imports.table.property.definitions.value.displayOrder = Ordre d''affichage
+
 descriptions.imports.table.property.definitions.required = Obligatoire ?
 
 # protocols
@@ -1023,6 +1072,7 @@ descriptions.experiments.tab.instruments = Instruments
 descriptions.experiments.tab.properties = Propriétés
 descriptions.experiments.tab.previous = Previous Exp
 descriptions.experiments.tab.cross.table = Tableau croisé Exp/Instruments
+descriptions.experiments.tab.graph = Schéma des liens entre les expériences transformations
 
 descriptions.select.experiment.types = Types d''expériences
 descriptions.select.experiments.instrument.types = Types d''instruments
@@ -1034,6 +1084,8 @@ descriptions.experiments.table.category.code = Category Code
 descriptions.experiments.table.type.name = Type Name
 descriptions.experiments.table.type.code = Type Code
 descriptions.experiments.table.type.active = Actif?
+descriptions.experiments.table.type.category.name = Catégorie
+descriptions.experiments.table.type.shortCode = ShortName
 descriptions.experiments.table.do.transfert = Do Transfert
 descriptions.experiments.table.mandatory.transfert = Mandatory Transfert
 descriptions.experiments.table.do.quality.control = Do Quality Control
@@ -1050,6 +1102,8 @@ descriptions.experiments.table.properties.definitions.display.order = Display Or
 descriptions.experiments.table.properties.definitions.value.default = Default Value
 descriptions.experiments.table.properties.definitions.choice = Choice In List
 descriptions.experiments.table.properties.definitions.value.possibles = Liste de valeurs
+descriptions.experiments.table.properties.definitions.value.displayUnit = Unité d''affichage
+descriptions.experiments.table.properties.definitions.value.saveUnit = Unité de stockage
 descriptions.experiments.table.instrument.type.name = Instrument Used Type Name
 descriptions.experiments.table.instrument.type.code = Instrument Used Type Code
 descriptions.experiments.table.previous.exp.type.name = Previous Exp Type Name
@@ -1078,8 +1132,10 @@ descriptions.mapping.comment.jira = Commentaire (précisez le ticket JIRA)
 
 
 
-descriptions.select.project.code = type de mapping projet
+descriptions.select.project.code = code projet
+descriptions.select.project.type = type de mapping projet
 
+descriptions.mapping.projects.type = Type de mapping projet
 descriptions.mapping.projects.parent.code = Code projet parent
 descriptions.mapping.projects.parent.name = Nom projet parent
 descriptions.mapping.projects.child.code = Code projet enfant
@@ -1097,6 +1153,7 @@ descriptions.processes.table.type.name = Type Name
 descriptions.processes.table.type.code = Type Code
 descriptions.processes.table.category.name = Category Name
 descriptions.processes.table.category.code = Category Code
+descriptions.processes.table.type.active = Actif ?
 descriptions.processes.table.void.experiment.name = Void Experiment Name
 descriptions.processes.table.void.experiment.code = Void Experiment Code
 descriptions.processes.table.first.experiment.name = First Experiment Name
@@ -1113,6 +1170,13 @@ descriptions.processes.table.properties.definitions.value.possibles = Liste de V
 descriptions.processes.table.experiment.type.position.in.process = Position in Process
 descriptions.processes.table.experiment.type.name = Experiment Type Name
 descriptions.processes.table.experiment.type.code = Experiment Type Code
+
+# Graph Processes
+descriptions.menu.processes.graph = Dans quel(s) processus est mon expérience ?
+
+descriptions.tabs.processes.graph = Dans quel(s) processus est mon expérience ?
+
+descriptions.info.processes.graph = Les processus sont déplaçables. Faites glisser pour les réorganiser.
 
 ###############
 #

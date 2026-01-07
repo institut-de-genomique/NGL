@@ -35,13 +35,11 @@
 	@_treatments.demultiplexingPacbio()
 }
 
-
+@**NGL-4395**@
+@if(typeCode == "sequencing-pacbio") {
+	@_treatments.sequencingPacbio()
+}
  
-
-
-
-
-
-
-
-
+@if(typeCode == "topindex-pacbio") {
+	@_treatments.topindexPacbio()
+}

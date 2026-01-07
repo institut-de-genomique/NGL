@@ -1,0 +1,211 @@
+@()
+<!-- copié depuis wholeGenome.scala.html -->
+<div class="row">
+ <div class="col-md-6 col-lg-6">
+ 	<div class="panel panel-default">
+	<div class="panel-heading text-center"><strong>@Messages("analyses.treatments.wholeGenomeONT.sequencingPrimaryQC")</strong></div>
+	 <table class="table table-condensed table-hover table-bordered">
+		<thead>
+		<tr>
+			<th>@Messages("analyses.treatments.wholeGenomeONT.nbTotalSeq")</th>
+			<th>@Messages("analyses.treatments.wholeGenomeONT.nbTrueBases")</th>
+			<th>@Messages("analyses.treatments.wholeGenomeONT.theoreticalDepth")</th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.nbTotalSeq.value| number}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.nbTrueBases.value| number}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.theoreticalDepth.value| number}}</td>
+		</tr>						
+		</tbody>
+	 </table>
+	 </div>
+ </div>	 
+ <!-- dans le même row-->
+ <div class="col-md-4 col-lg-4">
+	<div class="panel panel-default">
+   <div class="panel-heading text-center"><strong>@Messages("analyses.treatments.wholeGenomeONT.infoPipeline")</strong></div>
+	<table class="table table-condensed table-hover table-bordered">
+	   <thead>
+	   <tr>
+		   <th>@Messages("analyses.treatments.wholeGenomeONT.pipelineVersion")</th>
+		   <th>@Messages("analyses.treatments.wholeGenomeONT.humanReferenceGenome")</th>
+	   </tr>
+	   </thead>
+	   <tbody>
+	   <tr>
+		   <td>{{analysis.treatments[treatments.getTreatment().code].pairs.pipelineVersion.value}}</td>
+		   <td>{{analysis.treatments[treatments.getTreatment().code].pairs.humanReferenceGenome.value}}</td>
+	   </tr>						
+   	   </tbody>
+	</table>
+	</div>
+</div>
+
+</div>
+
+<div class="row">
+ <div class="col-md-10 col-lg-10">
+ 	<div class="panel panel-default">
+	<div class="panel-heading text-center"><strong>@Messages("analyses.treatments.wholeGenomeONT.mappingSecondaryQC")</strong></div>
+	 <table class="table table-condensed table-hover table-bordered">
+		<thead>
+		<tr>
+			<th>@Messages("analyses.treatments.wholeGenomeONT.mappedPercent")</th>
+			<th>@Messages("analyses.treatments.wholeGenomeONT.dupPercent")</th>
+			<th>@Messages("analyses.treatments.wholeGenomeONT.mq0Percent")</th>
+			<th>@Messages("analyses.treatments.wholeGenomeONT.suppPercent")</th>
+			<th>@Messages("analyses.treatments.wholeGenomeONT.meanLength")</th>
+			<th>@Messages("analyses.treatments.wholeGenomeONT.medianLength")</th>
+			<th>@Messages("analyses.treatments.wholeGenomeONT.n50")</th><!-- NGL-5011 -->
+			<th>@Messages("analyses.treatments.wholeGenomeONT.alignedLengthPercent")</th>
+			<th>@Messages("analyses.treatments.wholeGenomeONT.accuracy")</th>
+			<th>@Messages("analyses.treatments.wholeGenomeONT.meanDepth")</th>
+			<th>@Messages("analyses.treatments.wholeGenomeONT.medianDepth")</th>
+			<th>@Messages("analyses.treatments.wholeGenomeONT.coverageBreadthPercent")</th>
+			<th>@Messages("analyses.treatments.wholeGenomeONT.gender")</th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.mappedPercent.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.dupPercent.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.mq0Percent.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.suppPercent.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.meanLength.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.medianLength.value | number}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.n50.value | number}}</td><!-- NGL-5011 -->
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.alignedLengthPercent.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.accuracy.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.meanDepth.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.medianDepth.value | number}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.coverageBreadthPercent.value | number:2}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.gender.value}}</td>
+		</tr>					
+		</tbody>
+	 </table>
+	 </div>
+ </div>	 
+</div>
+
+<div class="row">
+ <div class="col-md-10 col-lg-10">
+ 	<div class="panel panel-default">
+	<div class="panel-heading text-center"><strong>@Messages("analyses.treatments.wholeGenomeONT.svCalling")</strong></div>
+	 <table class="table table-condensed table-hover table-bordered">
+		<thead>
+		<tr>
+			<th>@Messages("analyses.treatments.wholeGenomeONT.svSniffles")</th>
+			<th>@Messages("analyses.treatments.wholeGenomeONT.svPassSniffles")</th>
+			<th>@Messages("analyses.treatments.wholeGenomeONT.ratioPassSniffles")</th>
+
+			<th>@Messages("analyses.treatments.wholeGenomeONT.heterozygotesSniffles")</th>
+			<th>@Messages("analyses.treatments.wholeGenomeONT.homozygotesSniffles")</th>
+			<th>@Messages("analyses.treatments.wholeGenomeONT.ratioHetHomSniffles")</th>
+
+			<!-- NGL-5011 suppression métriques SVIM
+			<th>@Messages("analyses.treatments.wholeGenomeONT.svSvim")</th>
+			<th>@Messages("analyses.treatments.wholeGenomeONT.svPassSvim")</th>
+			<th>@Messages("analyses.treatments.wholeGenomeONT.ratioPassSvim")</th>
+
+			<th>@Messages("analyses.treatments.wholeGenomeONT.heterozygotesSvim")</th>
+			<th>@Messages("analyses.treatments.wholeGenomeONT.homozygotesSvim")</th>
+			<th>@Messages("analyses.treatments.wholeGenomeONT.ratioHetHomSvim")</th>
+			-->
+
+			<th>@Messages("analyses.treatments.wholeGenomeONT.svCuteSv")</th>
+			<th>@Messages("analyses.treatments.wholeGenomeONT.svPassCuteSv")</th>
+			<th>@Messages("analyses.treatments.wholeGenomeONT.ratioPassCuteSv")</th>
+
+			<th>@Messages("analyses.treatments.wholeGenomeONT.heterozygotesCuteSv")</th>
+			<th>@Messages("analyses.treatments.wholeGenomeONT.homozygotesCuteSv")</th>
+			<th>@Messages("analyses.treatments.wholeGenomeONT.ratioHetHomCuteSv")</th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.svSniffles.value| number}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.svPassSniffles.value| number}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.ratioPassSniffles.value | number:2}}</td>
+
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.heterozygotesSniffles.value| number}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.homozygotesSniffles.value| number}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.ratioHetHomSniffles.value | number:2}}</td>
+
+			<!-- NGL-5011 suppression métriques SVIM
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.svSvim.value| number}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.svPassSvim.value| number}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.ratioPassSvim.value | number:2}}</td>
+
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.heterozygotesSvim.value| number}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.homozygotesSvim.value| number}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.ratioHetHomSvim.value | number:2}}</td>
+			-->
+
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.svCuteSv.value| number}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.svPassCuteSv.value| number}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.ratioPassCuteSv.value | number:2}}</td>
+
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.heterozygotesCuteSv.value| number}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.homozygotesCuteSv.value| number}}</td>
+			<td>{{analysis.treatments[treatments.getTreatment().code].pairs.ratioHetHomCuteSv.value | number:2}}</td>
+		</tr>						
+		</tbody>
+	 </table>
+	 </div>
+ </div>	 
+</div>
+
+<!-- NGL5011 ajout tableau smallVariantCalling avec 13 métrique-->
+<div class="row">
+	<div class="col-md-10 col-lg-10">
+		<div class="panel panel-default">
+	   <div class="panel-heading text-center"><strong>@Messages("analyses.treatments.wholeGenomeONT.smallVariantCalling")</strong></div>
+		<table class="table table-condensed table-hover table-bordered">
+		   <thead>
+		   <tr>
+			   <th>@Messages("analyses.treatments.wholeGenomeONT.total")</th>
+			   <th>@Messages("analyses.treatments.wholeGenomeONT.totalPass")</th>
+			   <th>@Messages("analyses.treatments.wholeGenomeONT.ratioPass")</th>
+
+			   <th>@Messages("analyses.treatments.wholeGenomeONT.nbSNVs")</th>
+			   <th>@Messages("analyses.treatments.wholeGenomeONT.nbPassSNVs")</th>
+			   <th>@Messages("analyses.treatments.wholeGenomeONT.ratioPassSNVs")</th>
+
+			   <th>@Messages("analyses.treatments.wholeGenomeONT.nbIndels")</th>
+			   <th>@Messages("analyses.treatments.wholeGenomeONT.nbPassIndels")</th>
+			   <th>@Messages("analyses.treatments.wholeGenomeONT.ratioPassIndels")</th>
+
+			   <th>@Messages("analyses.treatments.wholeGenomeONT.nbComplex")</th>
+			   <th>@Messages("analyses.treatments.wholeGenomeONT.nbPassComplex")</th>
+			   <th>@Messages("analyses.treatments.wholeGenomeONT.ratioPassComplex")</th>
+
+			   <th>@Messages("analyses.treatments.wholeGenomeONT.ratioTiTV")</th>
+		   </tr>
+		   </thead>
+		   <tbody>
+		   <tr>
+			   <td>{{analysis.treatments[treatments.getTreatment().code].pairs.total.value| number}}</td>
+			   <td>{{analysis.treatments[treatments.getTreatment().code].pairs.totalPass.value| number}}</td>
+			   <td>{{analysis.treatments[treatments.getTreatment().code].pairs.ratioPass.value | number:2}}</td>
+
+			   <td>{{analysis.treatments[treatments.getTreatment().code].pairs.nbSNVs.value| number}}</td>
+			   <td>{{analysis.treatments[treatments.getTreatment().code].pairs.nbPassSNVs.value| number}}</td>
+			   <td>{{analysis.treatments[treatments.getTreatment().code].pairs.ratioPassSNVs.value | number:2}}</td>
+
+			   <td>{{analysis.treatments[treatments.getTreatment().code].pairs.nbIndels.value | number}}</td>
+			   <td>{{analysis.treatments[treatments.getTreatment().code].pairs.nbPassIndels.value| number}}</td>
+			   <td>{{analysis.treatments[treatments.getTreatment().code].pairs.ratioPassIndels.value| number:2}}</td>
+
+			   <td>{{analysis.treatments[treatments.getTreatment().code].pairs.nbComplex.value | number}}</td>
+			   <td>{{analysis.treatments[treatments.getTreatment().code].pairs.nbPassComplex.value| number}}</td>
+			   <td>{{analysis.treatments[treatments.getTreatment().code].pairs.ratioPassComplex.value| number:2}}</td>
+
+			   <td>{{analysis.treatments[treatments.getTreatment().code].pairs.ratioTiTV.value | number:2}}</td>
+		   </tr>						
+	  	   </tbody>
+		</table>
+		</div>
+	</div>	 
+</div>

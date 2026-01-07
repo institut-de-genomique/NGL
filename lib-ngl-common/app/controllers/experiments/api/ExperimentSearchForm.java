@@ -48,6 +48,8 @@ public class ExperimentSearchForm extends DBObjectListForm<Experiment> {
 	public String containerSupportCode;
 	public Set<String> containerSupportCodes;
 	public String containerSupportCodeRegex;
+
+	public List<String> umbrellaCodes;
 	
 	public String containerCode;
 	public Set<String> containerCodes;
@@ -59,7 +61,7 @@ public class ExperimentSearchForm extends DBObjectListForm<Experiment> {
 	public String reagentOrBoxCode;
 
 	public String ncbiScientificNameRegex;
-	public Set<String> ncbiScientificNameRegexs;
+	public Set<String> ncbiScientificNames;
 
 	public String instrument;
 	public Set<String> instruments;
@@ -222,19 +224,11 @@ public class ExperimentSearchForm extends DBObjectListForm<Experiment> {
 						 ));
 		}
 
-		if(CollectionUtils.isNotEmpty(this.ncbiScientificNameRegexs)) {
-			DBQuery.Query queryTmp = DBQuery.empty();
-			Iterator<String> iterator = this.ncbiScientificNameRegexs.iterator();
-
-			while (iterator.hasNext()) {
-				String ncbiNameLoop = iterator.next();
-				queryTmp.or(
-					DBQuery.regex("atomicTransfertMethods.inputContainerUseds.contents.ncbiScientificName", Pattern.compile(ncbiNameLoop)),
-					DBQuery.regex("atomicTransfertMethods.outputContainerUseds.contents.ncbiScientificName", Pattern.compile(ncbiNameLoop))
-				);
-			}
-
-			queryElts.add(queryTmp);
+		if(CollectionUtils.isNotEmpty(this.ncbiScientificNames)) {
+			queryElts.add(DBQuery.or(
+								DBQuery.in("atomicTransfertMethods.inputContainerUseds.contents.ncbiScientificName", ncbiScientificNames),
+								DBQuery.in("atomicTransfertMethods.outputContainerUseds.contents.ncbiScientificName", ncbiScientificNames)
+						 ));
 		}
 
 		if(StringUtils.isNotBlank(taxonCode)){

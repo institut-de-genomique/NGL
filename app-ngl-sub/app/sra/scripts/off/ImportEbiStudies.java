@@ -3,16 +3,16 @@ package sra.scripts.off;
 
 import javax.inject.Inject;
 
+import controllers.sra.api.StudyAPI;
 import fr.cea.ig.lfw.controllers.scripts.buffered.Script;
 import fr.cea.ig.ngl.NGLApplication; // pour affichage du contextValidationError
-import fr.cea.ig.ngl.dao.api.sra.StudyAPI;
 import models.laboratory.common.instance.State;
 import play.libs.Json; // pour affichage du contextValidationError
-import services.SraEbiAPI;
-import services.XmlToSra;
+import services.sra.VariableSRA;
+import sra.services.SraEbiAPI;
+import sra.services.XmlToSra;
 import validation.ContextValidation;
 import models.sra.submit.sra.instance.Study;
-import models.sra.submit.util.VariableSRA;
 
 /*
  * Script à lancer pour importer dans NGL-SUB un ensemble de studies soumis à l'EBI hors 

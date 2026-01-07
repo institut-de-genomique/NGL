@@ -92,18 +92,15 @@ angular.module('home').controller('ConsultationCtrl',[ '$http', '$scope', '$rout
 						editTemplate:"<textarea class='form-control' #ng-model rows='1'></textarea>",
 						choiceInList:false
 						});	    
-			columns.push({
-						property     : "studyAbstract",
-						header       : Messages("study.AbstractDescription"),
+			columns.push({property:"description",            // mettre description et pas abstract car abstract sera synchronisé  sur description.
+						header: Messages("study.description"),
 						type :"text",	
 						hide:true,
 						order:true,
 						edit:true,  
 						editTemplate:"<textarea class='form-control' #ng-model rows='1'></textarea>",
 						choiceInList:false
-						});	
-				
-					      
+				    	});	 
 			columns.push({
 						property     : "existingStudyType",
 						header       : Messages("study.existingStudyType"),
@@ -121,7 +118,7 @@ angular.module('home').controller('ConsultationCtrl',[ '$http', '$scope', '$rout
 						header       : Messages("study.locusTagPrefixs"),
 						type         : "text",
 						hide         : true,
-						edit         : false, // pas modifiable en consultation car present uniquement si SUB-F et après sur le project de type_sequencing 
+						edit         : true, 
 						order        : false,
 						choiceInList : false,
 						listStyle    : 'bt-select',
@@ -130,10 +127,18 @@ angular.module('home').controller('ConsultationCtrl',[ '$http', '$scope', '$rout
 						property     : "idsPubmed",
 						header       : Messages("study.idsPubmed"),
 						type         : "text",
+						hide         : false,
+						edit         : true, // study editable uniquement si SUB-N et à ce stade
+						order        : false,
+						choiceInList : false,
+						listStyle    : 'bt-select',
+						});
+			columns.push({
+						property     : "parentProjectAccessions",
+						header       : Messages("study.parentProjectAccessions"),
+						type         : "text",
 						hide         : true,
-						edit         : false, // study editable uniquement si SUB-N et à ce stade, project.xml n'existe pas et c'est dans ce fichier que ce champs apparait.
-						                      // De plus manip a faire si on voulait rendre ce champs editable. Il faudrait transformer ce champs en tableau 
-                                              // avant de le reinjecter dans study (voir interface update-ctrl.js)
+						edit         : true, 
 						order        : false,
 						choiceInList : false,
 						listStyle    : 'bt-select',
@@ -142,8 +147,8 @@ angular.module('home').controller('ConsultationCtrl',[ '$http', '$scope', '$rout
 						property     : "taxonId",
 						header       : Messages("project.taxonId"),
 						type         : "text",
-						hide         : true,
-						edit         : false, 
+						hide         : false,
+						edit         : true, 
 						order        : true,
 						choiceInList : false,
 						});		
@@ -155,18 +160,53 @@ angular.module('home').controller('ConsultationCtrl',[ '$http', '$scope', '$rout
 						edit         : false, 
 						order        : true,
 						choiceInList : false,
-						});		
+						});	
+						
+			columns.push({property    : "dropBox",
+						header        : Messages("project.dropBox"),
+						type          : "String",
+						hide          : true,
+						edit          : false,
+						order         : false,
+						choiceInList  : true,
+						listStyle     : 'bt-select',
+						possibleValues: 'sraVariables.dropBox',
+				    	});		
+//			columns.push({property    : "attributes",
+//					    header        : Messages("study.attributes"),
+//					    //"filter":"codes:'state'",
+//					    type          : "text",		    	  	
+//					    order         : false, 
+//					    edit          : true,  
+//					   	hide          : true,
+//						choiceInList  : false,
+//						editTemplate  :"<textarea class='form-control' #ng-model rows='3'></textarea>",
+//						render        : function(data, edit) {
+//							              return toolsServices.getStringAttributes(data);
+//						              },
+//				        });	
+			columns.push({property    : "attributes",
+					    header        : Messages("study.attributes"),
+					    //"filter":"codes:'state'",
+					    type          : "text",		    	  	
+					    order         : false, 
+					    edit          : true,  
+					   	hide          : true,
+						choiceInList  : false,
+						editTemplate  :"<textarea class='form-control' #ng-model rows='3'></textarea>",
+				        });	
 			columns.push({
-						property     : "comments",
-						header       : Messages("comments"),
-						type         : "text",
-						hide         : true,
-						edit         : false, // pas modifiable en consultation car uniquement dans vue detail
-						order        : false,
-						choiceInList : false,
-						filter       : "collect:'comment'",
-						listStyle    : 'bt-select',
-						});			
+						property      : "comments",
+						header        : Messages("comments"),
+						type          : "text",
+						hide          : true,
+						edit          : false, // pas modifiable en consultation car uniquement dans vue detail
+						order         : false,
+						choiceInList  : false,
+						filter        : "collect:'comment'",
+						listStyle     : 'bt-select',
+						});	
+	
 			return columns;
 		};
       
@@ -190,15 +230,17 @@ angular.module('home').controller('ConsultationCtrl',[ '$http', '$scope', '$rout
 				withoutSelect : true,
 				columnMode : true,
 				lineMode: function (line) {
+					//console.log("line", line);
 					if((line.state.code === "SUB-N" || line.state.code === "NONE") // modification autorisee seulement pour les samples nouvellement crees.
-						&&line._type === "Study")   // On n'edite pas les ExternalStudy
+						&&line._type === "Study") { // On n'edite pas les ExternalStudy
 						// suppression controle user
 						//&& line.traceInformation.createUser === $scope.user) // limiter autorisation de modification au proprietaire.
+						
 					   return true;
-					else 
+					} else {
 					   return false;
+					}
 				}
-
 			},
 			
 			cancel : {
@@ -225,20 +267,34 @@ angular.module('home').controller('ConsultationCtrl',[ '$http', '$scope', '$rout
 				}
 			},
 			save : {
-				active:true,
-				showButton : true,
-				mode:'remote', 
-				changeClass : false,
+				active      :true,
+				showButton  : true,
+				mode        :'remote', 
+				changeClass : true,   // pour mettre les lignes bien sauvegardees en verts et celles en echec en rouge
 				url:function(line){
-					line.description = line.studyAbstract;  // mettre la description avec meme valeur que abstract
-					return jsRoutes.controllers.sra.studies.api.Studies.update(line.code).url; // jamais utilisé si mode local
+					// pour regler problème de mapping entre representation du study dans datatable et dans model java :
+					//console.log("line=", line);
+					//console.log("$scope.studiesDT  du datatable avant save", $scope.studiesDT); 
+					$scope.toJsonStudyModelOrThrow(line, $scope.errorDetails);
+					//console.log("line dans bon model =", line);
+					return jsRoutes.controllers.sra.studies.api.Studies.update(line.code).url; // jamais utilisé si mode local 
+					// et si mode remote alors problème com.fasterxml.jackson.databind.JsonMappingException pour les champs locus_tag ...
+					// d'ou appel préalable de toJsonStudyModel;
 				},
 				method:'put',
+				//withoutEdit:true, //??
+
 				value:function(line){
 					return line;
 				},
+				
+				callback : function(datatable, errors) {
+					//console.log("XXXXXXXXXXXXXXXXX           datatable", datatable);
+					//console.log("XXXXXXXXXXXXXXXXX           errors", errors);
+					$scope.updateCallback(datatable, errors);
+				}
 			},
-
+				
 	};
 	
 	
@@ -246,16 +302,71 @@ angular.module('home').controller('ConsultationCtrl',[ '$http', '$scope', '$rout
 	
 
 //---------------------------------------------------------------------------------------------------
-	
 	// Definitions des methodes :
 	//---------------------------
+	$scope.toJsonStudyModelOrThrow = function(line, errorDetails) {
+		toolsServices.toJsonStudyModel(line, errorDetails);
+		//line.description = line.studyAbstract;   // mettre la description avec meme valeur que abstract => fait dans java
+		//console.log("dans save, scope.errorDetails=", $scope.errorDetails);
+		if((Object.keys(errorDetails)).length > 0) {
+			//console.log("AAAAAAAAAAAAAAAAAAA               J'ai bien une erreur de  PARSING");
+			$scope.messages = messages(); // si on re-sauve sans recharger page.
+			$scope.messages.clear();      // si on re-sauve sans recharger page.
+			$scope.messages.addDetails($scope.errorDetails);
+			$scope.messages.setError("save");
+			$scope.studiesDT.setSpinner(false);
+			throw("Erreur de parsing");
+		} 
+	}; // end $scope.toJsonStudyModelOrThrow
 	
+	$scope.updateCallback = function(datatable, countError) {
+		$scope.messages = messages(); // si on re-sauve sans recharger page.
+		$scope.messages.clear();      // si on re-sauve sans recharger page.
+		//console.log(datatable);
+//		console.log(countError);
+//		console.log("YYYYYYYY   TOTOTO   YYYYYYYYYYY    dans callback, displayResult : ", datatable.displayResult);
+//		console.log("xxxxxxxxxx    dans callback, displayResult.line : ", datatable.displayResult.line);
+		//console.log("eeeeeeeeeeeeee  dans callback scope.dbSamples = ", $scope.dbSamples);
+		for (var i = 0; i < datatable.displayResult.length; i++) {
+			var keysError =  Object.keys(datatable.displayResult[i].line.errors);
+//			console.log("eeeeeeeee keysError", keysError);
+//			console.log("eeeeeeeee keysError.length", keysError.length);
+			if ( keysError.length >= 1 ) {
+				// Recuperation message erreur :
+				var monObj = datatable.displayResult[i].line.errors;
+//				console.log("dans callback, monObj", monObj);
+//				console.log("dans callback, monObj.typeOf", monObj.typeOf);
+//				console.log("dans callback, monObj.hasOwnProperty()", monObj.hasOwnProperty());
+				for (var [key, values] of Object.entries(monObj)) {
+					var cle = `${key}`;
+					var values = `${values}`; 
+//  				console.log("xxxxxxxxxxx    cle = ", cle);
+//					console.log("xxxxxxxxxxx    values = ", values);
+//					console.log("monObjValues = ", monObj[cle]);
+					var monError = {};
+					monError[cle]=[values];
+					$scope.messages.addDetails(monError);
+				} // end for
+			} // end if						
+		}// end for
+		// Affichage message succes ou erreur :
+		// Dans le cas d'une exception, countError n'est pas definie :
+		if ( countError == undefined || countError == null || countError > 0) {
+			$scope.messages.setError("save");
+		} else {
+			$scope.messages.setSuccess("save");			
+		}
+	}; // end updateCallback
+	
+
+					
 	$scope.reset = function() {
 		$scope.form = {};
 		$scope.studiesDT = datatable(studiesDTConfig);
 		$scope.studiesDT.setColumnsConfig(getStudyColumns());
 		$scope.messages = messages();
 		$scope.messages.clear();
+		$scope.errorDetails = {};
 		//console.log("99999999999999999999999999999999999999999999999999999999999999  passage dans reset");
 	};
 	
@@ -271,19 +382,18 @@ angular.module('home').controller('ConsultationCtrl',[ '$http', '$scope', '$rout
 		}	
 		//console.log("$scope.messages = ", $scope.messages);
 		//console.log("Dans consultation-ctr.search, avec user", user);
-		if (! $scope.form.externalIdRegex      && 
-				! $scope.form.externalIds      &&
-				! $scope.form.accessionRegex   && 
-				! $scope.form.accessions       && 
+		if (	! $scope.form.identifierRegex  && 
+				! $scope.form.identifiers      &&
 				! $scope.form.codeRegex        &&
 				! $scope.form.codes            &&
 				! $scope.form.pseudoStateCodes &&
 				! $scope.form.projCodes ) {
-				console.log("Aucun parametre => envoyer message erreur");
+				//console.log("Aucun parametre => envoyer message erreur");
 				$scope.messages.setError(Messages("AbsenceSearchParameter"));
-				console.log("$scope.messages = ", $scope.messages);
+				//console.log("$scope.messages = ", $scope.messages);
 				throw("Aucun parametre pour la recherche des study");   
 			} 
+			//console.log("form = ", $scope.form);
 		$scope.user = user;
 		// Remplacement des pesudoStateCodes par codes stateCodes dans le formulaire et destruction
 		// de form.pseudoStateCodes pour pouvoir envoyer directement form a la methode search du datatable:
@@ -316,7 +426,7 @@ angular.module('home').controller('ConsultationCtrl',[ '$http', '$scope', '$rout
 	$scope.form = {};  // important. 
 	$scope.lists = lists;		
 	$scope.sraVariables = {}; // si on declare dans services => var sraVariables = {};
-	
+	$scope.errorDetails = {};
 	// Pour avoir les onglets a gauche de la page :
 	if (angular.isUndefined(mainService.getHomePage())) {
 		mainService.setHomePage('consultation');
@@ -397,5 +507,19 @@ angular.module('home').controller('ConsultationCtrl',[ '$http', '$scope', '$rout
 	$scope.sraVariables.existingStudyType = data;																					
 	});
 	
+//	Initialistation ExistingStudyType:
+	$http.get(jsRoutes.controllers.sra.api.Variables.list().url, {params:{type:'dropBox'}})
+	.success(function(data) {
+	// initialisation de la variable createService.sraVariables.dropBox utilisée dans create.scala.html
+	$scope.sraVariables.dropBox = data;																					
+	});	
+			
+	// NGL-4708
+	$scope.isShowConsigne=false;
+	$scope.toggleShowConsigne=function(){
+		//console.log("TOGGLE search-ctrl.js");
+		if ( $scope.isShowConsigne===false) { $scope.isShowConsigne=true}
+		else {$scope.isShowConsigne=false}
+	};	
 
 }]);

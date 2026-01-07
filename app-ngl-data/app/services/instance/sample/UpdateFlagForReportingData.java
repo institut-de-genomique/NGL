@@ -40,6 +40,7 @@ import models.laboratory.sample.instance.Sample;
 import models.utils.InstanceConstants;
 import models.utils.dao.DAOException;
 import net.sourceforge.htmlunit.corejs.javascript.tools.shell.Global;
+import play.Logger;
 import rules.services.RulesException;
 import services.instance.AbstractImportData;
 import validation.ContextValidation;
@@ -83,6 +84,8 @@ public class UpdateFlagForReportingData extends AbstractImportData {
 	public Set<String> ASC_SAMPLES = new TreeSet<String>();
 
 	public Set<String> SAMPLES = new TreeSet<String>();
+
+	public Set<String> GHOST_SAMPLE_LIST = new TreeSet<String>();
 
 	private Date CUSTOM_END_DATE;
 
@@ -137,6 +140,10 @@ public class UpdateFlagForReportingData extends AbstractImportData {
 		// Comme on a déjà une liste de samples, on peut pas avoir de liste de process / experiment / readset.
 
 		buildAndSendMail(processCodeList, experimentCodeList, readsetCodeList, START_CRON_DATE, END_CRON_DATE);
+
+		if (!GHOST_SAMPLE_LIST.isEmpty()) {
+			buildAndSendWarningMail(GHOST_SAMPLE_LIST);
+		}
 
 		logger.info("End UpdateFlagForReportingData");
 	}
@@ -258,6 +265,10 @@ public class UpdateFlagForReportingData extends AbstractImportData {
 
 		buildAndSendMail(processCodeList, experimentCodeList, readsetCodeList, START_CRON_DATE, END_CRON_DATE); 
 
+		if (!GHOST_SAMPLE_LIST.isEmpty()) {
+			buildAndSendWarningMail(GHOST_SAMPLE_LIST);
+		}
+
 		logger.info("End UpdateFlagForReportingData");
 	}
 
@@ -343,26 +354,40 @@ public class UpdateFlagForReportingData extends AbstractImportData {
 
 		SAMPLES.forEach(sampleCode -> {
 			Sample sample = MongoDBDAO.findByCode(InstanceConstants.SAMPLE_COLL_NAME, Sample.class, sampleCode);
-			sample.setProcessesToLaunchDate(new Date());
 
-			MongoDBDAO.update(InstanceConstants.SAMPLE_COLL_NAME, 
-				Sample.class, 
-				DBQuery.is("code", sample.code),
-				DBUpdate.set("processesToLaunchDate", sample.getProcessesToLaunchDate())); 
+			if (sample != null) {
+				sample.setProcessesToLaunchDate(new Date());
 
-			Set<String> parentSampleList = handleParentSample(sample);
+				if (sample.getProcessesToLaunchDate() != null) {
+					MongoDBDAO.update(InstanceConstants.SAMPLE_COLL_NAME, 
+						Sample.class, 
+						DBQuery.is("code", sample.code),
+						DBUpdate.set("processesToLaunchDate", sample.getProcessesToLaunchDate())); 
+				} 
 
-			parentSampleList.forEach(parentSampleCode -> {
-				Sample parentSample = MongoDBDAO.findByCode(InstanceConstants.SAMPLE_COLL_NAME, Sample.class, parentSampleCode);
-				parentSample.setProcessesToLaunchDate(new Date());
+				Set<String> parentSampleList = handleParentSample(sample);
 
-				MongoDBDAO.update(InstanceConstants.SAMPLE_COLL_NAME, 
-					Sample.class, 
-					DBQuery.is("code", parentSample.code),
-					DBUpdate.set("processesToLaunchDate", parentSample.getProcessesToLaunchDate())); 
-			});
+				parentSampleList.forEach(parentSampleCode -> {
+					Sample parentSample = MongoDBDAO.findByCode(InstanceConstants.SAMPLE_COLL_NAME, Sample.class, parentSampleCode);
 
-			ASC_SAMPLES.addAll(parentSampleList);
+					if (parentSample != null) {
+						parentSample.setProcessesToLaunchDate(new Date());
+
+						if (parentSample.getProcessesToLaunchDate() != null) {
+							MongoDBDAO.update(InstanceConstants.SAMPLE_COLL_NAME, 
+							Sample.class, 
+								DBQuery.is("code", parentSample.code),
+								DBUpdate.set("processesToLaunchDate", parentSample.getProcessesToLaunchDate())); 
+						} 
+					} else {
+						GHOST_SAMPLE_LIST.add(sampleCode);
+					}
+				});
+
+				ASC_SAMPLES.addAll(parentSampleList);
+			} else {
+				GHOST_SAMPLE_LIST.add(sampleCode);
+			}
 		});
 
 		long end = System.currentTimeMillis();
@@ -560,6 +585,29 @@ public class UpdateFlagForReportingData extends AbstractImportData {
 	}
 
 	/**
+	 * buildAndSendWarningMail
+	 * 
+	 * @param SAMPLES_LIST
+	 */
+	public void buildAndSendWarningMail(final Set<String> SAMPLES_LIST) {	
+		final String EXPEDITEUR = getEmailExpediteur();
+		final HashSet<String> DESTINATAIRES = getEmailDestinataires();
+		final String ENVIRONMENT = getEnvironment();
+		final String INSTITUTE = getInstitute();
+	    
+		final String SUBJECT = "[NGL-DATA] [" + ENVIRONMENT + "] [" + INSTITUTE + "] CRON UpdateFlagForReportingData - Erreur - Echantillons inexistants";
+
+		try {
+			String message = buildMailBody(SAMPLES_LIST);
+			
+			mailServices.sendMail(EXPEDITEUR, DESTINATAIRES, SUBJECT, message);	
+			GHOST_SAMPLE_LIST.clear();
+		} catch (IOException | MailServiceException e) {
+			e.printStackTrace();
+		} 
+	}
+
+	/**
 	 * Méthode permettant de construire le mail de reporting et de l'envoyer.
 	 * Les paramètres de la méthode sont déclarés en final car on ne veut surtout pas qu'ils soient altérés avant le reporting.
 	 * 
@@ -582,18 +630,28 @@ public class UpdateFlagForReportingData extends AbstractImportData {
 
 		try {
 			String message = buildMailBody(PROCESS_CODES_LIST, EXP_CODES_LIST, RS_CODES_LIST, START_CRON_DATE, END_CRON_DATE);
-			
+
 			if (needAttachment(PROCESS_CODES_LIST, EXP_CODES_LIST, RS_CODES_LIST)) {
 				Date currentDate = new Date();
 				
 				String attachment = buildMailAttachment(PROCESS_CODES_LIST, EXP_CODES_LIST, RS_CODES_LIST);
 				String fileName = "rapport-reporting-nocturne_UpdateFlagForReportingData_" + currentDate.getTime() + ".txt";
 
-				BufferedWriter writer = new BufferedWriter(new FileWriter(tmpDirectory() + fileName));
-				writer.write(attachment);
-				writer.close();
+				try {
+					BufferedWriter writer = new BufferedWriter(new FileWriter(tmpDirectory() + fileName));
+	
+					writer.write(attachment);
+					writer.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 
 				File file = new File(tmpDirectory() + fileName);
+
+				if (!file.exists()) {
+					Logger.error("Erreur lors de l'écriture du fichier de log. Il n'a pas été créé.");
+				}
+
 				int ALMOST_ONE_MB = 900000;
 
 				if (file.length() > ALMOST_ONE_MB) {
@@ -603,7 +661,7 @@ public class UpdateFlagForReportingData extends AbstractImportData {
 				} else {
 					mailServices.sendMail(EXPEDITEUR, DESTINATAIRES, SUBJECT, message, file);
 				}	
-			} else {
+			} else {				
 				mailServices.sendMail(EXPEDITEUR, DESTINATAIRES, SUBJECT, message);
 			}
 		} catch (IOException | MailServiceException e) {
@@ -687,6 +745,27 @@ public class UpdateFlagForReportingData extends AbstractImportData {
 		}
 
 		return new String(attachment.toString().getBytes(), "utf-8");
+	}
+
+	/**
+	 * buildMailBody
+	 * 
+	 * @param SAMPLES_LIST
+	 * 
+	 * @return Une chaîne de caractères représentant le mail d'avertissements de samples inexistants qui sera envoyé.
+	 * 
+	 * @throws UnsupportedEncodingException Si l'encodage spécifié pour le contenu du mail n'est pas bon.
+	 */
+	public String buildMailBody(final Set<String> SAMPLES_LIST) throws UnsupportedEncodingException {
+		StringBuilder message = new StringBuilder();
+
+		message.append("Des échantillons fantômes (pas / plus existants en base) ont été détectés lors de la récupération des objets (process, expérience, readset) récemment créés ou modifiés :<br />");
+
+		SAMPLES_LIST.stream().forEach(sampleCode -> {
+			message.append(sampleCode + "<br />");
+		});
+
+		return new String(message.toString().getBytes(), "iso-8859-1");
 	}
 
 	/**

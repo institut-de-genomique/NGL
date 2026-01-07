@@ -7,8 +7,8 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 
+import controllers.sra.api.ExperimentAPI;
 import fr.cea.ig.lfw.controllers.scripts.buffered.ScriptNoArgs;
-import fr.cea.ig.ngl.dao.api.sra.ExperimentAPI;
 import fr.cea.ig.ngl.dao.readsets.ReadSetsAPI;
 import models.laboratory.run.instance.ReadSet;
 import models.sra.submit.sra.instance.Experiment;

@@ -38,11 +38,13 @@ public class NGLSeq extends Controller {
 			//LevelService.main(errors);
 			new MeasureService  (mdao).saveData(errors);
 			new ContainerService(mdao).saveData(errors);
+			
 			dataService.saveInstrumentData(errors);
 			dataService.saveSampleData    (errors);
 			dataService.saveImportData    (errors);
 			dataService.saveExperimentData(errors);
 			dataService.saveProcessData   (errors);
+			
 			//RunService.main(errors);
 			//TreatmentService.main(errors);
 			if (errors.size() > 0) {

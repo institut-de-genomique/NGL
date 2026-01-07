@@ -13,13 +13,15 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.mongojack.DBQuery;
 
+import controllers.sra.api.AbstractSampleAPI;
+import controllers.sra.api.AbstractStudyAPI;
+import controllers.sra.api.ExperimentAPI;
+import controllers.sra.api.SampleAPI;
+import controllers.sra.api.StudyAPI;
+import controllers.sra.api.SubmissionAPI;
 import fr.cea.ig.lfw.controllers.scripts.buffered.ScriptNoArgs;
-import fr.cea.ig.ngl.dao.api.sra.AbstractSampleAPI;
-import fr.cea.ig.ngl.dao.api.sra.AbstractStudyAPI;
-import fr.cea.ig.ngl.dao.api.sra.ExperimentAPI;
-import fr.cea.ig.ngl.dao.api.sra.SampleAPI;
-import fr.cea.ig.ngl.dao.api.sra.StudyAPI;
-import fr.cea.ig.ngl.dao.api.sra.SubmissionAPI;
+import fr.cea.ig.ngl.dao.api.APIException;
+import fr.cea.ig.ngl.dao.api.APIValidationException;
 import fr.cea.ig.ngl.dao.readsets.ReadSetsDAO;
 import models.sra.submit.sra.instance.AbstractSample;
 import models.sra.submit.sra.instance.AbstractStudy;
@@ -29,7 +31,7 @@ import models.sra.submit.sra.instance.ExternalStudy;
 import models.sra.submit.sra.instance.Sample;
 import models.sra.submit.sra.instance.Study;
 import models.sra.submit.sra.instance.Submission;
-import services.SraEbiAPI;
+import sra.services.SraEbiAPI;
 
 
 /*
@@ -74,7 +76,7 @@ public class BilanAllSraCollectionsNoSubmission extends ScriptNoArgs {
 	
 
 
-	public void bilanForExperiments () {
+	public void bilanForExperiments () throws APIValidationException, APIException {
 		int cpExp = 0;
 		int cpExpNoSub = 0;
 		int cpExpNoCreateUser = 0;
@@ -118,6 +120,7 @@ public class BilanAllSraCollectionsNoSubmission extends ScriptNoArgs {
 					map_user.put(experiment.traceInformation.createUser, null);
 				}
 			}
+			//experimentAPI.create(experiment, experiment.traceInformation.createUser);
 			experimentAPI.dao_saveObject(experiment);
 		}
 		println("Nombre d'experiment dans base = " + cpExp);

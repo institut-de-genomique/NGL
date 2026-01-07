@@ -67,7 +67,7 @@ public class ReadsetAPITest {
 	public void testGetByCode() {
 		String randomCode = UUID.randomUUID().toString();
 		
-		ReadSet readset = ReadsetFactory.getRandomReadset(true, new Date());
+		ReadSet readset = ReadsetFactory.getRandomReadset(true, new Date(), 1);
 		readset.code = randomCode;
 		
 		when(rsDAO.findByCode(randomCode)).thenReturn(readset);
@@ -82,7 +82,7 @@ public class ReadsetAPITest {
 	public void testCreateValid() {
 		String randomCode = UUID.randomUUID().toString();
 
-		ReadSet readset = ReadsetFactory.getRandomReadset(false, new Date());
+		ReadSet readset = ReadsetFactory.getRandomReadset(false, new Date(), 1);
 		readset.code = randomCode;
 
 		when(rsDAO.save(readset)).thenReturn(readset);
@@ -128,7 +128,7 @@ public class ReadsetAPITest {
 	
 	@Test
 	public void testDeleteValid() {
-		ReadSet readset = ReadsetFactory.getRandomReadset(true, new Date());
+		ReadSet readset = ReadsetFactory.getRandomReadset(true, new Date(), 1);
 		
 		when(rsDAO.findByCode(any(String.class))).thenReturn(readset);
 		when(rsDAO.checkObjectExist(any(DBQuery.Query.class))).thenReturn(true);
@@ -154,7 +154,7 @@ public class ReadsetAPITest {
 	
 	@Test
 	public void testDeleteInvalid() {
-		ReadSet readset = ReadsetFactory.getRandomReadset(true, new Date());
+		ReadSet readset = ReadsetFactory.getRandomReadset(true, new Date(), 1);
 		
 		when(rsDAO.isObjectExist(readset.code)).thenReturn(false);
 		when(rsDAO.getElementClass()).thenReturn(ReadSet.class);

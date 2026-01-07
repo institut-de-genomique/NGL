@@ -8,6 +8,8 @@ rule "Volume not null in experiment outputContainer"
 	no-loop
     when
     	$experiment:Experiment($typeCode:typeCode,$typeCode=="pcr-and-indexing"||
+												  $typeCode=="pacbio-fragmentation"||
+												  $typeCode=="pacbio-library"||
     	                                          $typeCode=="test")
     	// code!="N" comme dans denat-dil-lib c'est trop tot
     	// code=="IP" comme dans additional-normalization on zappe l'etat "N" 

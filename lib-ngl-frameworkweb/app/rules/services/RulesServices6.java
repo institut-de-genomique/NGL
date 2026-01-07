@@ -1,9 +1,12 @@
 package rules.services;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.kie.api.KieBase;
@@ -11,6 +14,8 @@ import org.kie.api.KieBaseConfiguration;
 import org.kie.api.KieServices;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
+import org.kie.api.runtime.rule.AgendaFilter;
+import org.kie.api.runtime.rule.Match;
 
 import play.Application;
 
@@ -121,4 +126,70 @@ public class RulesServices6 {
 		return factsAfterRules;
 	}
 	
+	public List<Object> callRulesWithGettingFacts2(String keyRules, String ruleAnnotationName, List<Object> factsToInsert) {
+		return callRulesWithGettingFacts(RulesAgendaFilter6.getInstance(keyRules, ruleAnnotationName), factsToInsert);
+	}
+
+	//-------------------------------------------------------------------------------------------------------
+	// Ajout pour pouvoir appliquer une regle dont on donne le nom
+	/**
+	 * Selectionne les règles autorisées par nom.
+	 */
+	public static class DroolsRulesSelector implements AgendaFilter {
+	
+	    private final Set<String> ruleNames;
+	
+	    public DroolsRulesSelector(String... ruleNames) {
+	        this.ruleNames = new HashSet<>(Arrays.asList(ruleNames));
+	    }
+	
+	    @Override
+	    public boolean accept(Match match) {
+	        return ruleNames.contains(match.getRule().getName());
+	    }
+	
+	}
+	
+	public List<Object> callRulesByNameWithGettingFacts(String ruleName, List<Object> factsToInsert) {
+		return callRulesWithGettingFacts(new DroolsRulesSelector(ruleName), factsToInsert);
+	}
+
+	/**
+	 * Synchronous firing of the rules matching the rule name. 
+	 * @param agendaFilter       agendaFilter
+	 * @param factsToInsert      facts
+	 */
+	public void callRules(AgendaFilter agendaFilter, List<Object> factsToInsert) {
+		KieSession kSession = getKieBase().newKieSession();
+		for (Object fact : factsToInsert) 
+			kSession.insert(fact);
+		kSession.fireAllRules(agendaFilter);
+		kSession.dispose();		
+	}
+	
+	/**
+	 * Synchronous firing of the rules matching the rule name. 
+	 * @param ruleName           ruleName
+	 * @param factsToInsert      facts
+	 */	
+	public void callRulesByName(String ruleName, List<Object> factsToInsert) {
+		callRules(new DroolsRulesSelector(ruleName), factsToInsert);
+	}
+
+	/**
+	 * Synchronous firing of the rules matching the rule name
+	 * and return the drools facts. 
+	 * @param agendaFilter       agendaFilter
+	 * @param factsToInsert      facts
+	 * @return                   drools returned facts
+	 */	
+	public List<Object> callRulesWithGettingFacts(AgendaFilter filter, List<Object> factsToInsert) {
+		KieSession kSession = getKieBase().newKieSession();
+		for (Object fact : factsToInsert)
+			kSession.insert(fact);
+		kSession.fireAllRules(filter);
+		List<Object> factsAfterRules = new ArrayList<>(kSession.getObjects());
+		kSession.dispose();
+		return factsAfterRules;
+	}
 }

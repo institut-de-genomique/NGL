@@ -43,6 +43,10 @@ input[type="checkbox"] {
 	margin-bottom:5px;
 }
 
+.margin-bottom-15 {
+	margin-bottom:15px;
+}
+
 .margin-bottom-5:last-child {
 	margin-bottom:0px;
 }
@@ -114,3 +118,132 @@ input[type="checkbox"] {
     margin-top:-6px;
 }
 
+/* NGL-4285 couleur pour signaler instance NON PRODUCTION */
+.noprod {
+	background-color: rgb(170, 72, 72); /* bordeau-- connotation ERREUR !!*/
+    /* background-color: rgb(255,170,0); /*orange */
+	/* background-color: rgb(21,128,0); /*vert*/
+	/* background-color: #337ab7 /*meme bleu que boostrap*/
+	
+	/* la couleur de font est écrasée qq pet !!: color:white;*/
+}
+
+/**
+ * Accordion
+ */
+ 
+/* plus glyph for showing collapsible panels */
+.panel-heading .accordion-plus-toggle:before {
+    font-family: FontAwesome;
+    content: "\f068";
+    float: right;
+    color: silver;
+}
+
+.panel-heading .accordion-plus-toggle.collapsed:before {
+    content: "\f067";
+    color: silver;
+}
+
+/* arrow glyph for showing collapsible panels */
+.panel-heading .accordion-arrow-toggle:before {
+    font-family: FontAwesome;
+    content: "\f078";
+    float: right;
+    color: silver;
+}
+
+.panel-heading .accordion-arrow-toggle.collapsed:before {
+    content: "\f054";
+    color: silver;
+}
+
+/* sets the link to the width of the entire panel title */
+.panel-title > a {
+    display: block;
+    color: #555; /* Default color for links */
+	text-decoration : none;
+}
+
+.panel-title > a.collapsed {
+    color: #337ab7; /* Color for collapsed links */
+}
+
+/**
+ * Sticky
+ */
+
+.sticky{
+	position: sticky;
+	top: 42px;
+	z-index:1030;
+}
+
+/**
+ * Redef fieldset
+ */
+ 
+.fieldset{
+	border-bottom:none !important;
+	border-left:none !important;
+	border-right:none !important;
+	border-top:solid 3px #f5f5f5 !important
+}
+.legend{
+	background-color: #f5f5f5 !important;
+	width:auto !important;
+	border-bottom:none !important;
+	margin-left:10px !important; 
+	padding: 5px 5px !important;
+}
+
+.legend-btn-toggle{
+	width:auto !important;
+	border-bottom:none !important;
+	margin-left:10px !important; 
+	padding-top: 5px !important;
+	padding-left: 5px !important;
+}
+
+.fieldset-btn-toggle{
+	border-bottom:none !important;
+	border-left:none !important;
+	border-right:none !important;
+	border-top:1px solid #ddd !important
+}
+/**
+ * btn toggle
+ */
+ 
+.btn-toggle-primary{
+	background-color: #337ab7;
+	outline: none !important;
+	border-radius: 0px;
+}
+.btn-toggle-default{
+	outline: none !important;
+	border-radius: 0px;
+}
+
+/**
+ * Font Awesome rotated
+ */
+
+.fa-bars-rotated{
+	transform: rotate(90deg);
+}
+
+/**
+ * Redef fieldset
+ */
+
+.scroll-container{
+	width: 100%; 
+	overflow-x: auto;
+}
+.scroll-container::-webkit-scrollbar {
+  height: 5px;
+}
+.scroll-container::-webkit-scrollbar-thumb {
+background: #ddd; 
+}

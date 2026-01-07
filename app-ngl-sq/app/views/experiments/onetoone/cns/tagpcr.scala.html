@@ -40,8 +40,7 @@
 	<div class="col-md-4 col-lg-4">
 		<form class="form-horizontal">
 			<div class="form-group">
-				<label class="col-md-6 col-lg-6 control-label">Choisissez un
-					plan de tag 2ndaire : </label>
+				<label class="col-md-6 col-lg-6 control-label">Choisissez un plan de tag 2ndaire : </label>
 				<div class="input-group col-md-6 col-lg-6">
 					<div bt-select class="form-control" ng-model="selectedPlateIndex"
 						bt-options="value as label for plate in indexPlates"
@@ -63,6 +62,12 @@
 		<div class="col-md-12 col-lg-12" >
 			<div  class="alert alert-warning" ng-show="isMissingExtractionNegativeControlsWarning()">
 				Attention témoin négatif d'extraction présent pour cette expérience : <strong>{{missingExtractionNegativeControls}}</strong>. Pensez à les ajouter
+			</div>
+		</div>
+		<div class="col-md-12 col-lg-12" >
+			<p><a class="fa fa-info-circle" ng-click="toggleIsShowInformation()" title="Information" href=""> Information sur témoin négatif d'extraction :</a></p>
+			<div ng-show="isShowInformation">
+				le T neg extraction_ADN <b>CDW_AAKK</b> est, exceptionnellement (et le seul), considéré comme <b>FICTIF</b> et <b>ignoré du pipeline BA</b> "check conta sur amplicons". S'il est associé à vos ADN, vous devez l'ignorer et ne pas chercher à le faire poursuivre en tag-pcr.
 			</div>
 		</div>
 	</div>

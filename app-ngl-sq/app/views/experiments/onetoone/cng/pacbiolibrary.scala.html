@@ -1,0 +1,18 @@
+@()
+<div class="col-md-12 col-lg-12" ng-controller="PacBioLibraryCtrl">
+  <form class="form-inline margin-bottom-7" role="form">
+    <div class="row margin-bottom-7" ng-show="selectGroup.isShow()">
+        <div class="form-group col-lg-5"  >
+          <label for="selectTagGroup" control-label">@Messages("experiments.select.tagGroup")</label>
+          <select class="form-control"  ng-model="selectedTagGroup"
+                                        ng-options="group.name for group in getTagGroups()"
+                                        id="selectTagGroup">
+          </select>
+        </div>
+    </div>
+  </form>
+
+  <div class="row">
+	  <div class="col-md-12 col-lg-12" ultimate-datatable="atmService.data"></div>					
+  </div>	
+</div>

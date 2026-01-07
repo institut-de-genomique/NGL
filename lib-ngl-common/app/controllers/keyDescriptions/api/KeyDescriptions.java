@@ -1,8 +1,5 @@
 package controllers.keyDescriptions.api;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-
 import javax.inject.Inject;
 
 import controllers.NGLAPIController;
@@ -17,23 +14,17 @@ import fr.cea.ig.ngl.dao.keyDescriptions.KeyDescriptionDAO;
 import fr.cea.ig.play.IGBodyParsers;
 import models.administration.authorisation.instance.KeyDescription;
 import play.data.Form;
-import play.libs.ws.WSResponse;
 import play.mvc.BodyParser;
 import play.mvc.Result;
-import services.smrtlink.RunDesign;
-import services.smrtlink.SMRTLinkAuthorizationException;
-import services.smrtlink.SMRTLinkServices;
 
 public class KeyDescriptions extends NGLAPIController<KeyDescriptionAPI, KeyDescriptionDAO, KeyDescription> {
 	
 	private final Form<KeyDescription>              form;
-	private final SMRTLinkServices smrtLinkService;
 
 	@Inject
-	public KeyDescriptions(NGLApplication app, KeyDescriptionAPI api, SMRTLinkServices smrtLinkService) {
+	public KeyDescriptions(NGLApplication app, KeyDescriptionAPI api) {
 		super(app, api, KeyDescriptionsSearchForm.class);
 		this.form             = app.formFactory().form(KeyDescription.class);
-		this.smrtLinkService = smrtLinkService;
 	}
 	
 	@Authenticated
@@ -146,39 +137,6 @@ public class KeyDescriptions extends NGLAPIController<KeyDescriptionAPI, KeyDesc
         } else {
         	return doSimpleUpdate(code, input);
         }
-	}
-	
-	public Result testCallSMRTLinkStatus() {
-		try {
-			CompletableFuture<WSResponse> future = this.smrtLinkService.getStatus().toCompletableFuture();
-			WSResponse response = future.get();
-			return okAsJson(response.getBody());
-		} catch (InterruptedException | ExecutionException | SMRTLinkAuthorizationException e) {
-			getLogger().error(e.getMessage(), e);
-            return badRequestAsJson(e.getMessage());
-		}
-	}
-	
-	public Result testCallSMRTLinkRunDesign(String code) {
-		try {
-			CompletableFuture<WSResponse> future = this.smrtLinkService.getRunDesign(code).toCompletableFuture();
-			WSResponse response = future.get();
-			return okAsJson(response.getBody());
-		} catch (InterruptedException | ExecutionException | SMRTLinkAuthorizationException e) {
-			getLogger().error(e.getMessage(), e);
-            return badRequestAsJson(e.getMessage());
-		}
-	}
-	
-	public Result testCallSMRTLinkImport() {
-		try {
-			CompletableFuture<WSResponse> future = this.smrtLinkService.importRunDesign(new RunDesign()).toCompletableFuture();
-			WSResponse response = future.get();
-			return okAsJson(response.getBody());
-		} catch (InterruptedException | ExecutionException | SMRTLinkAuthorizationException e) {
-			getLogger().error(e.getMessage(), e);
-            return badRequestAsJson(e.getMessage());
-		}
 	}
 
 }

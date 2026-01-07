@@ -166,6 +166,26 @@ angular.module('home').controller('CNSPrepaFlowcellOrderedCtrl',['$scope', '$par
 				"inputContainerUsed.experimentProperties.trisHCLConcentration.value":400, 
 				"inputContainerUsed.experimentProperties.masterEPXVolume.value":63,
 				"outputContainerUsed.experimentProperties.finalVolume.value":90			
+			},
+			"NovaSeq X+ / 1.5B ou 10B":{
+				"inputContainerUsed.experimentProperties.inputVolume2.value":34,
+				"inputContainerUsed.experimentProperties.NaOHVolume.value":8.5,
+				"inputContainerUsed.experimentProperties.NaOHConcentration.value":"0.2N",
+				"inputContainerUsed.experimentProperties.preloadBufferVolume.value":"127.5",
+				"inputContainerUsed.experimentProperties.trisHCLVolume.value":-1,
+				"inputContainerUsed.experimentProperties.trisHCLConcentration.value":-1, 
+				"inputContainerUsed.experimentProperties.masterEPXVolume.value":-1,
+				"outputContainerUsed.experimentProperties.finalVolume.value":170			
+			},
+			"NovaSeq X+ / 25B": { 
+				"inputContainerUsed.experimentProperties.inputVolume2.value":56,
+				"inputContainerUsed.experimentProperties.NaOHVolume.value":14,
+				"inputContainerUsed.experimentProperties.NaOHConcentration.value":"0.2N",
+				"inputContainerUsed.experimentProperties.preloadBufferVolume.value":"210",
+				"inputContainerUsed.experimentProperties.trisHCLVolume.value":-1,
+				"inputContainerUsed.experimentProperties.trisHCLConcentration.value":-1, 
+				"inputContainerUsed.experimentProperties.masterEPXVolume.value":-1,
+				"outputContainerUsed.experimentProperties.finalVolume.value":280			
 			}
 			
 			

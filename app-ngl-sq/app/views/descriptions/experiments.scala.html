@@ -194,6 +194,28 @@
     </form>
 }
 
+@formTransformationExpGraph() = {
+    <form class="well well-small">
+        <div class="row">
+            @columnFormGroup{
+                <div bt-select  class="form-control"  placeholder='@Messages("descriptions.select.experiment.types")' filter="true"
+                        ng-model="graphSearchService.form.experimentTypeCode" 
+                        bt-options="type.code as type.name for type in graphSearchService.getExperimentTypes()" ></div>
+            }
+            @columnFormGroup{
+                <div class="btn-toolbar">
+                    <button type="submit" title='@Messages("button.search")' data-toggle="tooltip" ng-click="searchNode()" class="btn btn-primary" >
+                        <i class="fa fa-search"></i>
+                    </button>
+                    <button title='@Messages("button.reset")' data-toggle="tooltip" ng-click="resetTransformationExpGraphForm()"  class="btn btn-default">
+                        <i class="fa fa-undo"></i>
+                    </button>						 	
+                </div>
+            }		
+        </div>		
+    </form>	
+}
+
 <div class="row">
 	<div class="col-md-12 col-lg-12"  messages="messages"></div>
 </div>
@@ -218,6 +240,9 @@
         </li>
 		<li role="presentation">
             <a href="#" data-target="#crossTable" data-toggle="tab" role="tab">@Messages("descriptions.experiments.tab.cross.table")</a>
+        </li>
+        <li role="presentation">
+            <a href="#" ng-click="displayGraph()" data-target="#transformationExpGraph" data-toggle="tab" role="tab">@Messages("descriptions.experiments.tab.graph")</a>
         </li>
     </ul>	
     <div class="tab-content">
@@ -258,5 +283,11 @@
                 <div udt-form></div>
             </div>
         </div>
+        <div class="tab-pane fade" id="transformationExpGraph">
+            @formTransformationExpGraph
+            <div id="cy" style="height: 700px;"></div>
+        </div>
+        
     </div>
 </div>
+

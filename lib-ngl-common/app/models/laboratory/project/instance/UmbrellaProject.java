@@ -34,6 +34,7 @@ public class UmbrellaProject extends DBObject implements IValidation {
 	public String 						description;
 	public Map<String, PropertyValue> 	properties = new HashMap<>();
 	public List<Comment> 				comments = new ArrayList<Comment>();
+	public List<Applicant>				applicants = new ArrayList<Applicant>();
 	
 	@Override
 	@JsonIgnore

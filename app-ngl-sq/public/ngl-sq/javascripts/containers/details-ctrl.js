@@ -127,7 +127,11 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 		mainService.stopEditMode();
 			
 		$http.get(jsRoutes.controllers.containers.api.Containers.get($routeParams.code).url).then(function(response) {
-			$scope.container = response.data;			
+			$scope.container = response.data;
+			for(var i =0 ; i<$scope.container.contents.length;i++){
+				console.log($scope.container.contents[i].properties);
+			}
+					
 			if(tabService.getTabs().length == 0){			
 				tabService.addTabs({label:Messages('containers.tabs.search'),href:jsRoutes.controllers.containers.tpl.Containers.home("search").url,remove:true});
 				tabService.addTabs({label:$scope.container.code,href:jsRoutes.controllers.containers.tpl.Containers.get($scope.container.code).url,remove:true});
@@ -145,8 +149,7 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 			}
 			
 		});
-		
-		
+				
 		$http.get(jsRoutes.controllers.commons.api.PropertyDefinitions.list().url,{params:{'levelCode':'Content'}}).then(function(response) {
 			
 			response.data.forEach(function(pdef){
@@ -164,6 +167,36 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 		});
 	}
 	init();
+
+
+	$scope.hasProperties = function(property) {
+		if ($scope.container) {
+			// Vérif dans les property du container content.
+			for(var i =0 ; i<$scope.container.contents.length;i++){
+				var properties = Object.keys($scope.container.contents[i].properties)
+
+				var containsProperty = properties.some(function(p) {
+					return p === property
+				});
+					return containsProperty;
+				
+			}
+			
+		}
+		return false;
+	};
+
+	var FORBIDDEN_PROPERTIES = ["ncbiClass","ncbiPhylum"]
+
+	$scope.isAllowedProperty = function(property) {
+		for(var i =0 ; i<FORBIDDEN_PROPERTIES.length;i++){
+			if(FORBIDDEN_PROPERTIES[i] == property){
+				return false;
+			}
+		}
+		return true;
+	}
+
 	
 	$scope.getContentPropertyDefinitionValueType = function(key){
 		var propertyDef = contentPropertyDefinitionMap[key];

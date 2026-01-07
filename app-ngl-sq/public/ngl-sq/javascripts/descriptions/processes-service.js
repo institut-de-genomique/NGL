@@ -50,10 +50,19 @@
                         "hide":true
                     },  
                     {
+						"header":Messages("descriptions.processes.table.type.active"),
+						"property":"active",
+						"order":true,
+						"hide":true,
+                        "mergeCells":true,
+						"position":5,
+						"type":"boolean"
+					},
+                    {
                         "header":Messages("descriptions.processes.table.void.experiment.name"),
                         "property":"voidExperimentType.name",
                         "order":true,
-                        "position":5,
+                        "position":6,
                         "type":"text",
                         "mergeCells":true,
                         "hide":true
@@ -62,7 +71,7 @@
                         "header":Messages("descriptions.processes.table.void.experiment.code"),
                         "property":"voidExperimentType.code",
                         "order":true,
-                        "position":6,
+                        "position":7,
                         "type":"text",
                         "mergeCells":true,
                         "hide":true
@@ -71,7 +80,7 @@
                         "header":Messages("descriptions.processes.table.first.experiment.name"),
                         "property":"firstExperimentType.name",
                         "order":true,
-                        "position":7,
+                        "position":8,
                         "type":"text",
                         "mergeCells":true,
                         "hide":true
@@ -80,7 +89,7 @@
                         "header":Messages("descriptions.processes.table.first.experiment.code"),
                         "property":"firstExperimentType.code",
                         "order":true,
-                        "position":8,
+                        "position":9,
                         "type":"text",
                         "mergeCells":true,
                         "hide":true
@@ -89,7 +98,7 @@
                         "header":Messages("descriptions.processes.table.last.experiment.name"),
                         "property":"lastExperimentType.name",
                         "order":true,
-                        "position":9,
+                        "position":10,
                         "type":"text",
                         "mergeCells":true,
                         "hide":true
@@ -98,7 +107,7 @@
                         "header":Messages("descriptions.processes.table.last.experiment.code"),
                         "property":"lastExperimentType.code",
                         "order":true,
-                        "position":10,
+                        "position":11,
                         "type":"text",
                         "mergeCells":true,
                         "hide":true
@@ -106,7 +115,7 @@
                     {
                         "header":Messages("descriptions.processes.table.experiment.type.position.in.process"),
                         "property":"positionInProcess",
-                        "position":11,
+                        "position":12,
                         "type":"number",
                         "hide":true
                     },
@@ -114,14 +123,14 @@
                         "header":Messages("descriptions.processes.table.experiment.type.name"),
                         "property":"experimentTypeCode",
                         "filter":"codes:'type'",
-                        "position":12,
+                        "position":13,
                         "type":"text",
                         "hide":true
                     },
                     {
                         "header":Messages("descriptions.processes.table.experiment.type.code"),
                         "property":"experimentTypeCode",
-                        "position":13,
+                        "position":14,
                         "type":"text",
                         "hide":true
                     }
@@ -320,7 +329,6 @@
                 row.code=propDef.code;
                 row.levels=propDef.levels;
                 row.required=propDef.required;
-                row.active=propDef.active;
                 row.choiceInList=propDef.choiceInList;
                 row.valueType=propDef.valueType;
                 row.defaultValue=propDef.defaultValue;
@@ -360,6 +368,7 @@
                             code: rawProcessType.code,
                             name: rawProcessType.name,
                             category: rawProcessType.category,
+                            active: rawProcessType.active,
                             voidExperimentType : rawProcessType.voidExperimentType,
                             firstExperimentType : rawProcessType.firstExperimentType,
                             lastExperimentType : rawProcessType.lastExperimentType

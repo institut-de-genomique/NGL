@@ -81,6 +81,63 @@ public class ProcessTypeDAO extends AbstractDAOCommonInfoType<ProcessType> {
 		}
 	}
 
+	/* FDS NGL-4246 */
+	public List<ProcessType> findByExperimentTypes(boolean isLightVersion, String...experimentTypes) {	
+		try {
+			String sql ="SELECT distinct c.id, c.fk_common_info_type, c.fk_process_category, c.fk_void_experiment_type, c.fk_first_experiment_type, c.fk_last_experiment_type "
+			           +" FROM process_type as c "
+			           +" INNER JOIN process_experiment_type as pet on c.id = pet.fk_process_type"
+			           +" INNER JOIN common_info_type as cit on cit.id = pet.fk_experiment_type"
+			           +" WHERE cit.code in ("+listToParameters(Arrays.asList(experimentTypes))+") ORDER BY display_order";
+				
+			//forcer maping light en dur pour l'instant (arrive pas a le faire passer en parametre)
+			ProcessTypeMappingQuery mapping = (ProcessTypeMappingQuery)initializeMapping(sql, listToSqlParameters(Arrays.asList(experimentTypes) ,"cit.code", Types.VARCHAR));
+			mapping.lightVersion = isLightVersion;
+			return mapping.execute(experimentTypes);
+		} catch (DataAccessException e) {
+			logger.warn(e.getMessage());
+			return null;
+		}
+	}
+
+	/* FDS NGL-4246 */
+	public List<ProcessType> findByFirstExperimentTypes(String...firstExperimentTypes) {	
+		try {
+			String sql ="SELECT distinct c.id, c.fk_common_info_type, c.fk_process_category, c.fk_void_experiment_type, c.fk_first_experiment_type, c.fk_last_experiment_type "
+			           +" FROM process_type as c"
+			           +" INNER JOIN common_info_type as cit on cit.id = c.fk_first_experiment_type"
+			           +" WHERE cit.code in ("+listToParameters(Arrays.asList(firstExperimentTypes))+") ORDER BY display_order";
+			
+			//forcer maping light en dur pour l'instant (arrive pas a le faire passer en parametre)
+			ProcessTypeMappingQuery mapping = (ProcessTypeMappingQuery) initializeMapping(sql, listToSqlParameters(Arrays.asList(firstExperimentTypes) ,"cit.code", Types.VARCHAR));
+			mapping.lightVersion = true;
+			return mapping.execute(firstExperimentTypes);
+		} catch (DataAccessException e) {
+			logger.warn(e.getMessage());
+			return null;
+		}
+	}
+
+	/* FDS NGL-4246 */
+	public List<ProcessType> findByLastExperimentTypes(String...lastExperimentTypes) {	
+		try {
+			String sql ="SELECT distinct c.id, c.fk_common_info_type, c.fk_process_category, c.fk_void_experiment_type, c.fk_first_experiment_type, c.fk_last_experiment_type "
+			           +" FROM process_type as c"
+			           +" INNER JOIN common_info_type as cit on cit.id = c.fk_last_experiment_type"
+			           +" WHERE cit.code in ("+listToParameters(Arrays.asList(lastExperimentTypes))+") ORDER BY display_order";
+
+			//forcer maping light en dur pour l'instant (arrive pas a le faire passer en parametre)
+			ProcessTypeMappingQuery mapping = (ProcessTypeMappingQuery) initializeMapping(sql, listToSqlParameters(Arrays.asList(lastExperimentTypes) ,"cit.code", Types.VARCHAR));
+			mapping.lightVersion = true;
+			return mapping.execute(lastExperimentTypes);
+		} catch (DataAccessException e) {
+			logger.warn(e.getMessage());
+			return null;
+		}
+	}
+  
+
+
 	@Override
 	public long save(ProcessType processType) throws DAOException {
 //		if(null == processType){
@@ -217,7 +274,7 @@ public class ProcessTypeDAO extends AbstractDAOCommonInfoType<ProcessType> {
 	}
 	
 	public List<ProcessType> findAll(boolean light) throws DAOException {
-		ProcessTypeMappingQuery mapping = (ProcessTypeMappingQuery)initializeMapping(sqlCommon+" order by display_order");
+		ProcessTypeMappingQuery mapping = (ProcessTypeMappingQuery) initializeMapping(sqlCommon+" order by display_order");
 		mapping.lightVersion = light;
 		return mapping.execute();
 	}

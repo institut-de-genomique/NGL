@@ -78,6 +78,8 @@ public class UmbrellaProjects extends NGLController implements NGLJavascript {
 						controllers.projects.api.routes.javascript.UmbrellaProjectComments.save(),
 						controllers.projects.api.routes.javascript.UmbrellaProjectComments.update(),
 						controllers.projects.api.routes.javascript.UmbrellaProjectComments.delete(),
+						controllers.reporting.api.routes.javascript.FilteringConfigurations.list(),
+						controllers.reporting.api.routes.javascript.FilteringConfigurations.get(),
 						controllers.reporting.api.routes.javascript.ReportingConfigurations.list(),
 						controllers.reporting.api.routes.javascript.ReportingConfigurations.get()
   	    		);

@@ -250,7 +250,10 @@ angular.module('home').controller('XToTubesCtrl',['$scope', '$parse', '$filter',
 		if(categoryCodes.length === 1){
 			// les supports sont homogènes
 			categoryCode=categoryCodes[0];
-			$scope.supportCategoryCode =categoryCodes[0];
+			if(categoryCode!="tube" && categoryCode!="96-well-plate")
+				$scope.supportCategoryCode = "tube";
+			else
+				$scope.supportCategoryCode =categoryCodes[0];
 		} else {
 			categoryCode="mixte";
 			// NGL-3927 
@@ -380,32 +383,34 @@ angular.module('home').controller('XToTubesCtrl',['$scope', '$parse', '$filter',
 	*/
 	var checkNbInputPlates =function(){
 		if ( $scope.experiment.instrument.categoryCode !== 'hand' &&
-			 inputSupports.categoryCode === "96-well-plate" && 
-			 inputSupports.count > 1  ) {
-				var inputContainerSupports=$scope.getInputContainerSupports(); // array of string
-				// !!! faut le meme tri que dans l'onglet Source/destination !!
-				inputContainerSupports.sort();// sort by quoi ???
-					
+			 inputSupports.categoryCode === "96-well-plate" && inputSupports.count > 1  ) {
+
 				$scope.messages.clazz = "alert alert-warning";
-				$scope.messages.text ="Attention vous avez "+ inputSupports.count +" sources, vérifiez que le positionnement de vos plaques sur le robot correspond au plan proposé par NGL:";
-				var data = { 'sources':[], 'destinations':[] };
-					
+				$scope.messages.text ="Attention vous avez "+ inputSupports.count +" sources, vérifiez que le positionnement de vos plaques sur le robot correspond au plan proposé par NGL (Voir onglet Source/Destination)";
+				/* NGL-5049 en mode pool automatique l'utilisateur peut changer l'ordre des plaques d'entrée, cet affichage peut être incorrect !!!
+				  ce qui est correct c'est l'onglet Source/Destination qui est réordonné dynamiquement
+
+				// var inputContainerSupports=$scope.getInputContainerSupports(); // array of string
+				var inputContainerSupports=$scope.getInputContainerSupports().sort();
+
+				var data = { 'sources':[], 'destinations':[] };	
 				for (var p=0; p < inputContainerSupports.length; p++ ){
 					var tab=[inputContainerSupports[p], p+1];
 					data['sources'].push(tab);
 				}	
 					
 				var outputContainerSupports=$scope.getDistinctOutputContainerSupports(); // array of object !!!
-				// !!! faut le meme tri que dans l'onglet Source/destinantion !!
-				outputContainerSupports.sort();// sort by quoi ???
+				// !!! faut le meme tri que dans l'onglet Source/Destination !!
+				outputContainerSupports.sort();// tri alphabetique des support codes
 					
 				for (var p=0; p < outputContainerSupports.length; p++ ){
 					var tab=[outputContainerSupports[p].code, p+1];
 					data['destinations'].push(tab);
 				}
-				
-				$scope.messages.setDetails(data);
-				$scope.messages.showDetails = true;
+				*/
+
+				//$scope.messages.setDetails(data);
+				//$scope.messages.showDetails = true;
 				$scope.messages.open();	
 			}
 	}
@@ -424,7 +429,7 @@ angular.module('home').controller('XToTubesCtrl',['$scope', '$parse', '$filter',
 		} else {
 			// NGL-3593 Warning au CNG
 			if ($scope.isCNG) checkNbInputPlates();
-			
+
 			$scope.atmService.viewToExperiment($scope.experiment, false);
 			$scope.$emit('childSaved', callbackFunction);
 			

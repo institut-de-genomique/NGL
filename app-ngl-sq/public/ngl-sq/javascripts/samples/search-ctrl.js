@@ -1,7 +1,7 @@
 "use strict"
 
-angular.module('home').controller('SearchCtrl', ['$scope',  '$window','datatable','lists','$filter','mainService','tabService','samplesSearchService','$routeParams', 
-                                                 function($scope, $window, datatable, lists,$filter,mainService,tabService,samplesSearchService,$routeParams) {
+angular.module('home').controller('SearchCtrl', ['$http', '$scope',  '$window','datatable','lists','$filter','mainService','tabService','samplesSearchService','$routeParams', 'projectSearchFromUmbrella',
+                                                 function($http, $scope, $window, datatable, lists,$filter,mainService,tabService,samplesSearchService,$routeParams, projectSearchFromUmbrella) {
 	var datatableConfig = {
 		group:{active:true},
 		search:{
@@ -40,18 +40,29 @@ angular.module('home').controller('SearchCtrl', ['$scope',  '$window','datatable
 		save:{
 			active:Permissions.check("writing")?true:false,
 			url:function(value){
-				var fields = "";
+				var fields = [];
 				
 				if(value.comments) {
-					fields = "fields=comments";
+					fields.push("fields=comments");
 				}
+
+				if(value.resolutionCodes) {
+					fields.push("fields=resolutionCodes");
+				}
+
+				var fieldsQueryParams = fields.join("&");
 				
-				return jsRoutes.controllers.samples.api.Samples.update(value.code).url+"?"+fields;
+				return jsRoutes.controllers.samples.api.Samples.update(value.code).url+"?"+fieldsQueryParams;
 			},
 			method:'put',
 			mode:'remote'			
 		}
 	};	
+
+	$scope.selectProjetsFromUmbrellas = function() {
+		var projCodes = projectSearchFromUmbrella.search($scope.searchService.form.umbrellaCodes);
+		$scope.searchService.form.projectCodes = projCodes;
+	}
 	
 	$scope.search = function(){		
 		$scope.searchService.search();
@@ -65,6 +76,12 @@ angular.module('home').controller('SearchCtrl', ['$scope',  '$window','datatable
 	$scope.goToReadSet = function(code, $event){
 		$window.open(AppURL("bi")+"/readsets/"+code, 'readset');
 		if($event)$event.stopPropagation();
+	}
+
+	$scope.isShowInfo=false;
+
+	$scope.toggleShowInfo=function(){
+		$scope.isShowInfo = !$scope.isShowInfo;
 	}
 	
 	//init

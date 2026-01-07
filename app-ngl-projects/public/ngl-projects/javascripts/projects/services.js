@@ -19,8 +19,10 @@
  		columns.push({
  			property: "name",
  			header: "projects.name",
+			 groupMethod: "collect:true",
  			type: "String",
  			order: false,
+			 "render" : "<div list-resize='cellValue'list-resize-min-size='3' vertical>",
  			edit: false,
  			position: 2
  		});
@@ -31,6 +33,7 @@
  			type: "String",
  			order: true,
 			 edit: false,
+			 hide: true,
 			 position: 3,
  			choiceInList: false
  		});
@@ -41,6 +44,7 @@
  			type: "String",
  			order: true,
 			 edit: false,
+			 hide: true,
 			 position: 4,
  			choiceInList: false
  		});
@@ -51,6 +55,7 @@
  			type: "String",
  			filter: "codes:'boolean'",
 			 order: true,
+			 groupMethod: "unique",
 			 position: 5,
  			edit: false,
  			choiceInList: false
@@ -100,10 +105,14 @@
  			/*TODO EJACOBY AD*/
 			
  			searchService.lists.refresh.reportConfigs({
- 				pageCodes: ["projects-addcolumns"]
+ 				pageCodes: ["projects-addcolumns"], 
+				active:true
  			}, "projects-addcolumns");
  			searchService.lists.refresh.filterConfigs({pageCodes:["projects-addfilters"]}, "projects-addfilters");
- 			isInit = true;
+ 			
+			searchService.lists.refresh.umbrellaProjects();
+ 			
+			isInit = true;
  		}
  	};
 
@@ -240,18 +249,43 @@
  			if (count > 0) {
  				this.isRouteParam = true;
  				this.form = $routeParams;
-				console.log(this.form);
  			}
  		},
 
  		search: function () {
+			if (this.form.umbrellaCodes) {
+				var THIS = this;
+
+				$http.get(jsRoutes.controllers.projects.api.UmbrellaProjects.list().url, {})
+					.success(function(data) {
+						var umbCodes = [];
+
+						for (var i = 0; i < data.length; i++) {
+							for (var j = 0; j < THIS.form.umbrellaCodes.length; j++) {
+								if (THIS.form.umbrellaCodes[j] === data[i].name) {
+									umbCodes.push(data[i].code);
+								}
+							}	
+						}		
+						
+						if (umbCodes.length != 0) {
+							THIS.form.umbrellaCodes = umbCodes;
+						}
+
+						THIS._search();
+				});
+			} else {
+				this._search();
+			}
+ 		},
+
+		_search: function() {
 			this.updateForm();
 			mainService.setForm(this.form);
 			var form = this.convertForm();
-			console.log(form);
 			this.datatable.search(form);
 			this.datatable.setMessagesActive(true);
- 		},
+		},
 
  		resetForm : function(){
 			this.form = {};									

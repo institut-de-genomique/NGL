@@ -1,7 +1,7 @@
 @this()
 @()
 @import views.html.helper._
-@import views.html.tools.attributesInstructions
+@import views.html.tools.sampleAttributesInstructions
 @**Definition d'une variable user :**@
 @user            = @{ fr.cea.ig.authentication.Authentication.getUser() }
 
@@ -15,32 +15,39 @@
 	}
 
 	@columnSearchForm{
-		@formGroup{			
-			<bt-input  class="form-control"  input-ng-model="form.codeRegex" textarea-ng-model="form.codes" 
-			title='@Messages("consultation.textarea-placeholder.sampleCodes")' 
-			textarea-placeholder-ng-model='@Messages("consultation.textarea-placeholder.sampleCodes")' 
-			placeholder='@Messages("consultation.placeholder.sampleCodes")' >
-			</bt-input>												
-		}
 		@formGroup{
-			<bt-input  class="form-control"  input-ng-model="form.accessionRegex" textarea-ng-model="form.accessions" 
-			title='@Messages("consultation.textarea-placeholder.sampleAccessions")'
-			textarea-placeholder-ng-model='@Messages("consultation.textarea-placeholder.sampleAccessions")'
-			placeholder='@Messages("consultation.placeholder.sampleAccessions")' >
-			</bt-input>										
+			<bt-input  class="form-control"  input-ng-model="form.codeRegex" textarea-ng-model="form.codes" 
+			title='@Messages("consultation.textarea-placeholder-title.sampleCodes")' 
+			textarea-placeholder-ng-model='@Messages("consultation.textarea-placeholder-title.sampleCodes")' 
+			placeholder='@Messages("consultation.textarea-placeholder.sampleCodes")' >
+			</bt-input>									
 		}
-		@formGroup{			
-			<bt-input  class="form-control"  input-ng-model="form.externalIdRegex" textarea-ng-model="form.externalIds" 
-			title='@Messages("consultation.textarea-placeholder.sampleExternalIds")' 
-			textarea-placeholder-ng-model='@Messages("consultation.textarea-placeholder.sampleExternalIds")' 
-			placeholder='@Messages("consultation.placeholder.sampleExternalIds")' >
-			</bt-input>										
-		}
+
+		@formGroup{
+			<bt-input  class="form-control"  input-ng-model="form.identifierRegex" textarea-ng-model="form.identifiers" 
+			title='@Messages("consultation.textarea-placeholder-title.sampleIdentifiers")' 
+			textarea-placeholder-ng-model='@Messages("consultation.textarea-placeholder-title.sampleIdentifiers")' 
+			placeholder='@Messages("consultation.textarea-placeholder.sampleIdentifiers")' >
+			</bt-input>									
+		}	
 	}
 	
 	@columnSearchForm{
 		@formGroup{
-			<label>@Messages("userFileSample")</label> 
+			<input type="text" class="form-control" ng-model="form.createUser" placeholder='@Messages("consultation.placeholder.createUser")' >	
+		}	
+		@formGroup{
+			<bt-input  class="form-control"  input-ng-model="form.submissionCodeRegex" textarea-ng-model="form.submissionCodes" 
+			title='@Messages("consultation.textarea-placeholder-title.submissionCodes")' 
+			textarea-placeholder-ng-model='@Messages("consultation.textarea-placeholder-title.submissionCodes")' 
+			placeholder='@Messages("consultation.textarea-placeholder.submissionCodes")' >
+			</bt-input>									
+		}	
+	}
+	
+	@columnSearchForm{
+		@formGroup{
+			<label>@Messages("userFileSample.txt")</label> 
 			<input type="file"  id="idUserFileSample" base64-file="form2.userFileSample"/>
 		}
 	}	
@@ -90,7 +97,7 @@
 			</button>	
 		</div>				
 	}	
-	@attributesInstructions()
+	@sampleAttributesInstructions()
 
 }
 

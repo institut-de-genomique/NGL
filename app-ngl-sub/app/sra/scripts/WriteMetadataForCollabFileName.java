@@ -18,13 +18,14 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import javax.inject.Inject;
 import org.mongojack.DBQuery;
+
+import controllers.sra.api.ExperimentAPI;
 import fr.cea.ig.lfw.controllers.scripts.buffered.Script;
-import fr.cea.ig.ngl.dao.api.sra.ExperimentAPI;
 import models.sra.submit.sra.instance.Experiment;
 import models.sra.submit.sra.instance.RawData;
 import models.sra.submit.sra.instance.Run;
-import models.sra.submit.util.SraException;
-import services.Tools;
+import services.sra.SraException;
+import sra.services.Tools;
 
 
 /*
@@ -38,7 +39,7 @@ import services.Tools;
  * 
 
  * Exemple de lancement :
- * http://appdev.genoscope.cns.fr:9005/sra/scripts/run/sra.scripts.WriteMetadataForCollabFileName?collabFileNames=/env/cns/tmp/sgas/fileProcessingErrors.txt&resultDirectory=/env/cns/submit_traces/SRA/SNTS_output_xml/NGL/FIX_TRANSFERT/2023_03_03
+ * http://appdev.genoscope.cns.fr:9005/sra/scripts/run/sra.scripts.WriteMetadataForCollabFileName?collabFileNames=/env/cns/submit_traces/SRA/SNTS_output_xml/NGL/FIX_TRANSFERT/2025_03_17/fileProcessingErrors.txt&resultDirectory=/env/cns/submit_traces/SRA/SNTS_output_xml/NGL/FIX_TRANSFERT/2025_03_17
  *
  * @author sgas
  *

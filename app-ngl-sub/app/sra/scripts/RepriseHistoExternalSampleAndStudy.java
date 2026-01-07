@@ -9,17 +9,16 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 
-
+import controllers.sra.api.AbstractSampleAPI;
+import controllers.sra.api.AbstractStudyAPI;
 import fr.cea.ig.lfw.controllers.scripts.buffered.ScriptNoArgs;
-import fr.cea.ig.ngl.dao.api.sra.AbstractSampleAPI;
-import fr.cea.ig.ngl.dao.api.sra.AbstractStudyAPI;
 import models.sra.submit.sra.instance.AbstractSample;
 import models.sra.submit.sra.instance.AbstractStudy;
 import models.sra.submit.sra.instance.EbiIdentifiers;
 import models.sra.submit.sra.instance.Sample;
 import models.sra.submit.sra.instance.Study;
-import models.sra.submit.util.SraException;
-import services.SraEbiAPI;
+import services.sra.SraException;
+import sra.services.SraEbiAPI;
 
 /*
  * Script à utiliser pour ajouter externalId sur les externalSample et externalStudy.
@@ -116,20 +115,20 @@ public class RepriseHistoExternalSampleAndStudy extends ScriptNoArgs {
 			}
 			// recuperer sample de l'EBI :
 			
-			// le sample de la base a un ERS, il faut recuperer le sample à l'EBI et son SAM
+			// le sample de la base a un ERS ou SRS, il faut recuperer le sample à l'EBI et son SAM
 			if (StringUtils.isNotBlank(dbSample.accession)) {
 				//println(dbSample.code);
-				if ( ! dbSample.accession.startsWith("ERS") ) {
-					throw new SraException("Le sample de la base " + dbSample.code + " contient un AC qui ne commence pas par ERS " + dbSample.accession);	
+				if ( ! dbSample.accession.startsWith("ERS") && ! dbSample.accession.startsWith("SRS") ) {
+					throw new SraException("Le sample de la base " + dbSample.code + " contient un AC qui ne commence pas par ERS ou SRS " + dbSample.accession);	
 				}
-				EbiIdentifiers ebiIdentifiers = ebiAPI.EbiBrowserFetchEbiIdentifiers(dbSample.accession);
+				EbiIdentifiers ebiIdentifiers = ebiAPI.ebiBrowserFetchEbiIdentifiers(dbSample.accession);
 				// corriger dbSample et stocker pour validation et sauvegarde en base:
 				if (ebiIdentifiers == null ) {
 					println("Aucun sample recupere a l'EBI pour  " + dbSample.accession);
 					continue;
 				}
-				if ( ! ebiIdentifiers.getAccession().startsWith("ERS")) {
-					throw new SraException("Le sample recupere de l'EBI a un numeros d'accession qui ne commence pas par ERS " + ebiIdentifiers.getAccession());
+				if ( ! ebiIdentifiers.getAccession().startsWith("ERS") &&  ! ebiIdentifiers.getAccession().startsWith("SRS")) {
+					throw new SraException("Le sample recupere de l'EBI a un numeros d'accession qui ne commence pas par ERS ou SRS " + ebiIdentifiers.getAccession());
 				}
 				if ( ! ebiIdentifiers.getExternalId().startsWith("SAM")) {
 					throw new SraException("Le sample recupere de l'EBI a un externalId qui ne commence pas par SAM " + ebiIdentifiers.getExternalId());
@@ -139,20 +138,19 @@ public class RepriseHistoExternalSampleAndStudy extends ScriptNoArgs {
 				dbSample.traceInformation.modifyUser = user;
 				dbSample.traceInformation.modifyDate = courantDate;
 				abstractSampleAPI.dao_saveObject(dbSample);
-			}
-			// le sample de la base a un SAM, il faut recuperer le sample a l'EBI et son ERS
-			if (StringUtils.isNotBlank(dbSample.externalId)) {
+			} else if (StringUtils.isNotBlank(dbSample.externalId)) {
+				// le sample de la base a un SAM, il faut recuperer le sample a l'EBI et son ERS
 				if ( ! dbSample.externalId.startsWith("SAM") ) {
 					throw new SraException("Le sample de la base " + dbSample.code + " contient un externalId qui ne commence pas par SAM " + dbSample.externalId);	
 				}
-				EbiIdentifiers ebiIdentifiers = ebiAPI.EbiBrowserFetchEbiIdentifiers(dbSample.externalId);
+				EbiIdentifiers ebiIdentifiers = ebiAPI.ebiBrowserFetchEbiIdentifiers(dbSample.externalId);
 				// corriger dbSample et stocker pour validation et sauvegarde en base:
 				if (ebiIdentifiers == null ) {
 					println("Aucun sample recupere a l'EBI pour  " + dbSample.externalId);
 					continue;
 				}
-				if ( ! ebiIdentifiers.getAccession().startsWith("ERS")) {
-					throw new SraException("Le sample recupere de l'EBI a un numeros d'accession qui ne commence pas par ERS " + ebiIdentifiers.getAccession());
+				if ( ! ebiIdentifiers.getAccession().startsWith("ERS") &&  ! ebiIdentifiers.getAccession().startsWith("SRS")) {
+					throw new SraException("Le sample recupere de l'EBI a un numeros d'accession qui ne commence pas par ERS ou SRS : voir " + ebiIdentifiers.getAccession());
 				}
 				if ( ! ebiIdentifiers.getExternalId().startsWith("SAM")) {
 					throw new SraException("Le sample recupere de l'EBI a un externalId qui ne commence pas par SAM " + ebiIdentifiers.getExternalId());
@@ -162,7 +160,9 @@ public class RepriseHistoExternalSampleAndStudy extends ScriptNoArgs {
 				dbSample.traceInformation.modifyUser = user;
 				dbSample.traceInformation.modifyDate = courantDate;
 				abstractSampleAPI.dao_saveObject(dbSample);
-			}	
+			} else {
+				throw new SraException("le sample de la base " + dbSample.code + " n'a ni ERS ni SAM ???");
+			}
 		}	
 		println("Sauvegarde de " + count_externalSample + " externalSample");
 
@@ -186,7 +186,7 @@ public class RepriseHistoExternalSampleAndStudy extends ScriptNoArgs {
 					throw new SraException("Le study de la base " + dbStudy.code + " contient un AC qui ne commence pas par ERP " + dbStudy.accession);	
 				}
 				// on recupere à l'EBI le xml d'un study et les identifiers associés:
-				EbiIdentifiers ebiIdentifiers = ebiAPI.EbiBrowserFetchEbiIdentifiers(dbStudy.accession);
+				EbiIdentifiers ebiIdentifiers = ebiAPI.ebiBrowserFetchEbiIdentifiers(dbStudy.accession);
 				// corriger dbStudy et stocker pour validation et sauvegarde en base:
 				if (ebiIdentifiers == null ) {
 					println("Aucun study recuperé pour  " + dbStudy.accession);
@@ -203,14 +203,13 @@ public class RepriseHistoExternalSampleAndStudy extends ScriptNoArgs {
 				dbStudy.traceInformation.modifyUser = user;
 				dbStudy.traceInformation.modifyDate = courantDate;
 				abstractStudyAPI.dao_saveObject(dbStudy);
-			}
-			// le study de la base a un PRJEB, il faut recuperer le project à l'EBI et son ERP
-			if (StringUtils.isNotBlank(dbStudy.externalId)) {
+			} else if (StringUtils.isNotBlank(dbStudy.externalId)) {
+				// le study de la base a un PRJEB, il faut recuperer le project à l'EBI et son ERP
 				if ( ! dbStudy.externalId.startsWith("PRJ") ) {
 					throw new SraException("Le study de la base " + dbStudy.code + " contient un externalId qui ne commence pas par PRJ " + dbStudy.externalId);
 				}
 				// on recupere à l'EBI le xml d'un project et les identifiers associés:
-				EbiIdentifiers ebiIdentifiers = ebiAPI.EbiBrowserFetchEbiIdentifiers(dbStudy.externalId);
+				EbiIdentifiers ebiIdentifiers = ebiAPI.ebiBrowserFetchEbiIdentifiers(dbStudy.externalId);
 				// corriger dbStudy et stocker pour validation et sauvegarde en base:
 				if (ebiIdentifiers == null ) {
 					println("Aucun project recuperé pour  " + dbStudy.externalId);
@@ -227,7 +226,9 @@ public class RepriseHistoExternalSampleAndStudy extends ScriptNoArgs {
 				dbStudy.traceInformation.modifyUser = user;
 				dbStudy.traceInformation.modifyDate = courantDate;
 				abstractStudyAPI.dao_saveObject(dbStudy);
-			}			
+			} else {
+				throw new SraException("le study de la base " + dbStudy.code + " n'a ni ERP ni PRJ ???");
+			}
 		}	
 		println("Sauvegarde de " + count_externalStudy + " externalStudy");
 		

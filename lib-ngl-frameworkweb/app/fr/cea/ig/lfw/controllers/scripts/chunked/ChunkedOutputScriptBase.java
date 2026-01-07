@@ -4,6 +4,8 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import akka.actor.ActorRef;
+import akka.actor.ActorRefFactory;
+import akka.actor.PoisonPill;
 import akka.util.ByteString;
 import fr.cea.ig.lfw.reflect.ReflectionUtils;
 import play.mvc.Http.RequestBody;
@@ -98,6 +100,8 @@ public abstract class ChunkedOutputScriptBase<T> {
 			output(sb.toString());
 			logger.error(e.getMessage(), e);
 			throw e;
+		} finally {
+			output.tell(PoisonPill.getInstance(), ActorRef.noSender());
 		}
 	}
 	

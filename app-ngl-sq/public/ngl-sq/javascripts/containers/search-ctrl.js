@@ -1,7 +1,7 @@
 "use strict"
 
-angular.module('home').controller('SearchCtrl', ['$scope',  '$window','datatable','lists','$filter','mainService','tabService','containersSearchService','$routeParams', '$http', 
-                                                 function($scope, $window, datatable, lists,$filter,mainService,tabService,containersSearchService,$routeParams,$http) {
+angular.module('home').controller('SearchCtrl', ['$scope',  '$window','datatable','lists','$filter','mainService','tabService','containersSearchService','$routeParams', '$http', 'projectSearchFromUmbrella', 
+                                                 function($scope, $window, datatable, lists,$filter,mainService,tabService,containersSearchService,$routeParams,$http, projectSearchFromUmbrella) {
 	var datatableConfig = {
 		group:{active:true},
 		search:{
@@ -225,6 +225,12 @@ angular.module('home').controller('SearchCtrl', ['$scope',  '$window','datatable
 		$scope.form = {};
 		mainService.setForm($scope.form);
 	}
+
+	$scope.selectProjetsFromUmbrellas = function() {
+		var projCodes = projectSearchFromUmbrella.search($scope.searchService.form.umbrellaCodes);
+
+		$scope.searchService.form.projectCodes = projCodes;
+	}
 	
 	$scope.searchService = containersSearchService;
 	$scope.searchService.init($routeParams, datatableConfig)
@@ -236,8 +242,8 @@ angular.module('home').controller('SearchCtrl', ['$scope',  '$window','datatable
 
 
 "use strict"
-angular.module('home').controller('SearchStateCtrl', ['$scope','$location','$routeParams', 'datatable','lists','$filter','$http','$q','mainService','tabService','containersSearchService', 
-	function($scope,$location,$routeParams, datatable, lists,$filter,$http,$q,mainService,tabService,containersSearchService) {
+angular.module('home').controller('SearchStateCtrl', ['$scope','$location','$routeParams', 'datatable','lists','$filter','$http','$q','mainService','tabService','containersSearchService', 'projectSearchFromUmbrella', 
+	function($scope,$location,$routeParams, datatable, lists,$filter,$http,$q,mainService,tabService,containersSearchService, projectSearchFromUmbrella) {
 	var datatableConfig = {
 			search:{
 				url:jsRoutes.controllers.containers.api.Containers.list()
@@ -301,6 +307,11 @@ angular.module('home').controller('SearchStateCtrl', ['$scope','$location','$rou
 		$scope.searchService.resetTextareas();
 	};
 	
+	$scope.selectProjetsFromUmbrellas = function() {
+		var projCodes = projectSearchFromUmbrella.search($scope.searchService.form.umbrellaCodes);
+		$scope.searchService.form.projectCodes = projCodes;
+	}
+
 	$scope.search = function(){	
 		$scope.searchService.search();
 	};

@@ -11,7 +11,11 @@
 		@formGroup{
 			<div  class="form-control" bt-select  ng-model="form.analysisCode" placeholder='@Messages("create.placeholder.analysisCode")' bt-options="analysis.code as analysis.code for analysis in lists.getSraAnalyzes()" ng-focus="refreshSraAnalyzes()" required ></div>	
 		}
-	
+		
+		@formGroup{
+			<textarea type="number" class="form-control"  rows="2" ng-model="form.taxonCode" placeholder='@Messages("create.placeholder.taxonCode")' ></textarea>		
+		}
+		
 		@formGroup{		
 			<div class="form-control" bt-select ng-model="form.readSetCodes" filter="true" multiple="true" textarea="true" placeholder='@Messages("create.placeholder.submissions.readSet")' bt-options="readSet.code as readSet.code for readSet in readSets" ng-focus="refreshReadSets()"></div>			
 		}	
@@ -19,12 +23,12 @@
 		@** le ng-if empeche la recuperation de la valeur de input file => d'ou le ng-hide **@ 
 		@formGroup{	
 			<div>
-				<label>@Messages("userFileReadSet")</label> 
+				<label>@Messages("userFileReadSet.txt")</label> 
 				<input type="file"  id="idUserFileReadSet" base64-file="userFileReadSet"/> 
 			</div>	
 			<br/>
 			<div>
-				<label >@Messages("userFilePathcmap")</label> 
+				<label >@Messages("userFilePathcmap.txt")</label> 
 				<input type="file"  id="idUserFilePathcmap" base64-file="userFilePathcmap"/>
 			</div>
 			<br/>

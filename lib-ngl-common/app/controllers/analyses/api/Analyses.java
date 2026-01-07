@@ -33,6 +33,7 @@ public class Analyses extends NGLAPIController<AnalysesAPI, AnalysesDAO, Analysi
     private final Form<Analysis>             form;
     private final Form<Valuation>            valuationForm;
     private final Form<AnalysesBatchElement> batchElementForm;
+    private final Form<PropertyValue>		 propertyForm;
     private final IDrools6Actor              rulesActor;
 
     @Inject
@@ -42,6 +43,7 @@ public class Analyses extends NGLAPIController<AnalysesAPI, AnalysesDAO, Analysi
         this.form             = app.formFactory().form(Analysis.class);
         this.valuationForm    = app.formFactory().form(Valuation.class);
         this.batchElementForm = app.formFactory().form(AnalysesBatchElement.class);
+        this.propertyForm	  = app.formFactory().form(PropertyValue.class);
     }
 
 //    @SuppressWarnings("deprecation") // controller asynchronous drools
@@ -54,6 +56,25 @@ public class Analyses extends NGLAPIController<AnalysesAPI, AnalysesDAO, Analysi
                 return notFoundAsJson("Analysis " + code + " not found");
             rulesActor.tellMessage(rulesCode, objectInDB);
             return ok();
+        });
+    }
+	
+	@Authenticated
+    @Authorized.Write
+    public Result property(String code, String propertyName) {
+        return globalExceptionHandler(() -> {
+            Analysis objectInDB = api().get(code);
+            if (objectInDB == null) 
+                return notFoundAsJson("Analysis " + code + " not found");
+            try {
+            	Form<PropertyValue> filledForm = getFilledForm(propertyForm, PropertyValue.class);
+            	PropertyValue property = filledForm.get();
+            	return okAsJson(api().updateProperty(code, propertyName, property, getCurrentUser()));
+            } catch (APIValidationException e) {
+            	return badRequestLoggingForValidationException(e);
+            } catch (APIException e) {
+            	return badRequestAsJson(e.getMessage());
+            }   
         });
     }
 

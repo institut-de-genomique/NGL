@@ -46,11 +46,11 @@ public abstract class AbstractImportData implements Runnable {
 //		logger            = play.Logger.of(this.getClass().getName());
 //	}
 
-	protected AbstractImportData() {
-		this.name = "";
-		this.app = null;
-		logger = null;
-	}
+//	protected AbstractImportData() {
+//		this.name = "";
+//		this.app = null;
+//		logger = null;
+//	}
 
 	protected AbstractImportData(String name, NGLApplication app) {
 //		this.contextError = new ContextValidation(Constants.NGL_DATA_USER);

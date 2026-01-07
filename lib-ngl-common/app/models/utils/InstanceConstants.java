@@ -20,7 +20,7 @@ public interface InstanceConstants {
 	public static final String REAGENT_CATALOG_COLL_NAME    = "ngl_sq.ReagentCatalog";
 
 	/**
-	 * Name of the collection of {@link models.laboratory.reagent.reception.AbstractReception}
+	 * Name of the collection of {@link models.laboratory.reagent.instance.AbstractReception}
 	 */
 	public static final String REAGENT_RECEPTION_COLL_NAME	= "ngl_sq.ReagentReception";
 
@@ -47,13 +47,14 @@ public interface InstanceConstants {
 
 	public static final String SRA_STUDY_COLL_NAME          = "ngl_sub.Study";
 	public static final String SRA_PROJECT_COLL_NAME        = "ngl_sub.Project";
-	public static final String SRA_ANALYSIS_COLL_NAME        = "ngl_sub.Analysis";
+	public static final String SRA_ANALYSIS_COLL_NAME       = "ngl_sub.Analysis";
 	public static final String SRA_SAMPLE_COLL_NAME         = "ngl_sub.Sample";
 	public static final String SRA_EXPERIMENT_COLL_NAME     = "ngl_sub.Experiment";
 	public static final String SRA_SUBMISSION_COLL_NAME     = "ngl_sub.Submission";
 	public static final String SRA_CONFIGURATION_COLL_NAME  = "ngl_sub.Configuration";
 	public static final String SRA_READSET_COLL_NAME        = "ngl_sub.Readset";
 	public static final String SRA_PARAMETER_COLL_NAME      = "ngl_sub.Parameter";
+	public static final String SRA_ATLASEA_COLL_NAME        = "ngl_sub.Atlasea";   // pour les soumissions automatiques Atlasea
 
 	public static final String PARAMETER_COLL_NAME          = "ngl_common.Parameter";
 	public static final String REPORTING_CONFIG_COLL_NAME   = "ngl_common.ReportingConfiguration";

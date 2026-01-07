@@ -11,8 +11,6 @@
 			bt-options="project.code as project|formatProjectListLabel for project in lists.getProjects()">
 			</div>	
 		}													
-	}
-	@columnSearchForm{
 		@formGroup{
 			<div class="form-control" bt-select ng-model="form.pseudoStateCodes"  filter="true" multiple="true" 
 			placeholder='@Messages("consultation.placeholder.pseudoStateCodes")' 
@@ -22,38 +20,39 @@
 	@columnSearchForm{
 		@formGroup{
 			<bt-input  class="form-control"  input-ng-model="form.accessionRegex" textarea-ng-model="form.accessions" 
-			title='@Messages("consultation.textarea-placeholder.analysisAccessions")'  
-			textarea-placeholder-ng-model='@Messages("consultation.textarea-placeholder.analysisAccessions")' 
+			title='@Messages("consultation.textarea-placeholder-title.analysisAccessions")'  
+			textarea-placeholder-ng-model='@Messages("consultation.textarea-placeholder-title.analysisAccessions")' 
 			placeholder='@Messages("consultation.placeholder.analysisAccessions")' >
 			</bt-input>									
 		}
-	}
-	@columnSearchForm{
 		@formGroup{			
 			<bt-input  class="form-control"  input-ng-model="form.codeRegex" textarea-ng-model="form.codes" 
-			title='@Messages("consultation.textarea-placeholder.analysisCodes")' 
-			textarea-placeholder-ng-model='@Messages("consultation.textarea-placeholder.analysisCodes")'
+			title='@Messages("consultation.textarea-placeholder-title.analysisCodes")' 
+			textarea-placeholder-ng-model='@Messages("consultation.textarea-placeholder-title.analysisCodes")'
 			placeholder='@Messages("consultation.placeholder.analysisCodes")' >
 			</bt-input>									
 		}
 	}
 	@columnSearchForm{
-		@formGroup{			
-			<input type="text" class="form-control" ng-model="form.studyIdentifier" placeholder='@Messages("consultation.placeholder.studyIdentifier")' >	
-		}
+		@formGroup{
+			<bt-input  class="form-control"  input-ng-model="form.sampleIdentifierRegex" textarea-ng-model="form.sampleIdentifiers" 
+			title='@Messages("consultation.textarea-placeholder-title.sampleIdentifiers")' 
+			textarea-placeholder-ng-model='@Messages("consultation.textarea-placeholder-title.sampleIdentifiers")' 
+			placeholder='@Messages("consultation.textarea-placeholder.sampleIdentifiers")' >
+			</bt-input>									
+		}	
+		@formGroup{
+			<bt-input  class="form-control"  input-ng-model="form.studyIdentifierRegex" textarea-ng-model="form.studyIdentifiers" 
+			title='@Messages("consultation.textarea-placeholder-title.studyIdentifiers")' 
+			textarea-placeholder-ng-model='@Messages("consultation.textarea-placeholder-title.studyIdentifiers")' 
+			placeholder='@Messages("consultation.textarea-placeholder.studyIdentifiers")' >
+			</bt-input>									
+		}	
 	}
-	@columnSearchForm{
-		@formGroup{			
-			<input type="text" class="form-control" ng-model="form.sampleIdentifier" placeholder='@Messages("consultation.placeholder.sampleIdentifier")' >	
 
-		}
-	}	
 	@columnSearchForm{
-	
 	}
-	@columnSearchForm{
 	
-	}
 	@columnSearchForm{
 		@formGroup{
 		<div class="tab-pane active" id="filters">

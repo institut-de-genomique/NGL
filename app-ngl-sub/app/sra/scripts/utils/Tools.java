@@ -5,7 +5,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import play.data.validation.ValidationError;
+import validation.ContextValidation;
 
 public class Tools {
 
@@ -22,10 +26,30 @@ public class Tools {
 		return diff;
 	}
 
-	public static void writeInFile(String pahtOutputFile, String message) throws IOException {
-		try (BufferedWriter output_buffer = new BufferedWriter(new java.io.FileWriter(new File("pahtOutputFile")))) {
+	public static void writeInFile(String pathOutputFile, String message) throws IOException {
+		try (BufferedWriter output_buffer = new BufferedWriter(new java.io.FileWriter(new File(pathOutputFile)))) {
 			output_buffer.write(message);
 		} 
+	}
+	
+	// copie les erreurs du context de validation B vers le context de validation A 
+	
+	/**
+	 * copie les erreurs du context de validation B vers le context de validation A 
+	 * @param ctxA context de validation final
+	 * @param ctxB context de validation à copier dans final
+	 */	public static void addErreurCxtBInCtxA(ContextValidation ctxA, ContextValidation ctxB) {
+		if(ctxB.hasErrors()) {
+			// Reporter les erreurs dans intermediaireCtx : 
+			//String messages = "";
+			for (Map.Entry<String,List<ValidationError>> e : ctxB.getErrors().entrySet()) {
+				for (ValidationError validationError : e.getValue()) {
+					for (String message : validationError.messages()) {
+						ctxA.appendPath(e.getKey()).addError("", message);
+					}
+				}
+			}				
+		}
 	}
 	
 }

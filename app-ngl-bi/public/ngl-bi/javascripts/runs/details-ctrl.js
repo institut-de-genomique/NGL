@@ -240,9 +240,8 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 	
 	var saveRun = function(){
 		var queries = [];
-		queries.push($http.put(jsRoutes.controllers.runs.api.Runs.update($scope.run.code).url+"?fields=keep", {
-			keep: $scope.run.keep
-		}));
+
+		queries.push($http.put(jsRoutes.controllers.runs.api.Runs.update($scope.run.code).url+"?fields=keep", {keep: $scope.run.keep}));
 		queries.push($http.put(jsRoutes.controllers.runs.api.Runs.valuation($scope.run.code).url, $scope.run.valuation));
 		
 		if ($scope.run.typeCode == 'RSAPHYR' || $scope.run.typeCode == 'RIRYS') {
@@ -250,6 +249,17 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 				queries.push($http.put(jsRoutes.controllers.runs.api.LaneTreatments.update($scope.run.code, $scope.run.lanes[i].number, "mapCreationJobId").url, $scope.run.lanes[i].treatments.mapCreationJobId));
 			} 
 		} 
+
+		//NGL-4649 (& NGL-4650 ?)
+		// faire au niveau du run le save des lane.valuation qui se fait pour les autres technos dans le save du laneDT !!
+		// if CNG uniquement 
+
+		if ($scope.isCNGInstitute && ( $scope.run.categoryCode == 'pacbio' || $scope.run.categoryCode == 'nanopore')) {
+			for (var i = 0; i < $scope.run.lanes.length; i++) {
+				queries.push($http.put(jsRoutes.controllers.runs.api.Lanes.valuation($scope.run.code, $scope.run.lanes[i].number).url,$scope.run.lanes[i].valuation));
+			} 
+		} 
+		
 
 		$q.all(queries).then(function(results){
 			var error = false;
@@ -265,6 +275,7 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 				$scope.$broadcast('save');
 				$scope.messages.setSuccess("save");
 				$scope.mainService.stopEditMode();
+
 				updateData();
 			}
 		});
@@ -312,15 +323,19 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 	$scope.activeEditMode = function(){
 		$scope.messages.clear();
 		$scope.mainService.startEditMode();
-		if($scope.isLanesExist()){
-			$scope.lanesDT.setEdit();
+		// NGL-4649 (& NGL-4650) => ne pas jamais activer le mode edit pour nanopore et pacbio au CNG
+		if ($scope.isLanesExist() && ( ! $scope.isCNGInstitute || 
+			                         ( $scope.isCNGInstitute && $scope.run.categoryCode != "nanopore" && $scope.run.categoryCode != "pacbio") )){
+				$scope.lanesDT.setEdit();	
 		}
 	}
 
-	
+	// NGL-4649 pour recuperer isCNGInstitute positionné dans le scala
+	$scope.initInstitute = function(isCNGInstitute) {
+		$scope.isCNGInstitute=isCNGInstitute;
+	}
 	
 	/* readset section */
-	
 	$scope.form = {
 	};	
 	
@@ -381,6 +396,7 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 		$http.get(jsRoutes.controllers.runs.api.Runs.get($routeParams.code).url).success(function(data) {
 			$scope.run = data;	
 			if($scope.isLanesExist()){
+				//console.log('updateData... ');
 				$scope.lanesDT.setData($scope.run.lanes, $scope.run.lanes.length);
 			}
 			
@@ -403,6 +419,7 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 	};
 	
 	$scope.isLanesExist = function(){
+		// console.log ('NGL-4650 Il n y a pas de lanes au CNRGH bug ?? ');
 		return($scope.run.lanes != null &&  $scope.run.lanes.length > 0)
 	};
 	
@@ -460,6 +477,8 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 			$scope.typeCodeExp=["prepa-flowcell","prepa-fc-ordered"];
 		}else if($scope.run.categoryCode === "bionano"){
 			$scope.typeCodeExp=["irys-chip-preparation"];
+		}else if($scope.run.categoryCode === "pacbio"){
+			$scope.typeCodeExp=["prep-smrt-cell", "pacbio-depot-v2"];
 		}
 		
 		if($scope.typeCodeExp !== undefined){
@@ -721,7 +740,10 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 			
 			$scope.lists.clear("valuationCriterias");
 			$scope.lists.refresh.valuationCriterias({typeCode:$scope.run.typeCode, objectTypeCode:"Run", orderBy:'name'});
+
+			// !nanopore && !pacbio'
 			if ($scope.isLanesExist() && $scope.run.categoryCode != "nanopore" && $scope.run.categoryCode != "pacbio") {
+				//console.log ('INIT:  !nanopore && !pacbio');
 				$scope.lanesDT = datatable(lanesDTConfig);
 				$scope.lanesDT.setData($scope.run.lanes, $scope.run.lanes.length);
 				if(isValuationMode()){
@@ -743,19 +765,21 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
 				
 				$scope.laneOptions = $filter('orderBy')($scope.run.lanes, 'number');				
 				// NGL-3991 :
-				$scope.createDatatablesTopIndex();		
-			} else if ($scope.isLanesExist() && ($scope.run.categoryCode == "nanopore"||$scope.run.categoryCode == "pacbio")) {
+				$scope.createDatatablesTopIndex();
+
+			} //  nanopore OU pacbio
+			else if ($scope.isLanesExist() && ($scope.run.categoryCode == "nanopore"||$scope.run.categoryCode == "pacbio")) {
+				//console.log ('INIT: nanopore || pacbio');
 				$scope.lanesDT = datatable(lanesDTConfig);
 				$scope.lanesDT.setData($scope.run.lanes, $scope.run.lanes.length);
-				if(isValuationMode()){
-					$scope.mainService.startEditMode();	
-					$scope.lanesDT.setEdit();
-				}
+				
 				if(angular.isDefined($scope.run.treatments)){
 					$scope.treatments.init($scope.run.treatments, jsRoutes.controllers.runs.tpl.Runs.treatments, 'runs');				
 				}
 				$scope.laneOptions = $filter('orderBy')($scope.run.lanes, 'number');
 			}else{
+				// pas de lanes !!
+				//console.log ('INIT: NO LANES');
 				if(angular.isDefined($scope.run.treatments)){
 					$scope.treatments.init($scope.run.treatments, jsRoutes.controllers.runs.tpl.Runs.treatments, 'runs');				
 				}
@@ -1751,9 +1775,591 @@ angular.module('home').controller('DetailsCtrl', ['$scope', '$http', '$q', '$rou
     	return false;
     };
     
+}]).controller('LanesDemultiplexingPacBioCtrl', [ '$scope', 'datatable', function($scope, datatable) {
+	
+	var lanesDemultiplexingConfig = {
+			name:'lanesDemultiplexing',
+			order :{by:'number',mode:'local'},
+			search:{active:false},
+			pagination:{active:false},
+			select:{active:false},
+			showTotalNumberRecords:false,
+			cancel : {active:false},
+			columns : [
+				{
+					"property":"barcode",
+					"header": Messages("runs.lanes.treatments.demultiplexingPacBio.indexSummary.barcode"),
+					"type":"text",
+					"order":false,
+					"tdClass": isExpected 
+				},
+				{
+					"property":"count",
+					"header": Messages("runs.lanes.treatments.demultiplexingPacBio.indexSummary.count"),
+					"type":"number",
+					"order":false,
+					"tdClass": isExpected 
+				},
+				{
+					"property":"percent",
+					"header": Messages("runs.lanes.treatments.demultiplexingPacBio.indexSummary.percent"),
+					"type":"number",
+					"order":false,
+					"tdClass": isExpected 
+				},
+				{
+					"property":"expected",
+					"header": Messages("runs.lanes.treatments.demultiplexingPacBio.indexSummary.expected"),
+					"type":"number",
+					"order":false,
+					"tdClass": isExpected 
+				}
+								
+			]
+	};
+	
+	var init = function(){
+		$scope.$watch('run', function() {
+			var run = $scope.run;
+			if(!isOk(run)) return;
+			initDatatableList(run);
+			run.lanes.forEach(function(lane){
+				registerDatatable(lane);
+			});
+		}); 	
+		
+		//---
+
+		function isOk(run) {
+			return angular.isDefined(run) && angular.isDefined(run.lanes) && (run.lanes != null);
+		}
+
+		function initDatatableList(run) {
+			var listSize = run.lanes.length;
+			$scope.lanesDemultiplexing = Array(listSize);
+		}
+
+		function registerDatatable(lane){
+			var laneDemultiplexing = datatable(lanesDemultiplexingConfig);
+			var summaries = lane.treatments.demultiplexing.default.indexSummary.value;
+			laneDemultiplexing.setData(summaries, summaries.length);
+			$scope.lanesDemultiplexing[lane.number] = laneDemultiplexing;
+		}
+	};
+
+	init();
+
+	//---
+
+	function isExpected(value){
+		return value.expected ? "success" : "danger";
+	}
+	
+
+}]).controller('SequencingPacBioCtrl', [ '$scope', '$filter', '$http', 'datatable', 'lists', 'valuationService', function($scope, $filter, $http, datatable, lists, valuationService) {
+
+	var highlight = function(value){
+		if (lists.getValuationCriterias() && $scope.run && $scope.run.productionValuation) {
+			return "bg-" + $scope.valuationService.valuationCriteriaClass($scope.readset, $scope.run.productionValuation.criteriaCode, expression);
+		}
+		return undefined;	    		
+	}
+
+	var isExpected = function(value){
+		return value.expected ? "success" : "danger";
+	}
+	
+	var metadataConfig = {
+			name:'metadata',
+			order :{by:'number',mode:'local'},
+			search:{active:false},
+			pagination:{active:false},
+			select:{active:false},
+			showTotalNumberRecords:false,
+			cancel : {active:false},
+			lines : {
+				trClass : highlight
+			},
+			columns : [
+			    {  	
+					"property":"metadata.value.movieId",
+			    	"header": Messages("runs.treatments.sequencing.metadata.movieId"),
+			    	"type":"text",
+			    	"order":false,
+
+				},
+				{  	
+					"property":"metadata.value.movieLength",
+			    	"header": Messages("runs.treatments.sequencing.metadata.movieLength"),
+			    	"type":"text",
+			    	"order":false,
+					"filter":"number:2"
+				},
+				{  	
+					"property":"metadata.value.basecallerVersion",
+			    	"header": Messages("runs.treatments.sequencing.metadata.basecallerVersion"),
+			    	"type":"text",
+			    	"order":false,
+				},
+				{  	
+					"property":"metadata.value.ccsVersion",
+			    	"header": Messages("runs.treatments.sequencing.metadata.ccsVersion"),
+			    	"type":"text",
+			    	"order":false,
+				},
+				{  	
+					"property":"metadata.value.limaVersion",
+			    	"header": Messages("runs.treatments.sequencing.metadata.limaVersion"),
+			    	"type":"text",
+			    	"order":false,
+				},
+				// NGL-4668 ajout
+				{  	
+					"property":"metadata.value.instrumentSoftwareVersion",
+			    	"header": Messages("runs.treatments.sequencing.metadata.instrumentSoftwareVersion"),
+			    	"type":"text",
+			    	"order":false,
+				},												
+			]				
+	};
+
+	var adapterConfig = {
+		name:'adapter',
+		order :{by:'number',mode:'local'},
+		search:{active:false},
+		pagination:{active:false},
+		select:{active:false},
+		showTotalNumberRecords:false,
+		cancel : {active:false},
+		lines : {
+			trClass : highlight
+		},
+		columns : [
+			{  	
+				"property":"adapter.value.localBaseRate",
+				"header": Messages("runs.treatments.sequencing.adapter.localBaseRate"),
+				"type":"text",
+				"filter":"number:2",
+				"order":false,
+			}											
+		]				
+	};
+
+	var rawDataConfig = {
+		name:'rawData',
+		order :{by:'number',mode:'local'},
+		search:{active:false},
+		pagination:{active:false},
+		select:{active:false},
+		showTotalNumberRecords:false,
+		cancel : {active:false},
+		lines : {
+			trClass : highlight
+		},
+		columns : [
+			{  	
+				"property":"rawdata.value.polymeraseBases",
+				"header": Messages("runs.treatments.sequencing.rawdata.polymeraseBases"),
+				"type":"number",
+				"order":false,
+			},
+			{  	
+				"property":"rawdata.value.meanPolymeraseReadLength",
+				"header": Messages("runs.treatments.sequencing.rawdata.meanPolymeraseReadLength"),
+				"type":"text",
+				"filter":"number:2",
+				"order":false
+			},
+			{  	
+				"property":"rawdata.value.maxSubreadLength",
+				"header": Messages("runs.treatments.sequencing.rawdata.maxSubreadLength"),
+				"type":"number",
+				"order":false,
+			}										
+		]				
+	};
+
+	var sequencingConfig = {
+		name:'sequencing',
+		order :{by:'number',mode:'local'},
+		search:{active:false},
+		pagination:{active:false},
+		select:{active:false},
+		showTotalNumberRecords:false,
+		cancel : {active:false},
+		columns : [
+			{  	
+				"property":"sequencing.value.totalZmws",
+				"header": Messages("runs.treatments.sequencing.sequencing.totalZmws"),
+				"type":"number",
+				"order":false,
+			},
+			{  	
+				"property":"sequencing.value.productiveZmws",
+				"header": Messages("runs.treatments.sequencing.sequencing.productiveZmws"),
+				"type":"number",
+				"order":false,
+			},
+			{  	
+				"property":"sequencing.value.percentProductiveZmws",
+				"header": Messages("runs.treatments.sequencing.sequencing.percentProductiveZmws"),
+				"type":"text",
+				"filter":"number:2",
+				"order":false,
+			},
+			{  	
+				"property":"sequencing.value.p0",
+				"header": Messages("runs.treatments.sequencing.sequencing.p0"),
+				"type":"number",
+				"order":false,
+			},
+			{  	
+				"property":"sequencing.value.percentP0",
+				"header": Messages("runs.treatments.sequencing.sequencing.percentP0"),
+				"type":"text",
+				"filter":"number:2",
+				"order":false,
+				"tdClass" : "valuationService.valuationCriteriaClass(value.data, run.valuation.criteriaCode, 'sequencing.value.percentP0')"
+			},
+			{  	
+				"property":"sequencing.value.p1",
+				"header": Messages("runs.treatments.sequencing.sequencing.p1"),
+				"type":"number",
+				"order":false,
+			},
+			{  	
+				"property":"sequencing.value.percentP1",
+				"header": Messages("runs.treatments.sequencing.sequencing.percentP1"),
+				"type":"text",
+				"filter":"number:2",
+				"order":false,
+				"tdClass" : "valuationService.valuationCriteriaClass(value.data, run.valuation.criteriaCode, 'sequencing.value.percentP1')"
+			},
+			{  	
+				"property":"sequencing.value.p2",
+				"header": Messages("runs.treatments.sequencing.sequencing.p2"),
+				"type":"number",
+				"order":false,
+			},
+			{  	
+				"property":"sequencing.value.percentP2",
+				"header": Messages("runs.treatments.sequencing.sequencing.percentP2"),
+				"type":"text",
+				"filter":"number:2",
+				"order":false,
+			}									
+		]				
+	};
+
+	var consensusConfig = {
+		name:'consensus',
+		order :{by:'number',mode:'local'},
+		search:{active:false},
+		pagination:{active:false},
+		select:{active:false},
+		showTotalNumberRecords:false,
+		cancel : {active:false},
+		lines : {
+			trClass : highlight
+		},
+		columns : [
+			{  	
+				"property":"consensus.value.inputReads",
+				"header": Messages("runs.treatments.sequencing.consensus.inputReads"),
+				"type":"number",
+				"order":false,
+			},
+			{  	
+				"property":"consensus.value.ccsReads",
+				"header": Messages("runs.treatments.sequencing.consensus.ccsReads"),
+				"type":"text",
+				"filter":"number:2",
+				"order":false
+			},
+			{  	
+				"property":"consensus.value.percentCcsReads",
+				"header": Messages("runs.treatments.sequencing.consensus.percentCcsReads"),
+				"type":"text",
+				"filter":"number:2",
+				"order":false,
+			}										
+		]				
+	};
+
+	var hifiConfig = {
+		name:'hifi',
+		order :{by:'number',mode:'local'},
+		search:{active:false},
+		pagination:{active:false},
+		select:{active:false},
+		showTotalNumberRecords:false,
+		cancel : {active:false},
+		lines : {
+			trClass : highlight
+		},
+		columns : [
+			{  	
+				"property":"hifi.value.hifiBases",
+				"header": Messages("runs.treatments.sequencing.hifi.hifiBases"),
+				"type":"number",
+				"order":false,
+				"tdClass" : "valuationService.valuationCriteriaClass(value.data, run.valuation.criteriaCode, 'hifi.value.hifiBases')"
+			},
+			{  	
+				"property":"hifi.value.hifiReads",
+				"header": Messages("runs.treatments.sequencing.hifi.hifiReads"),
+				"type":"number",
+				"order":false,
+			},
+			{  	
+				"property":"hifi.value.percentHifiReads",
+				"header": Messages("runs.treatments.sequencing.hifi.percentHifiReads"),
+				"type":"text",
+				"filter":"number:2",
+				"order":false,
+			},
+			{  	
+				"property":"hifi.value.meanHifiReadLength",
+				"header": Messages("runs.treatments.sequencing.hifi.meanHifiReadLength"),
+				"type":"text",
+				"filter":"number:2",
+				"order":false,
+			},
+			{  	
+				"property":"hifi.value.medianHifiReadLength",
+				"header": Messages("runs.treatments.sequencing.hifi.medianHifiReadLength"),
+				"type":"text",
+				"filter":"number:2",
+				"order":false,
+			},
+			{  	
+				"property":"hifi.value.n50Hifi",
+				"header": Messages("runs.treatments.sequencing.hifi.n50Hifi"),
+				"type":"number",
+				"order":false,
+			},
+			{  	
+				"property":"hifi.value.medianHifiQuality",
+				"header": Messages("runs.treatments.sequencing.hifi.medianHifiQuality"),
+				"type":"text",
+				"filter":"number:2",
+				"order":false,
+			},
+			{  	
+				"property":"hifi.value.meanHifiPasses",
+				"header": Messages("runs.treatments.sequencing.hifi.meanHifiPasses"),
+				"type":"number",
+				"order":false,
+			},
+			{  	
+				"property":"hifi.value.percentQ30HifiBases",
+				"header": Messages("runs.treatments.sequencing.hifi.percentQ30HifiBases"),
+				"type":"number",
+				"order":false,
+			}								
+		]				
+	};
+
+	var indexSummaryConfig = {
+		name:'indexSummary',
+		order :{by:'number',mode:'local'},
+		search:{active:false},
+		pagination:{active:false},
+		select:{active:false},
+		showTotalNumberRecords:false,
+		cancel : {active:false},
+		columns : [
+			{  	
+				"property":"barcode",
+				"header": Messages("runs.treatments.sequencing.indexSummary.barcode"),
+				"type":"text",
+				"order":false,
+				"tdClass": isExpected 
+			},
+			{  	
+				"property":"count",
+				"header": Messages("runs.treatments.sequencing.indexSummary.count"),
+				"type":"number",
+				"order":false,
+				"tdClass": isExpected 
+			},
+			{  	
+				"property":"percent",
+				"header": Messages("runs.treatments.sequencing.indexSummary.percent"),
+				"type":"number",
+				"order":false,
+				"tdClass": isExpected 
+			}								
+		]				
+	};
+
+	var demultiplexingConfig = {
+		name:'demultiplexing',
+		order :{by:'number',mode:'local'},
+		search:{active:false},
+		pagination:{active:false},
+		select:{active:false},
+		showTotalNumberRecords:false,
+		cancel : {active:false},
+		lines : {
+			trClass : highlight
+		},
+		columns : [
+			{  	
+				"property":"demultiplexing.value.assignedHifiBases",
+				"header": Messages("runs.treatments.sequencing.demultiplexing.assignedHifiBases"),
+				"type":"number",
+				"order":false,
+			},
+			{  	
+				"property":"demultiplexing.value.assignedHifiReads",
+				"header": Messages("runs.treatments.sequencing.demultiplexing.assignedHifiReads"),
+				"type":"number",
+				"order":false,
+			},
+			{  	
+				"property":"demultiplexing.value.percentAssignedHifiReads",
+				"header": Messages("runs.treatments.sequencing.demultiplexing.percentAssignedHifiReads"),
+				"type":"text",
+				"filter":"number:2",
+				"order":false,
+			}										
+		]				
+	};
+
+	var controlConfig = {
+		name:'control',
+		order :{by:'number',mode:'local'},
+		search:{active:false},
+		pagination:{active:false},
+		select:{active:false},
+		showTotalNumberRecords:false,
+		cancel : {active:false},
+		lines : {
+			trClass : highlight
+		},
+		columns : [
+			{  	
+				"property":"control.value.reads",
+				"header": Messages("runs.treatments.sequencing.control.reads"),
+				"type":"number",
+				"order":false,
+				"tdClass" : "valuationService.valuationCriteriaClass(value.data, run.valuation.criteriaCode, 'control.value.reads')"
+			},
+			{  	
+				"property":"control.value.meanReadLength",
+				"header": Messages("runs.treatments.sequencing.control.meanReadLength"),
+				"type":"text",
+				"filter":"number:2",
+				"order":false,
+				"tdClass" : "valuationService.valuationCriteriaClass(value.data, run.valuation.criteriaCode, 'control.value.meanReadLength')"
+			},
+			{  	
+				"property":"control.value.percentMeanConcordance",
+				"header": Messages("runs.treatments.sequencing.control.percentMeanConcordance"),
+				"type":"text",
+				"filter":"number:2",
+				"order":false,
+				"tdClass" : "valuationService.valuationCriteriaClass(value.data, run.valuation.criteriaCode, 'control.value.percentMeanConcordance')"
+			}										
+		]				
+	};
+	
+	var init = function(){
+		$scope.lists = lists;
+		$scope.valuationService = valuationService();
+		$scope.$watch('run', function() {
+			if (angular.isDefined($scope.run) && angular.isDefined($scope.run.lanes)  && ($scope.run.lanes != null)) {
+								
+				$http.get(jsRoutes.controllers.alerts.api.Alerts.list().url, {params:{regexCode:$scope.run.code+'*'}})
+					.success(function(data, status, headers, config) {
+					$scope.alerts = {};
+					for(var i =	0; i < data.length ; i++){
+						$scope.alerts[data[i].code] = data[i]; 
+					}
+
+					var treatmentSequencing = [$scope.run.treatments.sequencing.default];
+					var treatmentSequencingIndexSummary = $scope.run.treatments.sequencing.default.indexSummary.value;
+					
+					$scope.metadataDatatable = datatable(metadataConfig);
+					$scope.metadataDatatable.setData(treatmentSequencing, 1);
+					
+					$scope.adapterDatatable = datatable(adapterConfig);
+					$scope.adapterDatatable.setData(treatmentSequencing, 1);
+
+					$scope.rawDataDatatable = datatable(rawDataConfig);
+					$scope.rawDataDatatable.setData(treatmentSequencing, 1);
+
+					$scope.sequencingDatatable = datatable(sequencingConfig);
+					$scope.sequencingDatatable.setData(treatmentSequencing, 1);
+
+					$scope.consensusDatatable = datatable(consensusConfig);
+					$scope.consensusDatatable.setData(treatmentSequencing, 1);
+
+					$scope.hifiDatatable = datatable(hifiConfig);
+					$scope.hifiDatatable.setData(treatmentSequencing, 1);
+
+					$scope.indexSummaryDatatable = datatable(indexSummaryConfig);
+					$scope.indexSummaryDatatable.setData(treatmentSequencingIndexSummary, treatmentSequencingIndexSummary.length);
+
+					$scope.demultiplexingDatatable = datatable(demultiplexingConfig);
+					$scope.demultiplexingDatatable.setData(treatmentSequencing, 1);
+
+					$scope.controlDatatable = datatable(controlConfig);
+					$scope.controlDatatable.setData(treatmentSequencing, 1);
+					
+				});
+				
+				
+			};
+		});
+	
+	};
+	
+	init();
+}]).controller('RunNGSRGValidAutoCtrl', [ '$scope', '$filter', '$http', 'datatable', 'lists', 'valuationService', function($scope, $filter, $http, datatable, lists, valuationService){
+	// NGL-4649 (& NGL-4650) ajouter nouveau controller; Besoin de tous ces "directives" ??
+	// utilisé pour PacBio ET Nanopore
+
+	var init = function(){
+
+		$scope.$watch('run.valuation.valid', function(newValue, OldValue){
+			// ne faire que si on change ou toujours??
+			//if ( newValue !== OldValue) {
+				//console.log('VALUATION CHANGED changed to :'+ newValue);
+				//reporter cette valeur dans lane.valuation de chaque lane
+				var run = $scope.run;
+				if(!isOk(run)) return;	
+				run.lanes.forEach(function(lane){
+					//console.log ('updating lane valuation :'+ lane.number);
+					lane.valuation=run.valuation;
+				});
+
+				$scope.lanesDT.setData($scope.run.lanes, $scope.run.lanes.length);
+			//}
+		});
+
+		$scope.$watch('run.valuation.resolutionCodes', function(newValue, OldValue){
+			// ne faire que si on change ou toujours??
+			//if ( newValue !== OldValue) {
+				//console.log('RESOLUTION CHANGED changed to :'+ newValue);
+				//reporter l'array resolutionCodes dans lane.valuation.resolutionCodes de chaque lane
+				var run = $scope.run;
+				if(!isOk(run)) return;	
+				run.lanes.forEach(function(lane){
+					//console.log ('updating lane resolutionCodes :'+ lane.number);
+					lane.valuation.resolutionCodes=run.valuation.resolutionCodes;
+				});
+
+				$scope.lanesDT.setData($scope.run.lanes, $scope.run.lanes.length);
+			//}
+		});
+
+		function isOk(run) {
+			return angular.isDefined(run) && angular.isDefined(run.lanes) && (run.lanes != null);
+		}
+	};
+
+	init();
+
 }]);
-
-
-
-
-

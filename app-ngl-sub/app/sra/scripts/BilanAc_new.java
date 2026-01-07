@@ -10,9 +10,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.mongojack.DBQuery;
 import org.mongojack.DBQuery.Query;
 
-
+import controllers.sra.api.ExperimentAPI;
 import fr.cea.ig.lfw.controllers.scripts.chunked.ScriptWithArgs;
-import fr.cea.ig.ngl.dao.api.sra.ExperimentAPI;
 import fr.cea.ig.ngl.dao.readsets.ReadSetsAPI;
 import models.laboratory.run.instance.ReadSet;
 import models.sra.submit.sra.instance.Experiment;
@@ -97,7 +96,7 @@ public class BilanAc_new extends ScriptWithArgs<BilanAc_new.MyParam>{
 				cp_rawData++;
 				if ("LS454".equals(experiment.typePlatform)) {
 					println("fichier=%s, expCode=%s, expAccession=%s, studyAC=%s; sampleAC=%s, readsetCode=%s, techno=%s", 
-						rawData.relatifName, experiment.code, experiment.accession, experiment.studyAccession, experiment.sampleAccession, experiment.readSetCode, experiment.typePlatform);
+						rawData.relatifName, experiment.code, experiment.accession, experiment.studyIdentifier, experiment.sampleIdentifier, experiment.readSetCode, experiment.typePlatform);
 				} else {
 					if ((StringUtils.isNotBlank(experiment.readSetCode) && (!experiment.readSetCode.contains("|")))) {
 						ReadSet readSet = laboReadSetAPI.get(experiment.readSetCode);
@@ -110,11 +109,11 @@ public class BilanAc_new extends ScriptWithArgs<BilanAc_new.MyParam>{
 							refCollab = readSet.sampleOnContainer.referenceCollab;
 						}
 						println("fichier=%s, expCode=%s, expAccession=%s, studyAC=%s; sampleAC=%s, readsetCode=%s, techno=%s, materiel=%s, refCollab=%s",
-								rawData.relatifName, experiment.code, experiment.accession, experiment.studyAccession, 
-								experiment.sampleAccession, experiment.readSetCode, experiment.typePlatform, materiel, refCollab);
+								rawData.relatifName, experiment.code, experiment.accession, experiment.studyIdentifier, 
+								experiment.sampleIdentifier, experiment.readSetCode, experiment.typePlatform, materiel, refCollab);
 					} else {
 						println("fichier=%s, expCode=%s, expAccession=%s, studyAC=%s; sampleAC=%s, readsetCode=%s, techno=%s", 
-								rawData.relatifName, experiment.code, experiment.accession, experiment.studyAccession, experiment.sampleAccession, experiment.readSetCode, experiment.typePlatform);
+								rawData.relatifName, experiment.code, experiment.accession, experiment.studyIdentifier, experiment.sampleIdentifier, experiment.readSetCode, experiment.typePlatform);
 					}
 				}
 			}	

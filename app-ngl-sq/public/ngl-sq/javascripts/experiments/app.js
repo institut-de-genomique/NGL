@@ -15,12 +15,7 @@ angular.module('home', ['ngRoute','ultimateDataTableServices','basketServices', 
 		templateUrl : function(params){return jsRoutes.controllers.experiments.tpl.Experiments.search("reagents").url},
 		controller : 'SearchReagentsCtrl'
 	});
-	
-	$routeProvider.when('/experiments/graph/home', {
-		templateUrl : function(params){return jsRoutes.controllers.experiments.tpl.Experiments.graph().url},
-		controller : 'SearchGraphCtrl'
-	});
-	
+
 	$routeProvider.when('/experiments/:code', {
 		templateUrl : function(params){return jsRoutes.controllers.experiments.tpl.Experiments.details().url},
 		controller : 'DetailsCtrl'

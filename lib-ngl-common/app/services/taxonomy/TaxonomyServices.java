@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import fr.cea.ig.ngl.NGLApplication;
+import validation.ContextValidation;
 
 public class TaxonomyServices {
 
@@ -68,7 +69,7 @@ public class TaxonomyServices {
 		if (taxon == null) {
 			//logger.debug("taxon {} absent du cache ", taxonCode);
 			//logger.debug("Recherche du taxon {} au ncbi ", taxonCode);
-			taxon = this.ncbi_taxonomyServices.getTaxon(taxonCode);
+			taxon = this.ncbi_taxonomyServices.getUniqueTaxon(taxonCode);
 			if( taxon != null && ! taxon.error) {
 				setObjectInCache(taxon, taxonCode);
 				return taxon;
@@ -97,7 +98,7 @@ public class TaxonomyServices {
 
 	
 	public Taxon getNCBITaxon(String taxonCode) {
-		return this.ncbi_taxonomyServices.getTaxon(taxonCode);				
+		return this.ncbi_taxonomyServices.getUniqueTaxon(taxonCode);				
 	}
 	
 	
@@ -136,6 +137,7 @@ public class TaxonomyServices {
 			}
 			// Pas besoin de verifier le format de taxonCode, il seront verifiés dans les methodes de ncbi_taxonomyServices et ebi_taxonomyServices
 			Taxon taxon = getObjectInCache(taxonCode);
+			
 			if (taxon == null) {
 				//logger.debug("WWWWWWWWWWWWWWWWWWWWWWWWWWWW taxonCode " + taxonCode +" absent du cache");
 				//  ajouter le taxonCode dans la liste des taxons à rechercher sur les serveurs
@@ -219,5 +221,26 @@ public class TaxonomyServices {
 			app.cache().set(key(code), o, 60 * 60 * 24); // 24h
 		}		
 	}
+	
+	public String getNcbiEbiScientificName(String strTaxonId, ContextValidation ctxVal) {	
+		Taxon taxon = this.getTaxon(strTaxonId);
+		if (taxon == null) {
+			ctxVal.addError("getNcbiEbiScientificName", "Pas de recuperation du taxonId " + strTaxonId + " au NCBI ou à l'EBI");
+			return null;
+			//throw new SraException("getNcbiEbiScientificName", "Pas de recuperation du taxonId " + strTaxonId + " au NCBI ou à l'EBI");
+		}
+		if(StringUtils.isNotBlank(taxon.errorMessage)) {
+			ctxVal.addError("getNcbiEbiScientificName", "Probleme lors de la recuperation du taxonId " + strTaxonId + " au NCBI ou à l'EBI " + taxon.errorMessage);
+			return null;
+			//throw new SraException("getNcbiEbiScientificName", "Probleme lors de la recuperation du taxonId " + strTaxonId + " au NCBI ou à l'EBI " + taxon.errorMessage);
+		}
+		if(StringUtils.isBlank(taxon.scientificName)) {
+			ctxVal.addError("getNcbiEbiScientificName", "Pas de recuperation du scientificName pour taxonId = " + strTaxonId + " au NCBI ou à l'EBI ");
+			return null;
+			//throw new SraException("getNcbiEbiScientificName", "Pas de recuperation du scientificName pour taxonId = " + strTaxonId + " au NCBI ou à l'EBI ");
+		}
+		return taxon.scientificName;
+	}
+
 
 }

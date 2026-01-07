@@ -158,6 +158,7 @@ factory('containerSupportsSearchService', ['$http', 'mainService', 'lists', 'dat
 			lists.refresh.users();
 			lists.refresh.processCategories();
 			lists.refresh.states({objectTypeCode:"Container"});
+			lists.refresh.umbrellaProjects();
 			isInit=true;
 		}
 	};

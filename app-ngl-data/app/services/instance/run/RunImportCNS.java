@@ -40,7 +40,6 @@ import workflows.run.RunWorkflows;
 public class RunImportCNS extends AbstractImportDataCNS {
 
 	// Accessed through static methods 
-	@SuppressWarnings("hiding")
 	private static final play.Logger.ALogger logger = play.Logger.of(RunImportCNS.class);
 	
 	private final RunWorkflows workflows;
